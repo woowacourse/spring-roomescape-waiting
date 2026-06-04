@@ -24,6 +24,7 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
@@ -48,6 +49,9 @@ class ReservationServiceTest {
 
     @Mock
     private ReservationWaitingRepository reservationWaitingRepository;
+
+    @Mock
+    private ReservationQueryDao reservationQueryDao;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -396,13 +400,13 @@ class ReservationServiceTest {
         // given
         LocalDate to = LocalDate.now().minusDays(1);
         LocalDate from = to.minusDays(7).plusDays(1);
-        given(reservationRepository.queryPopularThemes(from, to, 10))
+        given(reservationQueryDao.queryPopularThemes(from, to, 10))
                 .willReturn(List.of());
 
         // when
         reservationQueryService.queryPopularThemes(7, 10);
 
         // then
-        then(reservationRepository).should().queryPopularThemes(from, to, 10);
+        then(reservationQueryDao).should().queryPopularThemes(from, to, 10);
     }
 }

@@ -2,7 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +20,20 @@ import roomescape.waiting.domain.ReservationWaitingRepository;
 @Service
 @Transactional(readOnly = true)
 public class ReservationQueryService {
+
+    private static final Comparator<ReservationWithStatusResult> RESERVATION_WITH_STATUS_RESULT_COMPARATOR =
+            Comparator.comparing(ReservationWithStatusResult::status, (status1, status2) -> {
+                        if (status1.equals(status2)) {
+                            return 0;
+                        }
+                        if ("reserved".equals(status1)) {
+                            return -1;
+                        }
+                        return 1;
+                    })
+                    .thenComparing(ReservationWithStatusResult::date)
+                    .thenComparing(result -> result.time().getStartAt())
+                    .thenComparing(ReservationWithStatusResult::waitingOrder);
 
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
@@ -41,9 +55,6 @@ public class ReservationQueryService {
 
     public List<ReservationWithStatusResult> findAllByName(String name) {
         List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByName(name);
-        if (waitings.isEmpty()) {
-            return reservationQueryDao.queryAllByNameWithStatus(name);
-        }
         return combineAndSort(getReservationResults(name), getReservationWaitingResults(waitings));
     }
 
@@ -52,7 +63,7 @@ public class ReservationQueryService {
         LocalDate to = LocalDate.now().minusDays(oneDayDifference);
         LocalDate from = to.minusDays(period).plusDays(oneDayDifference);
         return new PopularThemesResult(
-                reservationRepository.queryPopularThemes(from, to, limit)
+                reservationQueryDao.queryPopularThemes(from, to, limit)
         );
     }
 
@@ -111,7 +122,7 @@ public class ReservationQueryService {
             combined.addAll(waitings);
         }
 
-        Collections.sort(combined);
+        combined.sort(RESERVATION_WITH_STATUS_RESULT_COMPARATOR);
         return combined;
     }
 }

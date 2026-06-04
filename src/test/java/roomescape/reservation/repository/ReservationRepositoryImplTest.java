@@ -63,8 +63,15 @@ class ReservationRepositoryImplTest {
     @Test
     @DisplayName("이름으로 예약을 조회할 수 있다.")
     void findAllByName_returnsReservations() {
-        Reservation saved = reservationRepository.save(buildReservation("브라운"));
-        reservationRepository.save(buildReservation("포비"));
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("테마", "설명", "url");
+
+        Reservation saved = reservationRepository.save(
+                new Reservation("브라운", LocalDate.of(2026, 5, 1), time, theme, LocalDate.of(2026, 5, 1).atStartOfDay())
+        );
+        reservationRepository.save(
+                new Reservation("포비", LocalDate.of(2026, 5, 2), time, theme, LocalDate.of(2026, 5, 2).atStartOfDay())
+        );
 
         assertThat(reservationRepository.findAllByName("브라운"))
                 .extracting(Reservation::getId)
@@ -91,15 +98,6 @@ class ReservationRepositoryImplTest {
 
         assertThat(reservationRepository.hasBookingAtSameTime(candidate1)).isTrue();
         assertThat(reservationRepository.hasBookingAtSameTime(candidate2)).isFalse();
-    }
-
-    @Test
-    @DisplayName("테마 인기 조회를 호출할 수 있다.")
-    void queryPopularThemes() {
-        LocalDate from = LocalDate.now().minusDays(7);
-        LocalDate to = LocalDate.now().minusDays(1);
-
-        assertThat(reservationRepository.queryPopularThemes(from, to, 10)).isNotNull();
     }
 
     private Reservation buildReservation(String name) {

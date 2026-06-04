@@ -80,10 +80,6 @@ class ReservationQueryServiceTest {
 
         given(reservationRepository.findAllByName(name)).willReturn(List.of(fixedReservation1, fixedReservation2));
         given(reservationWaitingRepository.findAllByName(name)).willReturn(List.of());
-        given(reservationQueryDao.queryAllByNameWithStatus(name)).willReturn(List.of(
-                ReservationWithStatusResult.from(fixedReservation1),
-                ReservationWithStatusResult.from(fixedReservation2)
-        ));
 
         // when
         List<ReservationWithStatusResult> results = reservationQueryService.findAllByName(name);
@@ -94,7 +90,6 @@ class ReservationQueryServiceTest {
         assertThat(results.get(1).id()).isEqualTo(1L);
         then(reservationRepository).should().findAllByName(name);
         then(reservationWaitingRepository).should().findAllByName(name);
-        then(reservationQueryDao).should().queryAllByNameWithStatus(name);
     }
 
     @Test
@@ -148,13 +143,13 @@ class ReservationQueryServiceTest {
         // given
         LocalDate to = LocalDate.now().minusDays(1);
         LocalDate from = to.minusDays(7).plusDays(1);
-        given(reservationRepository.queryPopularThemes(from, to, 10)).willReturn(List.of());
+        given(reservationQueryDao.queryPopularThemes(from, to, 10)).willReturn(List.of());
 
         // when
         PopularThemesResult result = reservationQueryService.queryPopularThemes(7, 10);
 
         // then
         assertThat(result.popularThemes()).isEmpty();
-        then(reservationRepository).should().queryPopularThemes(from, to, 10);
+        then(reservationQueryDao).should().queryPopularThemes(from, to, 10);
     }
 }
