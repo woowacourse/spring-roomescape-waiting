@@ -55,6 +55,13 @@ class ReservationWaitDaoTest {
                    (2, 2, 1);
             """;
 
+    private static final String INSERT_MULTIPLE_WAITS_SQL = """
+          INSERT INTO reservation_wait (id, reservation_id, member_id)
+          VALUES (1, 1, 1),
+                 (2, 1, 2),
+                 (3, 2, 1);
+          """;
+
     @Autowired
     ReservationWaitDao reservationWaitDao;
 
@@ -196,5 +203,27 @@ class ReservationWaitDaoTest {
                         tuple(2L, 1L),
                         tuple(3L, 1L)
                 );
+    }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_RESERVATIONS_SQL,
+            INSERT_MULTIPLE_WAITS_SQL
+    })
+    void reservationId에_해당하는_모든_대기를_삭제한다() {
+        // given: reservation(1) 에 wait 2개, reservation(2) 에 wait 1개
+
+        // when
+        reservationWaitDao.deleteAllByReservationId(1L);
+
+        // then
+        assertThat(reservationWaitDao.findReservationWaitById(1L)).isEmpty();
+        assertThat(reservationWaitDao.findReservationWaitById(2L)).isEmpty();
+
+        assertThat(reservationWaitDao.findReservationWaitById(3L)).isPresent();
     }
 }

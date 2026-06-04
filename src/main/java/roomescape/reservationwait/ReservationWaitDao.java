@@ -74,6 +74,11 @@ public class ReservationWaitDao {
         jdbcTemplate.update(sql, reservationId, memberId);
     }
 
+    public void deleteAllByReservationId(Long reservationId) {
+        String sql = "DELETE FROM reservation_wait WHERE reservation_id = ?";
+        jdbcTemplate.update(sql, reservationId);
+    }
+
     public Optional<Long> findEarliestMemberId(Long reservationId) {
         try {
             String sql = "SELECT member_id " +

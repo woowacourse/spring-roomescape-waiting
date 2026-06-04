@@ -83,10 +83,15 @@ public class ReservationService {
     public void deleteReservationByManager(Long reservationId, Member manager) {
         Reservation reservation = findReservation(reservationId);
         reservation.validateStoreOwnership(manager);
-        reservationDao.delete(reservationId);
+        deleteOrPromoteWait(reservation);
     }
 
     private void deleteOrPromoteWait(Reservation reservation) {
+        if (reservation.isPast()) {
+            reservationWaitDao.deleteAllByReservationId(reservation.getId());
+            reservationDao.delete(reservation.getId());
+            return;
+        }
         reservationWaitDao.findEarliestMemberId(reservation.getId())
                 .ifPresentOrElse(
                         waiterId -> promote(reservation, waiterId),
