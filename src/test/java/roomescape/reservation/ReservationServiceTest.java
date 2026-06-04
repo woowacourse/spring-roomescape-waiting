@@ -1,9 +1,27 @@
 package roomescape.reservation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
@@ -15,22 +33,9 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.theme.Theme;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingPromotionPolicy;
 import roomescape.waiting.infrastructure.WaitingRepository;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -47,6 +52,9 @@ class ReservationServiceTest {
     @Mock
     private WaitingRepository waitingRepository;
 
+    @Mock
+    private WaitingPromotionPolicy waitingPromotionPolicy;
+
     private ReservationService reservationService;
 
     private final Clock clock = Clock.fixed(
@@ -60,6 +68,7 @@ class ReservationServiceTest {
                 reservationRepository,
                 waitingRepository,
                 slotAssembler,
+                waitingPromotionPolicy,
                 clock
         );
     }
@@ -93,6 +102,7 @@ class ReservationServiceTest {
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
         );
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId())).thenReturn(List.of());
 
         assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
                 .doesNotThrowAnyException();
@@ -107,6 +117,7 @@ class ReservationServiceTest {
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
         );
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId())).thenReturn(List.of());
 
         assertThatCode(() -> reservationService.deleteById(reservationId))
                 .doesNotThrowAnyException();
@@ -125,6 +136,56 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하면 같은 슬롯의 첫 번째 대기가 예약으로 승격된다.")
+    void delete_promotes_first_waiting() {
+        long reservationId = 1L;
+        Reservation oldReservation = reservation(
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
+        );
+        Waiting firstWaiting = Waiting.of(1L, 2L, oldReservation.getSlotId());
+        Waiting secondWaiting = Waiting.of(2L, 3L, oldReservation.getSlotId());
+        Reservation promotedReservation = Reservation.create(firstWaiting.getMemberId(), oldReservation.getSlot());
+
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId()))
+                .thenReturn(List.of(firstWaiting, secondWaiting));
+        when(waitingPromotionPolicy.promote(firstWaiting, oldReservation.getSlot()))
+                .thenReturn(promotedReservation);
+
+        reservationService.deleteById(reservationId);
+
+        InOrder inOrder = inOrder(reservationRepository, waitingPromotionPolicy, waitingRepository);
+        inOrder.verify(reservationRepository).deleteById(reservationId);
+        inOrder.verify(waitingPromotionPolicy).promote(firstWaiting, oldReservation.getSlot());
+        inOrder.verify(reservationRepository).save(promotedReservation);
+        inOrder.verify(waitingRepository).deleteById(firstWaiting.getId());
+        verify(waitingPromotionPolicy, never()).promote(secondWaiting, oldReservation.getSlot());
+    }
+
+    @Test
+    @DisplayName("승격 예약 저장에 실패하면 승격된 대기를 삭제하지 않는다.")
+    void delete_promote_save_fail() {
+        long reservationId = 1L;
+        Reservation oldReservation = reservation(
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
+        );
+        Waiting firstWaiting = Waiting.of(1L, 2L, oldReservation.getSlotId());
+        Reservation promotedReservation = Reservation.create(firstWaiting.getMemberId(), oldReservation.getSlot());
+
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId()))
+                .thenReturn(List.of(firstWaiting));
+        when(waitingPromotionPolicy.promote(firstWaiting, oldReservation.getSlot()))
+                .thenReturn(promotedReservation);
+        doThrow(new IllegalStateException()).when(reservationRepository).save(promotedReservation);
+
+        assertThatThrownBy(() -> reservationService.deleteById(reservationId))
+                .isInstanceOf(IllegalStateException.class);
+
+        verify(waitingRepository, never()).deleteById(firstWaiting.getId());
     }
 
     @Test

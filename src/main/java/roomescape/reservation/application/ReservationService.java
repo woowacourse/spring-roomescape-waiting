@@ -6,11 +6,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
@@ -19,12 +19,12 @@ import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.slot.SlotOccupancy;
-import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.Slot;
+import roomescape.slot.application.SlotAssembler;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingLine;
+import roomescape.waiting.WaitingPromotionPolicy;
 import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
@@ -34,6 +34,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final SlotAssembler slotAssembler;
+    private final WaitingPromotionPolicy waitingPromotionPolicy;
     private final Clock clock;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
@@ -48,16 +49,23 @@ public class ReservationService {
         return ReservationDetailFindResponse.from(reservationRepository.findAll());
     }
 
+    @Transactional
     public void deleteById(long reservationId) {
-        deleteInternal(reservationId, oldReservation -> {
-        });
+        Reservation reservation = findReservationOrNull(reservationId);
+        if (reservation == null) {
+            return;
+        }
+        deleteReservation(reservation);
     }
 
+    @Transactional
     public void deleteByIdForUser(long reservationId, long memberId) {
-        deleteInternal(
-                reservationId,
-                oldReservation -> oldReservation.validateOwnedBy(memberId)
-        );
+        Reservation reservation = findReservationOrNull(reservationId);
+        if (reservation == null) {
+            return;
+        }
+        reservation.validateOwnedBy(memberId);
+        deleteReservation(reservation);
     }
 
     public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
@@ -91,16 +99,14 @@ public class ReservationService {
     }
 
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
-        return updateInternal(
-                body,
-                reservationId,
-                oldReservation -> oldReservation.validateOwnedBy(memberId)
-        );
+        Reservation oldReservation = getOldReservationOrThrow(reservationId);
+        oldReservation.validateOwnedBy(memberId);
+        return updateReservation(body, oldReservation);
     }
 
     public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        return updateInternal(body, reservationId, oldReservation -> {
-        });
+        Reservation oldReservation = getOldReservationOrThrow(reservationId);
+        return updateReservation(body, oldReservation);
     }
 
     private static void validateReservationUpdated(int affectedRow) {
@@ -115,27 +121,28 @@ public class ReservationService {
         }
     }
 
-    private void deleteInternal(
-            long reservationId,
-            Consumer<Reservation> accessValidator
-    ) {
-        Reservation reservation = reservationRepository.findById(reservationId)
+    private Reservation findReservationOrNull(long reservationId) {
+        return reservationRepository.findById(reservationId)
                 .orElse(null);
-        if (reservation == null) {
-            return;
-        }
-        accessValidator.accept(reservation);
-        validateNotPast(reservation);
-        reservationRepository.deleteById(reservationId);
     }
 
-    private ReservationSaveResponse updateInternal(
-            ReservationUpdateRequest body,
-            long reservationId,
-            Consumer<Reservation> accessValidator
-    ) {
-        Reservation oldReservation = getOldReservationOrThrow(reservationId);
-        accessValidator.accept(oldReservation);
+    private void deleteReservation(Reservation reservation) {
+        validateNotPast(reservation);
+        WaitingLine waitingLine = WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(reservation.getSlotId()));
+        reservationRepository.deleteById(reservation.getId());
+        promoteFirstWaitingIfExists(reservation, waitingLine);
+    }
+
+    private void promoteFirstWaitingIfExists(Reservation canceledReservation, WaitingLine waitingLine) {
+        waitingLine.first()
+                .ifPresent(waiting -> {
+                    Reservation promotedReservation = waitingPromotionPolicy.promote(waiting, canceledReservation.getSlot());
+                    reservationRepository.save(promotedReservation);
+                    waitingRepository.deleteById(waiting.getId());
+                });
+    }
+
+    private ReservationSaveResponse updateReservation(ReservationUpdateRequest body, Reservation oldReservation) {
         validateNotPast(oldReservation);
         validateNotEmptyUpdateRequest(body);
 
@@ -144,12 +151,12 @@ public class ReservationService {
         long themeId = oldReservation.getSlot().getThemeId();
         Slot slot = slotAssembler.assembleExisting(newDate, newTimeId, themeId);
         long slotId = slot.getId();
-        throwIfSlotUnavailableForUpdate(reservationId, slotId);
+        throwIfSlotUnavailableForUpdate(oldReservation.getId(), slotId);
 
         int affectedRow = reservationRepository.updateSlotById(oldReservation.getId(), slotId);
         validateReservationUpdated(affectedRow);
 
-        return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
+        return ReservationSaveResponse.from(getNewReservationOrThrow(oldReservation.getId()));
     }
 
     private Reservation getNewReservationOrThrow(long reservationId) {
