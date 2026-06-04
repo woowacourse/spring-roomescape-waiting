@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,7 +43,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약_조회() {
+    @DisplayName("예약 목록을 조회한다")
+    void getReservations_success() {
         RestAssured.given().log().all()
                 .header("Authorization", "ADMIN")
                 .when().get("/reservations")
@@ -52,7 +54,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 데이터베이스_연동() {
+    @DisplayName("데이터베이스 연결을 확인한다")
+    void connectDatabase_success() {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isEqualTo("DATABASE");
@@ -63,7 +66,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 시간_관리_API() {
+    @DisplayName("예약 시간 관리 기능을 처리한다")
+    void manageReservationTime_success() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "10:00");
 
@@ -87,7 +91,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약과_시간_연결() {
+    @DisplayName("예약과 예약 시간을 연결한다")
+    void connectReservationAndTime_success() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
 
@@ -113,7 +118,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약_대기_저장() {
+    @DisplayName("예약 대기를 저장한다")
+    void saveWaiting_success() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
         jdbcTemplate.update(
@@ -145,7 +151,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 같은_슬롯에_여러_사용자가_예약_대기를_신청할_수_있다() {
+    @DisplayName("같은 슬롯에 여러 사용자가 예약 대기를 신청할 수 있다")
+    void saveWaiting_success_when_other_user_waiting_exists() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
         jdbcTemplate.update(
@@ -187,7 +194,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약이_없는_슬롯에는_대기할_수_없다() {
+    @DisplayName("예약이 없는 슬롯에는 대기할 수 없다")
+    void saveWaiting_fail_with_not_found_reservation() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
 
@@ -207,7 +215,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약_대기_삭제() {
+    @DisplayName("예약 대기를 삭제한다")
+    void deleteWaiting_success() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
         jdbcTemplate.update(
@@ -229,7 +238,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 내_예약_목록에서_예약과_대기를_함께_조회한다() {
+    @DisplayName("내 예약 목록에서 예약과 대기를 함께 조회한다")
+    void getMyReservations_success_when_waiting_exists() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "테마1", "설명1", "theme1.jpg");
@@ -269,7 +279,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약이_취소되면_1순위_대기가_예약으로_자동_전환되고_남은_대기_순번이_재정렬된다() {
+    @DisplayName("예약이 취소되면 1순위 대기가 예약으로 자동 전환되고 남은 대기 순번이 재정렬된다")
+    void cancelReservation_success_when_waiting_auto_promoted() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
         jdbcTemplate.update(
@@ -323,7 +334,8 @@ public class MissionStepTest {
     private ReservationController reservationController;
 
     @Test
-    void 계층화_리팩터링() {
+    @DisplayName("컨트롤러가 저장소 기술에 직접 의존하지 않는다")
+    void layeredArchitecture_success() {
         boolean isJdbcTemplateInjected = false;
 
         for (Field field : reservationController.getClass().getDeclaredFields()) {

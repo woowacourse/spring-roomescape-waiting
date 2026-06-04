@@ -61,7 +61,7 @@ class ThemeJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 아이디로 테마를 조회하면 빈 Optional을 반환한다")
+    @DisplayName("존재하지 않는 아이디로 테마를 조회하면 빈 옵셔널을 반환한다")
     void findById_success_when_not_found() {
         // when
         Long notExistThemeId = 999L;
@@ -89,7 +89,7 @@ class ThemeJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("테마가 없으면 빈 목록을 반환한다")
-    void findAll_success_even_if_no_theme() {
+    void findAll_success_when_no_theme() {
         // when
         List<Theme> result = themeRepository.findAll();
 
@@ -113,8 +113,8 @@ class ThemeJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 ID로 테마를 삭제해도 예외가 발생하지 않는다")
-    void deleteById_success_even_if_no_theme() {
+    @DisplayName("존재하지 않는 아이디로 테마를 삭제해도 예외가 발생하지 않는다")
+    void deleteById_success_when_no_theme() {
         // when
         Long notExistThemeId = 999L;
         themeRepository.deleteById(notExistThemeId);

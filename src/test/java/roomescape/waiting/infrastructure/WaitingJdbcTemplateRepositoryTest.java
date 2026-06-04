@@ -57,7 +57,7 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약 대기를 저장하면 생성된 ID를 포함한 대기 객체를 반환한다")
+    @DisplayName("예약 대기를 저장하면 생성된 아이디를 포함한 대기 객체를 반환한다")
     void save_success() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
@@ -76,7 +76,7 @@ class WaitingJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("예약 대기를 저장하면 같은 슬롯의 대기 순번을 포함한 대기 객체를 반환한다")
-    void save_success_with_rank() {
+    void save_success_when_same_slot_waiting_exists() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
@@ -90,8 +90,8 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약 대기 저장 시 waiting 테이블에 값이 저장된다")
-    void save_persist_waiting_row() {
+    @DisplayName("예약 대기 저장 시 대기 테이블에 값이 저장된다")
+    void save_success_when_persisting_waiting_row() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Waiting waiting = Waiting.create("브라운", date, savedTime, savedTheme);
@@ -111,7 +111,7 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("ID로 예약 대기를 조회한다")
+    @DisplayName("아이디로 예약 대기를 조회한다")
     void findById_success() {
         // given
         waitingRepository.save(
@@ -130,14 +130,14 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 ID로 예약 대기를 조회하면 빈 Optional을 반환한다")
-    void findById_returns_empty_with_not_found_id() {
+    @DisplayName("존재하지 않는 아이디로 예약 대기를 조회하면 빈 옵셔널을 반환한다")
+    void findById_success_when_not_found_id() {
         // when & then
         assertThat(waitingRepository.findById(999L)).isEmpty();
     }
 
     @Test
-    @DisplayName("ID와 이름이 일치하는 예약 대기를 삭제한다")
+    @DisplayName("아이디와 이름이 일치하는 예약 대기를 삭제한다")
     void deleteByIdAndName_success() {
         // given
         Waiting savedWaiting = waitingRepository.save(
@@ -153,7 +153,7 @@ class WaitingJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("이름이 일치하지 않으면 예약 대기를 삭제하지 않는다")
-    void deleteByIdAndName_does_not_delete_with_different_name() {
+    void deleteByIdAndName_success_when_different_name() {
         // given
         Waiting savedWaiting = waitingRepository.save(
                 Waiting.create("브라운", LocalDate.now().plusDays(1), savedTime, savedTheme)
@@ -168,7 +168,7 @@ class WaitingJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("이름으로 예약 대기를 조회할 때 같은 슬롯의 대기 순번을 함께 반환한다")
-    void findByName_success_with_rank() {
+    void findByName_success_when_same_slot_waiting_exists() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
@@ -205,8 +205,8 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("같은 슬롯에 다른 사용자의 예약 대기만 있으면 빈 Optional을 반환한다")
-    void findByNameAndDateAndTimeIdAndThemeId_returns_empty_with_other_user_waiting() {
+    @DisplayName("같은 슬롯에 다른 사용자의 예약 대기만 있으면 빈 옵셔널을 반환한다")
+    void findByNameAndDateAndTimeIdAndThemeId_success_when_other_user_waiting_exists() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
@@ -254,7 +254,7 @@ class WaitingJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("예약 대기 삭제 후 같은 슬롯의 남은 대기 순번을 재정렬한다")
-    void deleteByIdAndName_reorders_remaining_waiting_rank() {
+    void deleteByIdAndName_success_when_remaining_waiting_exists() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Waiting firstWaiting = waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));

@@ -56,7 +56,7 @@ class ThemeControllerTest {
     private ThemeService themeService;
 
     @Test
-    @DisplayName("POST /themes - 테마 저장 요청을 서비스에 전달하고 201 응답을 반환한다")
+    @DisplayName("테마 저장 요청을 서비스에 전달하고 생성 응답을 반환한다")
     void addNewTheme_success() throws Exception {
         // given
         Theme theme = Theme.createRow(1L, "테마", "테마 설명", "https://image");
@@ -85,8 +85,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    @DisplayName("GET /themes - 테마 목록 조회 요청을 서비스에 전달하고 200 응답을 반환한다")
-    void readThemes_no_params_success() throws Exception {
+    @DisplayName("테마 목록 조회 요청을 서비스에 전달하고 성공 응답을 반환한다")
+    void readThemes_success_when_no_params() throws Exception {
         // given
         given(themeService.findAll()).willReturn(
                 List.of(Theme.createRow(1L, "기본 테마", "설명", "https://image"))
@@ -105,8 +105,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    @DisplayName("GET /themes?sortBy=... - 기간 기준 인기 테마 조회 요청을 서비스에 전달한다")
-    void readThemes_top_n_by_period_success() throws Exception {
+    @DisplayName("기간 기준 인기 테마 조회 요청을 서비스에 전달한다")
+    void readThemes_success_when_top_n_by_period() throws Exception {
         // given
         LocalDate from = LocalDate.of(2026, 5, 1);
         LocalDate to = LocalDate.of(2026, 5, 31);
@@ -133,7 +133,7 @@ class ThemeControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /themes/{id} - 테마 삭제 요청을 서비스에 전달하고 204 응답을 반환한다")
+    @DisplayName("테마 삭제 요청을 서비스에 전달하고 성공 응답을 반환한다")
     void deleteTheme_success() throws Exception {
         // when & then
         mockMvc.perform(delete("/themes/1")

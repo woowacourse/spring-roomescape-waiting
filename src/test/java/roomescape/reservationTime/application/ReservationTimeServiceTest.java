@@ -84,7 +84,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("날짜와 테마 기준으로 예약된 시간을 조회한다")
-    void getBookedTimes() {
+    void getBookedTimes_success() {
         // given
         ReservationTime bookedTime = saveTime(LocalTime.of(10, 0));
         saveTime(LocalTime.of(11, 0));
@@ -116,7 +116,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 예약 시간을 삭제하면 예외가 발생한다")
-    void deleteNotFoundTime() {
+    void deleteReservationTime_fail_with_not_found_time() {
         // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteTime(999L))
                 .isInstanceOf(EntityNotFoundException.class)

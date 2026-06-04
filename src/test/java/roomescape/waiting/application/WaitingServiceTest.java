@@ -117,7 +117,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("같은 슬롯에 다른 사용자의 대기가 있어도 예약 대기를 저장한다")
-    void save_success_with_other_user_waiting() {
+    void save_success_when_other_user_waiting_exists() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
@@ -162,7 +162,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("예약이 존재하지 않는 슬롯에 대기를 저장하면 예외가 발생한다")
-    void 예약이_존재하지_않는_슬롯에_대기를_저장하면_예외가_발생한다() {
+    void save_fail_with_not_found_reservation() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));

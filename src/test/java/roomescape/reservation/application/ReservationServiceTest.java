@@ -126,7 +126,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 테마 ID로 예약하면 잘못된 요청 예외가 전파된다")
+    @DisplayName("존재하지 않는 테마 아이디로 예약하면 잘못된 요청 예외가 전파된다")
     void saveReservation_fail_with_not_found_theme() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
@@ -170,7 +170,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("날짜와 테마를 기반으로 예약을 조회한다")
-    void getReservations_success_with_date_and_theme() {
+    void getReservations_success_when_date_and_theme_exist() {
         // given
         LocalDate date = LocalDate.now();
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
@@ -210,7 +210,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 ID로 삭제하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 예약 아이디로 삭제하면 예외가 발생한다")
     void deleteReservation_fail_with_not_found_reservation() {
         // when & then
         assertThatThrownBy(() -> reservationService.deleteReservation(999L))
@@ -289,7 +289,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 ID로 수정하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 예약 아이디로 수정하면 예외가 발생한다")
     void updateReservationSchedule_fail_with_not_found_reservation() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(
@@ -361,7 +361,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약 취소 시 같은 슬롯의 1순위 대기를 예약으로 전환한다")
-    void cancelReservation_success_with_promoting_first_waiting() {
+    void cancelReservation_success_when_first_waiting_exists() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));

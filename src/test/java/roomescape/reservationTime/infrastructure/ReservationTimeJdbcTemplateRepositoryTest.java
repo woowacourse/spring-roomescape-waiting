@@ -57,7 +57,7 @@ class ReservationTimeJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 아이디로 예약 시간을 조회하면 빈 Optional을 반환한다")
+    @DisplayName("존재하지 않는 아이디로 예약 시간을 조회하면 빈 옵셔널을 반환한다")
     void findById_success_when_not_found() {
         // when
         long notExistTimeId = 999L;
