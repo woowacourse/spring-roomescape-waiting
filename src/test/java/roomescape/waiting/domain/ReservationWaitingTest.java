@@ -14,6 +14,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
@@ -154,5 +156,72 @@ class ReservationWaitingTest {
 
         // then
         assertThat(waitings).containsExactly(third, second, first);
+    }
+    @Test
+    @DisplayName("대기 신청 슬롯의 예약자가 본인과 다르면 예외가 발생하지 않는다.")
+    void validateNoConflictWithReservation_DifferentName_Success() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "테마", "설명", "url")
+        );
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
+        Reservation targetReservation = new Reservation(1L, "포비", slot, slot.date().atStartOfDay());
+
+        // when & then
+        assertThatCode(() -> waiting.validateNoConflictWithReservation(targetReservation))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("대기 신청 슬롯의 예약자가 본인이면 InvalidBusinessStateException이 발생한다.")
+    void validateNoConflictWithReservation_SameName_ThrowsException() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "테마", "설명", "url")
+        );
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
+        Reservation targetReservation = new Reservation(1L, "브라운", slot, slot.date().atStartOfDay());
+
+        // when & then
+        assertThatThrownBy(() -> waiting.validateNoConflictWithReservation(targetReservation))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
+    }
+
+    @Test
+    @DisplayName("동일 슬롯에 대기가 없으면 validateNoDuplicateWaiting은 예외가 발생하지 않는다.")
+    void validateNoDuplicateWaiting_NoDuplicate_Success() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "테마", "설명", "url")
+        );
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
+
+        // when & then
+        assertThatCode(() -> waiting.validateNoDuplicateWaiting(false))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("동일 슬롯에 이미 대기가 있으면 validateNoDuplicateWaiting은 InvalidBusinessStateException이 발생한다.")
+    void validateNoDuplicateWaiting_Duplicate_ThrowsException() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "테마", "설명", "url")
+        );
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
+
+        // when & then
+        assertThatThrownBy(() -> waiting.validateNoDuplicateWaiting(true))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 }

@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -36,6 +37,18 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
 
         if (this.slot.isExpired(current)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_TIME);
+        }
+    }
+
+    public void validateNoConflictWithReservation(Reservation targetReservation) {
+        if (Objects.equals(this.name, targetReservation.getName())) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
+        }
+    }
+
+    public void validateNoDuplicateWaiting(boolean hasDuplicate) {
+        if (hasDuplicate) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 
