@@ -6,6 +6,10 @@ public class Theme {
     private String description;
     private String url;
 
+    public Theme(String name, String description, String url) {
+        this(null,name,description,url);
+    }
+
     public Theme(Long id, String name, String description, String url) {
         this.id = id;
         validateName(name);

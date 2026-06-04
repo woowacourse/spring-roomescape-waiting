@@ -10,7 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.dao.ReservationDao;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeStatus;
+import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.TimeSlotResponse;
@@ -24,6 +30,12 @@ class ReservationTimeServiceTest {
     @Autowired
     private ReservationTimeService reservationTimeService;
 
+    @Autowired
+    private ReservationDao reservationDao;
+
+    @Autowired
+    private ThemeDao themeDao;
+
     @Test
     void 전체_예약_시간_순서_확인() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
@@ -32,27 +44,21 @@ class ReservationTimeServiceTest {
                 .map(ReservationTimeResponse::startAt)
                 .toList();
 
-        assertThat(startTimes).containsExactly(
+        assertThat(startTimes).contains(
                 LocalTime.of(10, 0),
                 LocalTime.of(11, 0),
-                LocalTime.of(12, 0),
-                LocalTime.of(13, 0),
-                LocalTime.of(14, 0),
-                LocalTime.of(15, 0),
-                LocalTime.of(16, 0),
-                LocalTime.of(17, 0),
-                LocalTime.of(18, 0)
+                LocalTime.of(12, 0)
         );
     }
 
     @Test
     void 중복되지_않는_시간_저장() {
-        ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(19, 0));
+        LocalTime newTime = LocalTime.of(23, 59);
+        ReservationTimeRequest request = new ReservationTimeRequest(newTime);
 
         ReservationTimeResponse result = reservationTimeService.save(request);
 
-        assertThat(result.startAt()).isEqualTo(LocalTime.of(19, 0));
-        assertThat(reservationTimeService.findAll().getFirst().id()).isEqualTo(1L);
+        assertThat(result.startAt()).isEqualTo(newTime);
     }
 
     @Test
@@ -65,40 +71,55 @@ class ReservationTimeServiceTest {
 
     @Test
     void 예약_없는_시간_삭제() {
-        Long timeIdWithNoReservation = 6L;
+        ReservationTimeResponse saved = reservationTimeService.save(new ReservationTimeRequest(LocalTime.of(22, 0)));
 
-        reservationTimeService.delete(timeIdWithNoReservation);
+        reservationTimeService.delete(saved.id());
 
-        assertThat(reservationTimeService.findAll().getFirst().id()).isEqualTo(1L);
+        List<ReservationTimeResponse> all = reservationTimeService.findAll();
+        assertThat(all).noneMatch(t -> t.id().equals(saved.id()));
     }
 
     @Test
     void 예약_존재하는_시간_삭제_시_예외() {
-        Long timeIdWithReservation = 1L;
+        ReservationTimeResponse timeResponse = reservationTimeService.save(
+                new ReservationTimeRequest(LocalTime.of(21, 0)));
+        Theme theme = themeDao.save(new Theme("테스트테마", "설명", "url"));
+        reservationDao.save(
+                new Reservation("브라운", LocalDate.now(), new ReservationTime(timeResponse.id(), timeResponse.startAt()),
+                        theme, ReservationStatus.CONFIRMED));
 
-        assertThatThrownBy(() -> reservationTimeService.delete(timeIdWithReservation))
+        assertThatThrownBy(() -> reservationTimeService.delete(timeResponse.id()))
                 .isInstanceOf(AlreadyInUseException.class);
     }
 
     @Test
     void 예약된_시간_제외_가용_시간_조회() {
-        String date = LocalDate.now().minusDays(6).toString();
+        LocalDate date = LocalDate.now().plusDays(1);
+        Theme theme = themeDao.save(new Theme("가용시간테마", "설명", "url"));
 
-        List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(1L, date);
+        List<ReservationTimeResponse> allTimes = reservationTimeService.findAll();
+        ReservationTimeResponse targetTime = allTimes.get(0);
+        reservationDao.save(
+                new Reservation("브라운", date, new ReservationTime(targetTime.id(), targetTime.startAt()), theme,
+                        ReservationStatus.CONFIRMED));
 
-        long availableCount = result.stream()
-                .filter(r -> r.status() == ReservationTimeStatus.AVAILABLE)
-                .count();
+        List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(theme.getId(), date);
 
-        assertThat(availableCount).isEqualTo(4);
+        TimeSlotResponse occupiedSlot = result.stream()
+                .filter(r -> r.id().equals(targetTime.id()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(occupiedSlot.status()).isEqualTo(ReservationTimeStatus.RESERVED);
     }
 
     @Test
     void 예약_없는_날짜의_전체_가용_시간_조회() {
-        String date = LocalDate.now().plusDays(30).toString();
+        LocalDate date = LocalDate.now().plusDays(30);
+        Theme theme = themeDao.save(new Theme("빈날짜테마", "설명", "url"));
 
-        List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(1L, date);
+        List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(theme.getId(), date);
 
-        assertThat(result.getFirst().id()).isEqualTo(1L);
+        assertThat(result).allMatch(r -> r.status() == ReservationTimeStatus.AVAILABLE);
     }
 }

@@ -3,8 +3,10 @@ package roomescape.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -28,20 +30,33 @@ class ReservationDaoTest {
     @Autowired
     private ThemeDao themeDao;
 
+    private Theme theme;
+    private ReservationTime time;
+
+    @BeforeEach
+    void setUp() {
+        theme = themeDao.save(new Theme("테스트 테마", "설명", "/test"));
+        time = reservationTimeDao.save(new ReservationTime(LocalTime.of(9, 0)));
+    }
+
     @Test
     void ID로_예약_조회() {
-        Optional<Reservation> reservation = reservationDao.findById(1L);
+        Reservation saved = reservationDao.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+
+        Optional<Reservation> reservation = reservationDao.findById(saved.getId());
 
         assertThat(reservation)
                 .map(Reservation::getId)
-                .hasValue(1L);
+                .hasValue(saved.getId());
     }
 
     @Test
     void 이름으로_예약_조회() {
+        Reservation saved = reservationDao.save(new Reservation("아나키", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+
         List<ReservationRank> reservation = reservationDao.findByName("아나키");
 
-        assertThat(reservation.getFirst().getId()).isEqualTo(10L);
+        assertThat(reservation.getFirst().getId()).isEqualTo(saved.getId());
     }
 
     @Test
@@ -53,6 +68,10 @@ class ReservationDaoTest {
 
     @Test
     void 이름으로_예약_조회_시_대기_순번_부여() {
+        reservationDao.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+        reservationDao.save(new Reservation("그해", LocalDate.now(), time, theme, ReservationStatus.WAITING));
+        reservationDao.save(new Reservation("아나키", LocalDate.now(), time, theme, ReservationStatus.WAITING));
+
         ReservationRank firstWaiting = reservationDao.findByName("그해").stream()
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
                 .findFirst()
@@ -68,7 +87,11 @@ class ReservationDaoTest {
 
     @Test
     void 대기_삭제_시_후순위_대기자_순번_재정렬() {
-        reservationDao.delete(20L);
+        reservationDao.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+        Reservation waiting1 = reservationDao.save(new Reservation("그해", LocalDate.now(), time, theme, ReservationStatus.WAITING));
+        reservationDao.save(new Reservation("아나키", LocalDate.now(), time, theme, ReservationStatus.WAITING));
+
+        reservationDao.delete(waiting1.getId());
 
         ReservationRank secondWaiting = reservationDao.findByName("아나키").stream()
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
@@ -80,43 +103,38 @@ class ReservationDaoTest {
 
     @Test
     void 대기_예약_승인_확인() {
-        LocalDate date = LocalDate.now().minusDays(6);
-        long themeId = 1L;
-        long timeId = 1L;
+        LocalDate date = LocalDate.now();
+        Reservation confirmed = reservationDao.save(new Reservation("브라운", date, time, theme, ReservationStatus.CONFIRMED));
+        Reservation waiting = reservationDao.save(new Reservation("아나키", date, time, theme, ReservationStatus.WAITING));
 
-        reservationDao.delete(1L);
-        reservationDao.update(date, themeId, timeId);
+        reservationDao.delete(confirmed.getId());
+        reservationDao.update(date, theme.getId(), time.getId());
 
-        Reservation confirmed = reservationDao.findById(20L).orElseThrow();
-        assertThat(confirmed.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+        Reservation result = reservationDao.findById(waiting.getId()).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
     }
 
     @Test
     void 예약_존재_여부_확인_존재하는_경우() {
-        Optional<ReservationTime> time = reservationTimeDao.findTimeById(1L);
-        Optional<Theme> theme = themeDao.findThemeById(1L);
-        LocalDate date = LocalDate.now().minusDays(6);
+        LocalDate date = LocalDate.now();
+        reservationDao.save(new Reservation("브라운", date, time, theme, ReservationStatus.CONFIRMED));
 
-        boolean exists = reservationDao.existsByDateAndThemeAndTime(date, theme.get(), time.get());
+        boolean exists = reservationDao.existsByDateAndThemeAndTime(date, theme, time);
 
         assertThat(exists).isTrue();
     }
 
     @Test
     void 예약_존재_여부_확인_존재하지_않는_경우() {
-        Optional<ReservationTime> time = reservationTimeDao.findTimeById(1L);
-        Optional<Theme> theme = themeDao.findThemeById(1L);
         LocalDate date = LocalDate.now().plusDays(10);
 
-        boolean exists = reservationDao.existsByDateAndThemeAndTime(date, theme.get(), time.get());
+        boolean exists = reservationDao.existsByDateAndThemeAndTime(date, theme, time);
         assertThat(exists).isFalse();
     }
 
     @Test
     void 예약_저장() {
-        Optional<ReservationTime> time = reservationTimeDao.findTimeById(1L);
-        Optional<Theme> theme = themeDao.findThemeById(1L);
-        Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time.get(), theme.get(),
+        Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time, theme,
                 ReservationStatus.CONFIRMED);
 
         Reservation saved = reservationDao.save(reservation);
@@ -127,8 +145,10 @@ class ReservationDaoTest {
 
     @Test
     void 예약_삭제() {
-        reservationDao.delete(1L);
+        Reservation saved = reservationDao.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
 
-        assertThat(reservationDao.findById(1L)).isEmpty();
+        reservationDao.delete(saved.getId());
+
+        assertThat(reservationDao.findById(saved.getId())).isEmpty();
     }
 }

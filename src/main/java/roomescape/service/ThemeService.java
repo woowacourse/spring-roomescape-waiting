@@ -57,7 +57,6 @@ public class ThemeService {
         String imageUrl = "/images/" + fileName;
 
         Theme theme = new Theme(
-                null,
                 request.name(),
                 request.description(),
                 imageUrl
