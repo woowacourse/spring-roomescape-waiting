@@ -7,6 +7,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import roomescape.common.exception.DomainException;
+
+import static roomescape.reservation.exception.ReservationErrorCode.TOO_MANY_REQUESTS_FOR_RESERVATION;
 
 @Aspect
 @Component
@@ -26,7 +29,7 @@ public class RetryOnExceptionAspect {
                     throw e;
                 }
                 if (attempt == maxRetries) {
-                    throw e;
+                    throw new DomainException(TOO_MANY_REQUESTS_FOR_RESERVATION);
                 }
             }
         }

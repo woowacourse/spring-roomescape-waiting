@@ -60,6 +60,7 @@ public class ReservationService {
     }
 
     @Transactional
+    @RetryOnException(retryOn = RetryableReservationCreateException.class)
     public void editDateTime(Long reservationId, LocalDate changedDate, Long changedTimeId, String requestGuestName) {
         Reservation beforeReservation = getReservation(reservationId);
         reservationValidator.validateBeforeEdit(beforeReservation, changedDate, changedTimeId, requestGuestName);

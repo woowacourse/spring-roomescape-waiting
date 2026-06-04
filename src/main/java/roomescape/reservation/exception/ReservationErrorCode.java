@@ -18,7 +18,8 @@ public enum ReservationErrorCode implements ErrorPolicy {
     CANNOT_CHANGE_ALREADY_STARTED_RESERVATION("이미 시작된 예약은 변경할 수 없습니다.", UNPROCESSABLE_ENTITY),
     CANNOT_CHANGE_OTHER_GUEST_RESERVATION("본인의 예약만 변경할 수 있습니다.", FORBIDDEN),
     CANNOT_CHANGE_ALREADY_CANCELED("이미 취소된 예약은 변경할 수 없습니다.", CONFLICT),
-    RESERVATION_CREATE_FAIL("예약 생성에 실패했습니다.", INTERNAL_SERVER_ERROR)
+    RESERVATION_CREATE_FAIL("예약 생성에 실패했습니다.", INTERNAL_SERVER_ERROR),
+    TOO_MANY_REQUESTS_FOR_RESERVATION("요청이 많아 예약을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.", TOO_MANY_REQUESTS)
     ;
 
     private final String code;

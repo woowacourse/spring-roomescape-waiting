@@ -254,18 +254,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     keyHolder,
                     new String[]{"id"});
         } catch (DuplicateKeyException e) {
-            ReservationUniqueConstraint constraint = ReservationUniqueConstraint.from(e)
-                    .orElseThrow(() -> new DomainException(GlobalErrorCode.SERVER_ERROR));
-
-            if (constraint == ReservationUniqueConstraint.CONFIRMED_SLOT) {
-                throw new RetryableReservationCreateException();
-            }
-
-            if (constraint == ReservationUniqueConstraint.WAITING_GUEST_SLOT) {
-                throw new DomainException(RESERVATION_ALREADY_EXISTS);
-            }
-
-            throw e;
+            throw convertDuplicateKeyException(e);
         }
 
         return reservation.withId(keyHolder.getKey().longValue());
@@ -282,16 +271,31 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         ReservationToken reservationToken = ReservationToken.from(status);
-        int count = jdbcTemplate.update(sql, new MapSqlParameterSource()
-                .addValue("date", Date.valueOf(date))
-                .addValue("timeId", timeId)
-                .addValue("status", status.toString())
-                .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt))
-                .addValue("id", id)
-                .addValue("confirmToken", reservationToken.confirmToken())
-                .addValue("waitingToken", reservationToken.waitingToken())
-        );
+        int count;
+        try {
+            count = jdbcTemplate.update(sql, new MapSqlParameterSource()
+                    .addValue("date", Date.valueOf(date))
+                    .addValue("timeId", timeId)
+                    .addValue("status", status.toString())
+                    .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt))
+                    .addValue("id", id)
+                    .addValue("confirmToken", reservationToken.confirmToken())
+                    .addValue("waitingToken", reservationToken.waitingToken())
+            );
+        } catch (DuplicateKeyException e) {
+            throw convertDuplicateKeyException(e);
+        }
         return count == 1;
+    }
+
+    private RuntimeException convertDuplicateKeyException(DuplicateKeyException exception) {
+        ReservationUniqueConstraint constraint = ReservationUniqueConstraint.from(exception)
+                .orElseThrow(() -> new DomainException(GlobalErrorCode.SERVER_ERROR));
+
+        return switch (constraint) {
+            case CONFIRMED_SLOT -> new RetryableReservationCreateException();
+            case WAITING_GUEST_SLOT -> new DomainException(RESERVATION_ALREADY_EXISTS);
+        };
     }
 
     @Override
