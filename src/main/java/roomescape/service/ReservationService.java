@@ -149,6 +149,8 @@ public class ReservationService {
         Reservation reservation = getReservation(reservationId);
         validateModifiable(reservation, currentDateTime);
         reservationDao.delete(reservationId);
+
+        promoteFirstWaiting(reservation.getSlot());
     }
 
     private Reservation getReservation(long reservationId) {
