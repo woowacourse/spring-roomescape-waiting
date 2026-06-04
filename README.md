@@ -184,6 +184,11 @@
   - 예약의 날짜·시간을 변경하면 기존 슬롯이 비게 되므로, 해당 슬롯의 첫 번째 대기자를 자동 승인한다.
 - [x] **엣지 케이스 처리**
   - 자동 승인 대상 대기자의 예약 날짜가 이미 과거인 경우: 해당 대기를 삭제하고 다음 순번으로 넘어간다.
+- [x] **동시성 안전성 확보 — FOR UPDATE**
+  - `delete()` 의 `findById` → `FOR UPDATE`: 더블클릭 취소 시 두 TX가 동일 행을 읽고 둘 다 대기자를 승인하는 double-approval 방지
+  - `update()` 의 `findById` → `FOR UPDATE`: 더블클릭 변경 시 두 TX가 oldSlot을 읽고 둘 다 대기자를 승인하는 double-approval 방지
+  - `approveFirstWaitingIfExists()` 의 `findFirstWaiting` → `FOR UPDATE`: 자동 승인과 대기 취소가 동일 대기 행을 동시에 대상으로 할 경우 silent lost approval 방지
+  - `deleteWaiting()` 의 `findWaitingById` → `FOR UPDATE`: 자동 승인 완료 후 대기 취소가 CONFIRMED 행을 삭제하는 것 방지
 
 ---
 

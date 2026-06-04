@@ -53,7 +53,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation update(long id, LocalDate date, long timeId) {
-        Reservation reservation = reservationDao.findById(id)
+        Reservation reservation = reservationDao.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
         ReservationTime time = validateReservationTime(timeId);
         LocalDateTime now = LocalDateTime.now(clock);
@@ -68,7 +68,7 @@ public class ReservationService {
 
     @Transactional
     public void delete(long id) {
-        reservationDao.findById(id).ifPresent(reservation -> {
+        reservationDao.findByIdForUpdate(id).ifPresent(reservation -> {
             LocalDateTime now = LocalDateTime.now(clock);
             reservation.validateCancellable(now);
             reservationDao.delete(id);
@@ -78,7 +78,7 @@ public class ReservationService {
 
     private void approveFirstWaitingIfExists(Reservation slot, LocalDateTime now) {
         Optional<Reservation> candidate;
-        while ((candidate = reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(
+        while ((candidate = reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(
                 slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())).isPresent()) {
             Reservation waiting = candidate.get();
             if (LocalDateTime.of(waiting.getDate(), waiting.getTime().getStartAt()).isBefore(now)) {

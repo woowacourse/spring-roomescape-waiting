@@ -52,7 +52,7 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteWaiting(long id) {
-        reservationDao.findWaitingById(id).ifPresent(reservation -> {
+        reservationDao.findWaitingByIdForUpdate(id).ifPresent(reservation -> {
             reservation.validateCancellable(LocalDateTime.now(clock));
             reservationDao.delete(id);
         });

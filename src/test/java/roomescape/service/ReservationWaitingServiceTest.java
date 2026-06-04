@@ -125,7 +125,7 @@ class ReservationWaitingServiceTest {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        given(reservationDao.findWaitingById(1L))
+        given(reservationDao.findWaitingByIdForUpdate(1L))
                 .willReturn(Optional.of(reservation));
 
         reservationWaitingService.deleteWaiting(1L);

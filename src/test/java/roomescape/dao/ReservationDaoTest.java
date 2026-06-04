@@ -187,6 +187,39 @@ class ReservationDaoTest {
     }
 
     @Test
+    void findByIdForUpdate_정상_조회() {
+        Reservation found = reservationDao.findByIdForUpdate(1L).orElse(null);
+
+        assertThat(found).isNotNull();
+        assertThat(found.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void findWaitingByIdForUpdate_WAITING_상태만_반환() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation waiting = reservationDao.save(
+                new Reservation("브리", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme, ReservationStatus.WAITING));
+
+        assertThat(reservationDao.findWaitingByIdForUpdate(waiting.getId())).isPresent();
+        assertThat(reservationDao.findWaitingByIdForUpdate(1L)).isEmpty();
+    }
+
+    @Test
+    void findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate_첫번째_대기자_반환() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        LocalDate date = LocalDate.of(2026, 12, 31);
+
+        Reservation first = reservationDao.save(new Reservation("브리", date, LocalDateTime.of(2026, 12, 1, 9, 0), time, theme, ReservationStatus.WAITING));
+        reservationDao.save(new Reservation("이영희", date, LocalDateTime.of(2026, 12, 1, 10, 0), time, theme, ReservationStatus.WAITING));
+
+        Reservation found = reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L).orElseThrow();
+
+        assertThat(found.getId()).isEqualTo(first.getId());
+    }
+
+    @Test
     void findFirstWaitingByDateAndTimeIdAndThemeId_첫번째_대기자_반환() {
         ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");

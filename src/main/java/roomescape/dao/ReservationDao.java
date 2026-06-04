@@ -144,6 +144,20 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationRowMapper, username);
     }
 
+    public Optional<Reservation> findByIdForUpdate(long id) {
+        String sql = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+                FROM reservation AS r
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.id = ?
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
+    }
+
     public Optional<Reservation> findWaitingById(long id) {
         String sql = """
                 SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
@@ -187,6 +201,20 @@ public class ReservationDao {
                 Integer.class, date, timeId, themeId, name), 0) > 0;
     }
 
+    public Optional<Reservation> findWaitingByIdForUpdate(long id) {
+        String sql = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+                FROM reservation AS r
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.id = ? AND r.status = 'WAITING'
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
+    }
+
     public Optional<Reservation> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         String sql = """
                 SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
@@ -198,6 +226,22 @@ public class ReservationDao {
                 WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ? AND r.status = 'WAITING'
                 ORDER BY r.created_at ASC, r.id ASC
                 LIMIT 1
+                """;
+        return jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId).stream().findFirst();
+    }
+
+    public Optional<Reservation> findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, long timeId, long themeId) {
+        String sql = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+                FROM reservation AS r
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ? AND r.status = 'WAITING'
+                ORDER BY r.created_at ASC, r.id ASC
+                LIMIT 1
+                FOR UPDATE
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId).stream().findFirst();
     }

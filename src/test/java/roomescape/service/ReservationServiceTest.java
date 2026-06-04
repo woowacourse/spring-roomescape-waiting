@@ -100,7 +100,7 @@ class ReservationServiceTest {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
 
         reservationService.delete(1L);
 
@@ -109,11 +109,9 @@ class ReservationServiceTest {
 
     @Test
     void delete_존재하지_않는_예약이면_조용히_반환() {
-        given(reservationDao.findById(999L)).willReturn(Optional.empty());
-
         assertThatCode(() -> reservationService.delete(999L))
                 .doesNotThrowAnyException();
-        then(reservationDao).should().findById(999L);
+        then(reservationDao).should().findByIdForUpdate(999L);
     }
 
     @Test
@@ -123,8 +121,8 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         Reservation waiting = new Reservation(5L, "이영희", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
 
-        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(futureDate, 1L, 1L))
+        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(futureDate, 1L, 1L))
                 .willReturn(Optional.of(waiting))
                 .willReturn(Optional.empty());
 
@@ -142,8 +140,8 @@ class ReservationServiceTest {
         Reservation pastWaiting = new Reservation(2L, "이영희", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme, ReservationStatus.WAITING);
         Reservation futureWaiting = new Reservation(3L, "김철수", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
 
-        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(futureDate, 1L, 1L))
+        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(futureDate, 1L, 1L))
                 .willReturn(Optional.of(pastWaiting))
                 .willReturn(Optional.of(futureWaiting))
                 .willReturn(Optional.empty());
@@ -164,11 +162,11 @@ class ReservationServiceTest {
         Reservation waiting = new Reservation(5L, "이영희", oldDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
         Reservation updated = new Reservation(1L, "브라운", newDate, fixedNow.minusHours(1), newTime, sampleTheme);
 
-        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
         given(reservationDao.existsByDateAndTimeIdAndThemeId(newDate, 2L, 1L)).willReturn(false);
         given(reservationDao.update(any())).willReturn(updated);
-        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(oldDate, 1L, 1L))
+        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(oldDate, 1L, 1L))
                 .willReturn(Optional.of(waiting))
                 .willReturn(Optional.empty());
 
