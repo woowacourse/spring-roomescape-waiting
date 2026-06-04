@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +77,7 @@ public class ReservationTimeTest {
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
+        reservation.put("date", LocalDate.now().plusDays(1).toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 

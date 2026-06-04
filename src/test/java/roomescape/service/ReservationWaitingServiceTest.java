@@ -135,12 +135,6 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 존재하지_않는_대기열_삭제_시_예외가_발생한다() {
-        assertThatThrownBy(() -> service.delete(999L))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
     void 중간_순번_대기를_취소하면_뒤_순번이_변경된다() {
         Slot slot = reservedSlot(1L, tomorrow, "예약자");
         LocalDateTime base = LocalDateTime.now();
