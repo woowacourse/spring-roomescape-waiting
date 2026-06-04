@@ -26,7 +26,7 @@ public class Reservation {
         return new Reservation(id, reservationName, slot, status, createdAt);
     }
 
-    public static Reservation reserve(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
+    public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
         Reservation reservation = new Reservation(0L, reservationName, slot, status, now);
         reservation.ensureNotPast(now);

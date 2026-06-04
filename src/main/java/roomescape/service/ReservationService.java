@@ -62,7 +62,7 @@ public class ReservationService {
             status = Status.WAITING;
         }
 
-        Reservation reservation = Reservation.reserve(new ReservationName(request.getName()), slot, status, now);
+        Reservation reservation = Reservation.create(new ReservationName(request.getName()), slot, status, now);
         Reservation saved = reservationRepository.save(reservation);
 
         return getRankedReservation(saved);
@@ -108,7 +108,7 @@ public class ReservationService {
                 originReservation.getTheme());
 
         Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
-        Reservation target = Reservation.reserve(originReservation.getName(), slotToUpdate, status, now);
+        Reservation target = Reservation.create(originReservation.getName(), slotToUpdate, status, now);
 
         Reservation updated = reservationRepository.update(id, target);
 

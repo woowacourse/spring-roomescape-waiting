@@ -15,7 +15,7 @@ class ReservationTest {
     @ParameterizedTest
     @MethodSource("nullCases")
     void 매개변수에_NULL이_포함되면_예외가_발생한다(ReservationName reservationName, Slot slot, Status status) {
-        assertThatThrownBy(() -> Reservation.reserve(reservationName, slot, status, LocalDateTime.MIN))
+        assertThatThrownBy(() -> Reservation.create(reservationName, slot, status, LocalDateTime.MIN))
                 .isInstanceOf(NullPointerException.class);
     }
 

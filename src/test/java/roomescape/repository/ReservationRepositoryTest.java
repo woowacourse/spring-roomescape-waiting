@@ -75,7 +75,7 @@ class ReservationRepositoryTest {
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme,
                                     Status status) {
         Slot slot = giveSlot(date, time, theme);
-        return Reservation.reserve(new ReservationName(name), slot, status, LocalDateTime.now(FIXED_CLOCK));
+        return Reservation.create(new ReservationName(name), slot, status, LocalDateTime.now(FIXED_CLOCK));
     }
 
     @Nested
