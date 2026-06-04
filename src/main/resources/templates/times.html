@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomescape Reservation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/times.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="/" class="brand">ROOM<span>ESCAPE</span></a>
+        <nav class="main-nav">
+            <button type="button" class="nav-link-button active">예약 진행</button>
+            <button type="button" class="nav-link-button" data-scroll-target="user-reservations-section">내 예약</button>
+            <button type="button" class="nav-link-button" data-modal-open="popular-theme-modal">인기테마</button>
+        </nav>
+    </div>
+</header>
+
+<div class="page-shell page-shell-home">
+    <section class="hero hero-home">
+        <div class="hero-copy hero-copy-home">
+            <h1>방탈출 예약 시스템</h1>
+            <div class="hero-actions">
+                <button type="button" class="secondary-button" data-modal-open="popular-theme-modal">인기테마 조회</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="content-stack">
+        <section class="info-strip" id="status-strip">
+            <span class="badge-blue">예약 안내</span>
+            <p>테마와 날짜를 먼저 선택해 주세요.</p>
+        </section>
+
+        <section class="panel section-panel" id="theme-section">
+            <div class="section-title">
+                <div>
+                    <span class="section-kicker">STEP 1</span>
+                    <h2>테마를 선택하세요</h2>
+                </div>
+            </div>
+            <section class="selection-form" id="selection-form">
+                <div class="theme-grid theme-grid-refined" id="theme-list">
+                </div>
+
+                <section class="panel section-panel inner-panel" id="date-section">
+                    <div class="section-title">
+                        <div>
+                            <span class="section-kicker">STEP 2</span>
+                            <h2>예약 날짜를 선택하세요</h2>
+                        </div>
+                    </div>
+                    <div class="date-grid date-grid-refined" id="date-list">
+                    </div>
+                </section>
+
+                <div class="selection-actions selection-actions-home">
+                    <button type="button" id="show-times-button" class="primary-button">예약하기</button>
+                    <button type="button" id="reset-selection-button" class="secondary-button secondary-link">선택 초기화</button>
+                </div>
+            </section>
+        </section>
+
+        <section class="panel section-panel" id="time-section" hidden>
+            <div class="section-title">
+                <div>
+                    <span class="section-kicker">STEP 3</span>
+                    <h2>가능한 시간을 선택하세요</h2>
+                    <p id="selection-summary">선택한 조건에 맞는 시간을 불러왔습니다.</p>
+                </div>
+            </div>
+            <div class="time-layout-refined">
+                <div class="time-grid time-grid-refined" id="time-list"></div>
+                <form id="reservation-form" class="reservation-form reservation-form-refined">
+                    <input type="hidden" name="themeId" id="selected-theme-id">
+                    <input type="hidden" name="dateId" id="selected-date-id">
+                    <div class="reservation-form-head">
+                        <h3>예약 정보 입력</h3>
+                        <p id="reservation-form-summary">테마와 날짜를 선택해 주세요.</p>
+                    </div>
+                    <label for="reservation-name">예약자 이름</label>
+                    <input id="reservation-name" name="name" type="text" maxlength="20"
+                           placeholder="이름을 입력하세요" required>
+                    <button type="submit" class="primary-button full-width">예약 확정</button>
+                    <p id="reservation-message" class="form-message" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
+        <section class="panel section-panel" id="user-reservations-section">
+            <div class="section-title">
+                <div>
+                    <span class="section-kicker">MY RESERVATIONS</span>
+                    <h2>내 예약 조회</h2>
+                    <p>예약자 이름으로 예약 목록을 확인하고, 취소하거나 날짜와 시간을 변경할 수 있습니다.</p>
+                </div>
+            </div>
+            <form id="user-reservation-search-form" class="reservation-lookup-form">
+                <label for="user-reservation-name">예약자 이름</label>
+                <div class="lookup-controls">
+                    <input id="user-reservation-name" name="name" type="text" maxlength="20"
+                           placeholder="예약자 이름을 입력하세요" required>
+                    <button type="submit" class="primary-button">조회</button>
+                </div>
+                <p id="user-reservation-message" class="form-message" aria-live="polite"></p>
+            </form>
+            <div id="user-reservation-list" class="user-reservation-list"></div>
+        </section>
+
+    </main>
+</div>
+
+<div id="popular-theme-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="popular-theme-title">
+        <div class="modal-header">
+            <div>
+                <p class="section-kicker">TOP THEMES</p>
+                <h2 id="popular-theme-title">인기 테마</h2>
+                <p>최근 7일 기준으로 많이 예약된 테마입니다.</p>
+            </div>
+            <button type="button" class="modal-close" aria-label="닫기" data-modal-close>X</button>
+        </div>
+        <ol class="rank-list modal-rank-list" id="rank-list"></ol>
+    </div>
+</div>
+
+<script th:src="@{/js/times.js}"></script>
+</body>
+</html>
