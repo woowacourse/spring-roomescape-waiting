@@ -30,7 +30,7 @@ public class Reservation {
 
 
     public boolean isSameDateTime(LocalDate date, Long timeId) {
-        return date.equals(date) && time.getId().equals(timeId);
+        return this.date.equals(date) && this.time.getId().equals(timeId);
     }
 
     public void validateNotPast(LocalDate date, ReservationTime time) {
