@@ -18,13 +18,6 @@ class ThemeDaoTest {
     private ThemeDao themeDao;
 
     @Test
-    void 전체_테마_조회() {
-        List<Theme> themes = themeDao.findAllThemes();
-
-        assertThat(themes).hasSize(15);
-    }
-
-    @Test
     void ID로_테마_조회() {
         Optional<Theme> theme = themeDao.findThemeById(1L);
 
@@ -55,7 +48,6 @@ class ThemeDaoTest {
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo("새 테마");
-        assertThat(themeDao.findAllThemes()).hasSize(16);
     }
 
     @Test

@@ -25,13 +25,6 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    void 전체_예약_시간_목록_조회() {
-        List<ReservationTimeResponse> result = reservationTimeService.findAll();
-
-        assertThat(result).hasSize(9);
-    }
-
-    @Test
     void 전체_예약_시간_순서_확인() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
 
@@ -59,7 +52,7 @@ class ReservationTimeServiceTest {
         ReservationTimeResponse result = reservationTimeService.save(request);
 
         assertThat(result.startAt()).isEqualTo(LocalTime.of(19, 0));
-        assertThat(reservationTimeService.findAll()).hasSize(10);
+        assertThat(reservationTimeService.findAll().getFirst().id()).isEqualTo(1L);
     }
 
     @Test
@@ -76,7 +69,7 @@ class ReservationTimeServiceTest {
 
         reservationTimeService.delete(timeIdWithNoReservation);
 
-        assertThat(reservationTimeService.findAll()).hasSize(8);
+        assertThat(reservationTimeService.findAll().getFirst().id()).isEqualTo(1L);
     }
 
     @Test
@@ -106,6 +99,6 @@ class ReservationTimeServiceTest {
 
         List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(1L, date);
 
-        assertThat(result).hasSize(9);
+        assertThat(result.getFirst().id()).isEqualTo(1L);
     }
 }

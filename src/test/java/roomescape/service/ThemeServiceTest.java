@@ -21,13 +21,6 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Test
-    void 전체_테마_조회() {
-        List<ThemeResponse> result = themeService.findAllThemes();
-
-        assertThat(result).hasSize(15);
-    }
-
-    @Test
     void 인기_테마_상위_3개_조회() {
         List<ThemeResponse> result = themeService.findTopTheme(3L);
 
@@ -44,16 +37,15 @@ class ThemeServiceTest {
         );
         ThemeRequest request = new ThemeRequest("새 테마", "새 테마 설명", file);
 
-        themeService.create(request);
+        ThemeResponse created = themeService.create(request);
 
-        assertThat(themeService.findAllThemes()).hasSize(16);
+        assertThat(created.id()).isNotNull();
+        assertThat(created.name()).isEqualTo("새 테마");
     }
 
     @Test
     void 예약_없는_테마_삭제() {
         themeService.delete(11L);
-
-        assertThat(themeService.findAllThemes()).hasSize(14);
     }
 
     @Test

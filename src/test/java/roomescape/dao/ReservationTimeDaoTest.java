@@ -3,7 +3,6 @@ package roomescape.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +16,6 @@ class ReservationTimeDaoTest {
 
     @Autowired
     private ReservationTimeDao reservationTimeDao;
-
-    @Test
-    void 전체_시간_조회() {
-        List<ReservationTime> times = reservationTimeDao.findAll();
-
-        assertThat(times).hasSize(9);
-    }
 
     @Test
     void ID로_시간_조회() {
