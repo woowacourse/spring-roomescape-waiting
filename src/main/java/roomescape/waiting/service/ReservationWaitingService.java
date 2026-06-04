@@ -43,7 +43,8 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
-        ReservationWaiting newReservationWaiting = buildValidReservationWaiting(command, requestTime);
+        ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
+        validateWaiting(newReservationWaiting, requestTime);
         newReservationWaiting.validateExpiry(requestTime);
 
         try {
@@ -57,8 +58,10 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteById(Long id, String name, LocalDateTime requestTime) {
         ReservationWaiting reservationWaiting = getById(id);
+        if (name != null) {
+            reservationWaiting.validateOwner(name);
+        }
         reservationWaiting.validateExpiry(requestTime);
-        reservationWaiting.validateOwner(name);
 
         reservationWaitingRepository.delete(reservationWaiting);
     }
@@ -70,15 +73,9 @@ public class ReservationWaitingService {
                 );
     }
 
-    private ReservationWaiting buildValidReservationWaiting(ReservationWaitingCommand command,
-                                                            LocalDateTime requestTime) {
+    private ReservationWaiting createWaiting(ReservationWaitingCommand command, LocalDateTime requestTime) {
         ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
         Theme theme = themeService.findById(command.themeId());
-        ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
-
-        validateTargetReservationExists(slot);
-        validateNoSameTimeBooking(slot, command.name());
-        validateNoSameTimeWaiting(slot, command.name(), requestTime);
 
         return new ReservationWaiting(
                 command.name(),
@@ -89,20 +86,36 @@ public class ReservationWaitingService {
         );
     }
 
+    private void validateWaiting(ReservationWaiting reservationWaiting, LocalDateTime requestTime) {
+        validateTargetReservationExists(reservationWaiting.getSlot());
+        validateNoSameTimeBooking(reservationWaiting);
+        validateNoSameTimeWaiting(reservationWaiting, requestTime);
+    }
+
     private void validateTargetReservationExists(ReservationSlot slot) {
         reservationRepository.findBySlot(slot)
                 .orElseThrow(() -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND));
     }
 
-    private void validateNoSameTimeBooking(ReservationSlot slot, String name) {
-        Reservation candidate = new Reservation(null, name, slot, slot.date().atStartOfDay());
+    private void validateNoSameTimeBooking(ReservationWaiting reservationWaiting) {
+        Reservation candidate = new Reservation(
+                null,
+                reservationWaiting.getName(),
+                reservationWaiting.getSlot(),
+                reservationWaiting.getSlot().date().atStartOfDay()
+        );
         if (reservationRepository.hasBookingAtSameTime(candidate)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 
-    private void validateNoSameTimeWaiting(ReservationSlot slot, String name, LocalDateTime requestTime) {
-        ReservationWaiting candidate = new ReservationWaiting(null, name, slot, requestTime);
+    private void validateNoSameTimeWaiting(ReservationWaiting reservationWaiting, LocalDateTime requestTime) {
+        ReservationWaiting candidate = new ReservationWaiting(
+                null,
+                reservationWaiting.getName(),
+                reservationWaiting.getSlot(),
+                requestTime
+        );
         if (reservationWaitingRepository.hasWaitingAtSameTime(candidate)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }

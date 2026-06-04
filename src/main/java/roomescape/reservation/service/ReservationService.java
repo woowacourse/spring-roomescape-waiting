@@ -44,7 +44,8 @@ public class ReservationService {
     @Transactional
     public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
         try {
-            Reservation saved = buildNewReservation(command, requestTime);
+            Reservation saved = createReservation(command, requestTime);
+            validateReservation(saved);
             saved.validateExpiry(requestTime);
             saved = reservationRepository.save(saved);
             return ReservationResult.from(saved);
@@ -55,7 +56,8 @@ public class ReservationService {
 
     @Transactional
     public void update(ReservationUpdateCommand command, Long id, String name, LocalDateTime requestTime) {
-        Reservation updated = buildUpdatedReservation(command, id, name, requestTime);
+        Reservation updated = updateReservation(command, id, name, requestTime);
+        validateUpdatedReservation(updated);
         updated.validateExpiry(requestTime);
         try {
             reservationRepository.save(updated);
@@ -88,17 +90,14 @@ public class ReservationService {
         );
     }
 
-    private Reservation buildNewReservation(ReservationCommand command, LocalDateTime requestTime) {
+    private Reservation createReservation(ReservationCommand command, LocalDateTime requestTime) {
         ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
         Theme theme = themeService.findById(command.themeId());
 
-        Reservation newReservation = new Reservation(command.name(), command.date(), time, theme, requestTime);
-        validateNoDoubleBooking(newReservation);
-
-        return newReservation;
+        return new Reservation(command.name(), command.date(), time, theme, requestTime);
     }
 
-    private void validateNoDoubleBooking(Reservation newReservation) {
+    private void validateReservation(Reservation newReservation) {
         validateNoSameTimeBooking(newReservation);
         validateNoSameTimeWaiting(newReservation);
     }
@@ -123,15 +122,12 @@ public class ReservationService {
         }
     }
 
-    private Reservation buildUpdatedReservation(ReservationUpdateCommand command, Long id, String name,
-                                                LocalDateTime requestTime) {
+    private Reservation updateReservation(ReservationUpdateCommand command, Long id, String name,
+                                          LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         reservation.validateExpiry(requestTime);
         ReservationTime newTime = getReservationTime(command.timeId());
-        Reservation updated = reservation.update(command.date(), newTime, name, requestTime);
-        updated.validateExpiry(requestTime);
-        validateNoDoubleBookingForUpdate(updated);
-        return updated;
+        return reservation.update(command.date(), newTime, name, requestTime);
     }
 
     private ReservationTime getReservationTime(Long timeId) {
@@ -141,7 +137,7 @@ public class ReservationService {
         return reservationTimeService.getByIdForUpdate(timeId);
     }
 
-    private void validateNoDoubleBookingForUpdate(Reservation updated) {
+    private void validateUpdatedReservation(Reservation updated) {
         if (reservationRepository.isAlreadyBookedByOthers(updated)) {
             throw new InvalidBusinessStateException(
                     ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
@@ -151,8 +147,13 @@ public class ReservationService {
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
         for (ReservationWaiting waiting : lockedWaitings) {
-            Reservation candidate = new Reservation(null, waiting.getName(), waiting.getSlot(),
-                    waiting.getSlot().date().atStartOfDay());
+            Reservation candidate = new Reservation(
+                    null,
+                    waiting.getName(),
+                    waiting.getSlot(),
+                    waiting.getSlot().date().atStartOfDay()
+            );
+
             if (!reservationRepository.hasBookingAtSameTime(candidate)) {
                 createReservationFromWaiting(waiting, requestTime);
                 return;
