@@ -391,8 +391,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 취소하면 예외가 발생한다")
-    void throwExceptionWhenCancelingNonExistingReservation() {
+    @DisplayName("존재하지 않는 예약을 고객이 취소하면 예외가 발생한다")
+    void throwExceptionWhenCustomerCancelsNonExistingReservation() {
         // when & then
         assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
                 .isInstanceOf(NotFoundException.class);
@@ -416,8 +416,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("관리자는 예약일 당일에도 예약을 삭제할 수 있다")
-    void adminCanDeleteReservationOnReservationDate() {
+    @DisplayName("관리자는 예약일 당일에도 예약을 취소할 수 있다")
+    void adminCanCancelReservationOnReservationDate() {
         // given
         reservationRepository.add(Reservation.of(
                 1L,
@@ -428,17 +428,17 @@ class ReservationServiceTest {
         ));
 
         // when
-        reservationService.deleteByAdmin(1L);
+        reservationService.cancelByAdmin(1L);
 
         // then
         assertThat(reservationRepository.findById(1L)).isEmpty();
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 관리자가 삭제하면 예외가 발생한다")
-    void throwExceptionWhenAdminDeletesNonExistingReservation() {
+    @DisplayName("존재하지 않는 예약을 관리자가 취소하면 예외가 발생한다")
+    void throwExceptionWhenAdminCancelsNonExistingReservation() {
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteByAdmin(1L))
+        assertThatThrownBy(() -> reservationService.cancelByAdmin(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 

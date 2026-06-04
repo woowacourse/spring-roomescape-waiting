@@ -163,8 +163,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    @DisplayName("예약을 추가하고 삭제한다")
-    void createAndDeleteReservation() {
+    @DisplayName("예약을 추가하고 취소한다")
+    void createAndCancelReservation() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 

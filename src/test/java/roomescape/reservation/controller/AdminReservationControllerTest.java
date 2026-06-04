@@ -146,8 +146,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    @DisplayName("관리자는 예약을 삭제할 수 있다")
-    void adminCanDeleteReservation() {
+    @DisplayName("관리자는 제약없이 예약을 취소할 수 있다")
+    void adminCanCancelReservation() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -163,8 +163,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    @DisplayName("존재하지 않는 예약을 관리자가 삭제하면 404를 응답한다")
-    void respondNotFoundWhenAdminDeletesNonExistingReservation() {
+    @DisplayName("존재하지 않는 예약을 관리자가 취소하면 404를 응답한다")
+    void respondNotFoundWhenAdminCancelsNonExistingReservation() {
         RestAssured.given().log().all()
                 .when().delete("/admin/reservations/999")
                 .then().log().all()

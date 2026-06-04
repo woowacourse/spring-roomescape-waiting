@@ -115,7 +115,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteByAdmin(final Long reservationId) {
+    public void cancelByAdmin(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
 
         deleteReservationAndPromoteWaiting(reservation);
