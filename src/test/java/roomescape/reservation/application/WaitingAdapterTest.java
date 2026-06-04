@@ -16,15 +16,15 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 
-class WaitingAdapterTest {
+class WaitingReferenceAdapterTest {
 
     private ReservationRepository reservationRepository;
-    private WaitingAdapter waitingAdapter;
+    private WaitingReferenceAdapter waitingReferenceAdapter;
 
     @BeforeEach
     void setUp() {
         reservationRepository = new FakeReservationRepository();
-        waitingAdapter = new WaitingAdapter(reservationRepository);
+        waitingReferenceAdapter = new WaitingReferenceAdapter(reservationRepository);
     }
 
     @Test
@@ -43,7 +43,7 @@ class WaitingAdapterTest {
         );
 
         // when & then
-        assertThatCode(() -> waitingAdapter.validateExistReservation(command))
+        assertThatCode(() -> waitingReferenceAdapter.validateExistReservation(command))
                 .doesNotThrowAnyException();
     }
 
@@ -61,7 +61,7 @@ class WaitingAdapterTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> waitingAdapter.validateExistReservation(command))
+        assertThatThrownBy(() -> waitingReferenceAdapter.validateExistReservation(command))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("예약이 존재하지 않으면, 대기요청을 할 수 없습니다.");
     }
