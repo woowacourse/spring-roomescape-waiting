@@ -10,11 +10,11 @@ import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 
 @Component
-public class WaitingAdapter implements WaitingReference {
+public class WaitingReferenceAdapter implements WaitingReference {
 
     private final ReservationRepository reservationRepository;
 
-    public WaitingAdapter(ReservationRepository reservationRepository) {
+    public WaitingReferenceAdapter(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 
