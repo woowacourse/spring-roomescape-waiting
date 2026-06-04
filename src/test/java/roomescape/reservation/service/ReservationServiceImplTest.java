@@ -23,6 +23,7 @@ import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -421,5 +422,25 @@ class ReservationServiceImplTest {
         // when & then
         assertThatThrownBy(() -> reservationService.update(existing.getId(), oldTime.getId()))
                 .isInstanceOf(PastReservationException.class);
+    }
+
+    @DisplayName("변경하려는 슬롯에 같은 이름의 예약/대기가 이미 있는 경우, DuplicateReservationException이 발생한다.")
+    @Test
+    void update_중복_슬롯으로_변경하면_예외() {
+        // given
+        ReservationTime oldTime = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        ReservationTime newTime = new ReservationTime(2L,
+                LocalDateTime.of(2030, 6, 1, 14, 0),
+                LocalDateTime.of(2030, 6, 1, 16, 0));
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        when(reservationRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(reservationRepository.findEarliestWaiting(any(), any())).thenReturn(Optional.empty());
+        when(timeService.findById(2L)).thenReturn(newTime);
+        when(reservationRepository.isDuplicatedWithName("라이", 2L, newTime)).thenReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.update(existing.getId(), newTime.getId()))
+                .isInstanceOf(DuplicateReservationException.class);
     }
 }
