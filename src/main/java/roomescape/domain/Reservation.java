@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -33,7 +34,7 @@ public class Reservation {
 
     public static Reservation restore(Long id, LocalDate date, Theme theme, ReservationTime time,
                                       List<ReservationEntry> entries) {
-        return new Reservation(id, date, theme, time, entries);
+        return new Reservation(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), date, theme, time, entries);
     }
 
     public static Reservation createSlot(LocalDate date, Theme theme, ReservationTime time) {

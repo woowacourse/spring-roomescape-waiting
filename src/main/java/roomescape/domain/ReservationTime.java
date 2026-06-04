@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -31,7 +32,7 @@ public class ReservationTime {
     }
 
     public static ReservationTime restore(Long id, LocalTime startAt, TimeStatus status) {
-        return new ReservationTime(id, startAt, status);
+        return new ReservationTime(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), startAt, status);
     }
 
     public boolean isPast(LocalDate date) {

@@ -81,7 +81,7 @@ class ReservationEntriesTest {
     void 식별자가_없는_엔트리는_식별자로_조회되지_않는다() {
         // given
         ReservationEntries entries = new ReservationEntries(List.of(
-                entry(null, "이프", ReservationStatus.RESERVED, FIXED)
+                ReservationEntry.reserve("이프", FIXED)
         ));
 
         // when & then

@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
@@ -26,7 +27,7 @@ public abstract class ReservationEntry {
 
     public static ReservationEntry restore(Long id, String reserverName, ReservationStatus status,
                                            LocalDateTime createdAt) {
-        return of(id, reserverName, status, createdAt);
+        return of(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), reserverName, status, createdAt);
     }
 
     private static ReservationEntry of(Long id, String reserverName, ReservationStatus status,
