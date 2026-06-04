@@ -125,8 +125,9 @@ public class ReservationDao {
         return affectedRows > 0;
     }
 
-    public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
+    public boolean delete(Long id) {
+        int affected = jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
+        return affected > 0;
     }
 
     public boolean existsById(Long id) {

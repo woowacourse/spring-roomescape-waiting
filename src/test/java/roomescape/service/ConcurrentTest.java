@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.common.exception.ConflictException;
@@ -229,6 +230,68 @@ public class ConcurrentTest {
         assertThat(dangling)
                 .as("dangling waiting (예약 없는 슬롯에 대기만 떠 있는 상태) 발생 금지")
                 .isFalse();
+    }
+
+    @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
+    void 동시_cancel과_admin_remove시_waiting이_2건이면_이중승격_race가_발생할_수_있다() throws Exception {
+        SimpleJdbcInsert waitingInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("waiting")
+                .usingGeneratedKeyColumns("id");
+        Map<String, Object> w2Params = new HashMap<>();
+        w2Params.put("name", "두번째대기자");
+        w2Params.put("date", date);
+        w2Params.put("time_id", timeId);
+        w2Params.put("theme_id", themeId);
+        w2Params.put("created_at", LocalDateTime.of(2026, 5, 10, 10, 0));
+        waitingInsert.executeAndReturnKey(w2Params);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        CountDownLatch finishGate = new CountDownLatch(2);
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.cancelReservation(reservationId, CANCELLER_NAME);
+            } catch (Throwable t) {
+                errors.add(t);
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.removeReservation(reservationId);
+            } catch (Throwable t) {
+                errors.add(t);
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        startGate.countDown();
+        boolean finished = finishGate.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(finished)
+                .as("두 작업이 5초 안에 끝나야 함")
+                .isTrue();
+
+        int reservationCount = countReservations();
+
+        assertThat(reservationCount)
+                .as("UNIQUE 제약이 같은 슬롯의 reservation 중복을 막아야 함 (0 또는 1)")
+                .isIn(0, 1);
+
+        List<Throwable> uniqueViolations = errors.stream()
+                .filter(e -> e instanceof DataIntegrityViolationException)
+                .toList();
+        assertThat(uniqueViolations)
+                .as("이중 승격으로 인한 UNIQUE 위반이 없어야 함")
+                .isEmpty();
     }
 
     private int countReservations() {

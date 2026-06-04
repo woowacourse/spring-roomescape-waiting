@@ -321,6 +321,7 @@ class ReservationServiceTest {
         );
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.delete(reservationId)).willReturn(true);
         given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.of(firstWaiting));
 
         reservationService.cancelReservation(reservationId, userName);
@@ -335,6 +336,7 @@ class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.delete(reservationId)).willReturn(true);
         given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.empty());
 
         reservationService.cancelReservation(reservationId, userName);
@@ -356,6 +358,7 @@ class ReservationServiceTest {
         );
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.delete(reservationId)).willReturn(true);
         given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.of(firstWaiting));
 
         reservationService.removeReservation(reservationId);

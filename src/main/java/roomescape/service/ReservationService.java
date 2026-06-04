@@ -97,7 +97,9 @@ public class ReservationService {
     @Transactional
     public void removeReservation(Long id) {
         Reservation origin = getReservationOrThrow(id);
-        reservationDao.delete(id);
+        if (!reservationDao.delete(id)) {
+            return;
+        }
         if (isPast(origin.getDate(), origin.getTime())) {
             return;
         }
@@ -109,7 +111,9 @@ public class ReservationService {
         Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(userName);
         validatePastTime(origin.getDate(), origin.getTime());
-        reservationDao.delete(id);
+        if (!reservationDao.delete(id)) {
+            return;
+        }
         promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
     }
 
