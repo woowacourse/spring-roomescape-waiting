@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<?> handleMissingServletRequestParameter(
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException e
     ) {
         return ResponseEntity
