@@ -9,13 +9,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.slot.application.SlotService;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.slot.Slot;
+import roomescape.slot.application.SlotAssembler;
+import roomescape.theme.Theme;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +37,7 @@ class WaitingServiceTest {
     private static final long MEMBER_ID = 1L;
 
     @Mock
-    private SlotService slotService;
+    private SlotAssembler slotAssembler;
 
     @Mock
     private WaitingRepository waitingRepository;
@@ -53,8 +57,8 @@ class WaitingServiceTest {
         Waiting secondWaiting = Waiting.of(9L, 2L, slotId);
         Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
 
-        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(slotId);
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slot(slotId, request));
         when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
                 .thenReturn(false);
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
@@ -83,8 +87,8 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
 
-        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(slotId);
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slot(slotId, request));
         when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
                 .thenReturn(true);
 
@@ -93,7 +97,7 @@ class WaitingServiceTest {
                         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ALREADY_EXIST)
                 );
 
-        verify(slotService).resolveSlotId(request.date(), request.timeId(), request.themeId());
+        verify(slotAssembler).assembleExisting(request.date(), request.timeId(), request.themeId());
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
 
@@ -103,8 +107,8 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
 
-        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(slotId);
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slot(slotId, request));
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
                 .thenReturn(true);
 
@@ -122,8 +126,8 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 4L, 4L);
         long slotId = 4L;
 
-        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(slotId);
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slot(slotId, request));
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
                 .thenReturn(false);
         when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
@@ -146,8 +150,8 @@ class WaitingServiceTest {
         long slotId = 1L;
         Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
 
-        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(slotId);
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slot(slotId, request));
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
                 .thenReturn(false);
         when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
@@ -202,5 +206,14 @@ class WaitingServiceTest {
                 .doesNotThrowAnyException();
 
         verify(waitingRepository, never()).deleteById(999L);
+    }
+
+    private Slot slot(long slotId, WaitingRequest request) {
+        return Slot.of(
+                slotId,
+                request.date(),
+                new ReservationTime(request.timeId(), LocalTime.of(10, 0)),
+                new Theme(request.themeId(), "theme", "description", "thumbnail")
+        );
     }
 }

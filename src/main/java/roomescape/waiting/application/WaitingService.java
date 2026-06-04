@@ -6,26 +6,27 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.slot.Slot;
 import roomescape.slot.SlotOccupancy;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.SlotAssembler;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingLine;
-import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
+import roomescape.waiting.infrastructure.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
 public class WaitingService {
 
-    private final SlotService slotService;
+    private final SlotAssembler slotAssembler;
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
 
     @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
-        slotService.validateSlot(body.date(), body.timeId(), body.themeId());
-        long slotId = slotService.resolveSlotId(body.date(), body.timeId(), body.themeId());
+        Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
+        long slotId = slot.getId();
 
         validateReservedByMemberNotExists(memberId, slotId);
         validateWaitingByMemberNotExists(memberId, slotId);

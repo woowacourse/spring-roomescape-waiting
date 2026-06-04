@@ -13,7 +13,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.SlotAssembler;
 import roomescape.theme.Theme;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
@@ -42,7 +42,7 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Mock
-    private SlotService slotService;
+    private SlotAssembler slotAssembler;
 
     @Mock
     private WaitingRepository waitingRepository;
@@ -59,7 +59,7 @@ class ReservationServiceTest {
         reservationService = new ReservationService(
                 reservationRepository,
                 waitingRepository,
-                slotService,
+                slotAssembler,
                 clock
         );
     }
@@ -139,7 +139,7 @@ class ReservationServiceTest {
         Reservation updated = Reservation.of(reservationId, MEMBER_ID, newSlot);
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation), Optional.of(updated));
-        when(slotService.resolveSlot(request.date(), request.timeId(), 3L))
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), 3L))
                 .thenReturn(newSlot);
         when(reservationRepository.existsBySlotIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateSlotById(reservationId, 99L)).thenReturn(1);
@@ -163,7 +163,7 @@ class ReservationServiceTest {
         Reservation updated = Reservation.of(reservationId, MEMBER_ID, newSlot);
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation), Optional.of(updated));
-        when(slotService.resolveSlot(request.date(), request.timeId(), 3L))
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), 3L))
                 .thenReturn(newSlot);
         when(reservationRepository.existsBySlotIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateSlotById(reservationId, 99L)).thenReturn(1);
@@ -203,7 +203,7 @@ class ReservationServiceTest {
         Slot newSlot = slot(newSlotId, request.date(), 3L, request.timeId(), LocalTime.of(14, 0));
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(slotService.resolveSlot(request.date(), request.timeId(), 3L))
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), 3L))
                 .thenReturn(newSlot);
         when(reservationRepository.existsBySlotIdAndIdNot(newSlotId, reservationId)).thenReturn(true);
 
@@ -224,7 +224,7 @@ class ReservationServiceTest {
         Slot newSlot = slot(newSlotId, request.date(), 3L, request.timeId(), LocalTime.of(14, 0));
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(slotService.resolveSlot(request.date(), request.timeId(), 3L))
+        when(slotAssembler.assembleExisting(request.date(), request.timeId(), 3L))
                 .thenReturn(newSlot);
         when(reservationRepository.existsBySlotIdAndIdNot(newSlotId, reservationId)).thenReturn(false);
         when(waitingRepository.existsBySlotId(newSlotId)).thenReturn(true);

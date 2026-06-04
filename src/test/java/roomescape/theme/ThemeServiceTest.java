@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.SlotUsageValidator;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -22,7 +22,7 @@ public class ThemeServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
-    private SlotService slotService;
+    private SlotUsageValidator slotUsageValidator;
 
     @InjectMocks
     private ThemeService themeService;
@@ -32,7 +32,7 @@ public class ThemeServiceTest {
     void delete_실패_테스트_1() {
         // given
         long themeId = 1L;
-        doThrow(new IllegalStateException()).when(slotService).validateThemeDeletable(themeId);
+        doThrow(new IllegalStateException()).when(slotUsageValidator).validateThemeDeletable(themeId);
 
         // when, then
         assertThatThrownBy(() -> themeService.delete(themeId))

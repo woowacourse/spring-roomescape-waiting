@@ -21,7 +21,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.slot.SlotOccupancy;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.Slot;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingLine;
@@ -33,12 +33,11 @@ import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final SlotService slotService;
+    private final SlotAssembler slotAssembler;
     private final Clock clock;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
-        slotService.validateSlot(body.date(), body.timeId(), body.themeId());
-        Slot slot = slotService.resolveSlot(body.date(), body.timeId(), body.themeId());
+        Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
         throwIfSlotUnavailableForReservation(slot.getId());
         Reservation reservation = reservationRepository.save(Reservation.create(memberId, slot));
 
@@ -143,8 +142,7 @@ public class ReservationService {
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.getSlot().getDate());
         long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getSlot().getTimeId());
         long themeId = oldReservation.getSlot().getThemeId();
-        slotService.validateSlot(newDate, newTimeId, themeId);
-        Slot slot = slotService.resolveSlot(newDate, newTimeId, themeId);
+        Slot slot = slotAssembler.assembleExisting(newDate, newTimeId, themeId);
         long slotId = slot.getId();
         throwIfSlotUnavailableForUpdate(reservationId, slotId);
 
