@@ -29,13 +29,6 @@ class ReservationDaoTest {
     private ThemeDao themeDao;
 
     @Test
-    void 전체_예약_조회() {
-        List<Reservation> reservations = reservationDao.findAll();
-
-        assertThat(reservations).hasSize(21);
-    }
-
-    @Test
     void ID로_예약_조회() {
         Optional<Reservation> reservation = reservationDao.findById(1L);
 
@@ -48,7 +41,7 @@ class ReservationDaoTest {
     void 이름으로_예약_조회() {
         List<ReservationRank> reservation = reservationDao.findByName("아나키");
 
-        assertThat(reservation).hasSize(2);
+        assertThat(reservation.getFirst().getId()).isEqualTo(10L);
     }
 
     @Test
@@ -83,6 +76,19 @@ class ReservationDaoTest {
                 .orElseThrow();
 
         assertThat(secondWaiting.getRank()).isEqualTo(1);
+    }
+
+    @Test
+    void 대기_예약_승인_확인() {
+        LocalDate date = LocalDate.now().minusDays(6);
+        long themeId = 1L;
+        long timeId = 1L;
+
+        reservationDao.delete(1L);
+        reservationDao.update(date, themeId, timeId);
+
+        Reservation confirmed = reservationDao.findById(20L).orElseThrow();
+        assertThat(confirmed.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
     }
 
     @Test

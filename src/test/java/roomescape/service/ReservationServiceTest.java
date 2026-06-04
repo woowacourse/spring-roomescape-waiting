@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationStatus;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
+import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotFoundException;
@@ -91,5 +93,20 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.save(secondRequest))
                 .isInstanceOf(AlreadyExistsException.class);
+    }
+
+    @Test
+    void 예약_삭제_시_대기_순번_승인_확인() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationRequest firstRequest = new ReservationRequest("브라운", futureDate, 1L, 1L);
+        ReservationRequest secondRequest = new ReservationRequest("그해", futureDate, 1L, 1L);
+
+        long firstId = reservationService.save(firstRequest).id();
+        long secondId = reservationService.save(secondRequest).id();
+
+        reservationService.delete(firstId);
+
+        List<ReservationRankResponse> reservations = reservationService.find("그해");
+        assertThat(reservations.getFirst().status()).isEqualTo(ReservationStatus.CONFIRMED);
     }
 }
