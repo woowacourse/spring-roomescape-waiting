@@ -36,7 +36,9 @@ public class ThemeService {
         if (themeRepository.existsByName(command.name())) {
             throw new ThemeConflictException("이미 등록된 테마입니다: " + command.name());
         }
-        Theme saved = themeRepository.save(new Theme(null, command.name(), command.description(), command.thumbnailUrl()));
+        Theme saved = themeRepository.save(
+                new Theme(null, command.name(), command.description(), command.thumbnailUrl())
+        );
         return ThemeResult.from(saved);
     }
 
@@ -52,11 +54,10 @@ public class ThemeService {
     }
 
     public List<PopularThemeResult> findPopular() {
-       return themeRepository.findPopular().stream()
+        return themeRepository.findPopular().stream()
                 .map(p -> new PopularThemeResult(
                         ThemeResult.from(p.theme()),
                         p.reservationCount()))
                 .toList();
     }
-
 }
