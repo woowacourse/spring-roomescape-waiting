@@ -30,14 +30,16 @@ public class ReservationService {
     private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final ReservationWaitingService waitingService;
 
     public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao,
-                              ReservationTimeDao reservationTimeDao,
-                              ThemeDao themeDao) {
+                              ReservationTimeDao reservationTimeDao, ThemeDao themeDao,
+                              ReservationWaitingService waitingService) {
         this.reservationDao = reservationDao;
         this.reservationWaitingDao = reservationWaitingDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
+        this.waitingService = waitingService;
     }
 
     @Transactional
@@ -87,10 +89,9 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long reservationId) {
-        int deleted = reservationDao.delete(reservationId);
-        if (deleted == 0) {
-            throw new RoomEscapeException(ReservationErrorCode.NOT_FOUND);
-        }
+        Reservation reservation = getReservation(reservationId);
+        reservationDao.delete(reservationId);
+        waitingService.convertFirstWaitingToReservation(reservation.getSlot());
     }
 
     private ReservationTime getTime(long timeId) {

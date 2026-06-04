@@ -3,6 +3,8 @@ package roomescape.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -80,6 +82,22 @@ public class ReservationWaitingDao {
                 """;
         return jdbcTemplate.queryForObject(sql, Boolean.class,
                 name, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
+    }
+
+    public Optional<ReservationWaiting> selectFirstBySlot(ReservationSlot slot) {
+        String sql = baseSelectSql() + """
+                WHERE rw.reservation_date = ?
+                AND rw.time_id = ?
+                AND rw.theme_id = ?
+                ORDER BY rw.id
+                LIMIT 1
+                """;
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER,
+                    slot.getDate(), slot.getTime().getId(), slot.getTheme().getId()));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
     }
 
     public int delete(Long reservationWaitingId) {
