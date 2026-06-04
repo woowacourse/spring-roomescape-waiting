@@ -24,6 +24,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
+import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.dto.ReservationCondition;
 
@@ -148,6 +149,23 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
                 .singleElement()
                 .extracting(Reservation::getName, Reservation::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void 존재하지_않는_예약_슬롯을_수정하면_예외가_발생한다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                999L,
+                LocalDate.now().plusDays(2),
+                theme,
+                reservationTime,
+                List.of()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationRepository.save(slot))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("존재하지 않는 예약 슬롯입니다.");
     }
 
     @Test
