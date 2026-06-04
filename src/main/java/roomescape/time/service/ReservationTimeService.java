@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
@@ -31,7 +30,6 @@ public class ReservationTimeService {
         this.clock = clock;
     }
 
-    @Transactional
     public ReservationTime registerReservationTime(ReservationTimeCommand command) {
         if (reservationTimeRepository.existByStartAt(command.startAt())) {
             throw new DuplicateTimeException();
@@ -62,7 +60,6 @@ public class ReservationTimeService {
         return new AvailableTimesResult(reservationTimeRepository.findAvailableTimes(themeId, date));
     }
 
-    @Transactional
     public void removeReservationTimeById(Long id) {
         if (reservationTimeRepository.findById(id).isEmpty()) {
             throw new TimeNotFoundException();

@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
@@ -46,7 +45,6 @@ public class ReservationWaitingService {
         this.clock = clock;
     }
 
-    @Transactional
     public ReservationWaiting makeReservationWaiting(ReservationWaitingCommand command) {
         if (reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
                 command.date(), command.timeId(), command.themeId(), command.name()
@@ -96,7 +94,6 @@ public class ReservationWaitingService {
         }
     }
 
-    @Transactional
     public void deleteReservationWaitingById(Long id, String name) {
         ReservationWaiting reservationWaiting = getReservationWaiting(id);
 

@@ -50,7 +50,6 @@ public class ReservationService {
         this.clock = clock;
     }
 
-    @Transactional
     public Reservation makeReservation(ReservationCommand command) {
         if (reservationRepository.existByDateAndTimeIdAndThemeId(
                 command.date(), command.timeId(), command.themeId())) {
