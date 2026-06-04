@@ -49,10 +49,19 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAll() {
+    public List<ReservationOrderResponse> findAll() {
         return reservationDao.findAll().stream()
-                .map(ReservationResponse::from)
-                .collect(Collectors.toList());
+                .map(reservation -> {
+                    long order = calculateOrder(reservation);
+                    return new ReservationOrderResponse(
+                            reservation.getId(),
+                            reservation.getName(),
+                            reservation.getDate(),
+                            ReservationTimeResponse.from(reservation.getTime()),
+                            ThemeResponse.from(reservation.getTheme()),
+                            order);
+                })
+                .toList();
     }
 
     public ReservationResponse save(ReservationRequest request, LocalDateTime requestedAt) {
@@ -72,15 +81,10 @@ public class ReservationService {
         Theme theme = getValidTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
-//        ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
         if (reservationDao.existsBy(request.date(), theme, time)) {
             throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
         }
-
-//        if (status == ReservationStatus.WAITING) {
-//            throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
-//        }
 
         Reservation newReservation = reservationDao.update(id, request.date(), request.timeId());
         return ReservationResponse.from(newReservation);
