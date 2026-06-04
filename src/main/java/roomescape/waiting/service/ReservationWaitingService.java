@@ -5,7 +5,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
-import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -44,7 +43,7 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
-        validateWaiting(newReservationWaiting, requestTime);
+        validateWaiting(newReservationWaiting);
         newReservationWaiting.validateExpiry(requestTime);
 
         try {
@@ -56,7 +55,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void deleteById(long id, String name, LocalDateTime requestTime) {
+    public void deleteOwnedWaitingById(long id, String name, LocalDateTime requestTime) {
         ReservationWaiting reservationWaiting = getById(id);
         reservationWaiting.validateOwner(name);
         reservationWaiting.validateExpiry(requestTime);
@@ -72,7 +71,7 @@ public class ReservationWaitingService {
     }
 
     private ReservationWaiting createWaiting(ReservationWaitingCommand command, LocalDateTime requestTime) {
-        ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
+        ReservationTime time = reservationTimeService.getById(command.timeId());
         Theme theme = themeService.findById(command.themeId());
 
         return new ReservationWaiting(
@@ -84,38 +83,15 @@ public class ReservationWaitingService {
         );
     }
 
-    private void validateWaiting(ReservationWaiting reservationWaiting, LocalDateTime requestTime) {
-        validateTargetReservationExists(reservationWaiting.getSlot());
-        validateNoSameTimeBooking(reservationWaiting);
-        validateNoSameTimeWaiting(reservationWaiting, requestTime);
+    private void validateWaiting(ReservationWaiting reservationWaiting) {
+        Reservation targetReservation = validateTargetReservationExists(reservationWaiting.getSlot());
+        boolean hasDuplicateWaiting = reservationWaitingRepository.hasWaitingAtSameTime(reservationWaiting);
+        reservationWaiting.validateNoConflictWithReservation(targetReservation);
+        reservationWaiting.validateNoDuplicateWaiting(hasDuplicateWaiting);
     }
 
-    private void validateTargetReservationExists(ReservationSlot slot) {
-        reservationRepository.findBySlot(slot)
+    private Reservation validateTargetReservationExists(ReservationSlot slot) {
+        return reservationRepository.findBySlot(slot)
                 .orElseThrow(() -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND));
-    }
-
-    private void validateNoSameTimeBooking(ReservationWaiting reservationWaiting) {
-        Reservation candidate = new Reservation(
-                null,
-                reservationWaiting.getName(),
-                reservationWaiting.getSlot(),
-                reservationWaiting.getSlot().date().atStartOfDay()
-        );
-        if (reservationRepository.hasBookingAtSameTime(candidate)) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
-        }
-    }
-
-    private void validateNoSameTimeWaiting(ReservationWaiting reservationWaiting, LocalDateTime requestTime) {
-        ReservationWaiting candidate = new ReservationWaiting(
-                null,
-                reservationWaiting.getName(),
-                reservationWaiting.getSlot(),
-                requestTime
-        );
-        if (reservationWaitingRepository.hasWaitingAtSameTime(candidate)) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
-        }
     }
 }
