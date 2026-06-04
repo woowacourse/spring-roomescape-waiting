@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>룸이스케이프 예약</title>
+  <link rel="stylesheet" href="/css/user.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Room Escape</h1>
+      <nav class="header-nav">
+        <a href="/index.html" class="nav-link active">예약</a>
+        <a href="/admin.html" class="nav-link">관리자</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="popular-section" aria-labelledby="popular-title">
+      <h2 id="popular-title" class="section-title">이번 주 인기 테마</h2>
+      <p class="section-desc">최근 일주일 예약이 많았던 테마입니다.</p>
+      <div id="popular-list" class="popular-strip"></div>
+    </section>
+
+    <section class="my-reservations-section" aria-labelledby="my-reservations-title">
+      <h2 id="my-reservations-title" class="section-title">내 예약 조회</h2>
+      <p class="section-desc">이름을 입력하면 예약과 예약 대기 현황을 확인할 수 있습니다.</p>
+      <form id="lookup-form" class="lookup-form">
+        <label class="field">
+          <span class="field__label">예약자 이름</span>
+          <input type="text" id="lookup-name-input" name="userName" required autocomplete="name" />
+        </label>
+        <button type="submit" class="btn btn--primary">조회</button>
+      </form>
+      <p id="lookup-message" class="message" role="status"></p>
+      <div class="lookup-results">
+        <div class="lookup-group">
+          <h3 class="lookup-group__title">예약</h3>
+          <ul id="lookup-reservations" class="lookup-list"></ul>
+        </div>
+        <div class="lookup-group">
+          <h3 class="lookup-group__title">예약 대기</h3>
+          <ul id="lookup-waitings" class="lookup-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="booking-section" aria-labelledby="booking-title">
+      <h2 id="booking-title" class="section-title">예약하기</h2>
+      <ol class="steps" aria-label="예약 단계">
+        <li class="steps__item" data-step-indicator="1">테마 선택</li>
+        <li class="steps__item" data-step-indicator="2">날짜 선택</li>
+        <li class="steps__item" data-step-indicator="3">시간 · 이름</li>
+      </ol>
+
+      <div id="step-1" class="step-panel" data-step="1">
+        <p class="panel-hint">원하는 테마 카드를 눌러 주세요.</p>
+        <div id="theme-grid" class="theme-grid"></div>
+      </div>
+
+      <div id="step-2" class="step-panel is-hidden" data-step="2">
+        <div class="step-toolbar">
+          <button type="button" id="btn-back-to-themes" class="btn btn--ghost">← 테마 다시 선택</button>
+          <p class="selected-theme-label">선택 테마: <strong id="selected-theme-name">—</strong></p>
+        </div>
+        <p class="panel-hint">예약 가능한 날짜만 선택할 수 있습니다.</p>
+        <div id="calendar-loading" class="loading is-hidden">예약 가능한 날짜를 불러오는 중…</div>
+        <div id="calendar-root" class="calendar"></div>
+      </div>
+
+      <div id="step-3" class="step-panel is-hidden" data-step="3">
+        <div class="step-toolbar">
+          <button type="button" id="btn-back-to-calendar" class="btn btn--ghost">← 날짜 변경</button>
+        </div>
+        <p class="summary-line">
+          <span id="summary-theme">—</span>
+          · <span id="summary-date">—</span>
+        </p>
+        <form id="reserve-form" class="reserve-form">
+          <label class="field">
+            <span class="field__label">시간</span>
+            <select id="time-select" name="timeId" required></select>
+          </label>
+          <label class="field">
+            <span class="field__label">예약자 이름</span>
+            <input type="text" id="name-input" name="name" required autocomplete="name" />
+          </label>
+          <button type="submit" class="btn btn--primary">예약 완료</button>
+        </form>
+        <p id="reserve-message" class="message" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Room Escape · 예약 데모</small>
+  </footer>
+
+  <script src="/js/user.js" defer></script>
+</body>
+</html>
