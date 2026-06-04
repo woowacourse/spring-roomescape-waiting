@@ -187,9 +187,9 @@ public class ReservationWaitingRepository {
         return result.stream().findAny();
     }
 
-    public void delete(Long id) {
+    public int delete(Long id) {
         String sql = "DELETE FROM reservation_waiting WHERE id = ?;";
-        jdbcTemplate.update(sql, id);
+        return jdbcTemplate.update(sql, id);
     }
 
     public Optional<ReservationWaiting> findFirstBySlotForUpdate(ReservationSlot slot) {

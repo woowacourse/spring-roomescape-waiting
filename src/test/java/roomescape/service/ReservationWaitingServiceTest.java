@@ -190,11 +190,34 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
+        when(reservationWaitingRepository.delete(id))
+                .thenReturn(1);
 
         // when
         service.delete(id, name, now);
 
         // then
+        verify(reservationWaitingValidator).validateModifiable(waiting, name, now);
+        verify(reservationWaitingRepository).delete(id);
+    }
+
+    @Test
+    void 예약_대기_삭제시_이미_삭제된_대기이면_예외_발생() {
+        // given
+        Long id = 1L;
+        String name = "브라운";
+        ReservationWaiting waiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+        when(reservationWaitingRepository.findById(id))
+                .thenReturn(Optional.of(waiting));
+        when(reservationWaitingRepository.delete(id))
+                .thenReturn(0);
+
+        // when & then
+        assertThatThrownBy(() -> service.delete(id, name, now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
+                .hasMessage("존재하지 않는 예약 대기입니다.");
+
         verify(reservationWaitingValidator).validateModifiable(waiting, name, now);
         verify(reservationWaitingRepository).delete(id);
     }

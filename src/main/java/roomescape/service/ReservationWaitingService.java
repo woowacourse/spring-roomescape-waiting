@@ -51,7 +51,7 @@ public class ReservationWaitingService {
     public void delete(Long id, String name, LocalDateTime now) {
         ReservationWaiting waiting = findWaiting(id);
         reservationWaitingValidator.validateModifiable(waiting, name, now);
-        reservationWaitingRepository.delete(id);
+        deleteWaiting(id);
     }
 
     private ReservationTime findReservationTime(Long timeId) {
@@ -77,5 +77,12 @@ public class ReservationWaitingService {
     private ReservationWaiting findWaiting(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 대기입니다."));
+    }
+
+    private void deleteWaiting(Long id) {
+        int deletedCount = reservationWaitingRepository.delete(id);
+        if (deletedCount == 0) {
+            throw new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 대기입니다.");
+        }
     }
 }
