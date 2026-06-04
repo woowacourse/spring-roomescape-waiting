@@ -25,5 +25,7 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
+    void updateStatus(ReservationStatus changeStatus, Long id);
+
     List<ReservationCountResult> countReservation(Long themeId, Long dateId);
 }

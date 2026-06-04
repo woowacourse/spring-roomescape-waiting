@@ -96,6 +96,22 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void updateStatus(ReservationStatus changeStatus, Long id) {
+        Reservation reservation = storage.get(id);
+        if (reservation == null) {
+            return;
+        }
+        storage.put(id, Reservation.of(
+            reservation.getId(),
+            reservation.getReservationSlot(),
+            reservation.getUser(),
+            changeStatus,
+            reservation.getCreatedAt(),
+            reservation.getUpdatedAt()
+        ));
+    }
+
+    @Override
     public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
         return storage.values().stream()
             .filter(this::isActive)
@@ -137,6 +153,7 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         List<Reservation> orderedReservations = storage.values().stream()
             .filter(this::isActive)
+            .filter(storedReservation -> storedReservation.getStatus() == ReservationStatus.WAITING)
             .filter(storedReservation -> reservation.getReservationSlot().getId()
                 .equals(storedReservation.getReservationSlot().getId()))
             .sorted(Comparator.comparing(Reservation::getUpdatedAt)
@@ -144,9 +161,9 @@ public class FakeReservationRepository implements ReservationRepository {
             .toList();
 
         int order = orderedReservations.indexOf(reservation);
-        if (order < 1) {
+        if (order < 0) {
             return null;
         }
-        return (long) order;
+        return (long) order + 1;
     }
 }

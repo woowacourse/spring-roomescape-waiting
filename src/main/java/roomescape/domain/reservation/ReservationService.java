@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
-import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -71,8 +71,10 @@ public class ReservationService {
     @Transactional
     public void cancelReservationByAdmin(Long id) {
         Reservation reservation = findReservationByIdOrThrow(id);
-        reservationRepository.deleteById(id);
-        deleteReservationSlotIfEmpty(reservation.getReservationSlot());
+        reservationRepository.updateStatus(ReservationStatus.CANCELED, id);
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            promoteFirstWaitingReservation(reservation.getReservationSlot());
+        }
     }
 
     @Transactional
@@ -138,6 +140,16 @@ public class ReservationService {
         if (orderedReservations.isEmpty()) {
             reservationSlotService.deleteReservationSlot(reservationSlot.getId());
         }
+    }
+
+    private void promoteFirstWaitingReservation(ReservationSlot reservationSlot) {
+        reservationRepository.findAllByReservationIdOrder(reservationSlot.getId()).stream()
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .findFirst()
+            .ifPresent(reservation -> reservationRepository.updateStatus(
+                ReservationStatus.CONFIRMED,
+                reservation.getId()
+            ));
     }
 
     private boolean hasSameReservationSlot(ReservationSlot oldSlot, ReservationSlot newSlot) {

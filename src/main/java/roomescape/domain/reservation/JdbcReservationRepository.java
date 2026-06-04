@@ -49,15 +49,15 @@ public class JdbcReservationRepository implements ReservationRepository {
             with ranked_reservation as (
                 select r.*,
                        row_number() over (
-                           partition by r.reservation_slot_id
+                           partition by r.reservation_slot_id, r.status
                            order by r.updated_at, r.id
-                       ) as reservation_order
+                       ) as waiting_order
                 from reservation r
                 where r.status <> 'CANCELED'
             )
             select r.id as user_reservation_id,
-                   case when r.status = 'WAITING' and r.reservation_order > 1
-                        then r.reservation_order - 1
+                   case when r.status = 'WAITING'
+                        then r.waiting_order
                         else null
                    end as waiting_number,
                    r.status,
@@ -113,15 +113,15 @@ public class JdbcReservationRepository implements ReservationRepository {
             with ranked_reservation as (
                 select r.*,
                        row_number() over (
-                           partition by r.reservation_slot_id
+                           partition by r.reservation_slot_id, r.status
                            order by r.updated_at, r.id
-                       ) as reservation_order
+                       ) as waiting_order
                 from reservation r
                 where r.status <> 'CANCELED'
             )
             select r.id as user_reservation_id,
-                   case when r.status = 'WAITING' and r.reservation_order > 1
-                        then r.reservation_order - 1
+                   case when r.status = 'WAITING'
+                        then r.waiting_order
                         else null
                    end as waiting_number,
                    r.status,
@@ -198,6 +198,11 @@ public class JdbcReservationRepository implements ReservationRepository {
             where id = ?
             """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
+    private static final String UPDATE_STATUS_SQL = """
+        update reservation
+        set status = ?
+        where id = ?
+        """;
     private static final String COUNT_RESERVATION_BY_THEME_AND_DATE =
         """
             select rt.id as time_id,
@@ -290,6 +295,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void deleteById(Long id) {
         jdbcTemplate.update(DELETE_BY_ID_SQL, id);
+    }
+
+    @Override
+    public void updateStatus(ReservationStatus changeStatus, Long id) {
+        jdbcTemplate.update(UPDATE_STATUS_SQL, changeStatus.name(), id);
     }
 
     @Override
