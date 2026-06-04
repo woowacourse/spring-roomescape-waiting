@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
@@ -81,7 +80,7 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void promoteWaiting(LocalDate date, Long timeId, Long themeId) {
         reservationWaitingRepository.findReservationWaitingBySlot(date, timeId, themeId)
                 .ifPresent(waiting -> {
