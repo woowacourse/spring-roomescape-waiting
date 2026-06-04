@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 import static roomescape.domain.fixture.ReservationFixture.createDefaultReservationWithName;
 import static roomescape.domain.fixture.ReservationFixture.createWithNameAndDate;
 import static roomescape.domain.fixture.ReservationFixture.reservedReservationId;
@@ -22,6 +23,7 @@ import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.ReservationTimeRepository;
+import roomescape.persistence.dto.ReservationCondition;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fake.FakeReservationSlotRepository;
@@ -164,6 +166,33 @@ class ReservationServiceTest {
         // then
         assertThat(result.date()).isEqualTo(nextDate);
         assertThat(result.time().id()).isEqualTo(1L);
+    }
+
+    @Test
+    void 예약_변경_시_기존_예약의_첫_번째_대기가_예약으로_승격된다() {
+        // given
+        ReservationSlot slot = createDefaultReservationWithName("이프");
+        slot.joinWaitingList("찰리");
+
+        ReservationTime time = slot.getTime();
+        reservationTimeRepository.save(time);
+        ReservationSlot saved = reservationRepository.save(slot);
+
+        LocalDate nextDate = slot.getDate().plusDays(1);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(nextDate, time.getId());
+
+        // when
+        reservationService.change(reservedReservationId(saved), command);
+
+        // then
+        ReservationCondition condition = new ReservationCondition(slot.getDate(), slot.getTheme().getId(), slot.getTime().getId());
+        ReservationSlot current = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition).orElseThrow();
+        assertThat(current.getReservations())
+                .extracting(Reservation::getName, Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(
+                        tuple("이프", ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple("찰리", ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE)
+                );
     }
 
     @Test
