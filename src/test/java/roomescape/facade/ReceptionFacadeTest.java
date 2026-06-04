@@ -72,7 +72,7 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
+        when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
                 Optional.empty());
         when(reservationService.save(request, reservationTime, theme)).thenReturn(newReservation);
 
@@ -91,8 +91,9 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
-                Optional.of(beforeReservation));
+        when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
+                Optional.of(beforeReservation.getId()));
+        when(reservationService.findReservation(beforeReservation.getId())).thenReturn(beforeReservation);
         when(waitService.save(newWait)).thenReturn(savedWait);
         when(waitService.calculateOrder(savedWait)).thenReturn(1L);
 
@@ -121,8 +122,9 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
-                Optional.of(beforeReservation));
+        when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
+                Optional.of(beforeReservation.getId()));
+        when(reservationService.findReservation(beforeReservation.getId())).thenReturn(beforeReservation);
 
         assertThatThrownBy(() -> receptionFacade.save(request))
                 .isInstanceOf(RoomEscapeException.class)
@@ -177,6 +179,8 @@ public class ReceptionFacadeTest {
         Reservation reservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme);
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
+        when(reservationService.lockBySlot(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId())).thenReturn(Optional.of(reservation.getId()));
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())).thenReturn(new Waits(List.of()));
 
@@ -194,6 +198,8 @@ public class ReceptionFacadeTest {
                 firstWait.getTime().getId(), firstWait.getTheme().getId());
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
+        when(reservationService.lockBySlot(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId())).thenReturn(Optional.of(reservation.getId()));
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())).thenReturn(new Waits(List.of(firstWait)));
 
