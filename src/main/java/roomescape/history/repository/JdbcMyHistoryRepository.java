@@ -56,7 +56,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        NULL AS reservation_id,
                        rw.id AS waiting_id,
                        rw.name AS history_name,
-                       r.date,
+                       rw.date,
                        t.id AS theme_id,
                        t.name AS theme_name,
                        t.description,

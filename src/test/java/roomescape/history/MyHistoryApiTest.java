@@ -31,10 +31,10 @@ class MyHistoryApiTest {
         createTheme(1L, "미술관의 밤");
         createReservationTime(1L, "10:00:00");
         createReservationTime(2L, "11:00:00");
-        createReservation(1L, "아루", LocalDate.parse("2026-08-06"), 1L, 1L);
-        createReservation(2L, "쿠다", LocalDate.parse("2026-08-07"), 1L, 2L);
-        createReservationWaiting(1L, 1L, "다른이름", "2026-05-29 10:00:00");
-        createReservationWaiting(2L, 1L, "아루", "2026-05-30 09:00:00");
+        createReservation(1L, "아루", LocalDate.now().plusDays(1), 1L, 1L);
+        createReservation(2L, "쿠다", LocalDate.now().plusDays(2), 1L, 2L);
+        createReservationWaiting(1L, LocalDate.now().plusDays(1), 1L, 1L, "다른이름", "2026-05-29 10:00:00");
+        createReservationWaiting(2L, LocalDate.now().plusDays(1), 1L, 1L, "아루", "2026-05-30 09:00:00");
     }
 
     @Test
@@ -44,13 +44,13 @@ class MyHistoryApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("RESERVATION"))
                 .andExpect(jsonPath("$[0].name").value("아루"))
-                .andExpect(jsonPath("$[0].date").value("2026-08-06"))
+                .andExpect(jsonPath("$[0].date").value(LocalDate.now().plusDays(1).toString()))
                 .andExpect(jsonPath("$[0].theme.name").value("미술관의 밤"))
                 .andExpect(jsonPath("$[0].time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$[0].sequence").value(0))
                 .andExpect(jsonPath("$[1].status").value("WAITING"))
                 .andExpect(jsonPath("$[1].name").value("아루"))
-                .andExpect(jsonPath("$[1].date").value("2026-08-06"))
+                .andExpect(jsonPath("$[1].date").value(LocalDate.now().plusDays(1).toString()))
                 .andExpect(jsonPath("$[1].theme.name").value("미술관의 밤"))
                 .andExpect(jsonPath("$[1].time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$[1].sequence").value(2));
@@ -60,10 +60,10 @@ class MyHistoryApiTest {
     @DisplayName("등록 날짜가 다르면 날짜 + 시간 기준으로 순번이 결정된다")
     void sequenceIsOrderedByRegistrationDateTime() throws Exception {
         // 어제 10:00 등록
-        createReservationWaiting(3L, 2L, "먼저등록",
+        createReservationWaiting(3L, LocalDate.now().plusDays(2), 1L, 2L, "먼저등록",
                 String.valueOf(LocalDateTime.now().minusDays(1).withHour(10)));
         // 오늘 09:00 등록
-        createReservationWaiting(4L, 2L, "나중등록",
+        createReservationWaiting(4L, LocalDate.now().plusDays(2), 1L, 2L, "나중등록",
                 String.valueOf(LocalDateTime.now().withHour(9)));
 
         mockMvc.perform(get("/historys/먼저등록"))
@@ -121,14 +121,18 @@ class MyHistoryApiTest {
 
     private void createReservationWaiting(
             final long id,
-            final long reservationId,
+            final LocalDate date,
+            final long themeId,
+            final long timeId,
             final String name,
             final String requestedAt
     ) {
         jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (id, reservation_id, name, requested_at) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation_waiting (id, date, theme_id, time_id, name, requested_at) VALUES (?, ?, ?, ?, ?, ?)",
                 id,
-                reservationId,
+                date,
+                themeId,
+                timeId,
                 name,
                 requestedAt
         );

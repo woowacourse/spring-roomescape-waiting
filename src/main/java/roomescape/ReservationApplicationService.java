@@ -19,7 +19,7 @@ public class ReservationApplicationService {
             final ReservationWaitingService reservationWaitingService
     ) {
         this.reservationService = reservationService;
-        this.reservationWaitingService = reservationWaitingService;
+        this. reservationWaitingService = reservationWaitingService;
     }
 
     public ReservationWaiting saveWaiting(String name, LocalDate date, Long themeId, Long timeId) {

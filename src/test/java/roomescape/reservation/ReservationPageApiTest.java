@@ -152,8 +152,9 @@ class ReservationPageApiTest {
                 .header("Location", containsString("reservationName=aru"));
 
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1 AND name = 'aru'",
-                Integer.class
+                "SELECT count(1) FROM reservation_waiting WHERE date = ? AND theme_id = 1 AND time_id = 1 AND name = 'aru'",
+                Integer.class,
+                Date.valueOf(reservationDate)
         );
         org.assertj.core.api.Assertions.assertThat(count).isOne();
     }

@@ -47,26 +47,23 @@ class JdbcReservationWaitingRepositoryTest {
     void save() {
         Reservation reservation = createReservation();
         ReservationWaiting waiting = ReservationWaiting.createNew(
-                reservation,
+                LocalDate.now().plusDays(1),
+                1L,
+                1L,
                 "아루",
-                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                LocalDateTime.now().minusDays(1)
         );
 
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(waiting);
 
         assertThat(saved.getId()).isEqualTo(1L);
-        Long reservationId = jdbcTemplate.queryForObject(
-                "SELECT reservation_id FROM reservation_waiting WHERE id = ?",
-                Long.class,
-                saved.getId()
-        );
+
         String name = jdbcTemplate.queryForObject(
                 "SELECT name FROM reservation_waiting WHERE id = ?",
                 String.class,
                 saved.getId()
         );
 
-        assertThat(reservationId).isEqualTo(reservation.getId());
         assertThat(name).isEqualTo("아루");
     }
 
@@ -76,13 +73,15 @@ class JdbcReservationWaitingRepositoryTest {
         Reservation reservation = createReservation();
 
         jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                LocalDate.now().plusDays(1),
+                1L,
+                1L,
                 "아루",
-                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                LocalDateTime.now().minusDays(1)
         ));
 
         assertThrows(DataIntegrityViolationException.class, () -> jdbcReservationWaitingRepository.save(
-                ReservationWaiting.createNew(reservation, "아루", LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                ReservationWaiting.createNew(LocalDate.now().plusDays(1), 1L, 1L, "아루", LocalDateTime.now().minusDays(1))
         ));
     }
 
@@ -91,9 +90,11 @@ class JdbcReservationWaitingRepositoryTest {
     void deleteByIdAndName() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                LocalDate.now().plusDays(1),
+                1L,
+                1L,
                 "아루",
-                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                LocalDateTime.now().minusDays(1)
         ));
 
         int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "아루");
@@ -113,9 +114,11 @@ class JdbcReservationWaitingRepositoryTest {
     void deleteByIdAndDifferentName() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                LocalDate.now().plusDays(1),
+                1L,
+                1L,
                 "아루",
-                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                LocalDateTime.now().minusDays(1)
         ));
 
         int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "다른이름");
@@ -135,9 +138,11 @@ class JdbcReservationWaitingRepositoryTest {
     void deleteByNotFoundId() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getTime().getId(),
                 "아루",
-                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                LocalDateTime.now()
         ));
 
         int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(999L, "아루");

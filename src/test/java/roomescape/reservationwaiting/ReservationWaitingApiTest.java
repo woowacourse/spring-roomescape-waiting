@@ -55,13 +55,12 @@ class ReservationWaitingApiTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("아루"))
                 .andExpect(jsonPath("$.requestAt", notNullValue()))
-                .andExpect(jsonPath("$.reservationResponse.id").value(1))
-                .andExpect(jsonPath("$.reservationResponse.name").value("쿠다"))
-                .andExpect(jsonPath("$.reservationResponse.theme.id").value(1))
-                .andExpect(jsonPath("$.reservationResponse.time.id").value(1));
+                .andExpect(jsonPath("$.date").value("2026-08-06"))
+                .andExpect(jsonPath("$.themeId").value(1))
+                .andExpect(jsonPath("$.timeId").value(1));
 
         Integer waitingCount = jdbcTemplate.queryForObject(
-                "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1 AND name = '아루'",
+                "SELECT count(1) FROM reservation_waiting WHERE date = '2026-08-06' AND theme_id = 1 AND time_id = 1 AND name = '아루'",
                 Integer.class
         );
         assert waitingCount != null;
@@ -108,7 +107,7 @@ class ReservationWaitingApiTest {
     @Test
     @DisplayName("이미 같은 예약에 대기 중인 이름으로는 다시 대기를 생성할 수 없다")
     void createReservationWaitingDuplicatedName() throws Exception {
-        createReservationWaiting(1L, 1L, "아루");
+        createReservationWaiting(1L, "아루");
 
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +145,7 @@ class ReservationWaitingApiTest {
     @Test
     @DisplayName("예약 대기를 삭제한다")
     void deleteReservationWaiting() throws Exception {
-        createReservationWaiting(1L, 1L, "아루");
+        createReservationWaiting(1L, "아루");
 
         mockMvc.perform(delete("/waitings/1")
                         .param("name", "아루"))
@@ -163,7 +162,7 @@ class ReservationWaitingApiTest {
     @Test
     @DisplayName("이름이 다르면 예약 대기를 삭제할 수 없다")
     void deleteReservationWaitingWithDifferentName() throws Exception {
-        createReservationWaiting(1L, 1L, "아루");
+        createReservationWaiting(1L, "아루");
 
         mockMvc.perform(delete("/waitings/1")
                         .param("name", "다른이름"))
@@ -235,11 +234,13 @@ class ReservationWaitingApiTest {
         );
     }
 
-    private void createReservationWaiting(final long id, final long reservationId, final String name) {
+    private void createReservationWaiting(final long id, final String name) {
         jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (id, reservation_id, name, requested_at) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation_waiting (id, date, theme_id, time_id, name, requested_at) VALUES (?, ?, ?, ?, ?, ?)",
                 id,
-                reservationId,
+                LocalDate.parse("2026-08-06"),
+                1L,
+                1L,
                 name,
                 "2026-08-29 12:00:00"
         );
