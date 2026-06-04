@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -17,6 +16,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotDomainService;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -37,7 +37,7 @@ import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 
 @JdbcTest
-@Import({ReservationService.class, SlotDao.class,
+@Import({ReservationService.class, SlotDomainService.class, SlotDao.class,
         ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
         ThemeQueryingDao.class, ThemeUpdatingDao.class,
@@ -165,6 +165,21 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 슬롯_변경_시_id는_유지되고_생성시각은_갱신된다() {
+        setUpTimeAndTheme();
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+        ReservationResponse beforeUpdate = reservationService.read(created.id());
+
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        ReservationResponse updated = reservationService.update(created.id(),
+                new ReservationRequest("브라운", LocalDate.now().plusDays(2), newTimeId, themeId));
+
+        assertThat(updated.id()).isEqualTo(created.id());
+        assertThat(updated.createdAt()).isAfter(beforeUpdate.createdAt());
+        assertThat(updated.date()).isEqualTo(LocalDate.now().plusDays(2));
+    }
+
+    @Test
     void 과거_날짜로_변경시_예외가_발생한다() {
         setUpTimeAndTheme();
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
@@ -223,11 +238,6 @@ class ReservationServiceTest {
         reservationService.delete(created.id());
 
         assertThat(reservationService.readAll()).isEmpty();
-    }
-
-    @Test
-    void 존재하지_않는_예약_삭제시_예외없이_무시된다() {
-        assertThatCode(() -> reservationService.delete(999L)).doesNotThrowAnyException();
     }
 
     @Test

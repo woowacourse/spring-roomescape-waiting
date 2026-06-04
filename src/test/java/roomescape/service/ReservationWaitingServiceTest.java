@@ -15,6 +15,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotDomainService;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
@@ -41,8 +42,8 @@ class ReservationWaitingServiceTest {
         slotDao = new FakeSlotDao();
         reservationQueryingDao = new FakeReservationQueryingDao();
 
-        SlotService slotService = new SlotService(slotDao, null, null);
-        service = new ReservationWaitingService(waitingDao, slotService, reservationQueryingDao);
+        SlotDomainService slotDomainService = new SlotDomainService(slotDao, null, null);
+        service = new ReservationWaitingService(waitingDao, slotDomainService, reservationQueryingDao);
     }
 
     private Slot reservedSlot(Long slotId, LocalDate date, String ownerName) {

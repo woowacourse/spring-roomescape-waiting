@@ -1,31 +1,32 @@
 package roomescape.fake;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ThemeQueryingDao;
 
 public class FakeThemeQueryingDao extends ThemeQueryingDao {
 
-    private final Map<Long, Theme> store = new HashMap<>();
+    private final List<Theme> store = new ArrayList<>();
 
     public FakeThemeQueryingDao() {
         super(null);
     }
 
     public void save(Theme theme) {
-        store.put(theme.getId(), theme);
+        store.add(theme);
     }
 
     @Override
     public Optional<Theme> findThemeById(long id) {
-        return Optional.ofNullable(store.get(id));
+        return store.stream()
+                .filter(theme -> theme.getId().equals(id))
+                .findFirst();
     }
 
     @Override
     public List<Theme> findAllTheme() {
-        return List.copyOf(store.values());
+        return List.copyOf(store);
     }
 }

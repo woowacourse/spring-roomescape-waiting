@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.slot.SlotDomainService;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
@@ -26,7 +27,7 @@ import roomescape.repository.ThemeUpdatingDao;
 
 @JdbcTest
 @Import({ReservationTimeService.class, ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
-        ReservationService.class, SlotDao.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
+        ReservationService.class, SlotDomainService.class, SlotDao.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ThemeQueryingDao.class, ThemeUpdatingDao.class, ReservationWaitingDao.class})
 class ReservationTimeServiceTest {
 
