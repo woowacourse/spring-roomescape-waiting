@@ -330,6 +330,58 @@ public class MissionStepTest {
                 .body("waitings[0].rank", is(1));
     }
 
+    @Test
+    @DisplayName("관리자가 예약을 삭제하면 1순위 대기가 예약으로 자동 전환되고 남은 대기 순번이 재정렬된다")
+    void deleteReservation_success_when_waiting_auto_promoted() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "리오",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, DATEADD('SECOND', -1, CURRENT_TIMESTAMP))",
+                "브라운",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "흑곰",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
+
+        RestAssured.given().log().all()
+                .header("Authorization", "ADMIN")
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("브라운"))
+                .body("waitings.size()", is(0));
+
+        RestAssured.given().log().all()
+                .queryParam("name", "흑곰")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(1))
+                .body("waitings[0].name", is("흑곰"))
+                .body("waitings[0].rank", is(1));
+    }
+
     @Autowired
     private ReservationController reservationController;
 
