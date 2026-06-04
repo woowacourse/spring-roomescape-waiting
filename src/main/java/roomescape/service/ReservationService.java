@@ -77,6 +77,6 @@ public class ReservationService {
         Reservation reservation = findActiveById(id);
         reservation.cancelByUser(LocalDateTime.now());
         reservationDao.update(reservation);
-        waitingService.promoteFirstWaiting(reservation);
+        waitingService.enqueuePromotion(reservation.getSlot());
     }
 }

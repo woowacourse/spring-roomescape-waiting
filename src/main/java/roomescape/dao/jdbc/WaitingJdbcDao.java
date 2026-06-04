@@ -187,6 +187,21 @@ public class WaitingJdbcDao implements WaitingDao {
     }
 
     @Override
+    public Optional<Waiting> findFirstBySlotKeyForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId) {
+        String sql = BASE_SELECT + """
+                WHERE w.date = :date AND w.time_id = :timeId AND w.theme_id = :themeId AND w.store_id = :storeId
+                ORDER BY w.id
+                LIMIT 1
+                FOR UPDATE
+                """;
+        SqlParameterSource params = new MapSqlParameterSource("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId)
+                .addValue("storeId", storeId);
+        return jdbcTemplate.query(sql, params, ROW_MAPPER).stream().findFirst();
+    }
+
+    @Override
     public List<Waitings> findAllQueues() {
         String sql = BASE_SELECT + DEFAULT_ORDER;
         return toQueues(jdbcTemplate.query(sql, ROW_MAPPER));

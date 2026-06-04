@@ -20,6 +20,7 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.WaitingDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
+import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
@@ -28,7 +29,7 @@ import roomescape.domain.Waiting;
 import roomescape.dto.request.WaitingRequestDto;
 
 @JdbcTest
-@Import({WaitingService.class, WaitingJdbcDao.class, ReservationJdbcDao.class})
+@Import({WaitingService.class, WaitingJdbcDao.class, ReservationJdbcDao.class, PromotionOutboxJdbcDao.class})
 @ActiveProfiles("test")
 class WaitingServiceTest {
 

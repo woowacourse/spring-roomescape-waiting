@@ -24,6 +24,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
+import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
 import roomescape.dao.jdbc.StoreJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
@@ -41,10 +42,12 @@ import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.WaitingRequestDto;
 import roomescape.dto.response.PageResponse;
+import roomescape.worker.PromotionOutboxWorker;
 
 @JdbcTest
 @Import({AdminReservationService.class, ReservationCreator.class, WaitingService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
-        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class})
+        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class,
+        PromotionOutboxWorker.class})
 @ActiveProfiles("test")
 class AdminReservationServiceTest {
 
@@ -52,6 +55,8 @@ class AdminReservationServiceTest {
     private AdminReservationService adminReservationService;
     @Autowired
     private WaitingService waitingService;
+    @Autowired
+    private PromotionOutboxWorker promotionOutboxWorker;
     @Autowired
     private ReservationDao reservationDao;
     @Autowired
@@ -261,6 +266,7 @@ class AdminReservationServiceTest {
                     waiter.getId(), pastDate, savedTime1.getId(), savedTheme1.getId(), storeId);
 
             adminReservationService.cancelByAdmin(reservation.getId());
+            promotionOutboxWorker.processPendingTasks();
 
             Integer bookedCount = jdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM reservations WHERE status = 'BOOKED'", Integer.class);
@@ -280,6 +286,7 @@ class AdminReservationServiceTest {
             waitingService.create(waitingDto, secondWaiter);
 
             adminReservationService.cancelByAdmin(reservation.getId());
+            promotionOutboxWorker.processPendingTasks();
 
             assertThat(reservationDao.findAllByMemberId(firstWaiter.getId()))
                     .anyMatch(r -> r.getStatus() == ReservationStatus.BOOKED);

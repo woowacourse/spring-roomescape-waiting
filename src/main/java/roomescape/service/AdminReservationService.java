@@ -77,7 +77,7 @@ public class AdminReservationService {
         Reservation reservation = findById(id);
         reservation.cancelByAdmin(LocalDateTime.now());
         reservationDao.update(reservation);
-        waitingService.promoteFirstWaiting(reservation);
+        waitingService.enqueuePromotion(reservation.getSlot());
     }
 
     public void delete(Long id) {

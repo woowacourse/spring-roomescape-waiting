@@ -1,3 +1,6 @@
+scheduling:
+  enabled: false
+
 spring:
   h2:
     console:

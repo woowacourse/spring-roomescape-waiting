@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS promotion_outbox;
 DROP TABLE IF EXISTS waitings;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS members;
@@ -77,5 +78,20 @@ CREATE TABLE waitings
     FOREIGN KEY (theme_id) REFERENCES themes (id),
     FOREIGN KEY (store_id) REFERENCES stores (id),
     UNIQUE (member_id, date, time_id, theme_id, store_id)
+);
+
+CREATE TABLE promotion_outbox
+(
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    date       DATE        NOT NULL,
+    time_id    BIGINT      NOT NULL,
+    theme_id   BIGINT      NOT NULL,
+    store_id   BIGINT      NOT NULL,
+    status     VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES times (id),
+    FOREIGN KEY (theme_id) REFERENCES themes (id),
+    FOREIGN KEY (store_id) REFERENCES stores (id)
 );
 
