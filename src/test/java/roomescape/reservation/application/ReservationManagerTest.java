@@ -171,7 +171,7 @@ class ReservationManagerTest {
     @DisplayName("확정 예약을 취소하면 대기자가 확정 예약으로 승격된다.")
     void cancelActiveAndPromotePendingTest() {
         ReservationInfo pobiInfo = manager.addReservation(createCommand("포비", time.getId()));
-        manager.addReservation(createCommand("리사", time.getId()));
+        ReservationInfo lisaReservationInfo = manager.addReservation(createCommand("리사", time.getId()));
 
         ReservationCancelCommand cancelCommand = ReservationCancelCommand.builder()
                 .name("포비")
@@ -180,6 +180,7 @@ class ReservationManagerTest {
 
         List<ReservationPendingInfo> lisaReservations = manager.getReservationsByName("리사");
         Assertions.assertThat(lisaReservations.get(0).status()).isEqualTo(Status.ACTIVE);
+        Assertions.assertThat(lisaReservations.get(0).id()).isEqualTo(lisaReservationInfo.id());
     }
 
     @Test
