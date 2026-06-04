@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -24,20 +23,17 @@ public class ReservationService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationWaitingRepository reservationWaitingRepository,
             final ReservationTimeService reservationTimeService,
-            final ThemeService themeService,
-            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
+            final ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
     public List<Reservation> getAll() {
@@ -117,7 +113,7 @@ public class ReservationService {
     }
 
     private void validateCancelable(final Reservation reservation) {
-        if (reservationAvailabilityPolicy.isPast(reservation, LocalDateTime.now())) {
+        if (reservation.isPast(LocalDateTime.now())) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_CANCELLED,
                     "이미 지난 예약은 취소할 수 없습니다."
@@ -126,7 +122,7 @@ public class ReservationService {
     }
 
     private void validateUpdatable(final Reservation reservation) {
-        if (reservationAvailabilityPolicy.isPast(reservation, LocalDateTime.now())) {
+        if (reservation.isPast(LocalDateTime.now())) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
                     "이미 지난 예약은 변경할 수 없습니다."
@@ -150,8 +146,7 @@ public class ReservationService {
             final ReservationTime reservationTime
     ) {
         try {
-            reservationAvailabilityPolicy.validateReservable(date, reservationTime, LocalDateTime.now());
-            return Reservation.createNew(name, date, theme, reservationTime);
+            return Reservation.createNew(name, date, theme, reservationTime, LocalDateTime.now());
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
@@ -163,15 +158,14 @@ public class ReservationService {
             final ReservationTime reservationTime
     ) {
         try {
-            reservationAvailabilityPolicy.validateReservable(date, reservationTime, LocalDateTime.now());
-            return reservation.withDateAndTime(date, reservationTime);
+            return reservation.withDateAndTime(date, reservationTime, LocalDateTime.now());
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
     }
 
     private InvalidInputException toInvalidInputException(final IllegalArgumentException exception) {
-        if (ReservationAvailabilityPolicy.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
+        if (Reservation.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
             return new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
         }
 

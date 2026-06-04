@@ -1,11 +1,15 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
+    public static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
+
     private final Long id;
     private final String name;
     private final LocalDate date;
@@ -26,6 +30,17 @@ public class Reservation {
         return new Reservation(null, name, date, theme, time);
     }
 
+    public static Reservation createNew(
+            final String name,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        validateReservable(date, time, standardDateTime);
+        return new Reservation(null, name, date, theme, time);
+    }
+
     public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
         validateId(id);
         return new Reservation(id, name, date, theme, time);
@@ -40,8 +55,55 @@ public class Reservation {
         return new Reservation(this.id, this.name, date, this.theme, time);
     }
 
+    public Reservation withDateAndTime(
+            final LocalDate date,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        validateReservable(date, time, standardDateTime);
+        return new Reservation(this.id, this.name, date, this.theme, time);
+    }
+
     public boolean hasName(final String name) {
         return this.name.equals(ReservationName.from(name).value());
+    }
+
+    public boolean isPast(final LocalDateTime standardDateTime) {
+        return isPast(date, time, standardDateTime);
+    }
+
+    public static boolean isReservable(
+            final LocalDate date,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        return !isPast(date, time, standardDateTime);
+    }
+
+    public static boolean isPast(
+            final LocalDate date,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        return isPast(date, time.getStartAt(), standardDateTime);
+    }
+
+    public static boolean isPast(
+            final LocalDate date,
+            final LocalTime startAt,
+            final LocalDateTime standardDateTime
+    ) {
+        return LocalDateTime.of(date, startAt).isBefore(standardDateTime);
+    }
+
+    private static void validateReservable(
+            final LocalDate date,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        if (isPast(date, time, standardDateTime)) {
+            throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
+        }
     }
 
     private static void validateId(final Long id){

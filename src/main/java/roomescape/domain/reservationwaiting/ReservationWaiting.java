@@ -6,6 +6,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
 
 public class ReservationWaiting {
+    public static final String PAST_WAITING_MESSAGE = "지난 예약에는 대기를 생성할 수 없습니다.";
+
     private final Long id;
     private final Reservation reservation;
     private final ReservationName name;
@@ -21,6 +23,7 @@ public class ReservationWaiting {
         this.reservation = reservation;
         this.name = ReservationName.from(name);
         this.requestedAt = requestedAt;
+        validateWaitable();
     }
 
     public static ReservationWaiting createNew(
@@ -62,6 +65,12 @@ public class ReservationWaiting {
 
     public LocalDateTime getRequestedAt() {
         return requestedAt;
+    }
+
+    private void validateWaitable() {
+        if (reservation.isPast(requestedAt)) {
+            throw new IllegalArgumentException(PAST_WAITING_MESSAGE);
+        }
     }
 
     @Override

@@ -13,7 +13,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
@@ -225,14 +224,12 @@ class ReservationServiceTest {
         private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
-        private final ReservationAvailabilityPolicy reservationAvailabilityPolicy = new ReservationAvailabilityPolicy();
         private final ReservationService reservationService =
                 new ReservationService(
                         reservationRepository,
                         reservationWaitingRepository,
                         reservationTimeService,
-                        themeService,
-                        reservationAvailabilityPolicy
+                        themeService
                 );
     }
 }

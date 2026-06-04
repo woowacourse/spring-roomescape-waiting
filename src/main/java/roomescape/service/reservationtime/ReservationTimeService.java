@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationAvailabilityPolicy;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -22,18 +22,15 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeService themeService;
-    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationTimeService(
             final ReservationTimeRepository reservationTimeRepository,
             final ReservationRepository reservationRepository,
-            final ThemeService themeService,
-            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
+            final ThemeService themeService
     ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.themeService = themeService;
-        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
     public ReservationTime save(final LocalTime startAt) {
@@ -57,7 +54,7 @@ public class ReservationTimeService {
 
         return reservationTimeRepository.findAll().stream()
                 .filter(reservationTime -> !reservedTimeIds.contains(reservationTime.getId()))
-                .filter(reservationTime -> reservationAvailabilityPolicy.isReservable(
+                .filter(reservationTime -> Reservation.isReservable(
                         date,
                         reservationTime,
                         LocalDateTime.now()

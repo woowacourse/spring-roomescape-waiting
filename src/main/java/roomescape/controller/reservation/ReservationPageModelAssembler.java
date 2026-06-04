@@ -14,7 +14,7 @@ import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.domain.history.ReservationHistoryStatus;
-import roomescape.domain.reservation.ReservationAvailabilityPolicy;
+import roomescape.domain.reservation.Reservation;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -26,18 +26,15 @@ public class ReservationPageModelAssembler {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MyHistoryService myHistoryService;
-    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationPageModelAssembler(
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
-            final MyHistoryService myHistoryService,
-            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
+            final MyHistoryService myHistoryService
     ) {
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.myHistoryService = myHistoryService;
-        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
     public ThemeResponse resolveSelectedTheme(final Long themeId) {
@@ -113,7 +110,7 @@ public class ReservationPageModelAssembler {
             final LocalTime startAt,
             final boolean reservable
     ) {
-        if (reservationAvailabilityPolicy.isPast(selectedDate, startAt, LocalDateTime.now())) {
+        if (Reservation.isPast(selectedDate, startAt, LocalDateTime.now())) {
             return ReservationTimeSlotStatus.PAST;
         }
 
