@@ -230,7 +230,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("id에 해당하는 예외를 조회한다.")
-    void findById() {
+    void findByIdForUpdate() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -239,8 +239,8 @@ class JdbcReservationRepositoryTest {
 
         // when & then
         assertAll(
-                () -> assertThat(reservationRepository.findById(saved.getId())).isPresent(),
-                () -> assertThat(reservationRepository.findById(999L)).isEmpty()
+                () -> assertThat(reservationRepository.findByIdForUpdate(saved.getId())).isPresent(),
+                () -> assertThat(reservationRepository.findByIdForUpdate(999L)).isEmpty()
         );
     }
 
@@ -390,7 +390,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("date, themeId, timeId를 기준으로 예약을 조회한다.")
     @Test
-    void findByDateAndTimeIdAndThemeIdTest() {
+    void findByDateAndTimeIdAndThemeIdForUpdateTest() {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -398,7 +398,7 @@ class JdbcReservationRepositoryTest {
         Reservation saved = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         //when
-        Optional<Reservation> result = reservationRepository.findByDateAndTimeIdAndThemeId(
+        Optional<Reservation> result = reservationRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 saved.getDate(),
                 saved.getReservationTime().getId(),
                 saved.getTheme().getId()

@@ -12,9 +12,9 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByName(String name);
 
-    Optional<Reservation> findById(Long id);
+    Optional<Reservation> findByIdForUpdate(Long id);
 
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId);
 
     boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

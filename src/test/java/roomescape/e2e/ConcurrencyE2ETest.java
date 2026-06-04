@@ -1,30 +1,42 @@
 package roomescape.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.global.exception.BusinessException;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
 import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.theme.exception.DuplicateThemeException;
@@ -44,12 +56,15 @@ class ConcurrencyE2ETest extends E2ETest {
     @Autowired
     ReservationWaitingService reservationWaitingService;
 
+    @MockitoSpyBean
+    ReservationWaitingRepository reservationWaitingRepository;
+
     @Autowired
     ReservationTimeService reservationTimeService;
-
+    @Autowired
+    JdbcTemplate jdbcTemplate;
     @Autowired
     private ThemeService themeService;
-
 
     @DisplayName("동일한 예약 요청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
@@ -110,37 +125,143 @@ class ConcurrencyE2ETest extends E2ETest {
     ) throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThread);
 
-        CountDownLatch latch = new CountDownLatch(numberOfThread);
+        CountDownLatch readyLatch = new CountDownLatch(numberOfThread);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(numberOfThread);
 
         AtomicInteger successCount = new AtomicInteger();
         AtomicInteger duplicateCount = new AtomicInteger();
         AtomicInteger unexpectedErrorCount = new AtomicInteger();
 
-        for (int i = 0; i < numberOfThread; i++) {
-            executorService.submit(() -> {
-                try {
-                    runnable.run();
-                    successCount.incrementAndGet();
-                } catch (Throwable throwable) {
-                    if (expectedExceptionType.isInstance(throwable)) {
-                        duplicateCount.incrementAndGet();
-                    } else {
-                        unexpectedErrorCount.incrementAndGet();
-                    }
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
+        try {
+            for (int i = 0; i < numberOfThread; i++) {
+                executorService.submit(() -> {
+                    readyLatch.countDown();
 
-        latch.await();
-        executorService.shutdown();
+                    try {
+                        startLatch.await();
+
+                        runnable.run();
+                        successCount.incrementAndGet();
+                    } catch (Throwable throwable) {
+                        if (expectedExceptionType.isInstance(throwable)) {
+                            duplicateCount.incrementAndGet();
+                        } else {
+                            unexpectedErrorCount.incrementAndGet();
+                        }
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
+
+            assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+            startLatch.countDown();
+            assertThat(doneLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        } finally {
+            executorService.shutdownNow();
+        }
 
         return List.of(
                 successCount.get(),
                 duplicateCount.get(),
                 unexpectedErrorCount.get()
         );
+    }
+
+    @DisplayName("동일한 예약 대기 신청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
+    @Test
+    void makeReservationWaiting_duplicate() throws InterruptedException {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
+
+        //when
+        List<Integer> result = runConcurrentlyAndCountResults(
+                () -> reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
+                                "name",
+                                LocalDate.of(2026, 5, 15),
+                                1L,
+                                1L
+                        )
+                ),
+                100,
+                DuplicateReservationWaitingException.class
+        );
+
+        //then
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
+    }
+
+    @DisplayName("예약 대기 생성 중에는 동일 슬롯의 예약을 삭제/변경할 수 없다.")
+    @Test
+    void makeReservationWaiting_lock() throws Exception {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        CountDownLatch waitingSaveEntered = new CountDownLatch(1);
+        CountDownLatch allowWaitingSave = new CountDownLatch(1);
+
+        doAnswer(invocation -> {
+            waitingSaveEntered.countDown();
+            assertThat(allowWaitingSave.await(2, TimeUnit.SECONDS)).isTrue();
+            return invocation.callRealMethod();
+        }).when(reservationWaitingRepository).save(any());
+
+        try {
+            Future<ReservationWaiting> waitingFuture = executorService.submit(() ->
+                    reservationWaitingService.makeReservationWaiting(
+                            new ReservationWaitingCommand(
+                                    "pobi",
+                                    LocalDate.of(2026, 5, 15),
+                                    1L,
+                                    1L
+                            )
+                    )
+            );
+
+            assertThat(waitingSaveEntered.await(2, TimeUnit.SECONDS)).isTrue();
+
+            Future<?> deleteFuture = executorService.submit(() ->
+                    reservationService.deleteReservationById(1L)
+            );
+
+            Thread.sleep(200);
+            assertThat(deleteFuture.isDone()).isFalse();
+
+            //when
+            allowWaitingSave.countDown();
+            waitingFuture.get(2, TimeUnit.SECONDS);
+            deleteFuture.get(2, TimeUnit.SECONDS);
+
+            //then
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT name FROM reservation WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                    String.class,
+                    Date.valueOf(LocalDate.of(2026, 5, 15)),
+                    1L,
+                    1L
+            )).isEqualTo("pobi");
+
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation_waiting WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                    Long.class,
+                    Date.valueOf(LocalDate.of(2026, 5, 15)),
+                    1L,
+                    1L
+            )).isEqualTo(0);
+        } finally {
+            executorService.shutdownNow();
+        }
     }
 
     @DisplayName("동일한 예약 시간을 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
@@ -183,9 +304,9 @@ class ConcurrencyE2ETest extends E2ETest {
         );
     }
 
-    @DisplayName("예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
+    @DisplayName("예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다.")
     @Test
-    void deleteReservationById() throws InterruptedException {
+    void deleteReservationById_duplicate() throws InterruptedException {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
@@ -207,9 +328,149 @@ class ConcurrencyE2ETest extends E2ETest {
         );
     }
 
+    @DisplayName("예약 대기 생성 중에는 동일 슬롯의 예약을 삭제할 수 없다.")
+    @Test
+    void makeReservationWaiting_delete_lock() throws Exception {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        CountDownLatch waitingSaveEntered = new CountDownLatch(1);
+        CountDownLatch allowWaitingSave = new CountDownLatch(1);
+
+        doAnswer(invocation -> {
+            waitingSaveEntered.countDown();
+            assertThat(allowWaitingSave.await(2, TimeUnit.SECONDS)).isTrue();
+            return invocation.callRealMethod();
+        }).when(reservationWaitingRepository).save(any());
+
+        try {
+            Future<ReservationWaiting> waitingFuture = executorService.submit(() ->
+                    reservationWaitingService.makeReservationWaiting(
+                            new ReservationWaitingCommand(
+                                    "pobi",
+                                    LocalDate.of(2026, 5, 15),
+                                    1L,
+                                    1L
+                            )
+                    )
+            );
+
+            assertThat(waitingSaveEntered.await(2, TimeUnit.SECONDS)).isTrue();
+
+            Future<?> deleteFuture = executorService.submit(() ->
+                    reservationService.deleteReservationById(1L)
+            );
+
+            Thread.sleep(200);
+            assertThat(deleteFuture.isDone()).isFalse();
+
+            //when
+            allowWaitingSave.countDown();
+            waitingFuture.get(2, TimeUnit.SECONDS);
+            deleteFuture.get(2, TimeUnit.SECONDS);
+
+            //then
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT name FROM reservation WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                    String.class,
+                    Date.valueOf(LocalDate.of(2026, 5, 15)),
+                    1L,
+                    1L
+            )).isEqualTo("pobi");
+
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation_waiting WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                    Long.class,
+                    Date.valueOf(LocalDate.of(2026, 5, 15)),
+                    1L,
+                    1L
+            )).isEqualTo(0);
+        } finally {
+            executorService.shutdownNow();
+        }
+    }
+
+    @DisplayName("예약 삭제 중에는 승격 대상 예약 대기를 삭제할 수 없다.")
+    @Test
+    void deleteReservation_lock() throws Exception {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
+
+        ReservationWaiting waiting = reservationWaitingService.makeReservationWaiting(
+                new ReservationWaitingCommand(
+                        "pobi",
+                        LocalDate.of(2026, 5, 15),
+                        1L,
+                        1L
+                )
+        );
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        AtomicBoolean firstDelete = new AtomicBoolean(true);
+        CountDownLatch promotionDeleteEntered = new CountDownLatch(1);
+        CountDownLatch allowPromotionDelete = new CountDownLatch(1);
+
+        doAnswer(invocation -> {
+            if (firstDelete.compareAndSet(true, false)) {
+                promotionDeleteEntered.countDown();
+                assertThat(allowPromotionDelete.await(2, TimeUnit.SECONDS)).isTrue();
+            }
+            return invocation.callRealMethod();
+        }).when(reservationWaitingRepository).deleteById(any());
+
+        try {
+            Future<?> deleteReservationFuture = executorService.submit(() ->
+                    reservationService.deleteReservationById(1L)
+            );
+
+            assertThat(promotionDeleteEntered.await(2, TimeUnit.SECONDS)).isTrue();
+
+            Future<?> deleteWaitingFuture = executorService.submit(() ->
+                    reservationWaitingService.deleteReservationWaitingById(waiting.getId(), "pobi")
+            );
+
+            Thread.sleep(200);
+            assertThat(deleteWaitingFuture.isDone()).isFalse();
+
+            //when
+            allowPromotionDelete.countDown();
+            deleteReservationFuture.get(2, TimeUnit.SECONDS);
+
+            //then
+            assertThatThrownBy(() -> deleteWaitingFuture.get(2, TimeUnit.SECONDS))
+                    .isInstanceOf(ExecutionException.class)
+                    .hasCauseInstanceOf(ReservationWaitingNotFoundException.class);
+
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT name FROM reservation WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                    String.class,
+                    Date.valueOf(LocalDate.of(2026, 5, 15)),
+                    1L,
+                    1L
+            )).isEqualTo("pobi");
+
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation_waiting WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                    Long.class,
+                    Date.valueOf(LocalDate.of(2026, 5, 15)),
+                    1L,
+                    1L
+            )).isEqualTo(0);
+        } finally {
+            executorService.shutdownNow();
+        }
+    }
+
     @DisplayName("인가를 포함하는 예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
-    void deleteReservationByIdWithAuthorization() throws InterruptedException {
+    void deleteReservationById_authorization() throws InterruptedException {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
@@ -308,27 +569,30 @@ class ConcurrencyE2ETest extends E2ETest {
                 )
         );
 
-        for (Runnable task : tasks) {
-            executorService.submit(() -> {
-                readyLatch.countDown();
-                try {
-                    startLatch.await();
-                    task.run();
-                    successCount.incrementAndGet();
-                } catch (DuplicateReservationException e) {
-                    duplicateCount.incrementAndGet();
-                } catch (Throwable throwable) {
-                    unexpectedErrorCount.incrementAndGet();
-                } finally {
-                    doneLatch.countDown();
-                }
-            });
-        }
+        try {
+            for (Runnable task : tasks) {
+                executorService.submit(() -> {
+                    readyLatch.countDown();
+                    try {
+                        startLatch.await();
+                        task.run();
+                        successCount.incrementAndGet();
+                    } catch (DuplicateReservationException e) {
+                        duplicateCount.incrementAndGet();
+                    } catch (Throwable throwable) {
+                        unexpectedErrorCount.incrementAndGet();
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
 
-        readyLatch.await();
-        startLatch.countDown();
-        doneLatch.await();
-        executorService.shutdown();
+            assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+            startLatch.countDown();
+            assertThat(doneLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        } finally {
+            executorService.shutdownNow();
+        }
 
         //then
         assertAll(
@@ -355,35 +619,7 @@ class ConcurrencyE2ETest extends E2ETest {
                 .getLong("id");
     }
 
-    @DisplayName("동일한 예약 대기 신청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
-    @Test
-    void makeReservationWaiting() throws InterruptedException {
-        //given
-        createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
-        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
-
-        //when
-        List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
-                                "name",
-                                LocalDate.of(2026, 5, 15),
-                                1L,
-                                1L
-                        )
-                ),
-                100,
-                DuplicateReservationWaitingException.class
-        );
-
-        //then
-        assertAll(
-                () -> assertThat(result.get(0)).isEqualTo(1),
-                () -> assertThat(result.get(1)).isEqualTo(99),
-                () -> assertThat(result.get(2)).isEqualTo(0)
-        );
-    }
-
+    @DisplayName("예약 대기 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
     void deleteReservationWaiting() throws InterruptedException {
         // given

@@ -162,7 +162,6 @@ public class ReservationService {
         Reservation original = getReservation(id);
 
         validateReservationOwnership(original, name);
-
         validateExpiry(
                 original.getDate(),
                 original.getReservationTime().getStartAt()
@@ -174,7 +173,6 @@ public class ReservationService {
                 updated.getDate(),
                 updated.getReservationTime().getStartAt()
         );
-
         if (original.getDate().equals(updated.getDate())
                 && original.getReservationTime().equals(updated.getReservationTime())) {
             return;
@@ -198,7 +196,7 @@ public class ReservationService {
         try {
             reservationRepository.update(updated);
 
-            reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
+            reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(
                     original.getDate(), original.getReservationTime().getId(), original.getTheme().getId()
             ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
         } catch (DuplicateKeyException e) {
@@ -206,15 +204,15 @@ public class ReservationService {
         }
     }
 
+    private Reservation getReservation(Long id) {
+        return reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(ReservationNotFoundException::new);
+    }
+
     private void validateReservationOwnership(Reservation reservation, String userName) {
         if (!reservation.hasSameName(userName)) {
             throw new AuthorizationException();
         }
-    }
-
-    private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
     }
 
     private void promoteFirstWaitingForSameSlotToReservation(ReservationWaiting waiting) {
@@ -255,7 +253,6 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
 
         validateReservationOwnership(reservation, name);
-
         validateExpiry(
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt()
@@ -266,9 +263,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
-
+        Reservation reservation = getReservation(id);
         deleteReservation(reservation);
     }
 
@@ -280,7 +275,7 @@ public class ReservationService {
             throw new ReservationNotFoundException();
         }
 
-        reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
+        reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(
                 reservation.getDate(), reservation.getReservationTime().getId(), reservation.getTheme().getId()
         ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
     }

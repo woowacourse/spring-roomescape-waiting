@@ -94,7 +94,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
+    public Optional<Reservation> findByIdForUpdate(Long id) {
         String sql = """
         SELECT r.id AS reservation_id,
                r.name AS reservation_name,
@@ -111,6 +111,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         INNER JOIN theme h
           ON r.theme_id = h.id
         WHERE r.id = ?
+        FOR UPDATE
         """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, id)
@@ -118,7 +119,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
         String sql = """
         SELECT r.id AS reservation_id,
                r.name AS reservation_name,
@@ -135,6 +136,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         INNER JOIN theme h
           ON r.theme_id = h.id
         WHERE  r.reservation_date = ? AND r.theme_id = ? AND r.time_id = ?
+        FOR UPDATE
         """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date, themeId, timeId)

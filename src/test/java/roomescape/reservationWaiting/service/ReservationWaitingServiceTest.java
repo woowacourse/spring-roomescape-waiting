@@ -81,7 +81,7 @@ class ReservationWaitingServiceTest {
         when(themeRepository.findById(any()))
                 .thenReturn(Optional.of(theme));
 
-        when(reservationRepository.findByDateAndTimeIdAndThemeId(
+        when(reservationRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 any(), any(), any())
         ).thenReturn(Optional.of(new Reservation(1L, "pobi", LocalDate.of(2026, 5, 15), time, theme)));
 
@@ -180,7 +180,7 @@ class ReservationWaitingServiceTest {
         when(themeRepository.findById(any()))
                 .thenReturn(Optional.of(new Theme(1L, "이름", "설명", "thumbnailUrl")));
 
-        when(reservationRepository.findByDateAndTimeIdAndThemeId(
+        when(reservationRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 any(), any(), any())
         ).thenReturn(Optional.empty());
 
@@ -216,7 +216,7 @@ class ReservationWaitingServiceTest {
         when(themeRepository.findById(any()))
                 .thenReturn(Optional.of(theme));
 
-        when(reservationRepository.findByDateAndTimeIdAndThemeId(
+        when(reservationRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 any(), any(), any())
         ).thenReturn(Optional.of(new Reservation(1L, "brown", LocalDate.of(2026, 5, 15), time, theme)));
 

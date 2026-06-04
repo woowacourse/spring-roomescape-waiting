@@ -292,7 +292,7 @@ class ReservationServiceTest {
         LocalDate originalDate = LocalDate.of(2026, 5, 15);
         LocalDate updatedDate = LocalDate.of(2026, 5, 16);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -301,7 +301,7 @@ class ReservationServiceTest {
                         theme
                 )));
 
-        when(reservationRepository.findById(1L))
+        when(reservationRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(
                         new Reservation(
                                 1L,
@@ -328,7 +328,7 @@ class ReservationServiceTest {
         when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(false);
 
-        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "pobi",
@@ -357,7 +357,7 @@ class ReservationServiceTest {
                                 && reservation.getTheme().equals(theme)
                 )),
                 () -> verify(reservationWaitingRepository)
-                        .findFirstByReservationDateAndTimeIdAndThemeId(originalDate, 1L, 1L),
+                        .findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(originalDate, 1L, 1L),
                 () -> verify(reservationWaitingRepository).deleteById(1L),
                 () -> verify(reservationRepository).save(argThat(reservation ->
                         reservation.getName().equals("pobi")
@@ -376,7 +376,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         LocalDate date = LocalDate.of(2026, 5, 15);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -397,7 +397,7 @@ class ReservationServiceTest {
     @Test
     void updateReservationWithAuthorizationTest_reservation_not_found() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.empty());
 
         //when & then
@@ -410,7 +410,7 @@ class ReservationServiceTest {
     @Test
     void updateReservationTest_original_expired() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -436,7 +436,7 @@ class ReservationServiceTest {
     @Test
     void updateReservationTest_time_not_found() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -465,7 +465,7 @@ class ReservationServiceTest {
     @Test
     void updateReservationTest_updated_time_expired() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -495,7 +495,7 @@ class ReservationServiceTest {
     @Test
     void updateReservationTest_not_changed() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -538,7 +538,7 @@ class ReservationServiceTest {
         //given
         ReservationTime updatedTime = new ReservationTime(2L, LocalTime.of(11, 0));
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -572,7 +572,7 @@ class ReservationServiceTest {
         //given
         ReservationTime updatedTime = new ReservationTime(2L, LocalTime.of(11, 0));
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -612,7 +612,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         LocalDate originalDate = LocalDate.of(2026, 5, 15);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -637,7 +637,7 @@ class ReservationServiceTest {
         when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(false);
 
-        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "pobi",
@@ -666,7 +666,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         LocalDate date = LocalDate.of(2026, 5, 15);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -675,7 +675,7 @@ class ReservationServiceTest {
                         theme
                 )));
 
-        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "pobi",
@@ -697,7 +697,7 @@ class ReservationServiceTest {
         assertAll(
                 () -> verify(reservationRepository).deleteById(1L),
                 () -> verify(reservationWaitingRepository)
-                        .findFirstByReservationDateAndTimeIdAndThemeId(date, 1L, 1L),
+                        .findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L),
                 () -> verify(reservationWaitingRepository).deleteById(1L),
                 () -> verify(reservationRepository).save(argThat(reservation ->
                         reservation.getName().equals("pobi")
@@ -712,7 +712,7 @@ class ReservationServiceTest {
     @Test
     void deleteReservationByIdTest_reservation_not_found() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.empty());
 
         //when & then
@@ -724,7 +724,7 @@ class ReservationServiceTest {
     @Test
     void deleteReservationByIdTest_waiting_not_found() {
         //given
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -733,7 +733,7 @@ class ReservationServiceTest {
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
 
-        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(any(), any(), any()))
                 .thenReturn(Optional.empty());
 
         when(reservationRepository.deleteById(any()))
@@ -758,7 +758,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         LocalDate date = LocalDate.of(2026, 5, 15);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -777,7 +777,7 @@ class ReservationServiceTest {
         when(reservationRepository.deleteById(any()))
                 .thenReturn(1);
 
-        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "pobi",
@@ -796,7 +796,7 @@ class ReservationServiceTest {
         assertAll(
                 () -> verify(reservationRepository).deleteById(1L),
                 () -> verify(reservationWaitingRepository)
-                        .findFirstByReservationDateAndTimeIdAndThemeId(date, 1L, 1L),
+                        .findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L),
                 () -> verify(reservationWaitingRepository).deleteById(1L),
                 () -> verify(reservationRepository).save(argThat(reservation ->
                         reservation.getName().equals("pobi")
@@ -815,7 +815,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         LocalDate date = LocalDate.of(2026, 5, 15);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
@@ -837,7 +837,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         LocalDate date = LocalDate.of(2026, 5, 15);
 
-        when(reservationRepository.findById(any()))
+        when(reservationRepository.findByIdForUpdate(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",

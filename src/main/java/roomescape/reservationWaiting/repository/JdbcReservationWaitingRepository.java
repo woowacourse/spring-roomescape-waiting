@@ -118,6 +118,34 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public Optional<ReservationWaiting> findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(
+            LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT r.id AS reservation_waiting_id,
+                       r.name AS reservation_waiting_name,
+                       r.reservation_date AS reservation_waiting_date,
+                       r.time_id,
+                       t.start_at AS time_start_at,
+                       h.id AS theme_id,
+                       h.name AS theme_name,
+                       h.description AS theme_description,
+                       h.thumbnail_url AS theme_thumbnail_url
+                FROM reservation_waiting r
+                INNER JOIN reservation_time t
+                  ON r.time_id = t.id
+                INNER JOIN theme h
+                  ON r.theme_id = h.id
+                WHERE r.reservation_date = ? AND theme_id = ? AND time_id = ?
+                ORDER BY r.id ASC
+                LIMIT 1
+                FOR UPDATE
+                """;
+
+        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, themeId, timeId)
+                .stream().findFirst();
+    }
+
+    @Override
     public List<ReservationWaiting> findAllByName(String name) {
         String sql = """
                 SELECT r.id AS reservation_waiting_id,
