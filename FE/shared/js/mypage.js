@@ -10,6 +10,7 @@ const changeNameBtn = document.getElementById('change-name-btn');
 let currentName = '';
 let currentReservations = [];
 let currentWaitings = [];
+let currentThemes = [];
 
 const escapeHtml = (value) => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -21,6 +22,22 @@ const escapeHtml = (value) => String(value ?? '')
 const escapeCssUrl = (value) => String(value ?? '').replaceAll("'", '%27');
 
 const today = () => new Date().toISOString().split('T')[0];
+
+const getStartAt = (item) => item.time?.startAt || item.time || '00:00';
+
+const getThemeName = (item) => item.theme?.name || item.theme || '테마';
+
+const getThemeDescription = (item) => item.theme?.description || '';
+
+const getThemeModel = (item) => {
+  if (typeof item.theme === 'object' && item.theme !== null) {
+    return item.theme;
+  }
+  return currentThemes.find(theme => theme.name === item.theme) || { name: item.theme };
+};
+
+const getThemeId = (item) => item.theme?.id
+  || currentThemes.find(theme => theme.name === getThemeName(item))?.id;
 
 const setMessage = (message = '', type = 'error') => {
   nameError.textContent = message;
@@ -38,7 +55,7 @@ const setLoading = () => {
 
 const getReservationStatus = (reservation) => {
   const reservationDate = reservation.date;
-  const startAt = reservation.time?.startAt || '00:00';
+  const startAt = getStartAt(reservation);
   const target = new Date(`${reservationDate}T${startAt}`);
   return target.getTime() < Date.now() ? 'past' : 'active';
 };
@@ -54,23 +71,26 @@ const renderEmpty = (name) => {
 };
 
 const renderReservationCard = (reservation, index) => {
-  const thumbnail = getThemeThumbnail(reservation.theme, index);
+  const theme = getThemeModel(reservation);
+  const thumbnail = getThemeThumbnail(theme, index);
   const status = getReservationStatus(reservation);
   const disabled = status === 'past' ? 'disabled' : '';
   const statusText = status === 'past' ? '지난 예약' : '변경 가능';
+  const themeId = getThemeId(reservation) || '';
+  const startAt = getStartAt(reservation);
 
   return `
-    <article class="my-reservation-card" data-id="${reservation.id}" data-theme-id="${reservation.theme.id}">
+    <article class="my-reservation-card" data-id="${reservation.id}" data-theme-id="${themeId}">
       <div class="my-thumb" style="background-image: linear-gradient(135deg, rgba(7, 6, 5, 0.08), rgba(7, 6, 5, 0.42)), url('${escapeCssUrl(thumbnail)}')"></div>
       <div class="my-reservation-body">
         <div class="my-card-head">
           <div>
             <span class="my-status ${status}">${statusText}</span>
-            <h3>${escapeHtml(reservation.theme.name)}</h3>
+            <h3>${escapeHtml(getThemeName(reservation))}</h3>
           </div>
-          <strong>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)}</strong>
+          <strong>${escapeHtml(reservation.date)} ${escapeHtml(startAt)}</strong>
         </div>
-        <p>${escapeHtml(reservation.theme.description)}</p>
+        <p>${escapeHtml(getThemeDescription(reservation) || '예약 정보를 확인하고 가능한 시간으로 변경할 수 있습니다.')}</p>
         <div class="my-edit-grid">
           <label>
             날짜
@@ -79,7 +99,7 @@ const renderReservationCard = (reservation, index) => {
           <label>
             시간
             <select class="my-time" ${disabled}>
-              <option value="${reservation.time.id}">${escapeHtml(reservation.time.startAt)}</option>
+              <option value="">${escapeHtml(startAt)}</option>
             </select>
           </label>
         </div>
@@ -94,10 +114,12 @@ const renderReservationCard = (reservation, index) => {
 };
 
 const renderWaitingCard = (waiting, index) => {
-  const thumbnail = getThemeThumbnail(waiting.theme, index + currentReservations.length);
+  const theme = getThemeModel(waiting);
+  const thumbnail = getThemeThumbnail(theme, index + currentReservations.length);
   const status = getReservationStatus(waiting);
   const disabled = status === 'past' ? 'disabled' : '';
   const statusText = status === 'past' ? '지난 대기' : `${waiting.rank || '-'}순위 대기`;
+  const startAt = getStartAt(waiting);
 
   return `
     <article class="my-reservation-card waiting-card" data-id="${waiting.id}" data-kind="waiting">
@@ -106,11 +128,11 @@ const renderWaitingCard = (waiting, index) => {
         <div class="my-card-head">
           <div>
             <span class="my-status waiting">${escapeHtml(statusText)}</span>
-            <h3>${escapeHtml(waiting.theme.name)}</h3>
+            <h3>${escapeHtml(getThemeName(waiting))}</h3>
           </div>
-          <strong>${escapeHtml(waiting.date)} ${escapeHtml(waiting.time.startAt)}</strong>
+          <strong>${escapeHtml(waiting.date)} ${escapeHtml(startAt)}</strong>
         </div>
-        <p>${escapeHtml(waiting.theme.description)}</p>
+        <p>${escapeHtml(getThemeDescription(waiting) || '앞선 예약이 취소되면 자동으로 예약 전환됩니다.')}</p>
         <div class="waiting-rank-panel">
           <strong>${waiting.rank || '-'}순위</strong>
           <span>앞선 예약이 취소되면 자동으로 예약 전환됩니다.</span>
@@ -129,16 +151,24 @@ const loadAvailableTimes = async (card, reservation) => {
   const timeSelect = card.querySelector('.my-time');
   const message = card.querySelector('.card-message');
   const date = dateInput.value;
+  const themeId = card.dataset.themeId || getThemeId(reservation);
+  const currentStartAt = getStartAt(reservation);
+
+  if (!themeId) {
+    timeSelect.innerHTML = '<option value="">테마 정보를 확인할 수 없습니다</option>';
+    timeSelect.disabled = true;
+    return;
+  }
 
   timeSelect.innerHTML = '<option>시간 확인 중</option>';
   timeSelect.disabled = true;
 
   try {
-    const times = await api.getReservableTimes(date, reservation.theme.id);
+    const times = await api.getReservableTimes(date, themeId);
     const options = times
-      .filter(time => time.available || String(time.timeId) === String(reservation.time.id))
+      .filter(time => time.available || time.startAt === currentStartAt)
       .map(time => `
-        <option value="${time.timeId}" ${String(time.timeId) === String(reservation.time.id) ? 'selected' : ''}>
+        <option value="${time.timeId}" ${time.startAt === currentStartAt ? 'selected' : ''}>
           ${escapeHtml(time.startAt)}${time.available ? '' : ' · 현재 예약'}
         </option>
       `)
@@ -206,7 +236,11 @@ const loadReservations = async (name) => {
   window.localStorage.setItem('roomzero.guestName', currentName);
 
   try {
-    const result = await api.getMyReservations(currentName);
+    const [result, themes] = await Promise.all([
+      api.getMyReservations(currentName),
+      api.getThemes()
+    ]);
+    currentThemes = themes;
     renderReservations({
       reservations: result.reservations || [],
       waitings: result.waitings || []
@@ -226,7 +260,7 @@ const cancelWaiting = async (card) => {
   const waiting = currentWaitings.find(item => String(item.id) === String(id));
   if (!waiting) return;
 
-  if (!confirm(`${waiting.theme.name} 대기를 취소할까요?`)) return;
+  if (!confirm(`${getThemeName(waiting)} 대기를 취소할까요?`)) return;
 
   const message = card.querySelector('.card-message');
   try {
@@ -257,7 +291,7 @@ const updateReservation = async (card) => {
     await loadReservations(currentName);
   } catch (error) {
     message.dataset.type = 'error';
-    message.textContent = error.message || `${reservation?.theme?.name || '예약'} 변경에 실패했습니다.`;
+    message.textContent = error.message || `${reservation ? getThemeName(reservation) : '예약'} 변경에 실패했습니다.`;
   }
 };
 
@@ -266,7 +300,7 @@ const cancelReservation = async (card) => {
   const reservation = currentReservations.find(item => String(item.id) === String(id));
   if (!reservation) return;
 
-  if (!confirm(`${reservation.theme.name} 예약을 취소할까요?`)) return;
+  if (!confirm(`${getThemeName(reservation)} 예약을 취소할까요?`)) return;
 
   const message = card.querySelector('.card-message');
   try {

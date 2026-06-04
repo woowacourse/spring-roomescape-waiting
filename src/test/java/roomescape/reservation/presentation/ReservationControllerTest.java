@@ -106,10 +106,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("브라운"))
                 .andExpect(jsonPath("$.date").value("2026-05-05"))
-                .andExpect(jsonPath("$.time.id").value(1))
-                .andExpect(jsonPath("$.time.startAt").value("10:00"))
-                .andExpect(jsonPath("$.theme.id").value(1))
-                .andExpect(jsonPath("$.theme.name").value("테스트-테마"));
+                .andExpect(jsonPath("$.time").value("10:00:00"))
+                .andExpect(jsonPath("$.theme").value("테스트-테마"));
 
         then(reservationService).should().saveReservation(command);
     }
@@ -234,10 +232,10 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("브라운"))
-                .andExpect(jsonPath("$[0].time.id").value(1))
+                .andExpect(jsonPath("$[0].time").value("10:00:00"))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].name").value("리오"))
-                .andExpect(jsonPath("$[1].time.id").value(2));
+                .andExpect(jsonPath("$[1].time").value("11:00:00"));
 
         then(reservationService).should().getReservationsByDateAndTheme(date, 1L);
     }
@@ -275,13 +273,13 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations.length()").value(1))
                 .andExpect(jsonPath("$.reservations[0].id").value(1))
                 .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
-                .andExpect(jsonPath("$.reservations[0].time.startAt").value("10:00"))
-                .andExpect(jsonPath("$.reservations[0].theme.name").value("테마A"))
+                .andExpect(jsonPath("$.reservations[0].time").value("10:00:00"))
+                .andExpect(jsonPath("$.reservations[0].theme").value("테마A"))
                 .andExpect(jsonPath("$.waitings.length()").value(1))
                 .andExpect(jsonPath("$.waitings[0].id").value(2))
                 .andExpect(jsonPath("$.waitings[0].name").value("브라운"))
-                .andExpect(jsonPath("$.waitings[0].time.startAt").value("11:00"))
-                .andExpect(jsonPath("$.waitings[0].theme.name").value("테마B"))
+                .andExpect(jsonPath("$.waitings[0].time").value("11:00:00"))
+                .andExpect(jsonPath("$.waitings[0].theme").value("테마B"))
                 .andExpect(jsonPath("$.waitings[0].rank").value(2));
 
         then(reservationService).should().getReservationsByName("브라운");

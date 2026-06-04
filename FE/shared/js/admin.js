@@ -20,8 +20,8 @@ const escapeHtml = (value) => String(value ?? '')
 
 const escapeCssUrl = (value) => String(value ?? '').replaceAll("'", '%27');
 
-const getThemeLabel = (reservation) => reservation.theme?.name || '미지정';
-const getTimeLabel = (reservation) => reservation.time?.startAt || '--:--';
+const getThemeLabel = (reservation) => reservation.theme?.name || reservation.theme || '미지정';
+const getTimeLabel = (reservation) => reservation.time?.startAt || reservation.time || '--:--';
 
 const countBy = (items, getKey) => items.reduce((map, item) => {
   const key = getKey(item);
@@ -298,8 +298,8 @@ const loadReservations = async () => {
     reservationList.innerHTML = reservations.map(reservation => `
       <div class="item">
         <div class="item-info">
-          <span class="item-name">${escapeHtml(reservation.name)} · ${escapeHtml(reservation.theme?.name)}</span>
-          <span class="item-meta">${escapeHtml(reservation.date)} ${escapeHtml(reservation.time?.startAt)}</span>
+          <span class="item-name">${escapeHtml(reservation.name)} · ${escapeHtml(getThemeLabel(reservation))}</span>
+          <span class="item-meta">${escapeHtml(reservation.date)} ${escapeHtml(getTimeLabel(reservation))}</span>
         </div>
         <button class="btn-delete" data-id="${reservation.id}" data-type="reservation">삭제</button>
       </div>

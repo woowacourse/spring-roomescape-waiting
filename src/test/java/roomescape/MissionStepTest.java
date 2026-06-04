@@ -120,7 +120,8 @@ public class MissionStepTest {
     @Test
     @DisplayName("예약 대기를 저장한다")
     void saveWaiting_success() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
+        LocalTime startAt = LocalTime.now().plusHours(1).withNano(0);
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt.toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
@@ -145,8 +146,8 @@ public class MissionStepTest {
                 .body("id", is(1))
                 .body("name", is("브라운"))
                 .body("date", is(TODAY.plusDays(1).toString()))
-                .body("time.id", is(1))
-                .body("theme.id", is(1))
+                .body("time", is(startAt.toString()))
+                .body("theme", is("김인직"))
                 .body("rank", is(1));
     }
 

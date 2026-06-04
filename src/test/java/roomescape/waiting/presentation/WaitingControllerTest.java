@@ -88,10 +88,8 @@ class WaitingControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("브라운"))
                 .andExpect(jsonPath("$.date").value("2026-05-05"))
-                .andExpect(jsonPath("$.time.id").value(1))
-                .andExpect(jsonPath("$.time.startAt").value("10:00"))
-                .andExpect(jsonPath("$.theme.id").value(1))
-                .andExpect(jsonPath("$.theme.name").value("테스트-테마"))
+                .andExpect(jsonPath("$.time").value("10:00:00"))
+                .andExpect(jsonPath("$.theme").value("테스트-테마"))
                 .andExpect(jsonPath("$.rank").value(1));
 
         then(waitingService).should().save(command);
