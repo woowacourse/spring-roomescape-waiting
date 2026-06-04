@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -67,6 +69,7 @@ public class ReservationService {
         return ReservationResponse.from(reservation.withId(reservationId));
     }
 
+    @Retryable(retryFor = ConcurrencyConflictException.class, backoff = @Backoff(delay = 50, multiplier = 2.0, random = true))
     @Transactional
     public ReservationResponse update(Long id, ReservationRequest reservationRequest) {
         Reservation existed = getReservation(id);
@@ -81,6 +84,7 @@ public class ReservationService {
         return ReservationResponse.from(moved);
     }
 
+    @Retryable(retryFor = ConcurrencyConflictException.class, backoff = @Backoff(delay = 50, multiplier = 2.0, random = true))
     @Transactional
     public void delete(Long id) {
         Optional<Reservation> optionalReservation = reservationQueryingDao.findReservationById(id);
