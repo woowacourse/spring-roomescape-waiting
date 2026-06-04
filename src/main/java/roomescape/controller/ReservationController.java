@@ -41,7 +41,7 @@ public class ReservationController {
     public ResponseEntity<List<ReservationOrderResponse>> readReservation(
             @RequestParam("name") String name
     ) {
-        List<ReservationOrderResponse> response = reservationService.find(name);
+        List<ReservationOrderResponse> response = reservationService.findByName(name);
         return ResponseEntity.ok(response);
     }
 
