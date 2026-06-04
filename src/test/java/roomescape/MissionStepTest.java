@@ -261,6 +261,88 @@ public class MissionStepTest {
     }
 
     @Test
+    @DisplayName("예약 확정자가 취소하면 첫 번째 대기가 예약으로 전환되고 나머지 대기 순번이 재정렬된다.")
+    void cancelReservedReservation_promotesFirstWaitingAndReordersWaitingRank() {
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", "21:30");
+
+        Map<String, String> theme = new HashMap<>();
+        theme.put("name", "대기 전환 테스트");
+        theme.put("description", "대기 전환 테스트용 테마");
+        theme.put("thumbnail", "https://example.com/waiting-promotion-theme.png");
+
+        String date = LocalDate.now().plusDays(1).toString();
+
+        int timeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(time)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        int themeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(theme)
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", date);
+        reservation.put("timeId", timeId);
+        reservation.put("themeId", themeId);
+
+        reservation.put("name", "브라운");
+        int reservedReservationId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        reservation.put("name", "레아");
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        reservation.put("name", "포비");
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservedReservationId + "?name=브라운")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=레아")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].status", is("RESERVED"))
+                .body("reservations[0].waitingRank", is(0));
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=포비")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].status", is("WAITING"))
+                .body("reservations[0].waitingRank", is(1));
+    }
+
+    @Test
     @DisplayName("컨트롤러는 JdbcTemplate을 직접 의존하지 않는다.")
     void controllerDoesNotDependOnJdbcTemplate() {
         boolean isJdbcTemplateInjected = false;
