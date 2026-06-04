@@ -20,15 +20,23 @@ import roomescape.support.ServiceIntegrationTest;
 /**
  * ThemeService 통합 테스트.
  *
- * <p>검증 대상은 두 가지로, 둘 다 "시스템 상태(이미 저장된 예약)에 의존하는 규칙"이라 실제 H2로 검증한다:
+ * <p>검증 대상은 두 가지로, 둘 다 "서비스만의 협력 책임"이라 실제 H2로 검증한다:
  * <ul>
- *   <li>삭제 거부: 예약이 존재하는 테마는 삭제할 수 없다 (existsByThemeId 상태에 의존)</li>
- *   <li>인기 테마 집계: 최근 7일 예약 건수로 정렬 (집계 쿼리 + 날짜 경계)</li>
+ *   <li>삭제 거부 (예외 전환): existsByThemeId 결과를 보고 예외를 던지는 의사결정</li>
+ *   <li>인기 테마 (정책-Repository 조율): 정책에서 today, from, to, limit을 받아 Repository에 정확히 전달</li>
  * </ul>
  *
  * <p>인기 테마는 "오늘"의 의미가 흔들리면 집계 범위가 달라지므로 @Import(FixedPopularPolicyConfig)로
- * today를 2026-05-09로 고정한다. 집계 SQL "자체"의 정확성은 Repository 슬라이스가 따로 책임지고,
- * 여기서는 "서비스가 정책의 기간으로 집계를 호출해 결과를 만든다"는 흐름을 본다.
+ * today를 2026-05-09로 고정한다.
+ *
+ * <p>슬라이스(JdbcThemeRepositoryTest)와의 자리 분담:
+ * <ul>
+ *   <li>슬라이스: 집계 SQL "자체"의 정확성 (INNER JOIN, COUNT, ORDER BY, 부등호 경계 등)</li>
+ *   <li>여기: 서비스가 정책 객체에서 받은 값(today, from, to, limit)을 Repository에 정확히 넘기는 조율</li>
+ * </ul>
+ * 즉 SQL이 깨지면 슬라이스가, "from과 to를 바꿔 전달"·"today 외의 기준으로 호출"·"limit 누락" 같은
+ * 조율 회귀가 발생하면 여기가 잡는다. 슬라이스가 못 보고 인수도 정책 깨짐과 분리해 보지 못하는,
+ * 서비스 자리만의 고유 책임이다.
  */
 @Import(FixedPopularPolicyConfig.class)
 class ThemeServiceTest extends ServiceIntegrationTest {
