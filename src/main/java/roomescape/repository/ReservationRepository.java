@@ -29,4 +29,6 @@ public interface ReservationRepository {
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
+
+    boolean hasReservationOnSlot(LocalDate date, Long timeId, Long themeId);
 }

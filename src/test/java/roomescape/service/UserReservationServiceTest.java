@@ -20,6 +20,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -52,6 +53,8 @@ class UserReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
+    private WaitingRepository waitingRepository;
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @InjectMocks
     private UserReservationService userReservationService;
@@ -63,7 +66,7 @@ class UserReservationServiceTest {
         ReservationResult expected = new ReservationResult(
                 1L, OWNER, FUTURE_DATE, null, null, 0L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(reservationService.create(command)).willReturn(expected);
+        given(reservationService.reserveOnSlot(command)).willReturn(expected);
 
         ReservationResult actual = userReservationService.create(command);
 
@@ -99,7 +102,7 @@ class UserReservationServiceTest {
     void 중복_예약_시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(reservationService.create(command)).willThrow(new ReservationConflictException("중복 예약"));
+        given(reservationService.reserveOnSlot(command)).willThrow(new ReservationConflictException("중복 예약"));
 
         assertThrows(
                 ReservationConflictException.class,
@@ -146,6 +149,7 @@ class UserReservationServiceTest {
     void 본인이_아닌_예약_취소시_예외가_발생한다() {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.existsById(1L)).willReturn(true);
 
         assertThrows(
                 UnauthorizedReservationException.class,

@@ -47,15 +47,32 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.name        AS theme_name,
                 th.description AS theme_description,
                 th.thumbnail_url AS theme_thumbnail,
-                (SELECT COUNT(*)
-                   FROM reservation r2
-                  WHERE r2.date = r.date
-                    AND r2.time_id = r.time_id
-                    AND r2.theme_id = r.theme_id
-                    AND r2.id < r.id) AS waiting_order
+                0              AS waiting_order
             FROM reservation r
             INNER JOIN reservation_time t ON r.time_id = t.id
             INNER JOIN theme th ON r.theme_id = th.id
+            
+            UNION ALL
+            
+            SELECT
+                w.id           AS reservation_id,
+                w.name         AS reservation_name,
+                w.date         AS reservation_date,
+                t.id           AS time_id,
+                t.start_at     AS time_start_at,
+                th.id          AS theme_id,
+                th.name        AS theme_name,
+                th.description AS theme_description,
+                th.thumbnail_url AS theme_thumbnail,
+                (SELECT COUNT(*) + 1 
+                   FROM waiting w2 
+                  WHERE w2.date = w.date 
+                    AND w2.time_id = w.time_id 
+                    AND w2.theme_id = w.theme_id 
+                    AND w2.id < w.id) AS waiting_order
+            FROM waiting w
+            INNER JOIN reservation_time t ON w.time_id = t.id
+            INNER JOIN theme th ON w.theme_id = th.id
             """;
 
     private final RowMapper<Reservation> reservationRowMapper =
@@ -101,12 +118,19 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<ReservationWithWaitingOrder> findAll() {
-        return jdbcTemplate.query(SELECT_BASE_WITH_WAITING_ORDER, reservationWithWaitingOrderRowMapper);
+        String sql = SELECT_BASE_WITH_WAITING_ORDER + " ORDER BY reservation_date, time_start_at, waiting_order";
+        return jdbcTemplate.query(sql, reservationWithWaitingOrderRowMapper);
     }
 
     @Override
     public List<ReservationWithWaitingOrder> findByName(String name) {
-        String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.name = ?";
+        String sql = """
+            SELECT * FROM (
+            """ + SELECT_BASE_WITH_WAITING_ORDER + """
+            ) all_res
+            WHERE all_res.reservation_name = ?
+            ORDER BY all_res.reservation_date, all_res.time_start_at, all_res.waiting_order
+            """;
         return jdbcTemplate.query(sql, reservationWithWaitingOrderRowMapper, name);
     }
 
@@ -145,7 +169,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         }
 
         Long id = keyHolder.getKey().longValue();
-        return findWithWaitingOrderById(id);
+        return new ReservationWithWaitingOrder(
+                id,
+                reservation.getName(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                0L
+        );
     }
 
     @Override
@@ -159,12 +190,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getTheme().getId(),
                 reservation.getId()
         );
-        return findWithWaitingOrderById(reservation.getId());
-    }
-
-    private ReservationWithWaitingOrder findWithWaitingOrderById(Long id) {
-        String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.id = ?";
-        return jdbcTemplate.queryForObject(sql, reservationWithWaitingOrderRowMapper, id);
+        return new ReservationWithWaitingOrder(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                0L
+        );
     }
 
     @Override
@@ -220,5 +253,24 @@ public class JdbcReservationRepository implements ReservationRepository {
                 themeId
         );
         return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public boolean hasReservationOnSlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS
+                (
+                    SELECT 1 FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?
+                    UNION ALL
+                    SELECT 1 FROM waiting WHERE date = ? AND time_id = ? AND theme_id = ?
+                )
+                """;
+        Boolean hasReservation = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                date, timeId, themeId,
+                date, timeId, themeId
+        );
+        return Boolean.TRUE.equals(hasReservation);
     }
 }

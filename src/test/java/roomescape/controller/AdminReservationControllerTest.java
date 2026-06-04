@@ -49,7 +49,7 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("POST /admin/reservations - 유효한 요청이면 예약을 생성한다")
     void create() throws Exception {
-        given(reservationService.create(any())).willReturn(sampleResult());
+        given(reservationService.reserveOnSlot(any())).willReturn(sampleResult());
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2099, 12, 31), 1L, 1L);
 
         mockMvc.perform(post("/admin/reservations")

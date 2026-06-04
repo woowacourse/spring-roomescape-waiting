@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -30,15 +32,18 @@ public class UserReservationService {
     private final AdminReservationService reservationService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final WaitingRepository waitingRepository;
 
     public UserReservationService(
             AdminReservationService reservationService,
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository
+            ReservationTimeRepository reservationTimeRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationService = reservationService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -49,7 +54,7 @@ public class UserReservationService {
                     return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), time.getStartAt(), "과거 시점에는 예약할 수 없습니다");
-        return reservationService.create(command);
+        return reservationService.reserveOnSlot(command);
     }
 
     public List<ReservationResult> findByName(String name) {
@@ -60,14 +65,43 @@ public class UserReservationService {
 
     @Transactional
     public void cancel(Long id, String name) {
-        Reservation reservation = findReservation(id);
-        validateOwner(reservation, name);
-        validateNotPast(
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                "과거 예약은 취소할 수 없습니다"
-        );
-        reservationRepository.deleteById(id);
+        Reservation target = findByIdAndNameFromEither(id, name);
+
+        validateNotPast(target.getDate(), target.getTime().getStartAt(), "과거 예약은 취소할 수 없습니다");
+
+        executeDeletion(id, name, target.getDate(), target.getTime().getId(), target.getTheme().getId());
+    }
+
+    private Reservation findByIdAndNameFromEither(Long id, String name) {
+        return reservationRepository.findById(id)
+                .filter(r -> r.isOwnedBy(name))
+                .or(() -> waitingRepository.findById(id).filter(w -> w.isOwnedBy(name)))
+                .orElseThrow(() -> diagnoseError(id));
+    }
+
+    private void executeDeletion(Long id, String name, LocalDate date, Long timeId, Long themeId) {
+        boolean isConfirmed = reservationRepository.findById(id)
+                .filter(r -> r.isOwnedBy(name))
+                .isPresent();
+
+        if (isConfirmed) {
+            reservationRepository.deleteById(id);
+            waitingRepository.findFirstWaiting(date, timeId, themeId)
+                    .ifPresent(waiting -> {
+                        reservationRepository.save(waiting);
+                        waitingRepository.deleteById(waiting.getId());
+                    });
+            return;
+        }
+        waitingRepository.deleteById(id);
+        log.info("사용자 대기 취소 완료: waitingId={}, name={}", id, name);
+    }
+
+    private RuntimeException diagnoseError(Long id) {
+        if (reservationRepository.existsById(id) || waitingRepository.findById(id).isPresent()) {
+            return new UnauthorizedReservationException("본인의 예약이 아닙니다");
+        }
+        return new ReservationNotFoundException("존재하지 않는 예약입니다: id=" + id);
     }
 
     @Transactional
@@ -109,7 +143,7 @@ public class UserReservationService {
     }
 
     private void validateOwner(Reservation reservation, String name) {
-        if (!reservation.getName().equals(name)) {
+        if (!reservation.isOwnedBy(name)) {
             throw new UnauthorizedReservationException("본인의 예약이 아닙니다");
         }
     }

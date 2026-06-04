@@ -1,8 +1,9 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -11,8 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -46,9 +48,10 @@ class JdbcReservationRepositoryTest {
     @DisplayName("모든 예약을 조회한다")
     void findAll() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("무인도 탈출");
-        insertReservation("브라운", DATE, time, theme);
-        insertReservation("리사", DATE, time, theme);
+        Theme theme1 = insertTheme("무인도 탈출");
+        Theme theme2 = insertTheme("귀신 찾기");
+        insertReservation("브라운", DATE, time, theme1);
+        insertReservation("리사", DATE, time, theme2);
 
         List<ReservationWithWaitingOrder> reservations = reservationRepository.findAll();
 
@@ -159,8 +162,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Reservation first = insertReservation("루드비코", DATE, time, theme);
-        Reservation second = insertReservation("모아", DATE, time, theme);
-        Reservation third = insertReservation("브라운", DATE, time, theme);
+        Reservation second = insertWaiting("모아", DATE, time, theme);
 
         assertThat(reservationRepository.findByName("루드비코"))
                 .usingRecursiveFieldByFieldElementComparator()
@@ -171,68 +173,61 @@ class JdbcReservationRepositoryTest {
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
                         new ReservationWithWaitingOrder(second.getId(), "모아", DATE, time, theme, 1L));
-
-        assertThat(reservationRepository.findByName("브라운"))
-                .usingRecursiveFieldByFieldElementComparator()
-                .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(third.getId(), "브라운", DATE, time, theme, 2L));
-    }
-
-    @Test
-    @DisplayName("같은 사용자는 같은 슬롯에 중복 대기할 수 없다")
-    void 중복_예약을_시도하면_예외를_던진다() {
-        ReservationTime time = insertTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("무인도 탈출");
-        insertReservation("루드비코", DATE, time, theme);
-
-        assertThatThrownBy(() -> insertReservation("루드비코", DATE, time, theme))
-                .isExactlyInstanceOf(DuplicateKeyException.class);
-
-    }
-
-    @Test
-    @DisplayName("예약 취소시 대기 순번이 줄어든다")
-    void 예약_취소시_대기_순번이_줄어든다() {
-        ReservationTime time = insertTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("무인도 탈출");
-        Reservation reservation1 = insertReservation("루드비코", DATE, time, theme);
-        insertReservation("모아", DATE, time, theme);
-        insertReservation("브라운", DATE, time, theme);
-
-        List<ReservationWithWaitingOrder> list = reservationRepository.findByName("브라운");
-        Long waitingOrder = list.getFirst().waitingOrder();
-        assertThat(waitingOrder).isEqualTo(2L);
-
-        reservationRepository.deleteById(reservation1.getId());
-        assertThat(reservationRepository.findById(reservation1.getId())).isEmpty();
-
-        List<ReservationWithWaitingOrder> list2 = reservationRepository.findByName("브라운");
-        Long waitingOrder2 = list2.getFirst().waitingOrder();
-        assertThat(waitingOrder2).isEqualTo(1L);
-
     }
 
     private ReservationTime insertTime(LocalTime startAt) {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt.toString());
-        long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_time", Long.class);
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation_time")
+                .usingGeneratedKeyColumns("id");
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("start_at", Time.valueOf(startAt));
+
+        long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new ReservationTime(id, startAt);
     }
 
     private Theme insertTheme(String name) {
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                name, "설명", "https://example.com/thumb.jpg"
-        );
-        long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM theme", Long.class);
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("theme")
+                .usingGeneratedKeyColumns("id");
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", name)
+                .addValue("description", "설명")
+                .addValue("thumbnail_url", "https://example.com/thumb.jpg");
+
+        long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new Theme(id, name, "설명", "https://example.com/thumb.jpg");
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date.toString(), time.getId(), theme.getId()
-        );
-        long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", name)
+                .addValue("date", Date.valueOf(date))
+                .addValue("time_id", time.getId())
+                .addValue("theme_id", theme.getId());
+
+        long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
+        return new Reservation(id, name, date, time, theme);
+    }
+
+    private Reservation insertWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("waiting")
+                .usingGeneratedKeyColumns("id");
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", name)
+                .addValue("date", Date.valueOf(date))
+                .addValue("time_id", time.getId())
+                .addValue("theme_id", theme.getId());
+
+        long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new Reservation(id, name, date, time, theme);
     }
 }

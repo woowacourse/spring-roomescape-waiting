@@ -86,11 +86,12 @@ class JdbcThemeRepositoryTest {
     void findPopular() {
         long popularThemeId = insertTheme("무인도 탈출");
         long lessPopularThemeId = insertTheme("우주 정거장");
-        long timeId = insertTime(LocalTime.of(10, 0));
+        long timeId1 = insertTime(LocalTime.of(10, 0));
+        long timeId2 = insertTime(LocalTime.of(11, 0));
         LocalDate recent = LocalDate.now().minusDays(1);
-        insertReservation("브라운", recent, timeId, popularThemeId);
-        insertReservation("리사", recent, timeId, popularThemeId);
-        insertReservation("모아", recent, timeId, lessPopularThemeId);
+        insertReservation("브라운", recent, timeId1, popularThemeId);
+        insertReservation("리사", recent, timeId2, popularThemeId);
+        insertReservation("모아", recent, timeId1, lessPopularThemeId);
 
         List<PopularTheme> popular = themeRepository.findPopular();
 

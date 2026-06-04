@@ -36,7 +36,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ReservationResponse create(@RequestBody @Valid ReservationRequest request) {
-        ReservationResult saved = reservationService.create(request.toCommand());
+        ReservationResult saved = reservationService.reserveOnSlot(request.toCommand());
         return ReservationResponse.from(saved);
     }
 

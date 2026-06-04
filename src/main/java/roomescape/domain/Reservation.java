@@ -13,7 +13,13 @@ public class Reservation {
     private final ReservationTime time;
     private final Theme theme;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(
+            Long id,
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
         validateNameLength(name);
         this.id = id;
         this.name = name;
@@ -46,5 +52,9 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isOwnedBy(String name) {
+        return this.name.equals(name);
     }
 }
