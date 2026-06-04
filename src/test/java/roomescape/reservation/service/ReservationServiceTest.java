@@ -23,6 +23,7 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationRequestLockRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.reservation.exception.ReservationErrorCode;
@@ -52,6 +53,9 @@ class ReservationServiceTest {
 
     @Mock
     private ReservationQueryDao reservationQueryDao;
+
+    @Mock
+    private ReservationRequestLockRepository reservationRequestLockRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -361,7 +365,6 @@ class ReservationServiceTest {
                 date.atStartOfDay());
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(targetReservation));
-        given(reservationTimeService.getById(1L)).willReturn(time);
         given(reservationWaitingRepository.queryAllBySlotForUpdate(any(ReservationSlot.class)))
                 .willReturn(List.of(w1, w2));
 

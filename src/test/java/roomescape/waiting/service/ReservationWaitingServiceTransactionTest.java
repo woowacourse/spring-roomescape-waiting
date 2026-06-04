@@ -66,7 +66,7 @@ public class ReservationWaitingServiceTransactionTest {
     @Test
     void save_rollback() {
         // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(6, 6));
         ThemeResult themeResult = saveTheme();
         ReservationResult reservationResult = saveReservation(reservationTimeResult, themeResult);
 
@@ -103,7 +103,7 @@ public class ReservationWaitingServiceTransactionTest {
     @Test
     void delete_rollback() {
         // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(7, 7));
         ThemeResult themeResult = saveTheme();
         ReservationResult reservationResult = saveReservation(reservationTimeResult, themeResult);
 
@@ -120,7 +120,7 @@ public class ReservationWaitingServiceTransactionTest {
                 .delete(any(ReservationWaiting.class));
 
         // when
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(waitingResult.id(), "임꺽정", java.time.LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationWaitingService.deleteOwnedWaitingById(waitingResult.id(), "임꺽정", java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -143,8 +143,8 @@ public class ReservationWaitingServiceTransactionTest {
         return themeService.save(testThemeCommand);
     }
 
-    private ReservationTimeResult saveReservationTime() {
-        ReservationTimeCommand testReservationTimeCommand = new ReservationTimeCommand(LocalTime.now().plusHours(1));
+    private ReservationTimeResult saveReservationTime(LocalTime startAt) {
+        ReservationTimeCommand testReservationTimeCommand = new ReservationTimeCommand(startAt);
         return reservationTimeService.save(testReservationTimeCommand);
     }
 }

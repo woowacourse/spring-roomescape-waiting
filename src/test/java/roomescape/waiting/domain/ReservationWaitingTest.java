@@ -92,14 +92,14 @@ class ReservationWaitingTest {
     void validateOwner_Match_Success() {
         // given
         roomescape.reservation.domain.ReservationSlot slot = new roomescape.reservation.domain.ReservationSlot(
-                LocalDate.of(2026, 5, 5),
+                LocalDate.now().plusDays(1),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new Theme(1L, "테마", "설명", "url")
         );
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatCode(() -> waiting.validateDeletable("브라운", java.time.LocalDateTime.now().plusDays(2))).doesNotThrowAnyException();
+        assertThatCode(() -> waiting.validateDeletable("브라운", java.time.LocalDateTime.now())).doesNotThrowAnyException();
     }
 
     @Test
@@ -114,7 +114,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateDeletable("네오", java.time.LocalDateTime.now().plusDays(2)))
+        assertThatThrownBy(() -> waiting.validateDeletable("네오", java.time.LocalDateTime.now()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationWaitingErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -225,6 +225,7 @@ class ReservationWaitingTest {
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 }
+
 
 
 

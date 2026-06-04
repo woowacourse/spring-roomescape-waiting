@@ -28,11 +28,6 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findByIdForUpdate(long id) {
-        return reservationTimeDao.findByIdForUpdate(id);
-    }
-
-    @Override
     public boolean existsByStartAt(ReservationTime reservationTime) {
         return reservationTimeDao.existsByStartAt(reservationTime.getStartAt());
     }

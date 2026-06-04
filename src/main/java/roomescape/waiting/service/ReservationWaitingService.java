@@ -1,13 +1,16 @@
 package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationRequestLockRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
@@ -27,21 +30,25 @@ public class ReservationWaitingService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final ReservationRequestLockRepository reservationRequestLockRepository;
 
     public ReservationWaitingService(
             ReservationWaitingRepository reservationWaitingRepository,
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
-            ThemeService themeService
+            ThemeService themeService,
+            ReservationRequestLockRepository reservationRequestLockRepository
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.reservationRequestLockRepository = reservationRequestLockRepository;
     }
 
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
+        reservationRequestLockRepository.lock(command.name(), command.date(), command.timeId());
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
         validateWaiting(newReservationWaiting);
 
@@ -83,9 +90,23 @@ public class ReservationWaitingService {
 
     private void validateWaiting(ReservationWaiting reservationWaiting) {
         Reservation targetReservation = validateTargetReservationExists(reservationWaiting.getSlot());
+        validateNoSameTimeReservation(reservationWaiting);
         boolean hasDuplicateWaiting = reservationWaitingRepository.hasWaitingAtSameTime(reservationWaiting);
         reservationWaiting.validateNoConflictWithReservation(targetReservation);
         reservationWaiting.validateNoDuplicateWaiting(hasDuplicateWaiting);
+    }
+
+    private void validateNoSameTimeReservation(ReservationWaiting reservationWaiting) {
+        List<Reservation> reservations = reservationRepository.findAllByName(reservationWaiting.getName());
+        boolean hasSameTimeReservation = reservations.stream()
+                .anyMatch(reservation ->
+                        reservation.getDate().equals(reservationWaiting.getDate())
+                                && reservation.getTimeId().equals(reservationWaiting.getTime().getId())
+                );
+
+        if (hasSameTimeReservation) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
+        }
     }
 
     private Reservation validateTargetReservationExists(ReservationSlot slot) {

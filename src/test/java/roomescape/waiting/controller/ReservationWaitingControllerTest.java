@@ -162,7 +162,8 @@ class ReservationWaitingControllerTest {
     @DisplayName("예약 대기를 성공적으로 삭제한다.")
     void delete_Success() throws Exception {
         // given
-        willDoNothing().given(reservationWaitingService).deleteById(anyLong(), any(), any());
+        willDoNothing().given(reservationWaitingService)
+                .deleteOwnedWaitingById(anyLong(), any(), any());
 
         // when & then
         mockMvc.perform(delete("/reservations-waitings/1")

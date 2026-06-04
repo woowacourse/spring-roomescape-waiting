@@ -66,22 +66,6 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
     }
 
     @Override
-    public Optional<ReservationTime> findByIdForUpdate(Long id) {
-        String sql = """
-                SELECT id, start_at
-                FROM reservation_time
-                WHERE id = ?
-                FOR UPDATE
-                """;
-
-        return jdbcTemplate.query(
-                sql,
-                RESERVATION_TIME_ROW_MAPPER,
-                id
-        ).stream().findFirst();
-    }
-
-    @Override
     public boolean existsByStartAt(LocalTime localTime) {
         String sql = """
                 SELECT EXISTS (

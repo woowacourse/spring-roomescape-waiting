@@ -10,6 +10,7 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationRequestLockRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.service.dto.ReservationCommand;
@@ -30,20 +31,24 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationRequestLockRepository reservationRequestLockRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeService reservationTimeService,
                               ThemeService themeService,
-                              ReservationWaitingRepository reservationWaitingRepository) {
+                              ReservationWaitingRepository reservationWaitingRepository,
+                              ReservationRequestLockRepository reservationRequestLockRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationRequestLockRepository = reservationRequestLockRepository;
     }
 
     @Transactional
     public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
         try {
+            reservationRequestLockRepository.lock(command.name(), command.date(), command.timeId());
             Reservation saved = createReservation(command, requestTime);
             validateReservation(saved);
             saved = reservationRepository.save(saved);
@@ -56,6 +61,7 @@ public class ReservationService {
     @Transactional
     public void update(ReservationUpdateCommand command, long id, String name, LocalDateTime requestTime) {
         Reservation updated = updateReservation(command, id, name, requestTime);
+        reservationRequestLockRepository.lock(updated.getName(), updated.getDate(), updated.getTimeId());
         validateUpdatedReservation(updated);
         try {
             reservationRepository.save(updated);
@@ -68,8 +74,6 @@ public class ReservationService {
     public void deleteById(long id, String name, LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         reservation.validateDeletable(name, requestTime);
-
-        reservationTimeService.getById(reservation.getTimeId());
 
         List<ReservationWaiting> waitings = reservationWaitingRepository.queryAllBySlotForUpdate(
                 new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
@@ -121,7 +125,7 @@ public class ReservationService {
                                           LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         reservation.validateDeletable(name, requestTime);
-        ReservationTime newTime = reservationTimeService.getById((command.timeId()));
+        ReservationTime newTime = command.timeId() != null ? reservationTimeService.getById(command.timeId()) : null;
         return reservation.update(command.date(), newTime, name, requestTime);
     }
 

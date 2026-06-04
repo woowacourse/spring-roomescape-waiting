@@ -50,9 +50,9 @@ class ReservationTest {
     void construct_pastTime_throwsInvalidBusinessStateException() {
         // given
         LocalDate today = LocalDate.now();
-        LocalTime pastTimeVal = LocalTime.now().minusHours(1);
+        LocalTime pastTimeVal = LocalTime.of(10, 0);
         ReservationTime pastTime = new ReservationTime(2L, pastTimeVal);
-        LocalDateTime requestTime = LocalDateTime.now();
+        LocalDateTime requestTime = today.atTime(11, 0);
 
         // when & then
         assertThatThrownBy(() -> new Reservation("브라운", today, pastTime, theme, requestTime))
@@ -69,7 +69,7 @@ class ReservationTest {
                 LocalDate.now().plusDays(1).atStartOfDay());
 
         // when & then
-        assertThatCode(() -> reservation.validateDeletable("브라운", LocalDateTime.now().plusDays(2)))
+        assertThatCode(() -> reservation.validateDeletable("브라운", LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
@@ -82,7 +82,7 @@ class ReservationTest {
                 LocalDate.now().plusDays(1).atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateDeletable("코니", java.time.LocalDateTime.now().plusDays(2)))
+        assertThatThrownBy(() -> reservation.validateDeletable("코니", java.time.LocalDateTime.now()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -106,11 +106,12 @@ class ReservationTest {
     @DisplayName("예약 시간(시각)이 과거인 상태에서 validateExpiry 실행 시 InvalidBusinessStateException을 던진다.")
     void validateExpiry_pastTime_throwsInvalidBusinessStateException() {
         // given
-        LocalTime pastTimeVal = LocalTime.now().minusHours(1);
+        LocalDate today = LocalDate.now();
+        LocalTime pastTimeVal = LocalTime.of(10, 0);
         ReservationTime pastTime = new ReservationTime(2L, pastTimeVal);
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now(), pastTime, theme),
-                LocalDate.now().atStartOfDay());
-        LocalDateTime requestTime = LocalDateTime.now();
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(today, pastTime, theme),
+                today.atTime(9, 0));
+        LocalDateTime requestTime = today.atTime(11, 0);
 
         // when & then
         assertThatThrownBy(() -> reservation.validateDeletable("브라운", requestTime))
@@ -185,7 +186,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("수정하려는 타겟 시간대가 이미 지난 과거인 경우 InvalidBusinessStateException을 던진다.")
-    void update_expiredNewDate_doesNotThrow() {
+    void update_expiredNewDate_throwsInvalidBusinessStateException() {
         // given
         Reservation original = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
@@ -193,7 +194,7 @@ class ReservationTest {
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatCode(() -> original.update(LocalDate.now().minusDays(1), null, "브라운", requestTime))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> original.update(LocalDate.now().minusDays(1), null, "브라운", requestTime)).isInstanceOf(InvalidBusinessStateException.class).hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 }
+
