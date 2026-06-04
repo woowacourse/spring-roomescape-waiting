@@ -278,8 +278,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
-            when(reservationRepository.existsActiveOrWaitingReservation(
-                new Slot(newTime.getId(), newTheme.getId(), newDate))).thenReturn(false);
+            when(reservationRepository.existsActiveOrWaitingReservation(updated.getSlot())).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -315,8 +314,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
-            when(reservationRepository.existsActiveOrWaitingReservation(
-                new Slot(newTime.getId(), newTheme.getId(), newDate))).thenReturn(false);
+            when(reservationRepository.existsActiveOrWaitingReservation(updated.getSlot())).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when

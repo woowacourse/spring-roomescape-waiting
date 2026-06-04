@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
-import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
@@ -132,11 +131,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
         validateNotReservedOrWaitedByOther(updated);
 
-        eventPublisher.publishEvent(new SlotReleasedEvent(new Slot(
-                existingReservation.getTime().getId(),
-                existingReservation.getTheme().getId(),
-                existingReservation.getDate()
-        )));
+        eventPublisher.publishEvent(new SlotReleasedEvent(existingReservation.getSlot()));
 
         return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
     }
@@ -154,11 +149,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
-        eventPublisher.publishEvent(new SlotReleasedEvent(new Slot(
-                canceledReservation.getTime().getId(),
-                canceledReservation.getTheme().getId(),
-                canceledReservation.getDate()
-        )));
+        eventPublisher.publishEvent(new SlotReleasedEvent(canceledReservation.getSlot()));
 
         return reservationMapper.toCancelResponseDto(canceledReservation);
     }
@@ -176,11 +167,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
         reservationRepository.update(reservation.delete());
 
         if (reservation.getStatus() == ReservationStatus.ACTIVE) {
-            eventPublisher.publishEvent(new SlotReleasedEvent(new Slot(
-                    reservation.getTime().getId(),
-                    reservation.getTheme().getId(),
-                    reservation.getDate()
-            )));
+            eventPublisher.publishEvent(new SlotReleasedEvent(reservation.getSlot()));
         }
     }
 
