@@ -74,12 +74,14 @@ public class ReservationService {
     public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
         Reservation reservation = getReservation(id);
         ReservationTime time = getReservationTime(request.timeId());
-
+        
+        if (checkSame(request, reservation)) {
+            return ReservationResponse.from(reservation);
+        }
+        
         reservationDao.delete(id);
-
         reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
-
-
+        
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
 
@@ -137,6 +139,10 @@ public class ReservationService {
         ) {
             throw new AlreadyExistsException("이미 예약되었습니다.");
         }
+    }
+
+    private boolean checkSame(UserReservationUpdateRequest request, Reservation reservation) {
+        return reservation.getDate().equals(request.date()) && reservation.getTime().getId().equals(request.timeId());
     }
 
     private ReservationStatus checkReservationStatus(LocalDate date, Theme theme, ReservationTime time) {
