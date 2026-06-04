@@ -76,4 +76,34 @@ class AdminThemeControllerTest {
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
+
+    @DisplayName("로그인 없이 관리자 API를 호출하면 401을 반환한다")
+    @Test
+    void 비인증_관리자_접근_실패() {
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
+                .post("/admin/themes")
+                .then()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @DisplayName("일반 회원이 관리자 API를 호출하면 403을 반환한다")
+    @Test
+    void 일반회원_관리자_접근_실패() {
+        String userSession = given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "user2@test.com", "password", "1234"))
+                .post("/login")
+                .then()
+                .extract().cookie("JSESSIONID");
+
+        given()
+                .cookie("JSESSIONID", userSession)
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
+                .post("/admin/themes")
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
 }
