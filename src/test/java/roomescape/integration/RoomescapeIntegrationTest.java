@@ -1,13 +1,7 @@
 package roomescape.integration;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.notNullValue;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,10 +13,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.dto.ReservationRequest;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static org.hamcrest.Matchers.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class RoomescapeIntegrationTest {
+class RoomescapeIntegrationTest {
 
     @LocalServerPort
     int port;
@@ -38,7 +37,7 @@ public class RoomescapeIntegrationTest {
     @Test
     @DisplayName("ProblemDetail 에러 응답 규격을 정확히 준수하여 반환한다.")
     void problemDetailFormatTest() {
-        insertTestData();
+        insertTestData(LocalDate.now().minusDays(1));
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().minusDays(1), 1L, 1L);
 
         RestAssured.given().log().all()
@@ -49,14 +48,14 @@ public class RoomescapeIntegrationTest {
                 .statusCode(400)
                 .body("title", notNullValue())
                 .body("status", equalTo(400))
-                .body("detail", equalTo("지난 날짜로 예약하실 수 없습니다."))
+                .body("detail", equalTo("지난 시간/날짜로 예약하실 수 없습니다."))
                 .body("code", notNullValue());
     }
 
     @Test
     @DisplayName("특정 사용자의 이름으로 본인의 예약과 대기 목록만 조회할 수 있다.")
     void getMyReservations() {
-        insertTestData();
+        insertTestData(LocalDate.now().plusDays(1));
 
         RestAssured.given().log().all()
                 .queryParam("userName", "브라운")
@@ -70,8 +69,10 @@ public class RoomescapeIntegrationTest {
     @Test
     @DisplayName("날짜와 테마를 선택하면 해당 조건에 맞는 예약 가능한 시간 목록이 표시된다.")
     void fetchAvailableTimes() {
-        insertTestData();
+        insertTestData(LocalDate.now().plusDays(1));
         String dateStr = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE);
+
+        jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES ('12:00:00')");
 
         RestAssured.given().log().all()
                 .queryParam("themeId", 1)
@@ -86,7 +87,9 @@ public class RoomescapeIntegrationTest {
     @Test
     @DisplayName("같은 날짜와 시간이라도 테마가 다르면 각각 예약에 성공한다.")
     void independentThemeReservation() {
-        insertTestData();
+        insertTestData(LocalDate.now().plusDays(1));
+
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES ('코믹', '설명', 'url')");
 
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now().plusDays(1), 1L, 2L);
 
@@ -99,16 +102,21 @@ public class RoomescapeIntegrationTest {
     }
 
     @Test
-    @DisplayName("최근 7일(기간 파라미터) 동안의 예약 데이터를 기반으로 인기 테마 상위 목록을 조회한다.")
+    @DisplayName("최근 7일 동안의 예약 데이터를 기반으로 인기 테마 상위 목록을 조회한다.")
     void getPopularThemesBoundary() {
-        insertTestData();
+        insertTestData(LocalDate.now());
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES ('코믹', '설명', 'url')");
+
         LocalDate today = LocalDate.now();
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저1",
-                today.minusDays(8), 1L, 1L);
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저2",
-                today.minusDays(3), 1L, 2L);
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저3",
-                today.plusDays(2), 1L, 1L);
+
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 1)", today.minusDays(8));
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('유저1', 2)");
+
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 2)", today.minusDays(3));
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('유저2', 3)");
+
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 2)", today.minusDays(2));
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('유저3', 4)");
 
         RestAssured.given().log().all()
                 .queryParam("topCount", 10)
@@ -120,9 +128,11 @@ public class RoomescapeIntegrationTest {
                 .body("[0].id", equalTo(2));
     }
 
-    private void insertTestData() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', ?, 1, 1)",
-                tomorrow);
+    private void insertTestData(LocalDate date) {
+        jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES ('10:00:00')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES ('공포', '설명', 'url')");
+
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 1)", date);
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('브라운', 1)");
     }
 }

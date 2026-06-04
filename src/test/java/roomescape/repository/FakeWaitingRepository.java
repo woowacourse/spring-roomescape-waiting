@@ -2,10 +2,7 @@ package roomescape.repository;
 
 import roomescape.domain.Waiting;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class FakeWaitingRepository implements WaitingRepository {
 
@@ -15,7 +12,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public int calculateWaitingNumber(Waiting waiting) {
         return (int) storage.values().stream()
-                .filter(entry -> isSameSchedule(entry, waiting))
+                .filter(entry -> entry.getSlot().getId().equals(waiting.getSlot().getId()))
                 .filter(entry -> entry.getId() <= waiting.getId())
                 .count();
     }
@@ -23,7 +20,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         long id = sequence++;
-        Waiting savedWaiting = createSavedWaiting(id, waiting);
+        Waiting savedWaiting = new Waiting(id, waiting.getName(), waiting.getSlot(), waiting.getWaitingNumber());
         storage.put(id, savedWaiting);
         return waiting;
     }
@@ -40,6 +37,12 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public boolean isExistsBySlotId(long slotId) {
+        return storage.values().stream()
+                .anyMatch(entry -> entry.getSlot().getId().equals(slotId));
+    }
+
+    @Override
     public List<Waiting> findByName(String name) {
         return storage.values().stream()
                 .filter(entry -> entry.getName().equals(name))
@@ -51,25 +54,16 @@ public class FakeWaitingRepository implements WaitingRepository {
         return Optional.ofNullable(storage.get(id));
     }
 
-    private Waiting createSavedWaiting(long id, Waiting waiting) {
-        return new Waiting(
-                id,
-                waiting.getName(),
-                waiting.getDate(),
-                waiting.getTimeSlot(),
-                waiting.getTheme(),
-                waiting.getWaitingNumber()
-        );
-    }
-
-    private boolean isSameSchedule(Waiting first, Waiting second) {
-        return first.getDate().equals(second.getDate())
-                && first.getTimeSlot().getId().equals(second.getTimeSlot().getId())
-                && first.getTheme().getId().equals(second.getTheme().getId());
+    @Override
+    public Waiting findFirstBySlotId(long slotId) {
+        return storage.values().stream()
+                .filter(entry -> entry.getSlot().getId().equals(slotId))
+                .min(Comparator.comparingInt(Waiting::getWaitingNumber))
+                .orElse(null);
     }
 
     private boolean isSameWaiting(Waiting first, Waiting second) {
-        return isSameSchedule(first, second)
+        return first.getSlot().getId().equals(second.getSlot().getId())
                 && first.getName().equals(second.getName());
     }
 }
