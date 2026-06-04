@@ -241,12 +241,23 @@ class ReservationServiceTest {
         ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
         Reservation reservation = createReservation(id, name, date, originalTime);
         Reservation updatedReservation = createReservation(id, name, updateDate, updateTime);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, originalTime, reservation.getTheme());
+        Reservation promotedReservation = createReservation(2L, "구구", date, originalTime);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
         when(reservationTimeRepository.findBy(timeId))
                 .thenReturn(Optional.of(updateTime));
         when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
                 .thenReturn(false);
+        when(reservationWaitingRepository.findFirstWaiting(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenReturn(promotedReservation.getId());
+        when(reservationRepository.findById(promotedReservation.getId()))
+                .thenReturn(Optional.of(promotedReservation));
 
         // when
         Reservation result = service.update(id, name, updateDate, timeId);
@@ -255,6 +266,8 @@ class ReservationServiceTest {
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         assertThat(result).isEqualTo(updatedReservation);
         verify(reservationRepository, times(1)).update(captor.capture());
+        verify(reservationRepository, times(1)).insert(any(Reservation.class));
+        verify(reservationWaitingRepository, times(1)).delete(waiting.getId());
         Reservation captured = captor.getValue();
         assertAll(
                 () -> assertThat(captured.getId()).isEqualTo(id),
@@ -262,6 +275,39 @@ class ReservationServiceTest {
                 () -> assertThat(captured.getDate()).isEqualTo(updateDate),
                 () -> assertThat(captured.getTime()).isEqualTo(updateTime),
                 () -> assertThat(captured.getTheme()).isEqualTo(reservation.getTheme()));
+    }
+
+    @Test
+    void 사용자_본인_예약_변경시_기존_슬롯에_대기가_없으면_승격하지_않는다() {
+        // given
+        Long id = 1L;
+        String name = "브라운";
+        Long timeId = 2L;
+        LocalDate updateDate = date.plusDays(1);
+        ReservationTime originalTime = new ReservationTime(1L, LocalTime.parse("08:00"));
+        ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
+        Reservation reservation = createReservation(id, name, date, originalTime);
+        Reservation updatedReservation = createReservation(id, name, updateDate, updateTime);
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
+        when(reservationTimeRepository.findBy(timeId))
+                .thenReturn(Optional.of(updateTime));
+        when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
+                .thenReturn(false);
+        when(reservationWaitingRepository.findFirstWaiting(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()))
+                .thenReturn(Optional.empty());
+
+        // when
+        Reservation result = service.update(id, name, updateDate, timeId);
+
+        // then
+        assertThat(result).isEqualTo(updatedReservation);
+        verify(reservationRepository, times(1)).update(any(Reservation.class));
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(reservationWaitingRepository, never()).delete(any());
     }
 
     @Test

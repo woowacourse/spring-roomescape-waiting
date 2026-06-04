@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +15,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -87,7 +86,7 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
-
+        promoteFirstWaiting(reservation);
         return findUpdatedReservation(id);
     }
 
