@@ -6,22 +6,22 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
+import roomescape.repository.reservation.ReservationScheduleRepository;
 import roomescape.repository.theme.ThemeRepository;
 
 @Service
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationScheduleRepository reservationScheduleRepository;
 
     public ThemeService(
             final ThemeRepository themeRepository,
-            final ReservationRepository reservationRepository
+            final ReservationScheduleRepository reservationScheduleRepository
     ) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
     public Theme save(final String name, final String description, final String thumbnailUrl) {
@@ -49,7 +49,7 @@ public class ThemeService {
     }
 
     public void deleteById(final long themeId) {
-        if (reservationRepository.existsByThemeId(themeId)) {
+        if (reservationScheduleRepository.existsByThemeId(themeId)) {
             throw new ConflictException(ErrorCode.THEME_IN_USE, "이미 예약된 테마는 삭제할 수 없습니다.");
         }
 

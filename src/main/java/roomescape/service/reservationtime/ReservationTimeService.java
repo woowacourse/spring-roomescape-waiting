@@ -12,7 +12,7 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservation.ReservationScheduleRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.theme.ThemeService;
 
@@ -20,16 +20,16 @@ import roomescape.service.theme.ThemeService;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationScheduleRepository reservationScheduleRepository;
     private final ThemeService themeService;
 
     public ReservationTimeService(
             final ReservationTimeRepository reservationTimeRepository,
-            final ReservationRepository reservationRepository,
+            final ReservationScheduleRepository reservationScheduleRepository,
             final ThemeService themeService
     ) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationScheduleRepository = reservationScheduleRepository;
         this.themeService = themeService;
     }
 
@@ -50,7 +50,9 @@ public class ReservationTimeService {
 
     public List<ReservationTime> findAvailableTimes(final LocalDate date, final long themeId) {
         themeService.getById(themeId);
-        Set<Long> reservedTimeIds = Set.copyOf(reservationRepository.findReservedTimeIdsByDateAndThemeId(date, themeId));
+        Set<Long> reservedTimeIds = Set.copyOf(
+                reservationScheduleRepository.findReservedTimeIdsByDateAndThemeId(date, themeId)
+        );
 
         return reservationTimeRepository.findAll().stream()
                 .filter(reservationTime -> !reservedTimeIds.contains(reservationTime.getId()))
@@ -63,7 +65,7 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final long timeId) {
-        if (reservationRepository.existsByTimeId(timeId)) {
+        if (reservationScheduleRepository.existsByTimeId(timeId)) {
             throw new ConflictException(ErrorCode.RESERVATION_TIME_IN_USE, "이미 예약된 시간은 삭제할 수 없습니다.");
         }
         int affectedRowCount = reservationTimeRepository.deleteById(timeId);

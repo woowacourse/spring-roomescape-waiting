@@ -10,25 +10,25 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservation.ReservationScheduleRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 
 @Service
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationScheduleRepository reservationScheduleRepository;
 
     public ReservationWaitingService(
-            final ReservationRepository reservationRepository,
+            final ReservationScheduleRepository reservationScheduleRepository,
             final ReservationWaitingRepository reservationWaitingRepository
     ) {
-        this.reservationRepository = reservationRepository;
+        this.reservationScheduleRepository = reservationScheduleRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
         ReservationName waitingName = ReservationName.from(name);
-        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
+        Reservation reservation = reservationScheduleRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "예약 정보가 없으면 대기 생성이 불가능합니다."

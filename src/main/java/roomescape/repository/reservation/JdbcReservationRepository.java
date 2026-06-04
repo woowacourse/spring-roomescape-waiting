@@ -15,7 +15,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class JdbcReservationRepository implements ReservationRepository {
+public class JdbcReservationRepository implements ReservationRepository, ReservationScheduleRepository {
 
     private static final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
         Theme theme = Theme.of(

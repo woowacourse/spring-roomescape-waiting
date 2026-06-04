@@ -19,6 +19,7 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservation.ReservationScheduleRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -37,7 +38,7 @@ class ReservationServiceTest {
 
         when(fixture.themeService.getById(1L)).thenReturn(theme);
         when(fixture.reservationTimeService.getById(1L)).thenReturn(time);
-        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(false);
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(false);
         when(fixture.reservationRepository.save(any(Reservation.class))).thenReturn(savedReservation);
 
         Reservation saved = fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
@@ -55,7 +56,7 @@ class ReservationServiceTest {
 
         when(fixture.themeService.getById(1L)).thenReturn(theme);
         when(fixture.reservationTimeService.getById(1L)).thenReturn(time);
-        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(true);
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(true);
 
         assertThrows(
                 ConflictException.class,
@@ -157,7 +158,7 @@ class ReservationServiceTest {
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
         when(fixture.reservationTimeService.getById(2L)).thenReturn(secondTime);
-        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeIdExcludingId(
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeIdExcludingId(
                 LocalDate.parse("2026-08-07"),
                 1L,
                 2L,
@@ -187,7 +188,7 @@ class ReservationServiceTest {
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
         when(fixture.reservationTimeService.getById(2L)).thenReturn(secondTime);
-        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeIdExcludingId(date, 1L, 2L, 1L))
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeIdExcludingId(date, 1L, 2L, 1L))
                 .thenReturn(true);
 
         assertThrows(
@@ -221,12 +222,14 @@ class ReservationServiceTest {
 
     private static class Fixture {
         private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        private final ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
         private final ReservationService reservationService =
                 new ReservationService(
                         reservationRepository,
+                        reservationScheduleRepository,
                         reservationWaitingRepository,
                         reservationTimeService,
                         themeService
