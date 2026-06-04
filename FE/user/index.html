@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROOM ZERO 예약</title>
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="../shared/css/user.css">
+  <script defer src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-content">
+      <div class="logo">
+        <a href="index.html" style="font-weight: 600; color: white;">ROOM ZERO</a>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" style="opacity: 1;">테마 둘러보기</a>
+        <a href="mypage.html">마이페이지</a>
+        <a href="../admin/index.html">관리자</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="dark hero-section">
+      <canvas id="escape-scene" class="escape-scene" aria-hidden="true"></canvas>
+      <div class="hero-vignette" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="section-kicker hero-kicker">Seoul / Live Escape Archive</p>
+          <h1 class="display-hero">문이 닫히면 화면도 숨을 멈춘다.</h1>
+          <p class="subtitle white">테마를 고르면 예약 가능한 시간과 대기 가능한 시간을 함께 보여줍니다.</p>
+          <div class="hero-ctas">
+            <a href="#themes" class="btn-primary btn-pill">입장 가능한 테마</a>
+            <a href="#popular" class="btn-ghost">오늘의 흐름</a>
+          </div>
+        </div>
+        <div class="hero-console" aria-label="오늘 예약 현황">
+          <div class="console-line">
+            <span class="console-label">Status</span>
+            <strong>OPEN</strong>
+          </div>
+          <div class="console-line">
+            <span class="console-label">Session</span>
+            <strong id="hero-theme-count">--</strong>
+          </div>
+          <div class="console-line">
+            <span class="console-label">Next</span>
+            <strong id="hero-next-slot">확인 중</strong>
+          </div>
+          <div class="console-scan" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="popular" class="popular-section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">이번 달 인기</p>
+            <h2 class="section-title">사람들이 먼저 사라진 방</h2>
+          </div>
+          <a href="#themes" class="section-link">전체 테마 보기</a>
+        </div>
+        <div id="popular-theme-grid" class="popular-grid">
+          <!-- Popular themes loaded here -->
+        </div>
+      </div>
+    </section>
+
+    <section id="room-preview" class="room-preview-section dark">
+      <div class="container room-preview-grid">
+        <div class="room-preview-copy">
+          <p class="section-kicker hero-kicker">A-Frame Room Study</p>
+          <h2 class="section-title">예약 전에 방의 압력을 먼저 봅니다.</h2>
+          <p class="preview-text">복도, 문, 단서의 위치감이 천천히 움직입니다. 테마를 고르는 순간이 목록 선택이 아니라 진입처럼 느껴지게.</p>
+        </div>
+        <div class="aframe-stage" aria-label="3D 방 프리뷰">
+          <a-scene embedded renderer="colorManagement: true; antialias: true" vr-mode-ui="enabled: false" loading-screen="enabled: false" device-orientation-permission-ui="enabled: false">
+            <a-entity light="type: ambient; color: #f6e4c5; intensity: 0.55"></a-entity>
+            <a-entity light="type: point; color: #a32737; intensity: 2.2; distance: 8" position="-2 2.4 2"></a-entity>
+            <a-entity light="type: point; color: #d7a768; intensity: 1.8; distance: 7" position="2.4 1.2 1.8"></a-entity>
+            <a-entity camera position="0 1.55 4.8" rotation="-8 0 0" look-controls="enabled: false"></a-entity>
+            <a-entity position="0 0 0" animation="property: rotation; to: 0 360 0; dur: 26000; loop: true; easing: linear">
+              <a-box position="0 1 -1.35" depth="0.12" height="2.45" width="1.36" color="#15110e" material="roughness: 0.45; metalness: 0.18"></a-box>
+              <a-box position="0 1 -1.42" depth="0.08" height="2.05" width="0.92" color="#2b1815" material="roughness: 0.35; metalness: 0.32"></a-box>
+              <a-torus position="0.72 1.03 -1.27" radius="0.1" radius-tubular="0.012" rotation="90 0 0" color="#d7a768" material="metalness: 0.9; roughness: 0.16"></a-torus>
+              <a-box position="-1.24 1 -0.3" depth="1.5" height="2.2" width="0.12" color="#11100e"></a-box>
+              <a-box position="1.24 1 -0.3" depth="1.5" height="2.2" width="0.12" color="#11100e"></a-box>
+              <a-box position="0 2.05 -0.3" depth="1.5" height="0.12" width="2.6" color="#14120f"></a-box>
+              <a-cylinder position="-0.7 0.2 0.85" radius="0.08" height="1.1" rotation="0 0 90" color="#d7a768" material="metalness: 0.85; roughness: 0.18" animation="property: rotation; to: 0 0 450; dur: 5800; loop: true; easing: easeInOutSine"></a-cylinder>
+              <a-box position="0 -0.03 0" depth="4.8" height="0.08" width="3.4" color="#0e0d0b"></a-box>
+              <a-plane position="0 1.1 -1.5" width="3.8" height="2.7" color="#080706" opacity="0.4"></a-plane>
+              <a-sphere position="-1.15 1.38 0.2" radius="0.045" color="#a32737" animation="property: position; dir: alternate; to: -1.15 1.72 0.2; dur: 1900; loop: true; easing: easeInOutSine"></a-sphere>
+              <a-sphere position="1.1 0.72 0.65" radius="0.035" color="#d7a768" animation="property: position; dir: alternate; to: 1.1 1.05 0.65; dur: 2400; loop: true; easing: easeInOutSine"></a-sphere>
+            </a-entity>
+          </a-scene>
+        </div>
+      </div>
+    </section>
+
+    <section id="themes" class="light">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">전체 테마</p>
+            <h2 class="section-title">입장 가능한 장면</h2>
+          </div>
+        </div>
+        <div id="theme-grid" class="theme-grid">
+          <!-- Themes loaded here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Unified Booking Overlay -->
+    <div id="booking-overlay" class="booking-overlay" style="display: none;">
+      <div class="overlay-backdrop"></div>
+      <div class="overlay-content">
+        <button id="close-overlay" class="close-btn">&times;</button>
+        
+        <div class="booking-steps">
+          <div class="step active" data-step="1">구조</div>
+          <div class="step" data-step="2">시간</div>
+          <div class="step" data-step="3">이름</div>
+          <div class="step" data-step="4">확정</div>
+        </div>
+
+        <!-- Step 1: Room Structure -->
+        <div id="step-1-content" class="step-pane active">
+          <div id="booking-visual" class="booking-visual" aria-label="선택한 테마의 3D 방 구조 예시">
+            <canvas id="booking-room-model" class="booking-room-model" aria-hidden="true"></canvas>
+            <div class="structure-copy">
+              <span id="room-layout-name">Layout --</span>
+              <h2 id="structure-theme-name">테마 이름</h2>
+              <p>방 구조를 먼저 훑어본 뒤 예약 시간을 선택합니다.</p>
+            </div>
+          </div>
+          <button id="structure-next-btn" class="btn-primary btn-pill structure-next">시간 선택으로</button>
+        </div>
+
+        <!-- Step 2: Date & Time -->
+        <div id="step-2-content" class="step-pane">
+          <div class="theme-mini-info">
+            <h2 id="selected-theme-name">테마 이름</h2>
+            <p id="selected-theme-desc">테마 설명</p>
+          </div>
+          <div class="form-group">
+            <label>날짜 선택</label>
+            <input type="date" id="reservation-date" min="2026-05-04">
+          </div>
+          <div class="form-group">
+            <label>시간 선택</label>
+            <div id="time-slots" class="time-slots">
+              <!-- Time slots here -->
+            </div>
+          </div>
+          <div class="step-actions">
+            <button id="back-to-structure" class="btn-link">구조 다시 보기</button>
+            <button id="next-to-step-2" class="btn-primary btn-pill" disabled>다음</button>
+          </div>
+        </div>
+
+        <!-- Step 3: User Info -->
+        <div id="step-3-content" class="step-pane">
+          <h2>예약자 정보</h2>
+          <p class="pane-subtitle">예약과 대기 조회에 사용할 이름을 입력해주세요.</p>
+          <div class="form-group">
+            <label for="reservation-name">예약자 이름</label>
+            <input type="text" id="reservation-name" placeholder="예: 강민준">
+          </div>
+          <div class="step-actions">
+            <button id="back-to-step-1" class="btn-link">이전</button>
+            <button id="reserve-btn" class="btn-primary btn-pill">예약하기</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Success -->
+        <div id="step-4-content" class="step-pane">
+          <div class="success-animation">
+            <div class="check-icon">✓</div>
+          </div>
+          <h2>예약이 완료되었습니다</h2>
+          <div id="reservation-summary" class="summary-box"></div>
+          <button id="finish-btn" class="btn-primary btn-pill full-width">확인</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="../shared/js/user.js"></script>
+</body>
+</html>
