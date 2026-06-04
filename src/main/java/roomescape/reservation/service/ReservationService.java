@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -116,6 +117,8 @@ public class ReservationService {
             return reservationRepository.save(reservation);
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
+        } catch (DataIntegrityViolationException exception) {
+            throw new NotFoundException("선택한 예약 시간 또는 테마가 존재하지 않습니다. 다른 예약 정보를 선택해주세요.");
         }
     }
 
@@ -125,6 +128,8 @@ public class ReservationService {
                     .orElseThrow(() -> new NotFoundException("변경할 예약이 존재하지 않습니다. 예약 목록을 확인해주세요."));
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
+        } catch (DataIntegrityViolationException exception) {
+            throw new NotFoundException("선택한 예약 시간이 존재하지 않습니다. 다른 시간을 선택해주세요.");
         }
     }
 }

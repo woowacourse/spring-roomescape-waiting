@@ -1,6 +1,7 @@
 package roomescape.theme.service;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -47,7 +48,7 @@ public class ThemeService {
             throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다. 먼저 해당 예약들을 삭제해주세요.");
         }
 
-        themeRepository.deleteById(id);
+        deleteTheme(id);
     }
 
     private Theme save(Theme theme) {
@@ -55,6 +56,14 @@ public class ThemeService {
             return themeRepository.save(theme);
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 등록된 테마 이름입니다. 다른 이름을 입력해주세요.");
+        }
+    }
+
+    private void deleteTheme(Long id) {
+        try {
+            themeRepository.deleteById(id);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다. 먼저 해당 예약들을 삭제해주세요.");
         }
     }
 }
