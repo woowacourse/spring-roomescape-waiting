@@ -12,6 +12,7 @@ public enum ErrorCode {
     THEME_NOT_FOUND("존재하지 않는 테마입니다. 입력을 확인해 주세요.", HttpStatus.NOT_FOUND),
     RESERVATION_NOT_FOUND("존재하지 않는 예약입니다. 입력을 확인해 주세요.", HttpStatus.NOT_FOUND),
     RESERVATION_TIME_NOT_FOUND("존재하지 않는 시간입니다. 입력을 확인해 주세요.", HttpStatus.NOT_FOUND),
+    SLOT_NOT_FOUND("존재하지 않는 슬롯입니다. 입력을 확인해 주세요", HttpStatus.NOT_FOUND),
 
     // DB 제약 조건 관련 위반 (CONFLICT)
     DUPLICATE_RESERVATION("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.", HttpStatus.CONFLICT),

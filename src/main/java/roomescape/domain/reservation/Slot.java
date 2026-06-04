@@ -47,4 +47,18 @@ public class Slot {
     public Theme getTheme() {
         return theme;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Slot slot = (Slot) o;
+        return id == slot.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

@@ -43,7 +43,7 @@ class ReservationServiceIntegrationTest {
 
     @Test
     void 동시에_10명이_첫_예약_요청시_1명만_승인상태가_된다() throws Exception {
-        // 한 슬롯에 Approve된 예약은 반드시 1건 미만이어야 한다.
+        // 한 슬롯에 Approve된 예약은 반드시 1건 이하여야 한다.
         int threads = 10;
         var ready = new CountDownLatch(threads);
         var start = new CountDownLatch(1);

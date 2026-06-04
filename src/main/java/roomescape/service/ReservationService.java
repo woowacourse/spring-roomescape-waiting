@@ -2,10 +2,8 @@ package roomescape.service;
 
 import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationCreateRequest;
@@ -13,74 +11,40 @@ import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.RankedReservations;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
-import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
+    private final SlotService slotService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final SlotRepository slotRepository;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              SlotRepository slotRepository) {
+    public ReservationService(SlotService slotService, ReservationRepository reservationRepository) {
+        this.slotService = slotService;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.slotRepository = slotRepository;
     }
 
     @Transactional
     public RankedReservation reserve(ReservationCreateRequest request, LocalDateTime now) {
-        ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
-        Theme theme = findThemeByThemeId(request.getThemeId());
+        Slot foundSlot = slotService.findOrCreate(request.getDate(), request.getTimeId(), request.getThemeId());
+        slotService.lockSlot(foundSlot);
 
-        validateIsDuplicateNameReservation(request.getTimeId(), request.getThemeId(), request.getDate(),
-                request.getName());
-        Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
+        Reservations reservations = new Reservations(reservationRepository.findAllBySlot(foundSlot));
+        Reservation reservation = reservations.reserve(new ReservationName(request.getName()), foundSlot, now);
 
-        Slot slot = null;
-        try {
-            slot = slotRepository.findByDateAndTimeAndTheme(request.getDate(), reservationTime.getId(),
-                    theme.getId()).orElseGet(() -> slotRepository.save(
-                    Slot.create(new ReservationDate(request.getDate()), reservationTime, theme)));
-
-        } catch (DataIntegrityViolationException e) {
-            slot = slotRepository.findByDateAndTimeAndTheme(request.getDate(), reservationTime.getId(), theme.getId())
-                    .get();
-            status = Status.WAITING;
-        }
-
-        Reservation reservation = Reservation.create(new ReservationName(request.getName()), slot, status, now);
-        Reservation saved = reservationRepository.save(reservation);
-
-        return getRankedReservation(saved);
+        return getRankedReservation(reservationRepository.save(reservation));
     }
 
     private RankedReservation getRankedReservation(Reservation target) {
-        List<Reservation> reservations = reservationRepository.findByTimeAndThemeAndDate(
-                target.getTime(), target.getTheme(), target.getDate());
-        return RankedReservation.decideRankFrom(target, reservations);
+        return RankedReservation.decideRankFrom(target, reservationRepository.findAllBySlot(target.getSlot()));
     }
 
     public RankedReservation find(long reservationId) {
-        Reservation reservation = findReservationById(reservationId);
-
-        List<Reservation> sameSlots = reservationRepository.findByTimeAndThemeAndDate(
-                reservation.getTime(), reservation.getTheme(), reservation.getDate());
-
-        return RankedReservation.decideRankFrom(reservation, sameSlots);
+        return getRankedReservation(findReservationById(reservationId));
     }
 
     public List<RankedReservation> findList(String name) {
@@ -92,33 +56,29 @@ public class ReservationService {
         return rankedReservations.resultsOf(name);
     }
 
-
     @Transactional
     public RankedReservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation originReservation = findReservationById(id);
         originReservation.ensureNotPast(now);
 
-        ReservationDate reservationDateToUpdate = new ReservationDate(request.getDate());
-        ReservationTime reservationTimeToUpdate = findReservationTimeByTimeId(request.getTimeId());
+        Slot updateSlot = slotService.findOrCreate(request.getDate(), request.getTimeId(), request.getThemeId());
+        slotService.lockSlot(updateSlot);
 
-        validateIsDuplicateNameReservation(request.getTimeId(), request.getThemeId(), request.getDate(),
-                request.getName());
+        validateIsDuplicateReservation(updateSlot, request.getName());
 
-        Slot slotToUpdate = findOrCreateSlot(reservationDateToUpdate, reservationTimeToUpdate,
-                originReservation.getTheme());
+        Reservations reservations = new Reservations(reservationRepository.findAllBySlot(updateSlot));
+        Reservation reserved = reservations.reserve(new ReservationName(request.getName()), updateSlot, now);
 
-        Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
-        Reservation target = Reservation.create(originReservation.getName(), slotToUpdate, status, now);
+        Reservation updated = reservationRepository.update(id, reserved);
 
-        Reservation updated = reservationRepository.update(id, target);
-
-        reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
-                originReservation.getTime().getId(),
-                originReservation.getTheme().getId(),
-                originReservation.getDate().getValue()
-        ).ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
+        findFirstWaitingAndUpdateStatus(originReservation);
 
         return getRankedReservation(updated);
+    }
+
+    private void findFirstWaitingAndUpdateStatus(Reservation reservation) {
+        reservationRepository.findFirstWaitingBySlot(reservation.getSlot())
+                .ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
     }
 
     @Transactional
@@ -130,38 +90,12 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
 
         if (cancelledStatus == Status.APPROVED) {
-            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
-                    reservation.getTime().getId(),
-                    reservation.getTheme().getId(),
-                    reservation.getDate().getValue()
-            ).ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
+            findFirstWaitingAndUpdateStatus(reservation);
         }
     }
 
-    private Slot findOrCreateSlot(ReservationDate date, ReservationTime time, Theme theme) {
-        return slotRepository.findByDateAndTimeAndTheme(date.getValue(), time.getId(), theme.getId())
-                .orElseGet(() -> slotRepository.save(Slot.create(date, time, theme)));
-    }
-
-    private Status determineStatus(long timeId, long themeId, LocalDate date) {
-        if (reservationRepository.existsApprovedByTimeAndThemeAndDate(timeId, themeId, date)) {
-            return Status.WAITING;
-        }
-        return Status.APPROVED;
-    }
-
-    private ReservationTime findReservationTimeByTimeId(long reservationTimeId) {
-        return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new RoomEscapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
-    }
-
-    private Theme findThemeByThemeId(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(
-                () -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
-    }
-
-    private void validateIsDuplicateNameReservation(long timeId, long themeId, LocalDate date, String name) {
-        if (reservationRepository.existsByTimeAndThemeAndDateAndName(timeId, themeId, date, name)) {
+    private void validateIsDuplicateReservation(Slot slot, String name) {
+        if (reservationRepository.existsBySlotAndName(slot, name)) {
             throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }

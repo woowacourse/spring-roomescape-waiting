@@ -8,7 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 
 @Repository
 public class SlotRepository {
@@ -54,9 +56,21 @@ public class SlotRepository {
         return result.stream().findFirst();
     }
 
-    public Optional<Slot> findByDateAndTimeAndTheme(LocalDate date, long timeId, long themeId) {
+    public Optional<Slot> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
         String sql = SELECT_ALL + "WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ?";
-        List<Slot> result = jdbcTemplate.query(sql, SLOT_ROW_MAPPER, date, timeId, themeId);
+        List<Slot> result = jdbcTemplate.query(sql, SLOT_ROW_MAPPER, date, time.getId(), theme.getId());
         return result.stream().findFirst();
+    }
+
+    public boolean lockSlot(Slot foundSlot) {
+        String sql = """
+                SELECT 1
+                FROM slot
+                WHERE id = ?
+                FOR UPDATE
+                """;
+
+        List<Long> result = jdbcTemplate.queryForList(sql, Long.class, foundSlot.getId());
+        return !result.isEmpty();
     }
 }

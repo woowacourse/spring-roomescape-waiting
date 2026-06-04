@@ -4,7 +4,7 @@ import common.exception.RoomEscapeException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ThumbnailUrlTest {
+class ThumbnailUrlTest {
     @Test
     void 유효하지_않은_형식으로_생성시_예외가_발생한다() {
         Assertions.assertThatThrownBy(() -> new ThumbnailUrl("zeze.com")).isInstanceOf(RoomEscapeException.class);

@@ -92,7 +92,7 @@ class SlotRepositoryTest {
 
             Slot saved = slotRepository.save(Slot.create(new ReservationDate(FUTURE), time, theme));
 
-            assertThat(slotRepository.findByDateAndTimeAndTheme(FUTURE, time.getId(), theme.getId()))
+            assertThat(slotRepository.findByDateAndTimeAndTheme(FUTURE, time, theme))
                     .isPresent()
                     .get()
                     .extracting(Slot::getId)
@@ -102,34 +102,16 @@ class SlotRepositoryTest {
         @Test
         void 조건이_하나라도_다르면_빈_Optional을_반환한다() {
             ReservationTime time = giveTime(10);
+            ReservationTime otherTime = giveTime(11);
             Theme theme = giveTheme("테마1");
+            Theme otherTheme = giveTheme("테마2");
             slotRepository.save(Slot.create(new ReservationDate(FUTURE), time, theme));
 
             assertSoftly(soft -> {
-                soft.assertThat(slotRepository.findByDateAndTimeAndTheme(
-                        FUTURE.plusDays(1), time.getId(), theme.getId())).isEmpty();
-                soft.assertThat(slotRepository.findByDateAndTimeAndTheme(
-                        FUTURE, time.getId() + 1, theme.getId())).isEmpty();
-                soft.assertThat(slotRepository.findByDateAndTimeAndTheme(
-                        FUTURE, time.getId(), theme.getId() + 1)).isEmpty();
+                soft.assertThat(slotRepository.findByDateAndTimeAndTheme(FUTURE.plusDays(1), time, theme)).isEmpty();
+                soft.assertThat(slotRepository.findByDateAndTimeAndTheme(FUTURE, otherTime, theme)).isEmpty();
+                soft.assertThat(slotRepository.findByDateAndTimeAndTheme(FUTURE, time, otherTheme)).isEmpty();
             });
-        }
-    }
-
-    @Nested
-    @DisplayName("UNIQUE 제약")
-    class UniqueConstraint {
-
-        @Test
-        void 동일한_날짜_시간_테마로_두번_저장하면_두번째는_기존_슬롯이_조회된다() {
-            ReservationTime time = giveTime(10);
-            Theme theme = giveTheme("테마1");
-
-            Slot first = slotRepository.save(Slot.create(new ReservationDate(FUTURE), time, theme));
-            Slot found = slotRepository.findByDateAndTimeAndTheme(FUTURE, time.getId(), theme.getId())
-                    .orElseThrow();
-
-            assertThat(first.getId()).isEqualTo(found.getId());
         }
     }
 }

@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,10 +8,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
-import roomescape.domain.theme.Theme;
 
 @Repository
 public class ReservationRepository {
@@ -42,25 +39,16 @@ public class ReservationRepository {
             WHERE id = ?
             """;
     private static final String SELECT_BY_ID = SELECT_ALL + "WHERE r.id = ?";
-    private static final String SELECT_BY_NAME = SELECT_ALL + "WHERE r.name = ?";
-    private static final String EXISTS_BY_DATE_AND_TIME_AND_THEME_ID = """
+    private static final String SELECT_BY_SLOT = SELECT_ALL + "WHERE r.slot_id = ?";
+    private static final String EXISTS_BY_SLOT_AND_NAME = """
             SELECT EXISTS (
                 SELECT 1
-                FROM reservation r
-                INNER JOIN slot s ON r.slot_id = s.id
-                WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ? AND r.name = ?
-            )
-            """;
-    private static final String EXISTS_APPROVED_BY_SLOT = """
-            SELECT EXISTS (
-                SELECT 1
-                FROM reservation r
-                INNER JOIN slot s ON r.slot_id = s.id
-                WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ? AND r.status = 'APPROVED'
+                FROM reservation
+                WHERE slot_id = ? AND name = ?
             )
             """;
     private static final String SELECT_FIRST_WAITING_BY_SLOT = SELECT_ALL + """
-            WHERE s.date = ? AND rt.id = ? AND t.id = ? AND r.status = 'WAITING'
+            WHERE r.slot_id = ? AND r.status = 'WAITING'
             ORDER BY r.created_at, r.id
             LIMIT 1
             """;
@@ -96,12 +84,18 @@ public class ReservationRepository {
         return jdbcTemplate.query(SELECT_ALL, RESERVATION_ROW_MAPPER);
     }
 
-    public List<Reservation> findAllByName(String reservationName) {
-        return jdbcTemplate.query(SELECT_BY_NAME, RESERVATION_ROW_MAPPER, reservationName);
-    }
-
     public Optional<Reservation> findById(long reservationId) {
         List<Reservation> result = jdbcTemplate.query(SELECT_BY_ID, RESERVATION_ROW_MAPPER, reservationId);
+        return result.stream().findFirst();
+    }
+
+    public List<Reservation> findAllBySlot(Slot foundSlot) {
+        return jdbcTemplate.query(SELECT_BY_SLOT, RESERVATION_ROW_MAPPER, foundSlot.getId());
+    }
+
+    public Optional<Reservation> findFirstWaitingBySlot(Slot slot) {
+        List<Reservation> result = jdbcTemplate.query(SELECT_FIRST_WAITING_BY_SLOT, RESERVATION_ROW_MAPPER,
+                slot.getId());
         return result.stream().findFirst();
     }
 
@@ -125,6 +119,10 @@ public class ReservationRepository {
         return reservation.withId(id);
     }
 
+    public void updateStatus(Long id, Status status) {
+        jdbcTemplate.update(UPDATE_STATUS, status.name(), id);
+    }
+
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
@@ -139,29 +137,8 @@ public class ReservationRepository {
                 jdbcTemplate.queryForObject(EXISTS_BY_THEME_ID, Boolean.class, themeId));
     }
 
-    public boolean existsByTimeAndThemeAndDateAndName(Long timeId, Long themeId, LocalDate date, String name) {
+    public boolean existsBySlotAndName(Slot slot, String name) {
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class,
-                        date, timeId, themeId, name));
-    }
-
-    public boolean existsApprovedByTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date) {
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(EXISTS_APPROVED_BY_SLOT, Boolean.class, date, timeId, themeId));
-    }
-
-    public Optional<Reservation> findFirstWaitingByTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date) {
-        List<Reservation> result = jdbcTemplate.query(SELECT_FIRST_WAITING_BY_SLOT, RESERVATION_ROW_MAPPER,
-                date, timeId, themeId);
-        return result.stream().findFirst();
-    }
-
-    public void updateStatus(Long id, Status status) {
-        jdbcTemplate.update(UPDATE_STATUS, status.name(), id);
-    }
-
-    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
-        String sql = SELECT_ALL + "WHERE s.date = ? AND t.id = ? AND rt.id = ?";
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getValue(), theme.getId(), time.getId());
+                jdbcTemplate.queryForObject(EXISTS_BY_SLOT_AND_NAME, Boolean.class, slot.getId(), name));
     }
 }

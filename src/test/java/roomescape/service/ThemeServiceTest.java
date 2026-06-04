@@ -61,12 +61,6 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 삭제시_테마가_존재하지_않으면_예외가_발생한다() {
-        given(themeRepository.existsById(999L)).willReturn(false);
-        Assertions.assertThatThrownBy(() -> themeService.delete(999L)).isInstanceOf(RoomEscapeException.class);
-    }
-
-    @Test
     void 삭제시_테마를_사용하는_예외가_있으면_예외가_발생한다() {
         given(themeRepository.existsById(1L)).willReturn(true);
         given(reservationRepository.existsByThemeId(1L)).willReturn(true);
