@@ -5,6 +5,7 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -16,10 +17,7 @@ import roomescape.domain.ReservationTime;
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<ReservationTime> reservationTimeRowMapper = (rs, rowNum) -> new ReservationTime(
-            rs.getLong("id"),
-            rs.getTime("start_at").toLocalTime()
-    );
+    private final RowMapper<ReservationTime> reservationTimeRowMapper = new DataClassRowMapper<>(ReservationTime.class);
 
     public JdbcReservationTimeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

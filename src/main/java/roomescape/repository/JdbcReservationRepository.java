@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -62,10 +63,10 @@ public class JdbcReservationRepository implements ReservationRepository {
             (rs, rowNum) -> new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
-                    rs.getDate("reservation_date").toLocalDate(),
+                    rs.getObject("reservation_date", LocalDate.class),
                     new ReservationTime(
                             rs.getLong("time_id"),
-                            rs.getTime("time_start_at").toLocalTime()
+                            rs.getObject("time_start_at", LocalTime.class)
                     ),
                     new Theme(
                             rs.getLong("theme_id"),
@@ -79,10 +80,10 @@ public class JdbcReservationRepository implements ReservationRepository {
             (rs, rowNum) -> new ReservationWithWaitingOrder(
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
-                    rs.getDate("reservation_date").toLocalDate(),
+                    rs.getObject("reservation_date", LocalDate.class),
                     new ReservationTime(
                             rs.getLong("time_id"),
-                            rs.getTime("time_start_at").toLocalTime()
+                            rs.getObject("time_start_at", LocalTime.class)
                     ),
                     new Theme(
                             rs.getLong("theme_id"),
