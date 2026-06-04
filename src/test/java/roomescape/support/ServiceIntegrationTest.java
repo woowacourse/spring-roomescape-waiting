@@ -1,6 +1,5 @@
-package roomescape.e2e;
+package roomescape.support;
 
-import io.restassured.RestAssured;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -9,19 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.web.context.WebServerInitializedEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.e2e.E2ETest.WebConfig;
-import roomescape.support.DatabaseHelper;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@Transactional(propagation =  Propagation.NOT_SUPPORTED)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @ActiveProfiles("test")
-@Import(WebConfig.class)
-public abstract class E2ETest {
+@Import(ServiceIntegrationTest.ServiceIntegrationTestConfig.class)
+public class ServiceIntegrationTest {
 
     @Autowired
     DatabaseHelper databaseHelper;
@@ -32,7 +30,7 @@ public abstract class E2ETest {
     }
 
     @TestConfiguration
-    static class WebConfig {
+    static class ServiceIntegrationTestConfig {
 
         @Bean
         public Clock clock() {
@@ -45,11 +43,6 @@ public abstract class E2ETest {
         @Bean
         public DatabaseHelper databaseHelper(JdbcTemplate jdbcTemplate) {
             return new DatabaseHelper(jdbcTemplate);
-        }
-
-        @Bean
-        public ApplicationListener<WebServerInitializedEvent> restAssuredPortInitializer() {
-            return event -> RestAssured.port = event.getWebServer().getPort();
         }
     }
 }
