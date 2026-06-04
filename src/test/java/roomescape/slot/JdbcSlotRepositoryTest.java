@@ -64,12 +64,15 @@ class JdbcSlotRepositoryTest {
     }
 
     @Test
-    @DisplayName("날짜, 시간id, 테마id을 가진 슬롯id를 찾을 수 있다.")
-    void findSlotIdByDateAndTimeIdAndThemeId_레포지토리_테스트() {
-        long slotId = repository.findSlotIdByDateAndTimeIdAndThemeId(LocalDate.of(2026, 5, 5), 1L, 1L)
+    @DisplayName("날짜, 시간id, 테마id을 가진 슬롯을 찾을 수 있다.")
+    void findByDateAndTimeIdAndThemeId_레포지토리_테스트() {
+        Slot slot = repository.findByDateAndTimeIdAndThemeId(LocalDate.of(2026, 5, 5), 1L, 1L)
                 .orElseThrow();
 
-        assertThat(repository.findById(slotId)).isPresent();
+        assertThat(slot.getId()).isEqualTo(1L);
+        assertThat(slot.getDate()).isEqualTo(LocalDate.of(2026, 5, 5));
+        assertThat(slot.getTimeId()).isEqualTo(1L);
+        assertThat(slot.getThemeId()).isEqualTo(1L);
     }
 
     @Test

@@ -7,12 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservationtime.application.ReservationTimeAssembler;
 import roomescape.reservationtime.application.ReservationTimeService;
 import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.SlotUsageValidator;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -34,7 +35,10 @@ public class ReservationTimeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
 
     @Mock
-    private SlotService slotService;
+    private SlotUsageValidator slotUsageValidator;
+
+    @Mock
+    private ReservationTimeAssembler reservationTimeAssembler;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
@@ -44,9 +48,11 @@ public class ReservationTimeServiceTest {
     void save_성공_테스트() {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(14, 0));
         ReservationTime saved = new ReservationTime(5L, LocalTime.of(14, 0));
+        ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(14, 0));
 
         when(reservationTimeRepository.existsAlreadyTime(request.startAt())).thenReturn(false);
-        when(reservationTimeRepository.save(request.toDomain())).thenReturn(saved);
+        when(reservationTimeAssembler.assemble(request.startAt())).thenReturn(reservationTime);
+        when(reservationTimeRepository.save(reservationTime)).thenReturn(saved);
 
         ReservationTimeSaveResponse response = reservationTimeService.save(request);
 
@@ -75,7 +81,7 @@ public class ReservationTimeServiceTest {
     void delete_실패_테스트_1() {
         // given
         long timeId = 1L;
-        doThrow(new IllegalStateException()).when(slotService).validateTimeDeletable(timeId);
+        doThrow(new IllegalStateException()).when(slotUsageValidator).validateTimeDeletable(timeId);
 
         // when, then
         assertThatThrownBy(() -> reservationTimeService.delete(timeId))

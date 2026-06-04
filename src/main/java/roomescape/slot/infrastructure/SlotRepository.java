@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface SlotRepository {
     Slot save(Slot slot);
 
-    Optional<Long> findSlotIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    Optional<Slot> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     Optional<Slot> findById(long id);
 

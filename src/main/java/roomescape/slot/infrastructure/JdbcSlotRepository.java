@@ -67,17 +67,31 @@ public class JdbcSlotRepository implements SlotRepository {
     }
 
     @Override
-    public Optional<Long> findSlotIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
-        String sql = "SELECT s.id " +
-                "FROM slot s " +
-                "WHERE s.date = :date AND s.time_id = :timeId AND s.theme_id = :themeId";
+    public Optional<Slot> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+        String sql = """
+                SELECT
+                    s.id,
+                    s.date,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url
+                FROM slot s
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN theme t ON s.theme_id = t.id
+                WHERE s.date = :date
+                AND s.time_id = :timeId
+                AND s.theme_id = :themeId
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId);
 
-        return template.query(sql, params, (resultSet, rowNum) -> resultSet.getLong("id"))
+        return template.query(sql, params, slotRowMapper)
                 .stream()
                 .findFirst();
     }

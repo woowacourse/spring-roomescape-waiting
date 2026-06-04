@@ -18,20 +18,22 @@ import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.reservationtime.dto.response.TimeSlotStatus;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.SlotUsageValidator;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationTimeService {
-    private final SlotService slotService;
+    private final SlotUsageValidator slotUsageValidator;
+    private final ReservationTimeAssembler reservationTimeAssembler;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
     public ReservationTimeSaveResponse save(ReservationTimeSaveRequest body) {
         validateAlreadyTimeNot(body.startAt());
-        return ReservationTimeSaveResponse.from(reservationTimeRepository.save(body.toDomain()));
+        ReservationTime reservationTime = reservationTimeAssembler.assemble(body.startAt());
+        return ReservationTimeSaveResponse.from(reservationTimeRepository.save(reservationTime));
     }
 
     public List<ReservationTimeFindResponse> findAll() {
@@ -39,7 +41,7 @@ public class ReservationTimeService {
     }
 
     public void delete(long id) {
-        slotService.validateTimeDeletable(id);
+        slotUsageValidator.validateTimeDeletable(id);
         reservationTimeRepository.deleteById(id);
     }
 
