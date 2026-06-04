@@ -115,12 +115,12 @@ class ReservationDaoTest {
         }
 
         @Test
-        void 같은_사용자가_같은_슬롯에_같은_상태로_중복_저장할_수_없다() {
+        void 같은_사용자가_같은_슬롯에_중복_저장할_수_없다() {
             // given
             ReservationTime time = createTime();
             Theme theme = createTheme();
             LocalDate date = LocalDate.of(9999, 8, 5);
-            reservationDao.insert("브라운", date, time, theme, ReservationStatus.WAITING);
+            reservationDao.insert("브라운", date, time, theme, ReservationStatus.RESERVED);
 
             // when // then
             assertThatThrownBy(() -> reservationDao.insert("브라운", date, time, theme, ReservationStatus.WAITING))

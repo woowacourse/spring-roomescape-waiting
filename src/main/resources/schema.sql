@@ -35,7 +35,7 @@ CREATE TABLE reservation
     ),
     PRIMARY KEY (id),
     UNIQUE (reserved_slot_key),
-    UNIQUE (name, date, time_id, theme_id, status),
+    UNIQUE (name, date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
