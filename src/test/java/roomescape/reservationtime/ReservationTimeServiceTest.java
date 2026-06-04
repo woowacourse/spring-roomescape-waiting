@@ -13,6 +13,8 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationScheduleRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 import roomescape.support.FakeReservationRepository;
@@ -25,11 +27,11 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간을 저장한다")
     void save() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
         ReservationTime savedTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
@@ -44,11 +46,11 @@ class ReservationTimeServiceTest {
     @DisplayName("중복된 예약 시간은 저장할 수 없다")
     void saveDuplicateTime() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
 
@@ -59,11 +61,11 @@ class ReservationTimeServiceTest {
     @DisplayName("특정 날짜와 테마에 이미 예약된 시간을 제외한 예약 가능 시간을 조회한다")
     void findAvailableTimes() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
         ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
@@ -71,7 +73,11 @@ class ReservationTimeServiceTest {
         LocalDate date = LocalDate.parse("2026-08-06");
         fixture.reservationRepository.save(Reservation.createNew("쿠다", date, theme, ten));
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(date, theme.getId());
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationScheduleRepository.findReservedTimeIdsByDateAndThemeId(date, 1L)).thenReturn(List.of(1L));
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(ten, eleven));
+
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(date, 1L);
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -82,18 +88,25 @@ class ReservationTimeServiceTest {
     @DisplayName("지난 날짜에 대해서는 예약 가능 시간이 조회되지 않는다")
     void findAvailableTimesInPastDate() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
         LocalDate pastDate = LocalDate.now().minusDays(1);
         fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
         fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(pastDate, theme.getId());
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationScheduleRepository.findReservedTimeIdsByDateAndThemeId(pastDate, 1L)).thenReturn(List.of());
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(
+                ReservationTime.of(1L, LocalTime.parse("10:00")),
+                ReservationTime.of(2L, LocalTime.parse("11:00"))
+        ));
+
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(pastDate, 1L);
 
         assertThat(availableTimes).isEmpty();
     }
@@ -104,11 +117,11 @@ class ReservationTimeServiceTest {
         assumeTrue(LocalTime.now().isBefore(LocalTime.of(23, 59)));
 
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
@@ -117,7 +130,11 @@ class ReservationTimeServiceTest {
         ReservationTime past = fixture.reservationTimeRepository.save(ReservationTime.createNew(pastTime));
         ReservationTime future = fixture.reservationTimeRepository.save(ReservationTime.createNew(futureTime));
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(LocalDate.now(), theme.getId());
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationScheduleRepository.findReservedTimeIdsByDateAndThemeId(LocalDate.now(), 1L)).thenReturn(List.of());
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(past, future));
+
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(LocalDate.now(), 1L);
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -129,30 +146,33 @@ class ReservationTimeServiceTest {
     @DisplayName("예약이 존재하는 예약 시간은 삭제할 수 없다")
     void deleteById() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
 
-        assertThrows(ConflictException.class, () -> fixture.reservationTimeService.deleteById(time.getId()));
+        when(reservationScheduleRepository.existsByTimeId(1L)).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> reservationTimeService.deleteById(1L));
     }
 
     @Test
     @DisplayName("예약이 없는 예약 시간을 삭제한다")
     void deleteByIdWithoutReservation() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
 
-        fixture.reservationTimeService.deleteById(time.getId());
+        when(reservationScheduleRepository.existsByTimeId(1L)).thenReturn(false);
+        when(reservationTimeRepository.deleteById(1L)).thenReturn(1);
 
         assertThat(fixture.reservationTimeRepository.findById(time.getId())).isEmpty();
     }
@@ -161,26 +181,29 @@ class ReservationTimeServiceTest {
     @DisplayName("존재하지 않는 예약 시간은 삭제할 수 없다")
     void deleteByIdNotFound() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
 
-        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationTimeService.deleteById(1L));
+        when(reservationScheduleRepository.existsByTimeId(1L)).thenReturn(false);
+        when(reservationTimeRepository.deleteById(1L)).thenReturn(0);
+
+        assertThrows(ResourceNotFoundException.class, () -> reservationTimeService.deleteById(1L));
     }
 
     @Test
     @DisplayName("ID로 예약 시간을 조회한다")
     void getById() {
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
 
@@ -192,19 +215,12 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("존재하지 않는 ID로 예약 시간을 조회할 수 없다")
     void getByIdNotFound() {
-        Fixture fixture = new Fixture();
-
-        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationTimeService.getById(1L));
-    }
-
-    private static class Fixture {
-        private final FakeThemeRepository themeRepository = new FakeThemeRepository();
-        private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
-        private final FakeReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
-        private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
-        private final ReservationTimeService reservationTimeService = new ReservationTimeService(
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                reservationScheduleRepository,
                 themeService
         );
 

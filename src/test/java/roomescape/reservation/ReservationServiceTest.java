@@ -15,6 +15,9 @@ import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservation.ReservationScheduleRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -32,6 +35,14 @@ class ReservationServiceTest {
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.saveTime("10:00");
         LocalDate date = LocalDate.parse("2026-08-06");
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        Reservation savedReservation = Reservation.of(1L, "쿠다", date, theme, time);
+
+        when(fixture.themeService.getById(1L)).thenReturn(theme);
+        when(fixture.reservationTimeService.getById(1L)).thenReturn(time);
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(false);
+        when(fixture.reservationRepository.save(any(Reservation.class))).thenReturn(savedReservation);
 
         Reservation saved = fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
 
@@ -46,7 +57,12 @@ class ReservationServiceTest {
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.saveTime("10:00");
         LocalDate date = LocalDate.parse("2026-08-06");
-        fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
+
+        when(fixture.themeService.getById(1L)).thenReturn(theme);
+        when(fixture.reservationTimeService.getById(1L)).thenReturn(time);
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(true);
 
         assertThrows(
                 ConflictException.class,
@@ -144,8 +160,21 @@ class ReservationServiceTest {
     @DisplayName("조회한 이름의 예약 날짜와 시간을 변경한다")
     void updateByIdAndName() {
         Fixture fixture = new Fixture();
-        Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
-        ReservationTime secondTime = fixture.saveTime("11:00");
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime firstTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        ReservationTime secondTime = ReservationTime.of(2L, LocalTime.parse("11:00"));
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.parse("2026-08-06"), theme, firstTime);
+        Reservation updatedReservation = Reservation.of(1L, "쿠다", LocalDate.parse("2026-08-07"), theme, secondTime);
+
+        when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
+        when(fixture.reservationTimeService.getById(2L)).thenReturn(secondTime);
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeIdExcludingId(
+                LocalDate.parse("2026-08-07"),
+                1L,
+                2L,
+                1L
+        )).thenReturn(false);
+        when(fixture.reservationRepository.update(any(Reservation.class))).thenReturn(updatedReservation);
 
         Reservation updated = fixture.reservationService.updateByIdAndName(
                 reservation.getId(),
@@ -163,9 +192,16 @@ class ReservationServiceTest {
     @DisplayName("조회한 이름의 다른 예약과 시간이 겹치면 변경할 수 없다")
     void updateByIdAndNameDuplicate() {
         Fixture fixture = new Fixture();
-        Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
-        ReservationTime secondTime = fixture.saveTime("11:00");
-        fixture.reservationService.save("아루", LocalDate.parse("2026-08-06"), reservation.getTheme().getId(), secondTime.getId());
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime firstTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        ReservationTime secondTime = ReservationTime.of(2L, LocalTime.parse("11:00"));
+        LocalDate date = LocalDate.parse("2026-08-06");
+        Reservation reservation = Reservation.of(1L, "쿠다", date, theme, firstTime);
+
+        when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
+        when(fixture.reservationTimeService.getById(2L)).thenReturn(secondTime);
+        when(fixture.reservationScheduleRepository.existsByDateAndThemeIdAndTimeIdExcludingId(date, 1L, 2L, 1L))
+                .thenReturn(true);
 
         assertThrows(
                 ConflictException.class,
@@ -198,12 +234,14 @@ class ReservationServiceTest {
 
     private static class Fixture {
         private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        private final ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
         private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
         private final ReservationService reservationService =
                 new ReservationService(
                         reservationRepository,
+                        reservationScheduleRepository,
                         reservationWaitingRepository,
                         reservationTimeService,
                         themeService

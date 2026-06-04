@@ -12,6 +12,8 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationScheduleRepository;
+import roomescape.repository.theme.ThemeRepository;
 import roomescape.service.theme.ThemeService;
 import roomescape.support.FakeReservationRepository;
 import roomescape.support.FakeThemeRepository;
@@ -21,7 +23,10 @@ class ThemeServiceTest {
     @Test
     @DisplayName("테마를 저장한다")
     void save() {
-        Fixture fixture = new Fixture();
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
+        Theme savedTheme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
         Theme saved = fixture.themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
@@ -32,8 +37,11 @@ class ThemeServiceTest {
     @Test
     @DisplayName("중복된 이름의 테마는 저장할 수 없다")
     void saveDuplicateName() {
-        Fixture fixture = new Fixture();
-        fixture.themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
+
+        when(themeRepository.existsByName("미술관의 밤")).thenReturn(true);
 
         assertThrows(
                 ConflictException.class,
@@ -44,10 +52,10 @@ class ThemeServiceTest {
     @Test
     @DisplayName("ID로 테마를 조회한다")
     void getById() {
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.themeRepository.save(
-                Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
-        );
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
         Theme found = fixture.themeService.getById(theme.getId());
 
@@ -57,7 +65,9 @@ class ThemeServiceTest {
     @Test
     @DisplayName("존재하지 않는 ID로 테마를 조회할 수 없다")
     void getByIdNotFound() {
-        Fixture fixture = new Fixture();
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
 
         assertThrows(ResourceNotFoundException.class, () -> fixture.themeService.getById(1L));
     }
@@ -65,30 +75,24 @@ class ThemeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 테마는 삭제할 수 없다")
     void deleteById() {
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.themeRepository.save(
-                Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
-        );
-        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
-        fixture.reservationRepository.save(Reservation.createNew(
-                "쿠다",
-                LocalDate.parse("2026-08-06"),
-                theme,
-                time
-        ));
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
 
-        assertThrows(ConflictException.class, () -> fixture.themeService.deleteById(theme.getId()));
+        when(reservationScheduleRepository.existsByThemeId(1L)).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> themeService.deleteById(1L));
     }
 
     @Test
     @DisplayName("예약이 없는 테마를 삭제한다")
     void deleteByIdWithoutReservation() {
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.themeRepository.save(
-                Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
-        );
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
 
-        fixture.themeService.deleteById(theme.getId());
+        when(reservationScheduleRepository.existsByThemeId(1L)).thenReturn(false);
+        when(themeRepository.deleteById(1L)).thenReturn(1);
 
         assertThat(fixture.themeRepository.findById(theme.getId())).isEmpty();
     }
@@ -96,10 +100,12 @@ class ThemeServiceTest {
     @Test
     @DisplayName("존재하지 않는 테마는 삭제할 수 없다")
     void deleteByIdNotFound() {
-        Fixture fixture = new Fixture();
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationScheduleRepository reservationScheduleRepository = mock(ReservationScheduleRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationScheduleRepository);
 
-        assertThrows(ResourceNotFoundException.class, () -> fixture.themeService.deleteById(1L));
-    }
+        when(reservationScheduleRepository.existsByThemeId(1L)).thenReturn(false);
+        when(themeRepository.deleteById(1L)).thenReturn(0);
 
     private static class Fixture {
         private final FakeThemeRepository themeRepository = new FakeThemeRepository();
