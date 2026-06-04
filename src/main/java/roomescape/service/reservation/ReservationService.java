@@ -68,7 +68,7 @@ public class ReservationService {
     public void deleteByIdAndName(final long id, final String name) {
         ReservationName lookupName = ReservationName.from(name);
 
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName.value())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
@@ -92,9 +92,9 @@ public class ReservationService {
             final LocalDate date,
             final long timeId
     ) {
-        String lookupName = validateName(name);
+        ReservationName lookupName = ReservationName.from(name);
 
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName.value())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
@@ -119,14 +119,6 @@ public class ReservationService {
         }
 
         return reservationRepository.update(updatedReservation);
-    }
-
-    private String validateName(final String name) {
-        try {
-            return ReservationName.from(name).value();
-        } catch (IllegalArgumentException exception) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
-        }
     }
 
     private void validateCancelable(final Reservation reservation) {

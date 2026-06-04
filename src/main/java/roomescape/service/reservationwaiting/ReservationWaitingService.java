@@ -37,7 +37,7 @@ public class ReservationWaitingService {
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
-        String waitingName = validateName(name);
+        ReservationName waitingName = ReservationName.from(name);
         Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
@@ -48,7 +48,11 @@ public class ReservationWaitingService {
 
         LocalDateTime requestedAt = LocalDateTime.now();
 
-        ReservationWaiting nonIdReservationWaiting = createNewWaiting(reservation, waitingName, requestedAt);
+        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(
+                reservation,
+                waitingName.value(),
+                requestedAt
+        );
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 
@@ -60,9 +64,7 @@ public class ReservationWaitingService {
             );
         }
 
-        ReservationWaitingLine waitingLine = reservationWaitingRepository.findLineByReservation(reservation);
-
-        if (waitingLine.containsName(waitingName)) {
+        if (reservationWaitingRepository.existsByReservationIdAndName(reservation.getId(), waitingName.value())) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_WAITING_DUPLICATED,
                     "이미 같은 예약에 대기 중입니다."
