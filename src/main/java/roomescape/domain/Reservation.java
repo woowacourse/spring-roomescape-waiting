@@ -31,11 +31,14 @@ public class Reservation {
         return new Reservation(id, reservation.name, reservation.date, reservation.time, reservation.theme);
     }
 
-    private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
-        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
-        DomainPreconditions.requireNonNull(date, DomainErrorCode.INVALID_INPUT, "date");
-        DomainPreconditions.requireNonNull(time, DomainErrorCode.INVALID_INPUT, "time");
-        DomainPreconditions.requireNonNull(theme, DomainErrorCode.INVALID_INPUT, "theme");
+    public boolean isPast(LocalDateTime now) {
+        if (date.isBefore(now.toLocalDate())) {
+            return true;
+        }
+        if (date.isAfter(now.toLocalDate())) {
+            return false;
+        }
+        return time.isPast(now.toLocalTime());
     }
 
     public Long getId() {
@@ -62,14 +65,11 @@ public class Reservation {
         return this.name.equals(name);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        if (date.isBefore(now.toLocalDate())) {
-            return true;
-        }
-        if (date.isAfter(now.toLocalDate())) {
-            return false;
-        }
-        return time.isPast(now.toLocalTime());
+    private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
+        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
+        DomainPreconditions.requireNonNull(date, DomainErrorCode.INVALID_INPUT, "date");
+        DomainPreconditions.requireNonNull(time, DomainErrorCode.INVALID_INPUT, "time");
+        DomainPreconditions.requireNonNull(theme, DomainErrorCode.INVALID_INPUT, "theme");
     }
 
     @Override

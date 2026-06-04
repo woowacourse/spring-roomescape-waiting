@@ -34,6 +34,16 @@ public class Wait {
         return new Wait(id, wait.createdAt, wait.name, wait.reservationDate, wait.time, wait.theme);
     }
 
+    public boolean isPast(LocalDateTime now) {
+        if (reservationDate.isBefore(now.toLocalDate())) {
+            return true;
+        }
+        if (reservationDate.isAfter(now.toLocalDate())) {
+            return false;
+        }
+        return time.isPast(now.toLocalTime());
+    }
+
     public Long getId() {
         return id;
     }
@@ -60,16 +70,6 @@ public class Wait {
 
     public boolean isWaitedBy(Wait other) {
         return this.name.equals(other.name);
-    }
-
-    public boolean isPast(LocalDateTime now) {
-        if (reservationDate.isBefore(now.toLocalDate())) {
-            return true;
-        }
-        if (reservationDate.isAfter(now.toLocalDate())) {
-            return false;
-        }
-        return time.isPast(now.toLocalTime());
     }
 
     private void validate(LocalDateTime createAt, String name, LocalDate date, ReservationTime time, Theme theme) {
