@@ -1,6 +1,9 @@
 package roomescape.waiting.application;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
@@ -53,6 +56,23 @@ public class WaitingService {
                 theme
         );
         return waitingRepository.save(waiting);
+    }
+
+    @Transactional(propagation = Propagation.NESTED)
+    public void promoteNextWaiting(
+            LocalDate date,
+            ReservationTime time,
+            Theme theme) {
+        Optional<Waiting> targetWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeId(
+                date,
+                time.getId(),
+                theme.getId()
+        );
+        targetWaiting.ifPresent(waiting -> {
+                    waitingRepository.deleteByIdAndName(waiting.getId(), waiting.getName());
+                    waitingReference.promoteToReservation(waiting);
+                }
+        );
     }
 
     @Transactional

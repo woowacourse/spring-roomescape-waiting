@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ReservationErrorCode;
@@ -16,6 +17,7 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 
@@ -28,19 +30,22 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
     private final ReservationValidator reservationValidator;
+    private final WaitingService waitingService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             WaitingRepository waitingRepository,
-            ReservationValidator reservationValidator
+            ReservationValidator reservationValidator,
+            WaitingService waitingService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
         this.reservationValidator = reservationValidator;
+        this.waitingService = waitingService;
     }
 
     @Transactional
@@ -100,8 +105,21 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long id, String name) {
         Reservation targetReservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ReservationErrorCode.RESERVATION_NOT_FOUND,
+                        id
+                ));
         targetReservation.cancel(name);
         reservationRepository.deleteByIdAndName(id, name);
+
+        try {
+            waitingService.promoteNextWaiting(
+                    targetReservation.getDate(),
+                    targetReservation.getTime(),
+                    targetReservation.getTheme()
+            );
+        } catch (BusinessException | DataAccessException ignored) {
+            // 대기자 승격 실패는 예약 취소를 막지 않음.
+        }
     }
 }
