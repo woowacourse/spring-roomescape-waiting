@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
 import java.time.Clock;
@@ -27,6 +28,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Description;
@@ -76,15 +78,15 @@ public class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void registerReservation_Success() {
         ReservationCommand command = new ReservationCommand(name, futureDate, timeId, themeId);
-        Reservation reservation = new Reservation(1L, UserName.parse(name), futureDate, time, theme);
+        Reservation confirmed = Reservation.restoreConfirmed(1L, UserName.parse(name), eventSlot);
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(slotManager.tryAcquire(any(EventSlot.class))).willReturn(true);
-        given(reservationDao.save(any(Reservation.class))).willReturn(reservation);
+        given(reservationDao.save(any(Reservation.class))).willReturn(confirmed);
 
         ReservationResult saved = reservationService.registerReservation(command);
-
+        System.out.println(saved);
         assertThat(saved.id()).isNotNull();
         assertThat(saved.name()).isEqualTo(name);
         assertThat(saved.date()).isEqualTo(futureDate);
@@ -130,14 +132,15 @@ public class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("이미 존재하는 예약 건입니다.");
+                .hasMessageContaining("다른 사용자가 예약했습니다. 다시 시도해주세요.");
     }
 
     @Test
     @DisplayName("모든 예약을 조회한다.")
     void findReservations_Success() {
         given(reservationDao.findAll()).willReturn(
-                List.of(new Reservation(1L, UserName.parse(name), futureDate, time, theme)));
+                List.of(Reservation.restore(1L, UserName.parse(name), futureDate, time, theme,
+                        ReservationStatus.CONFIRMED)));
 
         List<ReservationResult> reservations = reservationService.findReservations();
 
@@ -148,7 +151,8 @@ public class ReservationServiceTest {
     @DisplayName("사용자 이름으로 예약과 대기를 조회한다.")
     void findReservationsByUserName_Success() {
         given(reservationDao.findByUserName(name)).willReturn(
-                List.of(new Reservation(1L, UserName.parse(name), futureDate, time, theme)));
+                List.of(Reservation.restore(1L, UserName.parse(name), futureDate, time, theme,
+                        ReservationStatus.CONFIRMED)));
         given(waitingDao.findByUserName(name)).willReturn(Collections.emptyList());
 
         ReservationDetailResults results = reservationService.findReservationsByUserName(name);
@@ -161,9 +165,13 @@ public class ReservationServiceTest {
     @DisplayName("예약을 삭제한다.")
     void deleteReservation_Success() {
         Long reservationId = 1L;
-        given(reservationDao.findById(reservationId))
-                .willReturn(Optional.of(new Reservation(reservationId, UserName.parse(name), futureDate, time, theme)));
+        Reservation reservation = Reservation.restore(reservationId, UserName.parse(name), futureDate, time, theme,
+                ReservationStatus.CONFIRMED);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(reservation));
 
         assertDoesNotThrow(() -> reservationService.deleteReservation(reservationId, name));
+
+        verify(slotManager).release(any(EventSlot.class));
+        verify(reservationDao).update(any(Reservation.class));
     }
 }

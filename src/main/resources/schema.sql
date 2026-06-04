@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS reservation
     date     DATE         NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
+    status   VARCHAR(30)  NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT uq_reservation_date_time_theme UNIQUE (date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

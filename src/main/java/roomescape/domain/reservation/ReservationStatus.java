@@ -4,8 +4,7 @@ public enum ReservationStatus {
     PENDING,
     CONFIRMED,
     REJECTED,
-    CANCELLED,
-    ;
+    CANCELED;
 
     public ReservationStatus pending() {
         return PENDING;
@@ -20,6 +19,6 @@ public enum ReservationStatus {
     }
 
     public ReservationStatus cancel() {
-        return CANCELLED;
+        return CANCELED;
     }
 }

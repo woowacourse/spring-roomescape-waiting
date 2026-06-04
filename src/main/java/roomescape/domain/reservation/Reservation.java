@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.domain.slot.EventSlot;
@@ -15,22 +16,6 @@ public class Reservation {
     private final UserName userName;
     private final EventSlot eventSlot;
     private ReservationStatus status;
-
-    public Reservation(UserName userName, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, userName, date, time, theme, ReservationStatus.PENDING);
-    }
-
-    public Reservation(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, userName, date, time, theme, ReservationStatus.PENDING);
-    }
-
-    public Reservation(Long id, UserName userName, EventSlot eventSlot) {
-        this(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme());
-    }
-
-    public Reservation(Long id, UserName userName, EventSlot eventSlot, ReservationStatus status) {
-        this(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(), status);
-    }
 
     public Reservation(
             Long id,
@@ -45,6 +30,28 @@ public class Reservation {
         this.userName = userName;
         this.eventSlot = EventSlot.from(date, time, theme);
         this.status = status;
+    }
+
+    public Reservation(Long id, UserName userName, EventSlot eventSlot, ReservationStatus status) {
+        this(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(), status);
+    }
+
+    public static Reservation restore(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme,
+                                      ReservationStatus status) {
+        return new Reservation(id, userName, date, time, theme, status);
+    }
+
+    public static Reservation restore(Long id, UserName userName, EventSlot eventSlot, ReservationStatus status) {
+        return new Reservation(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(), status);
+    }
+
+    public static Reservation restoreConfirmed(Long id, UserName userName, EventSlot eventSlot) {
+        return new Reservation(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(),
+                ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation createPending(UserName userName, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(null, userName, date, time, theme, ReservationStatus.PENDING);
     }
 
     private void validate(UserName userName, LocalDate date, ReservationTime time, Theme theme) {
@@ -69,6 +76,10 @@ public class Reservation {
     }
 
     public Reservation change(UserName userName, LocalDate newDate, ReservationTime newTime, LocalDateTime now) {
+        if (this.status == ReservationStatus.CANCELED || this.status == ReservationStatus.REJECTED) {
+            throw new BadRequestException("변경할 수 없는 예약입니다.");
+        }
+
         validateOwner(userName, "다른 사람의 예약은 변경할 수 없습니다.");
 
         EventSlot newEventSlot = EventSlot.from(newDate, newTime, this.eventSlot.theme());
@@ -77,15 +88,23 @@ public class Reservation {
         return new Reservation(this.id, userName, newEventSlot, status.pending());
     }
 
-    public void cancel(UserName userName, LocalDateTime now) {
+    public Reservation cancel(UserName userName, LocalDateTime now) {
+        if (this.status == ReservationStatus.CANCELED || this.status == ReservationStatus.REJECTED) {
+            throw new BadRequestException("취소할 수 없는 예약입니다.");
+        }
+
         validateOwner(userName, "다른 사람의 예약은 취소할 수 없습니다.");
         validatePast(eventSlot, now, "이미 지난 예약은 취소할 수 없습니다.");
 
-        status = status.cancel();
+        return new Reservation(this.id, this.userName, this.eventSlot, this.status.cancel());
     }
 
-    public void cancel() {
-        status = status.cancel();
+    public Reservation cancel() {
+        if (this.status == ReservationStatus.CONFIRMED || this.status == ReservationStatus.PENDING) {
+            throw new BadRequestException("취소할 수 없는 예약입니다.");
+        }
+
+        return new Reservation(this.id, this.userName, this.eventSlot, this.status.cancel());
     }
 
     private void validateOwner(UserName userName, String message) {
@@ -101,10 +120,18 @@ public class Reservation {
     }
 
     public Reservation confirm() {
+        if (this.status != ReservationStatus.PENDING) {
+            throw new BadRequestException("확정할 수 없는 예약입니다.");
+        }
+
         return new Reservation(id, userName, eventSlot, status.confirm());
     }
 
     public Reservation reject() {
+        if (this.status != ReservationStatus.PENDING) {
+            throw new BadRequestException("확정할 수 없는 예약입니다.");
+        }
+
         return new Reservation(id, userName, eventSlot, status.reject());
     }
 
@@ -118,5 +145,9 @@ public class Reservation {
 
     public EventSlot getEventSlot() {
         return eventSlot;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }

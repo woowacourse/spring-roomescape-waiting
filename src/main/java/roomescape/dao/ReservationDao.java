@@ -31,18 +31,21 @@ public class ReservationDao {
         params.put("date", reservation.getEventSlot().date());
         params.put("time_id", reservation.getEventSlot().time().getId());
         params.put("theme_id", reservation.getEventSlot().theme().getId());
+        params.put("status", reservation.getStatus().name());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return new Reservation(
+        return Reservation.restore(
                 id,
                 reservation.getName(),
-                reservation.getEventSlot()
+                reservation.getEventSlot(),
+                reservation.getStatus()
         );
     }
 
     public Optional<Reservation> findById(Long id) {
         String sql = """
-                SELECT r.id, r.name,r.date,rt.id AS time_id, rt.start_at,
+                SELECT r.id, r.name, r.date, r.status,
+                    rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM reservation r
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
@@ -61,7 +64,8 @@ public class ReservationDao {
     public List<Reservation> findAll() {
         return jdbcTemplate.query(
                 """
-                            SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
+                            SELECT r.id, r.name, r.date, r.status,
+                            rt.id AS time_id, rt.start_at,
                             t.id AS theme_id, t.name AS theme_name, t.description, t.url
                             FROM reservation r
                             INNER JOIN reservation_time rt ON r.time_id = rt.id
@@ -73,12 +77,13 @@ public class ReservationDao {
 
     public List<Reservation> findByUserName(String userName) {
         String sql = """
-                SELECT r.id, r.name,r.date,rt.id AS time_id, rt.start_at,
+                SELECT r.id, r.name, r.date, r.status,
+                    rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM reservation r
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
                 INNER JOIN theme t ON r.theme_id = t.id
-                WHERE r.name = ?;
+                WHERE r.name = ? AND r.status = 'CONFIRMED';
                 """;
         return jdbcTemplate.query(
                 sql,
@@ -89,7 +94,8 @@ public class ReservationDao {
 
     public List<Reservation> findByAfterDateTime(LocalDateTime now) {
         String sql = """
-                SELECT r.id, r.name,r.date,rt.id AS time_id, rt.start_at,
+                SELECT r.id, r.name, r.date, r.status,
+                    rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM reservation r
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
@@ -109,7 +115,7 @@ public class ReservationDao {
                 SELECT EXISTS(
                     SELECT 1
                     FROM reservation
-                    WHERE time_id = ?
+                    WHERE time_id = ? AND status IN ('CONFIRMED', 'PENDING')
                 )
                 """;
 
@@ -126,7 +132,7 @@ public class ReservationDao {
                 SELECT EXISTS(
                     SELECT 1
                     FROM reservation
-                    WHERE theme_id = ?
+                    WHERE theme_id = ? AND status IN ('CONFIRMED', 'PENDING')
                 )
                 """;
 
@@ -146,6 +152,7 @@ public class ReservationDao {
                             WHERE date = ?
                                 AND time_id = ?
                                 AND theme_id = ?
+                                AND status IN ('CONFIRMED', 'PENDING')
                         ) 
                         """,
                 Boolean.class,
@@ -165,6 +172,7 @@ public class ReservationDao {
                         AND date = ?
                         AND time_id = ?
                         AND theme_id = ?
+                        AND status IN ('CONFIRMED', 'PENDING')
                 )
                 """;
         Boolean result = jdbcTemplate.queryForObject(
@@ -181,7 +189,7 @@ public class ReservationDao {
     public boolean update(Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET name = ?, date = ?, time_id = ?, theme_id = ?
+                SET name = ?, date = ?, time_id = ?, theme_id = ?, status = ?
                 WHERE id = ?;
                 """;
 
@@ -191,6 +199,7 @@ public class ReservationDao {
                 reservation.getEventSlot().date(),
                 reservation.getEventSlot().time().getId(),
                 reservation.getEventSlot().theme().getId(),
+                reservation.getStatus().name(),
                 reservation.getId()
         );
 

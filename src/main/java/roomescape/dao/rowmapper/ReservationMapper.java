@@ -2,6 +2,7 @@ package roomescape.dao.rowmapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
@@ -27,7 +28,8 @@ public final class ReservationMapper {
                 UserName.parse(rs.getString("name")),
                 rs.getDate("date").toLocalDate(),
                 time,
-                theme
+                theme,
+                ReservationStatus.valueOf(rs.getString("status"))
         );
     };
 

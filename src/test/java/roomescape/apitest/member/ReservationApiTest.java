@@ -86,10 +86,10 @@ class ReservationApiTest {
                 .statusCode(204);
 
         List<Long> remainIds = RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/reservations?userName=" + userName)
                 .then().log().all()
                 .statusCode(200)
-                .extract().jsonPath().getList("id", Long.class);
+                .extract().jsonPath().getList("reservationResponses.id", Long.class);
 
         assertThat(remainIds).hasSize(initialReservationSize);
         assertThat(remainIds).doesNotContain(generatedId);

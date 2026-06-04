@@ -79,21 +79,21 @@ public class ReservationService {
         Theme theme = themeDao.findThemeById(command.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
-        Reservation reservation = new Reservation(UserName.parse(command.name()), command.date(), time, theme);
+        Reservation pending = Reservation.createPending(UserName.parse(command.name()), command.date(), time, theme);
 
-        reservation.verifyBookable(LocalDateTime.now(clock));
+        pending.verifyBookable(LocalDateTime.now(clock));
 
-        EventSlot eventSlot = reservation.getEventSlot();
+        EventSlot eventSlot = pending.getEventSlot();
         if (!slotManager.tryAcquire(eventSlot)) {
-            Reservation rejected = reservation.reject();
-//            throw new ConflictException("이미 존재하는 예약 건입니다.");
-            // 예외가 아니라 상태 전이로 해결할 것.
+            Reservation rejected = pending.reject();
+            reservationDao.save(rejected);
+            throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
 
-        Reservation confirmed = reservation.confirm();
+        Reservation confirmed = pending.confirm();
         Reservation saved = reservationDao.save(confirmed);
 
-        return ReservationResult.from(saved.confirm());
+        return ReservationResult.from(saved);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -129,7 +129,7 @@ public class ReservationService {
             throw new NotFoundException("예약 변경 중 문제가 발생했습니다. (이미 취소된 예약일 수 있습니다.)");
         }
 
-        return ReservationResult.from(modified.confirm());
+        return ReservationResult.from(modified);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -138,9 +138,9 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 
         slotManager.release(origin.getEventSlot());
-        origin.cancel();
+        Reservation canceled = origin.cancel();
 
-        reservationDao.delete(id);
+        reservationDao.update(canceled);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -149,8 +149,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 
         slotManager.release(origin.getEventSlot());
-        origin.cancel(UserName.parse(userName), LocalDateTime.now(clock));
+        Reservation canceled = origin.cancel(UserName.parse(userName), LocalDateTime.now(clock));
 
-        reservationDao.delete(id);
+        reservationDao.update(canceled);
     }
 }
