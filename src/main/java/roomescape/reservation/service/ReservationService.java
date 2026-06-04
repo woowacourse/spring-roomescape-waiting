@@ -81,14 +81,14 @@ public class ReservationService {
 
     public void promoteFirstWaiting(Long id) {
         Reservation reservation = reservationDao.findById(id);
-        if (reservation.isCanceled()) {
-            reservationDao.findFirstWaitingByDateTimeTheme(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-            ).ifPresent(waiting -> {
-                waiting.promote(ReservationStatus.RESERVED);
-                reservationDao.updateStatus(waiting.getId(), ReservationStatus.RESERVED);
-            });
-        }
+        validateReservedIsCanceled(reservation);
+
+        reservationDao.findFirstWaitingByDateTimeTheme(
+            reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+        ).ifPresent(waiting -> {
+            waiting.promote(ReservationStatus.RESERVED);
+            reservationDao.updateStatus(waiting.getId(), ReservationStatus.RESERVED);
+        });
     }
 
     public boolean existsByTimeId(Long timeId) {
@@ -111,6 +111,12 @@ public class ReservationService {
 
     public List<MyReservationResponse> findAllByName(String name) {
         return reservationDao.findAllByName(name);
+    }
+
+    private static void validateReservedIsCanceled(Reservation reservation) {
+        if (!reservation.isCanceled()) {
+            throw new IllegalStateException("확정 예약이 삭제되지 않으면 대기는 승격될 수 없습니다.");
+        }
     }
 
     private static void validateIsNotReserved(Reservation reservation, ReservationStatus reserved,

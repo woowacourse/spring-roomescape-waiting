@@ -3,10 +3,12 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.InvalidReservationStateException;
+import roomescape.exception.UnauthorizedReservationException;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dao.ReservationTimeDao;
 import roomescape.reservation.domain.Reservation;
@@ -100,6 +104,64 @@ class ReservationServiceTest {
       // when // then
       assertThatThrownBy(() -> reservationService.create(request))
           .isInstanceOf(DuplicateReservationException.class);
+    }
+  }
+
+  @Nested
+  class 확정_예약_삭제 {
+
+    public static final String NAME = "누누";
+    public static final long RESERVATION_ID = 1L;
+    public static final long WAITING_ID = 2L;
+
+    @Test
+    void 확정_예약이_삭제되면_첫_대기가_승격한다() {
+      // given
+      Reservation canceledReservation = Reservation.of(RESERVATION_ID, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.CANCELED);
+      Reservation waitingReservation = Reservation.of(WAITING_ID, "대기자", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+      when(reservationDao.findById(RESERVATION_ID)).thenReturn(canceledReservation);
+      when(reservationDao.findFirstWaitingByDateTimeTheme(DEFAULT_DATE, DEFAULT_TIME.getId(), DEFAULT_THEME.getId()))
+          .thenReturn(Optional.of(waitingReservation));
+
+      // when
+      reservationService.promoteFirstWaiting(RESERVATION_ID);
+
+      // then
+      verify(reservationDao).updateStatus(WAITING_ID, ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void 다른_사람의_예약을_삭제하면_예외를_발생한다() {
+      // given
+      Reservation reservation = Reservation.of(RESERVATION_ID, "다른사람", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
+      when(reservationDao.findById(RESERVATION_ID)).thenReturn(reservation);
+
+      // when // then
+      assertThatThrownBy(() -> reservationService.deleteMyReservation(RESERVATION_ID, NAME))
+          .isInstanceOf(UnauthorizedReservationException.class);
+    }
+
+    @Test
+    void 예약_상태가_아닌_예약을_삭제하면_예외를_발생한다() {
+      // given
+      Reservation reservation = Reservation.of(RESERVATION_ID, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+      when(reservationDao.findById(RESERVATION_ID)).thenReturn(reservation);
+
+      // when // then
+      assertThatThrownBy(() -> reservationService.deleteMyReservation(RESERVATION_ID, NAME))
+          .isInstanceOf(InvalidReservationStateException.class);
+    }
+
+    @Test
+    void 확정_예약이_삭제되지_않았다면_대기_승격시_예외를_발생한다() {
+      // given
+      Reservation reservation = Reservation.of(RESERVATION_ID, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
+      when(reservationDao.findById(RESERVATION_ID)).thenReturn(reservation);
+
+      // when // then
+      assertThatThrownBy(() -> reservationService.promoteFirstWaiting(RESERVATION_ID))
+          .isInstanceOf(IllegalStateException.class);
     }
   }
 }
