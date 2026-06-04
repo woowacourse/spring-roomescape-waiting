@@ -68,4 +68,30 @@ class WaitingTest {
         assertThat(savedWaiting.getTheme()).isEqualTo(waiting.getTheme());
         assertThat(savedWaiting.getRank()).isEqualTo(waiting.getRank());
     }
+
+    @Test
+    @DisplayName("미래 일정의 예약 대기는 승격 가능하다")
+    void isPromotable_true_with_future_schedule() {
+        // given
+        ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.createRow(1L, "공포", "무서운 테마", "https://good.com/thumb-nail/1");
+        Waiting waiting = Waiting.create("브라운", LocalDate.now().plusDays(1), time, theme);
+
+        // when & then
+        assertThat(waiting.isPromotable()).isTrue();
+    }
+
+    @Test
+    @DisplayName("지난 일정의 예약 대기는 승격 불가하다")
+    void isPromotable_false_with_past_schedule() {
+        // given
+        ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.createRow(1L, "공포", "무서운 테마", "https://good.com/thumb-nail/1");
+        Waiting pastWaiting = Waiting.createRow(
+                1L, "브라운", LocalDate.now().minusDays(1), time, theme, 1L, LocalDateTime.now().minusDays(2)
+        );
+
+        // when & then
+        assertThat(pastWaiting.isPromotable()).isFalse();
+    }
 }
