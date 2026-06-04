@@ -138,6 +138,17 @@ Content-Type: application/json
 ### 사용자 - 인기 테마 조회
 
 <details>
+<summary>Description</summary>
+<div markdown="1">
+
+오늘 날짜(currentDate) 기준 **직전 7일(currentDate-7 ~ currentDate-1)** 의 예약 데이터를 집계하여 예약 수 기준 상위 테마를 반환합니다.
+
+예) 오늘이 2026-06-04이면 **2026-05-28 ~ 2026-06-03** 기간의 예약을 기준으로 집계합니다.
+
+</div>
+</details>
+
+<details>
 <summary>Request</summary>
 <div markdown="1">
 
@@ -284,7 +295,7 @@ HTTP/1.1 204 No Content
 
 - themeId (필수・long)
     - 예약하고 싶은 테마의 ID 입니다.
-- date (필수・string)
+- baseDate (필수・string)
     - 예약하고 싶은 날짜 입니다.
     - `yyyy-MM-dd` 형식입니다.
 
@@ -296,7 +307,7 @@ HTTP/1.1 204 No Content
 <div markdown="1">
 
 ```
-GET /times?themeId=1&date=2026-05-08 HTTP/1.1
+GET /times?themeId=1&baseDate=2026-06-10 HTTP/1.1
 ```
 
 </div>
@@ -484,6 +495,8 @@ Content-Type: application/json
 
 ### 사용자 - 예약 수정
 
+> 날짜(`date`)와 시간(`timeId`)만 변경 가능합니다. 예약자 이름과 테마는 변경할 수 없습니다.
+
 <details>
 <summary>Request</summary>
 <div markdown="1">
@@ -493,10 +506,8 @@ PUT /reservations/{reservationId} HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "브라운",
-    "date": "2026-05-08",
-    "timeId": 2,
-    "themeId": 1
+    "date": "2026-06-10",
+    "timeId": 2
 }
 ```
 
@@ -514,7 +525,7 @@ Content-Type: application/json
 {
     "id": 1,
     "name": "브라운",
-    "date": "2026-05-08",
+    "date": "2026-06-10",
     "time": {
         "id": 2,
         "startAt": "15:00"
@@ -669,6 +680,11 @@ Content-Type: application/json
     - 에러 코드: SLOT_NOT_FOUND
     - 메시지: "존재하지 않는 슬롯입니다."
 
+- [x] 해당 슬롯에 예약이 존재하지 않는 경우 예외가 발생한다.
+    - 상태 코드: 400 Bad Request
+    - 에러 코드: RESERVATION_REQUIRED_FOR_WAITING
+    - 메시지: "예약이 없는 슬롯에는 대기를 생성할 수 없습니다."
+
 </div>
 </details>
 
@@ -727,11 +743,21 @@ Content-Type: application/json
 ### 사용자 - 예약 대기 취소
 
 <details>
+<summary>Query Parameter</summary>
+<div markdown="1">
+
+- name (필수・string)
+    - 대기 신청 시 사용한 이름입니다.
+
+</div>
+</details>
+
+<details>
 <summary>Request</summary>
 <div markdown="1">
 
 ```
-DELETE /waitings/{waitingId} HTTP/1.1
+DELETE /waitings/{waitingId}?name=브라운 HTTP/1.1
 ```
 
 </div>
@@ -744,6 +770,18 @@ DELETE /waitings/{waitingId} HTTP/1.1
 ```
 HTTP/1.1 204 No Content
 ```
+
+</div>
+</details>
+
+<details>
+<summary>Exception</summary>
+<div markdown="1">
+
+- [x] 존재하지 않거나 본인의 대기가 아닌 경우 예외가 발생한다.
+    - 상태 코드: 404 Not Found
+    - 에러 코드: WAITING_NOT_FOUND
+    - 메시지: "존재하지 않는 대기입니다."
 
 </div>
 </details>
