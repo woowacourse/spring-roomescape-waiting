@@ -228,6 +228,7 @@ public class WaitingDao {
                 WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
                 ORDER BY w.created_at, w.id ASC
                 LIMIT 1
+                FOR UPDATE
                 """;
         return jdbcTemplate.query(
                         sql,
