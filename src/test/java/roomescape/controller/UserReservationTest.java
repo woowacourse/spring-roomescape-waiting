@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Import(FixedClockConfig.class)
@@ -109,5 +110,31 @@ class UserReservationTest {
                 .body("[0].status", is("예약대기"))
                 .body("[0].rank", is(2))
                 .body("[1].status", is("예약"));
+    }
+
+    @Test
+    @DisplayName("예약 취소 후 대기 1번이 내 예약 목록에서 예약으로 조회된다.")
+    void cancelPromotesWaitingInMyReservations() {
+        RestAssured.given().log().all()
+                .queryParam("name", "user_c")
+                .when().delete("/reservations/3")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "user_e")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].status", is("예약"))
+                .body("[0].rank", nullValue());
+
+        RestAssured.given().log().all()
+                .queryParam("name", "user_b")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("find { it.status == '예약대기' }.rank", is(1));
     }
 }
