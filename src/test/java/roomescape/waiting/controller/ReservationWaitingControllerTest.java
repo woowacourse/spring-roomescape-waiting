@@ -1,6 +1,7 @@
 package roomescape.waiting.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -161,7 +162,7 @@ class ReservationWaitingControllerTest {
     @DisplayName("예약 대기를 성공적으로 삭제한다.")
     void delete_Success() throws Exception {
         // given
-        willDoNothing().given(reservationWaitingService).deleteById(any(), any(), any());
+        willDoNothing().given(reservationWaitingService).deleteById(anyLong(), any(), any());
 
         // when & then
         mockMvc.perform(delete("/reservations-waitings/1")

@@ -56,7 +56,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void deleteById(Long id, String name, LocalDateTime requestTime) {
+    public void deleteById(long id, String name, LocalDateTime requestTime) {
         ReservationWaiting reservationWaiting = getById(id);
         if (name != null) {
             reservationWaiting.validateOwner(name);
@@ -66,7 +66,7 @@ public class ReservationWaitingService {
         reservationWaitingRepository.delete(reservationWaiting);
     }
 
-    private ReservationWaiting getById(Long id) {
+    private ReservationWaiting getById(long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(
                         () -> new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND)

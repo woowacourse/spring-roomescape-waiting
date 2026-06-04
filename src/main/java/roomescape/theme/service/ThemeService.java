@@ -39,7 +39,7 @@ public class ThemeService {
                 .toList();
     }
 
-    public Theme findById(Long id) {
+    public Theme findById(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(
                         () -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND)
@@ -47,7 +47,7 @@ public class ThemeService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(long id) {
         Theme deleteTarget = findById(id);
 
         try {

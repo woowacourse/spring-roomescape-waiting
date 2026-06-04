@@ -1,6 +1,7 @@
 package roomescape.time.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,7 +56,7 @@ class ReservationTimeControllerTest {
         AvailableTimesResult result = new AvailableTimesResult(List.of(
                 new AvailableTimeQueryResult(1L, LocalTime.of(10, 0), false)
         ));
-        given(reservationTimeQueryService.queryAvailableTimes(any(), any())).willReturn(result);
+        given(reservationTimeQueryService.queryAvailableTimes(anyLong(), any())).willReturn(result);
 
         // when & then
         mockMvc.perform(get("/times/available-times")
@@ -80,7 +81,7 @@ class ReservationTimeControllerTest {
     @DisplayName("예약 가능 시간 조회 시 테마가 존재하지 않으면 404 에러를 반환한다.")
     void readAvailable_ThemeNotFound_NotFound() throws Exception {
         // given
-        given(reservationTimeQueryService.queryAvailableTimes(any(), any()))
+        given(reservationTimeQueryService.queryAvailableTimes(anyLong(), any()))
                 .willThrow(new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
 
         // when & then

@@ -31,13 +31,13 @@ public class ReservationTimeQueryService {
                 .toList();
     }
 
-    public ReservationTimeResult findById(Long id) {
+    public ReservationTimeResult findById(long id) {
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
         return ReservationTimeResult.from(reservationTime);
     }
 
-    public AvailableTimesResult queryAvailableTimes(Long themeId, LocalDate date) {
+    public AvailableTimesResult queryAvailableTimes(long themeId, LocalDate date) {
         themeService.findById(themeId);
         return new AvailableTimesResult(reservationTimeRepository.queryAvailableTimes(themeId, date));
     }

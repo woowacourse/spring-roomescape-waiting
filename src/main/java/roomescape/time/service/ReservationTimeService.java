@@ -41,19 +41,19 @@ public class ReservationTimeService {
         }
     }
 
-    public ReservationTime getById(Long id) {
+    public ReservationTime getById(long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND));
     }
 
     @Transactional
-    public ReservationTime getByIdForUpdate(Long id) {
+    public ReservationTime getByIdForUpdate(long id) {
         return reservationTimeRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND));
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(long id) {
         ReservationTime deleteTarget = getById(id);
 
         try {

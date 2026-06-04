@@ -55,7 +55,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void update(ReservationUpdateCommand command, Long id, String name, LocalDateTime requestTime) {
+    public void update(ReservationUpdateCommand command, long id, String name, LocalDateTime requestTime) {
         Reservation updated = updateReservation(command, id, name, requestTime);
         validateUpdatedReservation(updated);
         updated.validateExpiry(requestTime);
@@ -67,7 +67,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id, String name, LocalDateTime requestTime) {
+    public void deleteById(long id, String name, LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         if (name != null) {
             reservation.validateOwner(name);
@@ -84,7 +84,7 @@ public class ReservationService {
         promoteNextWaiting(waitings, requestTime);
     }
 
-    public Reservation getById(Long id) {
+    public Reservation getById(long id) {
         return reservationRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND)
         );
@@ -122,7 +122,7 @@ public class ReservationService {
         }
     }
 
-    private Reservation updateReservation(ReservationUpdateCommand command, Long id, String name,
+    private Reservation updateReservation(ReservationUpdateCommand command, long id, String name,
                                           LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         reservation.validateExpiry(requestTime);
