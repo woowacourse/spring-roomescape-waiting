@@ -32,13 +32,12 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<ReservationWithWaitingNumber> findAll() {
         return storage.values().stream()
-            .filter(this::isActive)
             .map(this::withWaitingNumber)
             .toList();
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
+    public Optional<Reservation> findActiveReservation(Long id) {
         return Optional.ofNullable(storage.get(id))
             .filter(this::isActive);
     }
@@ -46,7 +45,6 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<ReservationWithWaitingNumber> findReservations(String username) {
         return storage.values().stream()
-            .filter(this::isActive)
             .filter(userReservation -> username.equals(userReservation.getUser().getName()))
             .sorted(Comparator.comparing(Reservation::getId).reversed())
             .map(this::withWaitingNumber)

@@ -11,7 +11,7 @@ public interface ReservationRepository {
 
     List<ReservationWithWaitingNumber> findAll();
 
-    Optional<Reservation> findById(Long id);
+    Optional<Reservation> findActiveReservation(Long id);
 
     List<ReservationWithWaitingNumber> findReservations(String username);
 

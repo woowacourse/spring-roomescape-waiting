@@ -259,7 +259,7 @@ public class ReservationService {
     }
 
     private Reservation findReservationByIdOrThrow(Long id) {
-        return reservationRepository.findById(id)
+        return reservationRepository.findActiveReservation(id)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
     }
 }

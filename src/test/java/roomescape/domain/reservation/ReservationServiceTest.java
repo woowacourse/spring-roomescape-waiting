@@ -166,6 +166,49 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("관리자는 취소된 예약을 포함한 예약 목록을 전체 조회한다.")
+    void getAllReservationsIncludingCanceledReservation() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationDate savedReservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(savedReservationDate, reservationTime, theme)
+        );
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User canceledUser = userRepository.save(User.createWithoutId("수민"));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            confirmedUser,
+            ReservationStatus.CONFIRMED,
+            now
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            canceledUser,
+            ReservationStatus.CANCELED,
+            now
+        ));
+        ReservationService reservationService = createReservationService(now);
+
+        // when
+        List<ReservationResponse> responses = reservationService.getAllReservations();
+
+        // then
+        assertThat(responses)
+            .extracting(ReservationResponse::userName, ReservationResponse::reservationStatus)
+            .containsExactly(
+                tuple("보예", ReservationStatus.CONFIRMED),
+                tuple("수민", ReservationStatus.CANCELED)
+            );
+    }
+
+    @Test
     @DisplayName("사용자가 이름으로 예약을 조회한다.")
     void getUserReservationsByName() {
         // given
@@ -227,6 +270,56 @@ class ReservationServiceTest {
                     tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포", "CONFIRMED")
                 );
         });
+    }
+
+    @Test
+    @DisplayName("사용자는 취소된 예약을 포함한 본인의 예약 목록을 조회한다.")
+    void getUserReservationsIncludingCanceledReservation() {
+        // given
+        String name = "보예짱";
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
+        User user = userRepository.save(User.createWithoutId(name));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
+        );
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            ReservationStatus.CONFIRMED,
+            now
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            ReservationStatus.WAITING,
+            now
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            ReservationStatus.CANCELED,
+            now
+        ));
+        ReservationService reservationService = createReservationService(now);
+
+        // when
+        UserReservationsResponse userReservations = reservationService.getUserReservations(name);
+
+        // then
+        assertThat(userReservations.reservations())
+            .extracting("status", "waitingNumber")
+            .containsExactlyInAnyOrder(
+                tuple("CANCELED", null),
+                tuple("WAITING", 1L),
+                tuple("CONFIRMED", null)
+            );
     }
 
     @Test
@@ -339,7 +432,7 @@ class ReservationServiceTest {
 
         // when
         CreateReservationResponse response = reservationService.createReservation(request);
-        Reservation reservation = reservationRepository.findById(response.id()).orElseThrow();
+        Reservation reservation = reservationRepository.findActiveReservation(response.id()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
@@ -400,7 +493,7 @@ class ReservationServiceTest {
         reservationService.cancelUserReservation(savedUserReservation.getId());
 
         // then
-        assertThat(reservationRepository.findById(savedUserReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findActiveReservation(savedUserReservation.getId())).isEmpty();
     }
 
     @Test
@@ -496,7 +589,7 @@ class ReservationServiceTest {
         reservationService.updateReservation(savedUserReservation.getId(), request);
 
         // then
-        ReservationSlot updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+        ReservationSlot updatedReservation = reservationRepository.findActiveReservation(savedUserReservation.getId())
             .orElseThrow()
             .getReservationSlot();
         assertSoftly(softly -> {
@@ -548,11 +641,11 @@ class ReservationServiceTest {
         reservationService.updateReservation(confirmedReservation.getId(), request);
 
         // then
-        Reservation updatedConfirmedReservation = reservationRepository.findById(confirmedReservation.getId())
+        Reservation updatedConfirmedReservation = reservationRepository.findActiveReservation(confirmedReservation.getId())
             .orElseThrow();
-        Reservation updatedFirstWaitingReservation = reservationRepository.findById(firstWaitingReservation.getId())
+        Reservation updatedFirstWaitingReservation = reservationRepository.findActiveReservation(firstWaitingReservation.getId())
             .orElseThrow();
-        Reservation updatedSecondWaitingReservation = reservationRepository.findById(secondWaitingReservation.getId())
+        Reservation updatedSecondWaitingReservation = reservationRepository.findActiveReservation(secondWaitingReservation.getId())
             .orElseThrow();
         assertSoftly(softly -> {
             assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
@@ -585,7 +678,7 @@ class ReservationServiceTest {
 
         // when
         reservationService.updateReservation(savedUserReservation.getId(), request);
-        ReservationSlot updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+        ReservationSlot updatedReservation = reservationRepository.findActiveReservation(savedUserReservation.getId())
             .orElseThrow()
             .getReservationSlot();
 

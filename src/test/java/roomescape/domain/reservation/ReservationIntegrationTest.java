@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import io.restassured.RestAssured;
@@ -167,7 +168,9 @@ class ReservationIntegrationTest {
             .then()
             .statusCode(200)
             .body("username", is("보예"))
-            .body("reservations", hasSize(0));
+            .body("reservations", hasSize(1))
+            .body("reservations[0].status", is("CANCELED"))
+            .body("reservations[0].waitingNumber", nullValue());
     }
 
     @Test

@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p class="item-subtext">${formatReservationStatus(reservation.reservationStatus, reservation.waitingNumber)}</p>
                 </div>
                 <div class="item-actions">
-                    <button type="button" class="danger-button" data-delete-type="reservation" data-id="${reservation.id}">삭제</button>
+                    ${renderReservationAction(reservation)}
                 </div>
             </article>
         `).join("");
@@ -154,7 +154,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (status === "WAITING") {
             return waitingNumber ? `대기 ${waitingNumber}번` : "예약 대기";
         }
+        if (status === "CANCELED") {
+            return "예약 취소";
+        }
         return status;
+    }
+
+    function renderReservationAction(reservation) {
+        if (reservation.reservationStatus === "CANCELED") {
+            return "";
+        }
+        return `<button type="button" class="danger-button" data-delete-type="reservation" data-id="${reservation.id}">삭제</button>`;
     }
 
     async function refreshAll() {

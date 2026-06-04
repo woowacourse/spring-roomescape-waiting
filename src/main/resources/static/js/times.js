@@ -174,6 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (status === "WAITING") {
             return waitingNumber ? `대기 ${waitingNumber}번` : "예약 대기";
         }
+        if (status === "CANCELED") {
+            return "예약 취소";
+        }
         return status;
     }
 
@@ -238,17 +241,24 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <button type="button" class="secondary-button" data-edit-cancel>취소</button>
                             </div>
                         </form>
-                    ` : `
-                        <div class="reservation-card-actions">
-                            <button type="button" class="secondary-button" data-edit-id="${reservationId}">변경</button>
-                            <button type="button" class="danger-button" data-cancel-id="${reservationId}">예약 취소</button>
-                        </div>
-                    `}
+                    ` : renderUserReservationActions(reservation)}
                 </article>
             `;
         }).join("");
 
         bindUserReservationEvents();
+    }
+
+    function renderUserReservationActions(reservation) {
+        if (reservation.status === "CANCELED") {
+            return "";
+        }
+        return `
+            <div class="reservation-card-actions">
+                <button type="button" class="secondary-button" data-edit-id="${reservation.id}">변경</button>
+                <button type="button" class="danger-button" data-cancel-id="${reservation.id}">예약 취소</button>
+            </div>
+        `;
     }
 
     function buildEditTimeOptions(reservation, times) {

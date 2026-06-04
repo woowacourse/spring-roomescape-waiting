@@ -53,7 +53,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                            order by r.updated_at, r.id
                        ) as waiting_order
                 from reservation r
-                where r.status <> 'CANCELED'
             )
             select r.id as user_reservation_id,
                    case when r.status = 'WAITING'
@@ -82,7 +81,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             join theme th on rs.theme_id = th.id
             order by rd.date desc, rt.start_at desc, r.id;
             """;
-    private static final String FIND_BY_ID_SQL =
+    private static final String FIND_ACTIVE_BY_ID_SQL =
         """
             select r.id as user_reservation_id,
                    r.status,
@@ -117,7 +116,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                            order by r.updated_at, r.id
                        ) as waiting_order
                 from reservation r
-                where r.status <> 'CANCELED'
             )
             select r.id as user_reservation_id,
                    case when r.status = 'WAITING'
@@ -238,8 +236,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
-        List<Reservation> result = jdbcTemplate.query(FIND_BY_ID_SQL, userReservationRowMapper(), id);
+    public Optional<Reservation> findActiveReservation(Long id) {
+        List<Reservation> result = jdbcTemplate.query(FIND_ACTIVE_BY_ID_SQL, userReservationRowMapper(), id);
         return result.stream().findFirst();
     }
 
