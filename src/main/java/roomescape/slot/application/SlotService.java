@@ -11,6 +11,7 @@ import roomescape.slot.dto.request.SlotSaveRequest;
 import roomescape.slot.dto.response.SlotFindResponse;
 import roomescape.slot.dto.response.SlotSaveResponse;
 import roomescape.slot.infrastructure.SlotRepository;
+import roomescape.theme.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 import java.time.Clock;
@@ -30,6 +31,13 @@ public class SlotService {
         return getSlotIdOrThrow(date, timeId, themeId);
     }
 
+    public Slot resolveSlot(LocalDate date, long timeId, long themeId) {
+        long slotId = getSlotIdOrThrow(date, timeId, themeId);
+        ReservationTime reservationTime = getReservationTimeOrThrow(timeId);
+        Theme theme = getThemeOrThrow(themeId);
+        return Slot.of(slotId, date, reservationTime, theme);
+    }
+
     public List<SlotFindResponse> findAll() {
         List<Slot> slots = slotRepository.findAll();
         return SlotFindResponse.from(slots);
@@ -43,7 +51,9 @@ public class SlotService {
     public SlotSaveResponse save(SlotSaveRequest body) {
         validateSlot(body.date(), body.timeId(), body.themeId());
         throwIfSlotAlreadyExists(body.date(), body.themeId(), body.timeId());
-        Slot slot = Slot.create(body.date(), body.timeId(), body.themeId());
+        ReservationTime reservationTime = getReservationTimeOrThrow(body.timeId());
+        Theme theme = getThemeOrThrow(body.themeId());
+        Slot slot = Slot.create(body.date(), reservationTime, theme);
         return SlotSaveResponse.from(slotRepository.save(slot));
     }
 
@@ -91,8 +101,8 @@ public class SlotService {
         }
     }
 
-    private void getThemeOrThrow(Long themeId) {
-        themeRepository.findById(themeId)
+    private Theme getThemeOrThrow(Long themeId) {
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.THEME_NOT_FOUND, themeId));
     }
 

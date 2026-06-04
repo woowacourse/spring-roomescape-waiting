@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.infrastructure.JdbcSlotRepository;
+import roomescape.theme.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +27,7 @@ class JdbcSlotRepositoryTest {
 
     @Test
     void 슬롯_저장_레포지토리_테스트() {
-        Slot slot = new Slot(null, LocalDate.of(2026, 5, 7), 1L, 2L);
+        Slot slot = slot(LocalDate.of(2026, 5, 7), 1L, 2L);
 
         Slot savedSlot = repository.save(slot);
 
@@ -53,7 +56,7 @@ class JdbcSlotRepositoryTest {
 
     @Test
     void 슬롯_삭제_레포지토리_테스트() {
-        Slot savedSlot = repository.save(new Slot(null, LocalDate.of(2026, 5, 8), 3L, 4L));
+        Slot savedSlot = repository.save(slot(LocalDate.of(2026, 5, 8), 3L, 4L));
 
         repository.deleteById(savedSlot.getId());
 
@@ -97,5 +100,13 @@ class JdbcSlotRepositoryTest {
 
         // then
         assertThat(result).isFalse();
+    }
+
+    private Slot slot(LocalDate date, long timeId, long themeId) {
+        return Slot.create(
+                date,
+                new ReservationTime(timeId, LocalTime.of(10, 0)),
+                new Theme(themeId, "theme", "description", "thumbnail")
+        );
     }
 }

@@ -10,7 +10,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
+import roomescape.theme.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,12 +22,24 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcSlotRepository implements SlotRepository {
     private final NamedParameterJdbcTemplate template;
-    private final RowMapper<Slot> slotRowMapper = (resultSet, rowNum) -> Slot.of(
-            resultSet.getLong("id"),
-            resultSet.getDate("date").toLocalDate(),
-            resultSet.getLong("time_id"),
-            resultSet.getLong("theme_id")
-    );
+    private final RowMapper<Slot> slotRowMapper = (resultSet, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getTime("start_at").toLocalTime()
+        );
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("theme_description"),
+                resultSet.getString("theme_thumbnail_url")
+        );
+        return Slot.of(
+                resultSet.getLong("id"),
+                resultSet.getDate("date").toLocalDate(),
+                time,
+                theme
+        );
+    };
 
     @Override
     public Slot save(Slot slot) {
@@ -47,8 +61,8 @@ public class JdbcSlotRepository implements SlotRepository {
         return Slot.of(
                 id.longValue(),
                 slot.getDate(),
-                slot.getTimeId(),
-                slot.getThemeId()
+                slot.getTime(),
+                slot.getTheme()
         );
     }
 
@@ -70,7 +84,21 @@ public class JdbcSlotRepository implements SlotRepository {
 
     @Override
     public Optional<Slot> findById(long id) {
-        String sql = "SELECT * FROM slot WHERE id = :id";
+        String sql = """
+                SELECT
+                    s.id,
+                    s.date,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url
+                FROM slot s
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN theme t ON s.theme_id = t.id
+                WHERE s.id = :id
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
@@ -102,7 +130,20 @@ public class JdbcSlotRepository implements SlotRepository {
 
     @Override
     public List<Slot> findAll() {
-        String sql = "SELECT * FROM slot";
+        String sql = """
+                SELECT
+                    s.id,
+                    s.date,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url
+                FROM slot s
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN theme t ON s.theme_id = t.id
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         return template.query(sql, params, slotRowMapper);

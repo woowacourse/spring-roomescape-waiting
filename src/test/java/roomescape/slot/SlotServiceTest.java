@@ -50,7 +50,9 @@ class SlotServiceTest {
     @DisplayName("슬롯 저장에 성공한다.")
     void save_성공_테스트() {
         SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 10), 1L, 2L);
-        Slot savedSlot = new Slot(10L, LocalDate.of(2026, 5, 10), 1L, 2L);
+        ReservationTime reservationTime = new ReservationTime(request.timeId(), LocalTime.of(10, 0));
+        Theme theme = new Theme(request.themeId(), "test", "testDescription", "testUrl");
+        Slot savedSlot = Slot.of(10L, LocalDate.of(2026, 5, 10), reservationTime, theme);
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
                 LocalDate.of(2026, 5, 6)
@@ -58,9 +60,9 @@ class SlotServiceTest {
                         .toInstant()
         );
         when(reservationTimeRepository.findById(request.timeId()))
-                .thenReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(10, 0))));
+                .thenReturn(Optional.of(reservationTime));
         when(themeRepository.findById(request.themeId()))
-                .thenReturn(Optional.of(new Theme(request.themeId(), "test", "testDescription", "testUrl")));
+                .thenReturn(Optional.of(theme));
         when(slotRepository.save(any(Slot.class))).thenReturn(savedSlot);
 
         SlotSaveResponse response = slotService.save(request);
@@ -108,7 +110,12 @@ class SlotServiceTest {
     @Test
     @DisplayName("ID로 슬롯 단건 조회에 성공한다.")
     void findById_성공_테스트() {
-        Slot slot = new Slot(1L, LocalDate.of(2026, 5, 5), 1L, 1L);
+        Slot slot = Slot.of(
+                1L,
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "test", "testDescription", "testUrl")
+        );
         when(slotRepository.findById(1L)).thenReturn(Optional.of(slot));
 
         SlotFindResponse response = slotService.findById(1L);

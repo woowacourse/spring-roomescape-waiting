@@ -7,9 +7,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.member.Role;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.slot.Slot;
+import roomescape.theme.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,6 +38,30 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getTime("start_at").toLocalTime()
             );
 
+    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getTime("start_at").toLocalTime()
+        );
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("theme_description"),
+                resultSet.getString("theme_thumbnail_url")
+        );
+        Slot slot = Slot.of(
+                resultSet.getLong("slot_id"),
+                resultSet.getDate("date").toLocalDate(),
+                time,
+                theme
+        );
+        return Reservation.of(
+                resultSet.getLong("reservation_id"),
+                resultSet.getLong("member_id"),
+                slot
+        );
+    };
+
     @Override
     public Reservation save(Reservation reservation) {
         String insertReservationSql = "INSERT INTO reservation(member_id, slot_id) VALUES (:memberId, :slotId)";
@@ -55,7 +81,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Reservation.of(
                 keyHolder.getKey().longValue(),
                 reservation.getMemberId(),
-                reservation.getSlotId()
+                reservation.getSlot()
         );
     }
 
@@ -206,18 +232,31 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findById(long reservationId) {
-        String sql = "SELECT * FROM reservation WHERE id = :id";
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.member_id,
+                    s.id AS slot_id,
+                    s.date,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url
+                FROM reservation r
+                JOIN slot s ON r.slot_id = s.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN theme t ON s.theme_id = t.id
+                WHERE r.id = :id
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservationId);
 
-        return template.query(sql, params,
-                (resultSet, rowNum) -> new Reservation(
-                        resultSet.getLong("id"),
-                        resultSet.getLong("member_id"),
-                        resultSet.getLong("slot_id")
-                )
-        ).stream().findFirst();
+        return template.query(sql, params, reservationRowMapper)
+                .stream()
+                .findFirst();
     }
 
     @Override

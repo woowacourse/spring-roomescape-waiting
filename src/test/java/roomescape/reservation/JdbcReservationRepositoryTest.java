@@ -8,8 +8,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservation.infrastructure.JdbcReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.slot.Slot;
+import roomescape.theme.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
@@ -28,7 +32,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     void 예약_저장_레포지토리_테스트() {
-        Reservation reservation = new Reservation(null, MEMBER_ID, 4L);
+        Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -42,7 +46,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     void 전체_예약_상세_조회_레포지토리_테스트() {
-        Reservation reservation = new Reservation(null, MEMBER_ID, 4L);
+        Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
         List<ReservationDetailProjection> reservations = reservationRepository.findAll();
@@ -54,7 +58,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     void 예약_삭제_레포지토리_테스트() {
-        Reservation reservation = new Reservation(null, MEMBER_ID, 4L);
+        Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
         reservationRepository.deleteByIdAndMemberId(savedReservation.getId(), MEMBER_ID);
@@ -129,5 +133,14 @@ class JdbcReservationRepositoryTest {
                 .get()
                 .extracting(Reservation::getSlotId)
                 .isEqualTo(4L);
+    }
+
+    private Slot slot(long slotId) {
+        return Slot.of(
+                slotId,
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "theme", "description", "thumbnail")
+        );
     }
 }
