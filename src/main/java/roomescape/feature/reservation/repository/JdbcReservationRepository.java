@@ -54,7 +54,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findLowestIdWaitingReservation(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findLowestIdWaitingReservation(Slot slot) {
         String findSql = """
                 SELECT r.id, r.name, r.date, r.status, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
@@ -68,9 +68,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 LIMIT 1
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("timeId", timeId)
-                .addValue("themeId", themeId);
+                .addValue("date", slot.date())
+                .addValue("timeId", slot.timeId())
+                .addValue("themeId", slot.themeId());
 
         try {
             Reservation reservation = jdbcTemplate.queryForObject(
@@ -82,11 +82,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
-
     }
 
     @Override
-    public boolean existsActiveReservation(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsActiveReservation(Slot slot) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -98,9 +97,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("timeId", timeId)
-                .addValue("themeId", themeId);
+                .addValue("date", slot.date())
+                .addValue("timeId", slot.timeId())
+                .addValue("themeId", slot.themeId());
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
         return Boolean.TRUE.equals(exists);
@@ -292,8 +291,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int countByIdLessThanEqualAndDateAndTimeAndTheme(Long reservationId, LocalDate date, Time time,
-                                                            Theme theme) {
+    public int countByIdLessThanEqualAndSlot(Long reservationId, Slot slot) {
         String countSql = """
                 SELECT COUNT(*)
                 FROM reservation
@@ -305,9 +303,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("id", reservationId)
-                .addValue("date", date)
-                .addValue("timeId", time.getId())
-                .addValue("themeId", theme.getId());
+                .addValue("date", slot.date())
+                .addValue("timeId", slot.timeId())
+                .addValue("themeId", slot.themeId());
 
         return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
     }
@@ -324,29 +322,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
-        Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
-        return Boolean.TRUE.equals(exists);
-    }
-
-    @Override
-    public boolean existsReservationByDateAndTimeAndThemeAndActive(LocalDate date, Time time, Theme theme) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation
-                    WHERE date = :date
-                      AND time_id = :timeId
-                      AND theme_id = :themeId
-                      AND status = 'ACTIVE'
-                )
-                """;
-
-        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-                "date", date,
-                "timeId", time.getId(),
-                "themeId", theme.getId()
-        ));
-
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
         return Boolean.TRUE.equals(exists);
     }
@@ -378,7 +353,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsActiveOrWaitingReservation(LocalDate date, Time time, Theme theme) {
+    public boolean existsActiveOrWaitingReservation(Slot slot) {
         String existsSql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -390,9 +365,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-                "date", date,
-                "timeId", time.getId(),
-                "themeId", theme.getId()
+                "date", slot.date(),
+                "timeId", slot.timeId(),
+                "themeId", slot.themeId()
         ));
 
         Boolean exists = jdbcTemplate.queryForObject(existsSql, parameters, Boolean.class);

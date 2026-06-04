@@ -21,6 +21,7 @@ import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
@@ -84,7 +85,7 @@ class WaitingServiceTest {
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(date, time, theme))
+            when(reservationRepository.existsActiveReservation(new Slot(time.getId(), theme.getId(), date)))
                 .thenReturn(true);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -111,7 +112,7 @@ class WaitingServiceTest {
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(date, time, theme))
+            when(reservationRepository.existsActiveReservation(new Slot(time.getId(), theme.getId(), date)))
                 .thenReturn(false);
 
             // when & then

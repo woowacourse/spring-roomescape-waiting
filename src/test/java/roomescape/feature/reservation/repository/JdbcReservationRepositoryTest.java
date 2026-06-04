@@ -387,8 +387,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.WAITING));
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                waiting.getId(), waiting.getDate(), time, theme);
+            int actual = reservationRepository.countByIdLessThanEqualAndSlot(waiting.getId(), waiting.getSlot());
 
             // then
             assertThat(actual).isEqualTo(1);
@@ -406,8 +405,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자3"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                last.getId(), date, time, theme);
+            int actual = reservationRepository.countByIdLessThanEqualAndSlot(last.getId(), last.getSlot());
 
             // then
             assertThat(actual).isEqualTo(3);
@@ -427,51 +425,10 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자3"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                waiting.getId(), date, time, theme);
+            int actual = reservationRepository.countByIdLessThanEqualAndSlot(waiting.getId(), waiting.getSlot());
 
             // then
             assertThat(actual).isEqualTo(1);
-        }
-    }
-
-    @Nested
-    class 날짜_시간_테마_예약_존재_여부_확인 {
-
-        @BeforeEach
-        void assumeBasicsWork() {
-            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
-        }
-
-        @Test
-        void 같은_날짜_시간_테마의_활성_예약이_있으면_true를_반환한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
-
-            // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(
-                reservation.getDate(), time, theme);
-
-            // then
-            assertThat(actual).isTrue();
-        }
-
-        @Test
-        void 취소되거나_삭제된_예약이면_false를_반환한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
-            reservationRepository.update(reservation.cancelActive(new ReserverName(ReservationFixture.FUTURE.getName())));
-
-            // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(
-                reservation.getDate(), time, theme);
-
-            // then
-            assertThat(actual).isFalse();
         }
     }
 
@@ -491,8 +448,7 @@ class JdbcReservationRepositoryTest {
             Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
-            boolean actual = reservationRepository.existsActiveReservation(
-                reservation.getDate(), time.getId(), theme.getId());
+            boolean actual = reservationRepository.existsActiveReservation(reservation.getSlot());
 
             // then
             assertThat(actual).isTrue();
@@ -504,11 +460,26 @@ class JdbcReservationRepositoryTest {
             LocalDate date = LocalDate.now().plusYears(1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            reservationRepository.save(
+            Reservation waiting = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            boolean actual = reservationRepository.existsActiveReservation(date, time.getId(), theme.getId());
+            boolean actual = reservationRepository.existsActiveReservation(waiting.getSlot());
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+        @Test
+        void 취소되거나_삭제된_예약이면_false를_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
+            reservationRepository.update(reservation.cancelActive(new ReserverName(ReservationFixture.FUTURE.getName())));
+
+            // when
+            boolean actual = reservationRepository.existsActiveReservation(reservation.getSlot());
 
             // then
             assertThat(actual).isFalse();
@@ -803,7 +774,7 @@ class JdbcReservationRepositoryTest {
             Reservation active = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when & then
-            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getDate(), time, theme)).isTrue();
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getSlot())).isTrue();
         }
 
         @Test
@@ -814,11 +785,11 @@ class JdbcReservationRepositoryTest {
             LocalDate date = LocalDate.now().plusYears(1);
             reservationRepository.save(
                 Reservation.create(new ReserverName("예약자1"), date, time, theme, ReservationStatus.ACTIVE));
-            reservationRepository.save(
+            Reservation waiting = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자2"), date, time, theme, ReservationStatus.WAITING));
 
             // when & then
-            assertThat(reservationRepository.existsActiveOrWaitingReservation(date, time, theme)).isTrue();
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(waiting.getSlot())).isTrue();
         }
 
         @Test
@@ -832,7 +803,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.update(active.delete());
 
             // when & then
-            assertThat(reservationRepository.existsActiveOrWaitingReservation(date, time, theme)).isFalse();
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getSlot())).isFalse();
         }
     }
 }

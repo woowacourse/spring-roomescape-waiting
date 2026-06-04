@@ -65,8 +65,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
             return null;
         }
 
-        return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(),
-                reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return reservationRepository.countByIdLessThanEqualAndSlot(reservation.getId(), reservation.getSlot());
     }
 
     @Override
@@ -234,10 +233,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     }
 
     private void validateNotReservedOrWaitedByOther(Reservation reservation) {
-        if (reservationRepository.existsActiveOrWaitingReservation(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme())) {
+        if (reservationRepository.existsActiveOrWaitingReservation(reservation.getSlot())) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
     }
@@ -255,11 +251,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     }
 
     private void validateAlreadyReserved(Reservation reservation) {
-        boolean alreadyReserved = reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
+        boolean alreadyReserved = reservationRepository.existsActiveReservation(reservation.getSlot());
 
         if (!alreadyReserved) {
             throw new GeneralException(ReservationErrorType.NOT_RESERVED);

@@ -33,12 +33,11 @@ public class WaitingPromoter {
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void promoteFastestWaiting(Slot slot) {
-        if (reservationRepository.existsActiveReservation(slot.date(), slot.timeId(), slot.themeId())) {
+        if (reservationRepository.existsActiveReservation(slot)) {
             return;
         }
 
-        Optional<Reservation> candidate = reservationRepository.findLowestIdWaitingReservation(
-                slot.date(), slot.timeId(), slot.themeId());
+        Optional<Reservation> candidate = reservationRepository.findLowestIdWaitingReservation(slot);
         if (candidate.isEmpty()) {
             return;
         }

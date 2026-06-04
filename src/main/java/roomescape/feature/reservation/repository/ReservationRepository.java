@@ -7,16 +7,14 @@ import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.reservation.domain.Slot;
-import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.time.domain.Time;
 
 public interface ReservationRepository {
 
     List<Reservation> findAllReservations();
 
-    Optional<Reservation> findLowestIdWaitingReservation(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findLowestIdWaitingReservation(Slot slot);
 
-    boolean existsActiveReservation(LocalDate date, Long timeId, Long themeId);
+    boolean existsActiveReservation(Slot slot);
 
     List<Slot> findDeadSlots();
 
@@ -32,13 +30,11 @@ public interface ReservationRepository {
 
     int changeStatus(Long id, ReservationStatus from, ReservationStatus to);
 
-    int countByIdLessThanEqualAndDateAndTimeAndTheme(Long id, LocalDate date, Time time, Theme theme);
+    int countByIdLessThanEqualAndSlot(Long id, Slot slot);
 
     boolean existsReservationByIdAndNotDeleted(Long id);
 
-    boolean existsReservationByDateAndTimeAndThemeAndActive(LocalDate date, Time time, Theme theme);
-
     boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status);
 
-    boolean existsActiveOrWaitingReservation(LocalDate date, Time time, Theme theme);
+    boolean existsActiveOrWaitingReservation(Slot slot);
 }

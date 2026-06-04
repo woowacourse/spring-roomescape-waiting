@@ -38,6 +38,7 @@ class WaitingPromoterRetryTest {
     private static final Long TIME_ID = 1L;
     private static final Long THEME_ID = 1L;
     private static final LocalDate DATE = LocalDate.now().plusYears(1);
+    private static final Slot SLOT = new Slot(TIME_ID, THEME_ID, DATE);
 
     @Autowired
     private WaitingPromoter waitingPromoter;
@@ -70,41 +71,41 @@ class WaitingPromoterRetryTest {
     @Test
     void DB_예외가_발생하면_재시도하여_승격에_성공한다() {
         // given: 첫 시도에는 DB 예외, 두 번째 시도에는 정상 조회
-        when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
+        when(reservationRepository.findLowestIdWaitingReservation(SLOT))
                 .thenThrow(new CannotAcquireLockException("일시적 락 획득 실패"))
                 .thenReturn(Optional.of(waiting()));
         when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
                 .thenReturn(1);
 
         // when
-        waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE));
+        waitingPromoter.promoteFastestWaiting(SLOT);
 
         // then: 재시도되어 총 2회 조회, 승격 1회 수행
-        verify(reservationRepository, times(2)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
+        verify(reservationRepository, times(2)).findLowestIdWaitingReservation(SLOT);
         verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
     }
 
     @Test
     void DB_예외가_재시도_횟수만큼_지속되도_예외를_전파하지_않는다() {
         // given: 매 시도마다 DB 예외
-        when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
+        when(reservationRepository.findLowestIdWaitingReservation(SLOT))
                 .thenThrow(new CannotAcquireLockException("지속적인 락 획득 실패"));
 
         // when & then: 최대 시도(5회) 후 @Recover 가 예외를 전파하지 않는다
         assertThatNoException().isThrownBy(() ->
-                waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE)));
-        verify(reservationRepository, times(5)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
+                waitingPromoter.promoteFastestWaiting(SLOT));
+        verify(reservationRepository, times(5)).findLowestIdWaitingReservation(SLOT);
         verify(reservationRepository, times(0)).changeStatus(any(), any(), any());
     }
 
     @Test
     void DB_예외가_재시도_횟수만큼_지속되면_에러_로그를_남긴다() {
         // given: 매 시도마다 DB 예외
-        when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
+        when(reservationRepository.findLowestIdWaitingReservation(SLOT))
                 .thenThrow(new CannotAcquireLockException("지속적인 락 획득 실패"));
 
         // when: 최대 시도 후 @Recover(recoverPromotion) 진입
-        waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE));
+        waitingPromoter.promoteFastestWaiting(SLOT);
 
         // then: recoverPromotion 이 ERROR 로그를 한 번 남긴다
         List<ILoggingEvent> errorLogs = logAppender.list.stream()

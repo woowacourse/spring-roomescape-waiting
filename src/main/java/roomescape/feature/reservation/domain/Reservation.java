@@ -134,6 +134,10 @@ public class Reservation {
         return currentId != null && currentId.equals(newId);
     }
 
+    public Slot getSlot() {
+        return new Slot(getTime().getId(), theme.getId(), getDate());
+    }
+
     public LocalDate getDate() {
         return schedule.date();
     }

@@ -31,6 +31,7 @@ import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.mapper.ThemeMapper;
 import roomescape.feature.theme.repository.ThemeRepository;
@@ -91,7 +92,7 @@ class ReservationServiceTest {
                 2L, new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING);
             when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자")))
                 .thenReturn(List.of(waiting));
-            when(reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(2L, date, time, theme))
+            when(reservationRepository.countByIdLessThanEqualAndSlot(2L, waiting.getSlot()))
                 .thenReturn(2);
 
             // when
@@ -118,7 +119,7 @@ class ReservationServiceTest {
 
             // then
             verify(reservationRepository, never())
-                .countByIdLessThanEqualAndDateAndTimeAndTheme(any(), any(), any(), any());
+                .countByIdLessThanEqualAndSlot(any(), any());
         }
 
         @Test
@@ -173,7 +174,7 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE);
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsActiveOrWaitingReservation(date, time, theme))
+            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(time.getId(), theme.getId(), date)))
                 .thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -240,7 +241,7 @@ class ReservationServiceTest {
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsActiveOrWaitingReservation(date, time, theme))
+            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(time.getId(), theme.getId(), date)))
                 .thenReturn(true);
 
             // when & then
@@ -278,7 +279,7 @@ class ReservationServiceTest {
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
             when(reservationRepository.existsActiveOrWaitingReservation(
-                newDate, newTime, newTheme)).thenReturn(false);
+                new Slot(newTime.getId(), newTheme.getId(), newDate))).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -315,7 +316,7 @@ class ReservationServiceTest {
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
             when(reservationRepository.existsActiveOrWaitingReservation(
-                newDate, newTime, newTheme)).thenReturn(false);
+                new Slot(newTime.getId(), newTheme.getId(), newDate))).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -501,7 +502,7 @@ class ReservationServiceTest {
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsActiveOrWaitingReservation(
-                futureDate, time, theme)).thenReturn(true);
+                new Slot(time.getId(), theme.getId(), futureDate))).thenReturn(true);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
