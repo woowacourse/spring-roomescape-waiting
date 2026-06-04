@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static roomescape.reservation.domain.Status.CANCELED;
-import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_EXISTS;
+import static roomescape.reservation.exception.ReservationErrorCode.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -73,6 +73,21 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return jdbcTemplate.query(sql, new MapSqlParameterSource("id", id), reservationRowMapper).stream()
                 .findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByIdWithLock(Long id) {
+        List<Long> lockedIds = jdbcTemplate.queryForList("""
+                SELECT id
+                FROM reservation
+                WHERE id = :id
+                FOR UPDATE
+                """, new MapSqlParameterSource("id", id), Long.class);
+
+        if (lockedIds.isEmpty()) {
+            return Optional.empty();
+        }
+        return findById(id);
     }
 
     @Override

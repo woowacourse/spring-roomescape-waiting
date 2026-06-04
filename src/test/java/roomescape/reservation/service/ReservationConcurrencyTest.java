@@ -99,6 +99,63 @@ class ReservationConcurrencyTest {
         assertThat(countReservationsByStatus(targetDate, targetTime.getId(), theme.getId(), Status.WAITING)).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("확정 예약 취소와 같은 슬롯 예약 생성이 동시에 수행되어도 확정 예약은 하나 유지되어야 한다.")
+    void cancel_concurrently_createSameSlot_keepOneConfirmed() throws Exception {
+        // given
+        clock.setFixed(LocalDate.of(2025, 5, 10));
+
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2025, 5, 11);
+        Reservation reservation = sqlFixtureGenerator.insertReservation(
+                "브라운",
+                sqlFixtureGenerator.insertReservationSlot(date, time, theme),
+                Status.CONFIRMED);
+
+        // when
+        executeConcurrently(
+                () -> reservationService.cancel(reservation.getId()),
+                () -> reservationService.create("포비", date, time.getId(), theme.getId())
+        );
+
+        // then
+        assertThat(countReservationsByStatus(date, time.getId(), theme.getId(), Status.CONFIRMED)).isEqualTo(1);
+        assertThat(countReservationsByStatus(date, time.getId(), theme.getId(), Status.WAITING)).isZero();
+    }
+
+    @Test
+    @DisplayName("확정 예약 수정과 기존 슬롯 예약 생성이 동시에 수행되어도 기존 슬롯의 확정 예약은 하나 유지되어야 한다.")
+    void editDateTime_concurrently_createOriginalSlot_keepOneConfirmed() throws Exception {
+        // given
+        clock.setFixed(LocalDate.of(2025, 5, 10));
+
+        ReservationTime originalTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        ReservationTime targetTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate originalDate = LocalDate.of(2025, 5, 11);
+        LocalDate targetDate = LocalDate.of(2025, 5, 12);
+        Reservation reservation = sqlFixtureGenerator.insertReservation(
+                "브라운",
+                sqlFixtureGenerator.insertReservationSlot(originalDate, originalTime, theme),
+                Status.CONFIRMED);
+
+        // when
+        executeConcurrently(
+                () -> reservationService.editDateTime(
+                        reservation.getId(), targetDate, targetTime.getId(), reservation.getGuestName()),
+                () -> reservationService.create("포비", originalDate, originalTime.getId(), theme.getId())
+        );
+
+        // then
+        assertThat(countReservationsByStatus(originalDate, originalTime.getId(), theme.getId(), Status.CONFIRMED))
+                .isEqualTo(1);
+        assertThat(countReservationsByStatus(originalDate, originalTime.getId(), theme.getId(), Status.WAITING))
+                .isZero();
+        assertThat(countReservationsByStatus(targetDate, targetTime.getId(), theme.getId(), Status.CONFIRMED))
+                .isEqualTo(1);
+    }
+
     private void executeConcurrently(Runnable first, Runnable second) throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CountDownLatch startLatch = new CountDownLatch(1);

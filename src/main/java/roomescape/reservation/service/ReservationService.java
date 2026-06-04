@@ -4,26 +4,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.dto.PageResult;
+import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationSlotRepository;
-import roomescape.reservation.repository.exception.RetryableReservationCreateException;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
-import roomescape.common.retry.RetryOnException;
 import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.common.exception.DomainException;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static roomescape.reservation.domain.Status.CONFIRMED;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
@@ -65,14 +65,14 @@ public class ReservationService {
     }
 
     @Transactional
-    @RetryOnException(retryOn = RetryableReservationCreateException.class)
     public void editDateTime(Long reservationId, LocalDate changedDate, Long changedTimeId, String requestGuestName) {
-        Reservation beforeReservation = getReservation(reservationId);
+        Reservation beforeReservation = getReservationWithLock(reservationId);
         reservationValidator.validateBeforeEdit(beforeReservation, changedDate, changedTimeId, requestGuestName);
-
         ReservationTime changedTime = getReservationTime(changedTimeId);
+
         ReservationSlot changedSlot = reservationSlotRepository.upsert(
                 ReservationSlot.create(changedDate, changedTime, beforeReservation.getTheme()));
+        lockSlots(beforeReservation.getReservationSlot(), changedSlot);
 
         Status afterStatus = determineState(changedSlot);
         Reservation changedReservation = Reservation.of(
@@ -86,6 +86,27 @@ public class ReservationService {
 
         updateSlotAndStatus(changedReservation, changedSlot);
         updateTopWaitingConfirmed(beforeReservation);
+    }
+
+    private ReservationSlot getLockSlot(LocalDate date, ReservationTime time, Theme theme) {
+        ReservationSlot changedSlot = reservationSlotRepository.upsert(
+                ReservationSlot.create(date, time, theme));
+
+        return reservationSlotRepository.findByIdWithLock(changedSlot.getId())
+                .orElseThrow(() -> new DomainException(RESERVATION_SLOT_NOT_FOUND));
+    }
+
+    private void lockSlots(ReservationSlot first, ReservationSlot second) {
+        Stream.of(first, second)
+                .map(ReservationSlot::getId)
+                .distinct()
+                .sorted(Comparator.naturalOrder())
+                .forEach(this::lockSlot);
+    }
+
+    private void lockSlot(Long slotId) {
+        reservationSlotRepository.findByIdWithLock(slotId)
+                .orElseThrow(() -> new DomainException(RESERVATION_SLOT_NOT_FOUND));
     }
 
     private void updateTopWaitingConfirmed(Reservation reservation) {
@@ -104,7 +125,8 @@ public class ReservationService {
 
     @Transactional
     public void cancel(Long id) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationWithLock(id);
+        lockSlot(reservation.getReservationSlot().getId());
         reservationValidator.validateCancel(reservation);
         cancelReservation(id);
         updateTopWaitingConfirmed(reservation);
@@ -112,7 +134,8 @@ public class ReservationService {
 
     @Transactional
     public void cancelMine(Long id, String guestName) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationWithLock(id);
+        lockSlot(reservation.getReservationSlot().getId());
         reservationValidator.validateCancelMine(reservation, guestName);
         cancelReservation(id);
         updateTopWaitingConfirmed(reservation);
@@ -129,8 +152,8 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
     }
 
-    private Reservation getReservation(Long reservationId) {
-        return reservationRepository.findById(reservationId)
+    private Reservation getReservationWithLock(Long reservationId) {
+        return reservationRepository.findByIdWithLock(reservationId)
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
     }
 

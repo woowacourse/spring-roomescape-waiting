@@ -15,6 +15,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findByIdWithLock(Long id);
+
     Optional<ReservationWaitingDto> findWaitingById(Long id);
 
     PageResult<Reservation> findAllByStatusCanceledNot(int page, int size);
