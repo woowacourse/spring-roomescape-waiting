@@ -1,14 +1,13 @@
 package roomescape.service.history;
 
 import java.time.LocalDate;
-import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public record MyHistoryResult(
         Long reservationId,
         Long waitingId,
-        ReservationHistoryStatus status,
+        String status,
         String name,
         LocalDate date,
         Theme theme,

@@ -13,7 +13,6 @@ import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
-import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
@@ -22,6 +21,7 @@ import roomescape.service.theme.ThemeService;
 
 @Component
 public class ReservationPageModelAssembler {
+    private static final String WAITING_STATUS = "WAITING";
 
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
@@ -128,7 +128,7 @@ public class ReservationPageModelAssembler {
             final Long timeId
     ) {
         return myHistories.stream()
-                .filter(history -> history.status() == ReservationHistoryStatus.WAITING)
+                .filter(history -> WAITING_STATUS.equals(history.status()))
                 .filter(history -> history.date().equals(selectedDate))
                 .filter(history -> history.theme().id().equals(selectedThemeId))
                 .filter(history -> history.time().id().equals(timeId))

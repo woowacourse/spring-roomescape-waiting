@@ -8,7 +8,6 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.history.MyHistory;
@@ -23,10 +22,10 @@ class MyHistoriesTest {
     @DisplayName("대기 상태인 내역의 예약 ID만 중복 없이 추린다")
     void waitingReservationIds() {
         MyHistories histories = new MyHistories(List.of(
-                history(1L, null, ReservationHistoryStatus.RESERVATION),
-                history(2L, 1L, ReservationHistoryStatus.WAITING),
-                history(2L, 2L, ReservationHistoryStatus.WAITING),
-                history(3L, 3L, ReservationHistoryStatus.WAITING)
+                history(1L, null, "RESERVATION"),
+                history(2L, 1L, "WAITING"),
+                history(2L, 2L, "WAITING"),
+                history(3L, 3L, "WAITING")
         ));
 
         assertThat(histories.waitingReservationIds()).containsExactly(2L, 3L);
@@ -36,8 +35,8 @@ class MyHistoriesTest {
     @DisplayName("예약 내역과 대기 순번을 조회 결과로 묶는다")
     void toResults() {
         MyHistories histories = new MyHistories(List.of(
-                history(1L, null, ReservationHistoryStatus.RESERVATION),
-                history(2L, 2L, ReservationHistoryStatus.WAITING)
+                history(1L, null, "RESERVATION"),
+                history(2L, 2L, "WAITING")
         ));
         MyWaitingLines waitingLines = MyWaitingLines.from(List.of(
                 waitingOrder(2L, 1L, "2026-08-05T12:00:00"),
@@ -53,7 +52,7 @@ class MyHistoriesTest {
     private MyHistory history(
             final Long reservationId,
             final Long waitingId,
-            final ReservationHistoryStatus status
+            final String status
     ) {
         return new MyHistory(
                 reservationId,
