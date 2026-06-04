@@ -50,11 +50,10 @@ class ReservationServiceTest {
     void 이름으로_예약_목록을_조회한다() {
         // given
         String name = "브라운";
-        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
-        Theme theme = new Theme(1L, "테스트 테마", "테마 설명", "썸네일 주소");
+        ReservationTime time = time(1L);
         List<Reservation> reservations = List.of(
-                new Reservation(1L, name, new ReservationSlot(date, time, theme)),
-                new Reservation(2L, name, new ReservationSlot(date.plusDays(1), time, theme)));
+                reservation(1L, name, date, time),
+                reservation(2L, name, date.plusDays(1), time));
         when(reservationRepository.findByName(name))
                 .thenReturn(reservations);
 
@@ -70,11 +69,10 @@ class ReservationServiceTest {
     @Test
     void 전체_예약_목록을_조회한다() {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
-        Theme theme = new Theme(1L, "테스트 테마", "테마 설명", "썸네일 주소");
+        ReservationTime time = time(1L);
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "브라운", new ReservationSlot(date, time, theme)),
-                new Reservation(2L, "구구", new ReservationSlot(date, time, theme)));
+                reservation(1L, "브라운", date, time),
+                reservation(2L, "구구", date, time));
         when(reservationRepository.findAll())
                 .thenReturn(reservations);
 
@@ -94,9 +92,9 @@ class ReservationServiceTest {
         String name = "브라운";
         Long timeId = 1L;
         Long themeId = 1L;
-        ReservationTime time = new ReservationTime(timeId, LocalTime.parse("08:00"));
-        Theme theme = new Theme(themeId, "테스트 테마", "테마 설명", "썸네일 주소");
-        Reservation savedReservation = new Reservation(id, name, new ReservationSlot(date, time, theme));
+        ReservationTime time = time(timeId);
+        Theme theme = theme(themeId);
+        Reservation savedReservation = reservation(id, name, date, time, theme);
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
@@ -134,9 +132,9 @@ class ReservationServiceTest {
         Long timeId = 1L;
         Long themeId = 1L;
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        ReservationTime time = new ReservationTime(timeId, LocalTime.parse("08:00"));
-        Theme theme = new Theme(themeId, "테스트 테마", "테마 설명", "썸네일 주소");
-        Reservation savedReservation = new Reservation(id, name, new ReservationSlot(pastDate, time, theme));
+        ReservationTime time = time(timeId);
+        Theme theme = theme(themeId);
+        Reservation savedReservation = reservation(id, name, pastDate, time, theme);
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
@@ -164,8 +162,8 @@ class ReservationServiceTest {
         Long timeId = 1L;
         Long themeId = 1L;
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        ReservationTime time = new ReservationTime(timeId, LocalTime.parse("08:00"));
-        Theme theme = new Theme(themeId, "테스트 테마", "테마 설명", "썸네일 주소");
+        ReservationTime time = time(timeId);
+        Theme theme = theme(themeId);
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(themeId))
@@ -189,7 +187,7 @@ class ReservationServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = reservation(id, name, date);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
@@ -213,8 +211,8 @@ class ReservationServiceTest {
         Long id = 1L;
         Long waitingId = 2L;
         String name = "브라운";
-        Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        Reservation reservation = reservation(id, name, date);
+        ReservationWaiting waiting = waiting(waitingId, "구구", reservation.getSlot());
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
@@ -246,7 +244,7 @@ class ReservationServiceTest {
     void 관리자_예약을_삭제한다() {
         // given
         Long id = 1L;
-        Reservation reservation = createByUserReservation(id, "브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = reservation(id, "브라운", date);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
@@ -269,8 +267,8 @@ class ReservationServiceTest {
         // given
         Long id = 1L;
         Long waitingId = 2L;
-        Reservation reservation = createByUserReservation(id, "브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        Reservation reservation = reservation(id, "브라운", date);
+        ReservationWaiting waiting = waiting(waitingId, "구구", reservation.getSlot());
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
@@ -302,11 +300,7 @@ class ReservationServiceTest {
     void 관리자가_지난_예약을_삭제하면_대기를_자동_승격하지_않는다() {
         // given
         Long id = 1L;
-        Reservation reservation = createByUserReservation(
-                id,
-                "브라운",
-                now.toLocalDate().minusDays(1),
-                new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = reservation(id, "브라운", now.toLocalDate().minusDays(1));
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
 
@@ -346,8 +340,8 @@ class ReservationServiceTest {
         // given
         Long id = 1L;
         Long waitingId = 2L;
-        Reservation reservation = createByUserReservation(id, "브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        Reservation reservation = reservation(id, "브라운", date);
+        ReservationWaiting waiting = waiting(waitingId, "구구", reservation.getSlot());
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
@@ -376,9 +370,9 @@ class ReservationServiceTest {
         String name = "브라운";
         Long timeId = 2L;
         LocalDate updateDate = date.plusDays(1);
-        ReservationTime originalTime = new ReservationTime(1L, LocalTime.parse("08:00"));
-        ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
-        Reservation reservation = createByUserReservation(id, name, date, originalTime);
+        ReservationTime originalTime = time(1L);
+        ReservationTime updateTime = time(timeId, "10:00");
+        Reservation reservation = reservation(id, name, date, originalTime);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(timeId))
@@ -426,10 +420,10 @@ class ReservationServiceTest {
         String name = "브라운";
         Long timeId = 2L;
         LocalDate updateDate = date.plusDays(1);
-        ReservationTime originalTime = new ReservationTime(1L, LocalTime.parse("08:00"));
-        ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
-        Reservation reservation = createByUserReservation(id, name, date, originalTime);
-        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        ReservationTime originalTime = time(1L);
+        ReservationTime updateTime = time(timeId, "10:00");
+        Reservation reservation = reservation(id, name, date, originalTime);
+        ReservationWaiting waiting = waiting(waitingId, "구구", reservation.getSlot());
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(timeId))
@@ -477,8 +471,8 @@ class ReservationServiceTest {
         Long id = 1L;
         String name = "브라운";
         LocalDate updateDate = date.plusDays(1);
-        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
-        Reservation reservation = createByUserReservation(id, name, date, time);
+        ReservationTime time = time(1L);
+        Reservation reservation = reservation(id, name, date, time);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
@@ -510,14 +504,14 @@ class ReservationServiceTest {
         Long id = 1L;
         String name = "브라운";
         LocalDate updateDate = date.plusDays(1);
-        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
-        Reservation reservation = createByUserReservation(id, name, date, time);
+        ReservationTime time = time(1L);
+        Reservation reservation = reservation(id, name, date, time);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
                 .thenReturn(false);
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
-                .thenReturn(Optional.of(new ReservationWaiting(2L, "구구", reservation.getSlot())));
+                .thenReturn(Optional.of(waiting(2L, "구구", reservation.getSlot())));
         when(reservationRepository.update(any(Reservation.class)))
                 .thenReturn(0);
 
@@ -541,7 +535,7 @@ class ReservationServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = reservation(id, name, date);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
 
@@ -582,7 +576,7 @@ class ReservationServiceTest {
         Long id = 1L;
         String name = "브라운";
         Long timeId = 999L;
-        Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = reservation(id, name, date);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(timeId))
@@ -601,10 +595,34 @@ class ReservationServiceTest {
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
-    private Reservation createByUserReservation(Long id, String name, LocalDate date, ReservationTime time) {
+    private Reservation reservation(Long id, String name, LocalDate date) {
+        return reservation(id, name, date, time(1L));
+    }
+
+    private Reservation reservation(Long id, String name, LocalDate date, ReservationTime time) {
+        return reservation(id, name, date, time, theme(1L));
+    }
+
+    private Reservation reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(
                 id,
                 name,
-                new ReservationSlot(date, time, new Theme(1L, "테스트 테마", "테마 설명", "썸네일 주소")));
+                new ReservationSlot(date, time, theme));
+    }
+
+    private ReservationWaiting waiting(Long id, String name, ReservationSlot slot) {
+        return new ReservationWaiting(id, name, slot);
+    }
+
+    private ReservationTime time(Long id) {
+        return time(id, "08:00");
+    }
+
+    private ReservationTime time(Long id, String startAt) {
+        return new ReservationTime(id, LocalTime.parse(startAt));
+    }
+
+    private Theme theme(Long id) {
+        return new Theme(id, "테스트 테마", "테마 설명", "썸네일 주소");
     }
 }

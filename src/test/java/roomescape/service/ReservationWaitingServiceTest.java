@@ -49,8 +49,8 @@ class ReservationWaitingServiceTest {
         // given
         String name = "브라운";
         List<WaitingWithTurn> waitingWithTurns = List.of(
-                new WaitingWithTurn(new ReservationWaiting(1L, name, new ReservationSlot(date, time, theme)), 1L),
-                new WaitingWithTurn(new ReservationWaiting(2L, name, new ReservationSlot(date.plusDays(1), time, theme)), 2L));
+                waitingWithTurn(1L, name, date, 1L),
+                waitingWithTurn(2L, name, date.plusDays(1), 2L));
 
         when(reservationWaitingRepository.findByNameWithTurn(name))
                 .thenReturn(waitingWithTurns);
@@ -76,7 +76,7 @@ class ReservationWaitingServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        ReservationWaiting savedWaiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+        ReservationWaiting savedWaiting = waiting(id, name, date);
 
         when(reservationTimeRepository.findById(time.getId()))
                 .thenReturn(Optional.of(time));
@@ -187,7 +187,7 @@ class ReservationWaitingServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        ReservationWaiting waiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+        ReservationWaiting waiting = waiting(id, name, date);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
         when(reservationWaitingRepository.delete(id))
@@ -206,7 +206,7 @@ class ReservationWaitingServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        ReservationWaiting waiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+        ReservationWaiting waiting = waiting(id, name, date);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
         when(reservationWaitingRepository.delete(id))
@@ -226,7 +226,7 @@ class ReservationWaitingServiceTest {
     void 다른_사용자의_예약_대기_삭제시_예외_발생() {
         // given
         Long id = 1L;
-        ReservationWaiting waiting = new ReservationWaiting(id, "브라운", new ReservationSlot(date, time, theme));
+        ReservationWaiting waiting = waiting(id, "브라운", date);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
         doThrow(new RoomescapeException(ErrorCode.FORBIDDEN_RESOURCE, "본인의 예약 대기만 취소할 수 있습니다."))
@@ -246,10 +246,7 @@ class ReservationWaitingServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        ReservationWaiting waiting = new ReservationWaiting(
-                id,
-                name,
-                new ReservationSlot(LocalDate.now().minusDays(1), time, theme));
+        ReservationWaiting waiting = waiting(id, name, LocalDate.now().minusDays(1));
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
         doThrow(new RoomescapeException(ErrorCode.PAST_RESOURCE_LOCKED, "이미 지난 예약 대기는 취소할 수 없습니다."))
@@ -278,5 +275,13 @@ class ReservationWaitingServiceTest {
                 .hasMessage("존재하지 않는 예약 대기입니다.");
 
         verify(reservationWaitingRepository, never()).delete(id);
+    }
+
+    private WaitingWithTurn waitingWithTurn(Long id, String name, LocalDate date, Long turn) {
+        return new WaitingWithTurn(waiting(id, name, date), turn);
+    }
+
+    private ReservationWaiting waiting(Long id, String name, LocalDate date) {
+        return new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
     }
 }

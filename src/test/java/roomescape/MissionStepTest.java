@@ -32,11 +32,7 @@ public class MissionStepTest {
 
     @Test
     void 예약_대기_추가_조회_및_삭제() {
-        Map<String, String> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", LocalDate.now().plusDays(1).toString());
-        reservationParams.put("timeId", "1");
-        reservationParams.put("themeId", "1");
+        Map<String, String> reservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -45,8 +41,7 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Map<String, String> waitingParams = new HashMap<>(reservationParams);
-        waitingParams.put("name", "구구");
+        Map<String, String> waitingParams = waitingRequest(reservationParams, "구구");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -84,11 +79,7 @@ public class MissionStepTest {
 
     @Test
     void 같은_예약_슬롯의_대기는_신청_순서대로_순번이_부여된다() {
-        Map<String, String> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", LocalDate.now().plusDays(1).toString());
-        reservationParams.put("timeId", "1");
-        reservationParams.put("themeId", "1");
+        Map<String, String> reservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -97,10 +88,8 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Map<String, String> firstWaitingParams = new HashMap<>(reservationParams);
-        firstWaitingParams.put("name", "구구");
-        Map<String, String> secondWaitingParams = new HashMap<>(reservationParams);
-        secondWaitingParams.put("name", "포비");
+        Map<String, String> firstWaitingParams = waitingRequest(reservationParams, "구구");
+        Map<String, String> secondWaitingParams = waitingRequest(reservationParams, "포비");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -121,11 +110,7 @@ public class MissionStepTest {
 
     @Test
     void 예약_삭제시_첫번째_대기가_예약으로_승격되고_남은_대기_순번이_재정렬된다() {
-        Map<String, String> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", LocalDate.now().plusDays(1).toString());
-        reservationParams.put("timeId", "1");
-        reservationParams.put("themeId", "1");
+        Map<String, String> reservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -135,10 +120,8 @@ public class MissionStepTest {
                 .statusCode(201)
                 .body("id", is(1));
 
-        Map<String, String> firstWaitingParams = new HashMap<>(reservationParams);
-        firstWaitingParams.put("name", "구구");
-        Map<String, String> secondWaitingParams = new HashMap<>(reservationParams);
-        secondWaitingParams.put("name", "포비");
+        Map<String, String> firstWaitingParams = waitingRequest(reservationParams, "구구");
+        Map<String, String> secondWaitingParams = waitingRequest(reservationParams, "포비");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -187,11 +170,7 @@ public class MissionStepTest {
 
     @Test
     void 예약_변경시_기존_슬롯의_첫번째_대기가_예약으로_승격되고_남은_대기_순번이_재정렬된다() {
-        Map<String, String> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", LocalDate.now().plusDays(1).toString());
-        reservationParams.put("timeId", "1");
-        reservationParams.put("themeId", "1");
+        Map<String, String> reservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -201,10 +180,8 @@ public class MissionStepTest {
                 .statusCode(201)
                 .body("id", is(1));
 
-        Map<String, String> firstWaitingParams = new HashMap<>(reservationParams);
-        firstWaitingParams.put("name", "구구");
-        Map<String, String> secondWaitingParams = new HashMap<>(reservationParams);
-        secondWaitingParams.put("name", "포비");
+        Map<String, String> firstWaitingParams = waitingRequest(reservationParams, "구구");
+        Map<String, String> secondWaitingParams = waitingRequest(reservationParams, "포비");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -222,10 +199,7 @@ public class MissionStepTest {
                 .statusCode(201)
                 .body("turn", is(2));
 
-        Map<String, String> updateParams = new HashMap<>();
-        updateParams.put("name", "브라운");
-        updateParams.put("date", LocalDate.now().plusDays(2).toString());
-        updateParams.put("timeId", "2");
+        Map<String, String> updateParams = updateRequest("브라운", LocalDate.now().plusDays(2), "2");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -272,11 +246,7 @@ public class MissionStepTest {
 
     @Test
     void 예약_대기_신청_예외_응답() {
-        Map<String, String> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", LocalDate.now().plusDays(1).toString());
-        reservationParams.put("timeId", "1");
-        reservationParams.put("themeId", "1");
+        Map<String, String> reservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -294,8 +264,7 @@ public class MissionStepTest {
                 .body("code", is("WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION"))
                 .body("detail", is("본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
 
-        Map<String, String> waitingParams = new HashMap<>(reservationParams);
-        waitingParams.put("name", "구구");
+        Map<String, String> waitingParams = waitingRequest(reservationParams, "구구");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -316,11 +285,7 @@ public class MissionStepTest {
 
     @Test
     void 예약_가능한_시간에는_대기를_신청할_수_없다() {
-        Map<String, String> waitingParams = new HashMap<>();
-        waitingParams.put("name", "브라운");
-        waitingParams.put("date", LocalDate.now().plusDays(1).toString());
-        waitingParams.put("timeId", "1");
-        waitingParams.put("themeId", "1");
+        Map<String, String> waitingParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -334,11 +299,7 @@ public class MissionStepTest {
 
     @Test
     void 내_예약_목록에서_예약과_대기를_상태로_구분해서_함께_조회한다() {
-        Map<String, String> myReservationParams = new HashMap<>();
-        myReservationParams.put("name", "브라운");
-        myReservationParams.put("date", LocalDate.now().plusDays(1).toString());
-        myReservationParams.put("timeId", "1");
-        myReservationParams.put("themeId", "1");
+        Map<String, String> myReservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -347,9 +308,7 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Map<String, String> reservedSlotParams = new HashMap<>(myReservationParams);
-        reservedSlotParams.put("name", "구구");
-        reservedSlotParams.put("timeId", "2");
+        Map<String, String> reservedSlotParams = reservationRequestForSameDateAndTheme(myReservationParams, "구구", "2");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -358,8 +317,7 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Map<String, String> waitingParams = new HashMap<>(reservedSlotParams);
-        waitingParams.put("name", "브라운");
+        Map<String, String> waitingParams = waitingRequest(reservedSlotParams, "브라운");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -378,6 +336,40 @@ public class MissionStepTest {
                 .body("status", containsInAnyOrder("RESERVED", "WAITING"))
                 .body("find { it.status == 'RESERVED' }.turn", nullValue())
                 .body("find { it.status == 'WAITING' }.turn", is(1));
+    }
+
+    private Map<String, String> reservationRequest(String name, LocalDate date, String timeId, String themeId) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", name);
+        params.put("date", date.toString());
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+        return params;
+    }
+
+    private Map<String, String> reservationRequestForSameDateAndTheme(
+            Map<String, String> baseParams,
+            String name,
+            String timeId
+    ) {
+        Map<String, String> params = new HashMap<>(baseParams);
+        params.put("name", name);
+        params.put("timeId", timeId);
+        return params;
+    }
+
+    private Map<String, String> waitingRequest(Map<String, String> reservationParams, String name) {
+        Map<String, String> params = new HashMap<>(reservationParams);
+        params.put("name", name);
+        return params;
+    }
+
+    private Map<String, String> updateRequest(String name, LocalDate date, String timeId) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", name);
+        params.put("date", date.toString());
+        params.put("timeId", timeId);
+        return params;
     }
 
 }
