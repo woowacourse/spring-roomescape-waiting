@@ -34,18 +34,24 @@ public class SlotService {
         return slotDao.findByDateAndTimeAndTheme(date, timeId, themeId);
     }
 
-    public Slot getOrCreate(ReservationRequest request) {
-        ReservationTime time = reservationTimeQueryingDao.findReservationTimeById(request.timeId())
-                .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
-        Theme theme = themeQueryingDao.findThemeById(request.themeId())
-                .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
+    public boolean isExistByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        return slotDao.isExistByDateAndTimeAndTheme(date, timeId, themeId);
+    }
 
-        Slot slot = Slot.create(request.date(), time, theme);
+    public Slot create(LocalDate date, Long timeId, Long themeId) {
+        ReservationTime time = reservationTimeQueryingDao.findReservationTimeById(timeId)
+                .orElseThrow(() -> new ReservationTimeNotFoundException(timeId));
+        Theme theme = themeQueryingDao.findThemeById(themeId)
+                .orElseThrow(() -> new ThemeNotFoundException(themeId));
+
+        Slot slot = Slot.create(date, time, theme);
+
         if (slot.isExpired()) {
             throw new ExpiredDateTimeException();
         }
 
-        return slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())
+
+        return slotDao.findByDateAndTimeAndTheme(date, timeId, themeId)
                 .orElseGet(() -> slot.withId(slotDao.insert(slot)));
     }
 }

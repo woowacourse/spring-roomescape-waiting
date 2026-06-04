@@ -202,7 +202,7 @@ public class UserReservationTest {
     }
 
     @Test
-    void 중복_예약시_409를_반환한다() {
+    void 중복_예약시_400을_반환한다() {
         createTheme();
         createTime("10:00");
 

@@ -1,8 +1,6 @@
 package roomescape.service;
 
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -10,6 +8,7 @@ import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.slot.Slot;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
+import roomescape.exception.ConcurrencyConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
@@ -45,26 +44,17 @@ public class ReservationWaitingService {
         if (reservationWaitingDao.isExistByNameAndSlotId(reservationWaitingReq.name(), slot.getId())) {
             throw new InvalidInputException("이미 대기열에 등록되어 있습니다.");
         }
+        Long id = reservationWaitingDao.create(reservationWaitingCommand);
+        ReservationWaiting reservationWaiting = reservationWaitingDao.findReservationWaitingById(id)
+                .orElseThrow(() -> new ConcurrencyConflictException("대기열 생성 과정에서 오류가 발생했습니다."));
 
-        try {
-            Long id = reservationWaitingDao.create(reservationWaitingCommand);
-            ReservationWaiting reservationWaiting = reservationWaitingDao.findReservationWaitingById(id)
-                    .orElseThrow(() -> new DataIntegrityViolationException("대기열 생성 과정에서 오류가 발생했습니다."));
+        return ReservationWaitingResponse.from(reservationWaiting);
 
-            return ReservationWaitingResponse.from(reservationWaiting);
-        } catch (DuplicateKeyException e) {
-            throw new InvalidInputException("이미 대기열에 등록되어 있습니다.");
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
-        }
 
     }
 
     public void delete(Long id) {
-        long deleted = reservationWaitingDao.delete(id);
-        if (deleted == 0) {
-            throw new ResourceNotFoundException("해당 예약 대기가 존재하지 않습니다.");
-        }
+        reservationWaitingDao.delete(id);
     }
 
     public List<ReservationWaitingResponse> readAll() {
