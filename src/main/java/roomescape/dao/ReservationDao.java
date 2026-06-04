@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -141,16 +144,34 @@ public class ReservationDao {
 
     @Transactional
     public Reservation save(Reservation reservation) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", reservation.getName());
-        params.put("date", reservation.getDate());
-        params.put("time_id", reservation.getTime().getId());
-        params.put("theme_id", reservation.getTheme().getId());
-        params.put("status", reservation.getStatus());
+        String sql = """
+                INSERT INTO reservation (name, date, time_id, theme_id, status)
+                SELECT ?, ?, ?, ?,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM reservation
+                    WHERE date = ? AND time_id = ? AND theme_id = ?  AND status = 'CONFIRMED'
+                ) THEN 'WAITING' ELSE 'CONFIRMED' END
+                """;
 
-        Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update( con -> {
+            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, reservation.getName());
+            ps.setObject(2, reservation.getDate());
+            ps.setLong(3, reservation.getTime().getId());
+            ps.setLong(4, reservation.getTheme().getId());
+
+            ps.setObject(5, reservation.getDate());
+            ps.setLong(6, reservation.getTime().getId());
+            ps.setLong(7, reservation.getTheme().getId());
+
+            return ps;
+        }, keyHolder);
+
+        long id = keyHolder.getKey().longValue();
+
+        return findById(id).get();
     }
 
     @Transactional

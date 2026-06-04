@@ -53,14 +53,12 @@ public class ReservationService {
         ReservationTime time = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
 
-        ReservationStatus status = checkReservationStatus(request.date(), theme, time);
-
         Reservation reservation = new Reservation(
                 request.name(),
                 request.date(),
                 time,
                 theme,
-                status
+                ReservationStatus.PENDING
         );
 
         reservation.validateNotPast(request.date(), time);
@@ -82,13 +80,12 @@ public class ReservationService {
         reservationDao.delete(id);
         reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
 
-        ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
         Reservation newReservation = new Reservation(
                 reservation.getName(),
                 request.date(),
                 time,
                 reservation.getTheme(),
-                status
+                ReservationStatus.PENDING
         );
 
         newReservation.validateNotPast(request.date(), time);
@@ -132,14 +129,6 @@ public class ReservationService {
         ) {
             throw new AlreadyExistsException("이미 예약되었습니다.");
         }
-    }
-
-    private ReservationStatus checkReservationStatus(LocalDate date, Theme theme, ReservationTime time) {
-        if (reservationDao.existsByDateAndThemeAndTime(date, theme, time)) {
-            return ReservationStatus.WAITING;
-        }
-
-        return ReservationStatus.CONFIRMED;
     }
 }
 
