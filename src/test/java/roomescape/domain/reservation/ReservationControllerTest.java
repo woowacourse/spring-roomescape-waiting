@@ -240,7 +240,7 @@ class ReservationControllerTest {
         Long reservationId = insertReservation("유저1", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/reservation/" + reservationId)
+                .when().delete("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
 
@@ -259,7 +259,7 @@ class ReservationControllerTest {
         insertWaiting("대기자2", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/reservation/" + reservationId)
+                .when().delete("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
 
@@ -285,7 +285,7 @@ class ReservationControllerTest {
     @Test
     void deleteReservation_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-                .when().delete("/reservation/999")
+                .when().delete("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("해당 reservation id를 찾을 수 없습니다."));
@@ -306,7 +306,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
 
@@ -336,7 +336,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(401)
                 .body("message", is("해당 예약을 삭제할 권한이 없습니다."));
@@ -354,7 +354,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/999")
+                .when().patch("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("해당 reservation id를 찾을 수 없습니다."));
@@ -374,7 +374,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("해당 time id를 찾을 수 없습니다."));
@@ -394,7 +394,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(422)
                 .body("message", is("이미 지난 날짜의 예약은 생성할 수 없습니다."));

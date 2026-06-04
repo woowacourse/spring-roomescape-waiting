@@ -68,7 +68,7 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/reservation/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id
     ) {
@@ -76,7 +76,7 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/reservation/{id}")
+    @PatchMapping("/reservations/{id}")
     public ResponseEntity<Void> updateMyReservation(
             @PathVariable Long id,
             @RequestBody ReservationFixRequest request
