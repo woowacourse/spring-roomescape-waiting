@@ -84,4 +84,21 @@ class ReservationTest {
         Reservation future = Reservation.restore(1L, "현미밥", LocalDate.now().plusDays(1), time, theme);
         assertThat(future.isPast(clock)).isFalse();
     }
+
+    @Test
+    @DisplayName("예약하는 날짜가 과거면 예외를 반환한다")
+    void 수정할_날짜가_과거면_예외() {
+        Reservation reservation = factory.create("무빙", futureDate, time, theme);
+        assertThatThrownBy(() -> reservation.reschedule(LocalDate.now().minusDays(1), time, clock))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("이미 지난 시간으로 변경할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("수정할 날짜로 예약을 변경한다")
+    void 예약_날짜_수정() {
+        Reservation reservation = factory.create("무빙", futureDate, time, theme);
+        Reservation validReservation = reservation.reschedule(LocalDate.now().plusDays(5), time, clock);
+        assertThat(validReservation.getDate()).isEqualTo(LocalDate.now().plusDays(5));
+    }
 }
