@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.Reservation;
@@ -28,17 +27,18 @@ import roomescape.exception.domain.ThemeException;
 @Transactional(readOnly = true)
 public class ReservationService {
 
+    private final SlotService slotService;
+
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
-    private final SlotDao slotDao;
     private final WaitingDao waitingDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, WaitingDao waitingDao) {
+    public ReservationService(SlotService slotService, ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, WaitingDao waitingDao) {
+        this.slotService = slotService;
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
-        this.slotDao = slotDao;
         this.waitingDao = waitingDao;
     }
 
@@ -46,16 +46,12 @@ public class ReservationService {
     public ReservationResponse create(ReservationRequest request, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
-        Slot slot = createSlot(request.date(), reservationTime, theme);
+        Slot slot = slotService.findOrCreate(request.date(), reservationTime, theme);
 
         Reservation reservation = request.toReservation(slot, currentDateTime);
         validateUniqueReservation(theme.getId(), reservation.getDate(), reservationTime.getId());
         Reservation savedReservation = reservationDao.save(reservation);
         return ReservationResponse.from(savedReservation);
-    }
-
-    private Slot createSlot(LocalDate date, ReservationTime reservationTime, Theme theme) {
-        return slotDao.findOrCreate(new Slot(date, reservationTime, theme));
     }
 
     private void validateUniqueReservation(long themeId, LocalDate date, long timeId) {
@@ -99,7 +95,7 @@ public class ReservationService {
         validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
         validateUniqueReservationForUpdate(reservation, request.date(), reservationTime);
 
-        Slot newSlot = createSlot(request.date(), reservationTime, reservation.getTheme());
+        Slot newSlot = slotService.findOrCreate(request.date(), reservationTime, reservation.getTheme());
         validateSlotChanged(previousSlot, newSlot);
         Reservation updatedReservation = reservation.updateReservation(newSlot);
         reservationDao.update(updatedReservation);
