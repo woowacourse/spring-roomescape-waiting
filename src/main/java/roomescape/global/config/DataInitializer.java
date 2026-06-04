@@ -129,8 +129,8 @@ public class DataInitializer implements ApplicationRunner {
             LocalDateTime updatedAt = targetDate.atStartOfDay();
 
             jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id, deleted_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                name, java.sql.Date.valueOf(targetDate), timeId, themeId, java.sql.Timestamp.valueOf(LocalDateTime.of(1970, 1, 1, 0, 0, 0)), java.sql.Timestamp.valueOf(updatedAt)
+                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id, updated_at) VALUES (?, ?, ?, ?, ?)",
+                name, java.sql.Date.valueOf(targetDate), timeId, themeId, java.sql.Timestamp.valueOf(updatedAt)
             );
         }
     }

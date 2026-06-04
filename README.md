@@ -69,7 +69,6 @@ erDiagram
         DATE reservation_date "예약 날짜"
         BIGINT time_id FK
         BIGINT theme_id FK
-        TIMESTAMP deleted_at "삭제 일시"
     }
 
     theme ||--o{ reservation : "has"

@@ -33,7 +33,7 @@ public class DatabaseHelper {
 
     public void insertReservationWaitingDirectly(String name, LocalDate date, Long timeId, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id, deleted_at) VALUES (?, ?, ?, ?, '1970-01-01 00:00:00')",
+                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name, java.sql.Date.valueOf(date), timeId, themeId
         );
     }
