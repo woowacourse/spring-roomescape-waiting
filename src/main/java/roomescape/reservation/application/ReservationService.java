@@ -97,9 +97,22 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id));
+        Reservation targetReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ReservationErrorCode.RESERVATION_NOT_FOUND,
+                        id
+                ));
         reservationRepository.deleteById(id);
+
+        try {
+            waitingService.promoteNextWaiting(
+                    targetReservation.getDate(),
+                    targetReservation.getTime(),
+                    targetReservation.getTheme()
+            );
+        } catch (BusinessException | DataAccessException ignored) {
+            // 대기자 승격 실패는 예약 취소를 막지 않음.
+        }
     }
 
     @Transactional
