@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -87,14 +86,21 @@ public class UserReservationService {
         if (isConfirmed) {
             reservationRepository.deleteById(id);
             waitingRepository.findFirstWaiting(date, timeId, themeId)
-                    .ifPresent(waiting -> {
-                        reservationRepository.save(waiting);
-                        waitingRepository.deleteById(waiting.getId());
-                    });
+                    .ifPresent(this::promoteWaitingToReservation);
             return;
         }
-        waitingRepository.deleteById(id);
+
+        cancelWaiting(id);
         log.info("사용자 대기 취소 완료: waitingId={}, name={}", id, name);
+    }
+
+    private void promoteWaitingToReservation(Reservation waiting) {
+        reservationRepository.save(waiting);
+        cancelWaiting(waiting.getId());
+    }
+
+    private void cancelWaiting(Long waitingId) {
+        waitingRepository.deleteById(waitingId);
     }
 
     private RuntimeException diagnoseError(Long id) {
