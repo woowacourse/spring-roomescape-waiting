@@ -67,28 +67,17 @@ public class ReservationDao {
                 """, RESERVATION_ROW_MAPPER, name);
     }
 
-    public Reservation findById(Long id) {
-        return jdbcTemplate.queryForObject("""
+    public List<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
+        return jdbcTemplate.query("""
                     SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status, r.requested_at
+                           t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                           r.status, r.requested_at
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
-                    WHERE r.id = ?
-                """, (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
-            Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
-                    rs.getString("url"));
-            return new Reservation(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getDate("date").toLocalDate(),
-                    time,
-                    theme,
-                    rs.getTimestamp("requested_at").toLocalDateTime(),
-                    ReservationStatus.valueOf(rs.getString("status")));
-        }, id);
+                    WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
+                    ORDER BY r.requested_at
+                """, RESERVATION_ROW_MAPPER, date, timeId, themeId);
     }
 
     public List<Reservation> findAll() {
