@@ -42,6 +42,10 @@ public class Reservation {
         return this.status == ReservationStatus.RESERVED;
     }
 
+    public boolean isCanceled() {
+        return this.status == ReservationStatus.CANCELED;
+    }
+
     public Long getId() {
         return id;
     }

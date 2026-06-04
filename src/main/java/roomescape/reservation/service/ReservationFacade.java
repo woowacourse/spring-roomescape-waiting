@@ -2,6 +2,8 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ResourceInUseException;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
@@ -55,8 +57,10 @@ public class ReservationFacade {
         return reservationService.findById(id);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
-        reservationService.deleteReservedByNameAndReservationId(name, reservationId);
+        reservationService.deleteMyReservation(reservationId, name);
+        reservationService.promoteFirstWaiting(reservationId);
     }
 
     public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {

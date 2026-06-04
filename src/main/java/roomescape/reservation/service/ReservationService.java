@@ -69,8 +69,19 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
+        reservationDao.delete(id);
+    }
+
+    public void deleteMyReservation(Long id, String name) {
         Reservation reservation = reservationDao.findById(id);
-        if (reservation.isReserved()) {
+        validateReservationAuthority(name, reservation);
+        validateIsNotReserved(reservation, ReservationStatus.RESERVED, "예약 상태의 예약만 취소할 수 있습니다.");
+        reservationDao.delete(id);
+    }
+
+    public void promoteFirstWaiting(Long id) {
+        Reservation reservation = reservationDao.findById(id);
+        if (reservation.isCanceled()) {
             reservationDao.findFirstWaitingByDateTimeTheme(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
             ).ifPresent(waiting -> {
@@ -78,28 +89,16 @@ public class ReservationService {
                 reservationDao.updateStatus(waiting.getId(), ReservationStatus.RESERVED);
             });
         }
-        reservationDao.delete(id);
     }
 
     public boolean existsByTimeId(Long timeId) {
         return reservationDao.existsByTimeId(timeId);
     }
 
-    public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
-        Reservation reservation = reservationDao.findById(reservationId);
-        validateReservationAuthority(name, reservation);
-        if (reservation.getStatus() != ReservationStatus.RESERVED) {
-            throw new InvalidReservationStateException("예약 상태의 예약만 취소할 수 있습니다.");
-        }
-        delete(reservationId);
-    }
-
     public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
-        if (reservation.getStatus() != ReservationStatus.WAITING) {
-            throw new InvalidReservationStateException("대기 상태의 예약만 취소할 수 있습니다.");
-        }
+        validateIsNotReserved(reservation, ReservationStatus.WAITING, "대기 상태의 예약만 취소할 수 있습니다.");
         reservationDao.delete(reservationId);
     }
 
@@ -112,6 +111,13 @@ public class ReservationService {
 
     public List<MyReservationResponse> findAllByName(String name) {
         return reservationDao.findAllByName(name);
+    }
+
+    private static void validateIsNotReserved(Reservation reservation, ReservationStatus reserved,
+        String message) {
+        if (reservation.getStatus() != reserved) {
+            throw new InvalidReservationStateException(message);
+        }
     }
 
     private static void validateReservationAuthority(String name, Reservation reservation) {
