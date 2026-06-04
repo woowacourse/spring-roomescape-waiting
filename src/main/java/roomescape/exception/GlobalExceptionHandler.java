@@ -3,6 +3,7 @@ package roomescape.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -26,6 +27,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final String DETAIL_VALIDATION_ERROR = "요청 본문의 일부 필드가 유효하지 않습니다.";
     private static final String DETAIL_DUPLICATE_KEY = "요청이 현재 상태와 충돌하여 처리할 수 없습니다.";
+    private static final String DETAIL_TRANSIENT = "일시적인 문제로 요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.";
     private static final String DETAIL_INTERNAL_ERROR = "요청을 처리하는 중 알 수 없는 오류가 발생했습니다.";
     private static final String ERRORS_PROPERTY = "errors";
     private static final String POINTER_PREFIX = "/";
@@ -57,6 +59,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ProblemDetail handleBusinessRuleViolation(BusinessRuleViolationException ex, WebRequest request) {
         return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ProblemType.BUSINESS_RULE_VIOLATION, ex, request);
+    }
+
+    @ExceptionHandler(TransientDataAccessException.class)
+    public ProblemDetail handleTransient(TransientDataAccessException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, DETAIL_TRANSIENT);
+        applyType(problem, ProblemType.SERVICE_UNAVAILABLE, request);
+        logException(ex, status, request);
+        return problem;
     }
 
     @ExceptionHandler(Exception.class)
