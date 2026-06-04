@@ -2,6 +2,8 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -15,6 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.ReservationCancellationUseCase;
 import roomescape.application.command.ReservationCommandService;
@@ -23,6 +29,7 @@ import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.config.FixedClockConfig;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.repository.ReservationJdbcRepository;
@@ -58,6 +65,9 @@ class ReservationCancellationUseCaseIntegrationTest {
 
     @Autowired
     private Clock clock;
+
+    @MockitoSpyBean
+    private ReservationWaitingCommandService reservationWaitingCommandService;
 
     private Long timeId;
     private Long themeId;
@@ -96,6 +106,30 @@ class ReservationCancellationUseCaseIntegrationTest {
         assertThat(countWaitingsBySlot(future)).isEqualTo(1);
         assertThat(countWaitingsById(firstWaitingId)).isZero();
         assertThat(countWaitingsById(secondWaitingId)).isEqualTo(1);
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void 대기_삭제가_실패하면_예약_삭제와_대기_승격을_롤백한다() {
+        Long reservationId = insertReservation("민욱", future);
+        Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
+        Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
+
+        String errorMessage = "waiting delete failed";
+        doThrow(new RuntimeException(errorMessage))
+                .when(reservationWaitingCommandService)
+                .delete(any(ReservationWaiting.class));
+
+        assertThatThrownBy(() -> reservationCancellationUseCase.deleteReservation(reservationId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage(errorMessage);
+
+        assertThat(findReservationNamesBySlot(future)).containsExactly("민욱");
+        assertThat(countReservationsById(reservationId)).isEqualTo(1);
+        assertThat(countWaitingsById(firstWaitingId)).isEqualTo(1);
+        assertThat(countWaitingsById(secondWaitingId)).isEqualTo(1);
+        assertThat(countWaitingsBySlot(future)).isEqualTo(2);
     }
 
     @Test
