@@ -53,7 +53,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting(null, "브라운", new roomescape.reservation.domain.ReservationSlot(futureDate, time, theme), futureDate.atStartOfDay());
 
         // when & then
-        assertThatCode(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 4, 10, 0)))
+        assertThatCode(() -> waiting.validateDeletable("브라운", LocalDateTime.of(2026, 5, 4, 10, 0)))
                 .doesNotThrowAnyException();
     }
 
@@ -67,7 +67,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting(null, "브라운", new roomescape.reservation.domain.ReservationSlot(pastDate, time, theme), pastDate.atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 6, 10, 0)))
+        assertThatThrownBy(() -> waiting.validateDeletable("브라운", LocalDateTime.of(2026, 5, 6, 10, 0)))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
     }
@@ -82,7 +82,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting(null, "브라운", new roomescape.reservation.domain.ReservationSlot(today, time, theme), today.atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 5, 11, 0)))
+        assertThatThrownBy(() -> waiting.validateDeletable("브라운", LocalDateTime.of(2026, 5, 5, 11, 0)))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
     }
@@ -99,7 +99,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatCode(() -> waiting.validateOwner("브라운")).doesNotThrowAnyException();
+        assertThatCode(() -> waiting.validateDeletable("브라운", java.time.LocalDateTime.now().plusDays(2))).doesNotThrowAnyException();
     }
 
     @Test
@@ -114,7 +114,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateOwner("네오"))
+        assertThatThrownBy(() -> waiting.validateDeletable("네오", java.time.LocalDateTime.now().plusDays(2)))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationWaitingErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -225,3 +225,6 @@ class ReservationWaitingTest {
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 }
+
+
+

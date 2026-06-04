@@ -34,19 +34,20 @@ class ReservationTest {
 
     @Test
     @DisplayName("과거 날짜로 예약을 생성하려 하면 InvalidBusinessStateException을 던진다.")
-    void construct_pastDate_doesNotThrow() {
+    void construct_pastDate_throwsInvalidBusinessStateException() {
         // given
         LocalDate pastDate = LocalDate.now().minusDays(1);
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatCode(() -> new Reservation("브라운", pastDate, reservationTime, theme, requestTime))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> new Reservation("브라운", pastDate, reservationTime, theme, requestTime))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
     @DisplayName("과거 시간으로 예약을 생성하려 하면 InvalidBusinessStateException을 던진다.")
-    void construct_pastTime_doesNotThrow() {
+    void construct_pastTime_throwsInvalidBusinessStateException() {
         // given
         LocalDate today = LocalDate.now();
         LocalTime pastTimeVal = LocalTime.now().minusHours(1);
@@ -54,18 +55,21 @@ class ReservationTest {
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatCode(() -> new Reservation("브라운", today, pastTime, theme, requestTime))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> new Reservation("브라운", today, pastTime, theme, requestTime))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_TIME.getMessage());
     }
 
     @Test
     @DisplayName("예약 소유자 이름이 일치하면 예외가 발생하지 않는다.")
     void validateOwner_matchName_doesNotThrow() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
 
         // when & then
-        assertThatCode(() -> reservation.validateOwner("브라운"))
+        assertThatCode(() -> reservation.validateDeletable("브라운", LocalDateTime.now().plusDays(2)))
                 .doesNotThrowAnyException();
     }
 
@@ -73,10 +77,12 @@ class ReservationTest {
     @DisplayName("예약 소유자 이름이 일치하지 않으면 ForbiddenException을 던진다.")
     void validateOwner_mismatchName_throwsForbiddenException() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateOwner("코니"))
+        assertThatThrownBy(() -> reservation.validateDeletable("코니", java.time.LocalDateTime.now().plusDays(2)))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -85,11 +91,13 @@ class ReservationTest {
     @DisplayName("예약 일자가 과거인 상태에서 validateExpiry 실행 시 InvalidBusinessStateException을 던진다.")
     void validateExpiry_pastDate_throwsInvalidBusinessStateException() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), LocalDate.now().minusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme),
+                LocalDate.now().minusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateExpiry(requestTime))
+        assertThatThrownBy(() -> reservation.validateDeletable("브라운", requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
@@ -100,11 +108,12 @@ class ReservationTest {
         // given
         LocalTime pastTimeVal = LocalTime.now().minusHours(1);
         ReservationTime pastTime = new ReservationTime(2L, pastTimeVal);
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now(), pastTime, theme), LocalDate.now().atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now(), pastTime, theme),
+                LocalDate.now().atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateExpiry(requestTime))
+        assertThatThrownBy(() -> reservation.validateDeletable("브라운", requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_TIME.getMessage());
     }
@@ -113,7 +122,9 @@ class ReservationTest {
     @DisplayName("소유자가 동일하고 날짜가 유효하면 성공적으로 예약을 수정한다.")
     void update_validInput_returnsUpdatedReservation() {
         // given
-        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation original = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         LocalDate newDate = LocalDate.now().plusDays(2);
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
         LocalDateTime requestTime = LocalDateTime.now();
@@ -130,7 +141,9 @@ class ReservationTest {
     @DisplayName("예약 수정 시 날짜와 시간이 null이면 기존의 날짜와 시간을 유지한다.")
     void update_nullInput_keepsOriginalValues() {
         // given
-        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation original = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when
@@ -145,7 +158,9 @@ class ReservationTest {
     @DisplayName("소유자가 아닌 사람이 수정을 요청하면 ForbiddenException을 던진다.")
     void update_mismatchOwner_throwsForbiddenException() {
         // given
-        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation original = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
@@ -158,7 +173,9 @@ class ReservationTest {
     @DisplayName("이미 만료된 예약건에 대해 수정을 요청하면 InvalidBusinessStateException을 던진다.")
     void update_expiredOriginalReservation_doesNotThrow() {
         // given
-        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), LocalDate.now().minusDays(1).atStartOfDay());
+        Reservation original = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme),
+                LocalDate.now().minusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
@@ -170,7 +187,9 @@ class ReservationTest {
     @DisplayName("수정하려는 타겟 시간대가 이미 지난 과거인 경우 InvalidBusinessStateException을 던진다.")
     void update_expiredNewDate_doesNotThrow() {
         // given
-        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation original = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then

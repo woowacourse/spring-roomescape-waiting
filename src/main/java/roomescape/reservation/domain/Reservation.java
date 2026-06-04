@@ -57,13 +57,20 @@ public class Reservation {
         return newTime;
     }
 
-    public void validateOwner(String name) {
+    public void validateDeletable(String name, LocalDateTime requestTime) {
+        if (name != null) {
+            validateOwner(name);
+        }
+        validateExpiry(requestTime);
+    }
+
+    private void validateOwner(String name) {
         if (!this.name.equals(name)) {
             throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL);
         }
     }
 
-    public void validateExpiry(LocalDateTime requestTime) {
+    private void validateExpiry(LocalDateTime requestTime) {
         if (this.slot.isDateBefore(requestTime.toLocalDate())) {
             throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_DATE);
         }

@@ -31,7 +31,14 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
         validateExpiry(requestTime);
     }
 
-    public void validateExpiry(LocalDateTime current) {
+    public void validateDeletable(String name, LocalDateTime current) {
+        if (name != null) {
+            validateOwner(name);
+        }
+        validateExpiry(current);
+    }
+
+    private void validateExpiry(LocalDateTime current) {
         if (this.slot.isDateBefore(current.toLocalDate())) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_DATE);
         }
@@ -53,7 +60,7 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
         }
     }
 
-    public void validateOwner(String userName) {
+    private void validateOwner(String userName) {
         if (!Objects.equals(this.name, userName)) {
             throw new ForbiddenException(ReservationWaitingErrorCode.AUTHORIZATION_FAIL);
         }
