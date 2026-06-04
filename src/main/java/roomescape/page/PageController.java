@@ -1,0 +1,39 @@
+package roomescape.page;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import roomescape.reservation.application.ReservationService;
+import roomescape.theme.application.ThemeService;
+import roomescape.time.application.ReservationTimeService;
+
+@Controller
+@RequiredArgsConstructor
+public class PageController {
+
+    private final ThemeService themeService;
+    private final ReservationService reservationService;
+    private final ReservationTimeService reservationTimeService;
+    private final Clock clock;
+
+    @GetMapping({"/", "/reservation"})
+    public String reservationPage(Model model) {
+        LocalDate startDate = LocalDate.now(clock).minusDays(7);
+        LocalDate endDate = LocalDate.now(clock).minusDays(1);
+        model.addAttribute("themes", themeService.getThemes(0, 10));
+        model.addAttribute("popularThemes", themeService.getWeeksTopThemes(startDate, endDate, 10));
+        model.addAttribute("today", LocalDate.now(clock));
+        return "reservation";
+    }
+
+    @GetMapping("/admin")
+    public String adminPage(Model model) {
+        model.addAttribute("themes", themeService.getThemes(0, 10));
+        model.addAttribute("times", reservationTimeService.getReservationTimes(0, 10));
+        model.addAttribute("reservations", reservationService.getReservations(0, 10));
+        return "admin";
+    }
+}
