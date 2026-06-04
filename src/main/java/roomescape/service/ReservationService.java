@@ -10,7 +10,6 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
-import roomescape.dto.projection.ReservationOrderProjection;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -18,6 +17,8 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationOrderResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.IdNotFoundException;
 
 @Service
@@ -32,13 +33,28 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
-    public List<ReservationOrderResponse> find(String name) {
-        List<ReservationOrderProjection> response = reservationDao.findByName(name);
-        return response.stream().map(ReservationOrderResponse::from).toList();
+    public List<ReservationOrderResponse> findByName(String name) {
+        List<Reservation> myReservations = reservationDao.findByName(name);
+
+        return myReservations.stream()
+                .map(reservation -> {
+                    long order = calculateOrder(reservation);
+                    return new ReservationOrderResponse(
+                            reservation.getId(),
+                            reservation.getName(),
+                            reservation.getDate(),
+                            ReservationTimeResponse.from(reservation.getTime()),
+                            ThemeResponse.from(reservation.getTheme()),
+                            reservation.getStatus(),
+                            order);
+                })
+                .toList();
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationDao.findAll().stream().map(ReservationResponse::from).collect(Collectors.toList());
+        return reservationDao.findAll().stream()
+                .map(ReservationResponse::from)
+                .collect(Collectors.toList());
     }
 
     public ReservationResponse save(ReservationRequest request, LocalDateTime requestedAt) {
@@ -72,6 +88,26 @@ public class ReservationService {
 
     public void delete(Long id) {
         reservationDao.delete(id);
+    }
+
+
+    private long calculateOrder(Reservation reservation) {
+        boolean exists = reservationDao.existsBy(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getTime());
+        if (!exists) {
+            return 0;
+        }
+
+        List<Reservation> sameSlot = reservationDao.findBySlot(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId());
+
+        return sameSlot.stream()
+                .filter(other -> other.getRequestedAt().isBefore(reservation.getRequestedAt()))
+                .count();
     }
 
     private ReservationTime getValidReservationTime(Long timeId) {
