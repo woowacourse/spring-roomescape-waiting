@@ -32,4 +32,3 @@ CREATE TABLE IF NOT EXISTS reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (name, date, time_id, theme_id)
 );
-
