@@ -70,7 +70,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelReservationByAdmin(Long id) {
-        Reservation reservation = findReservationByIdOrThrow(id);
+        Reservation reservation = findActiveReservationByIdOrThrow(id);
         reservationRepository.update(
             reservation.getId(),
             reservation.update(ReservationStatus.CANCELED, clock)
@@ -82,7 +82,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelUserReservation(Long id) {
-        Reservation reservation = findReservationByIdOrThrow(id);
+        Reservation reservation = findActiveReservationByIdOrThrow(id);
         validateReservationDeletionAllowed(reservation);
         reservationRepository.update(
             reservation.getId(),
@@ -95,7 +95,7 @@ public class ReservationService {
 
     @Transactional
     public void updateReservation(Long id, UpdateReservationRequest request) {
-        Reservation reservation = findReservationByIdOrThrow(id);
+        Reservation reservation = findActiveReservationByIdOrThrow(id);
         ReservationSlot currentReservationSlot = reservation.getReservationSlot();
         ReservationSlot updatedReservationSlot = resolveUpdatedReservationSlot(currentReservationSlot, request);
 
@@ -258,7 +258,7 @@ public class ReservationService {
         return reservationDate.isSame(today) && reservationTime.isBefore(now);
     }
 
-    private Reservation findReservationByIdOrThrow(Long id) {
+    private Reservation findActiveReservationByIdOrThrow(Long id) {
         return reservationRepository.findActiveReservation(id)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
     }
