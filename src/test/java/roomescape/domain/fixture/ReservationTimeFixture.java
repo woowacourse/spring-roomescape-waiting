@@ -3,11 +3,12 @@ package roomescape.domain.fixture;
 import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.TimeStatus;
+import roomescape.support.TestDateTimes;
 
 public class ReservationTimeFixture {
 
     public static ReservationTime createDefault() {
-        return ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
+        return ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
     }
 
     public static ReservationTime createWithTime(LocalTime time) {
@@ -15,6 +16,6 @@ public class ReservationTimeFixture {
     }
 
     public static ReservationTime createInactive() {
-        return ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.INACTIVE);
+        return ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.INACTIVE);
     }
 }

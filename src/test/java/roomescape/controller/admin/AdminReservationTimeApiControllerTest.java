@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,7 @@ import roomescape.controller.admin.fixture.AdminReservationTimeApiRequestFixture
 import roomescape.service.ReservationTimeService;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.result.ReservationTimeResult;
+import roomescape.support.TestDateTimes;
 
 @WebMvcTest(AdminReservationTimeApiController.class)
 class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
@@ -113,7 +113,7 @@ class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 전체_시간_조회_요청시_200OK와_시간_정보들을_응답한다() {
         // given
-        ReservationTimeResult timeResult = new ReservationTimeResult(1L, LocalTime.of(10, 0), "ACTIVE");
+        ReservationTimeResult timeResult = new ReservationTimeResult(1L, TestDateTimes.defaultTime(), "ACTIVE");
         when(reservationTimeService.getAllReservationTimes()).thenReturn(List.of(timeResult));
 
         // when & then

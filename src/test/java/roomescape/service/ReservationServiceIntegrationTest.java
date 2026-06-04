@@ -2,8 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.service.command.ReservationCommand;
 import roomescape.support.BaseIntegrationTest;
+import roomescape.support.DatabaseCleaner;
 import roomescape.support.ReservationDataSource;
+import roomescape.support.TestDateTimes;
 
 class ReservationServiceIntegrationTest extends BaseIntegrationTest {
 
@@ -23,18 +23,20 @@ class ReservationServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ReservationDataSource reservationDataSource;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
     @BeforeEach
     void setUp() {
-        reservationDataSource.clearTable();
-        reservationDataSource.clearId();
+        databaseCleaner.clear();
         reservationDataSource.insertTheme("공포의 테마", "공포 테마", "https://image.com/image.png");
-        reservationDataSource.insertReservationTime(LocalTime.of(10, 0));
+        reservationDataSource.insertReservationTime(TestDateTimes.defaultTime());
     }
 
     @Test
     void 동시에_2명이_예약하면_1명만_성공해야_한다() throws InterruptedException {
         // given
-        ReservationCommand command = new ReservationCommand("이프", LocalDate.now().plusDays(1), 1L, 1L);
+        ReservationCommand command = new ReservationCommand("이프", TestDateTimes.tomorrow(), 1L, 1L);
         int threadCount = 2;
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger errorCount = new AtomicInteger(0);

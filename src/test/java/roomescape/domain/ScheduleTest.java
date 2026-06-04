@@ -3,20 +3,20 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static roomescape.support.TestDateTimes.FIXED;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.RoomEscapeException;
+import roomescape.support.TestDateTimes;
 
 class ScheduleTest {
-
-    final LocalDateTime FIXED = LocalDateTime.of(2025, 1, 1, 12, 0);
 
     @Test
     void 날짜_정보가_없다면_예외가_발생한다() {
         // given
-        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
+        ReservationTime time = ReservationTime.create(TestDateTimes.defaultTime());
 
         // when & then
         assertThatThrownBy(() -> Schedule.of(null, time))
@@ -76,12 +76,12 @@ class ScheduleTest {
     @Test
     void 날짜와_시간이_같으면_동등하다() {
         // given
-        LocalDate date = LocalDate.now();
-        ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
+        LocalDate date = TestDateTimes.today();
+        ReservationTime time = ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
 
         // when
         Schedule first = Schedule.of(date, time);
-        Schedule second = Schedule.of(date, ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE));
+        Schedule second = Schedule.of(date, ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE));
 
         // then
         assertThat(first).isEqualTo(second);

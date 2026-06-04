@@ -12,6 +12,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.support.BaseIntegrationTest;
 import roomescape.support.DatabaseCleaner;
+import roomescape.support.TestDateTimes;
 
 class JdbcReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
 
@@ -29,7 +30,7 @@ class JdbcReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 시간을_저장하고_ID로_조회한다() {
         // given
-        LocalTime reservationStartTime = LocalTime.of(10, 0);
+        LocalTime reservationStartTime = TestDateTimes.defaultTime();
         ReservationTime time = ReservationTime.create(reservationStartTime);
 
         // when
@@ -44,7 +45,7 @@ class JdbcReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 같은_시간으로_저장하면_참조_무결성_예외가_발생한다() {
         // given
-        LocalTime reservationStartTime = LocalTime.of(10, 0);
+        LocalTime reservationStartTime = TestDateTimes.defaultTime();
         ReservationTime time = ReservationTime.create(reservationStartTime);
         reservationTimeRepository.save(time);
 
@@ -57,11 +58,11 @@ class JdbcReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 특정_시간이_존재하는지_확인한다() {
         // given
-        LocalTime targetTime = LocalTime.of(10, 0);
+        LocalTime targetTime = TestDateTimes.defaultTime();
         reservationTimeRepository.save(ReservationTime.create(targetTime));
 
         // when & then
-        LocalTime otherTime = LocalTime.of(11, 0);
+        LocalTime otherTime = TestDateTimes.hour(11);
         assertThat(reservationTimeRepository.existsByStartAt(targetTime)).isTrue();
         assertThat(reservationTimeRepository.existsByStartAt(otherTime)).isFalse();
     }

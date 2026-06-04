@@ -1,7 +1,6 @@
 package roomescape.support;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,14 +44,14 @@ public class ThemeDataSource {
     public void insertTimeByStartToEndWithOneHourRotation(int startHour, int endHour) {
         String sql = "INSERT INTO reservation_time (start_at, status) VALUES (?, ?)";
         for (int i = startHour; i <= endHour; i++) {
-            jdbcTemplate.update(sql, LocalTime.of(i, 0), TimeStatus.ACTIVE.toString());
+            jdbcTemplate.update(sql, TestDateTimes.hour(i), TimeStatus.ACTIVE.toString());
         }
     }
 
     public void insertReservationByTheme(long themeId, int reservationCount) {
         for (long timeId = 1L; timeId <= reservationCount; timeId++) {
             jdbcTemplate.update("INSERT INTO reservation (date, theme_id, time_id) VALUES (?, ?, ?)",
-                    LocalDate.now(), themeId, timeId);
+                    TestDateTimes.today(), themeId, timeId);
             Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
             insertReservationEntry("바니", reservationId);
         }

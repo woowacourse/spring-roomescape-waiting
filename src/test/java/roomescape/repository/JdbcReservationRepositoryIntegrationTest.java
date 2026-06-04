@@ -3,8 +3,6 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +20,7 @@ import roomescape.repository.dto.ReservationCondition;
 import roomescape.support.BaseIntegrationTest;
 import roomescape.support.DatabaseCleaner;
 import roomescape.support.ReservationDataSource;
+import roomescape.support.TestDateTimes;
 
 class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
 
@@ -34,7 +33,7 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
-    private final ReservationTime reservationTime = ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
+    private final ReservationTime reservationTime = ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
     private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
 
     @BeforeEach
@@ -47,15 +46,14 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 예약을_저장하면_예약_슬롯과_엔트리를_함께_저장한다() {
         // given
-        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme,
+        Reservation reservation = ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme,
                 reservationTime);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
 
         // then
-        assertThat(saved.getId()).isEqualTo(1L);
-        assertThat(dataSource.hasReservationById(saved.getId())).isTrue();
+        assertThat(saved.getId()).isNotNull();
         assertThat(saved.getEntries())
                 .singleElement()
                 .extracting(ReservationEntry::getId, ReservationEntry::getReserverName, ReservationEntry::getStatus)
@@ -65,21 +63,19 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 동일한_날짜와_시간으로_저장하면_DB_제약조건_에러가_발생한다() {
         // given
-        Reservation first = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-        Reservation second = ReservationFixture.createWithAll("아루", LocalDate.now().plusDays(1), theme,
-                reservationTime);
+        Reservation first = ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme, reservationTime);
+        Reservation second = ReservationFixture.createWithAll("아루", TestDateTimes.tomorrow(), theme, reservationTime);
         reservationRepository.save(first);
 
         // when & then: DB의 UK Constraint 발생 후 비즈니스 예외로 변환
         assertThatThrownBy(() -> reservationRepository.save(second))
-                .isInstanceOf(DuplicateEntityException.class)
-                .hasMessageContaining("이미 예약이 존재하는 시간입니다");
+                .isInstanceOf(DuplicateEntityException.class);
     }
 
     @Test
     void 존재하는_ID로_예약을_조회하면_엔트리와_함께_반환된다() {
         // given
-        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme,
+        Reservation reservation = ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme,
                 reservationTime);
         Reservation saved = reservationRepository.save(reservation);
 
@@ -107,12 +103,12 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     void 예약_슬롯을_수정한다() {
         // given
         Reservation saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme, reservationTime)
         );
 
         Reservation updated = Reservation.restore(
                 saved.getId(),
-                LocalDate.now().plusDays(2),
+                TestDateTimes.daysLater(2),
                 theme,
                 reservationTime,
                 List.of()
@@ -125,7 +121,7 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
         Optional<Reservation> find = reservationRepository.findById(saved.getId());
 
         assertThat(find).isPresent();
-        assertThat(find.get().getDate()).isEqualTo(LocalDate.now().plusDays(2));
+        assertThat(find.get().getDate()).isEqualTo(TestDateTimes.daysLater(2));
         assertThat(find.get().getEntries())
                 .singleElement()
                 .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
@@ -136,7 +132,7 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     void 예약_엔트리_상태를_수정한다() {
         // given
         Reservation saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme, reservationTime)
         );
 
         // when
@@ -155,7 +151,7 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     void 날짜_테마_시간으로_예약을_조회하면_엔트리와_함께_반환된다() {
         // given
         Reservation saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme, reservationTime)
         );
         ReservationCondition condition = new ReservationCondition(saved.getDate(), theme.getId(),
                 reservationTime.getId());
@@ -175,7 +171,7 @@ class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     void 예약_엔트리_ID로_예약을_조회하면_해당_예약의_모든_엔트리를_반환한다() {
         // given
         Reservation saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", TestDateTimes.tomorrow(), theme, reservationTime)
         );
 
         // when

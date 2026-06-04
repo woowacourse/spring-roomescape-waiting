@@ -3,17 +3,17 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
-import static roomescape.domain.fixture.ReservationFixture.FIXED;
+import static roomescape.support.TestDateTimes.FIXED;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
+import roomescape.support.TestDateTimes;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.exception.RoomEscapeException;
@@ -230,7 +230,7 @@ class ReservationTest {
         LocalDate date = FIXED.plusDays(1).toLocalDate();
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
-        ReservationTime anotherTime = ReservationTime.restore(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
+        ReservationTime anotherTime = ReservationTime.restore(2L, TestDateTimes.hour(15), TimeStatus.ACTIVE);
 
         // when & then
         assertThat(reservation.isSameSchedule(date.plusDays(1), reservationTime)).isFalse();

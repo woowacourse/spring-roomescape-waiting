@@ -2,7 +2,7 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.domain.fixture.ReservationFixture.FIXED;
+import static roomescape.support.TestDateTimes.FIXED;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

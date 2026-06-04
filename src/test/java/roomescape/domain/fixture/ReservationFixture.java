@@ -1,16 +1,14 @@
 package roomescape.domain.fixture;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.support.TestDateTimes;
 
 public class ReservationFixture {
-
-    public static final LocalDateTime FIXED = LocalDateTime.of(2025, 1, 1, 12, 0);
 
     public static Stream<Arguments> invalidReservationConstructor() {
         return Stream.of(
@@ -23,14 +21,14 @@ public class ReservationFixture {
                 ),
                 // 테마 정보가 누락된 경우
                 Arguments.of(
-                        LocalDate.now().plusDays(1),
+                        TestDateTimes.tomorrow(),
                         null,
                         ReservationTimeFixture.createDefault(),
                         "테마 정보는 비어있을 수 없습니다."
                 ),
                 // 예약 시간 정보가 누락된 경우
                 Arguments.of(
-                        LocalDate.now().plusDays(1),
+                        TestDateTimes.tomorrow(),
                         ThemeFixture.createDefaultTheme(),
                         null,
                         "예약 날짜 및 시간 정보는 비어있을 수 없습니다."
@@ -39,11 +37,11 @@ public class ReservationFixture {
     }
 
     public static Reservation createDefaultReservationWithName(String name) {
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = TestDateTimes.tomorrow();
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
         Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name, FIXED);
+        reservation.reserve(name, TestDateTimes.FIXED);
         return reservation;
     }
 
@@ -51,13 +49,13 @@ public class ReservationFixture {
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
         Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name, FIXED);
+        reservation.reserve(name, TestDateTimes.FIXED);
         return reservation;
     }
 
     public static Reservation createWithAll(String name, LocalDate date, Theme theme, ReservationTime time) {
         Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name, FIXED);
+        reservation.reserve(name, TestDateTimes.FIXED);
         return reservation;
     }
 }
