@@ -83,7 +83,7 @@ public class ReservationSlot {
         reservations.findActiveById(reservationId)
                 .ifPresent(reservation -> {
                     validateCancelable(reservation);
-                    boolean wasReserved = reservation.isReserved();
+                    boolean wasReserved = reservation.isActiveReserved();
                     reservation.cancel();
                     promoteFirstWaiting(wasReserved);
                 });
@@ -95,7 +95,7 @@ public class ReservationSlot {
 
     public Reservation findReservedReservation(long reservationId) {
         return reservations.findActiveById(reservationId)
-                .filter(Reservation::isReserved)
+                .filter(Reservation::isActiveReserved)
                 .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
     }
 
@@ -127,7 +127,7 @@ public class ReservationSlot {
     }
 
     private void validateCancelable(Reservation reservation) {
-        if (reservation.isReserved() && isCancelableDate()) {
+        if (reservation.isActiveReserved() && isCancelableDate()) {
             throw new RoomEscapeException("예약 하루 전에는 취소할 수 없습니다.");
         }
     }

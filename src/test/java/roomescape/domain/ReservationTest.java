@@ -41,41 +41,39 @@ class ReservationTest {
     }
 
     @Test
-    void 예약_상태이면_true를_반환한다() {
+    void 활성_예약_상태이면_true를_반환한다() {
         // given
         Reservation reservation = createEntry(1L, ReservationStatus.RESERVED);
 
         // when & then
-        assertThat(reservation.isReserved()).isTrue();
+        assertThat(reservation.isActiveReserved()).isTrue();
     }
 
     @Test
-    void 대기_상태이면_true를_반환한다() {
+    void 활성_대기_상태이면_true를_반환한다() {
         // given
         Reservation reservation = createEntry(1L, ReservationStatus.WAITING);
 
         // when & then
-        assertThat(reservation.isWaiting()).isTrue();
+        assertThat(reservation.isActiveWaiting()).isTrue();
     }
 
     @Test
-    void 예약_또는_대기_상태이면_활성_상태이다() {
+    void 활성_상태에서_같은_식별자이면_true를_반환한다() {
         // given
-        Reservation reserved = createEntry(1L, ReservationStatus.RESERVED);
-        Reservation waiting = createEntry(2L, ReservationStatus.WAITING);
+        Reservation reservation = createEntry(1L, ReservationStatus.RESERVED);
 
         // when & then
-        assertThat(reserved.isActive()).isTrue();
-        assertThat(waiting.isActive()).isTrue();
+        assertThat(reservation.isActiveWithId(1L)).isTrue();
     }
 
     @Test
-    void 취소_상태이면_활성_상태가_아니다() {
+    void 취소_상태이면_활성_예약_상태가_아니다() {
         // given
         Reservation reservation = createCanceledEntry(1L, "이프", ReservationStatus.RESERVED);
 
         // when & then
-        assertThat(reservation.isActive()).isFalse();
+        assertThat(reservation.isActiveReserved()).isFalse();
     }
 
     @Test

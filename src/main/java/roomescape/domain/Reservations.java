@@ -27,8 +27,7 @@ public class Reservations {
 
     public void promoteFirstWaiting() {
         reservations.stream()
-                .filter(Reservation::isActive)
-                .filter(Reservation::isWaiting)
+                .filter(Reservation::isActiveWaiting)
                 .min(Comparator.comparing(Reservation::getCreatedAt))
                 .ifPresent(Reservation::promote);
     }
@@ -39,14 +38,12 @@ public class Reservations {
 
     public boolean hasReservationByName(String name) {
         return reservations.stream()
-                .filter(Reservation::isActive)
-                .anyMatch(reservation -> reservation.hasSameName(name));
+                .anyMatch(reservation -> reservation.hasSameActiveName(name));
     }
 
     public boolean hasReservedReservation() {
         return reservations.stream()
-                .filter(Reservation::isActive)
-                .anyMatch(Reservation::isReserved);
+                .anyMatch(Reservation::isActiveReserved);
     }
 
     public Optional<Reservation> findById(long id) {
@@ -57,15 +54,13 @@ public class Reservations {
 
     public Optional<Reservation> findActiveById(long id) {
         return reservations.stream()
-                .filter(Reservation::isActive)
-                .filter(reservation -> reservation.isSameId(id))
+                .filter(reservation -> reservation.isActiveWithId(id))
                 .findFirst();
     }
 
     public Optional<Reservation> findActiveEntryByName(String name) {
         return reservations.stream()
-                .filter(Reservation::isActive)
-                .filter(reservation -> reservation.hasSameName(name))
+                .filter(reservation -> reservation.hasSameActiveName(name))
                 .findFirst();
     }
 }

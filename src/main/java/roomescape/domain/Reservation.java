@@ -46,23 +46,39 @@ public class Reservation {
         this.status = ReservationStatus.RESERVED;
     }
 
-    public boolean isReserved() {
-        return this.status == ReservationStatus.RESERVED;
-    }
-
     public boolean isSameId(long id) {
         return this.id != null && this.id.equals(id);
     }
 
-    public boolean isWaiting() {
+    public boolean isActiveReserved() {
+        return isActive() && isReserved();
+    }
+
+    public boolean isActiveWaiting() {
+        return isActive() && isWaiting();
+    }
+
+    public boolean isActiveWithId(long id) {
+        return isActive() && isSameId(id);
+    }
+
+    public boolean hasSameActiveName(String name) {
+        return isActive() && hasSameName(name);
+    }
+
+    private boolean hasSameName(String name) {
+        return this.name.equals(name);
+    }
+
+    private boolean isWaiting() {
         return this.status == ReservationStatus.WAITING;
     }
 
-    public boolean isActive() {
+    private boolean isActive() {
         return this.activeStatus == ReservationActiveStatus.ACTIVE;
     }
 
-    public boolean hasSameName(String name) {
-        return this.name.equals(name);
+    private boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
     }
 }

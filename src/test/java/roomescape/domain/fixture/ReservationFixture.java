@@ -122,7 +122,7 @@ public class ReservationFixture {
     public static long reservedReservationId(ReservationSlot slot) {
         return slot.getReservations()
                 .stream()
-                .filter(Reservation::isReserved)
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
                 .findFirst()
                 .orElseThrow()
                 .getId();
