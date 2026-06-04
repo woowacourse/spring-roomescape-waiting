@@ -121,6 +121,7 @@ public class ReservationApiTest {
         .when().get("/reservations/my?name=누누")
         .then().log().all()
         .statusCode(200)
-        .body("size()", is(0));
+        .body("size()", is(1))
+        .body("[0].status", is("CANCELED"));
   }
 }

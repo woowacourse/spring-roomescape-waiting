@@ -90,7 +90,17 @@ public class ReservationDao {
     jdbcTemplate.update(sql, id);
   }
 
-public boolean existsByTimeId(Long timeId) {
+  public void cancelByNameAndId(String name, Long id) {
+    String sql = """
+        update reservation
+        set status = 'CANCELED'
+        where name = ? and id = ?
+        """;
+
+    jdbcTemplate.update(sql, name, id);
+  }
+
+  public boolean existsByTimeId(Long timeId) {
     String sql = """
         select count(*)
         from reservation
@@ -157,25 +167,6 @@ public boolean existsByTimeId(Long timeId) {
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
 
     return count != null && count > 0;
-  }
-
-  public boolean existsByNameAndReservationId(String name, Long reservationId) {
-    String sql = """
-        select count(*)
-        from reservation
-        where name = ? and id = ?
-        """;
-    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, reservationId);
-
-    return count != null && count > 0;
-  }
-
-  public void deleteByNameAndReservationId(String name, Long reservationId) {
-    String sql = """
-        delete from reservation
-        where name = ? and id = ?
-        """;
-    jdbcTemplate.update(sql, name, reservationId);
   }
 
   public void updateReservation(LocalDate date, Long timeId, String name, Long reservationId) {

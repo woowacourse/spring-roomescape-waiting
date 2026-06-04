@@ -61,8 +61,8 @@ public class ReservationFacade {
         return reservationService.findById(id);
     }
 
-    public void deleteReservationByNameAndReservationId(String name, Long reservationId) {
-        reservationService.deleteByNameAndReservationId(name, reservationId);
+    public void cancelReservationByNameAndId(String name, Long id) {
+        reservationService.cancelReservationByNameAndId(name, id);
     }
 
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {

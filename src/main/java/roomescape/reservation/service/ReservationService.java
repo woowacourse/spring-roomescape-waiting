@@ -56,17 +56,13 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
-    public boolean existsByTimeId(Long timeId) {
-        return reservationDao.existsByTimeId(timeId);
+    public void cancelReservationByNameAndId(String name, Long id) {
+        reservationDao.cancelByNameAndId(name, id);
     }
 
-    public void deleteByNameAndReservationId(String name, Long reservationId) {
-        boolean isExistReservation = reservationDao.existsByNameAndReservationId(name, reservationId);
-        if (!isExistReservation) {
-            throw new IllegalStateException("해당 예약이 이미 존재하지 않습니다.");
-        }
 
-        reservationDao.deleteByNameAndReservationId(name, reservationId);
+    public boolean existsByTimeId(Long timeId) {
+        return reservationDao.existsByTimeId(timeId);
     }
 
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
