@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
@@ -57,7 +58,7 @@ class WaitingPromoterTest {
                     .thenReturn(1);
 
             // when
-            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
@@ -70,7 +71,7 @@ class WaitingPromoterTest {
                     .thenReturn(true);
 
             // when
-            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository, never()).findLowestIdWaitingReservation(any(), any(), any());
@@ -84,7 +85,7 @@ class WaitingPromoterTest {
                     .thenReturn(Optional.empty());
 
             // when
-            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository, never()).changeStatus(any(), any(), any());
@@ -106,7 +107,7 @@ class WaitingPromoterTest {
                     .thenReturn(1);
 
             // when
-            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new Slot(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);

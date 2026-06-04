@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.reservation.repository.ReservationRepository;
 
 @Slf4j
@@ -31,13 +32,13 @@ public class WaitingPromoter {
             backoff = @Backoff(delay = PROMOTION_BACKOFF_MILLIS, multiplier = PROMOTION_BACKOFF_MULTIPLIER)
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void promoteFastestWaiting(SlotReleasedEvent event) {
-        if (reservationRepository.existsActiveReservation(event.date(), event.timeId(), event.themeId())) {
+    public void promoteFastestWaiting(Slot slot) {
+        if (reservationRepository.existsActiveReservation(slot.date(), slot.timeId(), slot.themeId())) {
             return;
         }
 
         Optional<Reservation> candidate = reservationRepository.findLowestIdWaitingReservation(
-                event.date(), event.timeId(), event.themeId());
+                slot.date(), slot.timeId(), slot.themeId());
         if (candidate.isEmpty()) {
             return;
         }
@@ -45,18 +46,17 @@ public class WaitingPromoter {
         int changedRowCount = reservationRepository.changeStatus(
                 candidate.get().getId(), ReservationStatus.WAITING, ReservationStatus.ACTIVE);
 
+        // 후보 대기가 그 사이 사라졌다면 다음 순번으로 재시도한다.
         if (changedRowCount <= 0) {
-            // 후보 대기가 그 사이 사라졌다면 다음 순번으로 재시도한다.
-            // (다른 주체가 이미 승격해 ACTIVE가 생긴 경우라면 위 검증에서 멈춘다)
-            promoteFastestWaiting(event);
+            promoteFastestWaiting(slot);
         }
     }
 
     @Recover
-    public void recoverPromotion(DataAccessException exception, SlotReleasedEvent event) {
+    public void recoverPromotion(DataAccessException exception, Slot slot) {
         log.error(
                 "대기 예약 자동 승격에 재시도 후에도 실패했습니다. date={}, timeId={}, themeId={}",
-                event.date(), event.timeId(), event.themeId(), exception
+                slot.date(), slot.timeId(), slot.themeId(), exception
         );
     }
 }

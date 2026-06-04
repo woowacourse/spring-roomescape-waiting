@@ -325,9 +325,9 @@ class ReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor =
                 ArgumentCaptor.forClass(SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().timeId()).isEqualTo(1L);
-            assertThat(captor.getValue().themeId()).isEqualTo(1L);
-            assertThat(captor.getValue().date()).isEqualTo(futureDate);
+            assertThat(captor.getValue().slot().timeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().themeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().date()).isEqualTo(futureDate);
         }
 
         @Test
@@ -558,9 +558,9 @@ class ReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor = ArgumentCaptor.forClass(
                     SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().timeId()).isEqualTo(1L);
-            assertThat(captor.getValue().themeId()).isEqualTo(1L);
-            assertThat(captor.getValue().date()).isEqualTo(futureDate);
+            assertThat(captor.getValue().slot().timeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().themeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().date()).isEqualTo(futureDate);
         }
 
         @Test

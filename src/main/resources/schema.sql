@@ -50,3 +50,11 @@ ON reservation_time (active_start_at);
 
 CREATE UNIQUE INDEX uq_active_theme
 ON theme (active_name);
+
+CREATE TABLE shedlock (
+    name VARCHAR(64) NOT NULL,
+    lock_until TIMESTAMP(3) NOT NULL,
+    locked_at TIMESTAMP(3) NOT NULL,
+    locked_by VARCHAR(255) NOT NULL,
+    PRIMARY KEY (name)
+);

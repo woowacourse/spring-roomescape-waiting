@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
@@ -718,6 +719,71 @@ class JdbcReservationRepositoryTest {
             Reservation stale = saved.update(new ReserverName("예약자"), date.plusDays(1), time, theme);
             assertThatThrownBy(() -> reservationRepository.update(stale))
                 .isInstanceOf(OptimisticLockingFailureException.class);
+        }
+    }
+
+    @Nested
+    class 죽은_슬롯_조회 {
+
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
+        @Test
+        void 활성_예약_없이_대기만_있는_슬롯을_조회한다() {
+            // given
+            LocalDate date = LocalDate.now().plusYears(1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("대기자"), date, time, theme, ReservationStatus.WAITING));
+
+            // when
+            List<Slot> actual = reservationRepository.findDeadSlots();
+
+            // then
+            assertThat(actual)
+                .extracting(Slot::timeId, Slot::themeId, Slot::date)
+                .containsExactly(tuple(time.getId(), theme.getId(), date));
+        }
+
+        @Test
+        void 활성_예약이_있는_슬롯은_죽은_슬롯이_아니다() {
+            // given
+            LocalDate date = LocalDate.now().plusYears(1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("대기자"), date, time, theme, ReservationStatus.WAITING));
+
+            // when
+            List<Slot> actual = reservationRepository.findDeadSlots();
+
+            // then
+            assertThat(actual).isEmpty();
+        }
+
+        @Test
+        void 같은_슬롯에_대기가_여러개여도_중복없이_하나만_조회한다() {
+            // given
+            LocalDate date = LocalDate.now().plusYears(1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("대기자1"), date, time, theme, ReservationStatus.WAITING));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("대기자2"), date, time, theme, ReservationStatus.WAITING));
+
+            // when
+            List<Slot> actual = reservationRepository.findDeadSlots();
+
+            // then
+            assertThat(actual)
+                .extracting(Slot::timeId, Slot::themeId, Slot::date)
+                .containsExactly(tuple(time.getId(), theme.getId(), date));
         }
     }
 

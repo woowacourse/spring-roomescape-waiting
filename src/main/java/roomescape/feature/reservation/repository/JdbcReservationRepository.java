@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.domain.EntityStatus;
@@ -103,6 +104,32 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
         return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public List<Slot> findDeadSlots() {
+        String sql = """
+                SELECT DISTINCT w.date, w.time_id, w.theme_id
+                FROM reservation w
+                WHERE w.status = 'WAITING'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM reservation a
+                      WHERE a.status = 'ACTIVE'
+                        AND a.date = w.date
+                        AND a.time_id = w.time_id
+                        AND a.theme_id = w.theme_id
+                  )
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new Slot(
+                        rs.getLong("time_id"),
+                        rs.getLong("theme_id"),
+                        rs.getDate("date").toLocalDate()
+                )
+        );
     }
 
     private Reservation mapReservation(ResultSet rs) throws SQLException {

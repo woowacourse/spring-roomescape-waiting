@@ -1,10 +1,8 @@
 package roomescape.feature.reservation.cancel;
 
-import java.time.LocalDate;
+import roomescape.feature.reservation.domain.Slot;
 
 public record SlotReleasedEvent(
-        Long timeId,
-        Long themeId,
-        LocalDate date
+        Slot slot
 ) {
 }

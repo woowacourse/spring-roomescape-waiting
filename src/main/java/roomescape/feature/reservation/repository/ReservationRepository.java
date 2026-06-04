@@ -6,6 +6,7 @@ import java.util.Optional;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 
@@ -16,6 +17,8 @@ public interface ReservationRepository {
     Optional<Reservation> findLowestIdWaitingReservation(LocalDate date, Long timeId, Long themeId);
 
     boolean existsActiveReservation(LocalDate date, Long timeId, Long themeId);
+
+    List<Slot> findDeadSlots();
 
     List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name);
 
