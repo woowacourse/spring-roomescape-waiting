@@ -23,6 +23,7 @@ import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
 import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
 import roomescape.dao.jdbc.StoreJdbcDao;
@@ -59,6 +60,8 @@ class AdminReservationServiceTest {
     private PromotionOutboxWorker promotionOutboxWorker;
     @Autowired
     private ReservationDao reservationDao;
+    @Autowired
+    private WaitingDao waitingDao;
     @Autowired
     private MemberDao memberDao;
     @Autowired
@@ -261,16 +264,13 @@ class AdminReservationServiceTest {
             Reservation reservation = reservationDao.insert(Reservation.createByAdmin(
                     member, pastDate, savedTime1, savedTheme1, new Store(storeId, "강남점")));
             Member waiter = saveMember("대기1", "waiting1@test.com");
-            jdbcTemplate.update(
-                    "INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (?, ?, ?, ?, ?)",
-                    waiter.getId(), pastDate, savedTime1.getId(), savedTheme1.getId(), storeId);
+            waitingDao.insert(Waiting.reconstruct(
+                    null, waiter, pastDate, savedTime1, savedTheme1, new Store(storeId, "강남점")));
 
             adminReservationService.cancelByAdmin(reservation.getId());
             promotionOutboxWorker.processPendingTasks();
 
-            Integer bookedCount = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM reservations WHERE status = 'BOOKED'", Integer.class);
-            assertThat(bookedCount).isZero();
+            assertThat(reservationDao.findAllByMemberId(waiter.getId())).isEmpty();
         }
 
         @Test
