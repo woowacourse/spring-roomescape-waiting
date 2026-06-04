@@ -10,6 +10,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithOrder;
+import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationWaitingRepository;
@@ -82,6 +83,19 @@ class ReservationWaitingServiceMockTest {
 
         assertThatThrownBy(() -> reservationWaitingService.cancelMyReservationWaiting(1L, "브라운"))
                 .isInstanceOf(UnauthorizedException.class);
+        verify(reservationWaitingRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void cancelMyReservationWaiting은_지난_슬롯이면_BusinessRuleViolationException을_던진다() {
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        Reservation pastReservation = new Reservation(1L, "티뉴", LocalDate.of(2020, 1, 1), time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2020, 1, 1, 9, 0), pastReservation);
+        given(reservationWaitingRepository.findById(1L)).willReturn(Optional.of(waiting));
+
+        assertThatThrownBy(() -> reservationWaitingService.cancelMyReservationWaiting(1L, "민욱"))
+                .isInstanceOf(BusinessRuleViolationException.class);
         verify(reservationWaitingRepository, never()).deleteById(anyLong());
     }
 

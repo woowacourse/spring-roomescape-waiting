@@ -186,9 +186,10 @@ class ReservationApplicationServiceMockTest {
     }
 
     @Test
-    void deleteReservation은_대기가_있으면_대기_1번을_예약으로_전환한다() {
+    void deleteReservation은_미래_슬롯에_대기가_있으면_대기_1번을_예약으로_전환한다() {
         Reservation reservation = new Reservation(1L, "민욱", DATE, TIME, THEME);
         ReservationWaiting first = new ReservationWaiting(10L, "브라운", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
+        given(reservationService.findReservation(1L)).willReturn(Optional.of(reservation));
         given(reservationWaitingService.findEarliestByReservationId(1L)).willReturn(Optional.of(first));
 
         applicationService.deleteReservation(1L);
@@ -199,10 +200,23 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void deleteReservation은_대기가_없으면_예약을_삭제한다() {
+        Reservation reservation = new Reservation(1L, "민욱", DATE, TIME, THEME);
+        given(reservationService.findReservation(1L)).willReturn(Optional.of(reservation));
         given(reservationWaitingService.findEarliestByReservationId(1L)).willReturn(Optional.empty());
 
         applicationService.deleteReservation(1L);
 
         verify(reservationService).deleteReservation(1L);
+    }
+
+    @Test
+    void deleteReservation은_지난_예약이면_BusinessRuleViolationException을_던진다() {
+        Reservation past = new Reservation(1L, "티뉴", PAST_DATE, TIME, THEME);
+        given(reservationService.findReservation(1L)).willReturn(Optional.of(past));
+
+        assertThatThrownBy(() -> applicationService.deleteReservation(1L))
+                .isInstanceOf(BusinessRuleViolationException.class);
+        verify(reservationService, never()).deleteReservation(anyLong());
+        verify(reservationService, never()).changeOwner(anyLong(), anyString());
     }
 }

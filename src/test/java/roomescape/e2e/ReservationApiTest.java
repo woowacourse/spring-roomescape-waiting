@@ -450,6 +450,18 @@ class ReservationApiTest {
     }
 
     @Test
+    void 관리자가_지난_예약을_삭제하면_422() {
+        Integer timeId = createTime("11:30");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        Long reservationId = insertPastReservation("민욱", "2020-01-01", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(422);
+    }
+
+    @Test
     void 취소_요청에_이름_파라미터가_없으면_400() {
         Integer timeId = createTime("13:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");

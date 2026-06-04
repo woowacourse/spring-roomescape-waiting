@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -151,6 +152,26 @@ class ReservationWaitingApiTest {
                 .when().delete("/waitings/me/999")
                 .then().log().all()
                 .statusCode(404);
+    }
+
+    @Test
+    void 지난_슬롯의_대기를_취소하면_422() {
+        Integer timeId = createTime("17:30");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        insertPastReservation("티뉴", "2020-01-01", timeId, themeId);
+        Long reservationId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation ORDER BY id DESC LIMIT 1", Long.class);
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)",
+                "민욱", LocalDateTime.of(2020, 1, 1, 9, 0), reservationId);
+        Long waitingId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_waiting ORDER BY id DESC LIMIT 1", Long.class);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().delete("/waitings/me/" + waitingId)
+                .then().log().all()
+                .statusCode(422);
     }
 
     @Test

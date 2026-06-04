@@ -11,6 +11,7 @@ import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,8 +41,12 @@ public class ReservationService {
         return reservationRepository.existsByTimeId(timeId);
     }
 
+    public Optional<Reservation> findReservation(Long id) {
+        return reservationRepository.findById(id);
+    }
+
     public Reservation findMyReservation(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = findReservation(id)
                 .orElseThrow(() -> NotFoundException.reservation(id));
         if (!reservation.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);

@@ -36,6 +36,7 @@ public class ReservationApplicationService {
     private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String EXPIRED_RESERVATION_UPDATE_REJECTED = "이미 지난 예약은 변경할 수 없습니다.";
     private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
+    private static final String PAST_RESERVATION_DELETE_REJECTED = "지난 예약은 삭제할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
 
     private final ReservationService reservationService;
@@ -134,15 +135,21 @@ public class ReservationApplicationService {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
         }
-        promoteOrDelete(id);
+        promoteOrDelete(reservation);
     }
 
     @Transactional
     public void deleteReservation(Long id) {
-        promoteOrDelete(id);
+        reservationService.findReservation(id).ifPresent(reservation -> {
+            if (reservation.isPast(LocalDateTime.now())) {
+                throw new BusinessRuleViolationException(PAST_RESERVATION_DELETE_REJECTED);
+            }
+            promoteOrDelete(reservation);
+        });
     }
 
-    private void promoteOrDelete(Long reservationId) {
+    private void promoteOrDelete(Reservation reservation) {
+        Long reservationId = reservation.getId();
         Optional<ReservationWaiting> earliest = reservationWaitingService.findEarliestByReservationId(reservationId);
         if (earliest.isEmpty()) {
             reservationService.deleteReservation(reservationId);
