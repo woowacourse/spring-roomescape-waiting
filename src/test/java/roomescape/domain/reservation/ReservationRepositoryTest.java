@@ -265,29 +265,6 @@ class ReservationRepositoryTest {
     }
 
     @Nested
-    @DisplayName("id로 예약 조회 (FOR UPDATE)")
-    class FindByIdForUpdate {
-
-        @Test
-        void 존재하는_id면_예약을_반환한다() {
-            Reservation saved = reservationRepository.save(
-                    Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
-            );
-
-            Optional<Reservation> result = reservationRepository.findByIdForUpdate(saved.getId());
-
-            assertThat(result).isPresent();
-        }
-
-        @Test
-        void 존재하지_않는_id면_빈값을_반환한다() {
-            Optional<Reservation> result = reservationRepository.findByIdForUpdate(999L);
-
-            assertThat(result).isEmpty();
-        }
-    }
-
-    @Nested
     @DisplayName("날짜/시간/테마로 예약자 이름 조회 (FOR UPDATE)")
     class FindNameByDateAndTimeIdAndThemeIdForUpdate {
 

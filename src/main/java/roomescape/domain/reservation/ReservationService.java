@@ -80,11 +80,13 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
 
-        reservationRepository.deleteById(id);
+        int deleted = reservationRepository.deleteById(id);
 
-        waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-        ).ifPresent(this::promoteToReservation);
+        if (deleted > 0) {
+            waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+            ).ifPresent(this::promoteToReservation);
+        }
     }
 
     private void promoteToReservation(Waiting waiting) {
@@ -106,7 +108,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         newTime.validateIfTimePast(fixRequest.date());
 
-        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         validateDuplicateReservation(fixRequest.date(), fixRequest.timeId(), reservation.getTheme().getId());
 

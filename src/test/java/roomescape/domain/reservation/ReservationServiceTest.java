@@ -178,6 +178,7 @@ class ReservationServiceTest {
         void 정상_삭제() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.deleteById(1L)).thenReturn(1);
             when(waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
                     reservation.getDate(), time.getId(), theme.getId()
             )).thenReturn(Optional.empty());
@@ -192,6 +193,7 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             Waiting waiting = Waiting.of(10L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
             when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.deleteById(1L)).thenReturn(1);
             when(waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
                     reservation.getDate(), time.getId(), theme.getId()
             )).thenReturn(Optional.of(waiting));
@@ -251,14 +253,14 @@ class ReservationServiceTest {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
 
             reservationService.updateMyReservation(1L, request);
 
             InOrder inOrder = inOrder(reservationTimeRepository, reservationRepository);
             inOrder.verify(reservationTimeRepository).findByIdForUpdate(1L);
-            inOrder.verify(reservationRepository).findByIdForUpdate(1L);
+            inOrder.verify(reservationRepository).findById(1L);
             verify(reservationRepository, times(1)).updateDateAndTime(1L, request.date(), 1L);
         }
 
@@ -266,7 +268,7 @@ class ReservationServiceTest {
         void 존재하지_않는_예약이면_예외() {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
-            when(reservationRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+            when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(99L, request))
                     .isInstanceOf(RoomescapeException.class)
@@ -290,7 +292,7 @@ class ReservationServiceTest {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
@@ -304,7 +306,7 @@ class ReservationServiceTest {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
             doThrow(DuplicateKeyException.class).when(reservationRepository)
                     .updateDateAndTime(1L, request.date(), 1L);
