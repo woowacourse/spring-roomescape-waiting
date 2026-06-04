@@ -5,11 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import roomescape.domain.PopularTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeAvailability;
+import roomescape.domain.populartheme.PopularTheme;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
 

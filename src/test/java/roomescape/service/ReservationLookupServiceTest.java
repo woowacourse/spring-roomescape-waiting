@@ -1,12 +1,7 @@
 package roomescape.service;
 
 import org.junit.jupiter.api.Test;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
-import roomescape.domain.WaitingWithTurn;
+import roomescape.domain.*;
 import roomescape.service.dto.ReservationStatus;
 import roomescape.service.dto.Status;
 

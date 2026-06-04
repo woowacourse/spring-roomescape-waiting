@@ -194,28 +194,28 @@ public class ReservationWaitingRepository {
 
     public Optional<ReservationWaiting> findFirstBySlotForUpdate(ReservationSlot slot) {
         String sql = """
-            SELECT
-                r.id AS reservation_waiting_id,
-                r.name AS username,
-                r.date,
-                rt.id AS time_id,
-                rt.start_at AS time_value,
-                t.id AS theme_id,
-                t.name AS theme_name,
-                t.description,
-                t.thumbnail
-            FROM reservation_waiting AS r
-            INNER JOIN reservation_time AS rt
-                ON r.time_id = rt.id
-            INNER JOIN theme AS t
-                ON r.theme_id = t.id
-            WHERE r.date = ?
-              AND r.time_id = ?
-              AND r.theme_id = ?
-            ORDER BY r.created_at ASC, r.id ASC
-            LIMIT 1
-            FOR UPDATE;
-            """;
+                SELECT
+                    r.id AS reservation_waiting_id,
+                    r.name AS username,
+                    r.date,
+                    rt.id AS time_id,
+                    rt.start_at AS time_value,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description,
+                    t.thumbnail
+                FROM reservation_waiting AS r
+                INNER JOIN reservation_time AS rt
+                    ON r.time_id = rt.id
+                INNER JOIN theme AS t
+                    ON r.theme_id = t.id
+                WHERE r.date = ?
+                  AND r.time_id = ?
+                  AND r.theme_id = ?
+                ORDER BY r.created_at ASC, r.id ASC
+                LIMIT 1
+                FOR UPDATE;
+                """;
         List<ReservationWaiting> result = jdbcTemplate.query(
                 sql,
                 waitingRowMapper,

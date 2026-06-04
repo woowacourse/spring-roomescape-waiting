@@ -1,6 +1,7 @@
-package roomescape.domain;
+package roomescape.domain.populartheme;
 
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

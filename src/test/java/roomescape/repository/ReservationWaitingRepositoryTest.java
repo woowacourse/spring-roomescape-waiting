@@ -6,11 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
-import roomescape.domain.WaitingWithTurn;
+import roomescape.domain.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

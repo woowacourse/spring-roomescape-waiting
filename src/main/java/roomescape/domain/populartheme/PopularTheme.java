@@ -1,4 +1,6 @@
-package roomescape.domain;
+package roomescape.domain.populartheme;
+
+import roomescape.domain.Theme;
 
 public class PopularTheme {
 

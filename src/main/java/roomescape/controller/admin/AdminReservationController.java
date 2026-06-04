@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.dto.ReservationRequest;
-import roomescape.controller.dto.ReservationResponse;
+import roomescape.controller.dto.request.ReservationRequest;
+import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 

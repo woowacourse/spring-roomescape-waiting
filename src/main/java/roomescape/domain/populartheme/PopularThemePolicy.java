@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.populartheme;
 
 import java.time.LocalDate;
 

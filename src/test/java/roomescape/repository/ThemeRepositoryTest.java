@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.PopularTheme;
-import roomescape.domain.PopularThemeCondition;
 import roomescape.domain.Theme;
+import roomescape.domain.populartheme.PopularTheme;
+import roomescape.domain.populartheme.PopularThemeCondition;
 
 import java.time.LocalDate;
 import java.util.List;

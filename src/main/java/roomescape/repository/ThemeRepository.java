@@ -5,9 +5,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.PopularTheme;
-import roomescape.domain.PopularThemeCondition;
 import roomescape.domain.Theme;
+import roomescape.domain.populartheme.PopularTheme;
+import roomescape.domain.populartheme.PopularThemeCondition;
 
 import java.sql.PreparedStatement;
 import java.util.List;

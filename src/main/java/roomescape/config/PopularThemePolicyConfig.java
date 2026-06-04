@@ -2,8 +2,8 @@ package roomescape.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import roomescape.domain.PopularThemePolicy;
-import roomescape.domain.WeeklyTopTenPopularThemePolicy;
+import roomescape.domain.populartheme.PopularThemePolicy;
+import roomescape.domain.populartheme.WeeklyTopTenPopularThemePolicy;
 
 @Configuration
 public class PopularThemePolicyConfig {

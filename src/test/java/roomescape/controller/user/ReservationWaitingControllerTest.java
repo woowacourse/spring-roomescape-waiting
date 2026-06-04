@@ -6,12 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.WaitingWithTurn;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.service.ReservationWaitingService;
 
 import java.time.LocalDate;

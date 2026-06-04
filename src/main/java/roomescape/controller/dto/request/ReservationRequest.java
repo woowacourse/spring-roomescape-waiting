@@ -1,4 +1,4 @@
-package roomescape.controller.dto;
+package roomescape.controller.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-public record ReservationWaitingRequest(
+public record ReservationRequest(
 
         @NotBlank(message = "name은 비어 있을 수 없습니다.")
         @Size(max = 255, message = "name은 255자를 넘을 수 없습니다.")
@@ -22,6 +22,5 @@ public record ReservationWaitingRequest(
 
         @NotNull(message = "themeId는 비어 있을 수 없습니다.")
         @Positive(message = "themeId는 양수이어야 합니다.")
-        Long themeId
-) {
+        Long themeId) {
 }

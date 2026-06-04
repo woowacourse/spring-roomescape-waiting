@@ -3,11 +3,10 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DataIntegrityViolationException;
-
-import roomescape.domain.PopularTheme;
-import roomescape.domain.PopularThemeCondition;
-import roomescape.domain.PopularThemePolicy;
 import roomescape.domain.Theme;
+import roomescape.domain.populartheme.PopularTheme;
+import roomescape.domain.populartheme.PopularThemeCondition;
+import roomescape.domain.populartheme.PopularThemePolicy;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
@@ -19,7 +18,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class ThemeServiceTest {

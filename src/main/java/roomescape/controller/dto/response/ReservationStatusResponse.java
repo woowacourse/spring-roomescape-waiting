@@ -1,4 +1,4 @@
-package roomescape.controller.dto;
+package roomescape.controller.dto.response;
 
 import roomescape.service.dto.ReservationStatus;
 import roomescape.service.dto.Status;

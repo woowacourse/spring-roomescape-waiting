@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.dto.PopularThemeResponse;
-import roomescape.controller.dto.ThemeResponse;
-import roomescape.controller.dto.TimeAvailabilityResponse;
+import roomescape.controller.dto.response.PopularThemeResponse;
+import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.controller.dto.response.TimeAvailabilityResponse;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
 
