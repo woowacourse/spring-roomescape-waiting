@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.feature.reservation.domain.Slot;
 import roomescape.feature.reservation.repository.ReservationRepository;
+import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.time.domain.Time;
+import roomescape.global.domain.EntityStatus;
 
 @ExtendWith(MockitoExtension.class)
 class DeadSlotPromotionSchedulerTest {
@@ -28,6 +32,13 @@ class DeadSlotPromotionSchedulerTest {
 
     @InjectMocks
     private DeadSlotPromotionScheduler deadSlotPromotionScheduler;
+
+    private static Slot slot(long timeId, long themeId) {
+        return new Slot(
+                DATE,
+                Time.reconstruct(timeId, LocalTime.of(10, 0), EntityStatus.ACTIVE),
+                Theme.reconstruct(themeId, "테마 이름", "테마 설명", "https://example.com/theme.png", EntityStatus.ACTIVE));
+    }
 
     @Test
     void 죽은_슬롯이_없으면_승격을_시도하지_않는다() {
@@ -44,8 +55,8 @@ class DeadSlotPromotionSchedulerTest {
     @Test
     void 죽은_슬롯마다_가장_빠른_대기를_승격한다() {
         // given
-        Slot firstDeadSlot = new Slot(1L, 1L, DATE);
-        Slot secondDeadSlot = new Slot(2L, 2L, DATE);
+        Slot firstDeadSlot = slot(1L, 1L);
+        Slot secondDeadSlot = slot(2L, 2L);
         when(reservationRepository.findDeadSlots()).thenReturn(List.of(firstDeadSlot, secondDeadSlot));
 
         // when
@@ -59,8 +70,8 @@ class DeadSlotPromotionSchedulerTest {
     @Test
     void 한_슬롯의_승격이_실패해도_나머지_슬롯을_계속_승격한다() {
         // given
-        Slot failingDeadSlot = new Slot(1L, 1L, DATE);
-        Slot remainingDeadSlot = new Slot(2L, 2L, DATE);
+        Slot failingDeadSlot = slot(1L, 1L);
+        Slot remainingDeadSlot = slot(2L, 2L);
         when(reservationRepository.findDeadSlots()).thenReturn(List.of(failingDeadSlot, remainingDeadSlot));
 
         doThrow(new RuntimeException("승격 실패"))

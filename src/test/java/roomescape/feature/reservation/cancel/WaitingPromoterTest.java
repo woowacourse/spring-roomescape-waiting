@@ -29,7 +29,7 @@ class WaitingPromoterTest {
     private static final Long TIME_ID = 1L;
     private static final Long THEME_ID = 1L;
     private static final LocalDate DATE = LocalDate.now().plusYears(1);
-    private static final Slot SLOT = new Slot(TIME_ID, THEME_ID, DATE);
+    private static final Slot SLOT = new Slot(DATE, time(), theme());
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -37,11 +37,11 @@ class WaitingPromoterTest {
     @InjectMocks
     private WaitingPromoter waitingPromoter;
 
-    private Time time() {
+    private static Time time() {
         return Time.reconstruct(TIME_ID, LocalTime.of(10, 0), EntityStatus.ACTIVE);
     }
 
-    private Theme theme() {
+    private static Theme theme() {
         return Theme.reconstruct(THEME_ID, "테마 이름", "테마 설명", "https://example.com/theme.png", EntityStatus.ACTIVE);
     }
 

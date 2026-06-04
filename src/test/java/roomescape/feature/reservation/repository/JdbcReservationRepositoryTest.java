@@ -715,7 +715,7 @@ class JdbcReservationRepositoryTest {
 
             // then
             assertThat(actual)
-                .extracting(Slot::timeId, Slot::themeId, Slot::date)
+                .extracting(Slot::getTimeId, Slot::getThemeId, Slot::getDate)
                 .containsExactly(tuple(time.getId(), theme.getId(), date));
         }
 
@@ -753,7 +753,7 @@ class JdbcReservationRepositoryTest {
 
             // then
             assertThat(actual)
-                .extracting(Slot::timeId, Slot::themeId, Slot::date)
+                .extracting(Slot::getTimeId, Slot::getThemeId, Slot::getDate)
                 .containsExactly(tuple(time.getId(), theme.getId(), date));
         }
     }

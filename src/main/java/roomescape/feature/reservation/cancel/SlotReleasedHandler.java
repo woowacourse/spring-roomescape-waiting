@@ -22,7 +22,7 @@ public class SlotReleasedHandler {
         } catch (Exception exception) {
             log.error(
                     "대기 예약 자동 승격 처리 중 예기치 못한 오류가 발생했습니다. date={}, timeId={}, themeId={}",
-                    slot.date(), slot.timeId(), slot.themeId(), exception
+                    slot.getDate(), slot.getTimeId(), slot.getThemeId(), exception
             );
         }
     }

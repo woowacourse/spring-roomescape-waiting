@@ -1,6 +1,7 @@
 package roomescape.feature.time.domain;
 
 import java.time.LocalTime;
+import java.util.Objects;
 import lombok.Getter;
 import roomescape.global.domain.EntityStatus;
 
@@ -23,5 +24,21 @@ public class Time {
 
     public static Time reconstruct(Long id, LocalTime startAt, EntityStatus status) {
         return new Time(id, startAt, status);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Time other)) {
+            return false;
+        }
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

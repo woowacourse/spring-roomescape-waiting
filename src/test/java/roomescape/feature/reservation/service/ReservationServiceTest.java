@@ -174,7 +174,7 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE);
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(time.getId(), theme.getId(), date)))
+            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(date, time, theme)))
                 .thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -241,7 +241,7 @@ class ReservationServiceTest {
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(time.getId(), theme.getId(), date)))
+            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(date, time, theme)))
                 .thenReturn(true);
 
             // when & then
@@ -324,9 +324,9 @@ class ReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor =
                 ArgumentCaptor.forClass(SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().slot().timeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().themeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().date()).isEqualTo(futureDate);
+            assertThat(captor.getValue().slot().getTimeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().getThemeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().getDate()).isEqualTo(futureDate);
         }
 
         @Test
@@ -500,7 +500,7 @@ class ReservationServiceTest {
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsActiveOrWaitingReservation(
-                new Slot(time.getId(), theme.getId(), futureDate))).thenReturn(true);
+                new Slot(futureDate, time, theme))).thenReturn(true);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
@@ -557,9 +557,9 @@ class ReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor = ArgumentCaptor.forClass(
                     SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().slot().timeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().themeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().date()).isEqualTo(futureDate);
+            assertThat(captor.getValue().slot().getTimeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().getThemeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slot().getDate()).isEqualTo(futureDate);
         }
 
         @Test

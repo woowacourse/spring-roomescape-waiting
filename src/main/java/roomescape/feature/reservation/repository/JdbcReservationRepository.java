@@ -68,9 +68,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 LIMIT 1
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("date", slot.date())
-                .addValue("timeId", slot.timeId())
-                .addValue("themeId", slot.themeId());
+                .addValue("date", slot.getDate())
+                .addValue("timeId", slot.getTimeId())
+                .addValue("themeId", slot.getThemeId());
 
         try {
             Reservation reservation = jdbcTemplate.queryForObject(
@@ -97,9 +97,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("date", slot.date())
-                .addValue("timeId", slot.timeId())
-                .addValue("themeId", slot.themeId());
+                .addValue("date", slot.getDate())
+                .addValue("timeId", slot.getTimeId())
+                .addValue("themeId", slot.getThemeId());
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
         return Boolean.TRUE.equals(exists);
@@ -108,8 +108,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Slot> findDeadSlots() {
         String sql = """
-                SELECT DISTINCT w.date, w.time_id, w.theme_id
+                SELECT DISTINCT w.date,
+                       rt.id AS time_id, rt.start_at, rt.status AS time_status,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
+                       t.status AS theme_status
                 FROM reservation w
+                JOIN reservation_time rt ON w.time_id = rt.id
+                JOIN theme t ON w.theme_id = t.id
                 WHERE w.status = 'WAITING'
                   AND NOT EXISTS (
                       SELECT 1
@@ -124,9 +129,9 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> new Slot(
-                        rs.getLong("time_id"),
-                        rs.getLong("theme_id"),
-                        rs.getDate("date").toLocalDate()
+                        rs.getDate("date").toLocalDate(),
+                        mapTime(rs),
+                        mapTheme(rs)
                 )
         );
     }
@@ -136,20 +141,28 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getLong("id"),
                 new ReserverName(rs.getString("name")),
                 rs.getDate("date").toLocalDate(),
-                Time.reconstruct(
-                        rs.getLong("time_id"),
-                        rs.getTime("start_at").toLocalTime(),
-                        EntityStatus.valueOf(rs.getString("time_status"))
-                ),
-                Theme.reconstruct(
-                        rs.getLong("theme_id"),
-                        rs.getString("theme_name"),
-                        rs.getString("description"),
-                        rs.getString("image_url"),
-                        EntityStatus.valueOf(rs.getString("theme_status"))
-                ),
+                mapTime(rs),
+                mapTheme(rs),
                 ReservationStatus.valueOf(rs.getString("status")),
                 rs.getLong("version")
+        );
+    }
+
+    private Time mapTime(ResultSet rs) throws SQLException {
+        return Time.reconstruct(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime(),
+                EntityStatus.valueOf(rs.getString("time_status"))
+        );
+    }
+
+    private Theme mapTheme(ResultSet rs) throws SQLException {
+        return Theme.reconstruct(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("description"),
+                rs.getString("image_url"),
+                EntityStatus.valueOf(rs.getString("theme_status"))
         );
     }
 
@@ -303,9 +316,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("id", reservationId)
-                .addValue("date", slot.date())
-                .addValue("timeId", slot.timeId())
-                .addValue("themeId", slot.themeId());
+                .addValue("date", slot.getDate())
+                .addValue("timeId", slot.getTimeId())
+                .addValue("themeId", slot.getThemeId());
 
         return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
     }
@@ -365,9 +378,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-                "date", slot.date(),
-                "timeId", slot.timeId(),
-                "themeId", slot.themeId()
+                "date", slot.getDate(),
+                "timeId", slot.getTimeId(),
+                "themeId", slot.getThemeId()
         ));
 
         Boolean exists = jdbcTemplate.queryForObject(existsSql, parameters, Boolean.class);

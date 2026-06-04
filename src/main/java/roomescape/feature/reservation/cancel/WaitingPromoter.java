@@ -55,7 +55,7 @@ public class WaitingPromoter {
     public void recoverPromotion(DataAccessException exception, Slot slot) {
         log.error(
                 "대기 예약 자동 승격에 재시도 후에도 실패했습니다. date={}, timeId={}, themeId={}",
-                slot.date(), slot.timeId(), slot.themeId(), exception
+                slot.getDate(), slot.getTimeId(), slot.getThemeId(), exception
         );
     }
 }

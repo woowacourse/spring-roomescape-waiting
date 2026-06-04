@@ -32,7 +32,7 @@ public class DeadSlotPromotionScheduler {
             } catch (Exception exception) {
                 log.error(
                         "죽은 슬롯 대기 승격에 실패했습니다. date={}, timeId={}, themeId={}",
-                        deadSlot.date(), deadSlot.timeId(), deadSlot.themeId(), exception
+                        deadSlot.getDate(), deadSlot.getTimeId(), deadSlot.getThemeId(), exception
                 );
             }
         }

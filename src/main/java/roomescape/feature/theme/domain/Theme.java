@@ -1,5 +1,6 @@
 package roomescape.feature.theme.domain;
 
+import java.util.Objects;
 import lombok.Getter;
 import roomescape.global.domain.EntityStatus;
 
@@ -40,5 +41,21 @@ public class Theme {
 
     public String getImageUrl() {
         return imageUrl.value();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Theme other)) {
+            return false;
+        }
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
