@@ -6,20 +6,11 @@ import org.junit.jupiter.api.Test;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 class WaitingTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atTime(10, 30)
-                    .atZone(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
-    ));
+    private static final LocalDateTime NOW = LocalDateTime.of(2026, 5, 8, 10, 30);
 
     @Test
     @DisplayName("현재 시간 이전으로 대기를 등록할 수 없다")

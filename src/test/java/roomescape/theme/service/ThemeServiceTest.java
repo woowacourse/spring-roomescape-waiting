@@ -10,9 +10,7 @@ import roomescape.theme.service.dto.request.ThemeCreateRequest;
 import roomescape.theme.service.dto.response.ThemeResponse;
 import roomescape.theme.service.support.FakeThemeRepository;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,20 +18,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ThemeServiceTest {
 
-    private static final Clock FIXED_CLOCK = Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atStartOfDay(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
-    );
-
     private FakeThemeRepository themeRepository;
     private ThemeService themeService;
 
     @BeforeEach
     void setUp() {
         themeRepository = new FakeThemeRepository();
-        themeService = new ThemeService(themeRepository, FIXED_CLOCK);
+        themeService = new ThemeService(themeRepository);
     }
 
     @Test
@@ -54,6 +45,7 @@ class ThemeServiceTest {
     @DisplayName("최근 예약이 많은 테마 조회 기간을 계산한다")
     void calculatePopularThemeSearchPeriod() {
         // given
+        final LocalDate today = LocalDate.now();
         themeRepository.setPopularThemes(List.of(
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -62,8 +54,8 @@ class ThemeServiceTest {
         List<ThemeResponse> responses = themeService.getPopularThemes();
 
         // then
-        assertThat(themeRepository.popularStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(themeRepository.popularToday()).isEqualTo(LocalDate.of(2026, 5, 8));
+        assertThat(themeRepository.popularStartDate()).isEqualTo(today.minusDays(7));
+        assertThat(themeRepository.popularToday()).isEqualTo(today);
         assertThat(responses)
                 .extracting(ThemeResponse::name)
                 .containsExactly("링");

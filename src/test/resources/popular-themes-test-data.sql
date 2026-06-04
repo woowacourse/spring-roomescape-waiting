@@ -35,62 +35,62 @@ CREATE TABLE reservation_seed
 
 INSERT INTO reservation_seed (id, customer_name, reservation_date, time_id, theme_id)
 VALUES
-    -- 2026-05-01
-    (1, '김민준', '2026-05-01', 1, 1),
-    (2, '이서연', '2026-05-01', 2, 1),
-    (3, '박도윤', '2026-05-01', 3, 2),
-    (4, '최하윤', '2026-05-01', 4, 3),
+    -- 오늘 기준 7일 전
+    (1, '김민준', DATEADD('DAY', -7, CURRENT_DATE), 1, 1),
+    (2, '이서연', DATEADD('DAY', -7, CURRENT_DATE), 2, 1),
+    (3, '박도윤', DATEADD('DAY', -7, CURRENT_DATE), 3, 2),
+    (4, '최하윤', DATEADD('DAY', -7, CURRENT_DATE), 4, 3),
 
-    -- 2026-05-02
-    (5, '정지호', '2026-05-02', 1, 1),
-    (6, '강지민', '2026-05-02', 2, 2),
-    (7, '조서아', '2026-05-02', 3, 2),
-    (8, '윤하준', '2026-05-02', 4, 4),
-    (9, '임서준', '2026-05-02', 5, 5),
+    -- 오늘 기준 6일 전
+    (5, '정지호', DATEADD('DAY', -6, CURRENT_DATE), 1, 1),
+    (6, '강지민', DATEADD('DAY', -6, CURRENT_DATE), 2, 2),
+    (7, '조서아', DATEADD('DAY', -6, CURRENT_DATE), 3, 2),
+    (8, '윤하준', DATEADD('DAY', -6, CURRENT_DATE), 4, 4),
+    (9, '임서준', DATEADD('DAY', -6, CURRENT_DATE), 5, 5),
 
-    -- 2026-05-03
-    (10, '한유진', '2026-05-03', 1, 1),
-    (11, '오시우', '2026-05-03', 2, 3),
-    (12, '신채원', '2026-05-03', 3, 3),
-    (13, '서지안', '2026-05-03', 4, 4),
+    -- 오늘 기준 5일 전
+    (10, '한유진', DATEADD('DAY', -5, CURRENT_DATE), 1, 1),
+    (11, '오시우', DATEADD('DAY', -5, CURRENT_DATE), 2, 3),
+    (12, '신채원', DATEADD('DAY', -5, CURRENT_DATE), 3, 3),
+    (13, '서지안', DATEADD('DAY', -5, CURRENT_DATE), 4, 4),
 
-    -- 2026-05-04
-    (14, '권도현', '2026-05-04', 1, 1),
-    (15, '황예준', '2026-05-04', 2, 2),
-    (16, '안수빈', '2026-05-04', 3, 4),
-    (17, '송민서', '2026-05-04', 4, 5),
-    (18, '류지우', '2026-05-04', 5, 6),
+    -- 오늘 기준 4일 전
+    (14, '권도현', DATEADD('DAY', -4, CURRENT_DATE), 1, 1),
+    (15, '황예준', DATEADD('DAY', -4, CURRENT_DATE), 2, 2),
+    (16, '안수빈', DATEADD('DAY', -4, CURRENT_DATE), 3, 4),
+    (17, '송민서', DATEADD('DAY', -4, CURRENT_DATE), 4, 5),
+    (18, '류지우', DATEADD('DAY', -4, CURRENT_DATE), 5, 6),
 
-    -- 2026-05-05
-    (19, '장서윤', '2026-05-05', 1, 1),
-    (20, '백현우', '2026-05-05', 2, 2),
-    (21, '남지후', '2026-05-05', 3, 3),
-    (22, '문하린', '2026-05-05', 4, 6),
+    -- 오늘 기준 3일 전
+    (19, '장서윤', DATEADD('DAY', -3, CURRENT_DATE), 1, 1),
+    (20, '백현우', DATEADD('DAY', -3, CURRENT_DATE), 2, 2),
+    (21, '남지후', DATEADD('DAY', -3, CURRENT_DATE), 3, 3),
+    (22, '문하린', DATEADD('DAY', -3, CURRENT_DATE), 4, 6),
 
-    -- 2026-05-06
-    (23, '유준서', '2026-05-06', 1, 4),
-    (24, '배아린', '2026-05-06', 2, 5),
-    (25, '홍시온', '2026-05-06', 3, 6),
-    (26, '진서우', '2026-05-06', 4, 7),
+    -- 오늘 기준 2일 전
+    (23, '유준서', DATEADD('DAY', -2, CURRENT_DATE), 1, 4),
+    (24, '배아린', DATEADD('DAY', -2, CURRENT_DATE), 2, 5),
+    (25, '홍시온', DATEADD('DAY', -2, CURRENT_DATE), 3, 6),
+    (26, '진서우', DATEADD('DAY', -2, CURRENT_DATE), 4, 7),
 
-    -- 2026-05-07
-    (27, '고은우', '2026-05-07', 1, 7),
-    (28, '민채린', '2026-05-07', 2, 8),
-    (29, '차윤재', '2026-05-07', 3, 9),
-    (30, '나예린', '2026-05-07', 4, 10);
+    -- 오늘 기준 1일 전
+    (27, '고은우', DATEADD('DAY', -1, CURRENT_DATE), 1, 7),
+    (28, '민채린', DATEADD('DAY', -1, CURRENT_DATE), 2, 8),
+    (29, '차윤재', DATEADD('DAY', -1, CURRENT_DATE), 3, 9),
+    (30, '나예린', DATEADD('DAY', -1, CURRENT_DATE), 4, 10);
 
 
 INSERT INTO reservation_seed (id, customer_name, reservation_date, time_id, theme_id)
-VALUES (31, '테스트1', '2026-04-25', 1, 12),
-       (32, '테스트2', '2026-04-25', 2, 12),
-       (33, '테스트3', '2026-04-26', 1, 12),
-       (34, '테스트4', '2026-04-26', 2, 12),
-       (35, '테스트5', '2026-04-27', 1, 12),
-       (36, '테스트6', '2026-04-27', 2, 12),
-       (37, '테스트7', '2026-04-28', 1, 12),
-       (38, '테스트8', '2026-04-28', 2, 12),
-       (39, '테스트9', '2026-04-29', 1, 12),
-       (40, '테스트10', '2026-04-29', 2, 12);
+VALUES (31, '테스트1', DATEADD('DAY', -13, CURRENT_DATE), 1, 12),
+       (32, '테스트2', DATEADD('DAY', -13, CURRENT_DATE), 2, 12),
+       (33, '테스트3', DATEADD('DAY', -12, CURRENT_DATE), 1, 12),
+       (34, '테스트4', DATEADD('DAY', -12, CURRENT_DATE), 2, 12),
+       (35, '테스트5', DATEADD('DAY', -11, CURRENT_DATE), 1, 12),
+       (36, '테스트6', DATEADD('DAY', -11, CURRENT_DATE), 2, 12),
+       (37, '테스트7', DATEADD('DAY', -10, CURRENT_DATE), 1, 12),
+       (38, '테스트8', DATEADD('DAY', -10, CURRENT_DATE), 2, 12),
+       (39, '테스트9', DATEADD('DAY', -9, CURRENT_DATE), 1, 12),
+       (40, '테스트10', DATEADD('DAY', -9, CURRENT_DATE), 2, 12);
 
 INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id)
 SELECT id, reservation_date, time_id, theme_id

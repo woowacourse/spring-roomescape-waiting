@@ -9,10 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,16 +37,6 @@ import static org.hamcrest.Matchers.notNullValue;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class WaitingControllerTest {
 
-    private static final Clock FIXED_CLOCK = Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atTime(10, 30)
-                    .atZone(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
-    );
-    private static final LocalDateTime NOW = LocalDateTime.now(FIXED_CLOCK);
-
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -61,26 +48,17 @@ class WaitingControllerTest {
         RestAssured.port = port;
     }
 
-    @TestConfiguration
-    static class FixedClockConfig {
-
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return FIXED_CLOCK;
-        }
-    }
-
     @Test
     @DisplayName("테마 날짜 시간 예약자명으로 대기를 등록할 수 있다")
     void registerWaitingWithThemeDateTimeAndCustomerName() {
         //given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
-        insertReservation("브라운", LocalDate.of(2026, 5, 26), time.getId(), theme.getId());
+        insertReservation("브라운", futureDate, time.getId(), theme.getId());
         Map<String, String> body = Map.of(
                 "name", "재키",
-                "date", "2026-05-26",
+                "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", theme.getId().toString()
         );
@@ -101,11 +79,12 @@ class WaitingControllerTest {
     @DisplayName("존재하지 않는 시간으로 대기를 등록하면 예외가 발생한다")
     void throwExceptionWhenRegisteringWaitingWithNonExistingTime() {
         //given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime unSavedTime = ReservationTime.of(999L, LocalTime.of(12, 00));
         Theme theme = insertTheme("링", "공포 테마", "http:~");
         Map<String, String> body = Map.of(
                 "name", "재키",
-                "date", "2026-05-26",
+                "date", futureDate.toString(),
                 "timeId", unSavedTime.getId().toString(),
                 "themeId", theme.getId().toString()
         );
@@ -127,11 +106,12 @@ class WaitingControllerTest {
     @DisplayName("존재하지 않는 테마로 대기를 등록하면 예외가 발생한다")
     void throwExceptionWhenRegisteringWaitingWithNonExistingTheme() {
         //given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = insertReservationTime("11:00:00");
         Theme unSavedTheme = Theme.of(999L, "name", "des", "url");
         Map<String, String> body = Map.of(
                 "name", "재키",
-                "date", "2026-05-26",
+                "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", unSavedTheme.getId().toString()
         );
@@ -157,13 +137,13 @@ class WaitingControllerTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
 
         final String customerName = "재키";
-        final LocalDate nowDate = NOW.toLocalDate();
-        insertReservation("브라운", nowDate, time.getId(), theme.getId());
-        insertWaiting(customerName, nowDate, time.getId(), theme.getId());
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        insertReservation("브라운", futureDate, time.getId(), theme.getId());
+        insertWaiting(customerName, futureDate, time.getId(), theme.getId());
 
         Map<String, String> body = Map.of(
                 "name", customerName,
-                "date", nowDate.toString(),
+                "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", theme.getId().toString()
         );
@@ -189,8 +169,8 @@ class WaitingControllerTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
 
         final String customerName = "재키";
-        final LocalDate nowDate = NOW.toLocalDate();
-        final long savedWaitingId = insertWaiting(customerName, nowDate, time.getId(), theme.getId());
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final long savedWaitingId = insertWaiting(customerName, futureDate, time.getId(), theme.getId());
 
         //when
         final Response response = RestAssured.given().log().all()
@@ -210,8 +190,8 @@ class WaitingControllerTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
 
         final String customerName = "코로구";
-        final LocalDate nowDate = NOW.toLocalDate();
-        final long savedWaitingId = insertWaiting(customerName, nowDate, time.getId(), theme.getId());
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final long savedWaitingId = insertWaiting(customerName, futureDate, time.getId(), theme.getId());
 
         //when
         final String invalidCustomerName = "재키";
@@ -253,7 +233,7 @@ class WaitingControllerTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
 
         final String customerName = "재키";
-        final LocalDate yesterday = NOW.minusDays(1).toLocalDate();
+        final LocalDate yesterday = LocalDate.now().minusDays(1);
         final long savedWaitingId = insertWaiting(customerName, yesterday, time.getId(), theme.getId());
 
         //when

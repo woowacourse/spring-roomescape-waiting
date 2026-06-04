@@ -31,14 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationServiceTest {
 
-    private static final Clock FIXED_CLOCK = Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atTime(10, 30)
-                    .atZone(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
-    );
-    private static final LocalDateTime NOW = LocalDateTime.now(FIXED_CLOCK);
+    private static final LocalDateTime NOW = LocalDateTime.now();
 
     private FakeReservationRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
@@ -59,8 +52,7 @@ class ReservationServiceTest {
                 reservationTimeRepository,
                 themeRepository,
                 reservationSlotRepository,
-                waitingRepository,
-                FIXED_CLOCK
+                waitingRepository
         );
     }
 
@@ -68,12 +60,13 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다")
     void createReservation() {
         // given
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
         reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(11, 0)));
         themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
 
         // when
         ReservationResponse response = reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.of(2026, 5, 8), 1L, 1L)
+                new ReservationCreateRequest("브라운", tomorrow, 1L, 1L)
         );
 
         // then
@@ -137,12 +130,13 @@ class ReservationServiceTest {
     @DisplayName("현재 이전 시간으로 예약하면 예외가 발생한다")
     void throwExceptionWhenCreatingReservationBeforeNow() {
         // given
+        final LocalDate yesterday = LocalDate.now().minusDays(1);
         reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(10, 0)));
         themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.of(2026, 5, 8), 1L, 1L)
+                new ReservationCreateRequest("브라운", yesterday, 1L, 1L)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -152,7 +146,7 @@ class ReservationServiceTest {
     void throwExceptionWhenCreatingReservationWithNonExistingReservationTime() {
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.of(2026, 8, 5), 1L, 1L)
+                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -165,7 +159,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.of(2026, 8, 5), 1L, 1L)
+                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -180,7 +174,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.of(2026, 5, 8), 1L, 1L)
+                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
     }
@@ -195,7 +189,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.of(2026, 5, 8), 1L, 1L)
+                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(ReservationOptionChangedException.class);
     }
@@ -204,10 +198,12 @@ class ReservationServiceTest {
     @DisplayName("예약 일정을 수정한다")
     void updateReservationSchedule() {
         // given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
+                futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -216,13 +212,13 @@ class ReservationServiceTest {
         // when
         ReservationResponse response = reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 6), 2L)
+                new ReservationUpdateRequest(changedFutureDate, 2L)
         );
 
         // then
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.name()).isEqualTo("브라운");
-        assertThat(response.date()).isEqualTo(LocalDate.of(2026, 8, 6));
+        assertThat(response.date()).isEqualTo(changedFutureDate);
         assertThat(response.time().id()).isEqualTo(2L);
         assertThat(response.theme().id()).isEqualTo(1L);
         assertThat(reservationRepository.findById(1L).get().getTime().getId()).isEqualTo(2L);
@@ -237,7 +233,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 5), 1L)
+                new ReservationUpdateRequest(LocalDate.now().plusDays(1), 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -246,10 +242,11 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약 시간으로 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingWithNonExistingReservationTime() {
         // given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
+                futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -257,7 +254,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 5), 999L)
+                new ReservationUpdateRequest(futureDate, 999L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -266,10 +263,12 @@ class ReservationServiceTest {
     @DisplayName("현재 이전 시간으로 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleBeforeNow() {
         // given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final LocalDate yesterday = LocalDate.now().minusDays(1);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
+                futureDate,
                 ReservationTime.of(2L, LocalTime.of(11, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -278,7 +277,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 5, 8), 1L)
+                new ReservationUpdateRequest(yesterday, 1L)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -287,10 +286,12 @@ class ReservationServiceTest {
     @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약 일정을 수정할 수 없다")
     void customerCannotUpdateReservationScheduleOnReservationDateBeforeStartTime() {
         // given
+        final LocalDate today = LocalDate.now();
+        final LocalDate tomorrow = today.plusDays(1);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 5, 8),
+                today,
                 ReservationTime.of(1L, LocalTime.of(11, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -299,7 +300,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 5, 9), 2L)
+                new ReservationUpdateRequest(tomorrow, 2L)
         ))
                 .isInstanceOf(ReservationModificationException.class);
     }
@@ -308,10 +309,12 @@ class ReservationServiceTest {
     @DisplayName("관리자는 예약일 당일에도 예약 일정을 수정할 수 있다")
     void adminCanUpdateReservationScheduleOnReservationDate() {
         // given
+        final LocalDate today = LocalDate.now();
+        final LocalDate tomorrow = today.plusDays(1);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 5, 8),
+                today,
                 ReservationTime.of(1L, LocalTime.of(11, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -320,11 +323,11 @@ class ReservationServiceTest {
         // when
         ReservationResponse response = reservationService.updateByAdmin(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 5, 9), 2L)
+                new ReservationUpdateRequest(tomorrow, 2L)
         );
 
         // then
-        assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 9));
+        assertThat(response.date()).isEqualTo(tomorrow);
         assertThat(response.time().id()).isEqualTo(2L);
     }
 
@@ -332,10 +335,12 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 시간으로 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleToAlreadyReservedTime() {
         // given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
+                futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -345,7 +350,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 6), 2L)
+                new ReservationUpdateRequest(changedFutureDate, 2L)
         ))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
     }
@@ -354,10 +359,12 @@ class ReservationServiceTest {
     @DisplayName("예약 옵션이 변경된 상태로 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleAfterOptionChanged() {
         // given
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
+                futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -367,7 +374,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 6), 2L)
+                new ReservationUpdateRequest(changedFutureDate, 2L)
         ))
                 .isInstanceOf(ReservationOptionChangedException.class);
     }
@@ -376,6 +383,7 @@ class ReservationServiceTest {
     @DisplayName("예약 가능 날짜와 테마를 조회한다")
     void findReservableDatesAndThemes() {
         // given
+        final LocalDate today = LocalDate.now();
         themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
 
         // when
@@ -383,8 +391,8 @@ class ReservationServiceTest {
 
         // then
         assertThat(response.dates()).hasSize(14);
-        assertThat(response.dates().getFirst()).isEqualTo(LocalDate.of(2026, 5, 8));
-        assertThat(response.dates().getLast()).isEqualTo(LocalDate.of(2026, 5, 21));
+        assertThat(response.dates().getFirst()).isEqualTo(today);
+        assertThat(response.dates().getLast()).isEqualTo(today.plusDays(13));
         assertThat(response.themes())
                 .extracting(theme -> theme.name())
                 .containsExactly("링");
@@ -402,10 +410,11 @@ class ReservationServiceTest {
     @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 취소할 수 없다")
     void customerCannotCancelReservationOnReservationDateBeforeStartTime() {
         // given
+        final LocalDate today = LocalDate.now();
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 5, 8),
+                today,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -419,10 +428,11 @@ class ReservationServiceTest {
     @DisplayName("관리자는 예약일 당일에도 예약을 취소할 수 있다")
     void adminCanCancelReservationOnReservationDate() {
         // given
+        final LocalDate today = LocalDate.now();
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 5, 8),
+                today,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
@@ -448,7 +458,7 @@ class ReservationServiceTest {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
 
         waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
         waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
@@ -468,7 +478,7 @@ class ReservationServiceTest {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
 
         waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
         waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
@@ -488,7 +498,7 @@ class ReservationServiceTest {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
 
         reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
 
@@ -508,7 +518,7 @@ class ReservationServiceTest {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
 
         reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
 
@@ -528,7 +538,7 @@ class ReservationServiceTest {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
 
         reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
 

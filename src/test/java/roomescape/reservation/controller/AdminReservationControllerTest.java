@@ -7,18 +7,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -39,21 +34,6 @@ class AdminReservationControllerTest {
         RestAssured.port = port;
     }
 
-    @TestConfiguration
-    static class FixedClockConfig {
-
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return Clock.fixed(
-                    LocalDate.of(2026, 5, 1)
-                            .atStartOfDay(ZoneId.of("Asia/Seoul"))
-                            .toInstant(),
-                    ZoneId.of("Asia/Seoul")
-            );
-        }
-    }
-
     @Test
     @Sql("/clear.sql")
     @DisplayName("예약 목록이 없으면 빈 배열을 응답한다")
@@ -69,9 +49,10 @@ class AdminReservationControllerTest {
     @Sql("/clear.sql")
     @DisplayName("예약 목록을 조회한다")
     void findReservations() {
+        final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", "2026-08-05", 1L, 1L);
+        insertReservation("브라운", futureDate, 1L, 1L);
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .when().get("/admin/reservations")
@@ -87,6 +68,7 @@ class AdminReservationControllerTest {
     @Sql("/clear.sql")
     @DisplayName("생성한 예약을 관리자 목록에서 조회한다")
     void findCreatedReservationInAdminList() {
+        final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 
@@ -94,7 +76,7 @@ class AdminReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
-                        "date", "2026-08-05",
+                        "date", futureDate,
                         "timeId", 1,
                         "themeId", 1
                 ))
@@ -113,22 +95,24 @@ class AdminReservationControllerTest {
     @Sql("/clear.sql")
     @DisplayName("관리자는 예약일 당일에도 예약 일정을 수정할 수 있다")
     void adminCanUpdateReservationScheduleOnReservationDate() {
+        final String today = LocalDate.now().toString();
+        final String tomorrow = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", "2026-05-01", 1L, 1L);
+        insertReservation("브라운", today, 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
-                        "date", "2026-05-02",
+                        "date", tomorrow,
                         "timeId", 2
                 ))
                 .when().put("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(200)
                 .body("id", is(1))
-                .body("date", is("2026-05-02"))
+                .body("date", is(tomorrow))
                 .body("time.id", is(2));
 
         Map<String, Object> updatedReservation = jdbcTemplate.queryForMap(
@@ -140,7 +124,7 @@ class AdminReservationControllerTest {
                         """,
                 1L
         );
-        assertThat(updatedReservation.get("RESERVATION_DATE").toString()).isEqualTo("2026-05-02");
+        assertThat(updatedReservation.get("RESERVATION_DATE").toString()).isEqualTo(tomorrow);
         assertThat(updatedReservation.get("TIME_ID")).isEqualTo(2L);
     }
 
@@ -148,9 +132,10 @@ class AdminReservationControllerTest {
     @Sql("/clear.sql")
     @DisplayName("관리자는 제약없이 예약을 취소할 수 있다")
     void adminCanCancelReservation() {
+        final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", "2026-08-05", 1L, 1L);
+        insertReservation("브라운", futureDate, 1L, 1L);
 
         RestAssured.given().log().all()
                 .when().delete("/admin/reservations/1")

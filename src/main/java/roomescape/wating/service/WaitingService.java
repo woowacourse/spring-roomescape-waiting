@@ -1,6 +1,5 @@
 package roomescape.wating.service;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ public class WaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
-    private final Clock clock;
 
     @Transactional
     public long create(final WaitingCreateRequest request) {
@@ -48,7 +46,7 @@ public class WaitingService {
         final Waiting waiting = Waiting.create(
                 request.name(),
                 slot,
-                LocalDateTime.now(clock)
+                LocalDateTime.now()
         );
         try {
             return waitingRepository.save(waiting);
@@ -64,7 +62,7 @@ public class WaitingService {
         if (!waiting.isOwnedBy(customerName)) {
             throw new WaitingNotFoundException();
         }
-        if (!waiting.isCancelable(LocalDateTime.now(clock))) {
+        if (!waiting.isCancelable(LocalDateTime.now())) {
             throw new PastReservationWaitingCancellationException();
         }
 

@@ -29,7 +29,6 @@ import roomescape.theme.service.dto.response.ThemeResponse;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.service.dto.response.WaitingResponse;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +44,6 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final WaitingRepository waitingRepository;
-    private final Clock clock;
 
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll()
@@ -55,7 +53,7 @@ public class ReservationService {
     }
 
     public ReservationsAndWaitingsResponse getReservationsByCustomerName(final String customerName) {
-        final LocalDateTime now = LocalDateTime.now(clock);
+        final LocalDateTime now = LocalDateTime.now();
         final CustomerName validCustomerName = new CustomerName(customerName);
 
         final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
@@ -85,7 +83,7 @@ public class ReservationService {
         final Reservation reservation = Reservation.create(
                 data.name(),
                 slot,
-                LocalDateTime.now(clock)
+                LocalDateTime.now()
         );
 
         final Reservation savedReservation = saveReservation(reservation);
@@ -95,7 +93,7 @@ public class ReservationService {
 
     public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest data) {
         final Reservation originReservation = getReservation(reservationId);
-        originReservation.validateModifiableByCustomer(LocalDate.now(clock));
+        originReservation.validateModifiableByCustomer(LocalDate.now());
 
         return updateSchedule(data, originReservation);
     }
@@ -109,7 +107,7 @@ public class ReservationService {
     @Transactional
     public void cancelByCustomer(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
-        reservation.validateCancelableByCustomer(LocalDate.now(clock));
+        reservation.validateCancelableByCustomer(LocalDate.now());
 
         deleteReservationAndPromoteWaiting(reservation);
     }
@@ -122,7 +120,7 @@ public class ReservationService {
     }
 
     public ReservationOptionResponse getReservationOptions() {
-        LocalDate today = LocalDate.now(clock);
+        LocalDate today = LocalDate.now();
         List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
 
         List<ThemeResponse> themes = themeRepository.findAll()
@@ -143,7 +141,7 @@ public class ReservationService {
 
         final Reservation updatedReservation = originReservation.changeSchedule(
                 slot,
-                LocalDateTime.now(clock)
+                LocalDateTime.now()
         );
         final Reservation reservation = updateReservation(updatedReservation);
 

@@ -22,10 +22,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,13 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import(JdbcWaitingRepository.class)
 class JdbcWaitingRepositoryTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atTime(10, 30)
-                    .atZone(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
-    ));
+    private static final LocalDateTime NOW = LocalDate.now().atTime(10, 30);
 
     @Autowired
     JdbcTemplate jdbcTemplate;

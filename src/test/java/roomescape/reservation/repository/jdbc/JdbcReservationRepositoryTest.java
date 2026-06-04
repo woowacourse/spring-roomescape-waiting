@@ -15,7 +15,9 @@ import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,13 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import(JdbcReservationRepository.class)
 class JdbcReservationRepositoryTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atTime(10, 30)
-                    .atZone(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
-    ));
+    private static final LocalDateTime NOW = LocalDateTime.of(2026, 5, 8, 10, 30);
 
     @Autowired
     JdbcTemplate jdbcTemplate;

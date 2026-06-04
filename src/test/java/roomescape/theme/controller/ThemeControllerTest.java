@@ -7,17 +7,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.service.dto.response.ThemeResponse;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,21 +30,6 @@ class ThemeControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-    }
-
-    @TestConfiguration
-    static class FixedClockConfig {
-
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return Clock.fixed(
-                    LocalDate.of(2026, 5, 8)
-                            .atStartOfDay(ZoneId.of("Asia/Seoul"))
-                            .toInstant(),
-                    ZoneId.of("Asia/Seoul")
-            );
-        }
     }
 
     @Test

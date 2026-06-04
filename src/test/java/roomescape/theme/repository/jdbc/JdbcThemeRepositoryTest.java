@@ -97,9 +97,11 @@ class JdbcThemeRepositoryTest {
     })
     @DisplayName("최근 예약이 많은 상위 10개 테마를 조회한다")
     void findTopTenPopularThemesByRecentReservations() {
+        final LocalDate today = LocalDate.now();
+
         List<Theme> popularThemes = themeRepository.findPopularThemes(
-                LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 5, 8)
+                today.minusDays(7),
+                today
         );
 
         assertThat(popularThemes).hasSize(10);

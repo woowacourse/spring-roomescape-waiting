@@ -10,7 +10,6 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.request.ThemeCreateRequest;
 import roomescape.theme.service.dto.response.ThemeResponse;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,7 +19,6 @@ public class ThemeService {
 
     private static final int POPULAR_THEME_PERIOD_DAYS = 7;
     private final ThemeRepository themeRepository;
-    private final Clock clock;
 
     public ThemeResponse create(final ThemeCreateRequest request) {
         final Theme themeWithoutId = Theme.create(
@@ -43,7 +41,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getPopularThemes() {
-        final LocalDate today = LocalDate.now(clock);
+        final LocalDate today = LocalDate.now();
         final LocalDate startDate = today.minusDays(POPULAR_THEME_PERIOD_DAYS);
 
         return themeRepository.findPopularThemes(startDate, today)
