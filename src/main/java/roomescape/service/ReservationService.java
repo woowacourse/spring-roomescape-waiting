@@ -73,9 +73,6 @@ public class ReservationService {
             return ReservationResponse.from(reservation);
         }
 
-        reservationDao.delete(id);
-        reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
-
         Reservation newReservation = new Reservation(
                 reservation.getName(),
                 request.date(),
@@ -86,6 +83,9 @@ public class ReservationService {
 
         newReservation.validateNotPast(request.date(), time);
         validateDuplicate(newReservation);
+
+        reservationDao.delete(id);
+        reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
 
         Reservation saved = reservationDao.save(newReservation);
 
