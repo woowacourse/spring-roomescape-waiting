@@ -1,17 +1,18 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
-import roomescape.exception.*;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateWaitingException;
+import roomescape.exception.InvalidWaitingPrerequisiteException;
+import roomescape.exception.WaitingNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,7 +22,8 @@ public class WaitingService {
     private final ReservationRepository reservationRepository;
     private final SlotService slotService;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository, SlotService slotService) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
+                          SlotService slotService) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.slotService = slotService;
@@ -36,7 +38,7 @@ public class WaitingService {
 
         Waiting waiting = Waiting.transientOf(request.name(), slot);
         validDuplicated(waiting);
-        validDateTime(slot.getDate(), slot.getTimeSlot().getStartAt());
+        waiting.validateNotPast(LocalDateTime.now());
 
         return waitingRepository.save(waiting);
     }
@@ -44,7 +46,7 @@ public class WaitingService {
     @Transactional
     public void removeWaiting(Long id, String userName) {
         Waiting waiting = waitingRepository.findById(id).orElseThrow(() -> new WaitingNotFoundException(id));
-        waiting.validateModifiable(userName);
+        waiting.validateModifiable(userName, LocalDateTime.now());
         waitingRepository.deleteById(id);
     }
 
@@ -55,7 +57,8 @@ public class WaitingService {
     }
 
     private Reservation findReservationOrThrow(Slot slot) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(slot.getDate(), slot.getTimeSlot().getId(), slot.getTheme().getId())
+        return reservationRepository.findByDateAndTimeIdAndThemeId(slot.getDate(), slot.getTimeSlot().getId(),
+                        slot.getTheme().getId())
                 .orElseThrow(InvalidWaitingPrerequisiteException::new);
     }
 
@@ -72,12 +75,6 @@ public class WaitingService {
     private void validDuplicated(Waiting waiting) {
         if (waitingRepository.isExists(waiting)) {
             throw new DuplicateWaitingException(waiting);
-        }
-    }
-
-    private void validDateTime(LocalDate date, LocalTime time) {
-        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
-            throw new PastTimeException("지난 시간/날짜로 예약 대기를 추가하실 수 없습니다.");
         }
     }
 }

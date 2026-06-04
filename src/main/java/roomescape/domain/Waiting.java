@@ -1,6 +1,9 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.PastSlotControlException;
+import roomescape.exception.PastTimeException;
 
 public class Waiting {
 
@@ -21,9 +24,18 @@ public class Waiting {
         return new Waiting(null, name, slot, null);
     }
 
-    public void validateModifiable(String requesterName) {
+    public void validateModifiable(String requesterName, LocalDateTime currentDateTime) {
         if (!this.name.equals(requesterName)) {
             throw new InvalidOwnershipException();
+        }
+        if (this.slot.isPast(currentDateTime)) {
+            throw new PastSlotControlException();
+        }
+    }
+
+    public void validateNotPast(LocalDateTime currentDateTime) {
+        if (this.slot.isPast(currentDateTime)) {
+            throw new PastTimeException("지난 시간/날짜로 예약 대기를 추가하실 수 없습니다.");
         }
     }
 

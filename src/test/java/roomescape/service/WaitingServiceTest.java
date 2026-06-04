@@ -1,5 +1,14 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,20 +16,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.controller.dto.WaitingRequest;
-import roomescape.domain.*;
-import roomescape.exception.*;
+import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
+import roomescape.domain.TimeSlot;
+import roomescape.domain.Waiting;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateWaitingException;
+import roomescape.exception.InvalidWaitingPrerequisiteException;
+import roomescape.exception.PastTimeException;
+import roomescape.exception.WaitingNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -41,7 +48,7 @@ class WaitingServiceTest {
     void setUp() {
         savedTimeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         savedTheme = new Theme(1L, "이름", "설명", "test.com");
-        savedSlot = new Slot(1L, LocalDate.now(), savedTimeSlot, savedTheme);
+        savedSlot = new Slot(1L, LocalDate.now().plusDays(1), savedTimeSlot, savedTheme);
         waitingService = new WaitingService(waitingRepository, reservationRepository, slotService);
     }
 

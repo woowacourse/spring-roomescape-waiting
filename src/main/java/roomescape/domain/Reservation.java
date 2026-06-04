@@ -1,7 +1,10 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.PastSlotControlException;
+import roomescape.exception.PastTimeException;
 
 public class Reservation {
 
@@ -20,14 +23,24 @@ public class Reservation {
         return new Reservation(null, name, slot);
     }
 
-    public Reservation reschedule(Slot slot) {
+    public Reservation reschedule(Slot slot, LocalDateTime currentDateTime) {
         Slot patchedSlot = Objects.requireNonNullElse(slot, this.slot);
+        validateNotPast(currentDateTime);
         return new Reservation(this.id, this.name, patchedSlot);
     }
 
-    public void validateModifiable(String requesterName) {
+    public void validateModifiable(String requesterName, LocalDateTime currentDateTime) {
         if (!this.name.equals(requesterName)) {
             throw new InvalidOwnershipException();
+        }
+        if (this.slot.isPast(currentDateTime)) {
+            throw new PastSlotControlException();
+        }
+    }
+
+    public void validateNotPast(LocalDateTime currentDateTime) {
+        if (this.slot.isPast(currentDateTime)) {
+            throw new PastTimeException("지난 시간/날짜로 예약하실 수 없습니다.");
         }
     }
 

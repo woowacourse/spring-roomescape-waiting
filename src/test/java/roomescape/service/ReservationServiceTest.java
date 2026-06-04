@@ -18,7 +18,7 @@ import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidOwnershipException;
-import roomescape.exception.PastReservationControlException;
+import roomescape.exception.PastSlotControlException;
 import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeSlotRepository;
@@ -123,7 +123,7 @@ class ReservationServiceTest {
     void removeReservation_Past() {
         Reservation pastReservation = savePastReservation(LocalDate.now().minusDays(1));
         assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운"))
-                .isInstanceOf(PastReservationControlException.class);
+                .isInstanceOf(PastSlotControlException.class);
     }
 
     @Test
@@ -133,7 +133,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.putReservation(
                 pastReservation.getId(), "브라운", new ReservationRequest(
                         "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId())
-        )).isInstanceOf(PastReservationControlException.class);
+        )).isInstanceOf(PastSlotControlException.class);
     }
 
     @Test
@@ -142,7 +142,7 @@ class ReservationServiceTest {
         Reservation pastReservation = savePastReservation(LocalDate.now().minusDays(1));
         assertThatThrownBy(() -> reservationService.patchReservation(
                 pastReservation.getId(), "브라운", new ReservationPatchRequest("브라운", null, null, null)))
-                .isInstanceOf(PastReservationControlException.class);
+                .isInstanceOf(PastSlotControlException.class);
     }
 
     @Test

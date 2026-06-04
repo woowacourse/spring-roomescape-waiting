@@ -1,7 +1,6 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -12,8 +11,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.PastReservationControlException;
-import roomescape.exception.PastTimeException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
@@ -37,9 +34,10 @@ public class ReservationService {
     @Transactional
     public Reservation saveReservation(ReservationRequest request) {
         Slot slot = slotService.resolveNewSlot(request.date(), request.timeId(), request.themeId());
-        validDateTime(slot.getDate(), slot.getTimeSlot().getStartAt());
+        Reservation reservation = Reservation.transientOf(request.name(), slot);
+        reservation.validateNotPast(LocalDateTime.now());
         checkDuplicateForSave(slot);
-        return reservationRepository.save(Reservation.transientOf(request.name(), slot));
+        return reservationRepository.save(reservation);
     }
 
     public List<Reservation> allReservations() {
@@ -68,11 +66,7 @@ public class ReservationService {
     public Reservation putReservation(long id, String userName, ReservationRequest request) {
         Reservation existing = validModifiable(id, userName);
         Slot newSlot = slotService.resolveNewSlot(request.date(), request.timeId(), request.themeId());
-        validDateTime(newSlot.getDate(), newSlot.getTimeSlot().getStartAt());
-        checkDuplicateForUpdate(newSlot, id);
-        Reservation updated = reservationRepository.update(existing.reschedule(newSlot));
-        processOldSlotIfChanged(existing.getSlot(), newSlot);
-        return updated;
+        return updateValidReservation(id, newSlot, existing);
     }
 
     @Transactional
@@ -80,10 +74,13 @@ public class ReservationService {
         Reservation existing = validModifiable(id, userName);
         Slot targetSlot = slotService.findSlotOrNull(request.date(), request.timeId(), request.themeId());
         Slot persistentSlot = slotService.resolveSlot(targetSlot);
-        validDateTime(persistentSlot.getDate(), persistentSlot.getTimeSlot().getStartAt());
-        checkDuplicateForUpdate(persistentSlot, id);
-        Reservation updated = reservationRepository.update(existing.reschedule(persistentSlot));
-        processOldSlotIfChanged(existing.getSlot(), persistentSlot);
+        return updateValidReservation(id, persistentSlot, existing);
+    }
+
+    private Reservation updateValidReservation(long id, Slot slot, Reservation existing) {
+        checkDuplicateForUpdate(slot, id);
+        Reservation updated = reservationRepository.update(existing.reschedule(slot, LocalDateTime.now()));
+        processOldSlotIfChanged(existing.getSlot(), slot);
         return updated;
     }
 
@@ -109,22 +106,8 @@ public class ReservationService {
 
     private Reservation validModifiable(long id, String userName) {
         Reservation existing = findReservationById(id);
-        existing.validateModifiable(userName);
-        validUpcoming(existing.getSlot());
+        existing.validateModifiable(userName, LocalDateTime.now());
         return existing;
-    }
-
-    private void validUpcoming(Slot slot) {
-        if (slot.getDate().isBefore(LocalDate.now()) || (slot.getDate().isEqual(LocalDate.now()) && slot.getTimeSlot()
-                .getStartAt().isBefore(LocalTime.now()))) {
-            throw new PastReservationControlException();
-        }
-    }
-
-    private void validDateTime(LocalDate date, LocalTime time) {
-        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
-            throw new PastTimeException("지난 시간/날짜로 예약하실 수 없습니다.");
-        }
     }
 
     private void checkDuplicateForSave(Slot slot) {

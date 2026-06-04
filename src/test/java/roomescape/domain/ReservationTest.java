@@ -1,14 +1,14 @@
 package roomescape.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.InvalidOwnershipException;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTest {
 
@@ -47,7 +47,7 @@ class ReservationTest {
     @DisplayName("예약 소유자가 일치하지 않으면 예외가 발생한다.")
     void validateModifiableThrowsException() {
         Reservation reservation = new Reservation(1L, "브라운", createMockSlot());
-        assertThatThrownBy(() -> reservation.validateModifiable("포비"))
+        assertThatThrownBy(() -> reservation.validateModifiable("포비", LocalDateTime.now()))
                 .isInstanceOf(InvalidOwnershipException.class);
     }
 
