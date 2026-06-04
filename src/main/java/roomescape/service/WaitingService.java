@@ -48,10 +48,8 @@ public class WaitingService {
     }
 
     private void validateReservationExists(long slotId) {
-        boolean exists = reservationDao.existsBySlot(slotId);
-        if (!exists) {
-            throw new WaitingException(WaitingErrorCode.RESERVATION_REQUIRED_FOR_WAITING);
-        }
+        reservationDao.findBySlotIdForUpdate(slotId)
+                .orElseThrow(() -> new WaitingException(WaitingErrorCode.RESERVATION_REQUIRED_FOR_WAITING));
     }
 
     private void validateNotOwnReservation(long slotId, String name) {

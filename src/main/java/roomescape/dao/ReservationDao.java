@@ -143,6 +143,36 @@ public class ReservationDao {
         }
     }
 
+    public Optional<Reservation> findBySlotIdForUpdate(long slotId) {
+        String sql = """
+                SELECT r.id, 
+                       r.name as reservation_name, 
+                       s.id as slot_id,
+                       s.date,
+                       rt.id as time_id,
+                       rt.start_at,
+                       t.id as theme_id,
+                       t.name as theme_name,
+                       t.description,
+                       t.thumbnail
+                FROM reservation AS r
+                INNER JOIN slot AS s
+                ON r.slot_id = s.id
+                INNER JOIN reservation_time AS rt 
+                    ON s.time_id = rt.id
+                INNER JOIN theme AS t 
+                    ON s.theme_id = t.id
+                WHERE s.id = ?
+                FOR UPDATE         
+                """;
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, slotId));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
+    }
+
     public boolean existsByReservationTime(long reservationTimeId) {
         String sql = """
                 SELECT EXISTS (
