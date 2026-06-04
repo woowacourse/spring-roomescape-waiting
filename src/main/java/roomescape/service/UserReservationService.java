@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -63,7 +64,7 @@ public class UserReservationService {
                 reservation.getTime().getStartAt(),
                 "과거 예약은 취소할 수 없습니다"
         );
-        reservationRepository.deleteById(id);
+        reservationService.cancel(reservation);
     }
 
     public ReservationResult update(ReservationUpdateCommand command) {
@@ -82,16 +83,35 @@ public class UserReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
-        validateNoConflict(command, reservation.getTheme().getId());
+        Long themeId = reservation.getTheme().getId();
+        validateNoConflict(command, themeId);
+
+        LocalDate oldDate = reservation.getDate();
+        Long oldTimeId = reservation.getTime().getId();
+        boolean slotChanged = !(oldDate.equals(command.date()) && oldTimeId.equals(command.timeId()));
+        boolean wasConfirmed = reservation.isConfirmed();
+
+        ReservationStatus newStatus = reservation.getStatus();
+        if (slotChanged) {
+            newStatus = reservationRepository.existsActiveConfirmed(command.date(), command.timeId(), themeId)
+                    ? ReservationStatus.WAITING
+                    : ReservationStatus.CONFIRMED;
+        }
 
         Reservation updated = new Reservation(
                 reservation.getId(),
                 reservation.getReserverName(),
                 command.date(),
                 newTime,
-                reservation.getTheme()
+                reservation.getTheme(),
+                newStatus
         );
-        return ReservationResult.from(reservationRepository.update(updated));
+        var result = reservationRepository.update(updated);
+
+        if (slotChanged && wasConfirmed) {
+            reservationRepository.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
+        }
+        return ReservationResult.from(result);
     }
 
     private Reservation findReservation(Long id) {

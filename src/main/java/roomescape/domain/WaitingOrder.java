@@ -5,22 +5,15 @@ import roomescape.domain.exception.DomainValidationException;
 
 public class WaitingOrder {
 
-    private static final long CONFIRMED_ORDER = 0L;
+    private static final long MIN_ORDER = 0L;
 
     private final long order;
 
     public WaitingOrder(long order) {
-        if (order < CONFIRMED_ORDER) {
+        if (order < MIN_ORDER) {
             throw new DomainValidationException("대기 순번은 0 이상이어야 합니다.");
         }
         this.order = order;
-    }
-
-    public ReservationStatus status() {
-        if (order == CONFIRMED_ORDER) {
-            return ReservationStatus.CONFIRMED;
-        }
-        return ReservationStatus.WAITING;
     }
 
     public long value() {

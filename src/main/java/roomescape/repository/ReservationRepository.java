@@ -19,6 +19,12 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
+    void cancel(Long id);
+
+    boolean promoteEarliestWaiting(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsActiveConfirmed(LocalDate date, Long timeId, Long themeId);
+
     boolean existsById(Long id);
 
     boolean existsByReserverNameAndDateAndTimeIdAndThemeId(String reserverName, LocalDate date, Long timeId, Long themeId);

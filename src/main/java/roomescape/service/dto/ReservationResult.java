@@ -22,7 +22,7 @@ public record ReservationResult(
                 ReservationTimeResult.from(reservation.time()),
                 ThemeResult.from(reservation.theme()),
                 waitingOrder.value(),
-                waitingOrder.status()
+                reservation.status()
         );
     }
 }
