@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
@@ -55,6 +56,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ReservationDetailResults findReservationDetailsByUserName(String userName) {
         List<Reservation> reservations = reservationDao.findAllByUserName(userName);
         List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
