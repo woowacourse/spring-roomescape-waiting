@@ -3,13 +3,10 @@ package roomescape.dao;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -24,7 +21,6 @@ import roomescape.domain.Theme;
 @Transactional(readOnly = true)
 public class ReservationDao {
     private final JdbcTemplate jdbcTemplate;
-    private final SimpleJdbcInsert jdbcInsert;
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> new Reservation(
             resultSet.getLong("id"),
             resultSet.getString("name"),
@@ -44,9 +40,6 @@ public class ReservationDao {
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("reservation")
-                .usingGeneratedKeyColumns("id");
     }
 
     public List<Reservation> findAll() {
@@ -155,7 +148,7 @@ public class ReservationDao {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update( con -> {
+        jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
             ps.setObject(2, reservation.getDate());
@@ -171,7 +164,7 @@ public class ReservationDao {
 
         long id = keyHolder.getKey().longValue();
 
-        return findById(id).get();
+        return findById(id).orElseThrow(() -> new IllegalStateException("예약 데이터를 조회할 수 없습니다."));
     }
 
     @Transactional

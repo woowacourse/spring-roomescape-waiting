@@ -1,9 +1,6 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +8,6 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -72,11 +68,11 @@ public class ReservationService {
     public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
         Reservation reservation = getReservation(id);
         ReservationTime time = getReservationTime(request.timeId());
-        
+
         if (reservation.isSameDateTime(request.date(), request.timeId())) {
             return ReservationResponse.from(reservation);
         }
-        
+
         reservationDao.delete(id);
         reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
 

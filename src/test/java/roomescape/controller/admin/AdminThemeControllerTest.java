@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,7 +32,8 @@ class AdminThemeControllerTest {
     void 테마_관리_API() throws Exception {
         String name = "추리물";
         String description = "추리";
-        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "fake-image-content".getBytes());
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png",
+                "fake-image-content".getBytes());
 
         given(themeService.create(any())).willReturn(new ThemeResponse(1L, name, description, "http://image.url"));
         willDoNothing().given(themeService).delete(16L);
