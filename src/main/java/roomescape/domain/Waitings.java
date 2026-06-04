@@ -27,9 +27,16 @@ public class Waitings {
 
     public Waiting enqueue(Member member, Reservation reservation, LocalDateTime now) {
         validateReservationMatchesSlot(reservation);
+        validateNotReservationOwner(member, reservation);
         validateCanCreate(member);
-        Waiting created = Waiting.create(member, reservation, now);
+        Waiting created = Waiting.create(member, slot, now);
         return created.withRank((long) waitings.size() + 1);
+    }
+
+    private void validateNotReservationOwner(Member member, Reservation reservation) {
+        if (reservation.isSameMember(member)) {
+            throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
+        }
     }
 
     public Optional<Waiting> peekFirst() {

@@ -21,14 +21,11 @@ public class Waiting {
         this.rank = rank;
     }
 
-    static Waiting create(Member member, Reservation reservation, LocalDateTime now) {
-        if (reservation.getSlot().isPast(now)) {
+    static Waiting create(Member member, Slot slot, LocalDateTime now) {
+        if (slot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 대기 생성은 불가능합니다.");
         }
-        if (reservation.isSameMember(member)) {
-            throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
-        }
-        return new Waiting(null, member, reservation.getSlot(), null);
+        return new Waiting(null, member, slot, null);
     }
 
     public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Store store) {
