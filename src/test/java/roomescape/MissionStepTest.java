@@ -208,6 +208,76 @@ class MissionStepTest {
     }
 
     @Test
+    void 예약_취소시_첫번째_예약_대기가_예약으로_자동_승격된다() {
+        Map<String, String> reservationParams = new HashMap<>();
+        reservationParams.put("name", "브라운");
+        reservationParams.put("date", LocalDate.now().plusDays(1).toString());
+        reservationParams.put("timeId", "1");
+        reservationParams.put("themeId", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(1));
+
+        Map<String, String> firstWaitingParams = new HashMap<>(reservationParams);
+        firstWaitingParams.put("name", "구구");
+        Map<String, String> secondWaitingParams = new HashMap<>(reservationParams);
+        secondWaitingParams.put("name", "포비");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(firstWaitingParams)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("turn", is(1));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(secondWaitingParams)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("turn", is(2));
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "구구")
+                .when().get("/reservation-statuses")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("구구"))
+                .body("[0].status", is("RESERVED"))
+                .body("[0].turn", nullValue());
+
+        RestAssured.given().log().all()
+                .queryParam("name", "구구")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
+
+        RestAssured.given().log().all()
+                .queryParam("name", "포비")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("포비"))
+                .body("[0].turn", is(1));
+    }
+
+    @Test
     void 예약_대기_신청_예외_응답() {
         Map<String, String> reservationParams = new HashMap<>();
         reservationParams.put("name", "브라운");
