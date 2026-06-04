@@ -12,8 +12,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.repository.dto.ReservationTimeDto;
 import roomescape.repository.dto.ThemeDto;
@@ -154,25 +152,6 @@ public class JdbcWaitRepository implements WaitRepository {
         String sql = "DELETE FROM `wait` WHERE `id` = (?)";
 
         jdbcTemplate.update(sql, id);
-    }
-
-    private static RowMapper<Wait> waitRowMapper() {
-        return (resultSet, rowNum) -> {
-            Long id = resultSet.getLong("id");
-            LocalDateTime createdAt = resultSet.getObject("created_at", LocalDateTime.class);
-            String name = resultSet.getString("name");
-            LocalDate date = resultSet.getDate("reservation_date").toLocalDate();
-            Long timeId = resultSet.getLong("time_id");
-            LocalTime timeValue = resultSet.getTime("time_value").toLocalTime();
-            Long themeId = resultSet.getLong("theme_id");
-            String themeName = resultSet.getString("theme_name");
-            String themeDescription = resultSet.getString("theme_description");
-            String themeThumbnailUrl = resultSet.getString("theme_thumbnail_url");
-
-            ReservationTime reservationTime = new ReservationTime(timeId, timeValue);
-            Theme theme = new Theme(themeId, themeName, themeDescription, themeThumbnailUrl);
-            return new Wait(id, createdAt, name, date, reservationTime, theme);
-        };
     }
 
     private static RowMapper<WaitDetailDto> waitDetailDtoRowMapper() {
