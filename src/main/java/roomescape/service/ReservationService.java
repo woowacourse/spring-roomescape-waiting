@@ -120,11 +120,11 @@ public class ReservationService {
     }
 
     private void promoteWaiting(ReservationWaiting reservationWaiting) {
-        if(!reservationWaitingDao.isExistByNameAndSlotId(reservationWaiting.getName(), reservationWaiting.getSlot().getId())) {
-            throw new ConcurrencyConflictException("승격할 대기가 존재하지 않습니다.");
+        long claimed = reservationWaitingDao.delete(reservationWaiting.getId());
+        if (claimed == 0) {
+            throw new ConcurrencyConflictException("승격 대상 대기가 사라졌습니다.");
         }
 
-        reservationWaitingDao.delete(reservationWaiting.getId());
         reservationUpdatingDao.insert(reservationWaiting.promote());
     }
 

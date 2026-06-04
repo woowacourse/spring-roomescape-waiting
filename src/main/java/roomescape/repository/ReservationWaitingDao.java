@@ -132,8 +132,8 @@ public class ReservationWaitingDao {
         return keyHolder.getKey().longValue();
     }
 
-    public void delete(Long id) {
+    public long delete(Long id) {
         String sql = "delete from waiting where id = ?";
-        jdbcTemplate.update(sql, id);
+        return jdbcTemplate.update(sql, id);
     }
 }
