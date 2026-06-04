@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -56,8 +57,20 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
+    @Transactional
     public void cancelReservationByNameAndId(String name, Long id) {
+        Reservation reservation = reservationDao.findById(id);
+        validateReservationAuthority(name, reservation);
+
         reservationDao.cancelByNameAndId(name, id);
+
+        if (reservation.getStatus() == ReservationStatus.RESERVED) {
+            reservationDao.promoteFirstWaiting(
+                    reservation.getDate(),
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId()
+            );
+        }
     }
 
 

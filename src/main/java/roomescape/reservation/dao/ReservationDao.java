@@ -94,10 +94,26 @@ public class ReservationDao {
     String sql = """
         update reservation
         set status = 'CANCELED'
-        where name = ? and id = ?
+        where name = ? and id = ? and status in ('RESERVED', 'WAITING')
         """;
 
     jdbcTemplate.update(sql, name, id);
+  }
+
+  public void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId) {
+    String sql = """
+        update reservation
+        set status = 'RESERVED'
+        where id = (
+            select id
+            from reservation
+            where date = ? and time_id = ? and theme_id = ? and status = 'WAITING'
+            order by id
+            limit 1
+        )
+        """;
+
+    jdbcTemplate.update(sql, date, timeId, themeId);
   }
 
   public boolean existsByTimeId(Long timeId) {
