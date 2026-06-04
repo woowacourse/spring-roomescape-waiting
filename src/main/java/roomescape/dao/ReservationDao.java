@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.dto.projection.ReservationOrderProjection;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -26,17 +26,23 @@ public class ReservationDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public List<Reservation> findAll() {
-        return jdbcTemplate.query("""
-                    SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
+    public Reservation findById(Long id) {
+        return jdbcTemplate.queryForObject("""
+                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url,
                     r.status, r.requested_at
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
-                    INNER JOIN theme t ON r.theme_id = t.id;
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.id = ?
                 """, (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
-            Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
+            ReservationTime time = new ReservationTime(
+                    rs.getLong("time_id"),
+                    rs.getTime("start_at").toLocalTime());
+            Theme theme = new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("description"),
                     rs.getString("url"));
             return new Reservation(
                     rs.getLong("id"),
@@ -46,7 +52,19 @@ public class ReservationDao {
                     theme,
                     rs.getTimestamp("requested_at").toLocalDateTime(),
                     ReservationStatus.valueOf(rs.getString("status")));
-        });
+        }, id);
+    }
+
+    public List<Reservation> findByName(String name) {
+        return jdbcTemplate.query("""
+                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                           t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                           r.status, r.requested_at
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.name = ?
+                """, RESERVATION_ROW_MAPPER, name);
     }
 
     public Reservation findById(Long id) {
@@ -73,27 +91,24 @@ public class ReservationDao {
         }, id);
     }
 
-    public List<ReservationOrderProjection> findByName(String name) {
+    public List<Reservation> findAll() {
         return jdbcTemplate.query("""
-                    SELECT *
-                    FROM (
-                        SELECT
-                            r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                            r.status, r.requested_at
-                            CASE WHEN r.status = 'WAITING'
-                                 THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
-                            END AS waiting_order
-                        FROM reservation r
-                        INNER JOIN reservation_time rt ON r.time_id = rt.id
-                        INNER JOIN theme t ON r.theme_id = t.id
-                    ) sub
-                    WHERE sub.name = ?
+                    SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                    r.status, r.requested_at
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id;
                 """, (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
-            Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
+            ReservationTime time = new ReservationTime(
+                    rs.getLong("time_id"),
+                    rs.getTime("start_at").toLocalTime());
+            Theme theme = new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("description"),
                     rs.getString("url"));
-            Reservation reservation = new Reservation(
+            return new Reservation(
                     rs.getLong("id"),
                     rs.getString("name"),
                     rs.getDate("date").toLocalDate(),
@@ -101,9 +116,7 @@ public class ReservationDao {
                     theme,
                     rs.getTimestamp("requested_at").toLocalDateTime(),
                     ReservationStatus.valueOf(rs.getString("status")));
-
-            return new ReservationOrderProjection(reservation, rs.getLong("waiting_order"));
-        }, name);
+        });
     }
 
     public boolean existsBy(LocalDate date, Theme theme, ReservationTime time) {
@@ -147,4 +160,22 @@ public class ReservationDao {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
 
+    private static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (rs, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime());
+        Theme theme = new Theme(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("description"),
+                rs.getString("url"));
+        return new Reservation(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme,
+                rs.getTimestamp("requested_at").toLocalDateTime(),
+                ReservationStatus.valueOf(rs.getString("status")));
+    };
 }
