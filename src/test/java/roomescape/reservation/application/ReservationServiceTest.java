@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
@@ -389,6 +390,57 @@ class ReservationServiceTest {
         ).orElseThrow();
         assertThat(promotedReservation.getName()).isEqualTo("브라운");
         assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("대기 승격 실패는 예약 취소를 막지 않는다")
+    void cancelReservation_success_when_waiting_promotion_fails() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        WaitingService failingWaitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                        throw new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST);
+                    }
+                },
+                new WaitingValidator(waitingRepository)
+        );
+        ReservationService reservationService = new ReservationService(
+                reservationRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitingRepository,
+                new ReservationValidator(reservationRepository),
+                failingWaitingService
+        );
+
+        // when
+        reservationService.cancelReservation(savedReservation.getId(), "인직");
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
     }
 
 }
