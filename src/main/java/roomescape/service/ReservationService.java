@@ -38,14 +38,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
-        Reservation reservation = findOrCreateSlotWithLock(command);
+        Reservation reservation = findOrCreateSlotForUpdate(command);
         reservation.reserve(command.name(), LocalDateTime.now(clock));
         return ReservationResult.from(reservationRepository.save(reservation));
     }
 
     @Transactional
     public ReservationResult addWaiting(ReservationCommand command) {
-        Reservation reservation = findOrCreateSlotWithLock(command);
+        Reservation reservation = findOrCreateSlotForUpdate(command);
         ReservationEntry added = reservation.reserveOrWait(command.name(), LocalDateTime.now(clock));
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
@@ -64,9 +64,14 @@ public class ReservationService {
         return moveEntry(entry, current, command.date(), newTime, LocalDateTime.now(clock));
     }
 
-    private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
-                                        LocalDate date, ReservationTime newTime, LocalDateTime now) {
-        Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
+    private ReservationResult moveEntry(
+            ReservationEntry entry,
+            Reservation current,
+            LocalDate date,
+            ReservationTime newTime,
+            LocalDateTime now
+    ) {
+        Reservation target = findOrCreateSlotForUpdate(date, current.getTheme(), newTime);
         ReservationEntry moved = target.reserveOrWait(entry.getReserverName(), now);
 
         current.cancelEntry(entry.getId());
@@ -94,13 +99,17 @@ public class ReservationService {
         return reservationQueryRepository.search(command, pageable);
     }
 
-    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time) {
+    public List<ReservationResult> getAllReservations() {
+        return reservationQueryRepository.getAllReservations();
+    }
+
+    private Reservation findOrCreateSlotForUpdate(LocalDate date, Theme theme, ReservationTime time) {
         ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
         return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
                 .orElseGet(() -> Reservation.createSlot(date, theme, time));
     }
 
-    private Reservation findOrCreateSlotWithLock(ReservationCommand command) {
+    private Reservation findOrCreateSlotForUpdate(ReservationCommand command) {
         return reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
                 .orElseGet(() -> {
                     Theme theme = findThemeWithThrow(command.themeId());
@@ -119,9 +128,5 @@ public class ReservationService {
         return reservationTimeRepository.findById(timeId)
                 .filter(ReservationTime::isActive)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간 정보입니다."));
-    }
-
-    public List<ReservationResult> getAllReservations() {
-        return reservationQueryRepository.getAllReservations();
     }
 }
