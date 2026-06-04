@@ -34,7 +34,7 @@ import roomescape.domain.theme.ThumbnailUrl;
         SlotRepository.class
 })
 class ReservationRepositoryTest {
-    private final static Clock FIXED_CLOCK = Clock.fixed(
+    private static final Clock FIXED_CLOCK = Clock.fixed(
             Instant.parse("2026-05-10T03:00:00Z"),
             ZoneId.of("Asia/Seoul")
     );

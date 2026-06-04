@@ -17,10 +17,10 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class MissionStep3Test {
+class MissionStep3Test {
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
+
     @LocalServerPort
     int port;
 

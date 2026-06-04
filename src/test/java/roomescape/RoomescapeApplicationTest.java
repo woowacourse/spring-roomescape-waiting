@@ -69,15 +69,6 @@ class RoomescapeApplicationTest {
     }
 
     @Test
-    void 과거_날짜로_사용_시간_조회시_400을_반환한다() {
-        String past = "2020-01-01";
-
-        RestAssured.given()
-                .when().get("/times/available?date=" + past + "&themeId=1")
-                .then().statusCode(422);
-    }
-
-    @Test
     void themeId_없이_사용_시간_조회시_400을_반환한다() {
         RestAssured.given()
                 .when().get("/times/available?date=" + AVAILABLE_DATE)

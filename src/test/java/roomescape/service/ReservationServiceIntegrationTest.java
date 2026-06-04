@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.RoomEscapeFixture;
@@ -69,7 +68,6 @@ class ReservationServiceIntegrationTest {
                     if (result.getReservation().getStatus() == Status.WAITING) {
                         waiting.incrementAndGet();
                     }
-                } catch (DuplicateKeyException ignored) {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {

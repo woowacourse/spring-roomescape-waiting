@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.RoomEscapeFixture;
 import roomescape.domain.theme.Theme;
 
-public class SlotTest {
+class SlotTest {
     @ParameterizedTest
     @MethodSource("nullCases")
     void 매개변수에_NULL이_포함되면_예외가_발생한다(ReservationDate date, ReservationTime time, Theme theme) {

@@ -19,7 +19,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class ThemeServiceTest {
+class ThemeServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;

@@ -15,7 +15,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class ReservationTimeServiceTest {
+class ReservationTimeServiceTest {
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @Mock

@@ -23,7 +23,7 @@ import roomescape.controller.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class MissionStep2Test {
+class MissionStep2Test {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

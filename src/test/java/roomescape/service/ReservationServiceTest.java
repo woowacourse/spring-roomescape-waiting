@@ -69,7 +69,7 @@ class ReservationServiceTest {
 
         @Test
         void 존재하지_않는_시간으로_예약시_예외가_발생한다() {
-            given(reservationTimeRepository.findById(999L)).willReturn(Optional.empty());
+            given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
 
             ReservationCreateRequest request = RoomEscapeFixture.reservationCreateRequest();
 

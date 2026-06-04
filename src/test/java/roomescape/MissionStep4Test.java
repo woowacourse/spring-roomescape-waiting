@@ -16,7 +16,7 @@ import roomescape.controller.ReservationController;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class MissionStep4Test {
+class MissionStep4Test {
     @Autowired
     private ReservationController reservationController;
 
