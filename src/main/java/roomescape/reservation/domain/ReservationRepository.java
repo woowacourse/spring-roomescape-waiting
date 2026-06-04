@@ -3,8 +3,6 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
 
 public interface ReservationRepository {
 
@@ -17,10 +15,6 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
 
     Optional<Reservation> findBySlot(ReservationSlot slot);
-
-    List<ReservationWithStatusResult> queryAllByNameWithStatus(String name);
-
-    List<PopularThemeQueryResult> queryPopularThemes(LocalDate from, LocalDate to, int limit);
 
     void delete(Reservation reservation);
 

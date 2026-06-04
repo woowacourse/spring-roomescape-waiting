@@ -1,7 +1,7 @@
 package roomescape.reservation.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 

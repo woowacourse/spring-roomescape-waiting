@@ -20,7 +20,8 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservation.query.dto.ReservationWithStatusResult;
+import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
@@ -34,6 +35,9 @@ class ReservationQueryServiceTest {
 
     @Mock
     private ReservationWaitingRepository reservationWaitingRepository;
+
+    @Mock
+    private ReservationQueryDao reservationQueryDao;
 
     @InjectMocks
     private ReservationQueryService reservationQueryService;
@@ -76,6 +80,10 @@ class ReservationQueryServiceTest {
 
         given(reservationRepository.findAllByName(name)).willReturn(List.of(fixedReservation1, fixedReservation2));
         given(reservationWaitingRepository.findAllByName(name)).willReturn(List.of());
+        given(reservationQueryDao.queryAllByNameWithStatus(name)).willReturn(List.of(
+                ReservationWithStatusResult.from(fixedReservation1),
+                ReservationWithStatusResult.from(fixedReservation2)
+        ));
 
         // when
         List<ReservationWithStatusResult> results = reservationQueryService.findAllByName(name);
@@ -86,6 +94,7 @@ class ReservationQueryServiceTest {
         assertThat(results.get(1).id()).isEqualTo(1L);
         then(reservationRepository).should().findAllByName(name);
         then(reservationWaitingRepository).should().findAllByName(name);
+        then(reservationQueryDao).should().queryAllByNameWithStatus(name);
     }
 
     @Test

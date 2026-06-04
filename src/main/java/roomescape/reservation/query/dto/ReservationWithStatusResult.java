@@ -1,4 +1,4 @@
-package roomescape.reservation.service.dto;
+package roomescape.reservation.query.dto;
 
 import java.time.LocalDate;
 import java.util.Comparator;

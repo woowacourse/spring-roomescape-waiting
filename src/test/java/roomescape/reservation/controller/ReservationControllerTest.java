@@ -30,7 +30,7 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 

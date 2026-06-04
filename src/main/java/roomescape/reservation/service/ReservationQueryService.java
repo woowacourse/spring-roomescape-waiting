@@ -10,9 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 
@@ -22,11 +23,14 @@ public class ReservationQueryService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationQueryDao reservationQueryDao;
 
     public ReservationQueryService(ReservationRepository reservationRepository,
-                                   ReservationWaitingRepository reservationWaitingRepository) {
+                                   ReservationWaitingRepository reservationWaitingRepository,
+                                   ReservationQueryDao reservationQueryDao) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationQueryDao = reservationQueryDao;
     }
 
     public List<ReservationResult> findAll() {
@@ -36,12 +40,11 @@ public class ReservationQueryService {
     }
 
     public List<ReservationWithStatusResult> findAllByName(String name) {
-        List<ReservationWithStatusResult> reservations = getReservationResults(name);
         List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByName(name);
         if (waitings.isEmpty()) {
-            return combineAndSort(reservations, null);
+            return reservationQueryDao.queryAllByNameWithStatus(name);
         }
-        return combineAndSort(reservations, getReservationWaitingResults(waitings));
+        return combineAndSort(getReservationResults(name), getReservationWaitingResults(waitings));
     }
 
     public PopularThemesResult queryPopularThemes(int period, int limit) {

@@ -1,4 +1,4 @@
-package roomescape.reservation.repository.dto;
+package roomescape.reservation.query.dto;
 
 public record PopularThemeQueryResult(
         Long id,

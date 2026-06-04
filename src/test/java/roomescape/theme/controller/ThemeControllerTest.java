@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.AuthInterceptor;
 import roomescape.auth.OwnerOnlyArgumentResolver;
 import roomescape.global.config.WebMvcConfig;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
+import roomescape.reservation.query.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.theme.domain.Theme;

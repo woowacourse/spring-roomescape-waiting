@@ -1,14 +1,11 @@
 package roomescape.reservation.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -50,16 +47,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                 slot.time().getId(),
                 slot.theme().getId()
         );
-    }
-
-    @Override
-    public List<ReservationWithStatusResult> queryAllByNameWithStatus(String name) {
-        return reservationDao.queryAllByNameWithStatus(name);
-    }
-
-    @Override
-    public List<PopularThemeQueryResult> queryPopularThemes(LocalDate from, LocalDate to, int limit) {
-        return reservationDao.queryPopularThemes(from, to, limit);
     }
 
     @Override
