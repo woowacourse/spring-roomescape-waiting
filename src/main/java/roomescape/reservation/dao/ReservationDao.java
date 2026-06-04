@@ -141,7 +141,7 @@ public boolean existsByTimeId(Long timeId) {
     String sql = """
         select count(*)
         from reservation
-        where date = ? and time_id = ? and theme_id = ?
+        where date = ? and time_id = ? and theme_id = ? and status = 'RESERVED'
         """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
 

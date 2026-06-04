@@ -1,6 +1,7 @@
 package roomescape.reservation.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Reservation;
@@ -80,6 +82,49 @@ class ReservationDaoTest {
             // then
             List<Reservation> all = reservationDao.findAll();
             assertThat(all).hasSize(1);
+        }
+
+        @Test
+        void 같은_슬롯에_확정_예약은_하나만_저장할_수_있다() {
+            // given
+            ReservationTime time = createTime();
+            Theme theme = createTheme();
+            LocalDate date = LocalDate.of(9999, 8, 5);
+            reservationDao.insert("브라운", date, time, theme, ReservationStatus.RESERVED);
+
+            // when // then
+            assertThatThrownBy(() -> reservationDao.insert("이안", date, time, theme, ReservationStatus.RESERVED))
+                    .isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        void 같은_슬롯에_대기는_여러_명_저장할_수_있다() {
+            // given
+            ReservationTime time = createTime();
+            Theme theme = createTheme();
+            LocalDate date = LocalDate.of(9999, 8, 5);
+            reservationDao.insert("브라운", date, time, theme, ReservationStatus.RESERVED);
+
+            // when
+            reservationDao.insert("이안", date, time, theme, ReservationStatus.WAITING);
+            reservationDao.insert("누누", date, time, theme, ReservationStatus.WAITING);
+
+            // then
+            List<Reservation> all = reservationDao.findAll();
+            assertThat(all).hasSize(3);
+        }
+
+        @Test
+        void 같은_사용자가_같은_슬롯에_같은_상태로_중복_저장할_수_없다() {
+            // given
+            ReservationTime time = createTime();
+            Theme theme = createTheme();
+            LocalDate date = LocalDate.of(9999, 8, 5);
+            reservationDao.insert("브라운", date, time, theme, ReservationStatus.WAITING);
+
+            // when // then
+            assertThatThrownBy(() -> reservationDao.insert("브라운", date, time, theme, ReservationStatus.WAITING))
+                    .isInstanceOf(DataIntegrityViolationException.class);
         }
     }
 

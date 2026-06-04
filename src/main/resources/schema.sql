@@ -20,13 +20,22 @@ CREATE TABLE theme
 
 CREATE TABLE reservation
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    date     date         NOT NULL,
-    time_id  BIGINT       NOT NULL,
-    theme_id BIGINT       NOT NULL,
-    status   VARCHAR(255) NOT NULL,
+    id                BIGINT       NOT NULL AUTO_INCREMENT,
+    name              VARCHAR(255) NOT NULL,
+    date              DATE         NOT NULL,
+    time_id           BIGINT       NOT NULL,
+    theme_id          BIGINT       NOT NULL,
+    status            VARCHAR(255) NOT NULL,
+    reserved_slot_key VARCHAR(255) AS (
+        CASE
+            WHEN status = 'RESERVED'
+            THEN CONCAT(date, ':', time_id, ':', theme_id)
+            ELSE NULL
+        END
+    ),
     PRIMARY KEY (id),
+    UNIQUE (reserved_slot_key),
+    UNIQUE (name, date, time_id, theme_id, status),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
