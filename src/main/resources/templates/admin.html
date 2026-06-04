@@ -57,7 +57,9 @@
                     <button class="button danger"
                             type="button"
                             data-action="delete-reservation"
-                            th:data-id="${reservation.id}">
+                            th:data-id="${reservation.id}"
+                            th:data-name="${reservation.name}"
+                            th:data-status="${reservation.status}">
                         예약 취소
                     </button>
                 </article>

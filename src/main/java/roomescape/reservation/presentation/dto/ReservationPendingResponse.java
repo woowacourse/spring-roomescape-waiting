@@ -1,5 +1,6 @@
 package roomescape.reservation.presentation.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDate;
 import lombok.Builder;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
@@ -8,6 +9,7 @@ import roomescape.theme.presentation.dto.ThemeResponse;
 import roomescape.time.presentation.dto.ReservationTimeResponse;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ReservationPendingResponse(
         Long id,
         String name,

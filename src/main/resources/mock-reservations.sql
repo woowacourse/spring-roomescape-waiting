@@ -1,89 +1,106 @@
--- 🥇 1등 (Theme 1: 버려진 정신병원) - 총 10건 (ACTIVE 7건, PENDING 3건)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-06-03', 1, 1, 'ACTIVE', '2026-05-26 10:00:00');
--- 💡 ★ 대기 순번 검증 슬롯 1 (2026-05-03 / Time 1 / Theme 1)
--- 포비가 이미 ACTIVE인 상태에서 어피치와 네오가 순서대로 대기를 건 상황입니다.
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('어피치', '2026-06-03', 1, 1, 'PENDING', '2026-05-26 10:00:10', 1); -- 대기 1번 예상
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('네오', '2026-06-03', 1, 1, 'PENDING', '2026-05-26 10:01:15', 2); -- 대기 2번 예상
+-- 예약별 날짜/시간/테마 조합 (오늘부터 6일 후까지 동적 세팅)
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 1, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 2, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 3, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 4, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 5, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (CURRENT_DATE, 7, 1);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 3, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 5, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 2, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 4, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 6, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (CURRENT_DATE, 8, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 1, 7);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 2, 13);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 4, 13);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 6, 13);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 8, 13);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 1, 13);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 3, 13);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 4, 25);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 2, 25);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 7, 25);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (CURRENT_DATE, 5, 25);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 3, 19);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 5, 19);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 7, 19);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 1, 19);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 2, 19);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 1, 2);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 3, 2);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 5, 2);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (CURRENT_DATE, 4, 2);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 5, 8);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 8, 8);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 6, 8);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 6, 14);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 7, 14);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 8, 14);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 6, 20);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 4, 20);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 2, CURRENT_DATE), 3, 20);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 7, 26);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 5, 26);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 6, CURRENT_DATE), 7, 3);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 5, CURRENT_DATE), 8, 9);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 4, CURRENT_DATE), 1, 15);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 3, CURRENT_DATE), 6, 21);
+INSERT INTO time_slot (date, time_id, theme_id) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 2, 27);
 
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-05-02', 2, 1, 'ACTIVE', '2026-05-26 10:05:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 3, 1, 'ACTIVE', '2026-05-26 10:10:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-04-30', 4, 1, 'ACTIVE', '2026-05-26 10:15:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브라운', '2026-04-29', 5, 1, 'ACTIVE', '2026-05-26 10:20:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('네오', '2026-04-28', 6, 1, 'ACTIVE', '2026-05-26 10:25:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('라이언', '2026-04-27', 7, 1, 'ACTIVE', '2026-05-26 10:30:00');
+-- 확정 예약 데이터
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('포비', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 1 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('리사', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 2 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 3 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제이슨', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 4 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브라운', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 5 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('네오', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 1, CURRENT_DATE) AND time_id = 6 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:25:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('라이언', (SELECT id FROM time_slot WHERE date = CURRENT_DATE AND time_id = 7 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:30:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('포비', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 3 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 5 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제이슨', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 2 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('네오', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 4 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('라이언', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 1, CURRENT_DATE) AND time_id = 6 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('리사', (SELECT id FROM time_slot WHERE date = CURRENT_DATE AND time_id = 8 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:25:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브라운', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 1 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:30:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('토미', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 2 AND theme_id = 13), CAST(CURRENT_DATE || ' 12:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제인', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 4 AND theme_id = 13), CAST(CURRENT_DATE || ' 12:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('포비', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 6 AND theme_id = 13), CAST(CURRENT_DATE || ' 12:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('리사', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 8 AND theme_id = 13), CAST(CURRENT_DATE || ' 12:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 1 AND theme_id = 13), CAST(CURRENT_DATE || ' 12:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제이슨', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 1, CURRENT_DATE) AND time_id = 3 AND theme_id = 13), CAST(CURRENT_DATE || ' 12:25:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('포비', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 4 AND theme_id = 25), CAST(CURRENT_DATE || ' 14:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 2 AND theme_id = 25), CAST(CURRENT_DATE || ' 14:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('리사', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 7 AND theme_id = 25), CAST(CURRENT_DATE || ' 14:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('네오', (SELECT id FROM time_slot WHERE date = CURRENT_DATE AND time_id = 5 AND theme_id = 25), CAST(CURRENT_DATE || ' 14:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('앨리스', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 3 AND theme_id = 19), CAST(CURRENT_DATE || ' 13:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('밥', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 5 AND theme_id = 19), CAST(CURRENT_DATE || ' 13:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('찰리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 7 AND theme_id = 19), CAST(CURRENT_DATE || ' 13:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('데이비드', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 1 AND theme_id = 19), CAST(CURRENT_DATE || ' 13:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('이브', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 2 AND theme_id = 19), CAST(CURRENT_DATE || ' 13:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제이슨', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 1 AND theme_id = 2), CAST(CURRENT_DATE || ' 14:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브라운', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 3 AND theme_id = 2), CAST(CURRENT_DATE || ' 14:25:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('라이언', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 1, CURRENT_DATE) AND time_id = 5 AND theme_id = 2), CAST(CURRENT_DATE || ' 14:30:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('어피치', (SELECT id FROM time_slot WHERE date = CURRENT_DATE AND time_id = 4 AND theme_id = 2), CAST(CURRENT_DATE || ' 14:35:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('포비', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 5 AND theme_id = 8), CAST(CURRENT_DATE || ' 15:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('리사', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 8 AND theme_id = 8), CAST(CURRENT_DATE || ' 15:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 6 AND theme_id = 8), CAST(CURRENT_DATE || ' 15:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브라운', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 6 AND theme_id = 14), CAST(CURRENT_DATE || ' 15:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('네오', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 7 AND theme_id = 14), CAST(CURRENT_DATE || ' 15:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('라이언', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 1, CURRENT_DATE) AND time_id = 8 AND theme_id = 14), CAST(CURRENT_DATE || ' 15:25:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('토미', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 6 AND theme_id = 20), CAST(CURRENT_DATE || ' 15:30:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제인', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 4 AND theme_id = 20), CAST(CURRENT_DATE || ' 15:35:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('앨리스', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 2, CURRENT_DATE) AND time_id = 3 AND theme_id = 20), CAST(CURRENT_DATE || ' 15:40:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('밥', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 7 AND theme_id = 26), CAST(CURRENT_DATE || ' 16:00:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('찰리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 5 AND theme_id = 26), CAST(CURRENT_DATE || ' 16:05:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('포비', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 7 AND theme_id = 3), CAST(CURRENT_DATE || ' 16:10:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('리사', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 8 AND theme_id = 9), CAST(CURRENT_DATE || ' 16:15:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 4, CURRENT_DATE) AND time_id = 1 AND theme_id = 15), CAST(CURRENT_DATE || ' 16:20:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('제이슨', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 3, CURRENT_DATE) AND time_id = 6 AND theme_id = 21), CAST(CURRENT_DATE || ' 16:25:00' AS TIMESTAMP));
+INSERT INTO reservation (name, slot_id, created_at) VALUES ('라이언', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 1, CURRENT_DATE) AND time_id = 2 AND theme_id = 27), CAST(CURRENT_DATE || ' 16:30:00' AS TIMESTAMP));
 
-
--- 🥈 2등 (Theme 7: 오리엔트 특급 살인) - 총 9건 (ACTIVE 7건, PENDING 2건)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-02', 3, 7, 'ACTIVE', '2026-05-26 11:00:00');
--- 💡 ★ 대기 순번 검증 슬롯 2 (2026-05-02 / Time 3 / Theme 7)
--- 포비가 선점한 자리에 브리인과 제이슨이 순차적으로 대기를 걸었습니다.
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('브리', '2026-05-02', 3, 7, 'PENDING', '2026-05-26 11:01:00', 3); -- 대기 1번 예상
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('제이슨', '2026-05-02', 3, 7, 'PENDING', '2026-05-26 11:02:30', 4); -- 대기 2번 예상
-
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 5, 7, 'ACTIVE', '2026-05-26 11:05:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-04-30', 2, 7, 'ACTIVE', '2026-05-26 11:10:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('네오', '2026-04-29', 4, 7, 'ACTIVE', '2026-05-26 11:15:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('라이언', '2026-04-28', 6, 7, 'ACTIVE', '2026-05-26 11:20:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-04-27', 8, 7, 'ACTIVE', '2026-05-26 11:25:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브라운', '2026-05-03', 1, 7, 'ACTIVE', '2026-05-26 11:30:00');
-
-
--- 🥉 3등 (Theme 13: 화성 기지 SOS) - 총 6건 (ACTIVE 전원)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('토미', '2026-05-03', 2, 13, 'ACTIVE', '2026-05-26 12:00:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제인', '2026-05-02', 4, 13, 'ACTIVE', '2026-05-26 12:05:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-01', 6, 13, 'ACTIVE', '2026-05-26 12:10:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-04-30', 8, 13, 'ACTIVE', '2026-05-26 12:15:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-04-29', 1, 13, 'ACTIVE', '2026-05-26 12:20:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-04-28', 3, 13, 'ACTIVE', '2026-05-26 12:25:00');
-
-
--- 🎖️ 공동 5등 (Theme 25: 세기의 금고 털기) - 총 5건 (ACTIVE 4건, PENDING 1건)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-03', 4, 25, 'ACTIVE', '2026-05-26 14:00:00');
--- 💡 ★ 대기 순번 검증 슬롯 3 (2026-05-03 / Time 4 / Theme 25)
--- 포비가 예약한 곳에 리사가 단독 대기를 걸었습니다.
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('리사', '2026-05-03', 4, 25, 'PENDING', '2026-05-26 14:00:45', 5); -- 대기 1번 예상
-
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 2, 25, 'ACTIVE', '2026-05-26 14:05:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-04-29', 7, 25, 'ACTIVE', '2026-05-26 14:10:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('네오', '2026-04-27', 5, 25, 'ACTIVE', '2026-05-26 14:15:00');
-
-
--- [이하 단독 예약 데이터 유지]
--- 🎖️ 4등 (Theme 19)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('앨리스', '2026-05-03', 3, 19, 'ACTIVE', '2026-05-26 13:00:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('밥', '2026-05-02', 5, 19, 'ACTIVE', '2026-05-26 13:05:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('찰리', '2026-05-01', 7, 19, 'ACTIVE', '2026-05-26 13:10:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('데이비드', '2026-04-30', 1, 19, 'ACTIVE', '2026-05-26 13:15:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('이브', '2026-04-29', 2, 19, 'ACTIVE', '2026-05-26 13:20:00');
-
--- 🎖️ 공동 5등 (Theme 2)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-05-02', 1, 2, 'ACTIVE', '2026-05-26 14:20:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브라운', '2026-04-30', 3, 2, 'ACTIVE', '2026-05-26 14:25:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('라이언', '2026-04-28', 5, 2, 'ACTIVE', '2026-05-26 14:30:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('어피치', '2026-04-27', 4, 2, 'ACTIVE', '2026-05-26 14:35:00');
-
--- 🎖️ 공동 7등 (Theme 8)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-03', 5, 8, 'ACTIVE', '2026-05-26 15:00:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-05-01', 8, 8, 'ACTIVE', '2026-05-26 15:05:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-04-29', 6, 8, 'ACTIVE', '2026-05-26 15:10:00');
-
--- 🎖️ 공동 7등 (Theme 14)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브라운', '2026-05-02', 6, 14, 'ACTIVE', '2026-05-26 15:15:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('네오', '2026-04-30', 7, 14, 'ACTIVE', '2026-05-26 15:20:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('라이언', '2026-04-28', 8, 14, 'ACTIVE', '2026-05-26 15:25:00');
-
--- 🎖️ 공동 7등 (Theme 20)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('토미', '2026-05-03', 6, 20, 'ACTIVE', '2026-05-26 15:30:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제인', '2026-05-01', 4, 20, 'ACTIVE', '2026-05-26 15:35:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('앨리스', '2026-04-29', 3, 20, 'ACTIVE', '2026-05-26 15:40:00');
-
--- 🎖️ 10등 (Theme 26)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('밥', '2026-05-02', 7, 26, 'ACTIVE', '2026-05-26 16:00:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('찰리', '2026-04-30', 5, 26, 'ACTIVE', '2026-05-26 16:05:00');
-
--- 엑스트라 데이터 (순위권 밖)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-03', 7, 3, 'ACTIVE', '2026-05-26 16:10:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-05-02', 8, 9, 'ACTIVE', '2026-05-26 16:15:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 1, 15, 'ACTIVE', '2026-05-26 16:20:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-04-30', 6, 21, 'ACTIVE', '2026-05-26 16:25:00');
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('라이언', '2026-04-28', 2, 27, 'ACTIVE', '2026-05-26 16:30:00');
+-- 대기 예약 데이터
+INSERT INTO pending (name, slot_id, created_at) VALUES ('어피치', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 1 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:00:10' AS TIMESTAMP));
+INSERT INTO pending (name, slot_id, created_at) VALUES ('네오', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 6, CURRENT_DATE) AND time_id = 1 AND theme_id = 1), CAST(CURRENT_DATE || ' 10:01:15' AS TIMESTAMP));
+INSERT INTO pending (name, slot_id, created_at) VALUES ('브리', (SELECT id FROM time_slot WHERE date = DATEADD('DAY', 5, CURRENT_DATE) AND time_id = 3 AND theme_id = 7), CAST(CURRENT_DATE || ' 11:01:00' AS TIMESTAMP));

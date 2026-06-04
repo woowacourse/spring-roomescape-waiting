@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.ReservationManager;
 import roomescape.theme.application.ThemeService;
 import roomescape.time.application.ReservationTimeService;
 
@@ -14,7 +14,7 @@ import roomescape.time.application.ReservationTimeService;
 public class PageController {
 
     private final ThemeService themeService;
-    private final ReservationService reservationService;
+    private final ReservationManager reservationManager;
     private final ReservationTimeService reservationTimeService;
 
     @GetMapping({"/", "/reservation"})
@@ -29,7 +29,7 @@ public class PageController {
     public String adminPage(final Model model) {
         model.addAttribute("themes", themeService.getThemes());
         model.addAttribute("times", reservationTimeService.getReservationTimes());
-        model.addAttribute("reservations", reservationService.getReservations());
+        model.addAttribute("reservations", reservationManager.getReservations());
         return "admin";
     }
 }

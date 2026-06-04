@@ -17,6 +17,7 @@ public record ReservationChangeRequest(
         @NotNull(message = "테마 ID는 필수입니다.")
         Long themeId
 ) {
+
     public ReservationChangeCommand toCommand() {
         return ReservationChangeCommand.builder()
                 .name(this.username)

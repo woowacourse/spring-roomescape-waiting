@@ -1,14 +1,16 @@
 package roomescape.time.application;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ActiveReservation;
+import roomescape.reservation.domain.ActiveReservationRepository;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.application.dto.AvailableReservationTimeFindCommand;
@@ -27,7 +29,7 @@ public class ReservationTimeService {
 
     private final Clock clock;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ActiveReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
     @Transactional(readOnly = true)
@@ -58,15 +60,23 @@ public class ReservationTimeService {
     @Transactional(readOnly = true)
     public AvailableReservationTimeInfo getAvailableReservationTime(final AvailableReservationTimeFindCommand command) {
         Theme theme = themeRepository.getById(command.themeId());
-        List<Reservation> reservations = reservationRepository.findByThemeAndDate(
+        List<ActiveReservation> reservations = reservationRepository.findByThemeAndDate(
                 command.themeId(), command.date());
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
         Set<ReservationTime> reservedTimes = reservations.stream()
-                .map(Reservation::getTime)
+                .map(ActiveReservation::getSlot)
+                .map(TimeSlot::getTime)
                 .collect(Collectors.toSet());
         List<ReservationTime> availableTime = allTimes.stream()
                 .filter(time -> !reservedTimes.contains(time))
                 .toList();
         return AvailableReservationTimeInfo.from(theme, availableTime);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationTime getTime(Long id, LocalDate date) {
+        ReservationTime time = reservationTimeRepository.getById(id);
+        time.validateDateTime(date, clock);
+        return time;
     }
 }

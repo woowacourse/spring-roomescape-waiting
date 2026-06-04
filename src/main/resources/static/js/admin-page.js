@@ -94,7 +94,7 @@ function renderReservations(reservations) {
                 </div>
                 <p>${reservation.theme.name} · ${reservation.date} · ${formatTime(reservation.time.startAt)}</p>
             </div>
-            <button class="button danger" type="button" data-action="delete-reservation" data-id="${reservation.id}">
+            <button class="button danger" type="button" data-action="delete-reservation" data-id="${reservation.id}" data-name="${reservation.name}" data-status="${reservation.status}">
                 예약 취소
             </button>
         </article>
@@ -219,7 +219,11 @@ reservationList.addEventListener("click", async (event) => {
     clearFeedback(reservationFeedback);
 
     try {
-        await request(`/admin/reservations/${target.dataset.id}`, { method: "DELETE" });
+        const params = new URLSearchParams({
+            username: target.dataset.name,
+            status: target.dataset.status
+        });
+        await request(`/reservations/${target.dataset.id}?${params}`, { method: "DELETE" });
         await refreshReservations();
         showFeedback(reservationFeedback, "success", "예약이 취소되었습니다.");
     } catch (error) {

@@ -280,10 +280,11 @@ function renderMyReservations(reservations, username) {
                     await request(`/reservations/${reservation.id}`, {
                         method: "PATCH",
                         body: JSON.stringify({
-                            username: newName, // 백엔드 DTO에 맞게 name 혹은 username으로 사용하세요. (POST와 통일하여 name으로 작성했습니다)
+                            username: newName,
                             date: dateInput.value,
                             themeId: Number(themeInput.value),
-                            timeId: inlineEditState.selectedTimeId
+                            timeId: inlineEditState.selectedTimeId,
+                            status: reservation.status
                         })
                     });
 
@@ -332,7 +333,11 @@ function renderMyReservations(reservations, username) {
                 if (!window.confirm("이 예약을 정말 취소하시겠습니까?")) return;
                 clearFeedback(checkFeedback);
                 try {
-                    await request(`/reservations/${reservation.id}?username=${encodeURIComponent(username)}`, { method: "DELETE" });
+                    const params = new URLSearchParams({
+                        username,
+                        status: reservation.status
+                    });
+                    await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
                     showFeedback(checkFeedback, "success", "예약이 성공적으로 취소되었습니다.");
                     checkForm.dispatchEvent(new Event("submit"));
                     loadTopAvailableTimes();

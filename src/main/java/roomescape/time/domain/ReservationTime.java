@@ -33,7 +33,7 @@ public class ReservationTime {
                 .build();
     }
 
-    public void checkValidDateTime(final LocalDate date, final Clock clock) {
+    public void validateDateTime(final LocalDate date, final Clock clock) {
         LocalDateTime time = LocalDateTime.of(date, startAt);
         if (time.isBefore(LocalDateTime.now(clock))) {
             throw new IllegalReservationDateTimeException("과거의 시간으로 예약을 변경, 등록 할 수 없습니다.");

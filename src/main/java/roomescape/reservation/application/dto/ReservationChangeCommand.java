@@ -6,8 +6,16 @@ import lombok.Builder;
 @Builder
 public record ReservationChangeCommand(
         String name,
+        LocalDate date,
         Long timeId,
-        Long themeId,
-        LocalDate date
+        Long themeId
 ) {
+    public ReservationCreateCommand toCreateCommand() {
+        return ReservationCreateCommand.builder()
+                .name(name)
+                .date(date)
+                .timeId(timeId)
+                .themeId(themeId)
+                .build();
+    }
 }
