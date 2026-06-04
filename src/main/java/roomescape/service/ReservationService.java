@@ -2,6 +2,7 @@ package roomescape.service;
 
 import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
@@ -22,6 +24,7 @@ import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
 
@@ -32,15 +35,18 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final StoreRepository storeRepository;
+    private final SlotRepository slotRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ThemeRepository themeRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              StoreRepository storeRepository) {
+                              StoreRepository storeRepository,
+                              SlotRepository slotRepository) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.storeRepository = storeRepository;
+        this.slotRepository = slotRepository;
     }
 
     public ReservationResponses getReservations(int page, int size, String name, User manager) {
@@ -118,8 +124,9 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", command.themeId()));
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", command.timeId()));
-        Reservation updated = new Reservation(command.reservationId(), existing.getUser(), theme, command.date(), time,
-                existing.getStore(), existing.getStatus());
+        Slot slot = resolveSlot(command.date(), theme, time, existing.getStore());
+        Reservation updated = new Reservation(command.reservationId(), existing.getUser(), slot,
+                existing.getStatus());
 
         validateNotPastDateTime(updated);
         validateNotDuplicatedForUpdate(existing, updated);
@@ -163,7 +170,16 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", command.timeId()));
         Store store = storeRepository.findById(command.storeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "매장", command.storeId()));
-        return new Reservation(null, command.user(), theme, command.date(), reservationTime, store, status);
+        Slot slot = resolveSlot(command.date(), theme, reservationTime, store);
+        return new Reservation(null, command.user(), slot, status);
+    }
+
+    private Slot resolveSlot(LocalDate date, Theme theme, ReservationTime time, Store store) {
+        return slotRepository.findByDateAndThemeAndTimeAndStore(date, theme.getId(), time.getId(), store.getId())
+                .orElseGet(() -> {
+                    Slot slot = new Slot(null, date, theme, time, store);
+                    return slot.withId(slotRepository.save(slot));
+                });
     }
 
     private void validateIsReserved(Reservation existing) {
