@@ -105,11 +105,13 @@ public class WaitingDao {
                         SELECT COUNT(*)
                         FROM waiting w2
                         WHERE w2.slot_id = w.slot_id
-                          AND w2.created_at < w.created_at
-                            OR (
+                          AND (
+                              w2.created_at < w.created_at
+                              OR (
                                 w2.created_at = w.created_at
                                 AND w2.id < w.id
                             )
+                        )
                     ) + 1 AS rank
                 FROM waiting w
                 JOIN slot s ON w.slot_id = s.id
