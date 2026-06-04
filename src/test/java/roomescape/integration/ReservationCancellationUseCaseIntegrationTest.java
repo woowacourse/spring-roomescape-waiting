@@ -8,21 +8,25 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.ReservationCancellationUseCase;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.command.ReservationWaitingCommandService;
 import roomescape.application.query.ReservationQueryService;
+import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.config.FixedClockConfig;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.repository.ReservationJdbcRepository;
+import roomescape.repository.ReservationTimeJdbcRepository;
 import roomescape.repository.ReservationWaitingJdbcRepository;
 import roomescape.repository.ReservationWaitingQueryJdbcRepository;
 
@@ -32,8 +36,10 @@ import roomescape.repository.ReservationWaitingQueryJdbcRepository;
         ReservationCommandService.class,
         ReservationWaitingCommandService.class,
         ReservationQueryService.class,
+        ReservationTimeQueryService.class,
         ReservationWaitingQueryService.class,
         ReservationJdbcRepository.class,
+        ReservationTimeJdbcRepository.class,
         ReservationWaitingJdbcRepository.class,
         ReservationWaitingQueryJdbcRepository.class,
         FixedClockConfig.class
@@ -56,12 +62,14 @@ class ReservationCancellationUseCaseIntegrationTest {
     private Long timeId;
     private Long themeId;
     private LocalDate future;
+    private LocalDate anotherFuture;
     private LocalDate past;
 
     @BeforeEach
     void setUp() {
         LocalDate today = LocalDate.now(clock);
         future = today.plusDays(1);
+        anotherFuture = today.plusDays(2);
         past = today.minusDays(1);
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", RESERVATION_START_AT);
         timeId = jdbcTemplate.queryForObject("SELECT id FROM reservation_time LIMIT 1", Long.class);
@@ -73,6 +81,21 @@ class ReservationCancellationUseCaseIntegrationTest {
                 "https://example.com/horror.jpg"
         );
         themeId = jdbcTemplate.queryForObject("SELECT id FROM theme LIMIT 1", Long.class);
+    }
+
+    @Test
+    void delete는_대기가_있으면_예약을_삭제하고_첫_대기자를_예약으로_만든다() {
+        Long reservationId = insertReservation("민욱", future);
+        Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
+        Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
+
+        reservationCancellationUseCase.delete(reservationId);
+
+        assertThat(countReservationsById(reservationId)).isZero();
+        assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
+        assertThat(countWaitingsBySlot(future)).isEqualTo(1);
+        assertThat(countWaitingsById(firstWaitingId)).isZero();
+        assertThat(countWaitingsById(secondWaitingId)).isEqualTo(1);
     }
 
     @Test
@@ -109,15 +132,42 @@ class ReservationCancellationUseCaseIntegrationTest {
     }
 
     @Test
-    void deleteMine은_대기가_있고_미래_예약이면_첫_대기자로_예약자를_바꾼다() {
+    void deleteMine은_대기가_있고_미래_예약이면_예약을_삭제하고_첫_대기자를_예약으로_만든다() {
         Long reservationId = insertReservation("민욱", future);
         Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
 
         reservationCancellationUseCase.deleteMine(reservationId, "민욱");
 
-        assertThat(findReservationName(reservationId)).isEqualTo("브라운");
-        assertThat(countReservationsById(reservationId)).isEqualTo(1);
+        assertThat(countReservationsById(reservationId)).isZero();
+        assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
+        assertThat(countWaitingsBySlot(future)).isEqualTo(1);
+        assertThat(countWaitingsById(firstWaitingId)).isZero();
+        assertThat(countWaitingsById(secondWaitingId)).isEqualTo(1);
+    }
+
+    @Test
+    void updateMine은_기존_슬롯에_대기가_없으면_예약만_새_슬롯으로_옮긴다() {
+        Long reservationId = insertReservation("민욱", future);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
+
+        reservationCancellationUseCase.updateMine(reservationId, "민욱", request);
+
+        assertThat(findReservationNamesBySlot(future)).isEmpty();
+        assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");
+    }
+
+    @Test
+    void updateMine은_기존_슬롯에_대기가_있으면_예약을_옮기고_첫_대기자를_기존_슬롯의_예약으로_만든다() {
+        Long reservationId = insertReservation("민욱", future);
+        Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
+        Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
+
+        reservationCancellationUseCase.updateMine(reservationId, "민욱", request);
+
+        assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
+        assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");
         assertThat(countWaitingsBySlot(future)).isEqualTo(1);
         assertThat(countWaitingsById(firstWaitingId)).isZero();
         assertThat(countWaitingsById(secondWaitingId)).isEqualTo(1);
@@ -161,6 +211,16 @@ class ReservationCancellationUseCaseIntegrationTest {
                 "SELECT name FROM reservation WHERE id = ?",
                 String.class,
                 reservationId
+        );
+    }
+
+    private List<String> findReservationNamesBySlot(LocalDate date) {
+        return jdbcTemplate.queryForList(
+                "SELECT name FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? ORDER BY id",
+                String.class,
+                date,
+                timeId,
+                themeId
         );
     }
 

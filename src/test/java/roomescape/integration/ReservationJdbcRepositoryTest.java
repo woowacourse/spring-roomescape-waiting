@@ -185,7 +185,7 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void deleteById는_예약에_달린_대기도_함께_삭제한다() {
+    void deleteById는_예약만_삭제하고_같은_슬롯의_대기는_남긴다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         Reservation saved = repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
@@ -197,7 +197,7 @@ class ReservationJdbcRepositoryTest {
         repository.deleteById(saved.getId());
 
         Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
-        assertThat(waitingCount).isZero();
+        assertThat(waitingCount).isOne();
     }
 
     @Test

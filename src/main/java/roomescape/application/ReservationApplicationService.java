@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationRequest;
 import roomescape.api.dto.ReservationResponses;
-import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
@@ -49,23 +48,6 @@ public class ReservationApplicationService {
         return reservationCommandService.save(
                 new Member(request.name()),
                 slot
-        );
-    }
-
-    @Transactional
-    public Reservation updateMine(Long id, String name, ReservationUpdateRequest request) {
-        Reservation existing = reservationQueryService.getById(id);
-        ReservationTime newTime = reservationTimeQueryService.getById(request.timeId());
-        Slot targetSlot = new Slot(
-                request.date(),
-                newTime,
-                existing.getTheme()
-        );
-
-        return reservationCommandService.updateMine(
-                existing,
-                new Member(name),
-                targetSlot
         );
     }
 

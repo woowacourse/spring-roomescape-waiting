@@ -52,7 +52,7 @@ public class ReservationController {
             @RequestParam String name,
             @RequestBody @Valid ReservationUpdateRequest request
     ) {
-        Reservation updated = reservationApplicationService.updateMine(id, name, request);
+        Reservation updated = reservationCancellationUseCase.updateMine(id, name, request);
 
         return ResponseEntity.ok()
                 .body(ReservationResponse.from(updated));

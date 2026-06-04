@@ -46,8 +46,8 @@ public class ReservationCommandService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        reservationRepository.deleteById(id);
+    public void delete(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
     }
 
     @Transactional
@@ -58,20 +58,6 @@ public class ReservationCommandService {
         );
 
         reservationRepository.deleteById(reservation.getId());
-    }
-
-    @Transactional
-    public Reservation changeReserver(Reservation reservation, Member requester, Member newReserver) {
-        reservation.cancelBy(
-                requester,
-                now()
-        );
-
-        Reservation changed = reservation.changeReserverTo(
-                newReserver
-        );
-
-        return reservationRepository.updateReserver(changed);
     }
 
     private LocalDateTime now() {
