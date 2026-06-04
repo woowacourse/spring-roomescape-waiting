@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
@@ -18,8 +18,8 @@ import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
 
 @Repository
-public class ReservationRepository {
-    public static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (resultSet, rowNum) -> Reservation.load(
+public class ReservationRepository1 {
+    public static final RowMapper<Slot> RESERVATION_ROW_MAPPER = (resultSet, rowNum) -> Slot.load(
             resultSet.getLong("reservation_id"),
             new ReservationName(resultSet.getString("name")),
             new ReservationDate(resultSet.getDate("date").toLocalDate()),
@@ -89,27 +89,27 @@ public class ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public ReservationRepository(JdbcTemplate jdbcTemplate) {
+    public ReservationRepository1(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
     }
 
-    public List<Reservation> findAll() {
+    public List<Slot> findAll() {
         return jdbcTemplate.query(SELECT_ALL, RESERVATION_ROW_MAPPER);
     }
 
-    public List<Reservation> findAllByName(String reservationName) {
+    public List<Slot> findAllByName(String reservationName) {
         return jdbcTemplate.query(SELECT_BY_NAME, RESERVATION_ROW_MAPPER, reservationName);
     }
 
-    public Optional<Reservation> findById(long reservationId) {
-        List<Reservation> result = jdbcTemplate.query(SELECT_BY_ID, RESERVATION_ROW_MAPPER, reservationId);
+    public Optional<Slot> findById(long reservationId) {
+        List<Slot> result = jdbcTemplate.query(SELECT_BY_ID, RESERVATION_ROW_MAPPER, reservationId);
         return result.stream().findFirst();
     }
 
-    public Reservation save(Reservation reservation) {
+    public Slot save(Slot reservation) {
         Map<String, Object> params = Map.of(
                 "name", reservation.getName().getValue(),
                 "date", reservation.getDate().getDate(),
@@ -121,7 +121,7 @@ public class ReservationRepository {
         return findById(generatedKey).orElseThrow();
     }
 
-    public Reservation update(long id, Reservation target) {
+    public Slot update(long id, Slot target) {
         jdbcTemplate.update(UPDATE,
                 target.getName().getValue(), target.getDate().getDate(), target.getTime().getId(),
                 target.getTheme().getId(), target.getStatus().name(), id);
@@ -166,9 +166,9 @@ public class ReservationRepository {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId));
     }
 
-    public Optional<Reservation> findFirstWaitingByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
+    public Optional<Slot> findFirstWaitingByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
         String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ? AND r.status = 'WAITING' ORDER BY r.id ASC LIMIT 1";
-        List<Reservation> result = jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
+        List<Slot> result = jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
         return result.stream().findFirst();
     }
 }
