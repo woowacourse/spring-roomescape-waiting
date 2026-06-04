@@ -81,6 +81,22 @@ public class ReservationWaitingDao {
         return jdbcTemplate.query(sql, rowMapper, name);
     }
 
+    public ReservationWaiting selectFirstWaitingByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
+        String sql = """
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date,
+                       t.id as time_id, t.start_at as start_at, w.created_at,
+                       1 as waiting_number
+                from reservation_waiting w
+                join reservation_time t
+                on w.time_id = t.id
+                where w.theme_id = ? and w.date = ? and w.time_id = ?
+                order by w.created_at asc, w.id asc
+                limit 1
+                """;
+
+        return jdbcTemplate.queryForObject(sql, rowMapper, themeId, date, timeId);
+    }
+
     public boolean existsByNameAndDateAndThemeIdAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {
         String sql = """
                 SELECT EXISTS (
@@ -108,5 +124,17 @@ public class ReservationWaitingDao {
     public void deleteById(Long id) {
         String sql = "delete from reservation_waiting where id = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    public boolean existsByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
+        String sql = """
+                select exists (
+                    select 1
+                        from reservation_waiting
+                        where theme_id = ? and date = ? and time_id =?
+                )
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, themeId, date, timeId) == Boolean.TRUE;
     }
 }

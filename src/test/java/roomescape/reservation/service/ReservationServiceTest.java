@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.reservation.MyReservation;
@@ -30,6 +32,9 @@ import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
+import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.dao.ReservationWaitingDao;
+import roomescape.waiting.service.ReservationWaitingService;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
@@ -43,8 +48,14 @@ public class ReservationServiceTest {
     @Mock
     private TimeDao timeDao;
 
+    @Mock
+    private ReservationWaitingDao reservationWaitingDao;
+
     @InjectMocks
     private ReservationService reservationService;
+
+    @InjectMocks
+    private ReservationWaitingService reservationWaitingService;
 
     @Test
     void 이름으로_예약과_예약_대기를_한_번에_조회한다() {
@@ -323,5 +334,118 @@ public class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(pastReserved, request.name()))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ErrorCode.CANNOT_DELETE_PAST_RESERVATION.getMessage());
+    }
+
+    @Test
+    void 예약_삭제_시_자동_예약_전환_성공() {
+        Long id = 1L;
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+        Long waitingNumber = 1L;
+
+        Reservation reservation = new Reservation(
+                id,
+                "워넬",
+                themeId,
+                date,
+                reservationTime
+        );
+
+        ReservationWaiting waiting = new ReservationWaiting(
+                id,
+                "로치",
+                themeId,
+                date,
+                reservationTime,
+                LocalDateTime.now(),
+                waitingNumber
+        );
+
+        when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
+        when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(waiting);
+        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId))
+                .thenReturn(Optional.of(new Reservation(id, waiting.getName(), themeId, date, reservationTime)));
+
+        reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName());
+
+        verify(reservationDao, times(1))
+                .updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId);
+        verify(reservationDao, times(0)).deleteById(id);
+        verify(reservationWaitingDao, times(1)).deleteById(waiting.getId());
+    }
+
+    @Test
+    void 자동_예약_전환_중_첫번째_대기_조회_실패_예외발생() {
+        Long id = 1L;
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+
+        Reservation reservation = new Reservation(
+                id,
+                "워넬",
+                themeId,
+                date,
+                reservationTime
+        );
+
+        when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
+        when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId))
+                .thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName()))
+                .isInstanceOf(EmptyResultDataAccessException.class);
+
+        verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(anyLong(), any(), anyLong(), any(), anyLong());
+        verify(reservationDao, times(0)).deleteById(id);
+        verify(reservationWaitingDao, times(0)).deleteById(anyLong());
+    }
+
+    @Test
+    void 자동_예약_전환_중_예약_갱신_실패_예외발생() {
+        Long id = 1L;
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+        Long waitingNumber = 1L;
+
+        Reservation reservation = new Reservation(
+                id,
+                "워넬",
+                themeId,
+                date,
+                reservationTime
+        );
+
+        ReservationWaiting waiting = new ReservationWaiting(
+                id,
+                "로치",
+                themeId,
+                date,
+                reservationTime,
+                LocalDateTime.now(),
+                waitingNumber
+        );
+
+        when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
+        when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(waiting);
+        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName()))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
+
+        verify(reservationDao, times(1))
+                .updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId);
+        verify(reservationDao, times(0)).deleteById(id);
+        verify(reservationWaitingDao, times(0)).deleteById(waiting.getId());
     }
 }

@@ -12,17 +12,22 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
+import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.dao.ReservationWaitingDao;
 
 @Service
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ThemeDao themeDao;
     private final TimeDao timeDao;
+    private final ReservationWaitingDao reservationWaitingDao;
 
-    public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao) {
+    public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao,
+                              ReservationWaitingDao reservationWaitingDao) {
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
         this.timeDao = timeDao;
+        this.reservationWaitingDao = reservationWaitingDao;
     }
 
     public List<Reservation> findAll() {
@@ -79,6 +84,7 @@ public class ReservationService {
         reservationDao.deleteById(id);
     }
 
+    @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
         Reservation originReservation = reservationDao.selectById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -88,7 +94,24 @@ public class ReservationService {
         validateDateTime(originReservation.getDate(), originReservation.getTime(),
                 ErrorCode.CANNOT_DELETE_PAST_RESERVATION);
 
+        if (validateExistsWaiting(originReservation.getThemeId(), originReservation.getDate(), originReservation.getTime().getId())) {
+            autoApprove(id, originReservation.getThemeId(), originReservation.getDate(), originReservation.getTime().getId());
+            return;
+        }
+
         reservationDao.deleteById(id);
+    }
+
+    private void autoApprove(Long id, Long themeId, LocalDate date, Long timeId) {
+        ReservationWaiting firstWaiting = reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId);
+
+        reservationDao.updateNameByThemeIdAndDateAndTimeId(id, firstWaiting.getName(), themeId, date, timeId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+        reservationWaitingDao.deleteById(firstWaiting.getId());
+    }
+
+    private boolean validateExistsWaiting(Long themeId, LocalDate date, Long timeId) {
+        return reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId);
     }
 
     private void validateReserved(Long timeId, ReservationTime reservedTime) {

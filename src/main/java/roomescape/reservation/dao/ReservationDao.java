@@ -189,6 +189,18 @@ public class ReservationDao {
         return selectById(id);
     }
 
+    public Optional<Reservation> updateNameByThemeIdAndDateAndTimeId(Long id, String name, Long themeId, LocalDate date, Long timeId) {
+        String sql = """
+                update reservation
+                set name = ?
+                where id = ? and theme_id = ? and date = ? and time_id = ?
+                """;
+
+        jdbcTemplate.update(sql, name, id, themeId, date, timeId);
+
+        return selectById(id);
+    }
+
     public boolean existsByThemeIdAndAfterDate(Long themeId, LocalDate now) {
         String sql = """
                 select count(*)
