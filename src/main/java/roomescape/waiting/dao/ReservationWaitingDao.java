@@ -24,6 +24,18 @@ public class ReservationWaitingDao {
                     rs.getLong("waiting_number")
             );
 
+    // 대기 번호(waiting_number) 계산이 필요 없는 락 조회 전용 매퍼
+    private static final RowMapper<ReservationWaiting> MAPPER_WITHOUT_NUMBER = (rs, rowNum) ->
+            new ReservationWaiting(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getLong("theme_id"),
+                    rs.getDate("date").toLocalDate(),
+                    new ReservationTime(rs.getLong("time_id"),
+                            rs.getTime("start_at").toLocalTime()),
+                    null
+            );
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
@@ -48,6 +60,34 @@ public class ReservationWaitingDao {
                 """;
 
         List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER, id);
+        return results.stream().findFirst();
+    }
+
+    public Optional<ReservationWaiting> selectByIdForUpdate(Long id) {
+        String sql = """
+                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
+                from reservation_waiting w
+                join reservation_time t on w.time_id = t.id
+                where w.id = ?
+                for update
+                """;
+
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER_WITHOUT_NUMBER, id);
+        return results.stream().findFirst();
+    }
+
+    public Optional<ReservationWaiting> selectFirstByThemeAndDateAndTimeForUpdate(Long themeId, LocalDate date, ReservationTime time) {
+        String sql = """
+                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
+                from reservation_waiting w
+                join reservation_time t on w.time_id = t.id
+                where w.theme_id = ? and w.date = ? and w.time_id = ?
+                order by w.id
+                limit 1
+                for update
+                """;
+
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER_WITHOUT_NUMBER, themeId, date, time.getId());
         return results.stream().findFirst();
     }
 

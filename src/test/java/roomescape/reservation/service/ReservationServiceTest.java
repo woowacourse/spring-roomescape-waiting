@@ -404,7 +404,7 @@ public class ReservationServiceTest {
 
         given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(originReservation));
-        given(reservationWaitingDao.selectFirstByThemeAndDateAndTime(
+        given(reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(
                 eq(themeId), any(LocalDate.class), any(ReservationTime.class)))
                 .willReturn(Optional.empty());
 
@@ -471,7 +471,7 @@ public class ReservationServiceTest {
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
         given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
-        given(reservationWaitingDao.selectFirstByThemeAndDateAndTime(
+        given(reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(
                 eq(themeId), any(LocalDate.class), any(ReservationTime.class)))
                 .willReturn(Optional.empty());
 
@@ -491,8 +491,6 @@ public class ReservationServiceTest {
                 .hasMessageContaining(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
-    // ===================== cancelReservation (대기 승격) =====================
-
     @Test
     void 취소시_대기가_있으면_첫_대기자가_예약으로_승격된다() {
         Long reservationId = 1L;
@@ -507,7 +505,7 @@ public class ReservationServiceTest {
                 waitingId, "브라운", themeId, date, time, 1L);
 
         given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
-        given(reservationWaitingDao.selectFirstByThemeAndDateAndTime(themeId, date, time))
+        given(reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time))
                 .willReturn(Optional.of(firstWaiting));
 
         reservationService.deleteById(reservationId);
@@ -534,7 +532,7 @@ public class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, "로치", themeId, date, time);
 
         given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
-        given(reservationWaitingDao.selectFirstByThemeAndDateAndTime(themeId, date, time))
+        given(reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time))
                 .willReturn(Optional.empty());
 
         reservationService.deleteById(reservationId);

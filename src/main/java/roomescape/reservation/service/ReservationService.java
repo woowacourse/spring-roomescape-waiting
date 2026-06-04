@@ -105,7 +105,7 @@ public class ReservationService {
     }
 
     private void cancelReservation(Long id, Reservation originReservation) {
-        Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.selectFirstByThemeAndDateAndTime(
+        Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(
                 originReservation.getThemeId(),
                 originReservation.getDate(),
                 originReservation.getTime());

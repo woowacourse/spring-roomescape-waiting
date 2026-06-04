@@ -159,8 +159,7 @@ public class ReservationWaitingServiceTest {
         Long id = 1L;
         String name = "ever";
 
-        when(reservationWaitingDao.selectById(id))
-                .thenReturn(Optional.empty());
+        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
@@ -174,8 +173,7 @@ public class ReservationWaitingServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         ReservationWaiting reservationWaiting = new ReservationWaiting("other", 1L, LocalDate.now().plusDays(1), reservationTime);
 
-        when(reservationWaitingDao.selectById(id))
-                .thenReturn(Optional.of(reservationWaiting));
+        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
@@ -189,8 +187,7 @@ public class ReservationWaitingServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
         ReservationWaiting reservationWaiting = new ReservationWaiting(name, 1L, LocalDate.now().minusDays(1), reservationTime);
 
-        when(reservationWaitingDao.selectById(id))
-                .thenReturn(Optional.of(reservationWaiting));
+        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
@@ -204,8 +201,7 @@ public class ReservationWaitingServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         ReservationWaiting reservationWaiting = new ReservationWaiting(name, 1L, LocalDate.now().plusDays(1), reservationTime);
 
-        when(reservationWaitingDao.selectById(id))
-                .thenReturn(Optional.of(reservationWaiting));
+        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservationWaiting));
 
         reservationWaitingService.deleteByIdIfNameMatches(id, name);
 
