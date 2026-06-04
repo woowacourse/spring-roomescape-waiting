@@ -88,14 +88,6 @@ public class ReservationService {
         updateTopWaitingConfirmed(beforeReservation);
     }
 
-    private ReservationSlot getLockSlot(LocalDate date, ReservationTime time, Theme theme) {
-        ReservationSlot changedSlot = reservationSlotRepository.upsert(
-                ReservationSlot.create(date, time, theme));
-
-        return reservationSlotRepository.findByIdWithLock(changedSlot.getId())
-                .orElseThrow(() -> new DomainException(RESERVATION_SLOT_NOT_FOUND));
-    }
-
     private void lockSlots(ReservationSlot first, ReservationSlot second) {
         Stream.of(first, second)
                 .map(ReservationSlot::getId)
