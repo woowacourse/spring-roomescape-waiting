@@ -159,6 +159,22 @@ class ReservationDaoTest {
     }
 
     @Test
+    void findAllWaitingByName_동시_대기_신청시_id_기준으로_순서_보장() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        LocalDate date = LocalDate.of(2026, 12, 31);
+        LocalDateTime sameTime = LocalDateTime.of(2026, 12, 1, 10, 0);
+
+        reservationDao.save(new Reservation("브리", date, sameTime, time, theme, ReservationStatus.WAITING));
+        reservationDao.save(new Reservation("이영희", date, sameTime, time, theme, ReservationStatus.WAITING));
+
+        List<ReservationWaiting> waitings = reservationDao.findAllWaitingByName("브리");
+
+        assertThat(waitings).hasSize(1);
+        assertThat(waitings.getFirst().waitingNumber()).isEqualTo(1L);
+    }
+
+    @Test
     void existsWaitingByDateAndTimeIdAndThemeIdAndName_대기_중복_확인() {
         ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");

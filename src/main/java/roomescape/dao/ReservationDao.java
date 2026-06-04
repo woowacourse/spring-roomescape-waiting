@@ -169,7 +169,7 @@ public class ReservationDao {
                            th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail,
                            ROW_NUMBER() OVER (
                                PARTITION BY r.date, r.theme_id, r.time_id
-                               ORDER BY r.created_at ASC
+                               ORDER BY r.created_at ASC, r.id ASC
                            ) AS waiting_order
                     FROM reservation AS r
                     INNER JOIN reservation_time AS t ON r.time_id = t.id
