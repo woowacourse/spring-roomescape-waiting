@@ -186,4 +186,38 @@ class ReservationDaoTest {
                 LocalDate.of(2026, 12, 31), 1L, 1L, "없는사람")).isFalse();
     }
 
+    @Test
+    void findFirstWaitingByDateAndTimeIdAndThemeId_첫번째_대기자_반환() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        LocalDate date = LocalDate.of(2026, 12, 31);
+
+        Reservation first = reservationDao.save(new Reservation("브리", date, LocalDateTime.of(2026, 12, 1, 9, 0), time, theme, ReservationStatus.WAITING));
+        reservationDao.save(new Reservation("이영희", date, LocalDateTime.of(2026, 12, 1, 10, 0), time, theme, ReservationStatus.WAITING));
+
+        Reservation found = reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(date, 1L, 1L).orElseThrow();
+
+        assertThat(found.getId()).isEqualTo(first.getId());
+        assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    void findFirstWaitingByDateAndTimeIdAndThemeId_대기자_없으면_empty() {
+        assertThat(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(
+                LocalDate.of(2026, 12, 31), 1L, 1L)).isEmpty();
+    }
+
+    @Test
+    void updateStatus_WAITING에서_CONFIRMED로_전환() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation waiting = reservationDao.save(
+                new Reservation("브리", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme, ReservationStatus.WAITING));
+
+        reservationDao.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED);
+
+        Reservation updated = reservationDao.findById(waiting.getId()).orElseThrow();
+        assertThat(updated.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+    }
+
 }

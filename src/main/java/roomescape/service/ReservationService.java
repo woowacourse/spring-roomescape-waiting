@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.Page;
@@ -54,19 +56,38 @@ public class ReservationService {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
         ReservationTime time = validateReservationTime(timeId);
-        Reservation updated = reservation.withUpdated(date, time, LocalDateTime.now(clock));
+        LocalDateTime now = LocalDateTime.now(clock);
+        Reservation updated = reservation.withUpdated(date, time, now);
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
-        return reservationDao.update(updated);
+        Reservation result = reservationDao.update(updated);
+        approveFirstWaitingIfExists(reservation, now);
+        return result;
     }
 
     @Transactional
     public void delete(long id) {
         reservationDao.findById(id).ifPresent(reservation -> {
-            reservation.validateCancellable(LocalDateTime.now(clock));
+            LocalDateTime now = LocalDateTime.now(clock);
+            reservation.validateCancellable(now);
             reservationDao.delete(id);
+            approveFirstWaitingIfExists(reservation, now);
         });
+    }
+
+    private void approveFirstWaitingIfExists(Reservation slot, LocalDateTime now) {
+        Optional<Reservation> candidate;
+        while ((candidate = reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())).isPresent()) {
+            Reservation waiting = candidate.get();
+            if (LocalDateTime.of(waiting.getDate(), waiting.getTime().getStartAt()).isBefore(now)) {
+                reservationDao.delete(waiting.getId());
+            } else {
+                reservationDao.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED);
+                break;
+            }
+        }
     }
 
     @Transactional(readOnly = true)

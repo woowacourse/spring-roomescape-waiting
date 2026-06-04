@@ -25,6 +25,7 @@ import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -113,6 +114,67 @@ class ReservationServiceTest {
         assertThatCode(() -> reservationService.delete(999L))
                 .doesNotThrowAnyException();
         then(reservationDao).should().findById(999L);
+    }
+
+    @Test
+    void delete_예약_취소_시_대기자_있으면_첫_번째_자동_승인() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(5L, "이영희", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
+
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(futureDate, 1L, 1L))
+                .willReturn(Optional.of(waiting))
+                .willReturn(Optional.empty());
+
+        reservationService.delete(1L);
+
+        then(reservationDao).should().updateStatus(5L, ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    void delete_자동_승인_대상_날짜가_과거면_삭제_후_다음_순번_승인() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate pastDate = fixedNow.toLocalDate().minusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation pastWaiting = new Reservation(2L, "이영희", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme, ReservationStatus.WAITING);
+        Reservation futureWaiting = new Reservation(3L, "김철수", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
+
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(futureDate, 1L, 1L))
+                .willReturn(Optional.of(pastWaiting))
+                .willReturn(Optional.of(futureWaiting))
+                .willReturn(Optional.empty());
+
+        reservationService.delete(1L);
+
+        then(reservationDao).should().delete(2L);
+        then(reservationDao).should().updateStatus(3L, ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    void update_예약_변경_시_원래_슬롯_첫_번째_대기자_자동_승인() {
+        fixClock();
+        LocalDate oldDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate newDate = fixedNow.toLocalDate().plusDays(2);
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
+        Reservation reservation = new Reservation(1L, "브라운", oldDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(5L, "이영희", oldDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
+        Reservation updated = new Reservation(1L, "브라운", newDate, fixedNow.minusHours(1), newTime, sampleTheme);
+
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(newDate, 2L, 1L)).willReturn(false);
+        given(reservationDao.update(any())).willReturn(updated);
+        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeId(oldDate, 1L, 1L))
+                .willReturn(Optional.of(waiting))
+                .willReturn(Optional.empty());
+
+        reservationService.update(1L, newDate, 2L);
+
+        then(reservationDao).should().updateStatus(5L, ReservationStatus.CONFIRMED);
     }
 
 }
