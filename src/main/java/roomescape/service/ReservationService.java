@@ -85,11 +85,13 @@ public class ReservationService {
 
         EventSlot eventSlot = reservation.getEventSlot();
         if (!slotManager.tryAcquire(eventSlot)) {
-            reservation.reject();
-            throw new ConflictException("이미 존재하는 예약 건입니다.");
+            Reservation rejected = reservation.reject();
+//            throw new ConflictException("이미 존재하는 예약 건입니다.");
+            // 예외가 아니라 상태 전이로 해결할 것.
         }
 
-        Reservation saved = reservationDao.save(reservation);
+        Reservation confirmed = reservation.confirm();
+        Reservation saved = reservationDao.save(confirmed);
 
         return ReservationResult.from(saved.confirm());
     }
