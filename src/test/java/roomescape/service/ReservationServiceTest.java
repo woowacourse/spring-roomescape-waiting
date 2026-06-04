@@ -245,6 +245,64 @@ class ReservationServiceTest {
                         .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
+    @Test
+    void 예약_취소_시_대기자가_자동으로_예약으로_승격된다() {
+        // given
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        waitingDao.insert(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
+                new ReservationSlot(date, time, theme)));
+
+        // when
+        reservationService.delete(reservation.getId());
+
+        // then
+        assertThat(reservationDao.selectByName("로지")).hasSize(1);
+        assertThat(waitingDao.select()).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_시_대기자가_없으면_예약만_삭제된다() {
+        // given
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = saveReservation("브라운", LocalDate.now().plusDays(1), time, theme);
+
+        // when
+        reservationService.delete(reservation.getId());
+
+        // then
+        assertThat(reservationDao.select()).isEmpty();
+        assertThat(waitingDao.select()).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_시_첫번째_대기자가_승격되어_남은_대기자_순번이_재정렬된다() {
+        // given
+        // 예약 1개
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+
+        // 대기 2명 (로지 1번, 맥스 2번)
+        waitingDao.insert(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), slot));
+        ReservationWaiting maxsWaiting = waitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now().plusSeconds(1), slot));
+
+        // when
+        // 예약 취소 및 대기 1번 자동 승격
+        reservationService.delete(reservation.getId());
+
+        // then
+        // 맥스 1번 대기로 재정렬
+        assertThat(reservationDao.selectByName("로지")).hasSize(1);
+        assertThat(waitingDao.countOrder(slot, maxsWaiting.getId())).isEqualTo(1);
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }

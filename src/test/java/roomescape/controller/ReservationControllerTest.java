@@ -162,6 +162,14 @@ public class ReservationControllerTest {
     }
 
     @Test
+    void 존재하지_않는_예약_취소_시_404를_반환한다() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @Test
     void 예약을_삭제한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
