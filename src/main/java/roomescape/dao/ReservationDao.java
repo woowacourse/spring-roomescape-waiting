@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -50,8 +49,7 @@ public class ReservationDao {
                     rs.getDate("date").toLocalDate(),
                     time,
                     theme,
-                    rs.getTimestamp("requested_at").toLocalDateTime(),
-                    ReservationStatus.valueOf(rs.getString("status")));
+                    rs.getTimestamp("requested_at").toLocalDateTime());
         }, id);
     }
 
@@ -103,8 +101,7 @@ public class ReservationDao {
                     rs.getDate("date").toLocalDate(),
                     time,
                     theme,
-                    rs.getTimestamp("requested_at").toLocalDateTime(),
-                    ReservationStatus.valueOf(rs.getString("status")));
+                    rs.getTimestamp("requested_at").toLocalDateTime());
         });
     }
 
@@ -128,7 +125,6 @@ public class ReservationDao {
         params.put("date", reservation.getDate());
         params.put("time_id", reservation.getTime().getId());
         params.put("theme_id", reservation.getTheme().getId());
-        params.put("status", reservation.getStatus());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return findById(id);
@@ -164,7 +160,6 @@ public class ReservationDao {
                 rs.getDate("date").toLocalDate(),
                 time,
                 theme,
-                rs.getTimestamp("requested_at").toLocalDateTime(),
-                ReservationStatus.valueOf(rs.getString("status")));
+                rs.getTimestamp("requested_at").toLocalDateTime());
     };
 }

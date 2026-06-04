@@ -10,15 +10,13 @@ public class Reservation {
     private final ReservationTime time;
     private final Theme theme;
     private final LocalDateTime requestedAt;
-    private final ReservationStatus status;
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme,
-                       LocalDateTime requestedAt, ReservationStatus status) {
-        this(null, name, date, time, theme, requestedAt, status);
+                       LocalDateTime requestedAt) {
+        this(null, name, date, time, theme, requestedAt);
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestedAt,
-                       ReservationStatus status) {
+    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestedAt) {
         this.id = id;
         validateName(name);
         validateDate(date);
@@ -28,7 +26,6 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.requestedAt = requestedAt;
-        this.status = status;
     }
 
     private void validateName(String name) {
@@ -71,9 +68,5 @@ public class Reservation {
 
     public LocalDateTime getRequestedAt() {
         return requestedAt;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 }

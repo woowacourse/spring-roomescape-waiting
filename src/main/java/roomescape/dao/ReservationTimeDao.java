@@ -25,6 +25,31 @@ public class ReservationTimeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
+    public ReservationTime findTimeById(Long timeId) {
+        return jdbcTemplate.queryForObject("SELECT id, start_at FROM reservation_time WHERE id = ?",
+                (rs, rowNum) -> new ReservationTime(rs.getLong("id"), rs.getTime("start_at").toLocalTime()), timeId);
+    }
+
+    public List<ReservationTimeStatusProjection> findAvailableTime(Long id, String date) {
+        return jdbcTemplate.query("""
+                       SELECT t.id AS time_id, t.start_at,
+                              CASE WHEN EXISTS (
+                                       SELECT 1
+                                       FROM reservation r
+                                       WHERE r.time_id = t.id
+                                           AND r.theme_id = ?
+                                           AND r.date = ?
+                                   ) THEN 'CONFIRMED' ELSE 'AVAILABLE' END AS status
+                       FROM reservation_time t
+                       ORDER BY t.start_at
+                """, (rs, rowNum) -> {
+            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
+
+            return new ReservationTimeStatusProjection(time, ReservationStatus.valueOf(rs.getString("status")));
+
+        }, id, date);
+    }
+
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query("SELECT id, start_at FROM reservation_time",
                 (rs, rowNum) -> new ReservationTime(rs.getLong("id"), rs.getTime("start_at").toLocalTime()));
@@ -68,26 +93,4 @@ public class ReservationTimeDao {
         jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
     }
 
-    public ReservationTime findTimeById(Long timeId) {
-        return jdbcTemplate.queryForObject("SELECT id, start_at FROM reservation_time WHERE id = ?",
-                (rs, rowNum) -> new ReservationTime(rs.getLong("id"), rs.getTime("start_at").toLocalTime()), timeId);
-    }
-
-    public List<ReservationTimeStatusProjection> findAvailableTime(Long id, String date) {
-        return jdbcTemplate.query("""
-                       SELECT t.id AS time_id, t.start_at,
-                              CASE WHEN r.id IS NULL THEN 'AVAILABLE' ELSE 'CONFIRMED' END AS status
-                       FROM reservation_time t
-                       LEFT JOIN reservation r ON t.id = r.time_id
-                           AND r.theme_id = ?
-                           AND r.date = ?
-                           AND r.status = 'CONFIRMED'
-                       ORDER BY t.start_at
-                """, (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
-
-            return new ReservationTimeStatusProjection(time, ReservationStatus.valueOf(rs.getString("status")));
-
-        }, id, date);
-    }
 }

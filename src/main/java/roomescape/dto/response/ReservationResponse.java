@@ -5,15 +5,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 
 public record ReservationResponse(Long id, String name, LocalDate date, ReservationTimeResponse timeResponse,
-                                  ThemeResponse themeResponse, ReservationStatus status) {
+                                  ThemeResponse themeResponse) {
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme()),
-                reservation.getStatus()
+                ThemeResponse.from(reservation.getTheme())
         );
     }
 }

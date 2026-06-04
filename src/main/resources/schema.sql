@@ -26,7 +26,6 @@ CREATE TABLE reservation
     time_id  BIGINT,
     theme_id BIGINT,
     requested_at TIMESTAMP(6) WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP(6) NOT NULL,
-    status   VARCHAR(255) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
