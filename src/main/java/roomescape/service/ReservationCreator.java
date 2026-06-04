@@ -2,12 +2,14 @@ package roomescape.service;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.StoreDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Slot;
@@ -23,17 +25,20 @@ public class ReservationCreator {
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
     private final StoreDao storeDao;
+    private final WaitingDao waitingDao;
 
     public ReservationCreator(
             ReservationDao reservationDao,
             TimeDao timeDao,
             ThemeDao themeDao,
-            StoreDao storeDao
+            StoreDao storeDao,
+            WaitingDao waitingDao
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
         this.storeDao = storeDao;
+        this.waitingDao = waitingDao;
     }
 
     public Reservation createByUser(Member member, ReservationRequestDto request, LocalDateTime now) {
@@ -42,6 +47,7 @@ public class ReservationCreator {
         Store store = findStore(request.storeId());
         Slot slot = new Slot(request.date(), time, theme, store);
         validateAvailable(slot);
+        validateNoWaitingQueue(slot);
 
         return Reservation.createByUser(member, request.date(), time, theme, store, now);
     }
@@ -59,6 +65,16 @@ public class ReservationCreator {
     private void validateAvailable(Slot slot) {
         if (reservationDao.existsBySlotForUpdate(slot)) {
             throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
+        }
+    }
+
+    /**
+     * 새치기 방지: 취소 직후 슬롯이 비어 보이는 순간(아웃박스 승격 대기 중)에 다른 사용자가
+     * 대기자를 제치고 직접 예약하는 것을 막는다. 대기 행을 잠금 조회하여 워커의 승격과 직렬화한다.
+     */
+    private void validateNoWaitingQueue(Slot slot) {
+        if (!waitingDao.findQueueBySlotForUpdate(slot).isEmpty()) {
+            throw new BusinessRuleViolationException("대기자가 있는 슬롯입니다. 대기 신청을 이용해주세요.");
         }
     }
 

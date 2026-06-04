@@ -36,6 +36,10 @@ public class Waitings {
         return waitings.stream().findFirst();
     }
 
+    public boolean isEmpty() {
+        return waitings.isEmpty();
+    }
+
     public List<Waiting> getAll() {
         return waitings;
     }

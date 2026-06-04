@@ -1,6 +1,7 @@
 package roomescape;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -17,6 +18,7 @@ import roomescape.dao.PromotionOutboxDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.domain.Member;
 import roomescape.domain.OutboxStatus;
 import roomescape.domain.Reservation;
@@ -24,6 +26,7 @@ import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
+import roomescape.dto.request.ReservationRequestDto;
 import roomescape.dto.request.WaitingRequestDto;
 import roomescape.service.ReservationService;
 import roomescape.service.WaitingService;
@@ -114,6 +117,21 @@ class PromotionOutboxTest {
         assertThat(waitingService.findAllByMemberId(waiter.getId())).isEmpty();
         assertThat(promotionOutboxDao.findByStatus(OutboxStatus.PENDING)).isEmpty();
         assertThat(promotionOutboxDao.findByStatus(OutboxStatus.DONE)).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("승격 대기 중인 빈 슬롯(대기자 존재)은 다른 사용자가 직접 예약할 수 없다")
+    void cannotDirectlyBookSlotWithWaitingQueue() {
+        reservationService.cancel(reservation.getId(), owner);
+        // 워커가 아직 승격하지 않아 슬롯은 비어 있지만, 대기자가 남아 있다.
+        jdbcTemplate.update("INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                "새치기", "jumper@test.com", "password", "USER");
+        Member jumper = memberDao.findByEmail("jumper@test.com").orElseThrow();
+
+        assertThatThrownBy(() -> reservationService.create(
+                jumper,
+                new ReservationRequestDto(reservation.getDate(), time.getId(), theme.getId(), store.getId())))
+                .isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test
