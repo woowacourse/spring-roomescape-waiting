@@ -3,6 +3,7 @@ package roomescape.repository;
 import roomescape.domain.ThemeSlot;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Optional;
 public class FakeThemeSlotDao implements ThemeSlotRepository {
 
     private final Map<Long, ThemeSlot> storage = new HashMap<>();
+    private final List<Long> findByIdForUpdateHistory = new ArrayList<>();
     private long sequence = 1L;
 
     @Override
@@ -35,6 +37,7 @@ public class FakeThemeSlotDao implements ThemeSlotRepository {
 
     @Override
     public Optional<ThemeSlot> findByIdForUpdate(long id) {
+        findByIdForUpdateHistory.add(id);
         return findById(id);
     }
 
@@ -43,4 +46,11 @@ public class FakeThemeSlotDao implements ThemeSlotRepository {
         storage.computeIfPresent(themeSlot.getId(), (id, saved) -> ThemeSlot.of(id, themeSlot));
     }
 
+    public List<Long> findByIdForUpdateHistory() {
+        return List.copyOf(findByIdForUpdateHistory);
+    }
+
+    public void clearFindByIdForUpdateHistory() {
+        findByIdForUpdateHistory.clear();
+    }
 }

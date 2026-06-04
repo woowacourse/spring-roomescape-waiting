@@ -11,6 +11,7 @@ import roomescape.global.exception.ErrorCode;
 public class FakeReservationDao implements ReservationRepository {
 
     private final Map<Long, Reservation> storage = new HashMap<>();
+    private final List<Long> findByIdForUpdateHistory = new ArrayList<>();
     private long sequence = 1L;
 
     @Override
@@ -21,6 +22,12 @@ public class FakeReservationDao implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(long id) {
         return Optional.ofNullable(storage.get(id));
+    }
+
+    @Override
+    public Optional<Reservation> findByIdForUpdate(long id) {
+        findByIdForUpdateHistory.add(id);
+        return findById(id);
     }
 
     @Override
@@ -151,5 +158,13 @@ public class FakeReservationDao implements ReservationRepository {
                         PendingStatus.getInstance()))
                 .sorted(Comparator.comparing(Reservation::getId))
                 .findFirst();
+    }
+
+    public List<Long> findByIdForUpdateHistory() {
+        return List.copyOf(findByIdForUpdateHistory);
+    }
+
+    public void clearFindByIdForUpdateHistory() {
+        findByIdForUpdateHistory.clear();
     }
 }

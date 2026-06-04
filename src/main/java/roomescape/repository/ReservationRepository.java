@@ -12,6 +12,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(long id);
 
+    Optional<Reservation> findByIdForUpdate(long id);
+
     Reservation save(Reservation reservation);
 
     void deleteById(long id);

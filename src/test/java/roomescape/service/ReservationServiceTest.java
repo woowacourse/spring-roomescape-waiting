@@ -260,6 +260,21 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약 변경 시 기존 슬롯과 대상 슬롯을 식별자 순서대로 잠근다.")
+    void lockThemeSlotsInIdOrderWhenModifyReservation() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        reservationService.saveReservation("네오", savedThemeSlot2.getId());
+        fakeReservationDao.clearFindByIdForUpdateHistory();
+        fakeThemeSlotDao.clearFindByIdForUpdateHistory();
+
+        reservationService.modifyReservation(reservation.getId(), savedThemeSlot2.getId());
+
+        assertThat(fakeReservationDao.findByIdForUpdateHistory()).containsExactly(reservation.getId());
+        assertThat(fakeThemeSlotDao.findByIdForUpdateHistory())
+                .containsExactly(savedThemeSlot1.getId(), savedThemeSlot2.getId());
+    }
+
+    @Test
     @DisplayName("취소된 예약은 다른 슬롯으로 변경할 수 없다.")
     void throwExceptionWhenModifyCancelledReservation() {
         Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
@@ -289,6 +304,17 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> {
             reservationService.cancelReservation(cancelledReservation.getId(), "김대기");
         }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
+    }
+
+    @Test
+    @DisplayName("예약 취소 시 예약 식별자를 잠금 조회한다.")
+    void lockReservationWhenCancelReservation() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        fakeReservationDao.clearFindByIdForUpdateHistory();
+
+        reservationService.cancelReservation(reservation.getId(), "브라운");
+
+        assertThat(fakeReservationDao.findByIdForUpdateHistory()).containsExactly(reservation.getId());
     }
 
     @Test
