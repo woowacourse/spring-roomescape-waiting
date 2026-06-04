@@ -99,14 +99,14 @@ class ReservationServiceTest {
     void 예약_삭제_시_대기_순번_승인_확인() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationRequest firstRequest = new ReservationRequest("브라운", futureDate, 1L, 1L);
-        ReservationRequest secondRequest = new ReservationRequest("그해", futureDate, 1L, 1L);
+        ReservationRequest secondRequest = new ReservationRequest("테스트유저", futureDate, 1L, 1L);
 
         long firstId = reservationService.save(firstRequest).id();
         long secondId = reservationService.save(secondRequest).id();
 
         reservationService.delete(firstId);
 
-        List<ReservationRankResponse> reservations = reservationService.find("그해");
+        List<ReservationRankResponse> reservations = reservationService.find("테스트유저");
         assertThat(reservations.getFirst().status()).isEqualTo(ReservationStatus.CONFIRMED);
     }
 }
