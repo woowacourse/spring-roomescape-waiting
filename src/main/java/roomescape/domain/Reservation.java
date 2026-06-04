@@ -93,4 +93,8 @@ public class Reservation {
     public Theme getTheme() {
         return theme;
     }
+
+    public boolean isOwnedBy(String name) {
+        return this.name.equals(name);
+    }
 }

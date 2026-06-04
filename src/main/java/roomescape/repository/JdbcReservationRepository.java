@@ -108,21 +108,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsBySlotAndName(LocalDate date, Long timeId, Long themeId, String name) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1 FROM reservation
-                    WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
-                )
-                """;
-        Boolean result = jdbcTemplate.queryForObject(
-                sql, Boolean.class, Date.valueOf(date), timeId, themeId, name
-        );
-        return Boolean.TRUE.equals(result);
-    }
-
-
-    @Override
     public boolean existsByTimeId(Long timeId) {
         String sql = """
                 SELECT EXISTS (
@@ -211,4 +196,25 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Boolean.TRUE.equals(result);
     }
 
+    @Override
+    public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.name AS reservation_name,
+                    r.date AS reservation_date,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail
+                FROM reservation r
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme th ON r.theme_id = th.id
+                WHERE r.date = ? AND t.id = ? AND th.id = ?
+                """;
+
+        return jdbcTemplate.query(sql, ROW_MAPPER, date, timeId, themeId).stream().findFirst();
+    }
 }

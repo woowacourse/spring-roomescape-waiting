@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -38,16 +39,14 @@ public class WaitingService {
         Theme theme = themeRepository.findById(command.getThemeId())
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
 
-        if (reservationRepository.existsBySlotAndName(
-                command.getDate(), command.getTimeId(), command.getThemeId(), command.getName())) {
-            throw new BusinessRuleViolationException(
-                    "이미 본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
-        }
+        Reservation reservation = reservationRepository.findBySlot(
+                command.getDate(),
+                command.getTimeId(),
+                command.getThemeId()
+        ).orElseThrow(() -> new BusinessRuleViolationException("예약 가능한 시간입니다. 대기가 아닌 예약을 신청해 주세요."));
 
-        if (!reservationRepository.existsByDateAndTimeAndTheme(
-                command.getDate(), command.getTimeId(), command.getThemeId())) {
-            throw new BusinessRuleViolationException(
-                    "예약 가능한 시간입니다. 대기가 아닌 예약을 신청해 주세요.");
+        if (reservation.isOwnedBy(command.getName())) {
+            throw new BusinessRuleViolationException("이미 본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
         }
 
         Waitings existing = new Waitings(
