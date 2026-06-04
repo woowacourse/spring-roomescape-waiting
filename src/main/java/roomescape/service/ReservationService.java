@@ -9,6 +9,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -31,12 +32,14 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final SlotDao slotDao;
+    private final WaitingDao waitingDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, WaitingDao waitingDao) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.slotDao = slotDao;
+        this.waitingDao = waitingDao;
     }
 
     @Transactional
@@ -86,33 +89,35 @@ public class ReservationService {
                 .toList();
     }
 
-    //    - [] 수정 후 예약에 대기가 존재하면 해당 사용자를 대기열 마지막 순번으로 등록한다.
-    //    - [] 수정 전 예약에 대기가 존재하면 대기 1순위 사용자를 예약으로 승격한다.
     @Transactional
     public ReservationResponse update(long reservationId, UpdateReservationRequest request, LocalDateTime currentDateTime) {
         Reservation reservation = getReservation(reservationId);
+        Slot previousSlot = reservation.getSlot();
         validateModifiable(reservation, currentDateTime);
 
         ReservationTime reservationTime = getTime(request.timeId());
         validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
         validateUniqueReservationForUpdate(reservation, request.date(), reservationTime);
 
-        Slot slot = createSlot(request.date(), reservationTime, reservation.getTheme());
-        Reservation updatedReservation = reservation.updateReservation(slot);
+        Slot newSlot = createSlot(request.date(), reservationTime, reservation.getTheme());
+        validateSlotChanged(previousSlot, newSlot);
+        Reservation updatedReservation = reservation.updateReservation(newSlot);
         reservationDao.update(updatedReservation);
+
+        promoteFirstWaiting(previousSlot);
         return ReservationResponse.from(updatedReservation);
+    }
+
+    private void validateModifiable(Reservation reservation, LocalDateTime currentDateTime) {
+        if (reservation.isNotModifiableAt(currentDateTime)) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_CANCEL_DEADLINE_PASSED);
+        }
     }
 
     private void validateNotPastDateTime(LocalDate date, ReservationTime time, LocalDateTime now) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (reservationDateTime.isBefore(now)) {
             throw new ReservationException(ReservationErrorCode.PAST_DATE_NOT_ALLOWED);
-        }
-    }
-
-    private void validateModifiable(Reservation reservation, LocalDateTime currentDateTime) {
-        if (reservation.isNotModifiableAt(currentDateTime)) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_CANCEL_DEADLINE_PASSED);
         }
     }
 
@@ -124,6 +129,19 @@ public class ReservationService {
         if (exists) {
             throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
         }
+    }
+
+    private void validateSlotChanged(Slot previousSlot, Slot newSlot) {
+        if (previousSlot.equals(newSlot)) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_NOT_CHANGED);
+        }
+    }
+
+    private void promoteFirstWaiting(Slot previousSlot) {
+        waitingDao.findFirstBySlot(previousSlot.getId()).ifPresent(waiting -> {
+            reservationDao.save(new Reservation(previousSlot, waiting.getName()));
+            waitingDao.delete(waiting.getId());
+        });
     }
 
     @Transactional

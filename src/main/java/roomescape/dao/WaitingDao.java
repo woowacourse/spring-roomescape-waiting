@@ -1,5 +1,10 @@
 package roomescape.dao;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -7,12 +12,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.RankedWaiting;
 import roomescape.domain.Waiting;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Repository
 public class WaitingDao {
@@ -69,6 +68,24 @@ public class WaitingDao {
                 """;
         try {
             return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, waitingId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Waiting> findFirstBySlot(long slotId) {
+        String sql = """
+                SELECT id, 
+                       created_at,
+                       slot_id,
+                       name
+                FROM waiting
+                    WHERE slot_id = ?
+                ORDER BY created_at ASC, id ASC
+                LIMIT 1;
+                """;
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, slotId));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import roomescape.dto.request.UpdateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.code.ReservationErrorCode;
 import roomescape.exception.code.ReservationTimeErrorCode;
 import roomescape.exception.code.ThemeErrorCode;
@@ -29,6 +31,9 @@ class ReservationServiceTest extends ServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private WaitingService waitingService;
 
     @Test
     void 예약을_생성할_수_있다() {
@@ -202,6 +207,69 @@ class ReservationServiceTest extends ServiceTest {
         assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest, currentDateTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.PAST_DATE_NOT_ALLOWED.getMessage());
+    }
+
+    @Test
+    void 예약_시간_또는_날짜_변경하지_않으면_예외가_발생한다() {
+        ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(11, 0));
+        Theme theme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+
+        ReservationRequest createRequest = new ReservationRequest(
+                "러키",
+                LocalDate.of(2026, 5, 25),
+                originalTime.getId(),
+                theme.getId()
+        );
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
+
+        UpdateReservationRequest updateRequest = new UpdateReservationRequest(
+                savedReservation.date(),
+                savedReservation.time().id()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest, currentDateTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(ReservationErrorCode.RESERVATION_NOT_CHANGED.getMessage());
+    }
+
+    @Test
+    void 예약_수정_후_변경_전_예약에_대기가_존재하면_승격시킨다() {
+        // given
+        Theme theme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+
+        ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime changedTime = fixtureGenerator.saveReservationTime(LocalTime.of(20, 0));
+
+        LocalDate reservationDate = LocalDate.of(2026, 5, 10);
+        LocalDate changedDate = LocalDate.of(2026, 5, 12);
+
+        ReservationRequest createRequest = new ReservationRequest(
+                "예약1",
+                reservationDate,
+                originalTime.getId(),
+                theme.getId()
+        );
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
+
+        fixtureGenerator.saveWaiting("대기자", reservationDate, originalTime, theme, LocalDateTime.now());
+
+        // when
+        reservationService.update(savedReservation.id(),
+                new UpdateReservationRequest(changedDate, changedTime.getId()),
+                currentDateTime);
+
+        // then: 대기자가 기존 슬롯의 예약자로 승격됐는지 & 승격됐으니 대기 목록에서 제거됐는지
+        List<ReservationResponse> promotedReservations = reservationService.getReservationsByName("대기자");
+        assertThat(promotedReservations)
+                .hasSize(1)
+                .extracting(ReservationResponse::date, r -> r.time().id())
+                .containsExactly(tuple(reservationDate, originalTime.getId()));
+
+        List<WaitingWithRankResponse> remainingWaitings = waitingService.getWaitingsByName("대기자");
+        assertThat(remainingWaitings).isEmpty();
     }
 
     @Test
