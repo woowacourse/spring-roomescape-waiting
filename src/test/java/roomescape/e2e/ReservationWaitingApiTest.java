@@ -153,6 +153,79 @@ class ReservationWaitingApiTest {
                 .statusCode(404);
     }
 
+    @Test
+    void 예약을_취소하면_대기_1번이_예약으로_전환된다() {
+        Integer timeId = createTime("16:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "티뉴")
+                .when().delete("/reservations/me/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("민욱"));
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/waitings/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(0));
+    }
+
+    @Test
+    void 예약을_취소하면_남은_대기_순번이_재정렬된다() {
+        Integer timeId = createTime("16:30");
+        Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
+        createWaiting("브라운", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "티뉴")
+                .when().delete("/reservations/me/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/waitings/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(1))
+                .body("waitings[0].order", is(1));
+    }
+
+    @Test
+    void 관리자가_예약을_삭제해도_대기_1번이_예약으로_전환된다() {
+        Integer timeId = createTime("17:00");
+        Integer themeId = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("민욱"));
+    }
+
     private Integer createWaiting(String name, String date, Integer timeId, Integer themeId) {
         return RestAssured.given()
                 .contentType(ContentType.JSON)
