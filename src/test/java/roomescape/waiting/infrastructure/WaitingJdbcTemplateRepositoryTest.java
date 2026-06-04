@@ -219,4 +219,36 @@ class WaitingJdbcTemplateRepositoryTest {
                 savedTheme.getId()
         )).isEmpty();
     }
+
+    @Test
+    @DisplayName("날짜와 시간과 테마가 일치하는 예약 대기 중 1순위 대기를 조회한다")
+    void findFirstByDateAndTimeIdAndThemeId_success() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "늦은대기",
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, DATEADD('SECOND', -1, CURRENT_TIMESTAMP))",
+                "빠른대기",
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when
+        Waiting foundWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeId(
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        ).orElseThrow();
+
+        // then
+        assertThat(foundWaiting.getName()).isEqualTo("빠른대기");
+        assertThat(foundWaiting.getRank()).isEqualTo(1L);
+    }
 }
