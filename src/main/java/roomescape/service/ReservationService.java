@@ -38,13 +38,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
+        LocalDateTime now = LocalDateTime.now(clock);
         Reservation reservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
                 .orElseGet(() -> {
                     Theme theme = findThemeWithThrow(command.themeId());
                     ReservationTime time = findTimeWithThrow(command.timeId());
-                    return Reservation.createSlot(command.date(), theme, time);
+                    return Reservation.createSlot(command.date(), theme, time, now);
                 });
-        reservation.reserve(command.name(), LocalDateTime.now(clock));
+        reservation.reserve(command.name(), now);
         return ReservationResult.from(reservationRepository.save(reservation));
     }
 
@@ -65,7 +66,7 @@ public class ReservationService {
 
     private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
                                         LocalDate date, ReservationTime newTime, LocalDateTime now) {
-        Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
+        Reservation target = findOrCreateSlot(date, current.getTheme(), newTime, now);
         ReservationEntry moved = target.joinWaitingList(entry.getReserverName(), now);
 
         current.cancelEntry(entry.getId());
@@ -75,21 +76,22 @@ public class ReservationService {
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(entry.getReserverName(), moved.getStatus()));
     }
 
-    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time) {
+    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time, LocalDateTime now) {
         ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
         return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
-                .orElseGet(() -> Reservation.createSlot(date, theme, time));
+                .orElseGet(() -> Reservation.createSlot(date, theme, time, now));
     }
 
     @Transactional
     public ReservationResult addWaiting(ReservationCommand command) {
+        LocalDateTime now = LocalDateTime.now(clock);
         Reservation reservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
                 .orElseGet(() -> {
                     Theme theme = findThemeWithThrow(command.themeId());
                     ReservationTime time = findTimeWithThrow(command.timeId());
-                    return Reservation.createSlot(command.date(), theme, time);
+                    return Reservation.createSlot(command.date(), theme, time, now);
                 });
-        ReservationEntry added = reservation.joinWaitingList(command.name(), LocalDateTime.now(clock));
+        ReservationEntry added = reservation.joinWaitingList(command.name(), now);
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
     }

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 
 public class ReservationFixture {
@@ -57,7 +58,7 @@ public class ReservationFixture {
         LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
-        Reservation reservation = Reservation.createSlot(date, theme, time);
+        Reservation reservation = Reservation.createSlot(date, theme, time, LocalDateTime.now());
         reservation.reserve(name, FIXED);
         return reservation;
     }
@@ -65,13 +66,13 @@ public class ReservationFixture {
     public static Reservation createWithNameAndDate(String name, LocalDate date) {
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
-        Reservation reservation = Reservation.createSlot(date, theme, time);
+        Reservation reservation = Reservation.createSlot(date, theme, time, LocalDateTime.now());
         reservation.reserve(name, FIXED);
         return reservation;
     }
 
     public static Reservation createWithAll(String name, LocalDate date, Theme theme, ReservationTime time) {
-        Reservation reservation = Reservation.createSlot(date, theme, time);
+        Reservation reservation = Reservation.createSlot(date, theme, time, LocalDateTime.now());
         reservation.reserve(name, FIXED);
         return reservation;
     }
