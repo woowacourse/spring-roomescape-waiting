@@ -39,6 +39,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         join reservation r on r.reservation_slot_id = rs.id
         join reservation_date rd on rd.id = rs.date_id
         where rd.date between ? and ?
+          and r.status <> 'CANCELED'
         group by t.id, t.name, t.url
         order by rank, t.id
         limit ?

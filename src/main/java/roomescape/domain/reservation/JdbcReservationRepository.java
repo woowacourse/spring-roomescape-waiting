@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.dto.ReservationCountResult;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -40,8 +41,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private static final String INSERT_SQL =
         """
-            insert into reservation(reservation_slot_id, user_id, waiting_number, status, created_at, updated_at)
-            values (?, ?, ?, ?, ?, ?)
+            insert into reservation(reservation_slot_id, user_id, status, created_at, updated_at)
+            values (?, ?, ?, ?, ?)
             """;
     private static final String FIND_ALL_WITH_ORDER_AND_STATUS_SQL =
         """
@@ -52,10 +53,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                            order by r.updated_at, r.id
                        ) as reservation_order
                 from reservation r
+                where r.status <> 'CANCELED'
             )
             select r.id as user_reservation_id,
-                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
-                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
+                   case when r.status = 'WAITING' and r.reservation_order > 1
+                        then r.reservation_order - 1
+                        else null
+                   end as waiting_number,
+                   r.status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -79,17 +84,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
     private static final String FIND_BY_ID_SQL =
         """
-            with ranked_reservation as (
-                select r.*,
-                       row_number() over (
-                           partition by r.reservation_slot_id
-                           order by r.updated_at, r.id
-                       ) as reservation_order
-                from reservation r
-            )
             select r.id as user_reservation_id,
-                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
-                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
+                   r.status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -103,13 +99,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                    th.url as theme_url,
                    r.created_at,
                    r.updated_at
-            from ranked_reservation r
+            from reservation r
             join users u on r.user_id = u.id
             join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
             join reservation_time rt on rs.time_id = rt.id
             join theme th on rs.theme_id = th.id
             where r.id = ?
+              and r.status <> 'CANCELED'
             """;
     private static final String FIND_ALL_BY_USERNAME_SQL =
         """
@@ -120,10 +117,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                            order by r.updated_at, r.id
                        ) as reservation_order
                 from reservation r
+                where r.status <> 'CANCELED'
             )
             select r.id as user_reservation_id,
-                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
-                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
+                   case when r.status = 'WAITING' and r.reservation_order > 1
+                        then r.reservation_order - 1
+                        else null
+                   end as waiting_number,
+                   r.status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -148,17 +149,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
     private static final String FIND_ALL_BY_RESERVATION_ID_ORDER_SQL =
         """
-            with ranked_reservation as (
-                select r.*,
-                       row_number() over (
-                           partition by r.reservation_slot_id
-                           order by r.updated_at, r.id
-                       ) as reservation_order
-                from reservation r
-            )
             select r.id as user_reservation_id,
-                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
-                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
+                   r.status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -172,13 +164,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                    th.url as theme_url,
                    r.created_at,
                    r.updated_at
-            from ranked_reservation r
+            from reservation r
             join users u on r.user_id = u.id
             join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
             join reservation_time rt on rs.time_id = rt.id
             join theme th on rs.theme_id = th.id
             where r.reservation_slot_id = ?
+              and r.status <> 'CANCELED'
             order by r.updated_at, r.id
             """;
     private static final String COUNT_BY_RESERVATION_SLOT_ID_SQL =
@@ -186,6 +179,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             select count(*)
             from reservation
             where reservation_slot_id = ?
+              and status <> 'CANCELED'
             """;
     private static final String EXISTS_ACTIVE_BY_USER_ID_AND_RESERVATION_ID_SQL =
         """
@@ -194,12 +188,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                 from reservation
                 where user_id = ?
                   and reservation_slot_id = ?
+                  and status <> 'CANCELED'
             )
             """;
     private static final String UPDATE_SQL =
         """
             update reservation
-            set reservation_slot_id = ?, user_id = ?, waiting_number = ?, status = ?, created_at = ?, updated_at = ?
+            set reservation_slot_id = ?, user_id = ?, status = ?, created_at = ?, updated_at = ?
             where id = ?
             """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
@@ -215,6 +210,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             and rs.theme_id = ?
             left join reservation r
             on r.reservation_slot_id = rs.id
+            and r.status <> 'CANCELED'
             group by rt.id, rt.start_at
             order by rt.start_at;
             """;
@@ -228,14 +224,9 @@ public class JdbcReservationRepository implements ReservationRepository {
             PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[]{"id"});
             ps.setLong(1, userReservation.getReservationSlot().getId());
             ps.setLong(2, userReservation.getUser().getId());
-            if (userReservation.getWaitingNumber() == null) {
-                ps.setObject(3, null);
-            } else {
-                ps.setLong(3, userReservation.getWaitingNumber());
-            }
-            ps.setString(4, userReservation.getStatus().name());
-            ps.setTimestamp(5, Timestamp.valueOf(userReservation.getCreatedAt()));
-            ps.setTimestamp(6, Timestamp.valueOf(userReservation.getUpdatedAt()));
+            ps.setString(3, userReservation.getStatus().name());
+            ps.setTimestamp(4, Timestamp.valueOf(userReservation.getCreatedAt()));
+            ps.setTimestamp(5, Timestamp.valueOf(userReservation.getUpdatedAt()));
             return ps;
         }, keyHolder);
         long id = extractId(keyHolder);
@@ -243,8 +234,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return jdbcTemplate.query(FIND_ALL_WITH_ORDER_AND_STATUS_SQL, userReservationRowMapper());
+    public List<ReservationWithWaitingNumber> findAll() {
+        return jdbcTemplate.query(FIND_ALL_WITH_ORDER_AND_STATUS_SQL, reservationWithWaitingNumberRowMapper());
     }
 
     @Override
@@ -254,8 +245,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservations(String username) {
-        return jdbcTemplate.query(FIND_ALL_BY_USERNAME_SQL, userReservationRowMapper(), username);
+    public List<ReservationWithWaitingNumber> findReservations(String username) {
+        return jdbcTemplate.query(FIND_ALL_BY_USERNAME_SQL, reservationWithWaitingNumberRowMapper(), username);
     }
 
     @Override
@@ -278,7 +269,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             UPDATE_SQL,
             updatedReservation.getReservationSlot().getId(),
             updatedReservation.getUser().getId(),
-            updatedReservation.getWaitingNumber(),
             updatedReservation.getStatus().name(),
             Timestamp.valueOf(updatedReservation.getCreatedAt()),
             Timestamp.valueOf(updatedReservation.getUpdatedAt()),
@@ -344,10 +334,16 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getLong(COLUMN_USER_ID),
                 rs.getString(COLUMN_USER_NAME)
             ),
-            rs.getObject(COLUMN_WAITING_NUMBER, Long.class),
             ReservationStatus.valueOf(rs.getString(COLUMN_STATUS)),
             rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime(),
             rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime()
+        );
+    }
+
+    private RowMapper<ReservationWithWaitingNumber> reservationWithWaitingNumberRowMapper() {
+        return (rs, rowNum) -> new ReservationWithWaitingNumber(
+            userReservationRowMapper().mapRow(rs, rowNum),
+            rs.getObject(COLUMN_WAITING_NUMBER, Long.class)
         );
     }
 

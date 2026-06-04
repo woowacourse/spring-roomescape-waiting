@@ -144,7 +144,6 @@ class ReservationServiceTest {
             Reservation.createWithoutId(
                 reservationSlot,
                 user,
-                null,
                 ReservationStatus.CONFIRMED,
                 now
             )
@@ -198,14 +197,12 @@ class ReservationServiceTest {
         reservationRepository.save(Reservation.createWithoutId(
             secondReservation,
             user,
-            null,
             ReservationStatus.CONFIRMED,
             now
         ));
         reservationRepository.save(Reservation.createWithoutId(
             firstReservation,
             user,
-            null,
             ReservationStatus.CONFIRMED,
             now
         ));
@@ -223,12 +220,11 @@ class ReservationServiceTest {
                     "reservationSlot.date.startWhen",
                     "reservationSlot.time.startAt",
                     "reservationSlot.theme.name",
-                    "status",
-                    "waitingNumber"
+                    "status"
                 )
                 .containsExactly(
-                    tuple(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0), "공포", "CONFIRMED", null),
-                    tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포", "CONFIRMED", null)
+                    tuple(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0), "공포", "CONFIRMED"),
+                    tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포", "CONFIRMED")
                 );
         });
     }
@@ -535,13 +531,11 @@ class ReservationServiceTest {
         Reservation firstWaitingReservation = saveWaitingReservation(
             savedReservation,
             firstWaitingUser,
-            1L,
             firstWaitingClock
         );
         Reservation secondWaitingReservation = saveWaitingReservation(
             savedReservation,
             secondWaitingUser,
-            2L,
             secondWaitingClock
         );
         ReservationService reservationService = createReservationService(updateClock);
@@ -561,12 +555,9 @@ class ReservationServiceTest {
         Reservation updatedSecondWaitingReservation = reservationRepository.findById(secondWaitingReservation.getId())
             .orElseThrow();
         assertSoftly(softly -> {
-            assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-            assertThat(updatedFirstWaitingReservation.getWaitingNumber()).isNull();
-            assertThat(updatedSecondWaitingReservation.getWaitingNumber()).isEqualTo(1L);
+            assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
             assertThat(updatedSecondWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(updatedConfirmedReservation.getWaitingNumber()).isEqualTo(2L);
-            assertThat(updatedConfirmedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(updatedConfirmedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
         });
     }
 
@@ -784,7 +775,6 @@ class ReservationServiceTest {
         return reservationRepository.save(Reservation.createWithoutId(
             reservationSlot,
             user,
-            null,
             ReservationStatus.CONFIRMED,
             clock
         ));
@@ -793,13 +783,11 @@ class ReservationServiceTest {
     private Reservation saveWaitingReservation(
         ReservationSlot reservationSlot,
         User user,
-        Long waitingNumber,
         Clock clock
     ) {
         return reservationRepository.save(Reservation.createWithoutId(
             reservationSlot,
             user,
-            waitingNumber,
             ReservationStatus.WAITING,
             clock
         ));

@@ -27,6 +27,7 @@ import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationResponse.ThemePayload;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -105,17 +106,19 @@ class ReservationControllerTest {
         // given
         String name = "보예";
         UserReservationsResponse response = UserReservationsResponse.of("보예",
-            List.of(Reservation.of(
-                1L,
-                ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
-                    ReservationTime.of(1L, LocalTime.of(10, 10)),
-                    Theme.of(1L, "공포", "아무서워", "theme-url")
+            List.of(new ReservationWithWaitingNumber(
+                Reservation.of(
+                    1L,
+                    ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
+                        ReservationTime.of(1L, LocalTime.of(10, 10)),
+                        Theme.of(1L, "공포", "아무서워", "theme-url")
+                    ),
+                    User.of(1L, "보예"),
+                    ReservationStatus.CONFIRMED,
+                    LocalDate.of(2026, 5, 16).atStartOfDay(),
+                    LocalDate.of(2026, 5, 16).atStartOfDay()
                 ),
-                User.of(1L, "보예"),
-                null,
-                ReservationStatus.CONFIRMED,
-                LocalDate.of(2026, 5, 16).atStartOfDay(),
-                LocalDate.of(2026, 5, 16).atStartOfDay()
+                null
             ))
         );
         given(reservationService.getUserReservations(name)).willReturn(response);

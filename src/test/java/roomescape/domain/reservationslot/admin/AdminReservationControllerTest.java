@@ -54,7 +54,7 @@ class AdminReservationControllerTest {
             ReservationTimePayload.from(ReservationTime.of(2L, LocalTime.of(10, 10))),
             ThemePayload.from(Theme.of(3L, "공포", "으악 무서워!", "theme-url")),
             "보예",
-            0L,
+            null,
             ReservationStatus.CONFIRMED
         );
         when(validator.isUnauthorized(any(HttpServletRequest.class))).thenReturn(false);
@@ -75,7 +75,7 @@ class AdminReservationControllerTest {
             .andExpect(jsonPath("$[0].theme.content").value("으악 무서워!"))
             .andExpect(jsonPath("$[0].theme.url").value("theme-url"))
             .andExpect(jsonPath("$[0].userName").value("보예"))
-            .andExpect(jsonPath("$[0].waitingNumber").value(0))
+            .andExpect(jsonPath("$[0].waitingNumber").doesNotExist())
             .andExpect(jsonPath("$[0].reservationStatus").value("CONFIRMED"))
         ;
 

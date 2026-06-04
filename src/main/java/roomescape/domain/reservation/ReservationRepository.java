@@ -3,16 +3,17 @@ package roomescape.domain.reservation;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.dto.ReservationCountResult;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 
 public interface ReservationRepository {
 
     Reservation save(Reservation userReservation);
 
-    List<Reservation> findAll();
+    List<ReservationWithWaitingNumber> findAll();
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findReservations(String username);
+    List<ReservationWithWaitingNumber> findReservations(String username);
 
     Long countByReservationSlotId(Long reservationSlotId);
 

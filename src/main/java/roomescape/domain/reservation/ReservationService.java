@@ -13,6 +13,7 @@ import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -63,7 +64,7 @@ public class ReservationService {
     }
 
     public UserReservationsResponse getUserReservations(String username) {
-        List<Reservation> userReservations = reservationRepository.findReservations(username);
+        List<ReservationWithWaitingNumber> userReservations = reservationRepository.findReservations(username);
         return UserReservationsResponse.of(username, userReservations);
     }
 
@@ -158,7 +159,6 @@ public class ReservationService {
 
         Reservation reservationToSave = reservation.update(
             updatedSlot,
-            currentReservationCount,
             updatedStatus,
             clock
         );
@@ -174,17 +174,9 @@ public class ReservationService {
         return Reservation.createWithoutId(
             reservationSlot,
             user,
-            waitingNumberOf(newReservationStatus, currentReservationCount),
             newReservationStatus,
             clock
         );
-    }
-
-    private Long waitingNumberOf(ReservationStatus reservationStatus, Long reservationCount) {
-        if (reservationStatus == ReservationStatus.CONFIRMED) {
-            return null;
-        }
-        return reservationCount;
     }
 
     private void validateNoDuplicateReservation(User user, ReservationSlot reservationSlot) {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -15,7 +14,7 @@ public record UserReservationsResponse(
     List<ReservationPayload> reservations
 ) {
 
-    public static UserReservationsResponse of(String username, List<Reservation> reservations) {
+    public static UserReservationsResponse of(String username, List<ReservationWithWaitingNumber> reservations) {
         return new UserReservationsResponse(
             username,
             reservations.stream()
@@ -31,12 +30,12 @@ public record UserReservationsResponse(
         Long waitingNumber
     ) {
 
-        private static ReservationPayload from(Reservation reservation) {
+        private static ReservationPayload from(ReservationWithWaitingNumber reservation) {
             return new ReservationPayload(
-                reservation.getId(),
-                ReservationSlotPayload.from(reservation.getReservationSlot()),
-                reservation.getStatus().toString(),
-                reservation.getWaitingNumber()
+                reservation.reservation().getId(),
+                ReservationSlotPayload.from(reservation.reservation().getReservationSlot()),
+                reservation.reservation().getStatus().toString(),
+                reservation.waitingNumber()
             );
         }
     }
