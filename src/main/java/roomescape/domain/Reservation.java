@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.util.Objects;
 import roomescape.exception.InvalidOwnershipException;
 
 public class Reservation {
@@ -9,7 +10,7 @@ public class Reservation {
     private final Slot slot;
 
     public Reservation(Long id, String name, Slot slot) {
-        validateFields(name, slot);
+        validate(name, slot);
         this.id = id;
         this.name = name;
         this.slot = slot;
@@ -19,13 +20,18 @@ public class Reservation {
         return new Reservation(null, name, slot);
     }
 
+    public Reservation reschedule(Slot slot) {
+        Slot patchedSlot = Objects.requireNonNullElse(slot, this.slot);
+        return new Reservation(this.id, this.name, patchedSlot);
+    }
+
     public void validateModifiable(String requesterName) {
         if (!this.name.equals(requesterName)) {
             throw new InvalidOwnershipException();
         }
     }
 
-    private void validateFields(String name, Slot slot) {
+    private void validate(String name, Slot slot) {
         if (name == null || name.isBlank() || slot == null) {
             throw new IllegalArgumentException("필수 예약 정보가 누락되었습니다.");
         }

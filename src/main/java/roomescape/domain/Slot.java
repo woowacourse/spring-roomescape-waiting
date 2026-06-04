@@ -10,7 +10,7 @@ public class Slot {
     private final Theme theme;
 
     public Slot(Long id, LocalDate date, TimeSlot timeSlot, Theme theme) {
-        validateFields(date, timeSlot, theme);
+        validate(date, timeSlot, theme);
         this.id = id;
         this.date = date;
         this.timeSlot = timeSlot;
@@ -21,7 +21,7 @@ public class Slot {
         return new Slot(null, date, timeSlot, theme);
     }
 
-    private void validateFields(LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private void validate(LocalDate date, TimeSlot timeSlot, Theme theme) {
         if (date == null || timeSlot == null || theme == null) {
             throw new IllegalArgumentException("필수 슬롯 정보가 누락되었습니다.");
         }

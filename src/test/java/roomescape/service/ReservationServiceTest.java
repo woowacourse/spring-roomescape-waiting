@@ -1,23 +1,30 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
-import roomescape.domain.*;
+import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
+import roomescape.domain.TimeSlot;
+import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastReservationControlException;
 import roomescape.exception.PastTimeException;
-import roomescape.repository.*;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import roomescape.repository.FakeReservationRepository;
+import roomescape.repository.FakeSlotRepository;
+import roomescape.repository.FakeThemeRepository;
+import roomescape.repository.FakeTimeSlotRepository;
+import roomescape.repository.FakeWaitingRepository;
 
 class ReservationServiceTest {
 
@@ -60,7 +67,8 @@ class ReservationServiceTest {
     void saveReservationDuplicate() {
         reservationService.saveReservation(basicReservationRequest);
         assertThatThrownBy(
-                () -> reservationService.saveReservation(new ReservationRequest("토미", futureDate, savedTimeSlot.getId(), savedTheme.getId())))
+                () -> reservationService.saveReservation(
+                        new ReservationRequest("토미", futureDate, savedTimeSlot.getId(), savedTheme.getId())))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -93,7 +101,8 @@ class ReservationServiceTest {
     void saveReservation_PastDate() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         assertThatThrownBy(
-                () -> reservationService.saveReservation(new ReservationRequest("브라운", pastDate, savedTimeSlot.getId(), savedTheme.getId())))
+                () -> reservationService.saveReservation(
+                        new ReservationRequest("브라운", pastDate, savedTimeSlot.getId(), savedTheme.getId())))
                 .isInstanceOf(PastTimeException.class);
     }
 
@@ -104,7 +113,8 @@ class ReservationServiceTest {
         LocalTime pastTime = LocalTime.now().minusHours(1);
         TimeSlot pastTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(pastTime));
         assertThatThrownBy(
-                () -> reservationService.saveReservation(new ReservationRequest("브라운", today, pastTimeSlot.getId(), savedTheme.getId())))
+                () -> reservationService.saveReservation(
+                        new ReservationRequest("브라운", today, pastTimeSlot.getId(), savedTheme.getId())))
                 .isInstanceOf(PastTimeException.class);
     }
 
@@ -148,20 +158,11 @@ class ReservationServiceTest {
     void putReservation_Duplicated() {
         Reservation target = reservationService.saveReservation(basicReservationRequest);
         TimeSlot otherTime = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(13, 0)));
-        reservationService.saveReservation(new ReservationRequest("네오", futureDate, otherTime.getId(), savedTheme.getId()));
+        reservationService.saveReservation(
+                new ReservationRequest("네오", futureDate, otherTime.getId(), savedTheme.getId()));
         assertThatThrownBy(() -> reservationService.putReservation(
                 target.getId(), "브라운", new ReservationRequest("브라운", futureDate, otherTime.getId(), savedTheme.getId())
         )).isInstanceOf(DuplicateReservationException.class);
-    }
-
-    @Test
-    @DisplayName("자기 자신의 예약 시간을 그대로 유지한 채 이름만 수정(PUT)한다.")
-    void putReservation_SelfDuplicate_Bug() {
-        Reservation target = reservationService.saveReservation(basicReservationRequest);
-        reservationService.putReservation(
-                target.getId(), "브라운", new ReservationRequest("새로운이름", futureDate, savedTimeSlot.getId(), savedTheme.getId())
-        );
-        assertThat(reservationService.findReservationById(target.getId()).getName()).isEqualTo("새로운이름");
     }
 
     @Test
@@ -198,7 +199,7 @@ class ReservationServiceTest {
     }
 
     private Reservation savePastReservation(LocalDate pastDate) {
-        Slot slot = slotService.resolveSlot(pastDate, savedTimeSlot.getId(), savedTheme.getId());
+        Slot slot = slotService.resolveNewSlot(pastDate, savedTimeSlot.getId(), savedTheme.getId());
         return reservationRepository.save(Reservation.transientOf("브라운", slot));
     }
 }
