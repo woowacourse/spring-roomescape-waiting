@@ -358,4 +358,37 @@ class ReservationServiceTest {
         assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
     }
 
+    @Test
+    @DisplayName("예약 취소 시 같은 슬롯의 1순위 대기를 예약으로 전환한다")
+    void cancelReservation_success_with_promoting_first_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+
+        // when
+        reservationService.cancelReservation(savedReservation.getId(), "인직");
+
+        // then
+        Reservation promotedReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        ).orElseThrow();
+        assertThat(promotedReservation.getName()).isEqualTo("브라운");
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
+
 }
