@@ -101,6 +101,19 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
+    public Optional<Reservation> findBySlotForUpdate(ReservationSlot slot) {
+        String sql = baseSelectSql() + """
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
+                FOR UPDATE
+                """;
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER,
+                    slot.getDate(), slot.getTime().getId(), slot.getTheme().getId()));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
     public boolean existsBySlot(ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0
