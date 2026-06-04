@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +41,8 @@ class ReservationWaitingServiceTest {
         slotDao = new FakeSlotDao();
         reservationQueryingDao = new FakeReservationQueryingDao();
 
-        service = new ReservationWaitingService(waitingDao, slotDao, reservationQueryingDao);
+        SlotService slotService = new SlotService(slotDao, null, null);
+        service = new ReservationWaitingService(waitingDao, slotService, reservationQueryingDao);
     }
 
     private Slot reservedSlot(Long slotId, LocalDate date, String ownerName) {
@@ -133,8 +135,20 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 존재하지_않는_대기열_삭제_시_예외없이_무시된다() {
-        assertThatCode(() -> service.delete(999L)).doesNotThrowAnyException();
+    void 중간_순번_대기를_취소하면_뒤_순번이_변경된다() {
+        Slot slot = reservedSlot(1L, tomorrow, "예약자");
+        LocalDateTime base = LocalDateTime.now();
+        waitingDao.create(ReservationWaiting.restore(null, slot, "대기1", null, base));
+        Long secondId = waitingDao.create(ReservationWaiting.restore(null, slot, "대기2", null, base.plusSeconds(1)));
+        waitingDao.create(ReservationWaiting.restore(null, slot, "대기3", null, base.plusSeconds(2)));
+
+        service.delete(secondId);
+
+        assertThat(service.readAll())
+                .extracting(ReservationWaitingResponse::name, ReservationWaitingResponse::sequence)
+                .containsExactlyInAnyOrder(
+                        tuple("대기1", 1L),
+                        tuple("대기3", 2L));
     }
 
     @Test
