@@ -39,15 +39,8 @@ public class ReservationTime {
         return LocalDateTime.of(date, this.startAt).isBefore(LocalDateTime.now());
     }
 
-    public void deactivate() {
-        if (this.status == TimeStatus.INACTIVE) {
-            throw new RoomEscapeException("이미 비활성화 된 시간 정보입니다.");
-        }
-        this.status = TimeStatus.INACTIVE;
-    }
-
     public void activate() {
-        if (this.status == TimeStatus.ACTIVE) {
+        if (isActive()) {
             throw new RoomEscapeException("이미 활성화 된 시간 정보입니다.");
         }
         this.status = TimeStatus.ACTIVE;
@@ -55,5 +48,16 @@ public class ReservationTime {
 
     public boolean isActive() {
         return this.status == TimeStatus.ACTIVE;
+    }
+
+    public void deactivate() {
+        if (isInActive()) {
+            throw new RoomEscapeException("이미 비활성화 된 시간 정보입니다.");
+        }
+        this.status = TimeStatus.INACTIVE;
+    }
+
+    public boolean isInActive() {
+        return this.status == TimeStatus.INACTIVE;
     }
 }
