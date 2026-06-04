@@ -45,3 +45,7 @@ CREATE TABLE reservation
     CONSTRAINT uq_reservation_slot UNIQUE (slot_id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
+
+-- 1순위 대기자 조회 + 순번 계산 서브쿼리
+CREATE INDEX idx_waiting_slot_created_id
+ON waiting (slot_id, created_at, id);
