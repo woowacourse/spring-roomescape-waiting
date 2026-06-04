@@ -172,7 +172,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("이미 만료된 예약건에 대해 수정을 요청하면 InvalidBusinessStateException을 던진다.")
-    void update_expiredOriginalReservation_doesNotThrow() {
+    void update_expiredOriginalReservation_throwsInvalidBusinessStateException() {
         // given
         Reservation original = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme),
@@ -180,8 +180,9 @@ class ReservationTest {
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatCode(() -> original.update(LocalDate.now().plusDays(1), null, "브라운", requestTime))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(1), null, "브라운", requestTime))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
@@ -197,4 +198,3 @@ class ReservationTest {
         assertThatThrownBy(() -> original.update(LocalDate.now().minusDays(1), null, "브라운", requestTime)).isInstanceOf(InvalidBusinessStateException.class).hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 }
-

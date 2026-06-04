@@ -29,6 +29,7 @@ public class Reservation {
 
     public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
         validateOwner(userName);
+        validateExpiry(requestTime);
 
         LocalDate targetDate = getNewDateValue(newDate);
         ReservationTime targetTime = getNewReservationTimeValue(newTime);

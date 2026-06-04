@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.reservation.service.dto.PopularThemesResult;
@@ -23,7 +22,7 @@ import roomescape.waiting.domain.ReservationWaitingRepository;
 public class ReservationQueryService {
 
     private static final Comparator<ReservationWithStatusResult> RESERVATION_WITH_STATUS_RESULT_COMPARATOR =
-            Comparator.<ReservationWithStatusResult>comparingInt(result -> statusOrder(result.status()))
+            Comparator.comparingInt((ReservationWithStatusResult result) -> result.status().priority())
                     .thenComparing(ReservationWithStatusResult::date)
                     .thenComparing(result -> result.time().getStartAt())
                     .thenComparing(ReservationWithStatusResult::waitingOrder);
@@ -119,11 +118,5 @@ public class ReservationQueryService {
         return combined;
     }
 
-    private static int statusOrder(ReservationStatus status) {
-        return switch (status) {
-            case RESERVED -> 0;
-            case WAITING -> 1;
-        };
-    }
 }
 

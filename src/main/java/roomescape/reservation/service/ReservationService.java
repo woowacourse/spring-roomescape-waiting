@@ -124,7 +124,6 @@ public class ReservationService {
     private Reservation updateReservation(ReservationUpdateCommand command, long id, String name,
                                           LocalDateTime requestTime) {
         Reservation reservation = getById(id);
-        reservation.validateDeletable(name, requestTime);
         ReservationTime newTime = command.timeId() != null ? reservationTimeService.getById(command.timeId()) : null;
         return reservation.update(command.date(), newTime, name, requestTime);
     }
