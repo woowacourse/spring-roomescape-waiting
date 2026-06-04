@@ -129,7 +129,7 @@ public class Reservation {
 
     public Reservation reject() {
         if (this.status != ReservationStatus.PENDING) {
-            throw new BadRequestException("확정할 수 없는 예약입니다.");
+            throw new IllegalStateException("대기 중인 예약만 거절할 수 있습니다.");
         }
 
         return new Reservation(id, userName, eventSlot, status.reject());
