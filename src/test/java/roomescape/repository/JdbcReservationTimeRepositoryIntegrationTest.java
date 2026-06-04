@@ -11,20 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.support.BaseIntegrationTest;
-import roomescape.support.ReservationTimeDataSource;
+import roomescape.support.DatabaseCleaner;
 
-class ReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
+class JdbcReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ReservationTimeDataSource dataSource;
+    private DatabaseCleaner databaseCleaner;
 
     @BeforeEach
     void setUp() {
-        dataSource.clearTable();
-        dataSource.clearId();
+        databaseCleaner.clear();
     }
 
     @Test

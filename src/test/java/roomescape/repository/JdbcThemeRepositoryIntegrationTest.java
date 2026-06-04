@@ -10,19 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Theme;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.support.BaseIntegrationTest;
-import roomescape.support.ThemeDataSource;
+import roomescape.support.DatabaseCleaner;
 
-class ThemeRepositoryIntegrationTest extends BaseIntegrationTest {
+class JdbcThemeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ThemeDataSource dataSource;
+    private DatabaseCleaner databaseCleaner;
 
     @BeforeEach
     void setUp() {
-        dataSource.clearId();
-        dataSource.clearTable();
+        databaseCleaner.clear();
     }
 
     @Test

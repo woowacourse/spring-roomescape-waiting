@@ -20,21 +20,26 @@ import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.repository.dto.ReservationCondition;
 import roomescape.support.BaseIntegrationTest;
+import roomescape.support.DatabaseCleaner;
 import roomescape.support.ReservationDataSource;
 
-class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
+class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
+
     @Autowired
     private ReservationRepository reservationRepository;
+
     @Autowired
     private ReservationDataSource dataSource;
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
 
     private final ReservationTime reservationTime = ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
     private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
 
     @BeforeEach
     void setUp() {
-        dataSource.clearTable();
-        dataSource.clearId();
+        databaseCleaner.clear();
         dataSource.insertTheme(theme.getName(), theme.getDescription(), theme.getThumbnailImageUrl());
         dataSource.insertReservationTime(reservationTime.getStartAt());
     }
