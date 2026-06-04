@@ -1,9 +1,9 @@
 package roomescape.reservation;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
@@ -11,23 +11,23 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.slot.application.SlotService;
 import roomescape.theme.Theme;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,28 +47,20 @@ class ReservationServiceTest {
     @Mock
     private WaitingRepository waitingRepository;
 
-    @InjectMocks
     private ReservationService reservationService;
 
-    private ReservationDetailProjection reservationDetail(
-            Long reservationId,
-            Long memberId,
-            LocalDate date,
-            Long themeId,
-            Long timeId,
-            LocalTime startAt
-    ) {
-        return new ReservationDetailProjection(
-                reservationId,
-                memberId,
-                "member",
-                date,
-                themeId,
-                "theme",
-                "description",
-                "thumbnail",
-                timeId,
-                startAt
+    private final Clock clock = Clock.fixed(
+            Instant.parse("2026-05-01T00:00:00Z"),
+            ZoneId.systemDefault()
+    );
+
+    @BeforeEach
+    void setUp() {
+        reservationService = new ReservationService(
+                reservationRepository,
+                waitingRepository,
+                slotService,
+                clock
         );
     }
 
@@ -248,16 +240,13 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         Reservation oldReservation = reservation(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0), 10L
+                reservationId, MEMBER_ID, LocalDate.of(2026, 4, 30), 3L, 3L, LocalTime.of(11, 0), 10L
         );
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        doNothing().when(slotService).validateNotPastDate(oldReservation.getSlot().getDate());
-        doThrow(IllegalStateException.class).when(slotService)
-                .validateNotPastTime(oldReservation.getSlot().getDate(), oldReservation.getSlot().getStartAt());
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).updateSlotById(anyLong(), anyLong());
     }
 }

@@ -1,6 +1,8 @@
 package roomescape.reservation.application;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +34,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final SlotService slotService;
+    private final Clock clock;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         slotService.validateSlot(body.date(), body.timeId(), body.themeId());
@@ -54,7 +57,7 @@ public class ReservationService {
     public void deleteByIdForUser(long reservationId, long memberId) {
         deleteInternal(
                 reservationId,
-                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
+                oldReservation -> oldReservation.validateOwnedBy(memberId)
         );
     }
 
@@ -92,23 +95,13 @@ public class ReservationService {
         return updateInternal(
                 body,
                 reservationId,
-                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
+                oldReservation -> oldReservation.validateOwnedBy(memberId)
         );
     }
 
     public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
         return updateInternal(body, reservationId, oldReservation -> {
         });
-    }
-
-    private static void validateReservationOwner(
-            long reservationId,
-            Reservation reservation,
-            long memberId
-    ) {
-        if (!reservation.isOwnedBy(memberId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
-        }
     }
 
     private static void validateReservationUpdated(int affectedRow) {
@@ -193,7 +186,6 @@ public class ReservationService {
     }
 
     private void validateNotPast(Reservation reservation) {
-        slotService.validateNotPastDate(reservation.getSlot().getDate());
-        slotService.validateNotPastTime(reservation.getSlot().getDate(), reservation.getSlot().getStartAt());
+        reservation.validateNotPast(LocalDateTime.now(clock));
     }
 }
