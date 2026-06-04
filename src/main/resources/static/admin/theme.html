@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>테마 관리 — RoomEscape Admin</title>
+    <meta content="방탈출 테마 관리 - 관리자" name="description">
+    <link href="../style.css" rel="stylesheet">
+    <style>
+        .popular-rank { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; }
+        .rank-1 { background: linear-gradient(135deg, #facc15, #f97316); color: #0d0f1a; }
+        .rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0d0f1a; }
+        .rank-3 { background: linear-gradient(135deg, #b45309, #92400e); color: #fff; }
+        .rank-other { background: var(--bg-input); color: var(--text-muted); }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-text">🔐 RoomEscape</div>
+            <div class="logo-sub">Admin Panel</div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">관리</div>
+            <a class="nav-item" href="reservation.html"><span class="icon">📋</span> 예약 관리</a>
+            <a class="nav-item" href="time.html"><span class="icon">🕐</span> 시간 관리</a>
+            <a class="nav-item active" href="theme.html"><span class="icon">🎭</span> 테마 관리</a>
+        </div>
+        <div class="sidebar-section" style="margin-top: auto;">
+            <div class="sidebar-section-label">사용자</div>
+            <a class="nav-item" href="../index.html"><span class="icon">🏠</span> 사용자 페이지</a>
+        </div>
+    </nav>
+
+    <main class="main">
+        <section class="card auth-panel" id="admin-auth-panel">
+            <div class="card-header"><span class="card-title">관리자 로그인</span></div>
+            <form id="admin-login-form">
+                <div class="form-grid" style="margin-bottom:14px;">
+                    <div class="form-group">
+                        <label for="admin-username">아이디</label>
+                        <input id="admin-username" type="text" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">비밀번호</label>
+                        <input id="admin-password" type="password" autocomplete="current-password">
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">로그인</button>
+                <p class="auth-message" id="admin-auth-message"></p>
+            </form>
+        </section>
+
+        <section id="admin-content" style="display:none;">
+            <div class="page-header">
+                <h1 class="page-title">테마 관리</h1>
+                <p class="page-subtitle">방탈출 테마를 생성, 조회, 삭제합니다.</p>
+                <button class="btn btn-ghost btn-sm" id="admin-logout-btn" type="button" style="margin-top:12px;">로그아웃</button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card red">
+                    <div class="stat-value" id="theme-count">–</div>
+                    <div class="stat-label">조회된 테마</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">새 테마 추가</span>
+                    <button class="btn btn-ghost btn-sm" id="toggle-form-btn" type="button">펼치기 / 접기</button>
+                </div>
+                <div id="add-form">
+                    <div class="form-grid form-grid-3" style="margin-bottom: 14px;">
+                        <div class="form-group">
+                            <label for="theme-name">테마 이름</label>
+                            <input id="theme-name" placeholder="공포의 저택" type="text">
+                        </div>
+                        <div class="form-group">
+                            <label for="theme-desc">설명</label>
+                            <input id="theme-desc" placeholder="어두운 저택에서 탈출하라" type="text">
+                        </div>
+                        <div class="form-group">
+                            <label for="theme-img">썸네일 URL</label>
+                            <input id="theme-img" placeholder="https://example.com/image.jpg" type="url">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="create-theme-btn" type="button"><span>➕</span> 테마 추가</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">테마 목록</span>
+                    <button class="btn btn-ghost btn-sm" id="refresh-btn" type="button">새로고침</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr><th>ID</th><th>썸네일</th><th>이름</th><th>설명</th><th>액션</th></tr>
+                        </thead>
+                        <tbody id="theme-table-body"></tbody>
+                    </table>
+                </div>
+                <div style="text-align: center; margin-top: 12px;">
+                    <button class="btn btn-ghost" id="theme-load-more-btn" style="display:none;" type="button">더 보기</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🏆 인기 테마 (최근 1주)</span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; margin: 0;">
+                            <label for="popular-limit" style="white-space: nowrap; margin: 0;">개수</label>
+                            <input id="popular-limit" max="20" min="1" style="width: 70px;" type="number" value="5">
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="popular-load-btn" type="button">조회</button>
+                    </div>
+                </div>
+                <div id="popular-list"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">📅 테마별 가용 시간 조회</span></div>
+                <div style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px;">
+                    <div class="form-group" style="flex: 1; min-width: 160px;">
+                        <label for="check-theme">테마</label>
+                        <select id="check-theme"><option value="">테마 선택</option></select>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 160px;">
+                        <label for="check-date">날짜</label>
+                        <input id="check-date" type="date">
+                    </div>
+                    <button class="btn btn-primary" id="check-times-btn" type="button">조회</button>
+                </div>
+                <div id="time-slots"></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="../app.js"></script>
+<script>
+    const R = Roomescape;
+    const themePageState = {page: 0, hasNext: false, totalLoaded: 0, allThemes: []};
+
+    function token() {
+        return R.managerToken();
+    }
+
+    function toggleForm() {
+        const form = R.byId('add-form');
+        form.style.display = form.style.display === 'none' ? '' : 'none';
+    }
+
+    function thumbnailCell(theme) {
+        return R.h('td', {}, R.imageOrFallback(theme.thumbnailImageUrl, theme.name, {
+            imgStyle: {width: '56px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)'},
+            fallbackStyle: {width: '56px', height: '40px', borderRadius: '6px', fontSize: '20px'},
+        }));
+    }
+
+    function renderThemeRow(theme) {
+        return R.h('tr', {}, [
+            R.h('td', {}, [R.badge(`#${theme.id}`)]),
+            thumbnailCell(theme),
+            R.h('td', {}, [R.h('strong', {text: theme.name})]),
+            R.h('td', {style: {color: 'var(--text-secondary)', maxWidth: '280px'}}, [
+                R.h('span', {
+                    text: theme.description || '–',
+                    title: theme.description || '',
+                    style: {display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'},
+                }),
+            ]),
+            R.h('td', {}, [R.button('btn btn-danger btn-sm', '🗑 삭제', () => deleteTheme(theme.id, theme.name))]),
+        ]);
+    }
+
+    async function loadThemes(reset = true) {
+        const tbody = R.byId('theme-table-body');
+        if (reset) {
+            themePageState.page = 0;
+            themePageState.totalLoaded = 0;
+            themePageState.allThemes = [];
+            R.clear(tbody);
+            tbody.appendChild(R.h('tr', {}, [R.h('td', {colSpan: 5}, [R.loadingState()])]));
+        }
+
+        try {
+            const data = await R.api('GET', `/themes?page=${themePageState.page}&size=20`);
+            const themes = data.themes;
+            themePageState.hasNext = data.hasNext;
+            themePageState.totalLoaded += themes.length;
+            themePageState.allThemes = themePageState.allThemes.concat(themes);
+
+            if (reset) R.clear(tbody);
+            if (reset && themes.length === 0) {
+                tbody.appendChild(R.h('tr', {}, [R.h('td', {colSpan: 5}, [R.emptyState('등록된 테마가 없습니다.', '🎭')])]));
+                R.setOptions(R.byId('check-theme'), [], '테마 선택');
+                R.byId('theme-count').textContent = '0';
+                R.byId('theme-load-more-btn').style.display = 'none';
+                return;
+            }
+
+            themes.forEach(theme => tbody.appendChild(renderThemeRow(theme)));
+            R.setOptions(R.byId('check-theme'), themePageState.allThemes, '테마 선택');
+            R.byId('theme-count').textContent = themePageState.hasNext ? `${themePageState.totalLoaded}+` : String(themePageState.totalLoaded);
+            R.byId('theme-load-more-btn').style.display = themePageState.hasNext ? '' : 'none';
+        } catch (e) {
+            R.toast(`테마 조회 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function loadThemeMore() {
+        themePageState.page += 1;
+        await loadThemes(false);
+    }
+
+    async function loadPopular() {
+        const limit = R.byId('popular-limit').value || 5;
+        const container = R.byId('popular-list');
+        R.clear(container);
+        container.appendChild(R.loadingState());
+        try {
+            const themes = (await R.api('GET', `/themes/popular?limit=${limit}`)).themes;
+            R.clear(container);
+            if (!themes.length) {
+                container.appendChild(R.emptyState('데이터가 없습니다.', '📊'));
+                return;
+            }
+            const tbody = R.h('tbody');
+            themes.forEach((theme, index) => tbody.appendChild(R.h('tr', {}, [
+                R.h('td', {}, [R.h('span', {
+                    className: `popular-rank ${index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-other'}`,
+                    text: index + 1,
+                })]),
+                thumbnailCell(theme),
+                R.h('td', {}, [R.h('strong', {text: theme.name})]),
+                R.h('td', {text: theme.description || '–', style: {color: 'var(--text-secondary)'}}),
+                R.h('td', {}, [R.badge(`🔖 ${theme.reservedCount}건`, 'yellow')]),
+            ])));
+            container.appendChild(R.h('div', {className: 'table-wrap'}, [
+                R.h('table', {}, [
+                    R.h('thead', {}, [R.h('tr', {}, ['순위', '썸네일', '이름', '설명', '예약 수'].map(text => R.h('th', {text})))]),
+                    tbody,
+                ]),
+            ]));
+        } catch (e) {
+            R.clear(container);
+            container.appendChild(R.errorState(`조회 실패: ${e.message}`));
+        }
+    }
+
+    async function checkTimes() {
+        const themeId = R.byId('check-theme').value;
+        const date = R.byId('check-date').value;
+        if (!themeId || !date) {
+            R.toast('테마와 날짜를 선택해주세요.', 'error');
+            return;
+        }
+
+        const container = R.byId('time-slots');
+        R.clear(container);
+        container.appendChild(R.loadingState());
+        try {
+            const times = (await R.api('GET', `/themes/${themeId}/times?date=${date}`)).times;
+            R.clear(container);
+            if (!times.length) {
+                container.appendChild(R.emptyState('등록된 시간이 없습니다.', '⏰'));
+                return;
+            }
+            const grid = R.h('div', {className: 'time-grid'});
+            times.forEach(time => grid.appendChild(R.h('div', {
+                className: `time-slot ${time.isReserved ? 'reserved' : 'available'}`,
+            }, [
+                R.h('div', {text: time.startAt}),
+                R.h('div', {className: 'time-slot-label', text: time.isReserved ? '예약됨' : '예약 가능'}),
+            ])));
+            container.appendChild(grid);
+        } catch (e) {
+            R.clear(container);
+            container.appendChild(R.errorState(`조회 실패: ${e.message}`));
+        }
+    }
+
+    async function createTheme() {
+        const name = R.byId('theme-name').value.trim();
+        const description = R.byId('theme-desc').value.trim();
+        const thumbnailImageUrl = R.byId('theme-img').value.trim();
+        if (!name || !description || !thumbnailImageUrl) {
+            R.toast('테마 이름, 설명, 썸네일 URL을 모두 입력해주세요.', 'error');
+            return;
+        }
+        try {
+            await R.api('POST', '/admin/themes', {token: token(), body: {name, description, thumbnailImageUrl}});
+            R.toast(`"${name}" 테마가 추가되었습니다.`, 'success');
+            R.byId('theme-name').value = '';
+            R.byId('theme-desc').value = '';
+            R.byId('theme-img').value = '';
+            await loadThemes(true);
+        } catch (e) {
+            R.toast(`추가 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function deleteTheme(id, name) {
+        if (!confirm(`테마 "${name}"을 삭제할까요?`)) return;
+        try {
+            await R.api('DELETE', `/admin/themes/${id}`, {token: token()});
+            R.toast(`"${name}" 테마가 삭제되었습니다.`, 'success');
+            await loadThemes(true);
+        } catch (e) {
+            R.toast(`삭제 실패: ${e.message}`, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        R.byId('toggle-form-btn').addEventListener('click', toggleForm);
+        R.byId('create-theme-btn').addEventListener('click', createTheme);
+        R.byId('refresh-btn').addEventListener('click', () => loadThemes(true));
+        R.byId('theme-load-more-btn').addEventListener('click', loadThemeMore);
+        R.byId('popular-load-btn').addEventListener('click', loadPopular);
+        R.byId('check-times-btn').addEventListener('click', checkTimes);
+        R.byId('check-date').value = new Date().toISOString().split('T')[0];
+        R.byId('popular-list').appendChild(R.emptyState('조회 버튼을 눌러 인기 테마를 확인하세요.'));
+        R.byId('time-slots').appendChild(R.emptyState('테마와 날짜를 선택 후 조회하세요.'));
+        R.setupAdminAuth(() => loadThemes(true));
+    });
+</script>
+</body>
+</html>
