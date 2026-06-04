@@ -29,6 +29,7 @@ class ReservationTimeRepositoryTest {
     void setup() {
         jdbcTemplate.update("DELETE FROM reservation_waiting;");
         jdbcTemplate.update("DELETE FROM reservation;");
+        jdbcTemplate.update("DELETE FROM theme;");
         jdbcTemplate.update("DELETE FROM reservation_time;");
         this.dao = new ReservationTimeRepository(jdbcTemplate);
     }

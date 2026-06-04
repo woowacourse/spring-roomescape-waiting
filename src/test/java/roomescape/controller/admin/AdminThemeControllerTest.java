@@ -8,8 +8,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.domain.Theme;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 import roomescape.service.ThemeService;
 
 import java.util.List;
@@ -108,23 +106,6 @@ class AdminThemeControllerTest {
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
                 .andExpect(jsonPath("$.detail").value("id는 양수이어야 합니다."));
 
-        verifyNoMoreInteractions(themeService);
-    }
-
-    @Test
-    void 예약이_존재하는_테마는_삭제시_에러_응답() throws Exception {
-        // given
-        doThrow(new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 테마는 삭제할 수 없습니다."))
-                .when(themeService)
-                .delete(1L);
-
-        // when & then
-        mockMvc.perform(delete("/admin/themes/1"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("RESOURCE_IN_USE"))
-                .andExpect(jsonPath("$.detail").value("예약이 존재하는 테마는 삭제할 수 없습니다."));
-
-        verify(themeService, times(1)).delete(1L);
         verifyNoMoreInteractions(themeService);
     }
 

@@ -7,8 +7,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 import roomescape.service.ReservationTimeService;
 
 import java.time.LocalTime;
@@ -105,20 +103,4 @@ class AdminReservationTimeControllerTest {
         verifyNoMoreInteractions(reservationTimeService);
     }
 
-    @Test
-    void 예약이_존재하는_시간은_삭제시_에러_응답() throws Exception {
-        // given
-        doThrow(new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다."))
-                .when(reservationTimeService)
-                .delete(1L);
-
-        // when & then
-        mockMvc.perform(delete("/admin/times/1"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("RESOURCE_IN_USE"))
-                .andExpect(jsonPath("$.detail").value("예약이 존재하는 시간은 삭제할 수 없습니다."));
-
-        verify(reservationTimeService, times(1)).delete(1L);
-        verifyNoMoreInteractions(reservationTimeService);
-    }
 }

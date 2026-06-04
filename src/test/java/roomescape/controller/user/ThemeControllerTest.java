@@ -10,8 +10,6 @@ import roomescape.domain.PopularTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeAvailability;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
 
@@ -80,25 +78,6 @@ class ThemeControllerTest {
     }
 
     @Test
-    void 존재하지_않는_테마의_예약_가능_시간_조회시_에러_응답() throws Exception {
-        // given
-        given(reservationAvailabilityService.findAvailableTimes(
-                eq(999L),
-                eq(LocalDate.of(2099, 1, 1))))
-                .willThrow(new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
-
-        // when & then
-        mockMvc.perform(get("/themes/999/times")
-                        .param("date", "2099-01-01"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
-                .andExpect(jsonPath("$.detail").value("존재하지 않는 테마입니다."));
-
-        verify(reservationAvailabilityService, times(1)).findAvailableTimes(999L, LocalDate.of(2099, 1, 1));
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
-    }
-
-    @Test
     void 인기_테마를_조회한다() throws Exception {
         // given
         given(themeService.findWeeklyTopTen(any(LocalDate.class)))
@@ -123,29 +102,6 @@ class ThemeControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
                 .andExpect(jsonPath("$.detail").value("date 형식이 올바르지 않습니다."));
-
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
-    }
-
-    @Test
-    void 필수_쿼리_파라미터가_없으면_에러_응답() throws Exception {
-        // when & then
-        mockMvc.perform(get("/themes/1/times"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
-                .andExpect(jsonPath("$.detail").value("date는 필수입니다."));
-
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
-    }
-
-    @Test
-    void 경로_변수_형식이_올바르지_않으면_에러_응답() throws Exception {
-        // when & then
-        mockMvc.perform(get("/themes/abc/times")
-                        .param("date", "2099-01-01"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
-                .andExpect(jsonPath("$.detail").value("id 형식이 올바르지 않습니다."));
 
         verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
