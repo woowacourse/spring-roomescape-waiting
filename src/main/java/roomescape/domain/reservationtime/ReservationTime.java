@@ -34,7 +34,7 @@ public class ReservationTime {
     }
 
     private static void validateId(final Long id){
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("Id는 비어있을 수 없습니다.");
         }
     }
@@ -48,8 +48,8 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(final Object o){
-        if(!(o instanceof ReservationTime)) {
+    public boolean equals(final Object o) {
+        if (!(o instanceof ReservationTime)) {
             return false;
         }
         ReservationTime r = (ReservationTime) o;
@@ -57,7 +57,7 @@ public class ReservationTime {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(id);
     }
 

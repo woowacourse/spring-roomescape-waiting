@@ -126,8 +126,8 @@ public class Reservation {
         }
     }
 
-    private static void validateId(final Long id){
-        if(id == null) {
+    private static void validateId(final Long id) {
+        if (id == null) {
             throw new IllegalArgumentException("Id는 비어있을 수 없습니다.");
         }
     }
@@ -138,26 +138,26 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime createdAt
     ) {
-        if(date == null) {
+        if (date == null) {
             throw new IllegalArgumentException("날짜는 비어있을 수 없습니다.");
         }
 
-        if(theme == null) {
+        if (theme == null) {
             throw new IllegalArgumentException("테마는 비어있으면 안됩니다.");
         }
 
-        if(time == null) {
+        if (time == null) {
             throw new IllegalArgumentException("시간은 비어있으면 안됩니다.");
         }
 
-        if(createdAt == null) {
+        if (createdAt == null) {
             throw new IllegalArgumentException("예약 생성 시각은 비어있으면 안됩니다.");
         }
     }
 
     @Override
-    public boolean equals(final Object o){
-        if(!(o instanceof Reservation)) {
+    public boolean equals(final Object o) {
+        if (!(o instanceof Reservation)) {
             return false;
         }
         Reservation r = (Reservation) o;
@@ -165,7 +165,7 @@ public class Reservation {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(id);
     }
 

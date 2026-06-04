@@ -55,7 +55,7 @@ public class ThemeService {
 
         int affectedRowCount = themeRepository.deleteById(themeId);
 
-        if(affectedRowCount <= 0) {
+        if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND, "삭제된 테마 데이터가 없습니다.");
         }
     }

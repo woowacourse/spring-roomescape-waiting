@@ -37,7 +37,7 @@ public class Theme {
     }
 
     private static void validateId(final Long id){
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("Id는 비어있을 수 없습니다.");
         }
     }
@@ -59,8 +59,8 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(final Object o){
-        if(!(o instanceof Theme)) {
+    public boolean equals(final Object o) {
+        if (!(o instanceof Theme)) {
             return false;
         }
         Theme t = (Theme) o;
@@ -68,7 +68,7 @@ public class Theme {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(id);
     }
 
