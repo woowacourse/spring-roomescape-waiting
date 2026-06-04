@@ -4,23 +4,23 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
+import roomescape.repository.dto.WaitDetailDto;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
+import roomescape.service.dto.response.ServiceReceptionListResponse;
 import roomescape.service.dto.response.ServiceReceptionResponse;
 
 @Service
@@ -54,48 +54,12 @@ public class ReceptionFacade {
         return saveReservationOrWait(request, reservationTime, theme);
     }
 
-    public List<ServiceReceptionResponse> findByName(String name) {
-        List<ServiceReceptionResponse> receptions = new ArrayList<>();
-
-        receptions.addAll(findReservationByName(name));
-        receptions.addAll(findWaitByName(name));
-
-        return receptions;
+    public ServiceReceptionListResponse findByName(String name) {
+        return ServiceReceptionListResponse.from(reservationService.findByName(name), waitService.findByName(name));
     }
 
-    private List<ServiceReceptionResponse> findReservationByName(String name) {
-        return reservationService.findByName(name).stream()
-                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED))
-                .toList();
-    }
-
-    private List<ServiceReceptionResponse> findWaitByName(String name) {
-        return waitService.findByName(name).stream()
-                .map(wait -> ServiceReceptionResponse.of(wait, waitService.calculateOrder(wait),
-                        ReservationStatus.WAITING))
-                .toList();
-    }
-
-    public List<ServiceReceptionResponse> findAll() {
-        List<ServiceReceptionResponse> receptions = new ArrayList<>();
-
-        receptions.addAll(findAllReservations());
-        receptions.addAll(findAllWaits());
-
-        return receptions;
-    }
-
-    private List<ServiceReceptionResponse> findAllReservations() {
-        return reservationService.findAll().stream()
-                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED))
-                .toList();
-    }
-
-    private List<ServiceReceptionResponse> findAllWaits() {
-        return waitService.findAll().stream()
-                .map(wait -> ServiceReceptionResponse.of(wait, waitService.calculateOrder(wait),
-                        ReservationStatus.WAITING))
-                .toList();
+    public ServiceReceptionListResponse findAll() {
+        return ServiceReceptionListResponse.from(reservationService.findAll(), waitService.findAll());
     }
 
     @Transactional
@@ -104,7 +68,7 @@ public class ReceptionFacade {
         validateDelete(reservation.getDate(), reservation.getTime());
         reservationService.delete(id);
 
-        List<Wait> waits = waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
+        List<WaitDetailDto> waits = waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
         if (waits.isEmpty()) {
             return;
@@ -114,8 +78,8 @@ public class ReceptionFacade {
 
     @Transactional
     public void deleteWait(Long id) {
-        Wait wait = waitService.findWait(id);
-        validateDelete(wait.getReservationDate(), wait.getTime());
+        WaitDetailDto waitDetailDto = waitService.findWait(id);
+        validateDelete(waitDetailDto.reservationDate(), waitDetailDto.reservationTime().toEntity());
 
         waitService.delete(id);
     }
@@ -159,23 +123,23 @@ public class ReceptionFacade {
                                                      Theme theme) {
         Reservation newReservationWithoutId = request.toReservation(reservationTime, theme);
         Reservation newReservation = reservationService.save(newReservationWithoutId);
-        return ServiceReceptionResponse.of(newReservation, 0L, ReservationStatus.CONFIRMED);
+        return ServiceReceptionResponse.from(newReservation);
     }
 
     private ServiceReceptionResponse saveWait(ServiceReservationCreateRequest request, ReservationTime reservationTime,
                                               Theme theme) {
         Wait newWaitWithoutId = request.toWait(LocalDateTime.now(clock), reservationTime, theme);
-        Wait newWait = waitService.save(newWaitWithoutId);
-        return ServiceReceptionResponse.of(newWait, waitService.calculateOrder(newWait),
-                ReservationStatus.WAITING);
+        WaitDetailDto newWait = waitService.save(newWaitWithoutId);
+        return ServiceReceptionResponse.from(newWait);
     }
 
-    private void confirmFirstWait(Wait firstOrder) {
-        ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.getName(),
-                firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
+    private void confirmFirstWait(WaitDetailDto firstOrder) {
+        ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.name(),
+                firstOrder.reservationDate(), firstOrder.reservationTime().id(), firstOrder.theme().id());
 
-        Reservation reservationWithoutId = request.toReservation(firstOrder.getTime(), firstOrder.getTheme());
+        Reservation reservationWithoutId = request.toReservation(firstOrder.reservationTime().toEntity(),
+                firstOrder.theme().toEntity());
         reservationService.save(reservationWithoutId);
-        waitService.delete(firstOrder.getId());
+        waitService.delete(firstOrder.id());
     }
 }

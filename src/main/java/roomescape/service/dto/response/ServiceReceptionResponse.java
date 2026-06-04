@@ -1,40 +1,17 @@
 package roomescape.service.dto.response;
 
-import java.time.LocalDate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.Wait;
+import roomescape.repository.dto.WaitDetailDto;
 
-public record ServiceReceptionResponse(
-        Long id,
-        Long order,
-        String name,
-        LocalDate reservationDate,
-        ServiceReservationTimeResponse time,
-        ServiceThemeResponse theme,
-        ReservationStatus status
-) {
-    public static ServiceReceptionResponse of(Reservation reservation, Long order, ReservationStatus status) {
-        return new ServiceReceptionResponse(
-                reservation.getId(),
-                order,
-                reservation.getName(),
-                reservation.getDate(),
-                ServiceReservationTimeResponse.from(reservation.getTime()),
-                ServiceThemeResponse.from(reservation.getTheme()),
-                status
-        );
+public sealed interface ServiceReceptionResponse permits ServiceReservationResponse, ServiceWaitResponse {
+    static ServiceReceptionResponse from(Reservation reservation) {
+        return ServiceReservationResponse.from(reservation);
     }
 
-    public static ServiceReceptionResponse of(Wait wait, Long order, ReservationStatus status) {
-        return new ServiceReceptionResponse(
-                wait.getId(),
-                order,
-                wait.getName(),
-                wait.getReservationDate(),
-                ServiceReservationTimeResponse.from(wait.getTime()),
-                ServiceThemeResponse.from(wait.getTheme()),
-                status
-        );
+    static ServiceReceptionResponse from(WaitDetailDto wait) {
+        return ServiceWaitResponse.from(wait);
     }
+
+    ReservationStatus status();
 }

@@ -48,7 +48,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = """
-                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, 
+                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
                 FROM `reservation` r
                 INNER JOIN `reservation_time` t ON r.time_id = t.id
@@ -62,7 +62,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,\s
+                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
                 FROM `reservation` r
                 INNER JOIN `reservation_time` t ON r.time_id = t.id
@@ -76,7 +76,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByName(String name) {
         String sql = """
-                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,\s
+                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
                 FROM `reservation` r
                 INNER JOIN `reservation_time` t ON r.time_id = t.id
@@ -90,7 +90,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAll() {
         String sql = """
-                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,\s
+                SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
                 FROM `reservation` r
                 INNER JOIN `reservation_time` t ON r.time_id = t.id

@@ -15,6 +15,9 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.repository.dto.ReservationTimeDto;
+import roomescape.repository.dto.ThemeDto;
+import roomescape.repository.dto.WaitDetailDto;
 
 @Repository
 public class JdbcWaitRepository implements WaitRepository {
@@ -46,28 +49,36 @@ public class JdbcWaitRepository implements WaitRepository {
     }
 
     @Override
-    public Optional<Wait> findById(Long id) {
+    public Optional<WaitDetailDto> findById(Long id) {
         String sql = """
-                SELECT w.id, w.created_at, w.name, w.reservation_date,\s
-                t.id as time_id, t.start_at as time_value,\s
-                th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
+                SELECT w.id, w.created_at, w.name, w.reservation_date,
+                t.id as time_id, t.start_at as time_value,
+                th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url,
+                ROW_NUMBER() OVER (
+                    PARTITION BY w.reservation_date, w.time_id, w.theme_id
+                    ORDER BY w.created_at
+                ) AS wait_order
                 FROM `wait` w
                 INNER JOIN `reservation_time` t ON w.time_id = t.id
                 INNER JOIN `theme` th ON w.theme_id = th.id
                 WHERE w.id = (?)
                 """;
 
-        return jdbcTemplate.query(sql, waitRowMapper(), id)
+        return jdbcTemplate.query(sql, waitDetailDtoRowMapper(), id)
                 .stream()
                 .findFirst();
     }
 
     @Override
-    public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+    public List<WaitDetailDto> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
         String sql = """
-                SELECT w.id, w.created_at, w.name, w.reservation_date AS date,\s
-                rt.id AS time_id, rt.start_at AS time_value,\s
-                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url
+                SELECT w.id, w.created_at, w.name, w.reservation_date,
+                rt.id AS time_id, rt.start_at AS time_value,
+                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url,
+                ROW_NUMBER() OVER (
+                    PARTITION BY w.reservation_date, w.time_id, w.theme_id
+                    ORDER BY w.created_at
+                ) AS wait_order
                 FROM wait w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
@@ -75,18 +86,22 @@ public class JdbcWaitRepository implements WaitRepository {
                 ORDER BY w.created_at
                 """;
 
-        return jdbcTemplate.query(sql, waitRowMapper(),
+        return jdbcTemplate.query(sql, waitDetailDtoRowMapper(),
                 reservationDate,
                 timeId,
                 themeId);
     }
 
     @Override
-    public List<Wait> findByName(String name) {
+    public List<WaitDetailDto> findByName(String name) {
         String sql = """
-                SELECT w.id, w.created_at, w.name, w.reservation_date AS date,\s
-                rt.id AS time_id, rt.start_at AS time_value,\s
-                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url
+                SELECT w.id, w.created_at, w.name, w.reservation_date,
+                rt.id AS time_id, rt.start_at AS time_value,
+                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url,
+                ROW_NUMBER() OVER (
+                    PARTITION BY w.reservation_date, w.time_id, w.theme_id
+                    ORDER BY w.created_at
+                ) AS wait_order
                 FROM wait w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
@@ -94,22 +109,26 @@ public class JdbcWaitRepository implements WaitRepository {
                 ORDER BY w.created_at
                 """;
 
-        return jdbcTemplate.query(sql, waitRowMapper(), name);
+        return jdbcTemplate.query(sql, waitDetailDtoRowMapper(), name);
     }
 
     @Override
-    public List<Wait> findAll() {
+    public List<WaitDetailDto> findAll() {
         String sql = """
-                SELECT w.id, w.created_at, w.name, w.reservation_date AS date, \s
-                rt.id AS time_id, rt.start_at AS time_value,\s
-                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url
+                SELECT w.id, w.created_at, w.name, w.reservation_date,
+                rt.id AS time_id, rt.start_at AS time_value,
+                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url,
+                ROW_NUMBER() OVER (
+                    PARTITION BY w.reservation_date, w.time_id, w.theme_id
+                    ORDER BY w.created_at
+                ) AS wait_order
                 FROM wait w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
                 ORDER BY w.created_at
                 """;
 
-        return jdbcTemplate.query(sql, waitRowMapper());
+        return jdbcTemplate.query(sql, waitDetailDtoRowMapper());
     }
 
     @Override
@@ -131,7 +150,7 @@ public class JdbcWaitRepository implements WaitRepository {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         String sql = "DELETE FROM `wait` WHERE `id` = (?)";
 
         jdbcTemplate.update(sql, id);
@@ -153,6 +172,26 @@ public class JdbcWaitRepository implements WaitRepository {
             ReservationTime reservationTime = new ReservationTime(timeId, timeValue);
             Theme theme = new Theme(themeId, themeName, themeDescription, themeThumbnailUrl);
             return new Wait(id, createdAt, name, date, reservationTime, theme);
+        };
+    }
+
+    private static RowMapper<WaitDetailDto> waitDetailDtoRowMapper() {
+        return (resultSet, rowNum) -> {
+            Long id = resultSet.getLong("id");
+            LocalDateTime createdAt = resultSet.getObject("created_at", LocalDateTime.class);
+            String name = resultSet.getString("name");
+            LocalDate date = resultSet.getDate("reservation_date").toLocalDate();
+            Long timeId = resultSet.getLong("time_id");
+            LocalTime timeValue = resultSet.getTime("time_value").toLocalTime();
+            Long themeId = resultSet.getLong("theme_id");
+            String themeName = resultSet.getString("theme_name");
+            String themeDescription = resultSet.getString("theme_description");
+            String themeThumbnailUrl = resultSet.getString("theme_thumbnail_url");
+            Long order = resultSet.getLong("wait_order");
+
+            ReservationTimeDto reservationTimeDto = new ReservationTimeDto(timeId, timeValue);
+            ThemeDto themeDto = new ThemeDto(themeId, themeName, themeDescription, themeThumbnailUrl);
+            return new WaitDetailDto(id, createdAt, name, date, reservationTimeDto, themeDto, order);
         };
     }
 }

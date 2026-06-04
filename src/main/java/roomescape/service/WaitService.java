@@ -8,6 +8,7 @@ import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.WaitRepository;
+import roomescape.repository.dto.WaitDetailDto;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,14 +23,14 @@ public class WaitService {
     }
 
     @Transactional
-    public Wait save(Wait waitWithoutId) {
-        List<Wait> waits = waitRepository.findBySlot(
+    public WaitDetailDto save(Wait waitWithoutId) {
+        List<WaitDetailDto> waits = waitRepository.findBySlot(
                 waitWithoutId.getReservationDate(),
                 waitWithoutId.getTime().getId(),
                 waitWithoutId.getTheme().getId());
 
-        for (Wait wait : waits) {
-            if (wait.isSameUser(waitWithoutId.getName())) {
+        for (WaitDetailDto waitDetailDto : waits) {
+            if (waitWithoutId.isSameUser(waitDetailDto.name())) {
                 throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_WAIT);
             }
         }
@@ -38,27 +39,28 @@ public class WaitService {
             throw new CustomInvalidRequestException(ErrorCode.WAIT_IS_FULL);
         }
 
-        return waitRepository.save(waitWithoutId);
+        Wait newWait = waitRepository.save(waitWithoutId);
+        return WaitDetailDto.from(newWait, calculateOrder(newWait));
     }
 
-    public List<Wait> findByName(String name) {
+    public List<WaitDetailDto> findByName(String name) {
         return waitRepository.findByName(name);
     }
 
-    public List<Wait> findAll() {
+    public List<WaitDetailDto> findAll() {
         return waitRepository.findAll();
     }
 
     @Transactional
     public void delete(Long id) {
-        waitRepository.delete(id);
+        waitRepository.deleteById(id);
     }
 
-    public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+    public List<WaitDetailDto> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
         return waitRepository.findBySlot(reservationDate, timeId, themeId);
     }
 
-    public Wait findWait(Long waitId) {
+    public WaitDetailDto findWait(Long waitId) {
         return waitRepository.findById(waitId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_WAIT));
     }

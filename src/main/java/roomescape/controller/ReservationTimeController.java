@@ -29,7 +29,6 @@ public class ReservationTimeController {
         this.reservationTimeFacade = reservationTimeFacade;
     }
 
-
     @PostMapping
     public ResponseEntity<ControllerReservationTimeResponse> save(
             @RequestBody ControllerReservationTimeCreateRequest requestDto) {

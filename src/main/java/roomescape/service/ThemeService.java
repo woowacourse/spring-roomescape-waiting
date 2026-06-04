@@ -37,7 +37,7 @@ public class ThemeService {
 
     @Transactional
     public void delete(Long id) {
-        themeRepository.delete(id);
+        themeRepository.deleteById(id);
     }
 
     public List<Theme> findRanking(LocalDate startDate, LocalDate endDate) {

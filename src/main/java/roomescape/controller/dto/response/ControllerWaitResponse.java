@@ -1,26 +1,31 @@
 package roomescape.controller.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.ReservationStatus;
-import roomescape.service.dto.response.ServiceReservationResponse;
+import roomescape.service.dto.response.ServiceWaitResponse;
 
-public record ControllerReservationResponse(
+public record ControllerWaitResponse(
         Long id,
         String name,
         LocalDate date,
         ControllerReservationTimeResponse time,
         ControllerThemeResponse theme,
-        ReservationStatus status
+        ReservationStatus status,
+        Long order,
+        LocalDateTime createdAt
 ) implements ControllerReceptionResponse {
 
-    public static ControllerReservationResponse from(ServiceReservationResponse response) {
-        return new ControllerReservationResponse(
+    public static ControllerWaitResponse from(ServiceWaitResponse response) {
+        return new ControllerWaitResponse(
                 response.id(),
                 response.name(),
                 response.date(),
                 ControllerReservationTimeResponse.from(response.time()),
                 ControllerThemeResponse.from(response.theme()),
-                response.status()
+                response.status(),
+                response.order(),
+                response.createdAt()
         );
     }
 }

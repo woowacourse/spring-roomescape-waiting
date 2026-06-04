@@ -1,6 +1,7 @@
 package roomescape.service.dto.response;
 
 import roomescape.domain.Theme;
+import roomescape.repository.dto.ThemeDto;
 
 public record ServiceThemeResponse(
         Long id,
@@ -14,6 +15,15 @@ public record ServiceThemeResponse(
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailUrl()
+        );
+    }
+
+    public static ServiceThemeResponse from(ThemeDto themeDto) {
+        return new ServiceThemeResponse(
+                themeDto.id(),
+                themeDto.name(),
+                themeDto.description(),
+                themeDto.thumbnailUrl()
         );
     }
 }
