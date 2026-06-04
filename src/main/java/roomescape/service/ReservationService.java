@@ -38,17 +38,15 @@ public class ReservationService {
 
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
-        LocalDateTime now = LocalDateTime.now(clock);
-        Reservation reservation = findOrCreateSlotWithLock(command, now);
-        reservation.reserve(command.name(), now);
+        Reservation reservation = findOrCreateSlotWithLock(command);
+        reservation.reserve(command.name(), LocalDateTime.now(clock));
         return ReservationResult.from(reservationRepository.save(reservation));
     }
 
     @Transactional
     public ReservationResult addWaiting(ReservationCommand command) {
-        LocalDateTime now = LocalDateTime.now(clock);
-        Reservation reservation = findOrCreateSlotWithLock(command, now);
-        ReservationEntry added = reservation.reserveOrWait(command.name(), now);
+        Reservation reservation = findOrCreateSlotWithLock(command);
+        ReservationEntry added = reservation.reserveOrWait(command.name(), LocalDateTime.now(clock));
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
     }
@@ -63,13 +61,12 @@ public class ReservationService {
             return ReservationResult.from(current, entry);
         }
 
-        LocalDateTime now = LocalDateTime.now(clock);
-        return moveEntry(entry, current, command.date(), newTime, now);
+        return moveEntry(entry, current, command.date(), newTime, LocalDateTime.now(clock));
     }
 
     private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
                                         LocalDate date, ReservationTime newTime, LocalDateTime now) {
-        Reservation target = findOrCreateSlot(date, current.getTheme(), newTime, now);
+        Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
         ReservationEntry moved = target.reserveOrWait(entry.getReserverName(), now);
 
         current.cancelEntry(entry.getId());
@@ -97,18 +94,18 @@ public class ReservationService {
         return reservationQueryRepository.search(command, pageable);
     }
 
-    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time, LocalDateTime now) {
+    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time) {
         ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
         return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
-                .orElseGet(() -> Reservation.createSlot(date, theme, time, now));
+                .orElseGet(() -> Reservation.createSlot(date, theme, time));
     }
 
-    private Reservation findOrCreateSlotWithLock(ReservationCommand command, LocalDateTime now) {
+    private Reservation findOrCreateSlotWithLock(ReservationCommand command) {
         return reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
                 .orElseGet(() -> {
                     Theme theme = findThemeWithThrow(command.themeId());
                     ReservationTime time = findTimeWithThrow(command.timeId());
-                    return Reservation.createSlot(command.date(), theme, time, now);
+                    return Reservation.createSlot(command.date(), theme, time);
                 });
     }
 

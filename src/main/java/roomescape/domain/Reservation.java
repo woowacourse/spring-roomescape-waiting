@@ -37,16 +37,8 @@ public class Reservation {
         return new Reservation(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), date, theme, time, entries);
     }
 
-    public static Reservation createSlot(LocalDate date, Theme theme, ReservationTime time, LocalDateTime now) {
-        Reservation reservation = new Reservation(null, date, theme, time, new ArrayList<>());
-        validatePastDateTime(reservation.schedule, now);
-        return reservation;
-    }
-
-    private static void validatePastDateTime(Schedule schedule, LocalDateTime now) {
-        if (schedule.isPast(now)) {
-            throw new RoomEscapeException("이전 날짜로 예약 할 수 없습니다.");
-        }
+    public static Reservation createSlot(LocalDate date, Theme theme, ReservationTime time) {
+        return new Reservation(null, date, theme, time, new ArrayList<>());
     }
 
     private static void validateTheme(Theme theme) {

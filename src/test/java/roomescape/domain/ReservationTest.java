@@ -29,7 +29,7 @@ class ReservationTest {
         LocalDate date = FIXED.plusDays(1).toLocalDate();
 
         // when
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // then
         assertThat(reservation)
@@ -39,9 +39,10 @@ class ReservationTest {
 
     @ParameterizedTest(name = "날짜 {0}, 테마 {1}, 시간 {2} 일 때, {3} 예외가 발생한다")
     @MethodSource("roomescape.domain.fixture.ReservationFixture#invalidReservationConstructor")
-    void 예약_일시와_테마_검증_통합_테스트(LocalDate date, Theme theme, ReservationTime reservationTime, String expectedMessage) {
+    void 슬롯_생성_시_날짜_테마_시간_누락_검증_통합_테스트(LocalDate date, Theme theme, ReservationTime reservationTime,
+                                          String expectedMessage) {
         // when & then
-        assertThatThrownBy(() -> Reservation.createSlot(date, theme, reservationTime, LocalDateTime.now()))
+        assertThatThrownBy(() -> Reservation.createSlot(date, theme, reservationTime))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining(expectedMessage);
     }
@@ -50,7 +51,7 @@ class ReservationTest {
     void 예약_정보가_있을_때_예약을_할_수_있다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
         reservation.reserve("이프", FIXED);
@@ -66,7 +67,7 @@ class ReservationTest {
     void 이미_예약된_예약_정보에_예약을_하면_예외가_발생한다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
         reservation.reserve("이프", FIXED);
 
         // when & then
@@ -79,7 +80,7 @@ class ReservationTest {
     void 동일_이름으로_예약을_중복_요청하면_예외가_발생한다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
         reservation.reserve("이프", FIXED);
 
         // when & then
@@ -92,7 +93,7 @@ class ReservationTest {
     void 대기_신청_시_예약이_있으면_대기로_등록된다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
         reservation.reserve("이프", FIXED);
 
         // when
@@ -111,7 +112,7 @@ class ReservationTest {
     void 대기_신청_시_예약이_없으면_예약으로_승격된다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
         reservation.reserveOrWait("라텔", FIXED);
@@ -127,7 +128,7 @@ class ReservationTest {
     void 대기_신청_시_동일_이름이_이미_존재하면_예외가_발생한다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
         reservation.reserve("이프", FIXED);
 
         // when & then
@@ -214,7 +215,7 @@ class ReservationTest {
     void 같은_날짜와_시간이면_true를_반환한다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
         boolean result = reservation.isSameSlot(date, reservationTime);
@@ -227,7 +228,7 @@ class ReservationTest {
     void 날짜나_시간이_다르면_false를_반환한다() {
         // given
         LocalDate date = FIXED.plusDays(1).toLocalDate();
-        Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         ReservationTime anotherTime = ReservationTime.restore(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
 
