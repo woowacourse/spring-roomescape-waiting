@@ -36,13 +36,13 @@ public class ReservationUpdatingDao {
         jdbcTemplate.update(sql, name, id);
     }
 
-    public long update(Long id, String name, Long slotId, LocalDateTime createdAt) {
+    public void update(Long id, String name, Long slotId, LocalDateTime createdAt) {
         String sql = "update reservation set slot_id = ?, name = ?, created_at = ? where id = ?";
-        return jdbcTemplate.update(sql, slotId, name, createdAt, id);
+        jdbcTemplate.update(sql, slotId, name, createdAt, id);
     }
 
-    public long delete(Long id) {
+    public void delete(Long id) {
         String sql = "delete from reservation where id = ?";
-        return jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(sql, id);
     }
 }

@@ -65,10 +65,8 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
     }
 
     @Override
-    public long delete(Long id) {
-        int before = store.size();
+    public void delete(Long id) {
         store.removeIf(w -> w.getId() != null && w.getId().equals(id));
-        return before - store.size();
     }
 
     private ReservationWaiting withSequence(ReservationWaiting waiting) {
