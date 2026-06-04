@@ -1,10 +1,10 @@
 package roomescape.reservationtime.repository.jdbc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
@@ -19,17 +19,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Sql("/clear.sql")
+@Import(JdbcReservationTimeRepository.class)
 class JdbcReservationTimeRepositoryTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
     JdbcReservationTimeRepository reservationTimeRepository;
-
-    @BeforeEach
-    void setUp() {
-        reservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
-    }
 
     @Test
     @DisplayName("예약 시간을 저장하고 조회한다")

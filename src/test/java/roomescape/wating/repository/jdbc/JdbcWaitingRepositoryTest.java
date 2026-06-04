@@ -1,7 +1,22 @@
 package roomescape.wating.repository.jdbc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
+import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.NoReservationForWaitingException;
+import roomescape.wating.repository.dto.WaitingWithRank;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -13,26 +28,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.theme.domain.Theme;
-import roomescape.wating.domain.Waiting;
-import roomescape.wating.domain.exception.NoReservationForWaitingException;
-import roomescape.wating.repository.dto.WaitingWithRank;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Sql("/clear.sql")
+@Import(JdbcWaitingRepository.class)
 class JdbcWaitingRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
@@ -46,12 +48,8 @@ class JdbcWaitingRepositoryTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
     JdbcWaitingRepository jdbcWaitingRepository;
-
-    @BeforeEach
-    void setUp() {
-        jdbcWaitingRepository = new JdbcWaitingRepository(jdbcTemplate);
-    }
 
     @Test
     @DisplayName("예약이 있는 슬롯에 대기를 등록할 수 있다")

@@ -1,10 +1,10 @@
 package roomescape.reservationslot.repository.jdbc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
@@ -20,19 +20,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Sql("/clear.sql")
+@Import({
+        JdbcReservationSlotRepository.class,
+        JdbcReservationRepository.class
+})
 class JdbcReservationSlotRepositoryTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
     private JdbcReservationSlotRepository reservationSlotRepository;
-    private JdbcReservationRepository reservationRepository;
 
-    @BeforeEach
-    void setUp() {
-        reservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
-        reservationRepository = new JdbcReservationRepository(jdbcTemplate);
-    }
+    @Autowired
+    private JdbcReservationRepository reservationRepository;
 
     @Test
     @DisplayName("예약을 삭제하고 첫 번째 대기를 예약으로 승격한다")
