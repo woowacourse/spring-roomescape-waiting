@@ -88,10 +88,10 @@ public class ReservationService {
     }
 
     private void promoteToReservation(Waiting waiting) {
-        waitingRepository.deleteById(waiting.getId());
         reservationRepository.save(Reservation.of(
                 waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme()
         ));
+        waitingRepository.deleteById(waiting.getId());
     }
 
     @Transactional(readOnly = true)

@@ -2,6 +2,7 @@ package roomescape.exception;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,6 +31,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.of(message));
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException exception) {
+        ErrorCode code = ErrorCode.SERVER_OVERLOADED;
+        return ResponseEntity
+                .status(code.getStatus())
+                .body(ErrorResponse.of(code.getMessage()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
