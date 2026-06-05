@@ -6,11 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.ReservationWaitingDao;
+import roomescape.domain.service.WaitingPromotionResult;
+import roomescape.domain.service.WaitingPromotionService;
 import roomescape.domain.common.UserName;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Schedule;
-import roomescape.domain.reservation.Slot;
+import roomescape.domain.reservation.*;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
@@ -20,12 +20,16 @@ import roomescape.service.command.ReservationUpdateCommand;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationUserCommandService {
 
+    private final WaitingPromotionService promotionService;
     private final ReservationDao reservationDao;
+    private final ReservationWaitingDao waitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final Clock clock;
@@ -86,8 +90,19 @@ public class ReservationUserCommandService {
         Reservation reservation = reservationDao.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
 
+        LocalDateTime now = LocalDateTime.now(clock);
+
         reservation.validateOwnedBy(name);
-        reservation.validateCancelable(LocalDateTime.now(clock));
+        reservation.validateCancelable(now);
+
+        List<ReservationWaiting> waitings = waitingDao.findAllBySlot(reservation.getSlot());
+        Optional<WaitingPromotionResult> promotion = promotionService.promote(waitings);
+
+        if (promotion.isPresent()) {
+            reservationDao.create(promotion.get().promotedReservation());
+            waitingDao.delete(promotion.get().targetWaiting());
+        }
+
         reservationDao.delete(reservation);
     }
 }

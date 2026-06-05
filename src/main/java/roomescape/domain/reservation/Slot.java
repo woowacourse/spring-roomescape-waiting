@@ -33,6 +33,10 @@ public class Slot {
         }
     }
 
+    public boolean isPast(LocalDateTime now) {
+        return schedule.isPast(now);
+    }
+
     public LocalDate getDate() {
         return schedule.getDate();
     }

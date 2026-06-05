@@ -54,6 +54,10 @@ public class ReservationWaiting {
         return userName;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public String getUserNameValue() {
         return userName.getName();
     }

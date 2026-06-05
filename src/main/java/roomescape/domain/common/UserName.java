@@ -1,11 +1,17 @@
 package roomescape.domain.common;
 
+import roomescape.exception.InvalidDomainStateException;
+
 import java.util.Objects;
 
 public class UserName {
     private final String name;
 
     private UserName(String name) {
+        if (name.isBlank()) {
+            throw new InvalidDomainStateException("username은 빈 문자열일 수 없습니다.");
+        }
+
         this.name = name;
     }
 
