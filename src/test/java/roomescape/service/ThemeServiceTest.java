@@ -14,7 +14,6 @@ import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.ReferencedDataException;
-import roomescape.repository.JdbcReservationOrderRepository;
 import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JdbcReservationTimeRepository;
 import roomescape.repository.JdbcReservationWaitingRepository;
@@ -27,8 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @JdbcTest
 @Import({ThemeService.class, JdbcThemeRepository.class,
         ReservationService.class, SlotDomainService.class, JdbcSlotRepository.class, JdbcReservationRepository.class,
-        JdbcReservationTimeRepository.class, JdbcReservationWaitingRepository.class,
-        ReservationOrderService.class, JdbcReservationOrderRepository.class})
+        JdbcReservationTimeRepository.class, JdbcReservationWaitingRepository.class})
 class ThemeServiceTest {
 
     @Autowired
@@ -73,7 +71,7 @@ class ThemeServiceTest {
     void 예약이_존재하는_테마_삭제시_예외가_발생한다() {
         ThemeResponse savedTheme = themeService.create(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
         Long timeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(10, 0)));
-        reservationService.reserve(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, savedTheme.getId()));
+        reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, savedTheme.getId()));
 
         assertThatThrownBy(() -> themeService.delete(savedTheme.getId()))
                 .isInstanceOf(ReferencedDataException.class);

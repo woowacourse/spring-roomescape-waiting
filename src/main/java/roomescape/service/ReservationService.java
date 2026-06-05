@@ -6,43 +6,34 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservationOrder.ReservationOrder;
-import roomescape.domain.reservationOrder.ReservationOrderRepository;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.SlotDomainService;
-import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
-import roomescape.dto.reservationOrder.OrderResponse;
+import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ConcurrencyConflictException;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ReservationService {
 
-    private static final long PENDING_EXPIRE_MINUTES = 10;
-
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final SlotDomainService slotDomainService;
-    private final ReservationOrderService reservationOrderService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationWaitingRepository reservationWaitingRepository,
-                              SlotDomainService slotDomainService, ReservationOrderRepository reservationOrderRepository,
-                              ReservationOrderService reservationOrderService) {
+                              SlotDomainService slotDomainService) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.slotDomainService = slotDomainService;
-        this.reservationOrderService = reservationOrderService;
     }
 
     public ReservationResponse read(Long id) {
@@ -62,18 +53,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public OrderResponse reserve(ReservationRequest reservationReq) {
+    public ReservationResponse create(ReservationRequest reservationReq) {
         if (slotDomainService.isExistByDateAndTimeAndTheme(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId())) {
             throw new ReservationAlreadyExistException();
         }
         Slot slot = slotDomainService.create(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId());
 
         Reservation reservation = Reservation.create(reservationReq.name(), slot);
-
         Long reservationId = reservationRepository.insert(reservation);
-        ReservationOrder order = reservationOrderService.insert(reservationId);
-
-        return OrderResponse.from(order);
+        return ReservationResponse.from(reservation.withId(reservationId));
     }
 
     @Retryable(retryFor = ConcurrencyConflictException.class, backoff = @Backoff(delay = 50, multiplier = 2.0, random = true))
@@ -110,23 +98,6 @@ public class ReservationService {
         promoteOrCleanupSlot(reservation.getSlot().getId());
     }
 
-    @Transactional
-    public void deleteEvictedReservations() {
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(PENDING_EXPIRE_MINUTES);
-        List<Reservation> evicted = reservationRepository.findUnpaidCreatedBefore(threshold);
-        if (evicted.isEmpty()) {
-            return;
-        }
-
-        reservationRepository.deleteUnpaidByIds(evicted.stream().map(Reservation::getId).toList());
-        for (Reservation reservation : evicted) {
-            if (reservationRepository.isExistBySlot(reservation.getSlotId())) {
-                continue;
-            }
-            promoteOrCleanupSlot(reservation.getSlotId());
-        }
-    }
-
     private ReservationResponse updateReservation(Reservation existedReservation, ReservationRequest request) {
         Reservation updated = existedReservation.update(request.name());
         if (reservationWaitingRepository.isExistByNameAndSlotId(updated.getName(), updated.getSlotId())) {
@@ -152,8 +123,7 @@ public class ReservationService {
             throw new ConcurrencyConflictException("승격 대상 대기가 사라졌습니다.");
         }
 
-        long reservationId = reservationRepository.insert(reservationWaiting.promote());
-        reservationOrderService.insert(reservationId);
+        reservationRepository.insert(reservationWaiting.promote());
     }
 
     private Reservation updateSlot(Reservation existed, ReservationRequest request) {

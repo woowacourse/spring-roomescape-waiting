@@ -20,13 +20,7 @@ public interface ReservationRepository {
 
     void updateName(Long id, String name);
 
-    int updatePaid(Long id, boolean paid);
-
     long update(Long id, String name, Long slotId, LocalDateTime createdAt);
 
     long delete(Long id);
-
-    void deleteUnpaidByIds(List<Long> ids);
-
-    List<Reservation> findUnpaidCreatedBefore(LocalDateTime dateTime);
 }

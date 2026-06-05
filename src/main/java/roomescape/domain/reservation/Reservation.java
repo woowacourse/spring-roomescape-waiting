@@ -6,7 +6,6 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
-import roomescape.exception.PaymentException.AlreadyProcessedException;
 
 public class Reservation {
 
@@ -15,49 +14,36 @@ public class Reservation {
     private final Slot slot;
 
     private final LocalDateTime createdAt;
-    private final boolean paid;
 
-    private Reservation(Long id, String name, Slot slot, LocalDateTime createdAt, boolean paid) {
+    private Reservation(Long id, String name, Slot slot, LocalDateTime createdAt) {
         this.id = id;
         this.slot = slot;
         this.name = name;
         this.createdAt = createdAt;
-        this.paid = paid;
     }
 
     public static Reservation create(String name, Slot slot) {
         validateNotExpired(slot);
-        return new Reservation(null, name, slot, LocalDateTime.now(), false);
+        return new Reservation(null, name, slot, LocalDateTime.now());
     }
 
-    public static Reservation restore(Long id, Slot slot, String name, LocalDateTime createdAt, boolean paid) {
-        return new Reservation(id, name, slot, createdAt, paid);
+    public static Reservation restore(Long id, Slot slot, String name, LocalDateTime createdAt) {
+        return new Reservation(id, name, slot, createdAt);
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, this.name, this.slot, this.createdAt, this.paid);
+        return new Reservation(id, this.name, this.slot, this.createdAt);
     }
 
     public Reservation update(String name) {
         validateNotExpired(this.slot);
-        return new Reservation(this.id, name, this.slot, this.createdAt, this.paid);
+        return new Reservation(this.id, name, this.slot, this.createdAt);
     }
 
     public Reservation update(String name, Slot slot) {
         validateNotExpired(this.slot);
         validateNotExpired(slot);
-        return new Reservation(this.id, name, slot, LocalDateTime.now(), this.paid);
-    }
-
-    public Reservation updatePaid(boolean paid) {
-        return new Reservation(this.id, this.name, this.slot, this.createdAt, paid);
-    }
-
-    public Reservation confirmPayment() {
-        if (this.paid) {
-            throw new AlreadyProcessedException("이미 결제 완료된 예약입니다.");
-        }
-        return new Reservation(this.id, this.name, this.slot, this.createdAt, true);
+        return new Reservation(this.id, name, slot, LocalDateTime.now());
     }
 
     public boolean isReservedBy(String name) {
@@ -104,10 +90,6 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public boolean isPaid() {
-        return paid;
     }
 
     public long getSlotId() {

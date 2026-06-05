@@ -42,7 +42,6 @@ public class RoomescapeApplicationConcurrencyTest {
     public void setUp() {
         RestAssured.port = port;
         jdbcTemplate.update("delete from waiting");
-        jdbcTemplate.update("delete from reservation_order");
         jdbcTemplate.update("delete from reservation");
         jdbcTemplate.update("delete from slot");
         jdbcTemplate.update("delete from reservation_time");
@@ -70,7 +69,7 @@ public class RoomescapeApplicationConcurrencyTest {
 
         Result result = RunConcurrency.run(
                 reservationRequests.stream()
-                        .map(reservationRequest -> (Runnable) () -> reservationService.reserve(reservationRequest))
+                        .map(reservationRequest -> (Runnable) () -> reservationService.create(reservationRequest))
                         .toArray(Runnable[]::new)
         );
 
@@ -83,7 +82,7 @@ public class RoomescapeApplicationConcurrencyTest {
         int thread = 10;
 
         ReservationRequest reservationRequest = new ReservationRequest("test", date, 1L, 1L);
-        Result result = RunConcurrency.run(thread, () -> reservationService.reserve(reservationRequest));
+        Result result = RunConcurrency.run(thread, () -> reservationService.create(reservationRequest));
 
         assertThat(result.success()).isEqualTo(1);
         assertThat(result.fail()).isEqualTo(thread - 1);
@@ -94,7 +93,7 @@ public class RoomescapeApplicationConcurrencyTest {
         int thread = 10;
 
         for(int i = 0; i < thread; i++) {
-            reservationService.reserve(new ReservationRequest("test" + i, date.plusDays(i), 1L, 1L));
+            reservationService.create(new ReservationRequest("test" + i, date.plusDays(i), 1L, 1L));
         }
 
        List<ReservationResponse> reservations = reservationService.readAll();
@@ -117,7 +116,7 @@ public class RoomescapeApplicationConcurrencyTest {
         int thread = 10;
 
         ReservationRequest reservationRequest = new ReservationRequest("test", date, 1L, 1L);
-        reservationService.reserve(reservationRequest);
+        reservationService.create(reservationRequest);
 
         List<ReservationWaitingRequest> reservationWaitingRequests = new ArrayList<>();
         for (int i = 0; i < thread; i++) {
@@ -150,11 +149,10 @@ public class RoomescapeApplicationConcurrencyTest {
 
     @Test
     void 예약_취소와_같은_슬롯_대기등록이_동시에_일어날_때_대기가_있으면_예약도_존재한다() throws InterruptedException {
-        reservationService.reserve(new ReservationRequest("test", date, 1L, 1L));
-        Long reservationId = reservationService.readByName("test").get(0).id();
+        ReservationResponse reservation = reservationService.create(new ReservationRequest("test", date, 1L, 1L));
 
         RunConcurrency.run(
-                () -> reservationService.delete(reservationId),
+                () -> reservationService.delete(reservation.id()),
                 () -> reservationWaitingService.create(new ReservationWaitingRequest("test2", date, 1L, 1L))
         );
 
@@ -169,13 +167,12 @@ public class RoomescapeApplicationConcurrencyTest {
 
     @Test
     void 예약_취소와_첫_대기자의_본인_대기취소가_동시에_일어나도_이중_승격되지_않는다() throws InterruptedException {
-        reservationService.reserve(new ReservationRequest("test", date, 1L, 1L));
-        Long reservationId = reservationService.readByName("test").get(0).id();
+        ReservationResponse reservation = reservationService.create(new ReservationRequest("test", date, 1L, 1L));
         ReservationWaitingResponse reservationWaiting = reservationWaitingService.create(new ReservationWaitingRequest("test2", date, 1L, 1L));
         reservationWaitingService.create(new ReservationWaitingRequest("test3", date, 1L, 1L));
 
         RunConcurrency.run(
-                () -> reservationService.delete(reservationId),
+                () -> reservationService.delete(reservation.id()),
                 () -> reservationWaitingService.delete(reservationWaiting.id())
         );
 
@@ -189,7 +186,7 @@ public class RoomescapeApplicationConcurrencyTest {
     @Test
     void 같은_사용자가_같은_슬롯에_동시_대기하면_하나만_성공한다() throws InterruptedException {
         int thread = 10;
-        reservationService.reserve(new ReservationRequest("test", date, 1L, 1L));
+        reservationService.create(new ReservationRequest("test", date, 1L, 1L));
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("test2", date, 1L, 1L);
         Result result = RunConcurrency.run(thread, () -> reservationWaitingService.create(request));
@@ -201,12 +198,11 @@ public class RoomescapeApplicationConcurrencyTest {
     @Test
     void 같은_예약을_동시에_취소해도_대기자는_한_번만_승격된다() throws InterruptedException {
         int thread = 10;
-        reservationService.reserve(new ReservationRequest("test", date, 1L, 1L));
-        Long reservationId = reservationService.readByName("test").get(0).id();
+        ReservationResponse reservation = reservationService.create(new ReservationRequest("test", date, 1L, 1L));
         reservationWaitingService.create(new ReservationWaitingRequest("test2", date, 1L, 1L));
         reservationWaitingService.create(new ReservationWaitingRequest("test3", date, 1L, 1L));
 
-        RunConcurrency.run(thread, () -> reservationService.delete(reservationId));
+        RunConcurrency.run(thread, () -> reservationService.delete(reservation.id()));
 
         List<ReservationResponse> reservations = reservationService.readAll();
         List<ReservationWaitingResponse> reservationWaitings = reservationWaitingService.readAll();

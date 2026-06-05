@@ -1,13 +1,11 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -32,7 +30,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT r.id AS reservation_id,
                    r.name AS reservation_name,
                    r.created_at AS reservation_created_at,
-                   r.paid AS reservation_paid,
                    s.id AS slot_id,
                    s.date AS slot_date,
                    t.id AS time_id,
@@ -68,8 +65,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getLong("reservation_id"),
                 slot,
                 resultSet.getString("reservation_name"),
-                resultSet.getObject("reservation_created_at", LocalDateTime.class),
-                resultSet.getBoolean("reservation_paid")
+                resultSet.getObject("reservation_created_at", LocalDateTime.class)
         );
     };
 
@@ -85,23 +81,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = SELECT_RESERVATION_SQL + " WHERE r.slot_id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, slotId).stream()
                 .findFirst();
-    }
-
-    @Override
-    public List<Reservation> findUnpaidCreatedBefore(LocalDateTime dateTime) {
-        String sql = SELECT_RESERVATION_SQL + " WHERE r.paid = false AND r.created_at < ?";
-        return jdbcTemplate.query(sql, reservationRowMapper, Timestamp.valueOf(dateTime));
-    }
-
-    @Override
-    public void deleteUnpaidByIds(List<Long> ids) {
-        if (ids.isEmpty()) {
-            return;
-        }
-        String placeholders = ids.stream().map(id -> "?").collect(Collectors.joining(", "));
-        jdbcTemplate.update(
-                "DELETE FROM reservation WHERE paid = false AND id IN (" + placeholders + ")",
-                ids.toArray());
     }
 
     @Override
@@ -127,14 +106,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Long insert(Reservation reservation) {
-        String sql = "insert into reservation(slot_id, name, created_at, paid) values(?, ?, ?, ?)";
+        String sql = "insert into reservation(slot_id, name, created_at) values(?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setLong(1, reservation.getSlot().getId());
             ps.setString(2, reservation.getName());
             ps.setObject(3, reservation.getCreatedAt());
-            ps.setBoolean(4, reservation.isPaid());
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -144,12 +122,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void updateName(Long id, String name) {
         String sql = "update reservation set name = ? where id = ?";
         jdbcTemplate.update(sql, name, id);
-    }
-
-    @Override
-    public int updatePaid(Long id, boolean paid) {
-        String sql = "update reservation set paid = ? where id = ?";
-        return jdbcTemplate.update(sql, paid, id);
     }
 
     @Override
