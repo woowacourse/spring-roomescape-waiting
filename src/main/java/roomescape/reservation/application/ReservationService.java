@@ -38,7 +38,7 @@ public class ReservationService {
 
         checkDuplicateReservation(command.name(), command.date(), time, theme);
 
-        Status status = decideReservationStatus(command.date(), time.getId(), theme.getId());
+        Status status = decideReservationStatus(command.date(), time, theme);
         Reservation reservation = command.toEntity(time, theme, status, clock);
 
         return ReservationInfo.from(reservationRepository.save(reservation));
@@ -55,10 +55,7 @@ public class ReservationService {
         reservationRepository.update(reservation.cancel());
 
         if (reservation.isReserved()) {
-            Optional<Reservation> nextWaitingReservation = reservationRepository.findNextWaitingReservation(
-                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-
-            nextWaitingReservation.ifPresent(waiting -> reservationRepository.update(waiting.reserved()));
+            promoteToReservation(reservation.getDate(), reservation.getTime(), reservation.getTheme());
         }
     }
 
@@ -70,10 +67,13 @@ public class ReservationService {
 
         checkDuplicateReservation(command.username(), command.date(), time, theme);
 
-        Status status = decideReservationStatus(command.date(), time.getId(), theme.getId());
-
+        Status status = decideReservationStatus(command.date(), time, theme);
         Reservation changedReservation = reservation.modify(command.date(), time, theme, status, clock);
         reservationRepository.update(changedReservation);
+
+        if (reservation.isReserved()) {
+            promoteToReservation(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        }
 
         return ReservationInfo.from(changedReservation);
     }
@@ -93,6 +93,12 @@ public class ReservationService {
                 .toList();
     }
 
+    private void promoteToReservation(LocalDate date, ReservationTime time, Theme theme) {
+        Optional<Reservation> nextWaitingReservation = reservationRepository.findNextWaitingReservation(date,
+                time.getId(), theme.getId());
+        nextWaitingReservation.ifPresent(waiting -> reservationRepository.update(waiting.reserved()));
+    }
+
     private Long findWaitingOrder(Reservation reservation) {
         if (!reservation.isWaiting()) {
             return null;
@@ -100,8 +106,8 @@ public class ReservationService {
         return reservationRepository.countWaitingBefore(reservation) + 1;
     }
 
-    private Status decideReservationStatus(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsActiveReservationByDateTimeAndTheme(timeId, themeId, date)) {
+    private Status decideReservationStatus(LocalDate date, ReservationTime time, Theme theme) {
+        if (reservationRepository.existsActiveReservationByDateTimeAndTheme(time.getId(), theme.getId(), date)) {
             return Status.WAITING;
         }
         return Status.RESERVED;

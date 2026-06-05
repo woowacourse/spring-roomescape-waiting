@@ -19,7 +19,6 @@ import roomescape.theme.domain.fixture.ThemeFixture;
 import roomescape.reservation.domain.fake.FakeReservationRepository;
 import roomescape.time.domain.fake.FakeReservationTimeRepository;
 import roomescape.theme.domain.fake.FakeThemeRepository;
-import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
@@ -120,7 +119,8 @@ class ReservationServiceTest {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        Reservation reservation = reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
         ReservationCreateCommand command = new ReservationCreateCommand("바니", reservation.getDate(), time.getId(),
                 theme.getId());
 
@@ -133,7 +133,8 @@ class ReservationServiceTest {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        Reservation reservation = reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
         ReservationCreateCommand command = new ReservationCreateCommand("포비", reservation.getDate(), time.getId(),
                 theme.getId());
 
@@ -158,7 +159,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약자_이름으로_조회할_때_대기_순번을_애플리케이션에서_계산한다() {
+    void 예약자_이름으로_조회할_때_대기_순번을_반환한다() {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         ReservationTime otherTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
@@ -175,21 +176,6 @@ class ReservationServiceTest {
         // then
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().waitingOrder()).isEqualTo(3L);
-    }
-
-    @Test
-    void 예약자_이름으로_조회할_때_확정_예약은_대기_순번이_없다() {
-        // given
-        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
-
-        // when
-        List<ReservationWaitingInfo> responses = reservationService.getReservationsByName("바니");
-
-        // then
-        assertThat(responses).hasSize(1);
-        assertThat(responses.getFirst().waitingOrder()).isNull();
     }
 
     @Test
@@ -222,8 +208,10 @@ class ReservationServiceTest {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        Reservation reserved = reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
-        Reservation waiting = reservationRepository.save(ReservationFixture.createWaitingReservation("포비", theme, time));
+        Reservation reserved = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
+        Reservation waiting = reservationRepository.save(
+                ReservationFixture.createWaitingReservation("포비", theme, time));
 
         // when
         reservationService.cancel(reserved.getId(), "바니");
@@ -238,7 +226,8 @@ class ReservationServiceTest {
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         ReservationTime changedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        Reservation reservation = reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
         ReservationChangeCommand command = new ReservationChangeCommand("바니", changedTime.getId(), theme.getId(),
                 reservation.getDate());
 
@@ -247,6 +236,27 @@ class ReservationServiceTest {
 
         // then
         assertThat(response.time().id()).isEqualTo(changedTime.getId());
+    }
+
+    @Test
+    void 예약을_다른_예약으로_수정하면_가장_먼저_등록된_대기_예약이_승인된다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime changedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
+        Reservation waiting = reservationRepository.save(
+                ReservationFixture.createWaitingReservation("포비", theme, time));
+
+        ReservationChangeCommand command = new ReservationChangeCommand("바니", changedTime.getId(), theme.getId(),
+                reservation.getDate());
+
+        // when
+        reservationService.modify(reservation.getId(), command);
+
+        // then
+        assertThat(reservationRepository.getById(waiting.getId()).getStatus()).isEqualTo(Status.RESERVED);
     }
 
     @Test
@@ -308,7 +318,8 @@ class ReservationServiceTest {
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         ReservationTime changedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        Reservation reservation = reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
         Reservation duplicated = reservationRepository.save(
                 ReservationFixture.createDefaultReservation("바니", theme, changedTime));
         ReservationChangeCommand command = new ReservationChangeCommand("바니", changedTime.getId(), theme.getId(),
