@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,6 +16,7 @@ import roomescape.waiting.domain.exception.PastReservationWaitingCancellationExc
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
 import roomescape.waiting.domain.exception.WaitingSlotDuplicateException;
 import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.repository.dto.WaitingWithRank;
 
 @Service
 @Transactional
@@ -70,7 +72,28 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Waiting> findEarliestWaitingBySlot(final LocalDate reservationDate, final long timeId, final long themeId) {
+    public Optional<Waiting> findEarliestWaitingBySlot(
+        final LocalDate reservationDate,
+        final long timeId,
+        final long themeId
+    ) {
         return waitingRepository.findEarliestBySlot(reservationDate, timeId, themeId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingWithRank> findAllWithRankByCustomerNameAfterNow(final String customerName) {
+        return waitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+            customerName,
+            LocalDateTime.now(clock)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsBySlot(
+        final LocalDate reservationDate,
+        final long timeId,
+        final long themeId
+    ) {
+        return waitingRepository.existsBySlot(reservationDate, timeId, themeId);
     }
 }

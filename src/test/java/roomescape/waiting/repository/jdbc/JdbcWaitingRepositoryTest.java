@@ -41,11 +41,11 @@ class JdbcWaitingRepositoryTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    JdbcWaitingRepository jdbcWaitingRepository;
+    JdbcWaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
-        jdbcWaitingRepository = new JdbcWaitingRepository(jdbcTemplate);
+        waitingRepository = new JdbcWaitingRepository(jdbcTemplate);
     }
 
     @Nested
@@ -70,7 +70,7 @@ class JdbcWaitingRepositoryTest {
             );
 
             //when
-            final Waiting saved = jdbcWaitingRepository.save(waiting);
+            final Waiting saved = waitingRepository.save(waiting);
 
             //then
             assertThat(saved.getId()).isNotNull();
@@ -90,7 +90,7 @@ class JdbcWaitingRepositoryTest {
             final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
 
             //when
-            final boolean deleted = jdbcWaitingRepository.deleteById(savedId);
+            final boolean deleted = waitingRepository.deleteById(savedId);
 
             //then
             assertThat(deleted).isTrue();
@@ -102,7 +102,7 @@ class JdbcWaitingRepositoryTest {
             final long unsavedId = 999L;
 
             //when
-            final boolean deleted = jdbcWaitingRepository.deleteById(unsavedId);
+            final boolean deleted = waitingRepository.deleteById(unsavedId);
 
             //then
             assertThat(deleted).isFalse();
@@ -119,7 +119,7 @@ class JdbcWaitingRepositoryTest {
             final long unsavedId = 99L;
 
             //when
-            final Optional<Waiting> find = jdbcWaitingRepository.findById(unsavedId);
+            final Optional<Waiting> find = waitingRepository.findById(unsavedId);
 
             //then
             assertThat(find).isEmpty();
@@ -133,7 +133,7 @@ class JdbcWaitingRepositoryTest {
             final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
 
             //when
-            final Optional<Waiting> find = jdbcWaitingRepository.findById(savedId);
+            final Optional<Waiting> find = waitingRepository.findById(savedId);
 
             //then
             assertThat(find).isPresent();
@@ -151,7 +151,7 @@ class JdbcWaitingRepositoryTest {
             final String customerName = "재키";
 
             //when
-            List<WaitingWithRank> waitingWithRanks = jdbcWaitingRepository
+            List<WaitingWithRank> waitingWithRanks = waitingRepository
                 .findAllWithRankByCustomerNameAndReservationDateTimeAfter(
                     customerName,
                     NOW
@@ -173,7 +173,7 @@ class JdbcWaitingRepositoryTest {
             final String customerName = "재키";
 
             //when
-            List<WaitingWithRank> waitingWithRanks = jdbcWaitingRepository
+            List<WaitingWithRank> waitingWithRanks = waitingRepository
                 .findAllWithRankByCustomerNameAndReservationDateTimeAfter(
                     customerName,
                     NOW
@@ -187,6 +187,79 @@ class JdbcWaitingRepositoryTest {
                 .orElseThrow();
 
             assertThat(rankTwo.rank()).isEqualTo(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("슬롯(날짜, 시간, 테마) 정보로 대기가 존재하는지 확인한다")
+    class ExistsBySlot {
+
+        @Test
+        void 동일한_슬롯_정보의_대기가_존재하면_TRUE_를_반환한다() {
+            // given
+            insertReservationTime("10:00:00");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertWaiting("수달", date, 1L, 1L);
+
+            // when
+            final boolean existsBySlot = waitingRepository.existsBySlot(date, 1L, 1L);
+
+            // then
+            assertThat(existsBySlot).isTrue();
+        }
+
+        @Test
+        void 날짜가_달라_동일한_슬롯_정보의_대기가_존재하지_않으면_FALSE_를_반환한다() {
+            // given
+            insertReservationTime("10:00:00");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertWaiting("브라운", date, 1L, 1L);
+
+            final LocalDate otherDate = date.plusDays(1);
+
+            // when
+            final boolean existsBySlot = waitingRepository.existsBySlot(otherDate, 1L, 1L);
+
+            // then
+            assertThat(existsBySlot).isFalse();
+        }
+
+        @Test
+        void 시간이_달라_동일한_슬롯_정보의_대기가_존재하지_않으면_FALSE_를_반환한다() {
+            // given
+            insertReservationTime("10:00:00");
+            insertReservationTime("12:00:00");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertWaiting("브라운", date, 1L, 1L);
+
+            // when
+            final boolean existsBySlot = waitingRepository.existsBySlot(date, 2L, 1L);
+
+            // then
+            assertThat(existsBySlot).isFalse();
+        }
+
+        @Test
+        void 테마가_달라_동일한_슬롯_정보의_대기가_존재하지_않으면_FALSE_를_반환한다() {
+            // given
+            insertReservationTime("10:00:00");
+            insertTheme("링", "공포 테마", "http:~");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertWaiting("브라운", date, 1L, 1L);
+
+            // when
+            final boolean existsBySlot = waitingRepository.existsBySlot(date, 1L, 2L);
+
+            // then
+            assertThat(existsBySlot).isFalse();
         }
     }
 

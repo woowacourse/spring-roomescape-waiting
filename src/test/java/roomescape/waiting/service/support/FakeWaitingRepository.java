@@ -76,6 +76,15 @@ public class FakeWaitingRepository implements WaitingRepository {
             .toList();
     }
 
+    @Override
+    public boolean existsBySlot(final LocalDate reservationDate, final long timeId, final long themeId) {
+        return waitings.stream()
+            .anyMatch(waiting ->
+                waiting.getReservationDate().isEqual(reservationDate)
+                    && waiting.getTimeId() == timeId
+                    && waiting.getThemeId() == themeId);
+    }
+
     public void add(final Waiting waiting) {
         waitings.add(waiting);
     }

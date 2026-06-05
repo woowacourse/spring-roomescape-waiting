@@ -169,4 +169,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
             Time.valueOf(now.toLocalTime())
         );
     }
+
+    @Override
+    public boolean existsBySlot(final LocalDate reservationDate, final long timeId, final long themeId) {
+        final String sql = """
+            SELECT COUNT(1)
+            FROM waiting
+            WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
+            """;
+        final Integer count = jdbcTemplate.queryForObject(
+            sql,
+            Integer.class,
+            Date.valueOf(reservationDate),
+            timeId,
+            themeId
+        );
+
+        return count != null && count != 0;
+    }
 }
