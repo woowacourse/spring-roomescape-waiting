@@ -23,12 +23,14 @@ const confirmCancelEl = document.getElementById("confirm-cancel");
 const myReservationOwnerEl = document.getElementById("my-reservation-owner");
 const myReservationCardsEl = document.getElementById("my-reservation-cards");
 const myReservationSectionEl = document.getElementById("my-reservation-section");
+const reservationSummaryEl = document.getElementById("reservation-summary");
 const AUTH_TOKEN_KEY = "roomescapeAccessToken";
+const AUTH_NAME_KEY = "roomescapeLoginName";
 let selectedThemeId = null;
 let selectedTimeId = null;
 let selectedTimeLabel = null;
 let selectedThemeName = null;
-let currentLoginName = null;
+let currentLoginName = localStorage.getItem(AUTH_NAME_KEY);
 let isAuthenticated = false;
 
 function getAccessToken() {
@@ -40,8 +42,20 @@ function setAccessToken(token) {
   localStorage.setItem(AUTH_TOKEN_KEY, token);
 }
 
+function setLoginName(name) {
+  currentLoginName = name || null;
+  if (currentLoginName) {
+    localStorage.setItem(AUTH_NAME_KEY, currentLoginName);
+  }
+}
+
 function clearAccessToken() {
   localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_NAME_KEY);
+}
+
+function currentUserLabel() {
+  return currentLoginName || "현재 사용자";
 }
 
 function setCommonAuthState(authenticated) {
@@ -69,6 +83,8 @@ function setCommonAuthState(authenticated) {
     selectedTimeLabelEl.textContent = "시간: 미선택";
     myReservationOwnerEl.textContent = "로그인 후 조회됩니다.";
     myReservationCardsEl.innerHTML = "";
+    reservationSummaryEl.innerHTML = "";
+    reservationSummaryEl.classList.add("hidden");
     myReservationSectionEl.classList.add("hidden");
     reservationSubmitEl.disabled = true;
     renderAvailableTimes([]);
@@ -209,9 +225,11 @@ function renderAvailableTimes(items) {
     const timeId = item.timeInformation.id;
     const timeLabel = item.timeInformation.time;
     const reservable = item.status === "RESERVABLE";
+    const statusText = reservable ? "즉시 예약 가능" : "대기 신청 가능";
     button.type = "button";
     button.className = `chip${reservable ? "" : " waitable"}`;
-    button.textContent = `${timeLabel} ${reservable ? "(예약)" : "(대기)"}`;
+    button.setAttribute("aria-label", `${timeLabel} ${statusText}`);
+    button.innerHTML = `<strong>${timeLabel}</strong><span>${reservable ? "예약" : "대기"}</span>`;
     if (!reservable) {
       button.addEventListener("click", async () => {
         await requestWaiting(timeId, timeLabel);
@@ -244,14 +262,10 @@ async function requestWaiting(timeId, timeLabel) {
     if (!selectedThemeId) {
       throw new Error("테마를 먼저 선택하세요.");
     }
-    if (!currentLoginName) {
-      throw new Error("로그인 후 대기 신청할 수 있습니다.");
-    }
-
     const date = document.getElementById("theme-date").value;
     const confirmed = await confirmAction({
       title: "대기 신청 확인",
-      message: `예약자 ${currentLoginName}\n날짜 ${date}\n테마 ${selectedThemeName}\n시간 ${timeLabel}\n\n이미 예약된 시간에 대기를 신청하시겠습니까?`,
+      message: `예약자 ${currentUserLabel()}\n날짜 ${date}\n테마 ${selectedThemeName}\n시간 ${timeLabel}\n\n이미 예약 또는 대기가 있는 시간입니다.\n대기 신청 후 내 예약 정보에서 현재 순번을 확인할 수 있습니다.`,
       okLabel: "대기 신청",
     });
     if (!confirmed) {
@@ -270,10 +284,11 @@ async function requestWaiting(timeId, timeLabel) {
 
     myReservationSectionEl.classList.remove("hidden");
     await loadMyReservations();
+    await refreshAvailableTimesForCurrentSelection();
     setStatus(`대기 신청 완료: ${timeLabel} / ${waiting.waitingOrder}번째`);
     await showResultModal({
       title: "대기 신청 성공",
-      message: `${currentLoginName}님의 대기가 신청되었습니다.\n대기 순번: ${waiting.waitingOrder}`,
+      message: `${currentUserLabel()}님의 대기가 신청되었습니다.\n현재 대기 순번: ${waiting.waitingOrder}번째`,
     });
   } catch (error) {
     await showErrorModal("대기 신청 실패", error);
@@ -297,9 +312,66 @@ function renderPopular(themes) {
   });
 }
 
+function summarizeReservations(reservations) {
+  const reservedCount = reservations.filter((reservation) => reservation.status === "RESERVED").length;
+  const waitingCount = reservations.filter((reservation) => reservation.status === "WAITING").length;
+
+  reservationSummaryEl.classList.remove("hidden");
+  reservationSummaryEl.innerHTML = `
+    <span><strong>${reservedCount}</strong> 예약</span>
+    <span><strong>${waitingCount}</strong> 대기</span>
+    <span>대기 순번은 취소/승격 후 자동 재계산됩니다.</span>
+  `;
+}
+
+function formatReservationMeta(reservation) {
+  return `${reservation.date} ${reservation.time.time} · ${reservation.theme.name}`;
+}
+
+function findReservationById(reservations, id, status = null) {
+  return reservations.find((reservation) => {
+    if (String(reservation.id) !== String(id)) return false;
+    return status ? reservation.status === status : true;
+  });
+}
+
+function buildReservationChangeMessage(beforeReservations, afterReservations, canceledReservationId) {
+  const beforeReserved = findReservationById(beforeReservations, canceledReservationId, "RESERVED");
+  const reorderedWaitings = afterReservations
+    .filter((reservation) => reservation.status === "WAITING")
+    .sort((a, b) => (a.waitingOrder ?? 0) - (b.waitingOrder ?? 0));
+
+  const lines = [`예약 ID ${canceledReservationId}가 취소되었습니다.`];
+  if (beforeReserved) {
+    lines.push(`취소 슬롯: ${formatReservationMeta(beforeReserved)}`);
+  }
+  lines.push("같은 슬롯에 대기가 있었다면 1번 대기가 자동으로 예약 전환되었습니다.");
+  if (reorderedWaitings.length) {
+    lines.push(`남은 대기 순번: ${reorderedWaitings.map((waiting) => `#${waiting.id} ${waiting.waitingOrder}번째`).join(", ")}`);
+  } else {
+    lines.push("내 목록에 남은 대기는 없습니다.");
+  }
+  return lines.join("\n");
+}
+
+function buildWaitingDeleteMessage(afterReservations, waitingId) {
+  const waitings = afterReservations
+    .filter((reservation) => reservation.status === "WAITING")
+    .sort((a, b) => (a.waitingOrder ?? 0) - (b.waitingOrder ?? 0));
+
+  const lines = [`대기 ID ${waitingId}가 취소되었습니다.`];
+  if (waitings.length) {
+    lines.push(`남은 대기 순번: ${waitings.map((waiting) => `#${waiting.id} ${waiting.waitingOrder}번째`).join(", ")}`);
+  } else {
+    lines.push("남은 대기가 없습니다.");
+  }
+  return lines.join("\n");
+}
+
 function renderMyReservationCards(reservations) {
   myReservationCardsEl.innerHTML = "";
   if (!reservations.length) {
+    reservationSummaryEl.classList.add("hidden");
     const empty = document.createElement("p");
     empty.className = "empty-message";
     empty.textContent = "조회된 내 예약이 없습니다.";
@@ -315,6 +387,7 @@ function renderMyReservationCards(reservations) {
     const menuItems = isWaiting
       ? `<button type="button" class="menu-item delete" data-waiting-delete-id="${reservation.id}">대기 취소</button>`
       : `<button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>`;
+    const rankLabel = isWaiting ? `대기 ${reservation.waitingOrder}번째` : "확정 예약";
 
     card.className = `reservation-card${isWaiting ? " waiting-card" : ""}`;
     card.innerHTML = `
@@ -324,7 +397,7 @@ function renderMyReservationCards(reservations) {
             <strong>${reservation.memberName}</strong>
             <span class="status-badge ${isWaiting ? "waiting" : "reserved"}">${statusLabel}</span>
           </div>
-          <p>#${reservation.id}${isWaiting ? ` · 대기 ${reservation.waitingOrder}번째` : ""}</p>
+          <p>#${reservation.id} · ${rankLabel}</p>
         </div>
         <div class="menu-wrapper">
           <button type="button" class="menu-button" data-menu-id="${menuId}" aria-label="${statusLabel} 메뉴">☰</button>
@@ -337,7 +410,7 @@ function renderMyReservationCards(reservations) {
         <p><span>날짜</span><strong>${reservation.date}</strong></p>
         <p><span>테마</span><strong>${reservation.theme.name}</strong></p>
         <p><span>시간</span><strong>${reservation.time.time}</strong></p>
-        ${isWaiting ? `<p><span>대기 순번</span><strong>${reservation.waitingOrder}번째</strong></p>` : ""}
+        <p><span>상태</span><strong>${isWaiting ? `${reservation.waitingOrder}번째 대기` : "예약 확정"}</strong></p>
       </div>
     `;
     myReservationCardsEl.appendChild(card);
@@ -347,8 +420,10 @@ function renderMyReservationCards(reservations) {
 async function loadMyReservations() {
   if (!isAuthenticated) return;
   const reservations = await api("/user/reservations/me");
-  myReservationOwnerEl.textContent = `${currentLoginName ?? "현재 사용자"}님의 예약 목록`;
+  myReservationOwnerEl.textContent = `${currentUserLabel()}님의 예약 목록`;
+  summarizeReservations(reservations);
   renderMyReservationCards(reservations);
+  return reservations;
 }
 
 function closeMenuPanels() {
@@ -414,12 +489,9 @@ document.getElementById("reservation-form").addEventListener("submit", async (e)
       return;
     }
     const date = document.getElementById("theme-date").value;
-    if (!currentLoginName) {
-      throw new Error("로그인 후 예약할 수 있습니다.");
-    }
     const confirmed = await confirmAction({
       title: "예약 확인",
-      message: `예약자 ${currentLoginName}\n날짜 ${date}\n테마 ${selectedThemeName}\n시간 ${selectedTimeLabel}\n\n예약하시겠습니까?`,
+      message: `예약자 ${currentUserLabel()}\n날짜 ${date}\n테마 ${selectedThemeName}\n시간 ${selectedTimeLabel}\n\n예약하시겠습니까?`,
       okLabel: "예약",
     });
     if (!confirmed) {
@@ -436,10 +508,10 @@ document.getElementById("reservation-form").addEventListener("submit", async (e)
         storeId: 1,
       }),
     });
-    setStatus(`예약 완료: ${currentLoginName} / ${date} / ${selectedTimeLabel}`);
+    setStatus(`예약 완료: ${currentUserLabel()} / ${date} / ${selectedTimeLabel}`);
     await showResultModal({
       title: "예약 성공",
-      message: `${currentLoginName}님의 예약이 완료되었습니다.`,
+      message: `${currentUserLabel()}님의 예약이 완료되었습니다.`,
     });
     await loadMyReservations();
     const items = await api(`/user/times/availability?date=${date}&themeId=${selectedThemeId}`);
@@ -489,13 +561,14 @@ myReservationCardsEl.addEventListener("click", async (e) => {
       if (!confirmed) {
         return;
       }
+      const beforeReservations = await loadMyReservations();
       await api(`/user/waitings/${id}`, { method: "DELETE" });
-      await loadMyReservations();
+      const afterReservations = await loadMyReservations();
       await refreshAvailableTimesForCurrentSelection();
       setStatus(`대기 #${id} 취소 완료`);
       await showResultModal({
         title: "대기 취소 성공",
-        message: `대기 ID ${id}가 취소되었습니다.`,
+        message: buildWaitingDeleteMessage(afterReservations ?? beforeReservations ?? [], id),
       });
     } catch (error) {
       await showErrorModal("대기 취소 실패", error);
@@ -518,13 +591,14 @@ myReservationCardsEl.addEventListener("click", async (e) => {
     if (!confirmed) {
       return;
     }
+    const beforeReservations = await loadMyReservations();
     await api(`/user/reservations/${id}`, { method: "DELETE" });
-    await loadMyReservations();
+    const afterReservations = await loadMyReservations();
     await refreshAvailableTimesForCurrentSelection();
     setStatus(`예약 #${id} 취소 완료`);
     await showResultModal({
-      title: "예약 취소 성공",
-      message: `예약 ID ${id}가 취소되었습니다.`,
+      title: "예약 취소 및 대기 자동 전환 완료",
+      message: buildReservationChangeMessage(beforeReservations ?? [], afterReservations ?? [], id),
     });
   } catch (error) {
     await showErrorModal("예약 취소 실패", error);
@@ -560,7 +634,7 @@ loginFormEl.addEventListener("submit", async (e) => {
       body: JSON.stringify({ name, password }),
     });
     setAccessToken(loginResponse.accessToken.replace("Bearer ", ""));
-    currentLoginName = name;
+    setLoginName(name);
     setCommonAuthState(true);
     authStatusEl.textContent = `${name} 로그인됨`;
     loginModalEl.classList.add("hidden");
@@ -614,5 +688,5 @@ loginCancelEl.addEventListener("click", () => {
 setDefaultDate();
 setCommonAuthState(Boolean(getAccessToken()));
 if (getAccessToken()) {
-  authStatusEl.textContent = "로그인 상태입니다.";
+  authStatusEl.textContent = `${currentUserLabel()} 로그인 상태입니다.`;
 }

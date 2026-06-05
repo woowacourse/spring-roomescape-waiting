@@ -21,6 +21,11 @@
 
   <!-- 예약 섹션 -->
   <section class="booking-section">
+    <div class="flow-notice">
+      <strong>예약이 찬 시간도 대기할 수 있습니다.</strong>
+      <span>예약자가 취소하면 대기 1번이 자동으로 예약 전환되고, 남은 대기 순번은 바로 다시 계산됩니다.</span>
+    </div>
+
     <div class="section-title-area">
       <h2>01. 날짜 및 테마 선택</h2>
     </div>
@@ -39,6 +44,7 @@
 
     <div class="section-title-area mt-40">
       <h3>02. 예약 가능 시간</h3>
+      <p class="section-caption">파란 시간은 즉시 예약, 노란 시간은 대기 신청 대상입니다.</p>
     </div>
     <div id="available-times" class="chips-container"></div>
 
@@ -66,10 +72,11 @@
   <section id="my-reservation-section" class="my-reservation-section hidden">
     <h2>내 예약 정보</h2>
     <p id="my-reservation-owner" class="empty-message">로그인 후 조회됩니다.</p>
+    <div id="reservation-summary" class="reservation-summary hidden"></div>
     <div id="my-reservation-cards" class="reservation-cards"></div>
   </section>
 
-<!--  <p id="status" class="status-bar"></p>-->
+  <p id="status" class="status-bar">날짜를 선택하고 테마를 조회하세요.</p>
 </main>
 
 <div id="confirm-modal" class="modal-backdrop hidden">

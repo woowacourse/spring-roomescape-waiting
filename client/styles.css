@@ -17,6 +17,27 @@ body {
   box-shadow: 0 8px 30px rgba(0,0,0,0.05);
 }
 
+.flow-notice {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 22px;
+  padding: 16px 18px;
+  border: 1px solid #ffd8a8;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff9db 0%, #fff4e6 100%);
+  color: #5f3f00;
+}
+
+.flow-notice strong {
+  font-size: 1rem;
+}
+
+.flow-notice span,
+.section-caption {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -141,6 +162,16 @@ button:disabled {
   min-width: 110px;
   font-weight: 600;
   transition: all 0.15s ease;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+#available-times .chip span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  opacity: 0.82;
 }
 
 #edit-available-times .chip {
@@ -176,8 +207,10 @@ button:disabled {
 }
 
 #available-times .chip.selected::before {
-  content: "✓ ";
+  content: "선택됨";
   font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
 }
 
 #edit-available-times .chip.selected::before {
@@ -416,6 +449,28 @@ button:disabled {
   margin-top: 12px;
 }
 
+.reservation-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.reservation-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.reservation-summary strong {
+  color: #0f172a;
+}
+
 .reservation-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -582,10 +637,47 @@ button:disabled {
 .modal-message {
   margin: 8px 0 14px;
   color: #334155;
+  white-space: pre-line;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 18px;
+  }
+
+  .page-header,
+  .row-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .link-row,
+  .selection-summary {
+    flex-wrap: wrap;
+  }
+
+  .theme-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .theme-thumbnail {
+    width: 100%;
+    height: 140px;
+  }
+
+  .reservation-card-head,
+  .reservation-card-body p {
+    gap: 8px;
+  }
 }
