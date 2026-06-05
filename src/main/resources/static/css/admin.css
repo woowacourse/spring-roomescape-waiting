@@ -221,6 +221,12 @@ a {
     border-color: #fecaca;
 }
 
+.action-note {
+    color: var(--muted);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
 .card-list,
 .simple-list {
     display: grid;

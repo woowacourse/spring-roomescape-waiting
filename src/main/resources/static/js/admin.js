@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderReservationAction(reservation) {
         if (reservation.reservationStatus === "CANCELED") {
-            return "";
+            return `<span class="action-note">취소 완료</span>`;
         }
         return `<button type="button" class="danger-button" data-delete-type="reservation" data-id="${reservation.id}">삭제</button>`;
     }

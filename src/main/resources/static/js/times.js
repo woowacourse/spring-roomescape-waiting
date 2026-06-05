@@ -153,18 +153,25 @@ document.addEventListener("DOMContentLoaded", () => {
         timeList.innerHTML = state.times.map((time) => `
             <label class="time-card time-card-refined available">
                 <input type="radio" name="timeId" value="${time.timeId}" form="reservation-form">
-                <span class="card-pill">${time.waitingNumber === 0 ? "CONFIRMED" : "WAITING"}</span>
+                <span class="card-pill">${formatTimeCardStatus(time.waitingNumber)}</span>
                 <span class="time-value">${time.startAt}</span>
                 <span class="time-status">${formatWaitingStatus(time.waitingNumber)}</span>
             </label>
         `).join("");
     }
 
+    function formatTimeCardStatus(waitingNumber) {
+        if (waitingNumber === 0) {
+            return "확정 가능";
+        }
+        return "대기 가능";
+    }
+
     function formatWaitingStatus(waitingNumber) {
         if (waitingNumber === 0) {
             return "바로 예약 확정";
         }
-        return `현재 대기 ${waitingNumber}명`;
+        return `예약 시 대기 ${waitingNumber}번`;
     }
 
     function formatReservationStatus(status, waitingNumber) {
@@ -209,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const timeOptions = buildEditTimeOptions(reservation, editTimes);
 
             return `
-                <article class="user-reservation-card">
+                <article class="user-reservation-card${reservation.status === "CANCELED" ? " canceled" : ""}">
                     <div class="user-reservation-main">
                         <div>
                             <span class="card-pill">예약 번호 ${reservationId}</span>
@@ -251,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderUserReservationActions(reservation) {
         if (reservation.status === "CANCELED") {
-            return "";
+            return `<p class="reservation-action-note">취소된 예약은 변경할 수 없습니다.</p>`;
         }
         return `
             <div class="reservation-card-actions">
