@@ -373,7 +373,7 @@ class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
-
+        given(reservationDao.delete(reservationId)).willReturn(true);
         reservationService.removeReservation(reservationId);
 
         verify(reservationDao).delete(reservationId);
