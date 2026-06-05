@@ -1,6 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
@@ -57,6 +59,26 @@ public class WaitingService {
     public void delete(Long waitingId) {
         if (!waitingDao.delete(waitingId)) {
             throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
+        }
+    }
+
+    public void promoteFirstWaiting(Reservation vacated, LocalDateTime now) {
+        waitingDao.findFirst(vacated.getDate(), vacated.getTime().getId(), vacated.getTheme().getId(),
+                        vacated.getStoreId())
+                .ifPresent(first -> promote(first, now));
+    }
+
+    private void promote(Waiting waiting, LocalDateTime now) {
+        if (waiting.isPast(now)) {
+            return;
+        }
+        if (!waitingDao.delete(waiting.getId())) {
+            return;
+        }
+        try {
+            reservationDao.insert(waiting.toReservation(now));
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateEntityException("이미 예약이 존재하여 대기를 전환할 수 없습니다.");
         }
     }
 

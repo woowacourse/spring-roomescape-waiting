@@ -25,17 +25,20 @@ public class ReservationService {
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
     private final ReservationAuthorizationService authorizationService;
+    private final WaitingService waitingService;
 
     public ReservationService(
             ReservationDao reservationDao,
             TimeDao timeDao,
             ThemeDao themeDao,
-            ReservationAuthorizationService authorizationService
+            ReservationAuthorizationService authorizationService,
+            WaitingService waitingService
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
         this.authorizationService = authorizationService;
+        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
@@ -73,9 +76,11 @@ public class ReservationService {
 
     public void cancel(Long id, Long memberId) {
         authorizationService.validateMemberCanAccess(memberId, id);
+        LocalDateTime now = LocalDateTime.now();
         Reservation reservation = findActiveById(id);
-        reservation.cancelByUser(LocalDateTime.now());
+        reservation.cancelByUser(now);
         reservationDao.update(reservation);
+        waitingService.promoteFirstWaiting(reservation, now);
     }
 
     private Reservation buildReservation(Member member, ReservationRequestDto request, LocalDateTime now) {

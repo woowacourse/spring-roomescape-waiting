@@ -33,10 +33,14 @@ public class Waiting {
     }
 
     public Reservation toReservation(LocalDateTime now) {
-        if (time.isReservationBefore(now, date)) {
+        if (isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간의 예약 대기는 예약으로 전환할 수 없습니다.");
         }
         return Reservation.fromWaiting(this);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return time.isReservationBefore(now, date);
     }
 
     public Long getId() {

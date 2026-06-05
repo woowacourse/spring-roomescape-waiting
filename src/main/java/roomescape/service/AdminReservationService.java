@@ -25,17 +25,20 @@ public class AdminReservationService {
     private final MemberDao memberDao;
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
+    private final WaitingService waitingService;
 
     public AdminReservationService(
             ReservationDao reservationDao,
             MemberDao memberDao,
             TimeDao timeDao,
-            ThemeDao themeDao
+            ThemeDao themeDao,
+            WaitingService waitingService
     ) {
         this.reservationDao = reservationDao;
         this.memberDao = memberDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
+        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
@@ -74,9 +77,11 @@ public class AdminReservationService {
     }
 
     public void cancelByAdmin(Long id) {
+        LocalDateTime now = LocalDateTime.now();
         Reservation reservation = findById(id);
-        reservation.cancelByAdmin(LocalDateTime.now());
+        reservation.cancelByAdmin(now);
         reservationDao.update(reservation);
+        waitingService.promoteFirstWaiting(reservation, now);
     }
 
     public void delete(Long id) {

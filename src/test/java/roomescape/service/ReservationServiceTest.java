@@ -29,6 +29,7 @@ import roomescape.dao.jdbc.MemberJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
+import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -37,15 +38,18 @@ import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
+import roomescape.dto.request.WaitingRequestDto;
 
 @JdbcTest
 @Import({ReservationService.class, ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
-        ThemeJdbcDao.class, MemberJdbcDao.class})
+        ThemeJdbcDao.class, MemberJdbcDao.class, WaitingService.class, WaitingJdbcDao.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private WaitingService waitingService;
     @Autowired
     private ReservationDao reservationDao;
     @Autowired
@@ -154,6 +158,34 @@ class ReservationServiceTest {
 
             assertThatThrownBy(() -> reservationService.findActiveById(saved.getId()))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    class CancelWithPromotion {
+
+        @Test
+        @DisplayName("예약을 취소하면 같은 슬롯의 1순위 대기가 예약으로 자동 전환된다")
+        void promotesFirstWaitingOnCancel() {
+            Reservation reservation = reservationService.create(member, requestDto1);
+            jdbcTemplate.update(
+                    "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                    "대기자", "waiter@test.com", "password", "USER");
+            Member waiter = memberDao.findByEmail("waiter@test.com").orElseThrow();
+            waitingService.create(
+                    new WaitingRequestDto(requestDto1.date(), requestDto1.timeId(), requestDto1.themeId(),
+                            requestDto1.storeId()),
+                    waiter);
+
+            reservationService.cancel(reservation.getId(), member.getId());
+
+            assertThat(reservationService.findAllByMemberId(waiter.getId()))
+                    .singleElement()
+                    .satisfies(promoted -> {
+                        assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.BOOKED);
+                        assertThat(promoted.getDate()).isEqualTo(requestDto1.date());
+                    });
+            assertThat(waitingService.findAllByMemberId(waiter.getId())).isEmpty();
         }
     }
 
