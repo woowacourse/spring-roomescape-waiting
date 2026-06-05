@@ -229,6 +229,45 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
+    public int updateStatus(Long id, ReservationStatus status) {
+        String sql = "update reservation set status = ? where id = ?";
+        return jdbcTemplate.update(sql, status.name(), id);
+    }
+
+    @Override
+    public Optional<Reservation> findFirstWaitingBySlotId(Long slotId) {
+        String sql = """
+                select r.id, rs.id as slot_id, rs.date, r.status,
+                       u.id as u_id, u.username as u_username, u.password as u_password,
+                       u.name as u_name, u.role as u_role,
+                       t.id as time_id, t.start_at,
+                       th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
+                       s.id as store_id, s.name as store_name
+                from reservation r
+                join reservation_slot rs on r.slot_id = rs.id
+                join users u on r.user_id = u.id
+                join reservation_time t on rs.time_id = t.id
+                join theme th on rs.theme_id = th.id
+                join store s on rs.store_id = s.id
+                where r.slot_id = ? and r.status = ?
+                order by r.id
+                limit 1
+                """;
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
+                    sql, rowMapper, slotId, ReservationStatus.WAITING.name()));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public boolean existsBySlotIdAndStatus(Long slotId, ReservationStatus status) {
+        String sql = "select exists(select 1 from reservation where slot_id = ? and status = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, slotId, status.name()));
+    }
+
+    @Override
     public List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date) {
         String sql = """
                 select rs.time_id

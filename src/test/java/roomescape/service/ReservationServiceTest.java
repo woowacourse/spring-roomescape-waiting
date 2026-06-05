@@ -2,6 +2,7 @@ package roomescape.service;
 
 import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.User;
@@ -18,7 +21,9 @@ import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.ReservationRepository;
+import roomescape.service.event.ReservationCanceledEvent;
 
+@RecordApplicationEvents
 class ReservationServiceTest extends ServiceIntegrationTest {
 
     private static final long OTHER_STORE_ID = 2L;
@@ -28,6 +33,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ApplicationEvents events;
 
     private User manager;
 
@@ -335,6 +343,40 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("deleteReservation - 삭제 시 해당 슬롯의 ReservationCanceledEvent를 발행한다")
+    void deleteReservationPublishesReservationCanceledEvent() {
+        User user = member("브라운");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(1));
+        long slotId = DbFixtures.slotId(jdbcTemplate, themeId, Fixtures.daysFromNow(1).toString(), timeId,
+                DEFAULT_STORE_ID);
+
+        service.deleteReservation(reservationId, manager);
+
+        assertThat(events.stream(ReservationCanceledEvent.class))
+                .extracting(ReservationCanceledEvent::slotId)
+                .containsExactly(slotId);
+    }
+
+    @Test
+    @DisplayName("deleteOwnReservation - 삭제 시 해당 슬롯의 ReservationCanceledEvent를 발행한다")
+    void deleteOwnReservationPublishesReservationCanceledEvent() {
+        User brown = member("브라운");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long slotId = DbFixtures.slotId(jdbcTemplate, themeId, Fixtures.daysFromNow(1).toString(), timeId,
+                DEFAULT_STORE_ID);
+
+        service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, brown));
+
+        assertThat(events.stream(ReservationCanceledEvent.class))
+                .extracting(ReservationCanceledEvent::slotId)
+                .containsExactly(slotId);
+    }
+
+    @Test
     @DisplayName("deletePastReservation - 과거 예약을 삭제하면 조회되지 않는다")
     void deletePastReservationMakesPastReservationUnqueryable() {
         User user = member("브라운");
@@ -603,7 +645,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-3650));
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(-3650), timeId), ReservationStatus.WAITING))
+                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(-3650), timeId),
+                ReservationStatus.WAITING))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);

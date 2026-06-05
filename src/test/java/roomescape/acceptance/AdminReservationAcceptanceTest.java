@@ -56,9 +56,12 @@ class AdminReservationAcceptanceTest {
     @Test
     @DisplayName("GET /admin/reservations - name으로 필터링한다")
     void getReservationsFilteredByName() {
-        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString()).onStore(managedStoreId).save();
-        Scenario.reservation(jdbcTemplate).member("다른사람").date(Fixtures.daysFromNow(-5).toString()).onStore(managedStoreId).save();
-        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-4).toString()).onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString())
+                .onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("다른사람").date(Fixtures.daysFromNow(-5).toString())
+                .onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-4).toString())
+                .onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -112,6 +115,32 @@ class AdminReservationAcceptanceTest {
                 .when().post("/admin/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("POST /admin/reservations/{id}/cancel - 확정 예약을 취소하면 같은 슬롯의 대기가 승격된다")
+    void promotesWaitingWhenReservedIsCanceled() {
+        String date = Fixtures.daysFromNow(1).toString();
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
+                .member("예약자").date(date).onStore(managedStoreId).save();
+        Scenario.ExistingReservation waiting = Scenario.waitingReservation(jdbcTemplate)
+                .member("대기자").date(date)
+                .onTheme(reserved.themeId()).onTime(reserved.timeId()).onStore(reserved.storeId())
+                .save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, managerBearer())
+                .when().post("/admin/reservations/" + reserved.reservationId() + "/cancel")
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, waiting.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("waitingReservations.size()", is(0));
     }
 
     @Test

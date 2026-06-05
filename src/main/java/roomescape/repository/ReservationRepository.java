@@ -23,6 +23,12 @@ public interface ReservationRepository {
 
     int update(Reservation reservation);
 
+    int updateStatus(Long id, ReservationStatus status);
+
+    Optional<Reservation> findFirstWaitingBySlotId(Long slotId);
+
+    boolean existsBySlotIdAndStatus(Long slotId, ReservationStatus status);
+
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 
     boolean existsByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
