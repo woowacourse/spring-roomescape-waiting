@@ -83,10 +83,10 @@ public class ReservationService {
             return;
         }
 
-        Reservation changed = reservation.cancelByAdmin(now);
+        Reservation canceled = reservation.cancelByAdmin(now);
 
-        reservationDao.changeStatusWithUpdateAt(changed);
-        promoteWaitingReservation(reservation, changed.getSchedule().getId());
+        reservationDao.changeStatusWithUpdateAt(canceled);
+        promoteWaitingReservation(reservation, scheduleId);
     }
 
     @Transactional
@@ -133,8 +133,8 @@ public class ReservationService {
         );
     }
 
-    private void promoteWaitingReservation(Reservation changed, long scheduleId) {
-        if (changed.isReserved()) {
+    private void promoteWaitingReservation(Reservation reserved, long scheduleId) {
+        if (reserved.isReserved()) {
             Optional<Reservation> reservations = reservationDao.findFirstByScheduleIdAndStatus(scheduleId, ReservationStatus.WAITING);
             reservations.ifPresent(reservation
                     -> reservationDao.promoteToReserved(reservation.getId())
