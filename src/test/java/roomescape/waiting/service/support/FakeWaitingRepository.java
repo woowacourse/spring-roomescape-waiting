@@ -77,6 +77,21 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<WaitingWithRank> findAllWithRank() {
+        return waitings.stream()
+            .map(w -> {
+                int rank = (int) waitings.stream()
+                    .filter(o -> o.getReservationDate().equals(w.getReservationDate()))
+                    .filter(o -> o.getTime().getId().equals(w.getTimeId()))
+                    .filter(o -> o.getTheme().getId().equals(w.getThemeId()))
+                    .filter(o -> o.getCreatedAt().isBefore(w.getCreatedAt()))
+                    .count() + 1;
+                return new WaitingWithRank(w, rank);
+            })
+            .toList();
+    }
+
+    @Override
     public boolean existsBySlot(final LocalDate reservationDate, final long timeId, final long themeId) {
         return waitings.stream()
             .anyMatch(waiting ->

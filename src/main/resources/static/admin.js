@@ -72,6 +72,7 @@ function switchPanel(panel) {
   if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
 
   if (panel === 'reservations') loadReservations();
+  if (panel === 'waitings') loadWaitings();
   if (panel === 'times') loadTimes();
   if (panel === 'themes') loadThemes();
 }
@@ -103,6 +104,27 @@ async function deleteReservation(id) {
   } catch (e) {
     showToast('삭제에 실패했습니다. ' + e.message, 'error');
   }
+}
+
+// ===== Waitings =====
+async function loadWaitings() {
+  const tbody = $('admin-waitings-tbody');
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">불러오는 중...</td></tr>`;
+  const data = await api.get('/admin/waitings');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">대기 내역이 없습니다.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(w => `
+    <tr>
+      <td>${w.id}</td>
+      <td>${w.customerName}</td>
+      <td>${w.date}</td>
+      <td>${formatTime(w.startAt)}</td>
+      <td>${w.theme.name}</td>
+      <td><span class="waiting-rank-badge">${w.rank}번째</span></td>
+    </tr>
+  `).join('');
 }
 
 // ===== Times =====

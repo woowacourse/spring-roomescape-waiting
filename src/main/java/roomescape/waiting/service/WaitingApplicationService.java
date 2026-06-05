@@ -1,8 +1,8 @@
 package roomescape.waiting.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
@@ -11,6 +11,7 @@ import roomescape.theme.service.ThemeService;
 import roomescape.waiting.controller.dto.request.WaitingCreateRequest;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.exception.NoReservationForWaitingException;
+import roomescape.waiting.repository.dto.WaitingWithRank;
 import roomescape.waiting.service.dto.response.WaitingCreateResponse;
 
 @Service
@@ -41,5 +42,9 @@ public class WaitingApplicationService {
 
     public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
         waitingService.deleteByIdAndCustomerName(waitingId, customerName);
+    }
+
+    public List<WaitingWithRank> findAllWithRank() {
+        return waitingService.findAllWithRank();
     }
 }

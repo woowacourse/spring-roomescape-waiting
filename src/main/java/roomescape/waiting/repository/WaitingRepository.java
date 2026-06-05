@@ -20,4 +20,6 @@ public interface WaitingRepository {
     List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(String customerName, LocalDateTime now);
 
     boolean existsBySlot(LocalDate reservationDate, long timeId, long themeId);
+
+    List<WaitingWithRank> findAllWithRank();
 }

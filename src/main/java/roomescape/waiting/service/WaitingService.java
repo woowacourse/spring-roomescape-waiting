@@ -89,6 +89,11 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
+    public List<WaitingWithRank> findAllWithRank() {
+        return waitingRepository.findAllWithRank();
+    }
+
+    @Transactional(readOnly = true)
     public boolean existsBySlot(
         final LocalDate reservationDate,
         final long timeId,
