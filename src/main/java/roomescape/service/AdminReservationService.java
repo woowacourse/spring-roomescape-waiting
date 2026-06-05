@@ -103,18 +103,21 @@ public class AdminReservationService {
 
     @Transactional
     public void cancel(Reservation reservation) {
-        if (reservation.isCanceled()) {
+        reservationRepository.lockTheme(reservation.getTheme().getId());
+        Reservation current = reservationRepository.findById(reservation.getId())
+                .orElseThrow(() -> new ReservationNotFoundException(
+                        "존재하지 않는 예약입니다: reservationId=" + reservation.getId()));
+        if (current.isCanceled()) {
             return;
         }
-        reservationRepository.lockTheme(reservation.getTheme().getId());
-        reservationRepository.cancel(reservation.getId());
-        if (reservation.isConfirmed()) {
+        reservationRepository.cancel(current.getId());
+        if (current.isConfirmed()) {
             boolean promoted = reservationRepository.promoteEarliestWaiting(
-                    reservation.getDate(),
-                    reservation.getTime().getId(),
-                    reservation.getTheme().getId()
+                    current.getDate(),
+                    current.getTime().getId(),
+                    current.getTheme().getId()
             );
-            log.info("예약 취소 후 승급 처리: reservationId={}, promoted={}", reservation.getId(), promoted);
+            log.info("예약 취소 후 승급 처리: reservationId={}, promoted={}", current.getId(), promoted);
         }
     }
 }

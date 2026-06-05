@@ -31,7 +31,7 @@ class ReservationConcurrencyTest {
     @DisplayName("같은 빈 슬롯에 동시에 예약하면 확정은 정확히 1건이어야 한다")
     void 동시에_같은_슬롯을_예약해도_확정은_하나여야_한다() throws InterruptedException {
         long timeId = insertTime();
-        long themeId = insertTheme();
+        long themeId = insertTheme("동시성테마-생성");
 
         ExecutorService pool = Executors.newFixedThreadPool(CONCURRENCY);
         CountDownLatch ready = new CountDownLatch(CONCURRENCY);
@@ -65,6 +65,47 @@ class ReservationConcurrencyTest {
                 .isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("같은 확정 예약을 동시에 취소해도 승급은 한 번만 일어나 확정은 1건을 유지한다")
+    void 동시에_같은_확정예약을_취소해도_확정은_하나여야_한다() throws InterruptedException {
+        long timeId = insertTime();
+        long themeId = insertTheme("동시성테마-취소");
+        long confirmedId = reservationService.create(
+                new ReservationCreateCommand("owner", DATE, timeId, themeId)).id();
+        for (int i = 0; i < 5; i++) {
+            reservationService.create(new ReservationCreateCommand("waiter" + i, DATE, timeId, themeId));
+        }
+
+        int threads = 10;
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        CountDownLatch ready = new CountDownLatch(threads);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threads);
+
+        for (int i = 0; i < threads; i++) {
+            pool.submit(() -> {
+                ready.countDown();
+                try {
+                    start.await();
+                    reservationService.delete(confirmedId);
+                } catch (Exception ignored) {
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+
+        ready.await();
+        start.countDown();
+        done.await();
+        pool.shutdown();
+
+        int confirmed = countConfirmed(timeId, themeId);
+        assertThat(confirmed)
+                .as("확정 취소 시 첫 대기자 1명만 승급되어야 한다(이중 승급 금지)")
+                .isEqualTo(1);
+    }
+
     private int countConfirmed(long timeId, long themeId) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation "
@@ -78,9 +119,9 @@ class ReservationConcurrencyTest {
         return jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_time", Long.class);
     }
 
-    private long insertTheme() {
+    private long insertTheme(String name) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES ('동시성테마', '설명', 'http://x')");
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, '설명', 'http://x')", name);
         return jdbcTemplate.queryForObject("SELECT MAX(id) FROM theme", Long.class);
     }
 }

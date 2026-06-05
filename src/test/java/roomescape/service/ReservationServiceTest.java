@@ -155,7 +155,7 @@ class ReservationServiceTest {
 
         assertDoesNotThrow(() -> reservationService.delete(1L));
 
-        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(2)).findById(1L);
         verify(reservationRepository, times(1)).cancel(1L);
         verify(reservationRepository, times(1)).promoteEarliestWaiting(VALID_RESERVATION_DATE, 1L, 1L);
         verifyNoInteractions(reservationTimeRepository, themeRepository);
