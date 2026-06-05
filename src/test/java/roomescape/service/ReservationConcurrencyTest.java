@@ -91,7 +91,7 @@ class ReservationConcurrencyTest {
                 ready.countDown();
                 try {
                     start.await();
-                    reservationService.delete(confirmedId);
+                    reservationService.cancel(confirmedId);
                 } catch (Exception ignored) {
                 } finally {
                     done.countDown();

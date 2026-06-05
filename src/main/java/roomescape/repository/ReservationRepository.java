@@ -18,8 +18,6 @@ public interface ReservationRepository {
 
     ReservationWithWaitingOrder update(Reservation reservation);
 
-    void deleteById(Long id);
-
     void cancel(Long id);
 
     Optional<Theme> lockTheme(Long themeId);

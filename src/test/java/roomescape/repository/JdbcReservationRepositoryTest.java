@@ -104,18 +104,6 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("id로 예약을 삭제한다")
-    void deleteById() {
-        ReservationTime time = insertTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("무인도 탈출");
-        Reservation saved = insertReservation("브라운", DATE, time, theme);
-
-        reservationRepository.deleteById(saved.getId());
-
-        assertThat(reservationRepository.findById(saved.getId())).isEmpty();
-    }
-
-    @Test
     @DisplayName("취소(soft delete)하면 행은 남고 상태가 CANCELED가 된다")
     void cancel() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));

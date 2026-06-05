@@ -178,11 +178,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
-    }
-
-    @Override
     public Optional<Theme> lockTheme(Long themeId) {
         String sql = "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? FOR UPDATE";
         try {

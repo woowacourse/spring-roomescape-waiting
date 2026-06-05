@@ -65,7 +65,7 @@ public class UserReservationService {
                 reservation.getTime().getStartAt(),
                 "과거 예약은 취소할 수 없습니다"
         );
-        reservationService.cancel(reservation);
+        reservationService.cancel(id);
     }
 
     @Transactional

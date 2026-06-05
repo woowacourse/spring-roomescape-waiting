@@ -41,9 +41,9 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable
+    public void cancel(@PathVariable
                        @Positive(message = "id는 0보다 커야합니다.")
                        Long id) {
-        reservationService.delete(id);
+        reservationService.cancel(id);
     }
 }

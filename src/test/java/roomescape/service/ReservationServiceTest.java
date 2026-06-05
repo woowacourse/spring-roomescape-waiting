@@ -129,13 +129,13 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 삭제하면 ReservationNotFoundException이 발생한다")
-    void 존재하지_않는_예약_삭제시_예외가_발생한다() {
+    @DisplayName("존재하지 않는 예약을 취소하면 ReservationNotFoundException이 발생한다")
+    void 존재하지_않는_예약_취소시_예외가_발생한다() {
         given(reservationRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationNotFoundException.class,
-                () -> reservationService.delete(1L)
+                () -> reservationService.cancel(1L)
         );
 
         verify(reservationRepository, times(1)).findById(1L);
@@ -143,13 +143,13 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("확정 예약을 삭제하면 soft delete 후 첫 대기자를 승급한다")
-    void 확정_예약_삭제시_취소하고_승급한다() {
+    @DisplayName("확정 예약을 취소하면 soft delete 후 첫 대기자를 승급한다")
+    void 확정_예약_취소시_취소하고_승급한다() {
         Reservation confirmed = new Reservation(
                 1L, "브라운", VALID_RESERVATION_DATE, VALID_TIME, VALID_THEME, ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(confirmed));
 
-        assertDoesNotThrow(() -> reservationService.delete(1L));
+        assertDoesNotThrow(() -> reservationService.cancel(1L));
 
         verify(reservationRepository, times(2)).findById(1L);
         verify(reservationRepository, times(1)).cancel(1L);

@@ -86,21 +86,16 @@ public class AdminReservationService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void cancel(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("존재하지 않는 예약 삭제 시도: reservationId={}", id);
+                    log.warn("존재하지 않는 예약 취소 시도: reservationId={}", id);
                     return new ReservationNotFoundException("존재하지 않는 예약입니다: reservationId=" + id);
                 });
-        cancel(reservation);
-    }
-
-    @Transactional
-    public void cancel(Reservation reservation) {
         reservationRepository.lockTheme(reservation.getTheme().getId());
-        Reservation current = reservationRepository.findById(reservation.getId())
+        Reservation current = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(
-                        "존재하지 않는 예약입니다: reservationId=" + reservation.getId()));
+                        "존재하지 않는 예약입니다: reservationId=" + id));
         if (current.isCanceled()) {
             return;
         }

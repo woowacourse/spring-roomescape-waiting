@@ -131,7 +131,7 @@ class UserReservationServiceTest {
         userReservationService.cancel(1L, OWNER);
 
         verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationService, times(1)).cancel(reservation);
+        verify(reservationService, times(1)).cancel(1L);
         verifyNoInteractions(reservationTimeRepository);
     }
 
