@@ -19,11 +19,6 @@ import roomescape.waiting.dao.ReservationWaitingDao;
 
 @Service
 public class ReservationService {
-    private static final String RESERVED_STATUS = "예약 확정";
-    private static final String WAITING_STATUS = "대기중";
-    private static final String RESERVED_RESOURCE = "reservation";
-    private static final String WAITING_RESOURCE = "waiting";
-
     private final ReservationDao reservationDao;
     private final ThemeDao themeDao;
     private final TimeDao timeDao;
@@ -54,14 +49,14 @@ public class ReservationService {
         for (Reservation reservation : reservations) {
             Theme theme = themeDao.selectById(reservation.getThemeId())
                     .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
-            myReservations.add(new MyReservation(reservation, theme, RESERVED_RESOURCE, RESERVED_STATUS));
+            myReservations.add(new MyReservation(reservation, theme));
         }
 
         List<ReservationWaiting> reservationWaitings = reservationWaitingDao.selectByName(name);
         for (ReservationWaiting reservationWaiting : reservationWaitings) {
             Theme theme = themeDao.selectById(reservationWaiting.getThemeId())
                     .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
-            myReservations.add(new MyReservation(reservationWaiting, theme, WAITING_RESOURCE, WAITING_STATUS));
+            myReservations.add(new MyReservation(reservationWaiting, theme));
         }
         return myReservations;
     }
