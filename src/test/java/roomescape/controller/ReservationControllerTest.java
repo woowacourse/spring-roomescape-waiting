@@ -30,13 +30,11 @@ import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Reservations;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThumbnailUrl;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(ReservationController.class)
@@ -48,16 +46,16 @@ class ReservationControllerTest {
 
     private Reservation approvedReservation() {
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Theme theme = Theme.load(1L, new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
-        return Reservation.load(1L, new ReservationName("zeze"),
-                new ReservationDate(LocalDate.of(2099, 1, 1)), time, theme, Status.APPROVED, 1);
+        Theme theme = Theme.load(1L, "공포", "무서워요", "https://zeze.com");
+        Slot slot = Slot.load(1L, LocalDate.of(2099, 1, 1), time, theme);
+        return Reservation.load(1L, "zeze", "APPROVED", slot);
     }
 
     private Reservation waitingReservation() {
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Theme theme = Theme.load(1L, new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
-        return Reservation.load(2L, new ReservationName("mingu"),
-                new ReservationDate(LocalDate.of(2099, 1, 1)), time, theme, Status.WAITING, 1);
+        Theme theme = Theme.load(1L, "공포", "무서워요", "https://zeze.com");
+        Slot slot = Slot.load(1L, LocalDate.of(2099, 1, 1), time, theme);
+        return Reservation.load(2L, "mingu", "WAITING", slot);
     }
 
     @Test
@@ -71,8 +69,7 @@ class ReservationControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("zeze"))
-                .andExpect(jsonPath("$.state").value("승인"))
-                .andExpect(jsonPath("$.rank").value(1));
+                .andExpect(jsonPath("$.state").value("승인"));
     }
 
     @Test
@@ -126,7 +123,8 @@ class ReservationControllerTest {
 
     @Test
     void 예약_전체_목록_조회_성공시_200을_반환한다() throws Exception {
-        given(reservationService.findList(null)).willReturn(List.of(approvedReservation(), waitingReservation()));
+        given(reservationService.findList(null))
+                .willReturn(new Reservations(List.of(approvedReservation(), waitingReservation())));
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservations.length()").value(2));
@@ -134,7 +132,8 @@ class ReservationControllerTest {
 
     @Test
     void 이름으로_예약_목록_조회_성공시_200을_반환한다() throws Exception {
-        given(reservationService.findList("zeze")).willReturn(List.of(approvedReservation()));
+        given(reservationService.findList("zeze"))
+                .willReturn(new Reservations(List.of(approvedReservation())));
         mockMvc.perform(get("/reservations").param("name", "zeze"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservations.length()").value(1))
@@ -215,7 +214,6 @@ class ReservationControllerTest {
         given(reservationService.find(2L)).willReturn(waitingReservation());
         mockMvc.perform(get("/reservations/2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.state").value("대기"))
-                .andExpect(jsonPath("$.rank").value(1));
+                .andExpect(jsonPath("$.state").value("대기"));
     }
 }

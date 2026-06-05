@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.JdbcSlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,7 +23,7 @@ public class ThemeServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private JdbcSlotRepository slotRepository;
 
     @InjectMocks
     private ThemeService themeService;
@@ -106,9 +106,9 @@ public class ThemeServiceTest {
     }
 
     @Test
-    void 삭제시_테마를_사용하는_예외가_있으면_예외가_발생한다() {
+    void 삭제시_테마를_사용하는_슬롯이_있으면_예외가_발생한다() {
         given(themeRepository.existsById(1L)).willReturn(true);
-        given(reservationRepository.existsByThemeId(1L)).willReturn(true);
+        given(slotRepository.existsByThemeId(1L)).willReturn(true);
         Assertions.assertThatThrownBy(() -> themeService.delete(1L)).isInstanceOf(RoomEscapeException.class);
     }
 }

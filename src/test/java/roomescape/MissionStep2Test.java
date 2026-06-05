@@ -48,9 +48,8 @@ public class MissionStep2Test {
 
     @Test
     void DB_조회_API_전환() {
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운",
-                "2023-08-05",
-                1, 1);
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)", "2023-08-05", 1, 1);
+        jdbcTemplate.update("INSERT INTO reservation (slot_id, name, status) VALUES (?, ?, ?)", 1, "브라운", "APPROVED");
 
         ReservationResponses reservations = RestAssured.given().log().all()
                 .when().get("/reservations")

@@ -18,6 +18,7 @@ import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationResponses;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Reservations;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -38,7 +39,7 @@ public class ReservationController {
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponses findList(@RequestParam(required = false) String name) {
-        List<Reservation> reservations = reservationService.findList(name);
+        Reservations reservations = reservationService.findList(name);
         return ReservationResponses.toDto(reservations);
     }
 
@@ -51,7 +52,7 @@ public class ReservationController {
 
     @DeleteMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id, @RequestParam String name) {
+    public void delete(@PathVariable long id, @RequestParam String name) {
         reservationService.cancel(id, name, LocalDateTime.now());
     }
 

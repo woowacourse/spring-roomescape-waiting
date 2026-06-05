@@ -2,6 +2,7 @@ package roomescape.controller.dto.response;
 
 import java.time.LocalDate;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Slot;
 
 public class ReservationResponse {
     private final long id;
@@ -24,14 +25,16 @@ public class ReservationResponse {
     }
 
     public static ReservationResponse toDto(Reservation reservation) {
+        Slot slot = reservation.getSlot();
+        Integer rank = reservation.getRank() != null ? reservation.getRank().getValue() : null;
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getName().getValue(),
-                reservation.getDate().getDate(),
+                slot.getDate().getDate(),
                 reservation.getStatus().getKoreanName(),
-                reservation.getRank(),
-                ReservationTimeResponse.toDto(reservation.getTime()),
-                ThemeResponse.toDto(reservation.getTheme()));
+                rank,
+                ReservationTimeResponse.toDto(slot.getTime()),
+                ThemeResponse.toDto(slot.getTheme()));
     }
 
     public long getId() { return id; }

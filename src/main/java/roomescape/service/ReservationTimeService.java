@@ -10,19 +10,19 @@ import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.JdbcSlotRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final JdbcSlotRepository slotRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  JdbcSlotRepository slotRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.slotRepository = slotRepository;
     }
 
     @Transactional
@@ -49,7 +49,7 @@ public class ReservationTimeService {
             throw new NotFoundException("존재하지 않는 시간입니다. 입력을 확인해 주세요.");
         }
 
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
+        if (slotRepository.existsByTimeId(reservationTimeId)) {
             throw new ConflictException("시간을 사용하는 예약이 존재합니다. 관련 예약을 지우고 요청해 주세요.");
         }
 

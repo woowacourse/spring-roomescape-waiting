@@ -11,7 +11,7 @@ import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.JdbcSlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -21,11 +21,11 @@ public class ThemeService {
     private static final long DEFAULT_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final JdbcSlotRepository slotRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository, JdbcSlotRepository slotRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+        this.slotRepository = slotRepository;
     }
 
     @Transactional
@@ -66,7 +66,7 @@ public class ThemeService {
             throw new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요.");
         }
 
-        if (reservationRepository.existsByThemeId(themeId)) {
+        if (slotRepository.existsByThemeId(themeId)) {
             throw new ConflictException("테마를 사용하는 예약이 존재합니다. 관련 예약을 지우고 요청해 주세요");
         }
 

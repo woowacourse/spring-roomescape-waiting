@@ -3,13 +3,13 @@ package roomescape;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -25,7 +25,11 @@ public class RoomEscapeFixture {
     private static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
     private static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
 
+    public static Slot slot() {
+        return Slot.load(1L, DATE.getDate(), TIME, THEME);
+    }
+
     public static Reservation reservation() {
-        return Reservation.create(NAME, DATE, TIME, THEME, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
+        return Reservation.create(NAME.getValue(), Status.APPROVED, slot());
     }
 }

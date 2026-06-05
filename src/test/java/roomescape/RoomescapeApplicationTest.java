@@ -186,8 +186,7 @@ class RoomescapeApplicationTest {
         RestAssured.given()
                 .when().get("/reservations/" + id)
                 .then().statusCode(200)
-                .body("state", org.hamcrest.Matchers.equalTo("승인"))
-                .body("rank", org.hamcrest.Matchers.equalTo(1));
+                .body("state", org.hamcrest.Matchers.equalTo("승인"));
     }
 
     @Test

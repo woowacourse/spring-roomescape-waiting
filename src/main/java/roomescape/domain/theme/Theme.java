@@ -15,12 +15,16 @@ public class Theme {
         this.thumbnailUrl = Objects.requireNonNull(thumbnailUrl);
     }
 
-    public static Theme load(long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
-        return new Theme(id, name, description, thumbnailUrl);
+    public static Theme load(long id, String name, String description, String thumbnailUrl) {
+        return new Theme(id, new ThemeName(name), description, new ThumbnailUrl(thumbnailUrl));
     }
 
     public static Theme create(ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         return new Theme(0L, name, description, thumbnailUrl);
+    }
+
+    public Theme withId(long generatedKey) {
+        return new Theme(generatedKey, name, description, thumbnailUrl);
     }
 
     public long getId() {

@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.JdbcSlotRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,7 +19,7 @@ public class ReservationTimeServiceTest {
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @Mock
-    private ReservationRepository reservationRepository;
+    private JdbcSlotRepository slotRepository;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
@@ -27,7 +27,7 @@ public class ReservationTimeServiceTest {
     @Test
     void 정상적인_시간_삭제는_성공해야_한다() {
         given(reservationTimeRepository.existsById(1L)).willReturn(true);
-        given(reservationRepository.existsByTimeId(1L)).willReturn(false);
+        given(slotRepository.existsByTimeId(1L)).willReturn(false);
 
         Assertions.assertThatNoException().isThrownBy(() -> reservationTimeService.delete(1L));
     }
@@ -43,7 +43,7 @@ public class ReservationTimeServiceTest {
     @Test
     void 예약이_있는_시간_삭제시_예외가_발생한다() {
         given(reservationTimeRepository.existsById(1L)).willReturn(true);
-        given(reservationRepository.existsByTimeId(1L)).willReturn(true);
+        given(slotRepository.existsByTimeId(1L)).willReturn(true);
 
         Assertions.assertThatThrownBy(() -> reservationTimeService.delete(1L))
                 .isInstanceOf(RoomEscapeException.class);
