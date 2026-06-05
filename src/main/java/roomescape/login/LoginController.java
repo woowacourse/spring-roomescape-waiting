@@ -13,7 +13,7 @@ import roomescape.auth.JwtTokenProvider;
 import roomescape.common.api.ApiResponse;
 import roomescape.login.dto.request.LoginRequest;
 import roomescape.login.dto.response.LoginResponse;
-import roomescape.member.AuthenticatedMember;
+import roomescape.member.domain.AuthenticatedMember;
 
 @RestController
 @RequestMapping("/api")

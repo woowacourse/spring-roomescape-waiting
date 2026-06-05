@@ -1,4 +1,4 @@
-package roomescape.member;
+package roomescape.member.domain;
 
 public record AuthenticatedMember(
         Long id,

@@ -1,6 +1,6 @@
-package roomescape.member.infrastructure;
+package roomescape.member.application.port.out;
 
-import roomescape.member.Member;
+import roomescape.member.domain.Member;
 
 import java.util.Optional;
 

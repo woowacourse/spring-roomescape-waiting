@@ -1,4 +1,4 @@
-package roomescape.member;
+package roomescape.member.domain;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.member.AuthenticatedMember;
+import roomescape.member.domain.AuthenticatedMember;
 
 @Component
 public class TokenLoginMemberProvider {
