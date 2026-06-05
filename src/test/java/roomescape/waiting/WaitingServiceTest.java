@@ -6,10 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 class WaitingServiceTest {
 
     private static final long MEMBER_ID = 1L;
-    private static final long MANAGER_ID = 2L;
 
     @Mock
     private ScheduleService scheduleService;
@@ -139,8 +138,9 @@ class WaitingServiceTest {
     @Test
     @DisplayName("reservationId가 있으면 예약 존재/권한을 검증하고 삭제한 뒤 대기를 저장한다. 즉, 현재 예약을 대기 가능한 다른 스케줄로 변경하려 할 때")
     void save_테스트_5() {
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, 10L);
+        long reservationIdToCancel = 10L;
         long scheduleId = 1L;
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, reservationIdToCancel);
         Waiting savedWaiting = new Waiting(11L, MEMBER_ID, scheduleId);
         Reservation reservation = new Reservation(
                 10L,
@@ -150,7 +150,7 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(reservationRepository.findByIdForPromotion(request.reservationId()))
+        when(reservationRepository.findByIdForPromotion(reservationIdToCancel))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
@@ -167,16 +167,17 @@ class WaitingServiceTest {
 
         assertThat(response.id()).isEqualTo(11L);
         verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(
-                request.reservationId(),
+                reservationIdToCancel,
                 reservation.getScheduleId()
         );
     }
 
     @Test
-    @DisplayName("reservationId의 예약이 본인 소유가 아니면 예외가 발생한다.")
+    @DisplayName("확정예약을 다른 스케줄의 대기로 변경할 경우 취소할 예약이 본인 소유가 아니면 예외가 발생한다.")
     void save_테스트_6() {
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, 10L);
         long scheduleId = 1L;
+        long reservationIdToCancel = 10L;
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, reservationIdToCancel);
         Reservation reservation = new Reservation(
                 10L,
                 999L,
@@ -191,7 +192,7 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
                 .thenReturn(Optional.of(reservation));
-        when(reservationRepository.findByIdForPromotion(request.reservationId()))
+        when(reservationRepository.findByIdForPromotion(reservationIdToCancel))
                 .thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))

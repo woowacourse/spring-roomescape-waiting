@@ -33,8 +33,8 @@ public class WaitingService {
         validateMemberNotAlreadyWaiting(memberId, scheduleId);
         validateWaitingTargetExists(scheduleId);
 
-        if (body.reservationId() != null) {
-            deleteReservationAndPromoteWaiting(body.reservationId(), memberId);
+        if (body.reservationIdToCancel() != null) {
+            cancelReservationAndPromoteFirstWaiting(body.reservationIdToCancel(), memberId);
         }
 
         Waiting waiting = saveWaiting(body.toDomain(memberId, scheduleId));
@@ -85,7 +85,7 @@ public class WaitingService {
         }
     }
 
-    private void deleteReservationAndPromoteWaiting(long reservationId, long memberId) {
+    private void cancelReservationAndPromoteFirstWaiting(long reservationId, long memberId) {
         Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
 
