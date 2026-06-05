@@ -25,7 +25,6 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationRequestLockRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
@@ -63,8 +62,6 @@ class ReservationWaitingServiceTest {
     @Mock
     private ThemeService themeService;
 
-    @Mock
-    private ReservationRequestLockRepository reservationRequestLockRepository;
 
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;

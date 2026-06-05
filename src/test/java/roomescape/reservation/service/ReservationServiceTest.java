@@ -17,18 +17,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationRequestLockRepository;
 import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
+import roomescape.reservation.repository.ReservationQueryDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
@@ -54,8 +54,6 @@ class ReservationServiceTest {
     @Mock
     private ReservationQueryDao reservationQueryDao;
 
-    @Mock
-    private ReservationRequestLockRepository reservationRequestLockRepository;
 
     @InjectMocks
     private ReservationService reservationService;

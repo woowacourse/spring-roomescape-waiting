@@ -10,12 +10,12 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationRequestLockRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
+
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
@@ -30,25 +30,21 @@ public class ReservationWaitingService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final ReservationRequestLockRepository reservationRequestLockRepository;
 
     public ReservationWaitingService(
             ReservationWaitingRepository reservationWaitingRepository,
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
-            ThemeService themeService,
-            ReservationRequestLockRepository reservationRequestLockRepository
+            ThemeService themeService
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.reservationRequestLockRepository = reservationRequestLockRepository;
     }
 
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
-        reservationRequestLockRepository.lock(command.name(), command.date(), command.timeId());
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
         validateWaiting(newReservationWaiting);
 
