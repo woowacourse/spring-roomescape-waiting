@@ -6,12 +6,9 @@ import static org.springframework.http.HttpStatus.*;
 
 public enum ErrorCode {
     INVALID_REQUEST(BAD_REQUEST, "요청 값이 올바르지 않습니다."),
-    INVALID_NAME_FORMAT(BAD_REQUEST, "이름은 필수입니다."),
     INVALID_DATE_FORMAT(BAD_REQUEST, "날짜 형식이 잘못되었습니다. (yyyy-MM-dd)"),
-    CANNOT_MODIFY_OTHER_RESERVATION(FORBIDDEN, "다른 사람 예약을 변경할 수 없습니다."),
-    CANNOT_DELETE_OTHER_RESERVATION(FORBIDDEN, "다른 사람 예약을 취소할 수 없습니다."),
+    FORBIDDEN_RESERVATION_ACCESS(FORBIDDEN, "본인의 예약 정보만 접근 가능합니다."),
     PAST_RESERVATION(BAD_REQUEST, "지난 시간에는 예약할 수 없습니다."),
-    CANNOT_DELETE_PAST_RESERVATION(BAD_REQUEST, "지난 시간 예약을 취소할 수 없습니다."),
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약을 찾을 수 없습니다."),
     RESERVATION_TIME_NOT_FOUND(NOT_FOUND, "예약 시간을 찾을 수 없습니다."),
     THEME_NOT_FOUND(NOT_FOUND, "테마를 찾을 수 없습니다."),

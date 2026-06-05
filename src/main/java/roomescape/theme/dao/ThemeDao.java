@@ -43,6 +43,12 @@ public class ThemeDao {
         return themes.stream().findFirst();
     }
 
+    public boolean existsById(Long id) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM theme WHERE id = ?)";
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, id) == Boolean.TRUE;
+    }
+
     public List<Theme> selectTopThemesByReservation(LocalDate startDate, LocalDate endDate, int limit) {
         String sql = """
                 SELECT

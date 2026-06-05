@@ -168,7 +168,7 @@ public class ReservationControllerTest {
                 .when().patch("/reservations/1")
                 .then().log().all()
                 .statusCode(403)
-                .body("code", is("CANNOT_MODIFY_OTHER_RESERVATION"));
+                .body("code", is("FORBIDDEN_RESERVATION_ACCESS"));
     }
 
     @Test

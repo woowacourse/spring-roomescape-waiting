@@ -11,7 +11,6 @@ import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dto.ReservationChangeRequest;
-import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
@@ -45,10 +44,6 @@ public class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
-
-    private Theme theme(Long themeId) {
-        return new Theme(themeId, "테마", "설명", "image");
-    }
 
     // ===================== findAll =====================
 
@@ -132,7 +127,7 @@ public class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
 
         given(timeDao.selectById(timeId)).willReturn(Optional.of(time));
-        given(themeDao.selectById(themeId)).willReturn(Optional.of(theme(themeId)));
+        given(themeDao.existsById(themeId)).willReturn(true);
         given(reservationDao.insert(any(Reservation.class)))
                 .willReturn(new Reservation(10L, "초록", themeId, date, time));
 
@@ -172,7 +167,7 @@ public class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
 
         given(timeDao.selectById(timeId)).willReturn(Optional.of(time));
-        given(themeDao.selectById(themeId)).willReturn(Optional.empty());
+        given(themeDao.existsById(themeId)).willReturn(false);
 
         assertThatThrownBy(() -> reservationService.add("브라운", themeId, LocalDate.now().plusDays(1), timeId))
                 .isInstanceOf(RoomescapeException.class)
@@ -187,7 +182,7 @@ public class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
 
         given(timeDao.selectById(timeId)).willReturn(Optional.of(time));
-        given(themeDao.selectById(themeId)).willReturn(Optional.of(theme(themeId)));
+        given(themeDao.existsById(themeId)).willReturn(true);
         given(reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).willReturn(true);
 
         assertThatThrownBy(() -> reservationService.add("브라운", themeId, date, timeId))
@@ -203,7 +198,7 @@ public class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
 
         given(timeDao.selectById(timeId)).willReturn(Optional.of(time));
-        given(themeDao.selectById(themeId)).willReturn(Optional.of(theme(themeId)));
+        given(themeDao.existsById(themeId)).willReturn(true);
         given(reservationDao.insert(any(Reservation.class)))
                 .willThrow(new DuplicateKeyException("duplicate"));
 
@@ -233,8 +228,7 @@ public class ReservationServiceTest {
                 .willReturn(Optional.of(originReservation));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(time));
-        given(themeDao.selectById(themeId))
-                .willReturn(Optional.of(theme(themeId)));
+        given(themeDao.existsById(themeId)).willReturn(true);
 
         Reservation changedReservation = new Reservation(reservationId, name, themeId, date, time);
         given(reservationDao.updateDateTimeById(reservationId, date, timeId))
@@ -276,7 +270,7 @@ public class ReservationServiceTest {
                 request.date(),
                 request.timeId()))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ErrorCode.CANNOT_MODIFY_OTHER_RESERVATION.getMessage());
+                .hasMessageContaining(ErrorCode.FORBIDDEN_RESERVATION_ACCESS.getMessage());
     }
 
     @Test
@@ -351,7 +345,7 @@ public class ReservationServiceTest {
         given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
-        given(themeDao.selectById(themeId)).willReturn(Optional.empty());
+        given(themeDao.existsById(themeId)).willReturn(false);
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
                 reservationId, name, themeId, LocalDate.now().plusDays(1), timeId))
@@ -373,7 +367,7 @@ public class ReservationServiceTest {
         given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
-        given(themeDao.selectById(themeId)).willReturn(Optional.of(theme(themeId)));
+        given(themeDao.existsById(themeId)).willReturn(true);
         given(reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).willReturn(true);
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
@@ -426,7 +420,7 @@ public class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservationId, "브라운"))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ErrorCode.CANNOT_DELETE_OTHER_RESERVATION.getMessage());
+                .hasMessageContaining(ErrorCode.FORBIDDEN_RESERVATION_ACCESS.getMessage());
     }
 
     @Test
@@ -453,7 +447,7 @@ public class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(pastReserved, "로치"))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ErrorCode.CANNOT_DELETE_PAST_RESERVATION.getMessage());
+                .hasMessageContaining(ErrorCode.PAST_RESERVATION.getMessage());
     }
 
     // ===================== deleteById (관리자) =====================
