@@ -73,7 +73,7 @@ class WaitingServiceTest {
 
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.findBySlotForUpdate(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
             when(waitingRepository.findAllBySlot(any(ReservationSlot.class))).thenReturn(List.of());
             when(waitingRepository.save(any(Waiting.class))).thenReturn(saved);
 
@@ -114,7 +114,7 @@ class WaitingServiceTest {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.findBySlotForUpdate(any(ReservationSlot.class))).thenReturn(Optional.empty());
+            when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
@@ -129,7 +129,7 @@ class WaitingServiceTest {
 
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.findBySlotForUpdate(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
             when(waitingRepository.findAllBySlot(any(ReservationSlot.class))).thenReturn(List.of(existing));
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
@@ -144,7 +144,7 @@ class WaitingServiceTest {
 
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.findBySlotForUpdate(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
             when(waitingRepository.findAllBySlot(any(ReservationSlot.class))).thenReturn(List.of());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
@@ -159,7 +159,7 @@ class WaitingServiceTest {
 
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.findBySlotForUpdate(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(Optional.of(reservation));
             when(waitingRepository.findAllBySlot(any(ReservationSlot.class))).thenReturn(List.of());
             when(waitingRepository.save(any(Waiting.class))).thenThrow(DuplicateKeyException.class);
 

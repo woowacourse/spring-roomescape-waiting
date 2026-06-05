@@ -137,7 +137,7 @@ public class ReservationRepository {
                 .findFirst();
     }
 
-    public Optional<Reservation> findBySlotForUpdate(ReservationSlot slot) {
+    public Optional<Reservation> findBySlot(ReservationSlot slot) {
         String query = """
                 SELECT r.id AS reservation_id, r.name, r.date,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
@@ -147,7 +147,6 @@ public class ReservationRepository {
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme th ON r.theme_id = th.id
                 WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
-                FOR UPDATE
                 """;
         return jdbcTemplate.query(query, rowMapper,
                         slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())

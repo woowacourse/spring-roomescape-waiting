@@ -46,7 +46,7 @@ public class WaitingService {
 
         ReservationSlot slot = ReservationSlot.of(waitingRequest.date(), reservationTime, theme);
 
-        Reservation reservation = reservationRepository.findBySlotForUpdate(slot)
+        Reservation reservation = reservationRepository.findBySlot(slot)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
 
         Waitings waitings = Waitings.of(waitingRepository.findAllBySlot(slot));

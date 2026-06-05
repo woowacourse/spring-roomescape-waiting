@@ -275,7 +275,7 @@ class ReservationRepositoryTest {
         void 해당_날짜_시간_테마의_예약이_있으면_예약을_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            Optional<Reservation> result = reservationRepository.findBySlotForUpdate(
+            Optional<Reservation> result = reservationRepository.findBySlot(
                     ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 
@@ -287,7 +287,7 @@ class ReservationRepositoryTest {
 
         @Test
         void 해당_날짜_시간_테마의_예약이_없으면_빈_Optional을_반환한다() {
-            Optional<Reservation> result = reservationRepository.findBySlotForUpdate(
+            Optional<Reservation> result = reservationRepository.findBySlot(
                     ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 

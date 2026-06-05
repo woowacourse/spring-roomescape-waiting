@@ -85,7 +85,7 @@ public class ReservationService {
         int deleted = reservationRepository.deleteById(id);
 
         if (deleted > 0) {
-            Waitings waitings = Waitings.of(waitingRepository.findAllBySlotForUpdate(reservation.getSlot()));
+            Waitings waitings = Waitings.of(waitingRepository.findAllBySlot(reservation.getSlot()));
             waitings.first().ifPresent(this::promoteToReservation);
         }
     }
@@ -102,7 +102,7 @@ public class ReservationService {
 
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
-        ReservationTime newTime = reservationTimeRepository.findByIdForUpdate(fixRequest.timeId())
+        ReservationTime newTime = reservationTimeRepository.findById(fixRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
 
         Reservation reservation = reservationRepository.findById(id)
