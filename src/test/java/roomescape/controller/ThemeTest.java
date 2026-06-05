@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,11 +30,13 @@ public class ThemeTest {
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");
+        jdbcTemplate.update("delete from slot");
         jdbcTemplate.update("delete from reservation_time");
         jdbcTemplate.update("delete from theme");
 
         jdbcTemplate.update("alter table waiting alter column id restart with 1");
         jdbcTemplate.update("alter table reservation alter column id restart with 1");
+        jdbcTemplate.update("alter table slot alter column id restart with 1");
         jdbcTemplate.update("alter table reservation_time alter column id restart with 1");
         jdbcTemplate.update("alter table theme alter column id restart with 1");
     }
@@ -82,7 +85,7 @@ public class ThemeTest {
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
+        reservation.put("date", LocalDate.now().plusDays(1).toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 

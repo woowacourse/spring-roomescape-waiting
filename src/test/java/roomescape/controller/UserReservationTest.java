@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,17 +24,23 @@ public class UserReservationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private static final String FUTURE_DATE = LocalDate.now().plusDays(1).toString();
+    private static final String FUTURE_DATE_2 = LocalDate.now().plusDays(2).toString();
+    private static final String PAST_DATE = LocalDate.now().minusDays(1).toString();
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");
+        jdbcTemplate.update("delete from slot");
         jdbcTemplate.update("delete from reservation_time");
         jdbcTemplate.update("delete from theme");
 
         jdbcTemplate.update("alter table waiting alter column id restart with 1");
         jdbcTemplate.update("alter table reservation alter column id restart with 1");
+        jdbcTemplate.update("alter table slot alter column id restart with 1");
         jdbcTemplate.update("alter table reservation_time alter column id restart with 1");
         jdbcTemplate.update("alter table theme alter column id restart with 1");
     }
@@ -64,7 +71,7 @@ public class UserReservationTest {
 
         Map<String, String> reservations = new HashMap<>();
         reservations.put("name", "브라운");
-        reservations.put("date", "2026-08-04");
+        reservations.put("date", FUTURE_DATE);
         reservations.put("timeId", "1");
         reservations.put("themeId", "1");
 
@@ -111,14 +118,14 @@ public class UserReservationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times/available?themeId=1&date=2026-06-04")
+                .when().get("/times/available?themeId=1&date=" + FUTURE_DATE)
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
 
         Map<String, String> reservations = new HashMap<>();
         reservations.put("name", "브라운");
-        reservations.put("date", "2026-06-04");
+        reservations.put("date", FUTURE_DATE);
         reservations.put("timeId", "1");
         reservations.put("themeId", "1");
 
@@ -130,7 +137,7 @@ public class UserReservationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times/available?themeId=1&date=2026-06-04")
+                .when().get("/times/available?themeId=1&date=" + FUTURE_DATE)
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
@@ -173,37 +180,38 @@ public class UserReservationTest {
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
+        reservation.put("date", FUTURE_DATE);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        String reservationId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract().jsonPath().getString("id");
 
         Map<String, Object> update = new HashMap<>();
         update.put("name", "브라운");
-        update.put("date", "2026-08-06");
+        update.put("date", FUTURE_DATE_2);
         update.put("timeId", 2);
         update.put("themeId", 1);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(update)
-                .when().patch("/reservations/1")
+                .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(200);
     }
 
     @Test
-    void 중복_예약시_409를_반환한다() {
+    void 중복_예약시_400을_반환한다() {
         createTheme();
         createTime("10:00");
 
-        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        Map<String, Object> reservation = createReservationBody("브라운", FUTURE_DATE, 1, 1);
         RestAssured.given().contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations").then().statusCode(201);
 
@@ -222,18 +230,19 @@ public class UserReservationTest {
         createTime("10:00");
         createTime("11:00");
 
-        Map<String, Object> reservation1 = createReservationBody("브라운", "2026-08-05", 1, 1);
-        RestAssured.given().contentType(ContentType.JSON).body(reservation1)
-                .when().post("/reservations").then().statusCode(201);
+        Map<String, Object> reservation1 = createReservationBody("브라운", FUTURE_DATE, 1, 1);
+        String reservationId = RestAssured.given().contentType(ContentType.JSON).body(reservation1)
+                .when().post("/reservations").then().statusCode(201)
+                .extract().jsonPath().getString("id");
 
-        Map<String, Object> reservation2 = createReservationBody("네오", "2026-08-05", 2, 1);
+        Map<String, Object> reservation2 = createReservationBody("네오", FUTURE_DATE, 2, 1);
         RestAssured.given().contentType(ContentType.JSON).body(reservation2)
                 .when().post("/reservations").then().statusCode(201);
 
-        Map<String, Object> update = createReservationBody("브라운", "2026-08-05", 2, 1);
+        Map<String, Object> update = createReservationBody("브라운", FUTURE_DATE, 2, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/1")
+                .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(409)
                 .body("errorCode", is("DUPLICATE_RESERVATION"))
@@ -245,10 +254,10 @@ public class UserReservationTest {
         createTheme();
         createTime("10:00");
 
-        Map<String, Object> update = createReservationBody("브라운", "2026-08-05", 1, 1);
+        Map<String, Object> update = createReservationBody("브라운", FUTURE_DATE, 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/999")
+                .when().put("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("errorCode", is("RESERVATION_NOT_FOUND"))
@@ -259,7 +268,7 @@ public class UserReservationTest {
     void 존재하지_않는_시간으로_예약시_404를_반환한다() {
         createTheme();
 
-        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 999, 1);
+        Map<String, Object> reservation = createReservationBody("브라운", FUTURE_DATE, 999, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
@@ -273,7 +282,7 @@ public class UserReservationTest {
     void 존재하지_않는_테마로_예약시_404를_반환한다() {
         createTime("10:00");
 
-        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 999);
+        Map<String, Object> reservation = createReservationBody("브라운", FUTURE_DATE, 1, 999);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
@@ -288,7 +297,7 @@ public class UserReservationTest {
         createTheme();
         createTime("10:00");
 
-        Map<String, Object> reservation = createReservationBody("브라운", "2020-01-01", 1, 1);
+        Map<String, Object> reservation = createReservationBody("브라운", PAST_DATE, 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
@@ -303,14 +312,15 @@ public class UserReservationTest {
         createTheme();
         createTime("10:00");
 
-        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
-        RestAssured.given().contentType(ContentType.JSON).body(reservation)
-                .when().post("/reservations").then().statusCode(201);
+        Map<String, Object> reservation = createReservationBody("브라운", FUTURE_DATE, 1, 1);
+        String reservationId = RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201)
+                .extract().jsonPath().getString("id");
 
-        Map<String, Object> update = createReservationBody("브라운", "2020-01-01", 1, 1);
+        Map<String, Object> update = createReservationBody("브라운", PAST_DATE, 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/1")
+                .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(400)
                 .body("errorCode", is("INVALID_DATE_OR_TIME"))
@@ -322,7 +332,7 @@ public class UserReservationTest {
         createTheme();
         createTime("10:00");
 
-        Map<String, Object> reservation = createReservationBody("", "2026-08-05", 1, 1);
+        Map<String, Object> reservation = createReservationBody("", FUTURE_DATE, 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")

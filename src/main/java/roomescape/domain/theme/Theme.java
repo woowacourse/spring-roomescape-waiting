@@ -29,4 +29,8 @@ public class Theme {
     public String getUrl() {
         return url;
     }
+
+    public boolean isEqual(Long id) {
+        return this.id.equals(id);
+    }
 }

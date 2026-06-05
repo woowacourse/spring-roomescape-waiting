@@ -48,11 +48,11 @@ public class ReservationWaitingControllerTest {
     private final static LocalDate tomorrow = LocalDate.now().plusDays(1);
     private final static LocalDateTime nowDateTime = LocalDateTime.now();
     private final static ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
-    private final static Theme theme = new Theme(1L, "test", "설명", "url");
+    private final static Theme theme = new Theme(2L, "test", "설명", "url");
 
     @Test
     void 예약_대기열이_정상_생성된다() throws Exception {
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 1L);
+        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
         ReservationWaitingResponse reservationWaitingResponse = new ReservationWaitingResponse(
                 1L, "테스트", tomorrow, ReservationTimeResponse.from(reservationTime), ThemeResponse.from(theme), 1L, nowDateTime);
 
@@ -67,14 +67,14 @@ public class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.date").value(tomorrow.toString()))
                 .andExpect(jsonPath("$.time.id").value(1L))
                 .andExpect(jsonPath("$.time.startAt").value("10:00"))
-                .andExpect(jsonPath("$.theme.id").value(1L))
+                .andExpect(jsonPath("$.theme.id").value(2L))
                 .andExpect(jsonPath("$.theme.name").value("test"))
                 .andExpect(jsonPath("$.sequence").value(1L));
     }
 
     @Test
     void 잘못된_시간_테마_id_생성시_에러_메세지_반환한다() throws Exception {
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 999L, 1L);
+        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 999L, 2L);
 
         given(reservationWaitingService.create(reservationWaitingRequest)).willThrow(new ReservationTimeNotFoundException(999L));
 
@@ -88,7 +88,7 @@ public class ReservationWaitingControllerTest {
 
     @Test
     void 과거_날짜로_예약대기열_생성시_에러_메세지_반환한다() throws Exception {
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", LocalDate.now().minusDays(1), 1L, 1L);
+        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", LocalDate.now().minusDays(1), 1L, 2L);
 
         given(reservationWaitingService.create(reservationWaitingRequest)).willThrow(new ExpiredDateTimeException());
 
@@ -102,7 +102,7 @@ public class ReservationWaitingControllerTest {
 
     @Test
     void 존재하지_않는_예약에_대기열_생성시_에러_메세지_반환한다() throws Exception {
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 1L);
+        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
 
         given(reservationWaitingService.create(reservationWaitingRequest)).willThrow(new ReservationAlreadyExistException());
 
@@ -116,7 +116,7 @@ public class ReservationWaitingControllerTest {
 
     @Test
     void 이미_예약한_이름으로_대기열_생성시_에러_메세지_반환한다() throws Exception {
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 1L);
+        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
 
         given(reservationWaitingService.create(reservationWaitingRequest)).willThrow(new InvalidInputException("이미 예약한 사용자는 대기열을 신청할 수 없습니다."));
 
@@ -130,7 +130,7 @@ public class ReservationWaitingControllerTest {
 
     @Test
     void 이미_대기열이_존재하는_예약에_중복_대기열_생성시_에러_메세지_반환한다() throws Exception {
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 1L);
+        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
 
         given(reservationWaitingService.create(reservationWaitingRequest)).willThrow(new InvalidInputException("이미 해당 예약에 대기열이 존재합니다."));
 
@@ -184,7 +184,7 @@ public class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$[0].date").value(tomorrow.toString()))
                 .andExpect(jsonPath("$[0].time.id").value(1L))
                 .andExpect(jsonPath("$[0].time.startAt").value("10:00"))
-                .andExpect(jsonPath("$[0].theme.id").value(1L))
+                .andExpect(jsonPath("$[0].theme.id").value(2L))
                 .andExpect(jsonPath("$[0].theme.name").value("test"))
                 .andExpect(jsonPath("$[0].sequence").value(1L));
     }
@@ -204,7 +204,7 @@ public class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$[0].date").value(tomorrow.toString()))
                 .andExpect(jsonPath("$[0].time.id").value(1L))
                 .andExpect(jsonPath("$[0].time.startAt").value("10:00"))
-                .andExpect(jsonPath("$[0].theme.id").value(1L))
+                .andExpect(jsonPath("$[0].theme.id").value(2L))
                 .andExpect(jsonPath("$[0].theme.name").value("test"))
                 .andExpect(jsonPath("$[0].sequence").value(1L));
     }
