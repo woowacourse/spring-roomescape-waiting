@@ -1,6 +1,5 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -19,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.ReservationStatus;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationOrderResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -45,10 +43,10 @@ public class ReservationControllerMockTest {
         ReservationResponse response = new ReservationResponse(
                 22L, "브라운", LocalDate.of(2027, 1, 1),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
-                new ThemeResponse(1L, "테마1", "설명", "썸네일"),
-                ReservationStatus.AVAILABLE
+                new ThemeResponse(1L, "테마1", "설명", "썸네일")
         );
-        given(reservationService.save(any())).willReturn(response);
+
+        given(reservationService.save(any(),any())).willReturn(response);
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,15 +64,15 @@ public class ReservationControllerMockTest {
                 LocalDate.of(2026, 6, 1),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(1L, "테마1", "설명", "썸네일"),
-                ReservationStatus.CONFIRMED,
                 1L
         );
-        given(reservationService.find(name)).willReturn(List.of(response));
+
+        given(reservationService.findByName(name)).willReturn(List.of(response));
 
         mockMvc.perform(get("/reservations/my-reservation").queryParam("name", name))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(name))
-                .andExpect(jsonPath("$[0].status").value("CONFIRMED"));
+                .andExpect(jsonPath("$[0].order").value(1));
     }
 
     @Test
