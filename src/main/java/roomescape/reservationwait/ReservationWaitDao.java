@@ -55,10 +55,11 @@ public class ReservationWaitDao {
                     (SELECT COUNT(*) + 1
                      FROM reservation_wait sub
                      WHERE sub.reservation_id = rw.reservation_id
-                       AND sub.created_at < rw.created_at) AS order_num
+                       AND (sub.created_at < rw.created_at
+                            OR (sub.created_at = rw.created_at AND sub.id < rw.id))) AS order_num
                 FROM reservation_wait rw
                 WHERE rw.member_id = ?
-                ORDER BY rw.created_at;
+                ORDER BY rw.created_at, rw.id;
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new WaitingProjection(
