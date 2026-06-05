@@ -183,6 +183,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void lockTheme(Long themeId) {
+        jdbcTemplate.queryForObject("SELECT id FROM theme WHERE id = ? FOR UPDATE", Long.class, themeId);
+    }
+
+    @Override
     public void cancel(Long id) {
         jdbcTemplate.update(
                 "UPDATE reservation SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",

@@ -21,6 +21,8 @@ public interface ReservationRepository {
 
     void cancel(Long id);
 
+    void lockTheme(Long themeId);
+
     boolean promoteEarliestWaiting(LocalDate date, Long timeId, Long themeId);
 
     boolean existsActiveConfirmed(LocalDate date, Long timeId, Long themeId);

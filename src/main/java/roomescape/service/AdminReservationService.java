@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -46,6 +47,7 @@ public class AdminReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
@@ -60,6 +62,8 @@ public class AdminReservationService {
                     return new ThemeNotFoundException(
                             "존재하지 않는 테마입니다: themeId=" + command.themeId());
                 });
+
+        reservationRepository.lockTheme(theme.getId());
 
         validateNoConflict(command);
 
@@ -87,6 +91,7 @@ public class AdminReservationService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> {
@@ -96,10 +101,12 @@ public class AdminReservationService {
         cancel(reservation);
     }
 
+    @Transactional
     public void cancel(Reservation reservation) {
         if (reservation.isCanceled()) {
             return;
         }
+        reservationRepository.lockTheme(reservation.getTheme().getId());
         reservationRepository.cancel(reservation.getId());
         if (reservation.isConfirmed()) {
             boolean promoted = reservationRepository.promoteEarliestWaiting(

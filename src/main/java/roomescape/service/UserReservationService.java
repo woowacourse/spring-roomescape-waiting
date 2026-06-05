@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -67,6 +68,7 @@ public class UserReservationService {
         reservationService.cancel(reservation);
     }
 
+    @Transactional
     public ReservationResult update(ReservationUpdateCommand command) {
         Reservation reservation = findReservation(command.id());
         validateOwner(reservation, command.reserverName());
@@ -84,6 +86,7 @@ public class UserReservationService {
                 });
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
         Long themeId = reservation.getTheme().getId();
+        reservationRepository.lockTheme(themeId);
         validateNoConflict(command, themeId);
 
         LocalDate oldDate = reservation.getDate();
