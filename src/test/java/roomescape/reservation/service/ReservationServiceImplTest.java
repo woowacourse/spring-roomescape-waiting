@@ -186,7 +186,7 @@ class ReservationServiceImplTest {
 
     @DisplayName("같은 슬롯/테마에 중복 예약을 시도하는 경우, 대기로 넘어가기 때문에 예외가 발생하지 않는다.")
     @Test
-    void create_중복_예약이면_예외() {
+    void create_중복_예약이면_대기로_저장() {
         // given
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
@@ -373,7 +373,7 @@ class ReservationServiceImplTest {
         Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
-        when(reservationRepository.hasConfirmedReservation(existing.getId(), newTime)).thenReturn(false);
+        when(reservationRepository.hasConfirmedReservation(theme.getId(), newTime)).thenReturn(false);
         when(reservationRepository.update(any(), any(), any(), any())).thenReturn(true);
 
         // when
@@ -435,9 +435,8 @@ class ReservationServiceImplTest {
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
-        when(reservationRepository.findEarliestWaiting(any(), any())).thenReturn(Optional.empty());
         when(timeService.findById(2L)).thenReturn(newTime);
-        when(reservationRepository.isDuplicatedWithName("라이", 2L, newTime)).thenReturn(true);
+        when(reservationRepository.isDuplicatedWithName("라이", 1L, newTime)).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(existing.getId(), newTime.getId()))
