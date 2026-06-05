@@ -110,7 +110,7 @@ public class WaitingDao {
                     w.name
                 FROM waiting w
                 WHERE w.slot_id=?
-                ORDER BY w.created_at ASC
+                ORDER BY w.created_at, w.id
                 LIMIT 1;
                 """;
 
