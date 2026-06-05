@@ -1,12 +1,10 @@
 package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
-import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -15,7 +13,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
-
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
@@ -47,10 +44,10 @@ public class ReservationWaitingService {
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
         Reservation targetReservation = validateTargetReservationExists(newReservationWaiting.getSlot());
-        boolean hasSameTimeBooking = reservationRepository.hasBookingAtSameTime(newReservationWaiting.toReservation(requestTime));
+        boolean hasSameTimeBooking = reservationRepository.hasBookingAtSameTime(
+                newReservationWaiting.toReservation(requestTime));
         boolean hasDuplicateWaiting = reservationWaitingRepository.hasWaitingAtSameTime(newReservationWaiting);
         newReservationWaiting.validate(targetReservation, hasSameTimeBooking, hasDuplicateWaiting);
-
 
         try {
             ReservationWaiting saved = reservationWaitingRepository.save(newReservationWaiting);
@@ -87,8 +84,6 @@ public class ReservationWaitingService {
                 requestTime
         );
     }
-
-
 
     private Reservation validateTargetReservationExists(ReservationSlot slot) {
         return reservationRepository.findBySlot(slot)

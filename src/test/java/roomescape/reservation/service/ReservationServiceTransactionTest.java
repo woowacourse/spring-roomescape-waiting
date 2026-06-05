@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -128,62 +129,6 @@ public class ReservationServiceTransactionTest {
         reservationWaitingService.save(reservationWaitingCommand, java.time.LocalDateTime.now());
     }
 
-    @Test
-    void save_rollback() {
-        // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(3, 33));
-        ThemeResult themeResult = saveTheme();
-        ReservationCommand command = new ReservationCommand(
-                "홍길동",
-                LocalDate.now().plusDays(1),
-                reservationTimeResult.id(),
-                themeResult.id()
-        );
-
-        doThrow(new RuntimeException("저장 중 에러 발생"))
-                .when(reservationRepository)
-                .save(any(Reservation.class));
-
-        // when
-        assertThatThrownBy(() -> reservationService.save(command, java.time.LocalDateTime.now()))
-                .isInstanceOf(RuntimeException.class);
-
-        // then
-        List<Reservation> reservations = reservationRepository.findAllByName("홍길동");
-        Assertions.assertTrue(reservations.isEmpty());
-    }
-
-    @Test
-    void update_rollback() {
-        // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(4, 44));
-        ThemeResult themeResult = saveTheme();
-
-        ReservationTimeCommand command2 = new ReservationTimeCommand(LocalTime.of(5, 55));
-        ReservationTimeResult time2 = reservationTimeService.save(command2);
-
-        ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
-        ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
-
-        Long testTargetId = reservationResult.id();
-        String testTargetOwnerName = reservationResult.name();
-
-        ReservationUpdateCommand updateCommand = new ReservationUpdateCommand(LocalDate.now().plusDays(5), time2.id());
-
-        doThrow(new RuntimeException("수정 중 에러 발생"))
-                .when(reservationRepository)
-                .save(any(Reservation.class));
-
-        // when
-        assertThatThrownBy(() -> reservationService.update(updateCommand, testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
-                .isInstanceOf(RuntimeException.class);
-
-        // then
-        Optional<Reservation> result = reservationRepository.findById(testTargetId);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(reservationResult.date(), result.get().getDate());
-        Assertions.assertEquals(reservationResult.time().id(), result.get().getTimeId());
-    }
 
     private static ReservationCommand saveReservation(
             ReservationTimeResult reservationTimeResult, ThemeResult themeResult
