@@ -21,7 +21,7 @@ public interface WaitingRepository {
 
     List<Waiting> findAllBySlotIdOrderById(long slotId);
 
-리    List<Waiting> findAllBySlotIds(List<Long> slotIds);
+    List<Waiting> findAllBySlotIds(List<Long> slotIds);
 
     List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
 
