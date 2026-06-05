@@ -42,6 +42,7 @@ public class Reservation {
 
     public Reservation update(String name, Slot slot) {
         validateNotExpired(this.slot);
+        validateNotExpired(slot);
         return new Reservation(this.id, name, slot, LocalDateTime.now());
     }
 
