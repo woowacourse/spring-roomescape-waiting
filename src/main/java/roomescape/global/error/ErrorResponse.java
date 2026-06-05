@@ -1,4 +1,4 @@
-package roomescape.error;
+package roomescape.global.error;
 
 public record ErrorResponse(ErrorCode code, String message) {
     public static ErrorResponse of(ErrorCode code) {

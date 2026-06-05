@@ -1,6 +1,6 @@
 package roomescape.time.domain;
 
-import roomescape.error.ErrorCode;
+import roomescape.global.error.ErrorCode;
 import roomescape.reservation.exception.PastReservationException;
 
 import java.time.LocalDate;

@@ -2,8 +2,8 @@ package roomescape.reservation.exception;
 
 import org.springframework.http.HttpStatus;
 
-import roomescape.error.BusinessException;
-import roomescape.error.ErrorCode;
+import roomescape.global.error.BusinessException;
+import roomescape.global.error.ErrorCode;
 
 public class ReservationNotFoundException extends BusinessException {
     public ReservationNotFoundException(Long id) {
