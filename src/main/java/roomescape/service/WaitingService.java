@@ -63,13 +63,18 @@ public class WaitingService {
         }
     }
 
-    public void promoteFirstWaiting(Reservation vacated, LocalDateTime now) {
-        promoteFirstWaiting(vacated.getDate(), vacated.getTime().getId(), vacated.getTheme().getId(),
-                vacated.getStoreId(), now);
+    public void promoteFirstWaiting(Reservation reservation, LocalDateTime now) {
+        promoteFirstWaitingBySlot(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getStoreId(),
+                now
+        );
     }
 
-    public void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId, Long storeId, LocalDateTime now) {
-        waitingDao.findFirst(date, timeId, themeId, storeId)
+    public void promoteFirstWaitingBySlot(LocalDate date, Long timeId, Long themeId, Long storeId, LocalDateTime now) {
+        waitingDao.findFirstForUpdate(date, timeId, themeId, storeId)
                 .ifPresent(first -> promote(first, now));
     }
 

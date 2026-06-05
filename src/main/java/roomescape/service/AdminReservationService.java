@@ -79,7 +79,7 @@ public class AdminReservationService {
         reservation.update(request.date(), time);
         Reservation updated = reservationDao.update(reservation);
         if (!previousDate.equals(updated.getDate()) || !previousTime.equals(updated.getTime())) {
-            waitingService.promoteFirstWaiting(previousDate, previousTime.getId(),
+            waitingService.promoteFirstWaitingBySlot(previousDate, previousTime.getId(),
                     updated.getTheme().getId(), updated.getStoreId(), now);
         }
         return updated;
