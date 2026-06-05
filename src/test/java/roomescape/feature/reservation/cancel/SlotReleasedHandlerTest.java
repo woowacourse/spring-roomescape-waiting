@@ -5,16 +5,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.feature.reservation.domain.Slot;
-import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.time.domain.Time;
-import roomescape.global.domain.EntityStatus;
+import roomescape.feature.reservation.domain.SlotKey;
 
 @ExtendWith(MockitoExtension.class)
 class SlotReleasedHandlerTest {
@@ -29,32 +25,29 @@ class SlotReleasedHandlerTest {
     @InjectMocks
     private SlotReleasedHandler reservationCancelHandler;
 
-    private static Slot slot() {
-        Time time = Time.reconstruct(TIME_ID, LocalTime.of(10, 0), EntityStatus.ACTIVE);
-        Theme theme = Theme.reconstruct(THEME_ID, "테마 이름", "테마 설명", "https://example.com/theme.png",
-                EntityStatus.ACTIVE);
-        return new Slot(DATE, time, theme);
+    private static SlotKey slotKey() {
+        return new SlotKey(DATE, TIME_ID, THEME_ID);
     }
 
     @Test
     void 이벤트를_받으면_대기_승격을_위임한다() {
         // given
-        Slot slot = slot();
-        SlotReleasedEvent event = new SlotReleasedEvent(slot);
+        SlotKey slotKey = slotKey();
+        SlotReleasedEvent event = new SlotReleasedEvent(slotKey);
 
         // when
         reservationCancelHandler.handleSlotReleasedEvent(event);
 
         // then
-        verify(waitingPromoter).promoteFastestWaiting(slot);
+        verify(waitingPromoter).promoteFastestWaiting(slotKey);
     }
 
     @Test
     void 승격_위임_중_예외가_발생해도_예외를_전파하지_않는다() {
         // given
-        Slot slot = slot();
-        SlotReleasedEvent event = new SlotReleasedEvent(slot);
-        doThrow(new RuntimeException("승격 실패")).when(waitingPromoter).promoteFastestWaiting(slot);
+        SlotKey slotKey = slotKey();
+        SlotReleasedEvent event = new SlotReleasedEvent(slotKey);
+        doThrow(new RuntimeException("승격 실패")).when(waitingPromoter).promoteFastestWaiting(slotKey);
 
         // when & then
         assertThatNoException().isThrownBy(() -> reservationCancelHandler.handleSlotReleasedEvent(event));

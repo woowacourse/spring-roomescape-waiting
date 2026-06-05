@@ -92,7 +92,7 @@ class ReservationServiceTest {
                 2L, new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING);
             when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자")))
                 .thenReturn(List.of(waiting));
-            when(reservationRepository.countByIdLessThanEqualAndSlot(2L, waiting.getSlot()))
+            when(reservationRepository.countByIdLessThanEqualAndSlot(2L, waiting.getSlot().toSlotKey()))
                 .thenReturn(2);
 
             // when
@@ -174,7 +174,7 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE);
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(date, time, theme)))
+            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(date, time, theme).toSlotKey()))
                 .thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -241,7 +241,7 @@ class ReservationServiceTest {
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(date, time, theme)))
+            when(reservationRepository.existsActiveOrWaitingReservation(new Slot(date, time, theme).toSlotKey()))
                 .thenReturn(true);
 
             // when & then
@@ -278,7 +278,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
-            when(reservationRepository.existsActiveOrWaitingReservation(updated.getSlot())).thenReturn(false);
+            when(reservationRepository.existsActiveOrWaitingReservation(updated.getSlot().toSlotKey())).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -314,7 +314,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
-            when(reservationRepository.existsActiveOrWaitingReservation(updated.getSlot())).thenReturn(false);
+            when(reservationRepository.existsActiveOrWaitingReservation(updated.getSlot().toSlotKey())).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -324,9 +324,9 @@ class ReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor =
                 ArgumentCaptor.forClass(SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().slot().getTimeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().getThemeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().getDate()).isEqualTo(futureDate);
+            assertThat(captor.getValue().slotKey().timeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slotKey().themeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slotKey().date()).isEqualTo(futureDate);
         }
 
         @Test
@@ -500,7 +500,7 @@ class ReservationServiceTest {
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsActiveOrWaitingReservation(
-                new Slot(futureDate, time, theme))).thenReturn(true);
+                new Slot(futureDate, time, theme).toSlotKey())).thenReturn(true);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
@@ -557,9 +557,9 @@ class ReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor = ArgumentCaptor.forClass(
                     SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().slot().getTimeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().getThemeId()).isEqualTo(1L);
-            assertThat(captor.getValue().slot().getDate()).isEqualTo(futureDate);
+            assertThat(captor.getValue().slotKey().timeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slotKey().themeId()).isEqualTo(1L);
+            assertThat(captor.getValue().slotKey().date()).isEqualTo(futureDate);
         }
 
         @Test

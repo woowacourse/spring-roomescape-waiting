@@ -18,6 +18,7 @@ import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
@@ -30,6 +31,7 @@ class WaitingPromoterTest {
     private static final Long THEME_ID = 1L;
     private static final LocalDate DATE = LocalDate.now().plusYears(1);
     private static final Slot SLOT = new Slot(DATE, time(), theme());
+    private static final SlotKey SLOT_KEY = SLOT.toSlotKey();
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -53,13 +55,13 @@ class WaitingPromoterTest {
             // given
             Reservation waiting = Reservation.reconstruct(
                     1L, new ReserverName("예약자"), DATE, time(), theme(), ReservationStatus.WAITING);
-            when(reservationRepository.findLowestIdWaitingReservation(SLOT))
+            when(reservationRepository.findLowestIdWaitingReservation(SLOT_KEY))
                     .thenReturn(Optional.of(waiting));
             when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
                     .thenReturn(1);
 
             // when
-            waitingPromoter.promoteFastestWaiting(SLOT);
+            waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
@@ -68,11 +70,11 @@ class WaitingPromoterTest {
         @Test
         void 슬롯에_이미_ACTIVE_예약이_있으면_승격하지_않는다() {
             // given
-            when(reservationRepository.existsActiveReservation(SLOT))
+            when(reservationRepository.existsActiveReservation(SLOT_KEY))
                     .thenReturn(true);
 
             // when
-            waitingPromoter.promoteFastestWaiting(SLOT);
+            waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
             verify(reservationRepository, never()).findLowestIdWaitingReservation(any());
@@ -82,11 +84,11 @@ class WaitingPromoterTest {
         @Test
         void 대기_예약이_없으면_아무것도_확정하지_않는다() {
             // given
-            when(reservationRepository.findLowestIdWaitingReservation(SLOT))
+            when(reservationRepository.findLowestIdWaitingReservation(SLOT_KEY))
                     .thenReturn(Optional.empty());
 
             // when
-            waitingPromoter.promoteFastestWaiting(SLOT);
+            waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
             verify(reservationRepository, never()).changeStatus(any(), any(), any());
@@ -99,7 +101,7 @@ class WaitingPromoterTest {
                     1L, new ReserverName("1순위"), DATE, time(), theme(), ReservationStatus.WAITING);
             Reservation second = Reservation.reconstruct(
                     2L, new ReserverName("2순위"), DATE, time(), theme(), ReservationStatus.WAITING);
-            when(reservationRepository.findLowestIdWaitingReservation(SLOT))
+            when(reservationRepository.findLowestIdWaitingReservation(SLOT_KEY))
                     .thenReturn(Optional.of(first))
                     .thenReturn(Optional.of(second));
             when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
@@ -108,7 +110,7 @@ class WaitingPromoterTest {
                     .thenReturn(1);
 
             // when
-            waitingPromoter.promoteFastestWaiting(SLOT);
+            waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);

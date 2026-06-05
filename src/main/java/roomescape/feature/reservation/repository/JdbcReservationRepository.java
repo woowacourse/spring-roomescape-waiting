@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
-import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.domain.EntityStatus;
@@ -54,7 +54,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findLowestIdWaitingReservation(Slot slot) {
+    public Optional<Reservation> findLowestIdWaitingReservation(SlotKey slotKey) {
         String findSql = """
                 SELECT r.id, r.name, r.date, r.status, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
@@ -68,9 +68,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 LIMIT 1
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("date", slot.getDate())
-                .addValue("timeId", slot.getTimeId())
-                .addValue("themeId", slot.getThemeId());
+                .addValue("date", slotKey.date())
+                .addValue("timeId", slotKey.timeId())
+                .addValue("themeId", slotKey.themeId());
 
         try {
             Reservation reservation = jdbcTemplate.queryForObject(
@@ -85,7 +85,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsActiveReservation(Slot slot) {
+    public boolean existsActiveReservation(SlotKey slotKey) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -97,24 +97,19 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("date", slot.getDate())
-                .addValue("timeId", slot.getTimeId())
-                .addValue("themeId", slot.getThemeId());
+                .addValue("date", slotKey.date())
+                .addValue("timeId", slotKey.timeId())
+                .addValue("themeId", slotKey.themeId());
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
         return Boolean.TRUE.equals(exists);
     }
 
     @Override
-    public List<Slot> findDeadSlots() {
+    public List<SlotKey> findDeadSlotKeys() {
         String sql = """
-                SELECT DISTINCT w.date,
-                       rt.id AS time_id, rt.start_at, rt.status AS time_status,
-                       t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                       t.status AS theme_status
+                SELECT DISTINCT w.date, w.time_id, w.theme_id
                 FROM reservation w
-                JOIN reservation_time rt ON w.time_id = rt.id
-                JOIN theme t ON w.theme_id = t.id
                 WHERE w.status = 'WAITING'
                   AND NOT EXISTS (
                       SELECT 1
@@ -128,10 +123,10 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> new Slot(
+                (rs, rowNum) -> new SlotKey(
                         rs.getDate("date").toLocalDate(),
-                        mapTime(rs),
-                        mapTheme(rs)
+                        rs.getLong("time_id"),
+                        rs.getLong("theme_id")
                 )
         );
     }
@@ -304,7 +299,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int countByIdLessThanEqualAndSlot(Long reservationId, Slot slot) {
+    public int countByIdLessThanEqualAndSlot(Long reservationId, SlotKey slotKey) {
         String countSql = """
                 SELECT COUNT(*)
                 FROM reservation
@@ -316,9 +311,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("id", reservationId)
-                .addValue("date", slot.getDate())
-                .addValue("timeId", slot.getTimeId())
-                .addValue("themeId", slot.getThemeId());
+                .addValue("date", slotKey.date())
+                .addValue("timeId", slotKey.timeId())
+                .addValue("themeId", slotKey.themeId());
 
         return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
     }
@@ -366,7 +361,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsActiveOrWaitingReservation(Slot slot) {
+    public boolean existsActiveOrWaitingReservation(SlotKey slotKey) {
         String existsSql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -378,9 +373,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-                "date", slot.getDate(),
-                "timeId", slot.getTimeId(),
-                "themeId", slot.getThemeId()
+                "date", slotKey.date(),
+                "timeId", slotKey.timeId(),
+                "themeId", slotKey.themeId()
         ));
 
         Boolean exists = jdbcTemplate.queryForObject(existsSql, parameters, Boolean.class);

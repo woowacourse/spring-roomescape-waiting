@@ -7,18 +7,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 import roomescape.feature.reservation.repository.ReservationRepository;
-import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.time.domain.Time;
-import roomescape.global.domain.EntityStatus;
 
 @ExtendWith(MockitoExtension.class)
 class DeadSlotPromotionSchedulerTest {
@@ -33,17 +29,14 @@ class DeadSlotPromotionSchedulerTest {
     @InjectMocks
     private DeadSlotPromotionScheduler deadSlotPromotionScheduler;
 
-    private static Slot slot(long timeId, long themeId) {
-        return new Slot(
-                DATE,
-                Time.reconstruct(timeId, LocalTime.of(10, 0), EntityStatus.ACTIVE),
-                Theme.reconstruct(themeId, "테마 이름", "테마 설명", "https://example.com/theme.png", EntityStatus.ACTIVE));
+    private static SlotKey slotKey(long timeId, long themeId) {
+        return new SlotKey(DATE, timeId, themeId);
     }
 
     @Test
     void 죽은_슬롯이_없으면_승격을_시도하지_않는다() {
         // given
-        when(reservationRepository.findDeadSlots()).thenReturn(List.of());
+        when(reservationRepository.findDeadSlotKeys()).thenReturn(List.of());
 
         // when
         deadSlotPromotionScheduler.promoteDeadSlots();
@@ -55,30 +48,30 @@ class DeadSlotPromotionSchedulerTest {
     @Test
     void 죽은_슬롯마다_가장_빠른_대기를_승격한다() {
         // given
-        Slot firstDeadSlot = slot(1L, 1L);
-        Slot secondDeadSlot = slot(2L, 2L);
-        when(reservationRepository.findDeadSlots()).thenReturn(List.of(firstDeadSlot, secondDeadSlot));
+        SlotKey firstDeadSlotKey = slotKey(1L, 1L);
+        SlotKey secondDeadSlotKey = slotKey(2L, 2L);
+        when(reservationRepository.findDeadSlotKeys()).thenReturn(List.of(firstDeadSlotKey, secondDeadSlotKey));
 
         // when
         deadSlotPromotionScheduler.promoteDeadSlots();
 
         // then
-        verify(waitingPromoter).promoteFastestWaiting(firstDeadSlot);
-        verify(waitingPromoter).promoteFastestWaiting(secondDeadSlot);
+        verify(waitingPromoter).promoteFastestWaiting(firstDeadSlotKey);
+        verify(waitingPromoter).promoteFastestWaiting(secondDeadSlotKey);
     }
 
     @Test
     void 한_슬롯의_승격이_실패해도_나머지_슬롯을_계속_승격한다() {
         // given
-        Slot failingDeadSlot = slot(1L, 1L);
-        Slot remainingDeadSlot = slot(2L, 2L);
-        when(reservationRepository.findDeadSlots()).thenReturn(List.of(failingDeadSlot, remainingDeadSlot));
+        SlotKey failingDeadSlotKey = slotKey(1L, 1L);
+        SlotKey remainingDeadSlotKey = slotKey(2L, 2L);
+        when(reservationRepository.findDeadSlotKeys()).thenReturn(List.of(failingDeadSlotKey, remainingDeadSlotKey));
 
         doThrow(new RuntimeException("승격 실패"))
-                .when(waitingPromoter).promoteFastestWaiting(failingDeadSlot);
+                .when(waitingPromoter).promoteFastestWaiting(failingDeadSlotKey);
 
         // when & then
         assertThatNoException().isThrownBy(() -> deadSlotPromotionScheduler.promoteDeadSlots());
-        verify(waitingPromoter).promoteFastestWaiting(remainingDeadSlot);
+        verify(waitingPromoter).promoteFastestWaiting(remainingDeadSlotKey);
     }
 }

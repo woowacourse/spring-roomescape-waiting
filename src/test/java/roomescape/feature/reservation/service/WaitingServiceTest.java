@@ -85,7 +85,7 @@ class WaitingServiceTest {
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.existsActiveReservation(new Slot(date, time, theme)))
+            when(reservationRepository.existsActiveReservation(new Slot(date, time, theme).toSlotKey()))
                 .thenReturn(true);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -112,7 +112,7 @@ class WaitingServiceTest {
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.existsActiveReservation(new Slot(date, time, theme)))
+            when(reservationRepository.existsActiveReservation(new Slot(date, time, theme).toSlotKey()))
                 .thenReturn(false);
 
             // when & then

@@ -1,8 +1,8 @@
 package roomescape.feature.reservation.cancel;
 
-import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 
 public record SlotReleasedEvent(
-        Slot slot
+        SlotKey slotKey
 ) {
 }

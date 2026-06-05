@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
-import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
@@ -387,7 +387,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.WAITING));
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndSlot(waiting.getId(), waiting.getSlot());
+            int actual = reservationRepository.countByIdLessThanEqualAndSlot(waiting.getId(), waiting.getSlot().toSlotKey());
 
             // then
             assertThat(actual).isEqualTo(1);
@@ -405,7 +405,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자3"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndSlot(last.getId(), last.getSlot());
+            int actual = reservationRepository.countByIdLessThanEqualAndSlot(last.getId(), last.getSlot().toSlotKey());
 
             // then
             assertThat(actual).isEqualTo(3);
@@ -425,7 +425,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자3"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndSlot(waiting.getId(), waiting.getSlot());
+            int actual = reservationRepository.countByIdLessThanEqualAndSlot(waiting.getId(), waiting.getSlot().toSlotKey());
 
             // then
             assertThat(actual).isEqualTo(1);
@@ -448,7 +448,7 @@ class JdbcReservationRepositoryTest {
             Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
-            boolean actual = reservationRepository.existsActiveReservation(reservation.getSlot());
+            boolean actual = reservationRepository.existsActiveReservation(reservation.getSlot().toSlotKey());
 
             // then
             assertThat(actual).isTrue();
@@ -464,7 +464,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            boolean actual = reservationRepository.existsActiveReservation(waiting.getSlot());
+            boolean actual = reservationRepository.existsActiveReservation(waiting.getSlot().toSlotKey());
 
             // then
             assertThat(actual).isFalse();
@@ -479,7 +479,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.update(reservation.cancelActive(new ReserverName(ReservationFixture.FUTURE.getName())));
 
             // when
-            boolean actual = reservationRepository.existsActiveReservation(reservation.getSlot());
+            boolean actual = reservationRepository.existsActiveReservation(reservation.getSlot().toSlotKey());
 
             // then
             assertThat(actual).isFalse();
@@ -711,11 +711,11 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("대기자"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            List<Slot> actual = reservationRepository.findDeadSlots();
+            List<SlotKey> actual = reservationRepository.findDeadSlotKeys();
 
             // then
             assertThat(actual)
-                .extracting(Slot::getTimeId, Slot::getThemeId, Slot::getDate)
+                .extracting(SlotKey::timeId, SlotKey::themeId, SlotKey::date)
                 .containsExactly(tuple(time.getId(), theme.getId(), date));
         }
 
@@ -731,7 +731,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("대기자"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            List<Slot> actual = reservationRepository.findDeadSlots();
+            List<SlotKey> actual = reservationRepository.findDeadSlotKeys();
 
             // then
             assertThat(actual).isEmpty();
@@ -749,11 +749,11 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("대기자2"), date, time, theme, ReservationStatus.WAITING));
 
             // when
-            List<Slot> actual = reservationRepository.findDeadSlots();
+            List<SlotKey> actual = reservationRepository.findDeadSlotKeys();
 
             // then
             assertThat(actual)
-                .extracting(Slot::getTimeId, Slot::getThemeId, Slot::getDate)
+                .extracting(SlotKey::timeId, SlotKey::themeId, SlotKey::date)
                 .containsExactly(tuple(time.getId(), theme.getId(), date));
         }
     }
@@ -774,7 +774,7 @@ class JdbcReservationRepositoryTest {
             Reservation active = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when & then
-            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getSlot())).isTrue();
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getSlot().toSlotKey())).isTrue();
         }
 
         @Test
@@ -789,7 +789,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date, time, theme, ReservationStatus.WAITING));
 
             // when & then
-            assertThat(reservationRepository.existsActiveOrWaitingReservation(waiting.getSlot())).isTrue();
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(waiting.getSlot().toSlotKey())).isTrue();
         }
 
         @Test
@@ -803,7 +803,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.update(active.delete());
 
             // when & then
-            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getSlot())).isFalse();
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getSlot().toSlotKey())).isFalse();
         }
     }
 }

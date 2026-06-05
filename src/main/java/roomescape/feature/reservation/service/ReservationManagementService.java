@@ -62,7 +62,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
             return null;
         }
 
-        return reservationRepository.countByIdLessThanEqualAndSlot(reservation.getId(), reservation.getSlot());
+        return reservationRepository.countByIdLessThanEqualAndSlot(reservation.getId(), reservation.getSlot().toSlotKey());
     }
 
     @Override
@@ -129,7 +129,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
         validateNotReservedOrWaitedByOther(updated);
 
-        eventPublisher.publishEvent(new SlotReleasedEvent(existingReservation.getSlot()));
+        eventPublisher.publishEvent(new SlotReleasedEvent(existingReservation.getSlot().toSlotKey()));
 
         return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
     }
@@ -147,7 +147,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
-        eventPublisher.publishEvent(new SlotReleasedEvent(canceledReservation.getSlot()));
+        eventPublisher.publishEvent(new SlotReleasedEvent(canceledReservation.getSlot().toSlotKey()));
 
         return reservationMapper.toCancelResponseDto(canceledReservation);
     }
@@ -165,7 +165,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
         reservationRepository.update(reservation.delete());
 
         if (reservation.getStatus() == ReservationStatus.ACTIVE) {
-            eventPublisher.publishEvent(new SlotReleasedEvent(reservation.getSlot()));
+            eventPublisher.publishEvent(new SlotReleasedEvent(reservation.getSlot().toSlotKey()));
         }
     }
 
@@ -203,7 +203,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     }
 
     private void validateNotReservedOrWaitedByOther(Reservation reservation) {
-        if (reservationRepository.existsActiveOrWaitingReservation(reservation.getSlot())) {
+        if (reservationRepository.existsActiveOrWaitingReservation(reservation.getSlot().toSlotKey())) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
     }
@@ -221,7 +221,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     }
 
     private void validateAlreadyReserved(Reservation reservation) {
-        boolean alreadyReserved = reservationRepository.existsActiveReservation(reservation.getSlot());
+        boolean alreadyReserved = reservationRepository.existsActiveReservation(reservation.getSlot().toSlotKey());
 
         if (!alreadyReserved) {
             throw new GeneralException(ReservationErrorType.NOT_RESERVED);

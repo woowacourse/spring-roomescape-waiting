@@ -165,9 +165,9 @@ class AdminReservationServiceTest {
             ArgumentCaptor<SlotReleasedEvent> captor =
                 ArgumentCaptor.forClass(SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().slot().getTimeId()).isEqualTo(time.getId());
-            assertThat(captor.getValue().slot().getThemeId()).isEqualTo(theme.getId());
-            assertThat(captor.getValue().slot().getDate()).isEqualTo(date);
+            assertThat(captor.getValue().slotKey().timeId()).isEqualTo(time.getId());
+            assertThat(captor.getValue().slotKey().themeId()).isEqualTo(theme.getId());
+            assertThat(captor.getValue().slotKey().date()).isEqualTo(date);
         }
 
         @Test

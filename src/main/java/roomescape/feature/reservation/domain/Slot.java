@@ -37,6 +37,10 @@ public class Slot {
         return theme.getId();
     }
 
+    public SlotKey toSlotKey() {
+        return new SlotKey(getDate(), getTimeId(), getThemeId());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

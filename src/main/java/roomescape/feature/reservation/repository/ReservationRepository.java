@@ -6,17 +6,17 @@ import java.util.Optional;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
-import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 
 public interface ReservationRepository {
 
     List<Reservation> findAllReservations();
 
-    Optional<Reservation> findLowestIdWaitingReservation(Slot slot);
+    Optional<Reservation> findLowestIdWaitingReservation(SlotKey slotKey);
 
-    boolean existsActiveReservation(Slot slot);
+    boolean existsActiveReservation(SlotKey slotKey);
 
-    List<Slot> findDeadSlots();
+    List<SlotKey> findDeadSlotKeys();
 
     List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name);
 
@@ -30,11 +30,11 @@ public interface ReservationRepository {
 
     int changeStatus(Long id, ReservationStatus from, ReservationStatus to);
 
-    int countByIdLessThanEqualAndSlot(Long id, Slot slot);
+    int countByIdLessThanEqualAndSlot(Long id, SlotKey slotKey);
 
     boolean existsReservationByIdAndNotDeleted(Long id);
 
     boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status);
 
-    boolean existsActiveOrWaitingReservation(Slot slot);
+    boolean existsActiveOrWaitingReservation(SlotKey slotKey);
 }

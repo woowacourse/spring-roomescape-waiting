@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
-import roomescape.feature.reservation.domain.Slot;
+import roomescape.feature.reservation.domain.SlotKey;
 import roomescape.feature.reservation.repository.ReservationRepository;
 
 @Slf4j
@@ -32,12 +32,12 @@ public class WaitingPromoter {
             backoff = @Backoff(delay = PROMOTION_BACKOFF_MILLIS, multiplier = PROMOTION_BACKOFF_MULTIPLIER)
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void promoteFastestWaiting(Slot slot) {
-        if (reservationRepository.existsActiveReservation(slot)) {
+    public void promoteFastestWaiting(SlotKey slotKey) {
+        if (reservationRepository.existsActiveReservation(slotKey)) {
             return;
         }
 
-        Optional<Reservation> candidate = reservationRepository.findLowestIdWaitingReservation(slot);
+        Optional<Reservation> candidate = reservationRepository.findLowestIdWaitingReservation(slotKey);
         if (candidate.isEmpty()) {
             return;
         }
@@ -47,15 +47,15 @@ public class WaitingPromoter {
 
         // 후보 대기가 그 사이 사라졌다면 다음 순번으로 재시도한다.
         if (changedRowCount <= 0) {
-            promoteFastestWaiting(slot);
+            promoteFastestWaiting(slotKey);
         }
     }
 
     @Recover
-    public void recoverPromotion(DataAccessException exception, Slot slot) {
+    public void recoverPromotion(DataAccessException exception, SlotKey slotKey) {
         log.error(
                 "대기 예약 자동 승격에 재시도 후에도 실패했습니다. date={}, timeId={}, themeId={}",
-                slot.getDate(), slot.getTimeId(), slot.getThemeId(), exception
+                slotKey.date(), slotKey.timeId(), slotKey.themeId(), exception
         );
     }
 }
