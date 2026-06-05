@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeInUseException;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
@@ -14,6 +15,7 @@ import roomescape.theme.service.dto.request.ThemeCreateRequest;
 import roomescape.theme.service.dto.response.ThemeResponse;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ThemeService {
 
@@ -29,10 +31,10 @@ public class ThemeService {
         );
 
         Theme theme = themeRepository.save(themeWithoutId);
-
         return ThemeResponse.from(theme);
     }
 
+    @Transactional(readOnly = true)
     public Theme getById(final long themeId) {
         return themeRepository.findById(themeId)
             .orElseThrow(ThemeNotFoundException::new);
@@ -46,6 +48,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate today = LocalDate.now(clock);
         final LocalDate startDate = today.minusDays(POPULAR_THEME_PERIOD_DAYS);

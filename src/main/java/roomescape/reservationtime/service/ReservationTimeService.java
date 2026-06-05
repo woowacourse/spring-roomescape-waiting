@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
@@ -12,11 +13,13 @@ import roomescape.reservationtime.service.dto.request.ReservationTimeCreateReque
 import roomescape.reservationtime.service.dto.response.ReservationTimeResponse;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -24,18 +27,16 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ReservationTime getById(final long timeId) {
         return reservationTimeRepository.findById(timeId)
             .orElseThrow(ReservationTimeNotFoundException::new);
     }
 
     public ReservationTimeResponse create(ReservationTimeCreateRequest data) {
-        final ReservationTime reservationTime = ReservationTime.create(
-                data.startAt()
-        );
+        final ReservationTime reservationTime = ReservationTime.create(data.startAt());
 
         final ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
-
         return ReservationTimeResponse.from(savedTime);
     }
 

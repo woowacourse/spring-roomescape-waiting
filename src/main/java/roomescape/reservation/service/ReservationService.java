@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
@@ -17,11 +16,9 @@ import roomescape.reservation.domain.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
-import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -30,12 +27,10 @@ import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.response.ThemeResponse;
 import roomescape.waiting.repository.WaitingRepository;
-import roomescape.waiting.repository.dto.WaitingWithRank;
-import roomescape.waiting.service.dto.response.WaitingResponse;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class ReservationService {
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
@@ -47,91 +42,70 @@ public class ReservationService {
     private final Clock clock;
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
+    public List<Reservation> findAllReservations() {
+        return reservationRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public ReservationsAndWaitingsResponse findReservationsAndWaitingsByCustomerName(final String customerName) {
-        final LocalDateTime now = LocalDateTime.now(clock);
-        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+    public List<Reservation> findAllByCustomerNameAndAfterNow(final String customerName) {
+        return reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
             new CustomerName(customerName),
-            now
+            LocalDateTime.now(clock)
         );
-        final List<WaitingWithRank> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
-            customerName,
-            now
-        );
-
-        return ReservationsAndWaitingsResponse.from(
-            reservations,
-            waitingsWithRank.stream()
-                .map(waitingWithRank -> WaitingResponse.of(
-                    waitingWithRank.waiting(),
-                    waitingWithRank.rank())
-                ).toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTimesWithStatus> getReservationTimeStatuses(final LocalDate date, final Long themeId) {
+    public List<ReservationTimesWithStatus> findReservationTimeStatuses(final LocalDate date, final Long themeId) {
         return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId);
     }
 
-    public ReservationResponse create(final ReservationCreateRequest data) {
-        final ReservationTime reservationTime = getReservationTime(data.timeId());
-        final Theme theme = getTheme(data.themeId());
+    @Transactional(readOnly = true)
+    public ReservationOptionResponse getReservationOptions() {
+        LocalDate today = LocalDate.now(clock);
+        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
 
-        final Reservation reservation = Reservation.create(
-                data.name(),
-                data.date(),
-                reservationTime,
-                theme,
-                LocalDateTime.now(clock)
-        );
+        List<ThemeResponse> themes = themeRepository.findAll()
+            .stream()
+            .map(ThemeResponse::from)
+            .toList();
 
-        final Reservation savedReservation = saveReservation(reservation);
-
-        return ReservationResponse.from(savedReservation);
+        return new ReservationOptionResponse(dates, themes);
     }
 
-    public ReservationResponse create(
+    @Transactional(readOnly = true)
+    public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
+        return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
+    }
+
+    public Reservation create(
         final String customerName,
         final LocalDate reservationDate,
-        final long timeId,
-        final long themeId
+        final ReservationTime time,
+        final Theme theme
     ) {
-        final ReservationTime reservationTime = getReservationTime(timeId);
-        final Theme theme = getTheme(themeId);
-
         final Reservation reservation = Reservation.create(
             customerName,
             reservationDate,
-            reservationTime,
+            time,
             theme,
             LocalDateTime.now(clock)
         );
-        final Reservation savedReservation = saveReservation(reservation);
-
-        return ReservationResponse.from(savedReservation);
+        return saveReservation(reservation);
     }
 
-    public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest data) {
+    public Reservation updateByCustomer(final Long reservationId, final ReservationUpdateRequest data) {
         final Reservation originReservation = getReservation(reservationId);
         originReservation.validateModifiableByCustomer(LocalDate.now(clock));
 
         return updateSchedule(data, originReservation);
     }
 
-    public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest data) {
+    public Reservation updateByAdmin(final Long reservationId, final ReservationUpdateRequest data) {
         final Reservation originReservation = getReservation(reservationId);
 
         return updateSchedule(data, originReservation);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancel(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
         reservation.validateCancelableByCustomer(LocalDate.now(clock));
@@ -143,25 +117,7 @@ public class ReservationService {
         deleteReservation(reservationId);
     }
 
-    @Transactional(readOnly = true)
-    public ReservationOptionResponse getReservationOptions() {
-        LocalDate today = LocalDate.now(clock);
-        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
-
-        List<ThemeResponse> themes = themeRepository.findAll()
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
-
-        return new ReservationOptionResponse(dates, themes);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
-        return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
-    }
-
-    private ReservationResponse updateSchedule(final ReservationUpdateRequest data, final Reservation originReservation) {
+    private Reservation updateSchedule(final ReservationUpdateRequest data, final Reservation originReservation) {
         final ReservationTime newReservationTime = getReservationTime(data.timeId());
 
         final Reservation updatedReservation = originReservation.changeSchedule(
@@ -169,9 +125,8 @@ public class ReservationService {
                 newReservationTime,
                 LocalDateTime.now(clock)
         );
-        final Reservation reservation = updateReservation(updatedReservation);
 
-        return ReservationResponse.from(reservation);
+        return updateReservation(updatedReservation);
     }
 
     private Reservation saveReservation(final Reservation reservation) {
@@ -191,34 +146,12 @@ public class ReservationService {
             if (!updated) {
                 throw new ReservationNotFoundException();
             }
-
             return reservation;
         } catch (DuplicateKeyException exception) {
             throw new ReservationAlreadyExistsException(exception);
         } catch (DataIntegrityViolationException exception) {
             throw new ReservationOptionChangedException(exception);
         }
-    }
-
-    private void promoteEarliestWaiting(final Reservation cancelledReservation) {
-        if (!cancelledReservation.isFutureSlot(LocalDateTime.now(clock))) {
-            return;
-        }
-
-        waitingRepository.findEarliestBySlot(
-                cancelledReservation.getDate(),
-                cancelledReservation.getTime().getId(),
-                cancelledReservation.getTheme().getId()
-        ).ifPresent(waiting -> {
-            waitingRepository.deleteById(waiting.getId());
-
-            saveReservation(Reservation.promote(
-                    waiting.getCustomerName(),
-                    waiting.getReservationDate(),
-                    waiting.getTime(),
-                    waiting.getTheme()
-            ));
-        });
     }
 
     private void deleteReservation(final Long reservationId) {
@@ -237,10 +170,5 @@ public class ReservationService {
     private ReservationTime getReservationTime(final Long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
                 .orElseThrow(ReservationTimeNotFoundException::new);
-    }
-
-    private Theme getTheme(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(ThemeNotFoundException::new);
     }
 }

@@ -28,9 +28,10 @@ public class WaitingPromotionService {
             reservationService.create(
                 waiting.getCustomerNameValue(),
                 waiting.getReservationDate(),
-                waiting.getTimeId(),
-                waiting.getThemeId()
+                waiting.getTime(),
+                waiting.getTheme()
             );
         });
+
     }
 }
