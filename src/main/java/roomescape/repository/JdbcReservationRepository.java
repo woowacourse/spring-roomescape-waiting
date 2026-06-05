@@ -92,31 +92,17 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findByIdForUpdate(long reservationId) {
         String sql = """
                 SELECT
-                    r.id AS r_id,
-                    r.name,
-                    r.status,
-                    ts.id AS theme_slot_id,
-                    ts.date,
-                    ts.is_reserved,
-                    t.id AS t_id,
-                    t.start_at,
-                    theme.id as theme_id,
-                    theme.name AS theme_name,
-                    theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
+                    r.id
                 FROM
                     reservation r
-                        INNER JOIN
-                        theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN
-                        time t ON ts.time_id = t.id
-                        INNER JOIN
-                        theme theme ON ts.theme_id = theme.id
                 WHERE r.id = ?
                 FOR UPDATE
                 """;
 
-        return jdbcTemplate.query(sql, rowMapper(), reservationId).stream().findFirst();
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), reservationId)
+                .stream()
+                .findFirst()
+                .flatMap(this::findById);
     }
 
     @Override

@@ -59,6 +59,15 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("식별자로 예약 row를 잠그고 예약 객체를 조회한다.")
+    void findByIdForUpdate() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_14, false);
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
+        Reservation foundReservation = jdbcReservationRepository.findByIdForUpdate(savedReservation.getId()).get();
+        assertThat(foundReservation.getThemeSlotId()).isEqualTo(themeSlot.getId());
+    }
+
+    @Test
     @DisplayName("모든 예약 객체 목록을 조회한다.")
     void findAll() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_18, false);
