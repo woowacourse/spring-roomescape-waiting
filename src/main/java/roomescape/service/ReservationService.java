@@ -67,6 +67,7 @@ public class ReservationService {
 
     @Transactional
     public CreatedWaitResult createWait(Long memberId, Long reservationId) {
+        reservationDao.lockById(reservationId);
         Reservation reservation = findReservation(reservationId);
         if (reservation.isPast()) {
             throw new PastReservationWaitNotAllowedException();
@@ -117,6 +118,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long reservationId, Long memberId) {
+        reservationDao.lockById(reservationId);
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(memberId, reservation);
         if (reservation.isPast()) {

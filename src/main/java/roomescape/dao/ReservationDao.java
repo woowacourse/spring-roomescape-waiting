@@ -112,6 +112,13 @@ public class ReservationDao {
         return reservation;
     }
 
+    public void lockById(Long id) {
+        jdbcTemplate.query(
+                "SELECT id FROM reservation WHERE id = ? FOR UPDATE",
+                (rs, rowNum) -> rs.getLong("id"),
+                id);
+    }
+
     public int updateById(Long id, LocalDate date, Long timeId) {
         String sql = "update reservation set date = ?, time_id = ? where id = ?";
         return jdbcTemplate.update(sql, date.toString(), timeId, id);
