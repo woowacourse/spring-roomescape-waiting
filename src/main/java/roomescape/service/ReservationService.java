@@ -71,8 +71,12 @@ public class ReservationService {
         return ReservationResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
+        Reservation reservation = findByIdOrThrow(id);
+
         reservationRepository.deleteById(id);
+        promoteFirstWaitingIfExists(reservation);
     }
 
     public List<MyReservationResult> findMyReservationsAndWaitings(String name) {
@@ -136,6 +140,11 @@ public class ReservationService {
                 .orElseThrow(() -> new DataInconsistencyException(
                         "저장된 예약을 찾을 수 없습니다. 데이터 정합성 문제가 의심됩니다."
                 ));
+    }
+
+    private Reservation findByIdOrThrow(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
     }
 
     private Reservation findByIdAndName(Long id, String name) {

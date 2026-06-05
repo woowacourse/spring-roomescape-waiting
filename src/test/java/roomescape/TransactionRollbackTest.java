@@ -43,6 +43,22 @@ public class TransactionRollbackTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("관리자 예약 삭제 중 대기 승격에 실패하면 예약 삭제가 롤백된다")
+    void 관리자_예약_삭제_중_대기_승격_실패_시_예약_삭제_롤백() {
+        Long timeId = helper.insertTime(LocalTime.of(10, 0));
+        Long themeId = helper.insertTheme("테마A", "설명", "url");
+        Long reservationId = helper.insertReservationAndReturnId("브라운", FUTURE_DATE, timeId, themeId);
+        Long invalidWaitingId = helper.insertWaiting(" ", FUTURE_DATE, timeId, themeId, 1);
+
+        assertThatThrownBy(() -> reservationService.delete(reservationId))
+                .isInstanceOf(InvalidDomainException.class);
+
+        assertThat(helper.findReservationCount(FUTURE_DATE, timeId, themeId)).isEqualTo(1);
+        assertThat(helper.findReservationOwner(FUTURE_DATE, timeId, themeId)).isEqualTo("브라운");
+        assertThat(helper.existsWaiting(invalidWaitingId)).isTrue();
+    }
+
+    @Test
     @DisplayName("대기 취소 중 순번 재정렬에 실패하면 대기 삭제가 롤백된다")
     void 대기_취소_중_순번_재정렬_실패_시_대기_삭제_롤백() {
         Long timeId = helper.insertTime(LocalTime.of(10, 0));
