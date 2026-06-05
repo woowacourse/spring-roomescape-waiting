@@ -10,8 +10,8 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.slot.Slot;
 import roomescape.support.ControllerTestSupport;
 import roomescape.waiting.Waiting;
@@ -22,12 +22,12 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @MockBean
+    @MockitoBean
     private WaitingPromotionPolicy waitingPromotionPolicy;
 
     @Test
     @DisplayName("대기 승격 중 실패하면 예약 삭제가 롤백된다.")
-    void 예약_취소_트랜잭션_테스트() {
+    void 대기_승격_중_실패하면_예약_삭제가_롤백된다() {
         String reservationUserToken = loginUserToken();
         String waitingUserToken = loginWaitingUserToken();
 
@@ -43,7 +43,7 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
                 .then().log().all()
                 .statusCode(500);
 
-        Integer cancledReservationCount = jdbcTemplate.queryForObject(
+        Integer canceledReservationCount = jdbcTemplate.queryForObject(
                 "select count(*) from reservation where id = 1",
                 Integer.class
         );
@@ -58,7 +58,7 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
                 Integer.class
         );
 
-        assertThat(cancledReservationCount).isEqualTo(1);
+        assertThat(canceledReservationCount).isEqualTo(1);
         assertThat(waitingCount).isEqualTo(1);
         assertThat(promotedReservationCount).isEqualTo(0);
     }
