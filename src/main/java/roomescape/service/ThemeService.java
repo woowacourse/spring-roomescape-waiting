@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.config.UploadProperties;
 import roomescape.dao.ThemeDao;
@@ -14,6 +15,7 @@ import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
     private final String uploadDir;
     private final ThemeDao themeDao;
@@ -37,6 +39,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         MultipartFile file = request.file();
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -66,6 +69,7 @@ public class ThemeService {
         return ThemeResponse.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
         themeDao.delete(id);
     }

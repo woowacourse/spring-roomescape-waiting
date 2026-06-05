@@ -50,7 +50,6 @@ public class ThemeDao {
                 rs.getString("url")), count);
     }
 
-    @Transactional
     public Theme save(Theme theme) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", theme.getName());
@@ -62,7 +61,6 @@ public class ThemeDao {
         return new Theme(id, theme.getName(), theme.getDescription(), theme.getUrl());
     }
 
-    @Transactional
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }

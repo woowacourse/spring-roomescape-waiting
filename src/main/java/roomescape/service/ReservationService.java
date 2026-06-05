@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -21,6 +22,7 @@ import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.IdNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -64,6 +66,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse save(ReservationRequest request, LocalDateTime requestedAt) {
         ReservationTime time = getValidReservationTime(request.timeId());
         Theme theme = getValidTheme(request.themeId());
@@ -76,6 +79,7 @@ public class ReservationService {
         return ReservationResponse.from(saved);
     }
 
+    @Transactional
     public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
         ReservationTime time = getValidReservationTime(request.timeId());
         Theme theme = getValidTheme(request.themeId());
@@ -90,6 +94,7 @@ public class ReservationService {
         return ReservationResponse.from(newReservation);
     }
 
+    @Transactional
     public void delete(Long id) {
         reservationDao.delete(id);
     }

@@ -78,7 +78,6 @@ public class ReservationTimeDao {
         return Boolean.TRUE.equals(result);
     }
 
-    @Transactional
     public ReservationTime save(ReservationTime reservationTime) {
         Map<String, Object> params = new HashMap<>();
         params.put("start_at", reservationTime.getStartAt());
@@ -88,7 +87,6 @@ public class ReservationTimeDao {
         return new ReservationTime(id, reservationTime.getStartAt());
     }
 
-    @Transactional
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
     }
