@@ -168,7 +168,7 @@ class ReservationWaitDaoTest {
                     """
     })
     void 가장_먼저_예약대기한_memberId를_반환한다() {
-        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberId(1L);
+        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberIdForUpdate(1L);
 
         assertThat(earliestMemberId).isPresent();
         assertThat(earliestMemberId.get()).isEqualTo(1L);
@@ -183,7 +183,7 @@ class ReservationWaitDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void 예약_대기자가_없으면_먼저_예약대기한_멤버는_없다() {
-        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberId(1L);
+        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberIdForUpdate(1L);
         assertThat(earliestMemberId).isEmpty();
     }
 
@@ -241,7 +241,7 @@ class ReservationWaitDaoTest {
             """
     })
     void created_at이_같으면_id가_작은_대기자를_먼저_반환한다() {
-        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberId(1L);
+        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberIdForUpdate(1L);
 
         assertThat(earliestMemberId).isPresent();
         assertThat(earliestMemberId.get()).isEqualTo(2L);

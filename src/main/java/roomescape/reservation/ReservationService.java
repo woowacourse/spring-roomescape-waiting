@@ -92,7 +92,7 @@ public class ReservationService {
             reservationDao.delete(reservation.getId());
             return;
         }
-        reservationWaitDao.findEarliestMemberId(reservation.getId())
+        reservationWaitDao.findEarliestMemberIdForUpdate(reservation.getId())
                 .ifPresentOrElse(
                         waiterId -> promote(reservation, waiterId),
                         () -> reservationDao.delete(reservation.getId()));

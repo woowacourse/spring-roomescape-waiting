@@ -80,13 +80,14 @@ public class ReservationWaitDao {
         jdbcTemplate.update(sql, reservationId);
     }
 
-    public Optional<Long> findEarliestMemberId(Long reservationId) {
+    public Optional<Long> findEarliestMemberIdForUpdate(Long reservationId) {
         try {
             String sql = "SELECT member_id " +
                     "FROM reservation_wait " +
                     "WHERE reservation_id = ? " +
                     "ORDER BY created_at, id " +
-                    "LIMIT 1";
+                    "LIMIT 1 " +
+                    "FOR UPDATE";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, Long.class, reservationId));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
