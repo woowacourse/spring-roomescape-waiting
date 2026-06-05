@@ -170,6 +170,33 @@
   - 대기에는 본인의 대기 순번도 함께 보여준다.
 - [x] **api에 맞추어 프론트 페이지를 수정한다.**
 
+## 방탈출 예약 대기 cycle 2 : 구현 기능 목록
+
+### 1단계 - 예약 대기 자동 승인
+- [x] **예약 취소 시 첫 번째 대기를 예약으로 자동 전환한다.**
+  - 예약이 취소되면 같은 날짜·시간·테마 슬롯의 가장 오래된 대기가 예약으로 승격된다.
+  - 승격된 대기는 대기 목록에서 삭제된다.
+- [x] **예약 변경 시 기존 슬롯의 첫 번째 대기를 예약으로 자동 전환한다.**
+  - 예약자가 날짜·시간을 변경하면 기존 슬롯은 비게 되므로 해당 슬롯의 첫 번째 대기를 예약으로 승격한다.
+  - 승격된 대기는 대기 목록에서 삭제된다.
+  - 이미 지난 예약은 변경할 수 없다.
+- [x] **대기 순번을 재정렬한다.**
+  - 대기 순번은 별도 컬럼으로 저장하지 않고 조회 시 `ROW_NUMBER()`로 계산한다.
+  - 대기 취소, 예약 취소, 예약 변경으로 대기 목록이 바뀌면 남은 대기의 순번이 다시 계산된다.
+
+### 선택한 승인 방식
+- 자동 전환 방식을 선택했다.
+  - 사용자가 예약을 취소하거나 변경해 슬롯이 비는 순간 대기 1번이 예약 가능한 상태가 되므로, 별도 관리자 승인 없이 즉시 전환하는 것이 사용자 흐름에 자연스럽다고 판단했다.
+  - 수동 승인 UI와 관리자 판단 절차를 추가하지 않아도 대기 상태가 오래 방치되지 않는다.
+
+### 트랜잭션 경계
+- 예약 취소와 대기 승격은 하나의 트랜잭션으로 묶는다.
+  - 예약 삭제, 첫 번째 대기 예약 저장, 해당 대기 삭제는 같은 슬롯의 상태를 하나의 일관된 결과로 만들어야 한다.
+- 예약 변경과 기존 슬롯 대기 승격은 하나의 트랜잭션으로 묶는다.
+  - 예약 이동으로 기존 슬롯이 비는 것과 기존 슬롯의 첫 번째 대기가 예약으로 전환되는 것은 함께 성공하거나 함께 실패해야 한다.
+- 대기 순번 재정렬은 별도 쓰기 트랜잭션으로 처리하지 않는다.
+  - 순번은 저장값이 아니라 조회 시 계산하는 파생값이므로, 대기 목록 변경 후 조회 결과에서 자동으로 재정렬된다.
+
 ### 에러 응답 형식
 
 ```json
@@ -193,7 +220,7 @@
 
 | 기능 | 메서드 / URL | 요청 본문 | 응답 |
 |------|------------|---------|------|
-| **예약 변경** | `PATCH /reservations/{id}` | `{date, timeId}` | `200 {id, date, themeName, time}` |
+| **예약 변경** | `PATCH /reservations/{id}` | `{date, timeId}` | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` |
 
 ---
 
@@ -206,6 +233,7 @@
 | **관리자 테마 추가**    | `POST /admin/themes`           | `{name, description, thumbnail_url}`   | `201 Location: /themes/{id}`                                          |
 | **관리자 테마 삭제**    | `DELETE /admin/themes/{id}`    | —                                      | `204`                                                                 |
 | **관리자 예약 조회**    | `GET /admin/reservations`      | —                                      | `200 [{id, name, date, themeName, time}]`                             |
+| **관리자 예약 삭제**    | `DELETE /admin/reservations/{id}` | —                                   | `204` (첫 번째 대기가 있으면 자동 예약 전환)                              |
 
 ### 공통 API (시간)
 
@@ -217,15 +245,16 @@
 
 ### 사용자 API
 
-| 기능                  | 메서드 / URL                          | 요청 본문 / 쿼리 파라미터                     | 응답                                                                       |
-|:--------------------|:------------------------------------|:---------------------------------------|:-------------------------------------------------------------------------|
-| **테마 전체 조회**        | `GET /themes`                       | —                                      | `200 [{id, name, description, thumbnailUrl}]`                            |
-| **인기 테마 조회**        | `GET /themes?condition=popular&size={n}` | —                                 | `200 [{id, name, description, thumbnailUrl}]`                            |
-| **테마별 예약 가능 시간 조회** | `GET /themes/{id}/times?date={date}` | —                                     | `200 [{id, startAt, isAvailable}]`                                       |
-| **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}]` |
-| **내 예약 통합 조회**     | `GET /reservations/me?username={name}` | —                                   | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber, reservationStatus}]` |
-| **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}`   |
-| **예약 삭제**           | `DELETE /reservations/{id}`         | —                                      | `204`                                                                    |
+| 기능                  | 메서드 / URL                          | 요청 본문 / 쿼리 파라미터                     | 응답                                                                                                                                |
+|:--------------------|:------------------------------------|:---------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|
+| **테마 전체 조회**        | `GET /themes`                       | —                                      | `200 [{id, name, description, thumbnailUrl}]`                                                                                     |
+| **인기 테마 조회**        | `GET /themes?condition=popular&size={n}` | —                                 | `200 [{id, name, description, thumbnailUrl}]`                                                                                     |
+| **테마별 예약 가능 시간 조회** | `GET /themes/{id}/times?date={date}` | —                                     | `200 [{id, startAt, isAvailable}]`                                                                                                |
+| **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}]`                                       |
+| **내 예약 통합 조회**     | `GET /reservations/me?username={name}` | —                                   | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber, reservationStatus}]`                        |
+| **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}`                                         |
+| **예약 변경**           | `PATCH /reservations/{id}`          | `{date, timeId}`                       | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` (첫 번째 대기가 있으면 자동 예약 전환)                 |
+| **예약 삭제**           | `DELETE /reservations/{id}?username={name}` | —                              | `204` (첫 번째 대기가 있으면 자동 예약 전환)                                                                                                     |
 
 ### 예약 대기 API 명세
 
