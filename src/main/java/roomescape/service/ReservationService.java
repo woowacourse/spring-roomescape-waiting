@@ -8,6 +8,7 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
@@ -171,15 +172,24 @@ public class ReservationService {
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
-        Optional<Reservation> waitingReservation = reservationRepository.findFirstPendingByThemeSlotId(reservation.getThemeSlotId());
+        while (true) {
+            Optional<Reservation> waitingReservation = reservationRepository.findFirstPendingByThemeSlotId(reservation.getThemeSlotId());
 
-        if (waitingReservation.isPresent()) {
-            waitingReservation.ifPresent(Reservation::confirm);
-            reservationRepository.updateStatus(waitingReservation.get());
-        }
+            if (waitingReservation.isEmpty()) {
+                updateThemeSlotReserved(reservation.getThemeSlot(), false);
+                return;
+            }
 
-        if (waitingReservation.isEmpty()) {
-            updateThemeSlotReserved(reservation.getThemeSlot(), false);
+            Reservation waiting = waitingReservation.get();
+            Reservation promotedReservation = new Reservation(
+                    waiting.getId(),
+                    waiting.getName(),
+                    waiting.getThemeSlot(),
+                    ConfirmedStatus.getInstance()
+            );
+            if (reservationRepository.updateStatusIfPending(promotedReservation)) {
+                return;
+            }
         }
     }
 

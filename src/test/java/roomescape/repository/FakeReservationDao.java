@@ -108,6 +108,21 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
+    public boolean updateStatusIfPending(Reservation reservation) {
+        Long id = reservation.getId();
+        if (!storage.containsKey(id)) {
+            throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
+
+        Reservation getReservation = storage.get(id);
+        if (!getReservation.isPendingStatus()) {
+            return false;
+        }
+        getReservation.changeStatus(reservation.getReservationStatus());
+        return true;
+    }
+
+    @Override
     public void updateThemeSlot(Reservation reservation) {
         Long id = reservation.getId();
         if (!storage.containsKey(id)) {

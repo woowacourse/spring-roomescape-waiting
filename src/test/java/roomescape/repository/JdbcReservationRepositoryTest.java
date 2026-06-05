@@ -18,6 +18,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.WaitingReservation;
+import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 
 @JdbcTest
@@ -136,5 +137,45 @@ class JdbcReservationRepositoryTest {
         assertThat(waitingReservations)
                 .extracting(WaitingReservation::waitingOrder)
                 .containsExactly(2, 1);
+    }
+
+    @Test
+    @DisplayName("PENDING 예약일 때만 상태를 변경한다.")
+    void updateStatusIfPending() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        Reservation pendingReservation = jdbcReservationRepository.save(new Reservation("김대기", themeSlot));
+        pendingReservation.confirm();
+
+        boolean updated = jdbcReservationRepository.updateStatusIfPending(pendingReservation);
+
+        Reservation reservation = jdbcReservationRepository.findById(pendingReservation.getId()).orElseThrow();
+        assertThat(updated).isTrue();
+        assertThat(reservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+    }
+
+    @Test
+    @DisplayName("PENDING이 아닌 예약은 조건부 상태 변경에서 제외한다.")
+    void updateStatusIfPendingWhenNotPending() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        Reservation reservation = jdbcReservationRepository.save(new Reservation("김대기", themeSlot));
+        Reservation cancelledReservation = new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getThemeSlot(),
+                CancelledStatus.getInstance()
+        );
+        jdbcReservationRepository.updateStatus(cancelledReservation);
+        Reservation confirmedReservation = new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getThemeSlot(),
+                ConfirmedStatus.getInstance()
+        );
+
+        boolean updated = jdbcReservationRepository.updateStatusIfPending(confirmedReservation);
+
+        Reservation foundReservation = jdbcReservationRepository.findById(reservation.getId()).orElseThrow();
+        assertThat(updated).isFalse();
+        assertThat(foundReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
     }
 }

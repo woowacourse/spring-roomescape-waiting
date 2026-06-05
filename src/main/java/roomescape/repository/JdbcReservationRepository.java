@@ -183,6 +183,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean updateStatusIfPending(Reservation reservation) {
+        String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE id = ?
+                AND status = 'PENDING'
+                """;
+        int updatedCount = jdbcTemplate.update(sql,
+                reservation.getReservationStatusName(),
+                reservation.getId()
+        );
+        return updatedCount == 1;
+    }
+
+    @Override
     public void updateThemeSlot(Reservation reservation) {
         String sql = """
                 UPDATE reservation 

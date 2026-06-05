@@ -26,6 +26,8 @@ public interface ReservationRepository {
 
     void updateStatus(Reservation reservation);
 
+    boolean updateStatusIfPending(Reservation reservation);
+
     void updateThemeSlot(Reservation reservation);
 
     boolean existsByThemeId(long themeId);
