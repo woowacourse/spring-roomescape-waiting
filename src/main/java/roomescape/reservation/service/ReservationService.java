@@ -66,7 +66,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation modifyDateTimeByName(Long id, String name, Long themeId, LocalDate date, Long timeId) {
-        Reservation originReservation = reservationDao.selectById(id)
+        Reservation originReservation = reservationDao.selectByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
 
         originReservation.validateSameName(name, ErrorCode.CANNOT_MODIFY_OTHER_RESERVATION);
@@ -80,8 +80,17 @@ public class ReservationService {
             throw new RoomescapeException(ErrorCode.RESERVATION_ALREADY_EXISTS);
         }
 
-        return reservationDao.updateDateTimeById(id, date, timeId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+        Reservation updated;
+        try {
+            updated = reservationDao.updateDateTimeById(id, date, timeId)
+                    .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+        } catch (DuplicateKeyException e) {
+            throw new RoomescapeException(ErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
+
+        promoteFirstWaiting(originReservation.getThemeId(), originReservation.getDate(), originReservation.getTime());
+
+        return updated;
     }
 
     @Transactional
@@ -105,25 +114,20 @@ public class ReservationService {
     }
 
     private void cancelReservation(Long id, Reservation originReservation) {
-        Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(
-                originReservation.getThemeId(),
-                originReservation.getDate(),
-                originReservation.getTime());
-
-        if (firstWaiting.isEmpty()) {
-            reservationDao.deleteById(id);
-            return;
-        }
-
-        ReservationWaiting reservationWaiting = firstWaiting.get();
-        reservationWaitingDao.deleteById(reservationWaiting.getId());
         reservationDao.deleteById(id);
-        reservationDao.insert(new Reservation(
-                reservationWaiting.getName(),
-                reservationWaiting.getThemeId(),
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime()
-        ));
+        promoteFirstWaiting(originReservation.getThemeId(), originReservation.getDate(), originReservation.getTime());
+    }
+
+    private void promoteFirstWaiting(Long themeId, LocalDate date, ReservationTime time) {
+        reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time)
+                .ifPresent(waiting -> {
+                    reservationWaitingDao.deleteById(waiting.getId());
+                    reservationDao.insert(new Reservation(
+                            waiting.getName(),
+                            waiting.getThemeId(),
+                            waiting.getDate(),
+                            waiting.getTime()));
+                });
     }
 
     private void validateDateTime(LocalDate date, ReservationTime time, ErrorCode errorCode) {

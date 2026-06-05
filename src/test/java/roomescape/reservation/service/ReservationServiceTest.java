@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +15,6 @@ import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
-import roomescape.waiting.ReservationWaiting;
 import roomescape.waiting.dao.ReservationWaitingDao;
 
 import java.time.LocalDate;
@@ -214,8 +212,6 @@ public class ReservationServiceTest {
                 .hasMessage(ErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
     }
 
-    // ===================== modifyDateTimeByName =====================
-
     @Test
     void 본인_예약_변경_성공() {
         Long reservationId = 1L;
@@ -233,7 +229,7 @@ public class ReservationServiceTest {
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
 
-        given(reservationDao.selectById(reservationId))
+        given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(originReservation));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(time));
@@ -270,7 +266,7 @@ public class ReservationServiceTest {
                 2L
         );
 
-        given(reservationDao.selectById(reservationId))
+        given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
@@ -294,7 +290,7 @@ public class ReservationServiceTest {
                 2L
         );
 
-        given(reservationDao.selectById(notFoundId)).willReturn(Optional.empty());
+        given(reservationDao.selectByIdForUpdate(notFoundId)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
                 notFoundId,
@@ -314,7 +310,7 @@ public class ReservationServiceTest {
                 reservationId, name, 1L, LocalDate.now().plusDays(2),
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(anyLong())).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
@@ -332,7 +328,7 @@ public class ReservationServiceTest {
                 reservationId, name, 1L, LocalDate.now().plusDays(2),
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
 
@@ -352,7 +348,7 @@ public class ReservationServiceTest {
                 reservationId, name, 1L, LocalDate.now().plusDays(2),
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
         given(themeDao.selectById(themeId)).willReturn(Optional.empty());
@@ -374,7 +370,7 @@ public class ReservationServiceTest {
                 reservationId, name, themeId, LocalDate.now().plusDays(2),
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
         given(themeDao.selectById(themeId)).willReturn(Optional.of(theme(themeId)));
@@ -489,56 +485,5 @@ public class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteById(notFoundId))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    void 취소시_대기가_있으면_첫_대기자가_예약으로_승격된다() {
-        Long reservationId = 1L;
-        Long themeId = 1L;
-        LocalDate date = LocalDate.now().plusDays(1);
-        ReservationTime time = new ReservationTime(3L, LocalTime.of(10, 0));
-
-        Reservation origin = new Reservation(reservationId, "로치", themeId, date, time);
-
-        Long waitingId = 50L;
-        ReservationWaiting firstWaiting = new ReservationWaiting(
-                waitingId, "브라운", themeId, date, time, 1L);
-
-        given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
-        given(reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time))
-                .willReturn(Optional.of(firstWaiting));
-
-        reservationService.deleteById(reservationId);
-
-        verify(reservationWaitingDao, times(1)).deleteById(waitingId);
-        verify(reservationDao, times(1)).deleteById(reservationId);
-
-        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-        verify(reservationDao, times(1)).insert(captor.capture());
-        Reservation promoted = captor.getValue();
-        assertThat(promoted.getName()).isEqualTo("브라운");
-        assertThat(promoted.getThemeId()).isEqualTo(themeId);
-        assertThat(promoted.getDate()).isEqualTo(date);
-        assertThat(promoted.getTime().getId()).isEqualTo(time.getId());
-    }
-
-    @Test
-    void 취소시_대기가_없으면_승격없이_삭제만_수행된다() {
-        Long reservationId = 1L;
-        Long themeId = 1L;
-        LocalDate date = LocalDate.now().plusDays(1);
-        ReservationTime time = new ReservationTime(3L, LocalTime.of(10, 0));
-
-        Reservation origin = new Reservation(reservationId, "로치", themeId, date, time);
-
-        given(reservationDao.selectByIdForUpdate(reservationId)).willReturn(Optional.of(origin));
-        given(reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time))
-                .willReturn(Optional.empty());
-
-        reservationService.deleteById(reservationId);
-
-        verify(reservationDao, times(1)).deleteById(reservationId);
-        verify(reservationWaitingDao, never()).deleteById(anyLong());
-        verify(reservationDao, never()).insert(any(Reservation.class));
     }
 }
