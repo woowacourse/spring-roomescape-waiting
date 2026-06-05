@@ -28,6 +28,11 @@ public class ConfirmedStatus implements ReservationStatus {
     }
 
     @Override
+    public void waiting(Reservation reservation) {
+        reservation.changeStatus(PendingStatus.getInstance());
+    }
+
+    @Override
     public void complete(Reservation reservation) {
         reservation.changeStatus(CompletedStatus.getInstance());
     }

@@ -6,6 +6,7 @@ public interface ReservationStatus {
 
     void cancel(Reservation reservation);
     void confirm(Reservation reservation);
+    void waiting(Reservation reservation);
     void complete(Reservation reservation);
     String getName();
 }

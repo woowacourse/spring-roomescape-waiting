@@ -158,7 +158,7 @@ public class ReservationService {
         }
 
         if (targetSlotHasConfirmedReservation) {
-            reservation.changeStatus(PendingStatus.getInstance());
+            reservation.waiting();
             return;
         }
 
