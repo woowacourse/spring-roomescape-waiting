@@ -122,17 +122,23 @@ public class ReservationDao {
         return selectById(id);
     }
 
-    public Optional<Reservation> updateNameByThemeIdAndDateAndTimeId(Long id, String name, Long themeId, LocalDate date,
-                                                                     Long timeId) {
+    public Optional<Reservation> updateNameByThemeIdAndDateAndTimeId(Reservation reservation) {
         String sql = """
                 update reservation
                 set name = ?
                 where id = ? and theme_id = ? and date = ? and time_id = ?
                 """;
 
-        jdbcTemplate.update(sql, name, id, themeId, date, timeId);
+        jdbcTemplate.update(
+                sql,
+                reservation.getName(),
+                reservation.getId(),
+                reservation.getThemeId(),
+                reservation.getDate(),
+                reservation.getTime().getId()
+        );
 
-        return selectById(id);
+        return selectById(reservation.getId());
     }
 
     public boolean existsByThemeIdAndAfterDate(Long themeId, LocalDate now) {

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -382,13 +383,20 @@ public class ReservationServiceTest {
         when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
         when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
         when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(waiting);
-        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId))
+        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(any(Reservation.class)))
                 .thenReturn(Optional.of(new Reservation(id, waiting.getName(), themeId, date, reservationTime)));
 
         reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName());
 
-        verify(reservationDao, times(1))
-                .updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId);
+        ArgumentCaptor<Reservation> approvedReservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationDao, times(1)).updateNameByThemeIdAndDateAndTimeId(approvedReservationCaptor.capture());
+        Reservation approvedReservation = approvedReservationCaptor.getValue();
+
+        assertThat(approvedReservation.getId()).isEqualTo(id);
+        assertThat(approvedReservation.getName()).isEqualTo(waiting.getName());
+        assertThat(approvedReservation.getThemeId()).isEqualTo(themeId);
+        assertThat(approvedReservation.getDate()).isEqualTo(date);
+        assertThat(approvedReservation.getTime().getId()).isEqualTo(timeId);
         verify(reservationDao, times(0)).deleteById(id);
         verify(reservationWaitingDao, times(1)).deleteById(waiting.getId());
     }
@@ -417,7 +425,7 @@ public class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName()))
                 .isInstanceOf(EmptyResultDataAccessException.class);
 
-        verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(anyLong(), any(), anyLong(), any(), anyLong());
+        verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(any(Reservation.class));
         verify(reservationDao, times(0)).deleteById(id);
         verify(reservationWaitingDao, times(0)).deleteById(anyLong());
     }
@@ -452,15 +460,16 @@ public class ReservationServiceTest {
         when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
         when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
         when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(waiting);
-        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId))
+        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(any(Reservation.class)))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName()))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
 
-        verify(reservationDao, times(1))
-                .updateNameByThemeIdAndDateAndTimeId(id, waiting.getName(), themeId, date, timeId);
+        ArgumentCaptor<Reservation> approvedReservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationDao, times(1)).updateNameByThemeIdAndDateAndTimeId(approvedReservationCaptor.capture());
+        assertThat(approvedReservationCaptor.getValue().getName()).isEqualTo(waiting.getName());
         verify(reservationDao, times(0)).deleteById(id);
         verify(reservationWaitingDao, times(0)).deleteById(waiting.getId());
     }

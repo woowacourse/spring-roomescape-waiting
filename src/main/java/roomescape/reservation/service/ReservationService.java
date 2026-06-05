@@ -135,12 +135,8 @@ public class ReservationService {
                 reservation.getTime().getId()
         );
 
-        reservationDao.updateNameByThemeIdAndDateAndTimeId(
-                reservation.getId(),
-                        firstWaiting.getName(),
-                        reservation.getThemeId(),
-                        reservation.getDate(),
-                        reservation.getTime().getId())
+        Reservation approvedReservation = reservation.approve(firstWaiting);
+        reservationDao.updateNameByThemeIdAndDateAndTimeId(approvedReservation)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
         reservationWaitingDao.deleteById(firstWaiting.getId());
     }
