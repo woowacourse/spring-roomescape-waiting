@@ -236,12 +236,12 @@ public class ReservationService {
     }
 
     private void confirmWaitingReservation(Reservation waitingReservation) {
-        waitingReservation.confirm();
-        updateReservation(waitingReservation);
+        Reservation confirmedReservation = waitingReservation.confirm();
+        updateWaitingToReserved(confirmedReservation);
     }
 
-    private void updateReservation(Reservation waitingReservation) {
-        int affected = reservationRepository.update(waitingReservation);
+    private void updateWaitingToReserved(Reservation reservation) {
+        int affected = reservationRepository.updateWaitingToReserved(reservation);
         validateReservationModified(affected);
     }
 

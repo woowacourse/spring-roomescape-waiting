@@ -12,7 +12,7 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Store store;
-    private ReservationStatus status;
+    private final ReservationStatus status;
 
     public Reservation(Long id, User user, Theme theme, LocalDate date, ReservationTime time, Store store,
                        ReservationStatus status) {
@@ -73,12 +73,12 @@ public class Reservation {
         return new Reservation(id, user, theme, date, time, store, status);
     }
 
-    public void confirm() {
+    public Reservation confirm() {
         if (!isWaiting()) {
             throw new InvalidDomainException("예약 대기 상태만 확정할 수 있습니다.");
         }
 
-        this.status = ReservationStatus.RESERVED;
+        return new Reservation(id, user, theme, date, time, store, ReservationStatus.RESERVED);
     }
 
     public Long getId() {

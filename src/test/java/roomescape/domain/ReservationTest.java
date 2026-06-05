@@ -103,8 +103,10 @@ class ReservationTest {
     @Test
     void confirm_예약_대기인_경우_올바르게_예약_확정으로_변경() {
         Reservation reservation = build(LocalDate.of(2026, 5, 7), LocalTime.of(12, 0), ReservationStatus.WAITING);
-        reservation.confirm();
-        assertThat(reservation.isReserved()).isTrue();
+        Reservation confirmed = reservation.confirm();
+
+        assertThat(confirmed.isReserved()).isTrue();
+        assertThat(reservation.isWaiting()).isTrue();
 
     }
 

@@ -260,6 +260,24 @@ class ReservationServiceTest {
                 Fixtures.DEFAULT_STORE_ID)).isFalse();
     }
 
+    /**
+     * 동시에 삭제 요청이 들어오는 경우, 기존 예약을 두 트랜잭션이 모두 읽은 이후, 트랜잭션 A가 먼저 삭제했을 때, 트랜잭션 B는 삭제에 실패하며
+     * ReservationConcurrentModificationException가 발생한다.
+     */
+    @Test
+    void cancelOwnReservation_두명의_사용자가_동시에_삭제를_요청하는_경우_ReservationConcurrentModificationException() {
+
+    }
+
+    /**
+     * 트랜잭션A가 삭제 시점에 대기 1번을 조회 완료하고 아직 승격하지 않은 사이, 대기 1번 사용자가 해당 대기를 삭제하는 경우 트랜잭션A는 업데이트에 실패하며
+     * ReservationConcurrentModificationException가 발생한다.
+     */
+    @Test
+    void cancelOwnReservation_대기_예약을_승격시키기_직전에_해당_대기가_삭제되는_경우_ReservationConcurrentModificationException() {
+
+    }
+
     void cancelOwnReservation_삭제_대상이_동시에_변경되면_ReservationConcurrentModificationException() {
 
     }
