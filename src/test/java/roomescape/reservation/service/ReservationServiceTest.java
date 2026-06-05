@@ -4,8 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
@@ -34,6 +34,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static roomescape.reservation.domain.Status.*;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
@@ -50,24 +53,22 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
         ReservationCreator.class
 })
 class ReservationServiceTest {
-
     @Autowired
     ReservationService reservationService;
-
     @Autowired
     ReservationRepository reservationRepository;
-
     @Autowired
     ReservationSlotRepository reservationSlotRepository;
-
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
-
     @Autowired
     ThemeRepository themeRepository;
-
+    @Autowired
+    ReservationValidator reservationValidator;
     @Autowired
     MutableClock clock;
+    @Autowired
+    ReservationCreator reservationCreator;
 
 
     @Test
@@ -146,6 +147,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 취소할 때 확정된 상태의 예약을 취소하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다. ")
     public void cancel_success_promoteWaiting() {
         // given
+        clock.setFixed(LocalDate.of(2023, 8, 6));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2023, 8, 10);
@@ -519,7 +521,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("본인의 예약이 아니면 예외가 발생한다.")
+    @DisplayName("예약 날짜/시간을 수정할 때 본인의 예약이 아니면 예외가 발생한다.")
     public void editDateTime_fail_otherGuest() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
@@ -536,7 +538,6 @@ class ReservationServiceTest {
                 .isInstanceOf(DomainException.class)
                 .hasMessage(CANNOT_CHANGE_OTHER_GUEST_RESERVATION.message());
     }
-
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
         return reservationTimeRepository.save(ReservationTime.create(startAt));

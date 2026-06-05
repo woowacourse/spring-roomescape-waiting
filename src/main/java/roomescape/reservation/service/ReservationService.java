@@ -46,6 +46,7 @@ public class ReservationService {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
         ReservationSlot reservationSlot = reservationSlotRepository.upsert(ReservationSlot.create(date, time, theme));
+        lockSlot(reservationSlot.getId());
 
         Reservation saved = reservationCreator.createReservation(guestName, reservationSlot);
         return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
@@ -66,7 +67,7 @@ public class ReservationService {
 
     @Transactional
     public void editDateTime(Long reservationId, LocalDate changedDate, Long changedTimeId, String requestGuestName) {
-        Reservation beforeReservation = getReservationWithLock(reservationId);
+        Reservation beforeReservation = getReservation(reservationId);
         reservationValidator.validateBeforeEdit(beforeReservation, changedDate, changedTimeId, requestGuestName);
         ReservationTime changedTime = getReservationTime(changedTimeId);
 
@@ -117,7 +118,7 @@ public class ReservationService {
 
     @Transactional
     public void cancel(Long id) {
-        Reservation reservation = getReservationWithLock(id);
+        Reservation reservation = getReservation(id);
         lockSlot(reservation.getReservationSlot().getId());
         reservationValidator.validateCancel(reservation);
         cancelReservation(id);
@@ -126,7 +127,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelMine(Long id, String guestName) {
-        Reservation reservation = getReservationWithLock(id);
+        Reservation reservation = getReservation(id);
         lockSlot(reservation.getReservationSlot().getId());
         reservationValidator.validateCancelMine(reservation, guestName);
         cancelReservation(id);
@@ -144,8 +145,8 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
     }
 
-    private Reservation getReservationWithLock(Long reservationId) {
-        return reservationRepository.findByIdWithLock(reservationId)
+    private Reservation getReservation(Long reservationId) {
+        return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
     }
 
