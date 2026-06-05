@@ -52,4 +52,10 @@ public class Reservation {
             throw new RoomescapeException(errorCode);
         }
     }
+
+    public void validateDateTime(LocalDate date, ReservationTime time, ErrorCode errorCode) {
+        if (time.isBeforeDateTime(date, time)) {
+            throw new RoomescapeException(errorCode);
+        }
+    }
 }

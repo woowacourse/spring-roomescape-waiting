@@ -65,17 +65,18 @@ public class ReservationService {
 
     @Transactional
     public Reservation add(String name, Long themeId, LocalDate date, Long timeId) {
+        validateThemeExists(themeId);
         ReservationTime time = timeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
-        validateDateTime(date, time, ErrorCode.PAST_RESERVATION);
-        validateThemeExists(themeId);
+
+        Reservation newReservation = new Reservation(name, themeId, date, time);
+        newReservation.validateDateTime(date, time, ErrorCode.CANNOT_RESERVE_PAST_DATETIME);
 
         List<Reservation> reservedList = reservationDao.selectByThemeIdAndDate(themeId, date);
         for (Reservation reserved : reservedList) {
             validateReserved(timeId, reserved.getTime());
         }
 
-        Reservation newReservation = new Reservation(name, themeId, date, time);
         return reservationDao.insert(newReservation);
     }
 
@@ -88,7 +89,7 @@ public class ReservationService {
 
         ReservationTime time = timeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
-        validateDateTime(date, time, ErrorCode.PAST_RESERVATION);
+        originReservation.validateDateTime(date, time, ErrorCode.CANNOT_RESERVE_PAST_DATETIME);
         validateThemeExists(themeId);
 
         List<Reservation> reservedList = reservationDao.selectByThemeIdAndDate(themeId, date);
@@ -106,18 +107,16 @@ public class ReservationService {
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        Reservation originReservation = reservationDao.selectById(id)
+        Reservation reservation = reservationDao.selectById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
 
-        originReservation.validateSameName(name, ErrorCode.CANNOT_DELETE_OTHER_RESERVATION);
+        reservation.validateSameName(name, ErrorCode.CANNOT_DELETE_OTHER_RESERVATION);
 
-        validateDateTime(originReservation.getDate(), originReservation.getTime(),
+        reservation.validateDateTime(reservation.getDate(), reservation.getTime(),
                 ErrorCode.CANNOT_DELETE_PAST_RESERVATION);
 
-        if (validateExistsWaiting(originReservation.getThemeId(), originReservation.getDate(),
-                originReservation.getTime().getId())) {
-            autoApprove(id, originReservation.getThemeId(), originReservation.getDate(),
-                    originReservation.getTime().getId());
+        if (validateExistsWaiting(reservation)) {
+            autoApprove(reservation);
             return;
         }
 
@@ -129,28 +128,34 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND)));
     }
 
-    private void autoApprove(Long id, Long themeId, LocalDate date, Long timeId) {
-        ReservationWaiting firstWaiting = reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId,
-                date, timeId);
+    private void autoApprove(Reservation reservation) {
+        ReservationWaiting firstWaiting = reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(
+                reservation.getThemeId(),
+                reservation.getDate(),
+                reservation.getTime().getId()
+        );
 
-        reservationDao.updateNameByThemeIdAndDateAndTimeId(id, firstWaiting.getName(), themeId, date, timeId)
+        reservationDao.updateNameByThemeIdAndDateAndTimeId(
+                reservation.getId(),
+                        firstWaiting.getName(),
+                        reservation.getThemeId(),
+                        reservation.getDate(),
+                        reservation.getTime().getId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
         reservationWaitingDao.deleteById(firstWaiting.getId());
     }
 
-    private boolean validateExistsWaiting(Long themeId, LocalDate date, Long timeId) {
-        return reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId);
+    private boolean validateExistsWaiting(Reservation reservation) {
+        return reservationWaitingDao.existsByThemeIdAndDateAndTimeId(
+                reservation.getThemeId(),
+                reservation.getDate(),
+                reservation.getTime().getId()
+        );
     }
 
     private void validateReserved(Long timeId, ReservationTime reservedTime) {
         if (timeId.equals(reservedTime.getId())) {
             throw new RoomescapeException(ErrorCode.RESERVATION_ALREADY_EXISTS);
-        }
-    }
-
-    private void validateDateTime(LocalDate date, ReservationTime time, ErrorCode errorCode) {
-        if (time.isBeforeDateTime(date, time)) {
-            throw new RoomescapeException(errorCode);
         }
     }
 

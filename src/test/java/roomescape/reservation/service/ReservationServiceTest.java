@@ -142,15 +142,16 @@ public class ReservationServiceTest {
     @Test
     void 지난_날짜및시간_예약_하는_경우_예외발생() {
         ReservationTime mockTime = new ReservationTime(17L, LocalTime.now().minusMinutes(10));
+        when(themeDao.selectById(anyLong())).thenReturn(Optional.of(new Theme("name", "description", "image")));
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(mockTime));
 
         assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().minusDays(1), 1L))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
+                .hasMessage(ErrorCode.CANNOT_RESERVE_PAST_DATETIME.getMessage());
 
         assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now(), mockTime.getId()))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
+                .hasMessage(ErrorCode.CANNOT_RESERVE_PAST_DATETIME.getMessage());
     }
 
     @Test
