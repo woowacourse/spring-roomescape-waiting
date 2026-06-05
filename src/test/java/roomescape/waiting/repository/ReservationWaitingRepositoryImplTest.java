@@ -127,7 +127,7 @@ class ReservationWaitingRepositoryImplTest {
 
     @Test
     @DisplayName("이름을 기반으로 해당 사용자의 예약 대기 내역을 모두 조회한다.")
-    void findAllByName() {
+    void findAllByName_returnsWaitingsForGivenName() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -161,7 +161,7 @@ class ReservationWaitingRepositoryImplTest {
 
     @Test
     @DisplayName("동일 날짜, 시간, 예약자 이름에 해당하는 예약 대기가 존재하는지 여부를 확인한다.")
-    void hasWaitingAtSameTime() {
+    void hasWaitingAtSameTime_returnsTrueIfSameUserHasWaiting() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -177,7 +177,7 @@ class ReservationWaitingRepositoryImplTest {
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마의 모든 대기 리스트를 ID 순으로 정렬하여 조회한다.")
-    void queryAllBySlotForUpdate() {
+    void queryAllBySlotForUpdate_returnsWaitingsInOrder() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");

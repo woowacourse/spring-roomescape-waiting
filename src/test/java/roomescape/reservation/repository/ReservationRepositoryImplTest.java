@@ -90,7 +90,7 @@ class ReservationRepositoryImplTest {
 
     @Test
     @DisplayName("동일 시간 예약 여부를 확인할 수 있다.")
-    void hasBookingAtSameTime() {
+    void hasBookingAtSameTime_returnsTrueIfSameUserHasBooking() {
         Reservation saved = reservationRepository.save(buildReservation("브라운"));
 
         Reservation candidate1 = new Reservation(null, "브라운", saved.getSlot(), saved.getUpdatedAt());

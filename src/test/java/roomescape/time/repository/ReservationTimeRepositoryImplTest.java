@@ -33,7 +33,7 @@ class ReservationTimeRepositoryImplTest {
     }
 
     @Nested
-    class save {
+    class Save {
         @Test
         @DisplayName("save persists a new reservation time and returns its id.")
         void save_validTime_returnsWithId() {
@@ -79,7 +79,7 @@ class ReservationTimeRepositoryImplTest {
 
     @Test
     @DisplayName("existsByStartAt returns whether a time exists at the given start time.")
-    void existsByStartAt() {
+    void existsByStartAt_ReturnsTrueIfTimeExists() {
         // given
         createTime(LocalTime.of(11, 0));
 

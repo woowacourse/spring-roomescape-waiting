@@ -37,7 +37,7 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Nested
-    class save {
+    class Save {
         @Test
         @DisplayName("테마를 성공적으로 생성한다.")
         void save_success() {
@@ -87,7 +87,7 @@ class ThemeServiceTest {
     }
 
     @Nested
-    class findById {
+    class FindById {
         @Test
         @DisplayName("id에 해당하는 테마 요청을 레포지토리 계층에 잘 한다")
         void findById_success() {
