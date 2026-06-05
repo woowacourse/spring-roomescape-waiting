@@ -371,6 +371,6 @@ class ReservationServiceTest {
                 reservation.getThemeSlot(),
                 CompletedStatus.getInstance()
         );
-        fakeReservationDao.updateStatus(completedReservation);
+        fakeReservationDao.updateStatus(completedReservation, reservation.getReservationStatusName());
     }
 }

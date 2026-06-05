@@ -102,6 +102,7 @@ public class ReservationService {
     }
 
     private void cancel(Reservation reservation) {
+        String expectedStatus = reservation.getReservationStatusName();
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
@@ -110,7 +111,7 @@ public class ReservationService {
         }
 
         reservation.cancel();
-        reservationRepository.updateStatus(reservation);
+        updateStatusOrElseThrow(reservation, expectedStatus);
 
         if (wasConfirmed) {
             promoteWaitingReservationOrReleaseSlot(reservation);
@@ -127,6 +128,7 @@ public class ReservationService {
     public Reservation modifyReservation(Long reservationId, Long themeSlotId) {
         Reservation reservation = getReservationForUpdateOrElseThrow(reservationId);
         validateModifiable(reservation);
+        String expectedStatus = reservation.getReservationStatusName();
         ThemeSlot themeSlot = getThemeSlotWithOrderedLock(reservation.getThemeSlotId(), themeSlotId);
 
         validateBeforeDate(themeSlot);
@@ -142,7 +144,7 @@ public class ReservationService {
                 reservation.getReservationStatus()
         );
         reservationRepository.updateThemeSlot(updateReservation);
-        reservationRepository.updateStatus(updateReservation);
+        updateStatusOrElseThrow(updateReservation, expectedStatus);
         return updateReservation;
     }
 
@@ -187,9 +189,15 @@ public class ReservationService {
                     waiting.getThemeSlot(),
                     ConfirmedStatus.getInstance()
             );
-            if (reservationRepository.updateStatusIfPending(promotedReservation)) {
+            if (reservationRepository.updateStatus(promotedReservation, PendingStatus.getInstance().getName())) {
                 return;
             }
+        }
+    }
+
+    private void updateStatusOrElseThrow(Reservation reservation, String expectedStatus) {
+        if (!reservationRepository.updateStatus(reservation, expectedStatus)) {
+            throw new CustomException(ErrorCode.RESERVATION_STATUS_CONFLICT);
         }
     }
 

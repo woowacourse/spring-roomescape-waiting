@@ -140,13 +140,13 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("PENDING 예약일 때만 상태를 변경한다.")
-    void updateStatusIfPending() {
+    @DisplayName("기대 상태와 현재 상태가 같을 때만 상태를 변경한다.")
+    void updateStatus() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
         Reservation pendingReservation = jdbcReservationRepository.save(new Reservation("김대기", themeSlot));
         pendingReservation.confirm();
 
-        boolean updated = jdbcReservationRepository.updateStatusIfPending(pendingReservation);
+        boolean updated = jdbcReservationRepository.updateStatus(pendingReservation, "PENDING");
 
         Reservation reservation = jdbcReservationRepository.findById(pendingReservation.getId()).orElseThrow();
         assertThat(updated).isTrue();
@@ -154,8 +154,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("PENDING이 아닌 예약은 조건부 상태 변경에서 제외한다.")
-    void updateStatusIfPendingWhenNotPending() {
+    @DisplayName("기대 상태와 현재 상태가 다르면 상태 변경에서 제외한다.")
+    void updateStatusWhenExpectedStatusIsDifferent() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
         Reservation reservation = jdbcReservationRepository.save(new Reservation("김대기", themeSlot));
         Reservation cancelledReservation = new Reservation(
@@ -164,7 +164,7 @@ class JdbcReservationRepositoryTest {
                 reservation.getThemeSlot(),
                 CancelledStatus.getInstance()
         );
-        jdbcReservationRepository.updateStatus(cancelledReservation);
+        jdbcReservationRepository.updateStatus(cancelledReservation, "PENDING");
         Reservation confirmedReservation = new Reservation(
                 reservation.getId(),
                 reservation.getName(),
@@ -172,7 +172,7 @@ class JdbcReservationRepositoryTest {
                 ConfirmedStatus.getInstance()
         );
 
-        boolean updated = jdbcReservationRepository.updateStatusIfPending(confirmedReservation);
+        boolean updated = jdbcReservationRepository.updateStatus(confirmedReservation, "PENDING");
 
         Reservation foundReservation = jdbcReservationRepository.findById(reservation.getId()).orElseThrow();
         assertThat(updated).isFalse();

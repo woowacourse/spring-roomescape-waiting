@@ -24,9 +24,7 @@ public interface ReservationRepository {
 
     List<WaitingReservation> findWaitingReservationsWithOrderByName(String name);
 
-    void updateStatus(Reservation reservation);
-
-    boolean updateStatusIfPending(Reservation reservation);
+    boolean updateStatus(Reservation reservation, String expectedStatus);
 
     void updateThemeSlot(Reservation reservation);
 
