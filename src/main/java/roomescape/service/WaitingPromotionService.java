@@ -1,22 +1,25 @@
-package roomescape.domain;
+package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.SlotDao;
 import roomescape.dao.WaitingDao;
+import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Waiting;
 import roomescape.exception.code.SlotErrorCode;
 import roomescape.exception.domain.SlotException;
 
 import java.util.Optional;
 
 @Service
-public class PromotionService {
+public class WaitingPromotionService {
 
     private final WaitingDao waitingDao;
     private final SlotDao slotDao;
     private final ReservationDao reservationDao;
 
-    public PromotionService(WaitingDao waitingDao, SlotDao slotDao, ReservationDao reservationDao) {
+    public WaitingPromotionService(WaitingDao waitingDao, SlotDao slotDao, ReservationDao reservationDao) {
         this.waitingDao = waitingDao;
         this.slotDao = slotDao;
         this.reservationDao = reservationDao;

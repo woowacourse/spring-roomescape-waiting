@@ -6,7 +6,10 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.*;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.code.ReservationErrorCode;
@@ -30,15 +33,15 @@ public class ReservationService {
     private final ThemeDao themeDao;
     private final SlotDao slotDao;
     private final Clock clock;
-    private final PromotionService promotionService;
+    private final WaitingPromotionService waitingPromotionService;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, Clock clock, PromotionService promotionService) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, Clock clock, WaitingPromotionService waitingPromotionService) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.slotDao = slotDao;
         this.clock = clock;
-        this.promotionService = promotionService;
+        this.waitingPromotionService = waitingPromotionService;
     }
 
     public ReservationResponse create(ReservationRequest request) {
@@ -136,7 +139,7 @@ public class ReservationService {
         validateModifiable(reservation);
         reservationDao.delete(reservationId);
 
-        promotionService.promoteWaiting(reservation.getSlot().getId());
+        waitingPromotionService.promoteWaiting(reservation.getSlot().getId());
     }
 
     private Reservation getReservation(long reservationId) {
