@@ -1,7 +1,9 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.common.exception.BusinessRuleViolationException;
 
 public class Waiting {
     private final Long id;
@@ -28,6 +30,13 @@ public class Waiting {
 
     public boolean isOwnedBy(Long memberId) {
         return Objects.equals(this.member.getId(), memberId);
+    }
+
+    public Reservation toReservation(LocalDateTime now) {
+        if (time.isReservationBefore(now, date)) {
+            throw new BusinessRuleViolationException("지난 시간의 예약 대기는 예약으로 전환할 수 없습니다.");
+        }
+        return Reservation.fromWaiting(this);
     }
 
     public Long getId() {

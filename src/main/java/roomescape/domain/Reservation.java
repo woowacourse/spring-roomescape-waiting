@@ -76,6 +76,16 @@ public class Reservation {
         return reconstruct(id, member, date, time, theme, ReservationStatus.BOOKED, null, 0L, null);
     }
 
+    public static Reservation fromWaiting(Waiting waiting) {
+        return new Builder()
+                .member(waiting.getMember())
+                .date(waiting.getDate())
+                .time(waiting.getTime())
+                .theme(waiting.getTheme())
+                .storeId(waiting.getStoreId())
+                .build();
+    }
+
     public void cancelByUser(LocalDateTime now) {
         if (getTime().isReservationBefore(now, date)) {
             throw new BusinessRuleViolationException("지난 예약은 취소 불가능합니다.");
