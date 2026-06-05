@@ -1,5 +1,9 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,15 +12,23 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Slot;
 import roomescape.repository.mapper.DomainRowMapperFactory;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 @Repository
 public class JdbcSlotRepository implements SlotRepository {
 
-    private static final String FIND_ALL_SQL = "SELECT * FROM slot";
+    private static final String FIND_ALL_SQL = """
+            SELECT 
+                s.id AS slot_id, 
+                s.date, 
+                t.id AS t_id, 
+                t.start_at, 
+                th.id AS theme_id, 
+                th.name AS theme_name, 
+                th.description AS theme_description, 
+                th.thumbnail_url AS theme_thumbnail_url 
+            FROM slot s 
+            INNER JOIN time_slot t ON s.time_id = t.id 
+            INNER JOIN theme th ON s.theme_id = th.id 
+            """;
     private static final String FIND_BY_CONDITIONS_SQL = """
             SELECT 
                 s.id AS slot_id, 

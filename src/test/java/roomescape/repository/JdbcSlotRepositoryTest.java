@@ -1,5 +1,11 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,12 +17,6 @@ import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.repository.mapper.DomainRowMapperFactory;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -41,6 +41,19 @@ class JdbcSlotRepositoryTest {
         JdbcThemeRepository themeRepo = new JdbcThemeRepository(jdbcTemplate, factory);
         savedTimeSlot = timeRepo.save(new TimeSlot(1L, LocalTime.of(10, 0)));
         savedTheme = themeRepo.save(new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com"));
+    }
+
+    @Test
+    @DisplayName("슬롯을 저장하고 저장된 슬롯들의 목록을 반환한다.")
+    void findAll() {
+        jdbcSlotRepository.save(Slot.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
+        jdbcSlotRepository.save(Slot.transientOf(LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
+        jdbcSlotRepository.save(Slot.transientOf(LocalDate.now().plusDays(2), savedTimeSlot, savedTheme));
+        jdbcSlotRepository.save(Slot.transientOf(LocalDate.now().plusDays(3), savedTimeSlot, savedTheme));
+        jdbcSlotRepository.save(Slot.transientOf(LocalDate.now().plusDays(4), savedTimeSlot, savedTheme));
+        List<Slot> slots = jdbcSlotRepository.findAll();
+
+        assertThat(slots).hasSize(5);
     }
 
     @Test
