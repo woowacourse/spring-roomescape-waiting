@@ -31,8 +31,8 @@ public class ReservationController {
             @RequestParam String name
     ) {
         List<ReservationResponse> responses = Stream.concat(
-                reservationQueryService.getByName(name).stream().map(ReservationResponse::from),
-                waitingQueryService.getByName(name).stream().map(ReservationResponse::from)
+                reservationQueryService.getByName(UserName.from(name)).stream().map(ReservationResponse::from),
+                waitingQueryService.getByName(UserName.from(name)).stream().map(ReservationResponse::from)
         ).toList();
 
         return ResponseEntity.ok(responses);

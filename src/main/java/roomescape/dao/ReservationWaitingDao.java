@@ -96,7 +96,7 @@ public class ReservationWaitingDao {
         return waitingId.longValue();
     }
 
-    public Optional<ReservationWaiting> findById(long waitingId) {
+    public Optional<ReservationWaiting> findById(Long waitingId) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,
@@ -140,7 +140,7 @@ public class ReservationWaitingDao {
         return count != null && count > 0;
     }
 
-    public List<WaitingWithRank> findAllByName(String name) {
+    public List<WaitingWithRank> findAllByName(UserName name) {
         String sql = """
                 SELECT
                     ranked_waiting.id AS waiting_id,
@@ -162,7 +162,7 @@ public class ReservationWaitingDao {
                 INNER JOIN theme ON ranked_waiting.theme_id = theme.id
                 WHERE ranked_waiting.name = ?
                 """;
-        return jdbcTemplate.query(sql, withRankRowMapper, name);
+        return jdbcTemplate.query(sql, withRankRowMapper, name.getName());
     }
 
     public List<ReservationWaiting> findAllBySlot(Slot slot) {
