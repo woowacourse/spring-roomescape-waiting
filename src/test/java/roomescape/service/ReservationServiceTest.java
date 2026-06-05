@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import roomescape.auth.service.ReservationAuthorizationService;
-import roomescape.common.exception.BusinessRuleViolationException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -18,6 +15,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.auth.service.ReservationAuthorizationService;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
@@ -27,8 +26,8 @@ import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
 import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
-import roomescape.dao.jdbc.StoreJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
+import roomescape.dao.jdbc.StoreJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.dao.jdbc.WaitingJdbcDao;
