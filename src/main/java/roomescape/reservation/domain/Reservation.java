@@ -5,7 +5,7 @@ import java.util.Objects;
 import lombok.Getter;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 
 @Getter
 public class Reservation {

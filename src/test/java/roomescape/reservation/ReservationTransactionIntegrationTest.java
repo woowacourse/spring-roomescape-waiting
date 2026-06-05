@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 import roomescape.support.ControllerTestSupport;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingPromotionPolicy;

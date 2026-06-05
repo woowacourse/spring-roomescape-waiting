@@ -1,4 +1,4 @@
-package roomescape.slot;
+package roomescape.slot.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,7 +19,7 @@ import roomescape.exception.EscapeRoomException;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.slot.application.SlotAssembler;
-import roomescape.slot.infrastructure.SlotRepository;
+import roomescape.slot.application.port.out.SlotRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 

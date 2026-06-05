@@ -1,4 +1,4 @@
-package roomescape.slot.presentation;
+package roomescape.slot.adapter.in.web;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.slot.application.SlotService;
-import roomescape.slot.dto.request.SlotSaveRequest;
-import roomescape.slot.dto.response.SlotFindResponse;
-import roomescape.slot.dto.response.SlotSaveResponse;
+import roomescape.slot.application.dto.request.SlotSaveRequest;
+import roomescape.slot.application.dto.response.SlotFindResponse;
+import roomescape.slot.application.dto.response.SlotSaveResponse;
 
 import java.util.List;
 

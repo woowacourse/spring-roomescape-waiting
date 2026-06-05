@@ -1,4 +1,4 @@
-package roomescape.slot;
+package roomescape.slot.domain;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

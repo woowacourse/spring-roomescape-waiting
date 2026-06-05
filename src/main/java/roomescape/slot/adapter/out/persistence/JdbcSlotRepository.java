@@ -1,4 +1,4 @@
-package roomescape.slot.infrastructure;
+package roomescape.slot.adapter.out.persistence;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,7 +11,8 @@ import org.springframework.stereotype.Repository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.slot.Slot;
+import roomescape.slot.application.port.out.SlotRepository;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;

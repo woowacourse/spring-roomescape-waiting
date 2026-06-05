@@ -1,6 +1,6 @@
-package roomescape.slot.dto.response;
+package roomescape.slot.application.dto.response;
 
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 
 import java.time.LocalDate;
 

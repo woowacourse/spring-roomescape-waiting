@@ -29,7 +29,7 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.theme.Theme;
 import roomescape.waiting.domain.Waiting;

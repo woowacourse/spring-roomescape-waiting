@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservation.adapter.out.persistence.JdbcReservationRepository;
 import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

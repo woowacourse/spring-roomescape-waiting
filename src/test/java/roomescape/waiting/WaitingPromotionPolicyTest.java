@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.Theme;
 
 class WaitingPromotionPolicyTest {

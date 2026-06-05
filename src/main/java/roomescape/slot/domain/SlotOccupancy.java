@@ -1,4 +1,4 @@
-package roomescape.slot;
+package roomescape.slot.domain;
 
 public class SlotOccupancy {
 

@@ -2,7 +2,7 @@ package roomescape.waiting.domain;
 
 import org.springframework.stereotype.Component;
 import roomescape.reservation.domain.Reservation;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 
 @Component
 public class WaitingPromotionPolicy {

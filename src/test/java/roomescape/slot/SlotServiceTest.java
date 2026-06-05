@@ -1,4 +1,4 @@
-package roomescape.slot;
+package roomescape.slot.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,10 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.application.SlotService;
-import roomescape.slot.dto.request.SlotSaveRequest;
-import roomescape.slot.dto.response.SlotFindResponse;
-import roomescape.slot.dto.response.SlotSaveResponse;
-import roomescape.slot.infrastructure.SlotRepository;
+import roomescape.slot.application.dto.request.SlotSaveRequest;
+import roomescape.slot.application.dto.response.SlotFindResponse;
+import roomescape.slot.application.dto.response.SlotSaveResponse;
+import roomescape.slot.application.port.out.SlotRepository;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;

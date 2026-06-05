@@ -1,4 +1,4 @@
-package roomescape.slot;
+package roomescape.slot.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.slot.infrastructure.JdbcSlotRepository;
+import roomescape.slot.adapter.out.persistence.JdbcSlotRepository;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;

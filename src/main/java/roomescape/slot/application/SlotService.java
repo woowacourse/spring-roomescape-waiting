@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.slot.Slot;
-import roomescape.slot.dto.request.SlotSaveRequest;
-import roomescape.slot.dto.response.SlotFindResponse;
-import roomescape.slot.dto.response.SlotSaveResponse;
-import roomescape.slot.infrastructure.SlotRepository;
+import roomescape.slot.domain.Slot;
+import roomescape.slot.application.dto.request.SlotSaveRequest;
+import roomescape.slot.application.dto.response.SlotFindResponse;
+import roomescape.slot.application.dto.response.SlotSaveResponse;
+import roomescape.slot.application.port.out.SlotRepository;
 
 @Service
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package roomescape.slot;
+package roomescape.slot.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -15,10 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.slot.application.SlotService;
-import roomescape.slot.dto.request.SlotSaveRequest;
-import roomescape.slot.dto.response.SlotFindResponse;
-import roomescape.slot.dto.response.SlotSaveResponse;
-import roomescape.slot.presentation.ManagerSlotController;
+import roomescape.slot.application.dto.request.SlotSaveRequest;
+import roomescape.slot.application.dto.response.SlotFindResponse;
+import roomescape.slot.application.dto.response.SlotSaveResponse;
+import roomescape.slot.adapter.in.web.ManagerSlotController;
 
 @ExtendWith(MockitoExtension.class)
 class SlotControllerTest {

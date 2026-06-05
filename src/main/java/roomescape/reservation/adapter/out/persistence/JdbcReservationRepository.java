@@ -11,7 +11,7 @@ import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;

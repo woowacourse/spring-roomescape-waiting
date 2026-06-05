@@ -9,8 +9,8 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.slot.Slot;
-import roomescape.slot.infrastructure.SlotRepository;
+import roomescape.slot.domain.Slot;
+import roomescape.slot.application.port.out.SlotRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 

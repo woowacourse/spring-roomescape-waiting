@@ -1,6 +1,6 @@
-package roomescape.slot.infrastructure;
+package roomescape.slot.application.port.out;
 
-import roomescape.slot.Slot;
+import roomescape.slot.domain.Slot;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.slot.infrastructure.SlotRepository;
+import roomescape.slot.application.port.out.SlotRepository;
 
 @Component
 @RequiredArgsConstructor
