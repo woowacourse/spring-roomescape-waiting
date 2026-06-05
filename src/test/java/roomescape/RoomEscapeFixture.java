@@ -8,8 +8,6 @@ import java.time.ZoneId;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
-import roomescape.domain.reservation.Rank;
-import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
@@ -33,8 +31,6 @@ public class RoomEscapeFixture {
     static final ReservationDate PAST_DATE = new ReservationDate(PAST_DATE_TIME.toLocalDate());
     static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
     static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
-    private static final Rank APPROVE_RANK = new Rank(1);
-    private static final Rank WAITING_RANK = new Rank(2);
 
     public static SlotBuilder slot() {
         return new SlotBuilder();
@@ -46,14 +42,6 @@ public class RoomEscapeFixture {
 
     public static Theme theme() {
         return THEME;
-    }
-
-    public static RankedReservation reservationResultWithApproved() {
-        return new RankedReservation(APPROVE_RANK, reservation().build());
-    }
-
-    public static RankedReservation reservationResultWithWaiting() {
-        return new RankedReservation(WAITING_RANK, reservation().id(2L).status(Status.WAITING).build());
     }
 
     public static ThemeFamousFindRequest themeFamousFindRequest() {

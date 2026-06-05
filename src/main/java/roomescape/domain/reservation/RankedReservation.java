@@ -6,7 +6,7 @@ public class RankedReservation {
     private final Rank rank;
     private final Reservation reservation;
 
-    public RankedReservation(Rank rank, Reservation reservation) {
+    private RankedReservation(Rank rank, Reservation reservation) {
         this.rank = rank;
         this.reservation = reservation;
     }
