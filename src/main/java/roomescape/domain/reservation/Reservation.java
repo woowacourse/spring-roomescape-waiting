@@ -27,6 +27,7 @@ public class Reservation {
     }
 
     public static Reservation of(String name, LocalDate date, ReservationTime time, Theme theme) {
+        time.validateIfTimePast(date);
         return new Reservation(null, name, date, time, theme);
     }
 
@@ -34,6 +35,10 @@ public class Reservation {
         if (!name.equals(newRequestOwner)) {
             throw new RoomescapeException(ErrorCode.UNAUTHORIZED_NAME);
         }
+    }
+
+    public boolean isOwner(String name) {
+        return this.name.equals(name);
     }
 
     public Long getId() {
@@ -54,6 +59,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationSlot getSlot() {
+        return ReservationSlot.of(date, time, theme);
     }
 
 }

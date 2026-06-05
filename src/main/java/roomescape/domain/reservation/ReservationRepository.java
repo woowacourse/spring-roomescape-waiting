@@ -67,13 +67,14 @@ public class ReservationRepository {
                 reservation.getTheme());
     }
 
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlot(ReservationSlot slot) {
         String query = """
                 SELECT COUNT(*)
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ?
                 """;
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class,
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
         return count != null && count > 0;
     }
 
@@ -144,14 +145,20 @@ public class ReservationRepository {
                 .findFirst();
     }
 
-    public Optional<String> findNameByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findBySlotForUpdate(ReservationSlot slot) {
         String query = """
-                SELECT name
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?
+                SELECT r.id AS reservation_id, r.name, r.date,
+                       t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
                 FOR UPDATE
                 """;
-        return jdbcTemplate.query(query, (rs, rowNum) -> rs.getString("name"), date, timeId, themeId)
+        return jdbcTemplate.query(query, rowMapper,
+                        slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())
                 .stream()
                 .findFirst();
     }

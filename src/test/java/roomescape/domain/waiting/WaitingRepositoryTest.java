@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.waiting.dto.MyWaitingResult;
 
 @JdbcTest
 @Import(WaitingRepository.class)
@@ -64,74 +63,19 @@ class WaitingRepositoryTest {
     }
 
     @Nested
-    @DisplayName("날짜/시간/테마/이름으로 존재 여부 조회")
-    class ExistsByDateAndTimeIdAndThemeIdAndName {
-
-        @Test
-        void 대기가_존재하면_true를_반환한다() {
-            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
-            waitingRepository.save(waiting);
-
-            boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저1"
-            );
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 대기가_없으면_false를_반환한다() {
-            boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저1"
-            );
-
-            assertThat(result).isFalse();
-        }
-
-        @Test
-        void 이름이_다르면_false를_반환한다() {
-            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
-            waitingRepository.save(waiting);
-
-            boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저2"
-            );
-
-            assertThat(result).isFalse();
-        }
-
-        @Test
-        void 날짜가_다르면_false를_반환한다() {
-            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
-            waitingRepository.save(waiting);
-
-            boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 30), time.getId(), theme.getId(), "유저1"
-            );
-
-            assertThat(result).isFalse();
-        }
-    }
-
-    @Nested
     @DisplayName("id로 존재 여부 조회")
     class ExistsById {
 
         @Test
         void 존재하는_id면_true를_반환한다() {
-            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
-            Waiting saved = waitingRepository.save(waiting);
+            Waiting saved = waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            boolean result = waitingRepository.existsById(saved.getId());
-
-            assertThat(result).isTrue();
+            assertThat(waitingRepository.existsById(saved.getId())).isTrue();
         }
 
         @Test
         void 존재하지_않는_id면_false를_반환한다() {
-            boolean result = waitingRepository.existsById(999L);
-
-            assertThat(result).isFalse();
+            assertThat(waitingRepository.existsById(999L)).isFalse();
         }
     }
 
@@ -141,8 +85,7 @@ class WaitingRepositoryTest {
 
         @Test
         void 삭제하면_해당_대기가_조회되지_않는다() {
-            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
-            Waiting saved = waitingRepository.save(waiting);
+            Waiting saved = waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
             waitingRepository.deleteById(saved.getId());
 
@@ -151,28 +94,29 @@ class WaitingRepositoryTest {
     }
 
     @Nested
-    @DisplayName("날짜/시간/테마로 첫 번째 대기 조회")
-    class FindFirstByDateAndTimeIdAndThemeIdForUpdate {
+    @DisplayName("날짜/시간/테마로 전체 대기 조회")
+    class FindAllBySlot {
 
         @Test
-        void 대기가_여러_개면_id_오름차순_첫번째를_반환한다() {
+        void 대기가_여러_개면_id_오름차순으로_반환한다() {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
 
-            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            List<Waiting> result = waitingRepository.findAllBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 
             assertAll(
-                    () -> assertThat(result).isPresent(),
-                    () -> assertThat(result.get().getName()).isEqualTo("유저1")
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result.get(0).getName()).isEqualTo("유저1"),
+                    () -> assertThat(result.get(1).getName()).isEqualTo("유저2")
             );
         }
 
         @Test
-        void 대기가_없으면_빈_Optional을_반환한다() {
-            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+        void 대기가_없으면_빈_리스트를_반환한다() {
+            List<Waiting> result = waitingRepository.findAllBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 
             assertThat(result).isEmpty();
@@ -182,8 +126,8 @@ class WaitingRepositoryTest {
         void 날짜_조건이_다르면_반환하지_않는다() {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                    LocalDate.of(2099, 12, 30), time.getId(), theme.getId()
+            List<Waiting> result = waitingRepository.findAllBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 30), time, theme)
             );
 
             assertThat(result).isEmpty();
@@ -195,21 +139,17 @@ class WaitingRepositoryTest {
     class FindByName {
 
         @Test
-        void 이름에_해당하는_대기와_대기_순번을_반환한다() {
+        void 이름에_해당하는_대기를_반환한다() {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 30), time, theme));
 
-            List<MyWaitingResult> result = waitingRepository.findByName("유저1");
+            List<Waiting> result = waitingRepository.findByName("유저1");
 
             assertAll(
                     () -> assertThat(result).hasSize(2),
-                    () -> assertThat(result).extracting(MyWaitingResult::name)
-                            .containsExactly("유저1", "유저1"),
-                    () -> assertThat(result).extracting(MyWaitingResult::themeName)
-                            .containsExactly("테마1", "테마1"),
-                    () -> assertThat(result).extracting(MyWaitingResult::waitingNumber)
-                            .containsExactly(1, 1)
+                    () -> assertThat(result).extracting(Waiting::getName)
+                            .containsOnly("유저1")
             );
         }
 
@@ -217,7 +157,7 @@ class WaitingRepositoryTest {
         void 이름에_해당하는_대기가_없으면_빈_리스트를_반환한다() {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            List<MyWaitingResult> result = waitingRepository.findByName("없는유저");
+            List<Waiting> result = waitingRepository.findByName("없는유저");
 
             assertThat(result).isEmpty();
         }

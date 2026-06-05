@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
@@ -16,6 +17,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
+import roomescape.domain.waiting.Waitings;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -46,8 +48,8 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
-        validateDuplicateReservation(request.date(), request.timeId(), request.themeId());
-        time.validateIfTimePast(request.date());
+        ReservationSlot slot = ReservationSlot.of(request.date(), time, theme);
+        validateDuplicateReservation(slot);
 
         Reservation reservation = Reservation.of(
                 request.name(),
@@ -83,16 +85,13 @@ public class ReservationService {
         int deleted = reservationRepository.deleteById(id);
 
         if (deleted > 0) {
-            waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-            ).ifPresent(this::promoteToReservation);
+            Waitings waitings = Waitings.of(waitingRepository.findAllBySlotForUpdate(reservation.getSlot()));
+            waitings.first().ifPresent(this::promoteToReservation);
         }
     }
 
     private void promoteToReservation(Waiting waiting) {
-        reservationRepository.save(Reservation.of(
-                waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme()
-        ));
+        reservationRepository.save(waiting.toReservation());
         waitingRepository.deleteById(waiting.getId());
     }
 
@@ -110,7 +109,8 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
-        validateDuplicateReservation(fixRequest.date(), fixRequest.timeId(), reservation.getTheme().getId());
+        ReservationSlot newSlot = ReservationSlot.of(fixRequest.date(), newTime, reservation.getTheme());
+        validateDuplicateReservation(newSlot);
 
         reservation.validateOwner(fixRequest.name());
 
@@ -121,9 +121,8 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
-        boolean isDuplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
-        if (isDuplicated) {
+    private void validateDuplicateReservation(ReservationSlot slot) {
+        if (reservationRepository.existsBySlot(slot)) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
