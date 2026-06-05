@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotRepository;
 import roomescape.domain.theme.Theme;
 
 @JdbcTest
@@ -26,11 +27,11 @@ public class SlotDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private SlotDao slotDao;
+    private SlotRepository slotDao;
 
     @BeforeEach
     void setUp() {
-        this.slotDao = new SlotDao(jdbcTemplate);
+        this.slotDao = new JdbcSlotRepository(jdbcTemplate);
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");

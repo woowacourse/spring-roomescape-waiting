@@ -6,16 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
-import roomescape.repository.ReservationWaitingDao;
+import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 
-public class FakeReservationWaitingDao extends ReservationWaitingDao {
+public class FakeReservationWaitingRepository implements ReservationWaitingRepository {
 
     private final List<ReservationWaiting> store = new ArrayList<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
-
-    public FakeReservationWaitingDao() {
-        super(null);
-    }
 
     @Override
     public boolean isExistByNameAndSlotId(String name, Long slotId) {

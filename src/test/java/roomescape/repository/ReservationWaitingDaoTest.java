@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
+import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.theme.Theme;
@@ -29,11 +30,11 @@ public class ReservationWaitingDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ReservationWaitingDao reservationWaitingDao;
+    private ReservationWaitingRepository reservationWaitingDao;
 
     @BeforeEach
     void setUp() {
-        this.reservationWaitingDao = new ReservationWaitingDao(jdbcTemplate);
+        this.reservationWaitingDao = new JdbcReservationWaitingRepository(jdbcTemplate);
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");

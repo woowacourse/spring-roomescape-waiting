@@ -6,16 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.slot.Slot;
-import roomescape.repository.SlotDao;
+import roomescape.domain.slot.SlotRepository;
 
-public class FakeSlotDao extends SlotDao {
+public class FakeSlotRepository implements SlotRepository {
 
     private final List<Slot> store = new ArrayList<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
-
-    public FakeSlotDao() {
-        super(null);
-    }
 
     public Slot save(Slot slot) {
         Slot withId = slot.getId() == null ? slot.withId(idGenerator.getAndIncrement()) : slot;

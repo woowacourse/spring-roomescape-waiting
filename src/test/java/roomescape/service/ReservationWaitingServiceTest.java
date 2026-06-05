@@ -21,15 +21,15 @@ import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.fake.FakeReservationQueryingDao;
-import roomescape.fake.FakeReservationWaitingDao;
-import roomescape.fake.FakeSlotDao;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationWaitingRepository;
+import roomescape.fake.FakeSlotRepository;
 
 class ReservationWaitingServiceTest {
 
-    private FakeReservationWaitingDao waitingDao;
-    private FakeSlotDao slotDao;
-    private FakeReservationQueryingDao reservationQueryingDao;
+    private FakeReservationWaitingRepository waitingDao;
+    private FakeSlotRepository slotDao;
+    private FakeReservationRepository reservationQueryingDao;
     private ReservationWaitingService service;
 
     private static final LocalDate tomorrow = LocalDate.now().plusDays(1);
@@ -38,9 +38,9 @@ class ReservationWaitingServiceTest {
 
     @BeforeEach
     void setUp() {
-        waitingDao = new FakeReservationWaitingDao();
-        slotDao = new FakeSlotDao();
-        reservationQueryingDao = new FakeReservationQueryingDao();
+        waitingDao = new FakeReservationWaitingRepository();
+        slotDao = new FakeSlotRepository();
+        reservationQueryingDao = new FakeReservationRepository();
 
         SlotDomainService slotDomainService = new SlotDomainService(slotDao, null, null);
         service = new ReservationWaitingService(waitingDao, slotDomainService, reservationQueryingDao);

@@ -12,16 +12,17 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
+import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class ReservationWaitingDao {
+public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationWaitingDao(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -80,6 +81,7 @@ public class ReservationWaitingDao {
         );
     };
 
+    @Override
     public Optional<ReservationWaiting> findFirstBySlotId(Long slotId) {
         String sql = SELECT_RESERVATION_WAITING_SQL + """
                 WHERE w.slot_id = ?
@@ -90,6 +92,7 @@ public class ReservationWaitingDao {
                 .findFirst();
     }
 
+    @Override
     public boolean isExistByNameAndSlotId(String name, Long slotId) {
         String sql = """
             SELECT EXISTS (
@@ -102,21 +105,25 @@ public class ReservationWaitingDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, slotId);
     }
 
+    @Override
     public Optional<ReservationWaiting> findReservationWaitingById(long id) {
         String sql = SELECT_RESERVATION_WAITING_SQL + " where w.id = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, id).stream()
                 .findFirst();
     }
 
+    @Override
     public List<ReservationWaiting> findAllReservationWaiting() {
         return jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL, reservationWaitingRowMapper);
     }
 
+    @Override
     public List<ReservationWaiting> findAllByName(String name) {
         String sql = SELECT_RESERVATION_WAITING_SQL + " where w.name = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, name);
     }
 
+    @Override
     public Long create(ReservationWaiting reservationWaiting) {
         String sql = "insert into waiting(slot_id, name, created_at) values(?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -132,6 +139,7 @@ public class ReservationWaitingDao {
         return keyHolder.getKey().longValue();
     }
 
+    @Override
     public long delete(Long id) {
         String sql = "delete from waiting where id = ?";
         return jdbcTemplate.update(sql, id);

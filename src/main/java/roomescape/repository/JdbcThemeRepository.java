@@ -1,20 +1,23 @@
 package roomescape.repository;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import roomescape.domain.theme.Theme;
-
+import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 
 @Repository
-public class ThemeQueryingDao {
+public class JdbcThemeRepository implements ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ThemeQueryingDao(JdbcTemplate jdbcTemplate) {
+    public JdbcThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -25,6 +28,7 @@ public class ThemeQueryingDao {
             resultSet.getString("url")
     );
 
+    @Override
     public Optional<Theme> findThemeById(long id) {
         String sql = """
                 SELECT id, name, description, url
@@ -35,6 +39,7 @@ public class ThemeQueryingDao {
                 .findFirst();
     }
 
+    @Override
     public List<Theme> findAllTheme() {
         String sql = """
                 SELECT id, name, description, url
@@ -43,6 +48,7 @@ public class ThemeQueryingDao {
         return jdbcTemplate.query(sql, themeRowMapper);
     }
 
+    @Override
     public List<Theme> findAllByTopTheme() {
         String sql = """
                 SELECT t.id, t.name, t.description, t.url
@@ -59,5 +65,27 @@ public class ThemeQueryingDao {
                 """;
         LocalDateTime filtered = LocalDateTime.now().minusWeeks(1);
         return jdbcTemplate.query(sql, themeRowMapper, filtered);
+    }
+
+    @Override
+    public Long insert(Theme theme) {
+        String sql = "INSERT INTO theme (name, description, url) VALUES (?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, theme.getName());
+            ps.setString(2, theme.getDescription());
+            ps.setString(3, theme.getUrl());
+            return ps;
+        }, keyHolder);
+
+        return keyHolder.getKey().longValue();
+    }
+
+    @Override
+    public void delete(Long id) {
+        String sql = "DELETE FROM theme WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 }

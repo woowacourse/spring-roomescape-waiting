@@ -4,42 +4,42 @@ import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.SlotDao;
-import roomescape.repository.ThemeQueryingDao;
 
 @Service
 public class SlotDomainService {
-    private final SlotDao slotDao;
-    private final ReservationTimeQueryingDao reservationTimeQueryingDao;
-    private final ThemeQueryingDao themeQueryingDao;
+    private final SlotRepository slotRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
 
-    public SlotDomainService(SlotDao slotDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
-        this.slotDao = slotDao;
-        this.reservationTimeQueryingDao = reservationTimeQueryingDao;
-        this.themeQueryingDao = themeQueryingDao;
+    public SlotDomainService(SlotRepository slotRepository, ReservationTimeRepository reservationTimeRepository,
+                             ThemeRepository themeRepository) {
+        this.slotRepository = slotRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
     }
 
     public void delete(Long id) {
-        slotDao.delete(id);
+        slotRepository.delete(id);
     }
 
     public Optional<Slot> find(LocalDate date, Long timeId, Long themeId) {
-        return slotDao.findByDateAndTimeAndTheme(date, timeId, themeId);
+        return slotRepository.findByDateAndTimeAndTheme(date, timeId, themeId);
     }
 
     public boolean isExistByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
-        return slotDao.isExistByDateAndTimeAndTheme(date, timeId, themeId);
+        return slotRepository.isExistByDateAndTimeAndTheme(date, timeId, themeId);
     }
 
     public Slot create(LocalDate date, Long timeId, Long themeId) {
-        ReservationTime time = reservationTimeQueryingDao.findReservationTimeById(timeId)
+        ReservationTime time = reservationTimeRepository.findReservationTimeById(timeId)
                 .orElseThrow(() -> new ReservationTimeNotFoundException(timeId));
-        Theme theme = themeQueryingDao.findThemeById(themeId)
+        Theme theme = themeRepository.findThemeById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException(themeId));
 
         Slot slot = Slot.create(date, time, theme);
@@ -48,8 +48,7 @@ public class SlotDomainService {
             throw new ExpiredDateTimeException();
         }
 
-
-        return slotDao.findByDateAndTimeAndTheme(date, timeId, themeId)
-                .orElseGet(() -> slot.withId(slotDao.insert(slot)));
+        return slotRepository.findByDateAndTimeAndTheme(date, timeId, themeId)
+                .orElseGet(() -> slot.withId(slotRepository.insert(slot)));
     }
 }

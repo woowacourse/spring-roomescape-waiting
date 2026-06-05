@@ -20,47 +20,45 @@ import roomescape.domain.slot.SlotDomainService;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservationtime.ReservationTimeRequest;
-import roomescape.dto.theme.ThemeRequest;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.slot.SlotRepository;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationTimeUpdatingDao;
-import roomescape.repository.ReservationUpdatingDao;
-import roomescape.repository.ReservationWaitingDao;
-import roomescape.repository.SlotDao;
-import roomescape.repository.ThemeQueryingDao;
-import roomescape.repository.ThemeUpdatingDao;
+import roomescape.repository.JdbcReservationRepository;
+import roomescape.repository.JdbcReservationTimeRepository;
+import roomescape.repository.JdbcReservationWaitingRepository;
+import roomescape.repository.JdbcSlotRepository;
+import roomescape.repository.JdbcThemeRepository;
 
 @JdbcTest
-@Import({ReservationService.class, SlotDomainService.class, SlotDao.class,
-        ReservationQueryingDao.class, ReservationUpdatingDao.class,
-        ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
-        ThemeQueryingDao.class, ThemeUpdatingDao.class,
-        ReservationWaitingDao.class})
+@Import({ReservationService.class, SlotDomainService.class, JdbcSlotRepository.class,
+        JdbcReservationRepository.class, JdbcReservationTimeRepository.class,
+        JdbcThemeRepository.class, JdbcReservationWaitingRepository.class})
 class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
 
     @Autowired
-    private ReservationTimeUpdatingDao reservationTimeUpdatingDao;
+    private ReservationTimeRepository reservationTimeUpdatingDao;
 
     @Autowired
-    private ThemeUpdatingDao themeUpdatingDao;
+    private ThemeRepository themeUpdatingDao;
 
     @Autowired
-    private SlotDao slotDao;
+    private SlotRepository slotDao;
 
     @Autowired
-    private ReservationUpdatingDao reservationUpdatingDao;
+    private ReservationRepository reservationUpdatingDao;
 
     @Autowired
-    private ReservationWaitingDao reservationWaitingDao;
+    private ReservationWaitingRepository reservationWaitingDao;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -71,8 +69,8 @@ class ReservationServiceTest {
     private Theme theme;
 
     private void setUpTimeAndTheme() {
-        timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
-        themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        timeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(10, 0)));
+        themeId = themeUpdatingDao.insert(new Theme(null,"테마", "설명", "http://example.com"));
         time = new ReservationTime(timeId, LocalTime.of(10, 0));
         theme = new Theme(themeId, "테마", "설명", "http://example.com");
     }
@@ -104,8 +102,8 @@ class ReservationServiceTest {
     @Test
     void 과거_시간으로_예약시_예외가_발생한다() {
         LocalDateTime past = LocalDateTime.now().minusHours(1);
-        Long pastTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(past.toLocalTime()));
-        Long localThemeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
+        Long pastTimeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,past.toLocalTime()));
+        Long localThemeId = themeUpdatingDao.insert(new Theme(null,"명탐정의 부재", "탐험", "http://example.com"));
         ReservationRequest reservationReq = new ReservationRequest("브라운", past.toLocalDate(), pastTimeId, localThemeId);
 
         assertThatThrownBy(() -> reservationService.create(reservationReq))
@@ -125,7 +123,7 @@ class ReservationServiceTest {
 
     @Test
     void 존재하지_않는_시간으로_예약시_예외가_발생한다() {
-        Long localThemeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
+        Long localThemeId = themeUpdatingDao.insert(new Theme(null,"명탐정의 부재", "탐험", "http://example.com"));
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().plusDays(1), 999L, localThemeId);
 
         assertThatThrownBy(() -> reservationService.create(request))
@@ -134,7 +132,7 @@ class ReservationServiceTest {
 
     @Test
     void 존재하지_않는_테마로_예약시_예외가_발생한다() {
-        Long localTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long localTimeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(10, 0)));
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().plusDays(1), localTimeId, 999L);
 
         assertThatThrownBy(() -> reservationService.create(request))
@@ -157,7 +155,7 @@ class ReservationServiceTest {
         setUpTimeAndTheme();
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
 
-        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(11, 0)));
         ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().plusDays(2), newTimeId, themeId);
         ReservationResponse updated = reservationService.update(created.id(), newReservationReq);
 
@@ -170,7 +168,7 @@ class ReservationServiceTest {
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
         ReservationResponse beforeUpdate = reservationService.read(created.id());
 
-        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(11, 0)));
         ReservationResponse updated = reservationService.update(created.id(),
                 new ReservationRequest("브라운", LocalDate.now().plusDays(2), newTimeId, themeId));
 
@@ -184,7 +182,7 @@ class ReservationServiceTest {
         setUpTimeAndTheme();
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
 
-        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(11, 0)));
         ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().minusDays(1), newTimeId, themeId);
 
         assertThatThrownBy(() -> reservationService.update(created.id(), newReservationReq))
@@ -194,7 +192,7 @@ class ReservationServiceTest {
     @Test
     void 이미_예약된_시간으로_변경시_예외가_발생한다() {
         setUpTimeAndTheme();
-        Long timeId2 = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long timeId2 = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(11, 0)));
 
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
         reservationService.create(new ReservationRequest("네오", LocalDate.now().plusDays(1), timeId2, themeId));
@@ -306,7 +304,7 @@ class ReservationServiceTest {
     @Test
     void 슬롯_변경_시_대기열이_있으면_대기자가_기존_슬롯에_승격된다() {
         setUpTimeAndTheme();
-        Long timeId2 = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long timeId2 = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(11, 0)));
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
         Slot slot = findSlot(created.date());
         reservationWaitingDao.create(ReservationWaiting.create("네오", slot));

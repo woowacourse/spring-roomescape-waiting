@@ -1,25 +1,28 @@
 package roomescape.repository;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.slot.Slot;
-import roomescape.domain.theme.Theme;
-
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.slot.Slot;
+import roomescape.domain.theme.Theme;
 
 @Repository
-public class ReservationQueryingDao {
+public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationQueryingDao(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -66,35 +69,70 @@ public class ReservationQueryingDao {
         );
     };
 
+    @Override
     public Optional<Reservation> findReservationById(long id) {
         String sql = SELECT_RESERVATION_SQL + " WHERE r.id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, id).stream()
                 .findFirst();
     }
 
+    @Override
     public Optional<Reservation> findReservationBySlotId(Long slotId) {
         String sql = SELECT_RESERVATION_SQL + " WHERE r.slot_id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, slotId).stream()
                 .findFirst();
     }
 
+    @Override
     public List<Reservation> findAllReservations() {
         return jdbcTemplate.query(SELECT_RESERVATION_SQL, reservationRowMapper);
     }
 
+    @Override
     public List<Reservation> findAllByName(String name) {
         String sql = SELECT_RESERVATION_SQL + " WHERE r.name = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, name);
     }
 
+    @Override
     public boolean isExistBySlot(long slotId) {
         String sql = """
-            SELECT EXISTS (
-                SELECT 1
-                    FROM reservation
-                    WHERE slot_id = ?
-            )
-            """;
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation WHERE slot_id = ?
+                )
+                """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, slotId);
+    }
+
+    @Override
+    public Long insert(Reservation reservation) {
+        String sql = "insert into reservation(slot_id, name, created_at) values(?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setLong(1, reservation.getSlot().getId());
+            ps.setString(2, reservation.getName());
+            ps.setObject(3, reservation.getCreatedAt());
+            return ps;
+        }, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
+    @Override
+    public void updateName(Long id, String name) {
+        String sql = "update reservation set name = ? where id = ?";
+        jdbcTemplate.update(sql, name, id);
+    }
+
+    @Override
+    public long update(Long id, String name, Long slotId, LocalDateTime createdAt) {
+        String sql = "update reservation set slot_id = ?, name = ?, created_at = ? where id = ?";
+        return jdbcTemplate.update(sql, slotId, name, createdAt, id);
+    }
+
+    @Override
+    public long delete(Long id) {
+        String sql = "delete from reservation where id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 }

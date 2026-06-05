@@ -11,14 +11,15 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotRepository;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class SlotDao {
+public class JdbcSlotRepository implements SlotRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public SlotDao(JdbcTemplate jdbcTemplate) {
+    public JdbcSlotRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -53,18 +54,32 @@ public class SlotDao {
         );
     };
 
+    @Override
     public Optional<Slot> findByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
         String sql = SELECT_SLOT_SQL + " WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ?";
         return jdbcTemplate.query(sql, slotRowMapper, date, timeId, themeId).stream()
                 .findFirst();
     }
 
+    @Override
+    public boolean isExistByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM slot
+                    WHERE date = ? AND time_id = ? AND theme_id = ?
+                )
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
+    }
+
+    @Override
     public Optional<Slot> findById(Long id) {
         String sql = SELECT_SLOT_SQL + " WHERE s.id = ?";
         return jdbcTemplate.query(sql, slotRowMapper, id).stream()
                 .findFirst();
     }
 
+    @Override
     public Long insert(Slot slot) {
         String sql = "insert into slot(date, time_id, theme_id) values(?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -78,21 +93,9 @@ public class SlotDao {
         return keyHolder.getKey().longValue();
     }
 
+    @Override
     public long delete(Long id) {
         String sql = "delete from slot where id = ?";
         return jdbcTemplate.update(sql, id);
-    }
-
-    public boolean isExistByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-            SELECT EXISTS (
-                SELECT 1
-                    FROM slot
-                    WHERE date = ?
-                    AND time_id = ?
-                    AND theme_id = ?
-            )
-            """;
-        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
     }
 }
