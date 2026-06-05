@@ -169,8 +169,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 본인 예약만 반환한다")
-    void getMyReservationsReturnsOnlyOwnReservations() {
+    @DisplayName("getMyReservationStatuses - 본인 예약만 반환한다")
+    void getMyReservationStatusesReturnsOnlyOwnReservations() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -179,15 +179,15 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         saveReservation(other, themeId, timeId, Fixtures.daysFromNow(-5));
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
     }
 
     @Test
-    @DisplayName("getMyReservations - size를 초과하면 hasNext가 true이고 size만큼만 반환한다")
-    void getMyReservationsReturnsOnlySizeWithHasNextWhenExceedingSize() {
+    @DisplayName("getMyReservationStatuses - size를 초과하면 hasNext가 true이고 size만큼만 반환한다")
+    void getMyReservationStatusesReturnsOnlySizeWithHasNextWhenExceedingSize() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -195,8 +195,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-5));
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
-        ReservationWithStatusResponses firstPage = service.getMyReservations(brown, 0, 2);
-        ReservationWithStatusResponses secondPage = service.getMyReservations(brown, 1, 2);
+        ReservationWithStatusResponses firstPage = service.getMyReservationStatuses(brown, 0, 2);
+        ReservationWithStatusResponses secondPage = service.getMyReservationStatuses(brown, 1, 2);
 
         assertThat(firstPage.reservations()).hasSize(2);
         assertThat(firstPage.hasNext()).isTrue();
@@ -205,11 +205,11 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 예약과 대기가 없으면 빈 목록을 반환한다")
-    void getMyReservationsReturnsEmptyWhenNoReservationsOrWaiting() {
+    @DisplayName("getMyReservationStatuses - 예약과 대기가 없으면 빈 목록을 반환한다")
+    void getMyReservationStatusesReturnsEmptyWhenNoReservationsOrWaiting() {
         User brown = member("브라운");
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.reservations()).isEmpty();
         assertThat(responses.waitingReservations()).isEmpty();
@@ -217,8 +217,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 확정은 reservations에, 대기는 waitingReservations에 분리돼 노출된다")
-    void getMyReservationsSeparatesReservedAndWaiting() {
+    @DisplayName("getMyReservationStatuses - 확정은 reservations에, 대기는 waitingReservations에 분리돼 노출된다")
+    void getMyReservationStatusesSeparatesReservedAndWaiting() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -226,7 +226,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservedId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
         long waitingId = saveWaitingReservation(brown, themeId, timeId2, Fixtures.daysFromNow(-5));
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.reservations()).extracting("id").containsExactly(reservedId);
         assertThat(responses.waitingReservations()).extracting("id").containsExactly(waitingId);
@@ -234,8 +234,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 대기 순번은 슬롯별로 독립적으로 계산된다")
-    void getMyReservationsCalculatesWaitingOrderPerSlot() {
+    @DisplayName("getMyReservationStatuses - 대기 순번은 슬롯별로 독립적으로 계산된다")
+    void getMyReservationStatusesCalculatesWaitingOrderPerSlot() {
         User brown = member("브라운");
         User charles = member("샤를");
         User aron = member("아론");
@@ -257,7 +257,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         setCreatedAt(slotBAron, "2026-05-01 10:00:00");
         setCreatedAt(slotBBrown, "2026-05-01 11:00:00");
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.waitingReservations()).extracting("id")
                 .containsExactly(slotABrown, slotBBrown);

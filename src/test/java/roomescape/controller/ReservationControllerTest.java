@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
@@ -57,9 +58,10 @@ class ReservationControllerTest {
     @Test
     @DisplayName("GET /reservations/mine - 로그인 사용자의 예약 목록을 응답한다")
     void getMyReservationsRespondsWithLoginUserReservations() throws Exception {
-        given(reservationService.getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20))
-                .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
-                        Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
+        given(reservationService.getMyReservationStatuses(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20))
+                .willReturn(ReservationWithStatusResponses.of(List.of(
+                        new ReservationWithWaitingOrder(Fixtures.sampleReservation(1L), 1),
+                        new ReservationWithWaitingOrder(Fixtures.sampleWaitingReservation(2L), 1)), false));
 
         mockMvc.perform(get("/reservations/mine"))
                 .andExpect(status().isOk())
@@ -67,15 +69,16 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
                 .andExpect(jsonPath("$.hasNext").value(false));
 
-        verify(reservationService).getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20);
+        verify(reservationService).getMyReservationStatuses(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20);
     }
 
     @Test
     @DisplayName("GET /reservations/mine - 예약 확정과 예약 대기 목록을 구분해서 응답한다")
     void getMyReservationsSeparatesReservedAndWaiting() throws Exception {
-        given(reservationService.getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20))
-                .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
-                        Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
+        given(reservationService.getMyReservationStatuses(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20))
+                .willReturn(ReservationWithStatusResponses.of(List.of(
+                        new ReservationWithWaitingOrder(Fixtures.sampleReservation(1L), 1),
+                        new ReservationWithWaitingOrder(Fixtures.sampleWaitingReservation(2L), 1)), false));
 
         mockMvc.perform(get("/reservations/mine"))
                 .andExpect(status().isOk())
@@ -85,7 +88,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
                 .andExpect(jsonPath("$.waitingReservations[0].waitingOrder").value(1));
 
-        verify(reservationService).getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20);
+        verify(reservationService).getMyReservationStatuses(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20);
     }
 
 

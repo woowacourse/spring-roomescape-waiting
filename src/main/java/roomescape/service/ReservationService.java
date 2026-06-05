@@ -4,16 +4,14 @@ import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.domain.Slot;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
@@ -80,30 +78,16 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationWithStatusResponses getMyReservations(User user, int page, int size) {
-        Map<Reservation, Integer> myReservations = reservationRepository.findAllByUserIdWithWaitingOrder(
+    public ReservationWithStatusResponses getMyReservationStatuses(User user, int page, int size) {
+        List<ReservationWithWaitingOrder> rows = reservationRepository.findAllByUserIdWithWaitingOrder(
                 user.getId(), size + 1, page * size);
 
-        boolean hasNext = myReservations.size() > size;
-
-        List<Reservation> reservations = new ArrayList<>();
-        Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
-        int count = 0;
-        for (Map.Entry<Reservation, Integer> entry : myReservations.entrySet()) {
-            if (count++ >= size) {
-                break;
-            }
-            Reservation reservation = entry.getKey();
-            if (reservation.isReserved()) {
-                reservations.add(reservation);
-                continue;
-            }
-            if (reservation.isWaiting()) {
-                waitingReservations.put(reservation, entry.getValue());
-            }
+        boolean hasNext = rows.size() > size;
+        if (hasNext) {
+            rows = rows.subList(0, size);
         }
 
-        return ReservationWithStatusResponses.of(reservations, waitingReservations, hasNext);
+        return ReservationWithStatusResponses.of(rows, hasNext);
     }
 
     @Transactional

@@ -1,27 +1,22 @@
 package roomescape.dto.reservation.response;
 
 import java.util.List;
-import java.util.Map;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWithWaitingOrder;
 
 public record ReservationWithStatusResponses(
         List<ReservationResponse> reservations,
         List<WaitingReservationResponse> waitingReservations,
         boolean hasNext
 ) {
-    public static ReservationWithStatusResponses of(
-            List<Reservation> reservations,
-            Map<Reservation, Integer> waitingReservations,
-            boolean hasNext
-    ) {
-        return new ReservationWithStatusResponses(
-                reservations.stream()
-                        .map(ReservationResponse::from)
-                        .toList(),
-                waitingReservations.entrySet().stream()
-                        .map(entry -> WaitingReservationResponse.from(entry.getKey(), entry.getValue()))
-                        .toList(),
-                hasNext
-        );
+    public static ReservationWithStatusResponses of(List<ReservationWithWaitingOrder> rows, boolean hasNext) {
+        List<ReservationResponse> reservations = rows.stream()
+                .filter(ReservationWithWaitingOrder::isReserved)
+                .map(row -> ReservationResponse.from(row.reservation()))
+                .toList();
+        List<WaitingReservationResponse> waitingReservations = rows.stream()
+                .filter(ReservationWithWaitingOrder::isWaiting)
+                .map(row -> WaitingReservationResponse.from(row.reservation(), row.waitingOrder()))
+                .toList();
+        return new ReservationWithStatusResponses(reservations, waitingReservations, hasNext);
     }
 }

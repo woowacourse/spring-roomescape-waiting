@@ -2,10 +2,10 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationWithWaitingOrder;
 
 public interface ReservationRepository {
 
@@ -13,7 +13,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByStoreIdsAndName(List<Long> storeIds, String name, int limit, int offset);
 
-    Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId, int limit, int offset);
+    List<ReservationWithWaitingOrder> findAllByUserIdWithWaitingOrder(Long userId, int limit, int offset);
 
     Optional<Reservation> findById(Long id);
 

@@ -4,9 +4,7 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +16,7 @@ import roomescape.domain.Password;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.domain.Role;
 import roomescape.domain.Slot;
 import roomescape.domain.Store;
@@ -130,7 +129,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId, int limit, int offset) {
+    public List<ReservationWithWaitingOrder> findAllByUserIdWithWaitingOrder(Long userId, int limit, int offset) {
         String sql = """
                 select *
                 from (
@@ -161,10 +160,10 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 limit ? offset ?
                 """;
 
-        Map<Reservation, Integer> reservations = new LinkedHashMap<>();
+        List<ReservationWithWaitingOrder> reservations = new ArrayList<>();
         jdbcTemplate.query(sql, resultSet -> {
             Reservation reservation = rowMapper.mapRow(resultSet, resultSet.getRow());
-            reservations.put(reservation, resultSet.getInt("waiting_order"));
+            reservations.add(new ReservationWithWaitingOrder(reservation, resultSet.getInt("waiting_order")));
         }, userId, limit, offset);
         return reservations;
     }
