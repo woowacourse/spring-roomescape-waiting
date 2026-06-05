@@ -1,0 +1,122 @@
+# Domain
+
+## 예약 대기
+
+- [x] 이름, 날짜, 시간, 테마, 생성시간을 가진다.
+
+# Service
+
+- [x] 이미 다른 사용자에 의해 예약된 슬롯(날짜+시간+테마)에 **대기를 신청**할  수 있다.
+- [x] 같은 사용자가 같은 슬롯에 **중복 대기할 수 없다**.
+
+# Repository
+## WaitingReservationRepository
+
+- [x] 이름, 날짜, 테마, 시간으로 예약 대기를 생성할 수 있다.
+- [x] 가장 먼저 신청한 예약 대기를 가져온다. (예약 취소 삭제 로직)
+- [x] 같은 이름, 날짜, 테마, 시간으로 예약 대기를 생성할 수 없다. (유니크 키 걸기)
+    - 이름, 날짜, 테마, 시간를 유니크로
+        - 이유: 상태까지 하면 한 사용자가 예약 완료, 예약 대기 둘 다 가능하기 때문
+- [x] 대기 취소를 하면 정상 삭제한다.
+- [x] 사용자 이름으로 예약 대기 목록 리스트를 가져온다.
+ 
+# 통합테스트
+## ReservationCancellationIntegration
+- [x] 사용자가 본인의 예약을 취소하면 같은 슬롯의 1순위 대기가 예약으로 변경된다.
+
+# API
+
+- [x] 예약 대기 신청
+
+  **`POST /waiting-reservations`**
+
+    - 설명: 예약 대기 생성
+    - 요청 본문
+
+    ```json
+    {
+      "name": "쿠키",
+      "dateId": 1,
+      "timeId": 2,
+      "themeId": 3
+    }
+    ```
+
+    - 응답 `201 Created`
+
+    ```json
+    {
+      "id": 29,
+      "name": "쿠키",
+      "date": "2026-05-01",
+      "time": "11:00",
+      "theme": {
+        "name": "청춘물",
+        "content": "학교 배경인 테마 입니다.",
+        "url": "/themes/youth"
+      },
+      "createdAt": "2026-05-26T11:00:55"
+    }
+    ```
+
+    - 에러 처리
+        - [x] 중복 예약 대기 신청: 409 Conflict
+        - [x] 예약 가능한 시간에 대기 신청: 409 Conflict
+        - [x] 존재하지 않는 date/time/theme: 404 Not Found
+        - [x] 요청 값 누락/형식 오류: 400 Bad Request
+- [x] 예약 대기 취소
+
+  **`DELETE /waiting-reservations/{id}`**
+
+    - 설명: 사용자 본인 예약 대기 취소
+    - 응답 `204 No Content`
+
+- [x] 예약 대기 목록 조회
+
+  **`GET /waiting-reservations?name={name}`**
+
+    - 설명: 사용자 이름으로 예약 대기 목록 조회
+    - 응답 `200 OK`
+
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "고래",
+        "date": "2026-05-05",
+        "time": {
+          "id": 1,
+          "startAt": "10:00"
+        },
+        "theme": {
+          "id": 1,
+          "name": "공포",
+          "content": "오금이 저리는 공포입니다.",
+          "url": "/themes/scary"
+        },
+        "rank" : 1,
+        "createdAt": "2026-05-26T11:00:55"
+      },
+        {
+        "id": 2,
+        "name": "고래",
+        "date": "2026-06-05",
+        "time": {
+          "id": 2,
+          "startAt": "11:00"
+        },
+        "theme": {
+          "id": 1,
+          "name": "공포",
+          "content": "오금이 저리는 공포입니다.",
+          "url": "/themes/scary"
+        },
+        "rank" : 2,
+        "createdAt": "2026-05-26T11:00:55"
+      },
+      ...
+    ]
+    ```
+
+    - 에러 처리
+        - [x] name이 비어있는 경우: 400 Bad Request
