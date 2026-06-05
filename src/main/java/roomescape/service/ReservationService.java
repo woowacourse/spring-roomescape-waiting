@@ -94,7 +94,11 @@ public class ReservationService {
         if (reservation.isExpired()) {
             throw new ExpiredDateTimeException();
         }
-        reservationRepository.delete(reservation.getId());
+        long deletedRow = reservationRepository.delete(reservation.getId());
+
+        if(deletedRow == 0) {
+            return;
+        }
         promoteOrCleanupSlot(reservation.getSlot().getId());
     }
 
