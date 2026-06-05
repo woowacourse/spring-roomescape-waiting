@@ -57,8 +57,6 @@ class ReservationPromotionServiceTest {
 
         reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId);
 
-
-
         verify(waitingRepository).deleteById(firstWaiting.getId());
         verify(reservationRepository).deleteById(reservationId);
         verify(reservationRepository).save(argThat(promoted ->
