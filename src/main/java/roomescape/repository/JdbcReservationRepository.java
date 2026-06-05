@@ -90,6 +90,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Long> lockById(Long id) {
+        String sql = "SELECT id FROM reservation WHERE id = ? FOR UPDATE";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, Long.class, id));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Optional<Long> lockBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT id FROM reservation

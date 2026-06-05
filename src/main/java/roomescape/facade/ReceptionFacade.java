@@ -83,12 +83,11 @@ public class ReceptionFacade {
 
     @Transactional
     public void deleteReservation(Long id) {
+        reservationService.lockById(id);
         Reservation reservation = reservationService.findReservation(id);
         if (reservation.isPast(LocalDateTime.now(clock))) {
             throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
         }
-        reservationService.lockBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
         reservationService.delete(id);
 
         waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
