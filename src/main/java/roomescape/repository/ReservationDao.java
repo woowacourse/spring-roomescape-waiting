@@ -157,7 +157,7 @@ public class ReservationDao {
             INNER JOIN theme            AS th ON s.theme_id    = th.id
             WHERE r.schedule_id = ?
                 AND status      = ?
-            ORDER BY updated_at ASC
+            ORDER BY r.updated_at ASC, r.id ASC
             LIMIT 1
             """;
 
