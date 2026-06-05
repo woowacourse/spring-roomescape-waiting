@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.login.application.port.in.LoginUseCase;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.Member;
 import roomescape.member.application.port.out.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService {
+public class LoginService implements LoginUseCase {
 
     private final MemberRepository memberRepository;
 

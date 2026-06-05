@@ -13,6 +13,7 @@ import roomescape.auth.JwtTokenProvider;
 import roomescape.common.api.ApiResponse;
 import roomescape.login.dto.request.LoginRequest;
 import roomescape.login.dto.response.LoginResponse;
+import roomescape.login.application.port.in.LoginUseCase;
 import roomescape.member.domain.AuthenticatedMember;
 
 @RestController
@@ -20,12 +21,12 @@ import roomescape.member.domain.AuthenticatedMember;
 @RequiredArgsConstructor
 public class LoginController {
 
-    private final LoginService loginService;
+    private final LoginUseCase loginUseCase;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest body) {
-        AuthenticatedMember member = loginService.login(body.name(), body.password());
+        AuthenticatedMember member = loginUseCase.login(body.name(), body.password());
         String accessToken = jwtTokenProvider.generateAccessToken(member);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(LoginResponse.bearer(accessToken)));

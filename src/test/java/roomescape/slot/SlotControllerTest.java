@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
-import roomescape.slot.application.SlotService;
+import roomescape.slot.application.port.in.CreateSlotUseCase;
+import roomescape.slot.application.port.in.DeleteSlotUseCase;
+import roomescape.slot.application.port.in.FindSlotUseCase;
 import roomescape.slot.application.dto.request.SlotSaveRequest;
 import roomescape.slot.application.dto.response.SlotFindResponse;
 import roomescape.slot.application.dto.response.SlotSaveResponse;
@@ -24,7 +26,11 @@ import roomescape.slot.adapter.in.web.ManagerSlotController;
 class SlotControllerTest {
 
     @Mock
-    private SlotService slotService;
+    private CreateSlotUseCase createSlotUseCase;
+    @Mock
+    private FindSlotUseCase findSlotUseCase;
+    @Mock
+    private DeleteSlotUseCase deleteSlotUseCase;
 
     @InjectMocks
     private ManagerSlotController managerSlotController;
@@ -33,7 +39,7 @@ class SlotControllerTest {
     void 슬롯_생성_응답_테스트() {
         SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         SlotSaveResponse serviceResponse = new SlotSaveResponse(1L, LocalDate.of(2026, 5, 5), 1L, 1L);
-        when(slotService.save(request)).thenReturn(serviceResponse);
+        when(createSlotUseCase.save(request)).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<SlotSaveResponse>> response = managerSlotController.save(request);
 
@@ -47,7 +53,7 @@ class SlotControllerTest {
         List<SlotFindResponse> serviceResponse = List.of(
                 new SlotFindResponse(1L, LocalDate.of(2026, 5, 5), 1L, 1L)
         );
-        when(slotService.findAll()).thenReturn(serviceResponse);
+        when(findSlotUseCase.findAll()).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<List<SlotFindResponse>>> response = managerSlotController.findAll();
 
@@ -62,6 +68,6 @@ class SlotControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(response.getBody()).isNull();
-        verify(slotService).deleteById(1L);
+        verify(deleteSlotUseCase).deleteById(1L);
     }
 }

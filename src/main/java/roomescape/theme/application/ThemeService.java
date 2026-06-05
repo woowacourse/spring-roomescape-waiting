@@ -15,9 +15,13 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
+import roomescape.theme.application.port.in.CreateThemeUseCase;
+import roomescape.theme.application.port.in.DeleteThemeUseCase;
+import roomescape.theme.application.port.in.FindThemeUseCase;
+
 @Service
 @RequiredArgsConstructor
-public class ThemeService {
+public class ThemeService implements CreateThemeUseCase, FindThemeUseCase, DeleteThemeUseCase {
     private final ThemeRepository themeRepository;
     private final ThemeAssembler themeAssembler;
     private final SlotUsageValidator slotUsageValidator;

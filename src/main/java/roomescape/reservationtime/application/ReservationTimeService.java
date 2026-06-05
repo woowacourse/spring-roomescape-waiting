@@ -21,9 +21,13 @@ import roomescape.reservationtime.application.port.out.ReservationTimeRepository
 import roomescape.slot.application.SlotUsageValidator;
 import roomescape.waiting.application.port.out.WaitingRepository;
 
+import roomescape.reservationtime.application.port.in.CreateReservationTimeUseCase;
+import roomescape.reservationtime.application.port.in.DeleteReservationTimeUseCase;
+import roomescape.reservationtime.application.port.in.FindReservationTimeUseCase;
+
 @Service
 @RequiredArgsConstructor
-public class ReservationTimeService {
+public class ReservationTimeService implements CreateReservationTimeUseCase, FindReservationTimeUseCase, DeleteReservationTimeUseCase {
     private final SlotUsageValidator slotUsageValidator;
     private final ReservationTimeAssembler reservationTimeAssembler;
     private final ReservationTimeRepository reservationTimeRepository;

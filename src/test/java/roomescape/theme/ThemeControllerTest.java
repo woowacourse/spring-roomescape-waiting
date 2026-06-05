@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
-import roomescape.theme.application.ThemeService;
+import roomescape.theme.application.port.in.CreateThemeUseCase;
+import roomescape.theme.application.port.in.DeleteThemeUseCase;
+import roomescape.theme.application.port.in.FindThemeUseCase;
 import roomescape.theme.application.dto.request.ThemeSaveRequest;
 import roomescape.theme.application.dto.response.ThemeFindResponse;
 import roomescape.theme.application.dto.response.ThemeSaveResponse;
@@ -25,22 +27,26 @@ import roomescape.theme.adapter.in.web.UserThemeController;
 class ThemeControllerTest {
 
     @Mock
-    private ThemeService themeService;
+    private CreateThemeUseCase createThemeUseCase;
+    @Mock
+    private FindThemeUseCase findThemeUseCase;
+    @Mock
+    private DeleteThemeUseCase deleteThemeUseCase;
 
     private UserThemeController userThemeController;
     private ManagerThemeController managerThemeController;
 
     @BeforeEach
     void setUp() {
-        userThemeController = new UserThemeController(themeService);
-        managerThemeController = new ManagerThemeController(themeService);
+        userThemeController = new UserThemeController(findThemeUseCase);
+        managerThemeController = new ManagerThemeController(createThemeUseCase, findThemeUseCase, deleteThemeUseCase);
     }
 
     @Test
     void 날짜별_테마_목록_조회_응답_테스트() {
         LocalDate date = LocalDate.of(2026, 5, 5);
         List<ThemeFindResponse> serviceResponse = List.of(themeFindResponse());
-        when(themeService.findThemesBySlotDate(date)).thenReturn(serviceResponse);
+        when(findThemeUseCase.findThemesBySlotDate(date)).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<List<ThemeFindResponse>>> response =
                 userThemeController.findThemesBySlotDate(date);
@@ -55,7 +61,7 @@ class ThemeControllerTest {
     void 테마_생성_응답_테스트() {
         ThemeSaveRequest request = new ThemeSaveRequest("theme", "description", "thumbnail");
         ThemeSaveResponse serviceResponse = new ThemeSaveResponse(1L, "theme", "description", "thumbnail");
-        when(themeService.save(request)).thenReturn(serviceResponse);
+        when(createThemeUseCase.save(request)).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<ThemeSaveResponse>> response = managerThemeController.save(request);
 
@@ -70,7 +76,7 @@ class ThemeControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(response.getBody()).isNull();
-        verify(themeService).delete(1L);
+        verify(deleteThemeUseCase).delete(1L);
     }
 
     private ThemeFindResponse themeFindResponse() {

@@ -15,7 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
-import roomescape.reservationtime.application.ReservationTimeService;
+import roomescape.reservationtime.application.port.in.CreateReservationTimeUseCase;
+import roomescape.reservationtime.application.port.in.DeleteReservationTimeUseCase;
+import roomescape.reservationtime.application.port.in.FindReservationTimeUseCase;
 import roomescape.reservationtime.application.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.application.dto.response.AvailableTimeFindResponse;
 import roomescape.reservationtime.application.dto.response.ReservationTimeFindResponse;
@@ -29,15 +31,19 @@ import roomescape.reservationtime.adapter.in.web.UserReservationTimeController;
 class ReservationTimeControllerTest {
 
     @Mock
-    private ReservationTimeService reservationTimeService;
+    private CreateReservationTimeUseCase createReservationTimeUseCase;
+    @Mock
+    private FindReservationTimeUseCase findReservationTimeUseCase;
+    @Mock
+    private DeleteReservationTimeUseCase deleteReservationTimeUseCase;
 
     private UserReservationTimeController userReservationTimeController;
     private ManagerReservationTimeController managerReservationTimeController;
 
     @BeforeEach
     void setUp() {
-        userReservationTimeController = new UserReservationTimeController(reservationTimeService);
-        managerReservationTimeController = new ManagerReservationTimeController(reservationTimeService);
+        userReservationTimeController = new UserReservationTimeController(findReservationTimeUseCase);
+        managerReservationTimeController = new ManagerReservationTimeController(createReservationTimeUseCase, findReservationTimeUseCase, deleteReservationTimeUseCase);
     }
 
     @Test
@@ -46,7 +52,7 @@ class ReservationTimeControllerTest {
         List<AvailableTimeFindResponse> serviceResponse = List.of(
                 new AvailableTimeFindResponse(new TimeInformation(1L, LocalTime.of(10, 0)), TimeSlotStatus.RESERVABLE)
         );
-        when(reservationTimeService.findTimesByDateAndThemeId(date, 1L)).thenReturn(serviceResponse);
+        when(findReservationTimeUseCase.findTimesByDateAndThemeId(date, 1L)).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<List<AvailableTimeFindResponse>>> response =
                 userReservationTimeController.findTimesByDateAndThemeId(date, 1L);
@@ -60,7 +66,7 @@ class ReservationTimeControllerTest {
     void 시간_생성_응답_테스트() {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(10, 0));
         ReservationTimeSaveResponse serviceResponse = new ReservationTimeSaveResponse(1L, LocalTime.of(10, 0));
-        when(reservationTimeService.save(request)).thenReturn(serviceResponse);
+        when(createReservationTimeUseCase.save(request)).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<ReservationTimeSaveResponse>> response = managerReservationTimeController.save(request);
 
@@ -75,7 +81,7 @@ class ReservationTimeControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(response.getBody()).isNull();
-        verify(reservationTimeService).delete(1L);
+        verify(deleteReservationTimeUseCase).delete(1L);
     }
 
     @Test
@@ -83,7 +89,7 @@ class ReservationTimeControllerTest {
         List<ReservationTimeFindResponse> serviceResponse = List.of(
                 new ReservationTimeFindResponse(1L, LocalTime.of(10, 0))
         );
-        when(reservationTimeService.findAll()).thenReturn(serviceResponse);
+        when(findReservationTimeUseCase.findAll()).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<List<ReservationTimeFindResponse>>> response = managerReservationTimeController.findAll();
 

@@ -12,9 +12,13 @@ import roomescape.slot.application.dto.response.SlotFindResponse;
 import roomescape.slot.application.dto.response.SlotSaveResponse;
 import roomescape.slot.application.port.out.SlotRepository;
 
+import roomescape.slot.application.port.in.CreateSlotUseCase;
+import roomescape.slot.application.port.in.DeleteSlotUseCase;
+import roomescape.slot.application.port.in.FindSlotUseCase;
+
 @Service
 @RequiredArgsConstructor
-public class SlotService {
+public class SlotService implements CreateSlotUseCase, FindSlotUseCase, DeleteSlotUseCase {
     private final SlotRepository slotRepository;
     private final SlotAssembler slotAssembler;
 

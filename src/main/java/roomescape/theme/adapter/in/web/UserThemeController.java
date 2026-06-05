@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
-import roomescape.theme.application.ThemeService;
+import roomescape.theme.application.port.in.FindThemeUseCase;
 import roomescape.theme.application.dto.response.ThemeFindResponse;
 
 import java.time.LocalDate;
@@ -19,19 +19,19 @@ import java.util.List;
 @RequestMapping("/api/themes")
 @RequiredArgsConstructor
 public class UserThemeController {
-    private final ThemeService themeService;
+    private final FindThemeUseCase findThemeUseCase;
 
     @GetMapping(params = "date")
     public ResponseEntity<ApiResponse<List<ThemeFindResponse>>> findThemesBySlotDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        List<ThemeFindResponse> responses = themeService.findThemesBySlotDate(date);
+        List<ThemeFindResponse> responses = findThemeUseCase.findThemesBySlotDate(date);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 
     @GetMapping("/popular")
     public ResponseEntity<ApiResponse<List<ThemeFindResponse>>> findByDayAndLimit() {
-        List<ThemeFindResponse> responses = themeService.findPopularTheme();
+        List<ThemeFindResponse> responses = findThemeUseCase.findPopularTheme();
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 }

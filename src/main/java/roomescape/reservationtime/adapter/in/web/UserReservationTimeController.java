@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
-import roomescape.reservationtime.application.ReservationTimeService;
+import roomescape.reservationtime.application.port.in.FindReservationTimeUseCase;
 import roomescape.reservationtime.application.dto.response.AvailableTimeFindResponse;
 
 import java.time.LocalDate;
@@ -19,14 +19,14 @@ import java.util.List;
 @RequestMapping("/api/user/times/availability")
 @RequiredArgsConstructor
 public class UserReservationTimeController {
-    private final ReservationTimeService reservationTimeService;
+    private final FindReservationTimeUseCase findReservationTimeUseCase;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<AvailableTimeFindResponse>>> findTimesByDateAndThemeId(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam long themeId
     ) {
-        List<AvailableTimeFindResponse> responses = reservationTimeService.findTimesByDateAndThemeId(date, themeId);
+        List<AvailableTimeFindResponse> responses = findReservationTimeUseCase.findTimesByDateAndThemeId(date, themeId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 }
