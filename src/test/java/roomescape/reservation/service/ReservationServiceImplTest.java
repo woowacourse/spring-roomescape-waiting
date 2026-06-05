@@ -1,9 +1,9 @@
 package roomescape.reservation.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.holiday.service.HolidayService;
@@ -41,23 +41,17 @@ class ReservationServiceImplTest {
 
     @Mock
     private ReservationRepository reservationRepository;
-
     @Mock
     private TimeService timeService;
-
     @Mock
     private ThemeRepository themeRepository;
-
     @Mock
     private HolidayService holidayService;
+    @Mock
+    private SlotService slotService;
 
+    @InjectMocks
     private ReservationServiceImpl reservationService;
-
-    @BeforeEach
-    void setUp() {
-        reservationService = new ReservationServiceImpl(
-                reservationRepository, timeService, themeRepository, holidayService);
-    }
 
     @DisplayName("정상 입력이고 대기가 없는 경우, 저장된 예약을 반환한다.")
     @Test
@@ -225,6 +219,10 @@ class ReservationServiceImplTest {
     @Test
     void cancel_정상_취소() {
         // given
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.deleteById(1L)).thenReturn(true);
 
         // when
@@ -333,7 +331,8 @@ class ReservationServiceImplTest {
     void cancelForUser_지난_슬롯_예약이면_예외() {
         // given
         ReservationTime time = new ReservationTime(1L, PAST_START, PAST_END);
-        Reservation past = new Reservation("라이", time, null, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation past = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(past));
 
         // when & then
@@ -430,7 +429,7 @@ class ReservationServiceImplTest {
                 .isInstanceOf(PastReservationException.class);
     }
 
-    @DisplayName("변경하려는 슬롯이 이미 차 있는 경우, DuplicateReservationException이 발생한다.")
+    @DisplayName("변경하려는 슬롯이 이미 차 있는 경우, Waiting 상태로 변경한다.")
     @Test
     void update_중복_슬롯으로_변경하면_예외() {
         // given
@@ -438,13 +437,79 @@ class ReservationServiceImplTest {
         ReservationTime newTime = new ReservationTime(2L,
                 LocalDateTime.of(2030, 6, 1, 14, 0),
                 LocalDateTime.of(2030, 6, 1, 16, 0));
-        Reservation existing = new Reservation("라이", oldTime, new Theme("name", "description", "https://img.test/a.png").withId(1L), Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Theme theme = new Theme("name", "description", "https://img.test/a.png").withId(1L);
+        Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation updated = existing.withTime(newTime).withStatus(Status.WAITING);
+
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
+        when(reservationRepository.isDuplicatedWithName("라이", 1L, newTime)).thenReturn(false);
+        when(reservationRepository.findAllWaitingBy(1L, 1L)).thenReturn(List.of());
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(true);
+        when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
-        // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L, "라이"))
-                .isInstanceOf(DuplicateReservationException.class);
+        // when
+        Reservation result = reservationService.update(1L, 2L, "라이");
+
+        // then
+        assertThat(result.getStatus()).isEqualTo(Status.WAITING);
+        assertThat(result.getTime()).isEqualTo(newTime);
+    }
+
+    @DisplayName("자기가 RESERVED이고, 같은 슬롯에 대기가 있으면, 변경 시 대기가 자동으로 승격된다.")
+    @Test
+    void update_예약대기_자동_승격() {
+        // given
+        ReservationTime oldTime = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        ReservationTime newTime = new ReservationTime(2L,
+                LocalDateTime.of(2030, 6, 1, 14, 0),
+                LocalDateTime.of(2030, 6, 1, 16, 0));
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation oldestWaiting = new Reservation("어셔", oldTime, theme, Status.WAITING,
+                LocalDateTime.of(2030, 5, 1, 10, 0)).withId(2L);
+        Reservation updated = existing.withTime(newTime);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(timeService.findById(2L)).thenReturn(newTime);
+        when(reservationRepository.isDuplicatedWithName("라이", 1L, newTime)).thenReturn(false);
+        when(reservationRepository.findAllWaitingBy(1L, 1L)).thenReturn(List.of(oldestWaiting));
+        when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
+        when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
+
+        // when
+        reservationService.update(1L, 2L, "라이");
+
+        // then
+        verify(reservationRepository).update(argThat(r ->
+                r.getId().equals(oldestWaiting.getId()) && r.getStatus() == Status.RESERVED));
+        verify(reservationRepository).update(argThat(r ->
+                r.getId().equals(existing.getId()) && r.getTime().equals(newTime)));
+    }
+
+    @DisplayName("자기가 WAITING 이면 원 슬롯 자동 승격은 일어나지 않는다.")
+    @Test
+    void update_자기_WAITING이면_자동_대기_승격_패스() {
+        // given
+        ReservationTime oldTime = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        ReservationTime newTime = new ReservationTime(2L,
+                LocalDateTime.of(2030, 6, 1, 14, 0),
+                LocalDateTime.of(2030, 6, 1, 16, 0));
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation existing = new Reservation("라이", oldTime, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
+        Reservation updated = existing.withStatus(Status.RESERVED);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(timeService.findById(2L)).thenReturn(newTime);
+        when(reservationRepository.isDuplicatedWithName("라이", 1L, newTime)).thenReturn(false);
+        when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
+        when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
+
+        // when
+        reservationService.update(1L, 2L, "라이");
+
+        // then
+        verify(reservationRepository, times(1)).update(any(Reservation.class));
+        verify(reservationRepository, never()).findAllWaitingBy(any(), any());
     }
 }

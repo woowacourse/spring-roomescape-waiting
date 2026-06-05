@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.error.ErrorCode;
+import roomescape.global.error.ErrorCode;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
