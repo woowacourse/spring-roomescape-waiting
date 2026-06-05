@@ -174,10 +174,10 @@ public class JdbcReservationDao implements ReservationDao {
                   ON r.time_id = t.id
                 INNER JOIN theme h
                   ON r.theme_id = h.id
-                WHERE  r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
+                WHERE r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
                 """;
 
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date, timeId, themeId)
+        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, Date.valueOf(date), timeId, themeId)
                 .stream().findFirst();
     }
 
