@@ -21,18 +21,18 @@ public class ReservationWaitingController {
         this.reservationWaitingService = reservationWaitingService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ReservationWaitingResponse> readById(@PathVariable Long id) {
-        ReservationWaiting reservationWaiting = reservationWaitingService.findById(id);
-        return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservationWaiting));
-    }
-
     @GetMapping(params = "name")
     public ResponseEntity<List<ReservationWaitingResponse>> findByName(@RequestParam String name) {
         List<ReservationWaitingResponse> reservationWaitingResponses = reservationWaitingService.findByName(name).stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();
         return ResponseEntity.ok().body(reservationWaitingResponses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservationWaitingResponse> readById(@PathVariable Long id) {
+        ReservationWaiting reservationWaiting = reservationWaitingService.findById(id);
+        return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservationWaiting));
     }
 
     @PostMapping
@@ -44,13 +44,12 @@ public class ReservationWaitingController {
                 request.timeId()
         );
 
-        // 상의 필요
         URI location = URI.create("/reservation-waitings/" + reservationWaiting.getId());
 
         return ResponseEntity.created(location).body(ReservationWaitingResponse.from(reservationWaiting));
     }
 
-    @DeleteMapping(value = "/my/{id}", params = "name")
+    @DeleteMapping(value = "/{id}", params = "name")
     public ResponseEntity<Void> cancel(@PathVariable Long id, @Valid @RequestParam String name) {
         reservationWaitingService.deleteByIdIfNameMatches(id, name);
         return ResponseEntity.noContent().build();

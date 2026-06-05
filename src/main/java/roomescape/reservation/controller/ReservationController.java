@@ -33,18 +33,18 @@ public class ReservationController {
         return ResponseEntity.ok().body(reservations);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ReservationResponse> readById(@PathVariable Long id) {
-        Reservation reservation = reservationService.findById(id);
-        return ResponseEntity.ok().body(ReservationResponse.from(reservation));
-    }
-
     @GetMapping(params = "name")
     public ResponseEntity<List<ReservationResponse>> readAllByName(@RequestParam String name) {
         List<ReservationResponse> totalReservations = reservationService.findAllByName(name).stream()
                 .map(ReservationResponse::from)
                 .toList();
         return ResponseEntity.ok().body(totalReservations);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservationResponse> readById(@PathVariable Long id) {
+        Reservation reservation = reservationService.findById(id);
+        return ResponseEntity.ok().body(ReservationResponse.from(reservation));
     }
 
     @PostMapping
