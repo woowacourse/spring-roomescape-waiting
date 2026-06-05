@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.service.dto.ReservationCreateCommand;
+import roomescape.service.dto.ReservationUpdateCommand;
 
 @SpringBootTest
 class ReservationConcurrencyTest {
@@ -23,6 +24,9 @@ class ReservationConcurrencyTest {
 
     @Autowired
     private AdminReservationService reservationService;
+
+    @Autowired
+    private UserReservationService userReservationService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -106,6 +110,57 @@ class ReservationConcurrencyTest {
                 .isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("빈 슬롯으로의 예약 변경과 신규 예약이 동시에 일어나도 확정은 1건이어야 한다")
+    void 변경_진입과_신규_예약이_경합해도_확정은_하나여야_한다() throws InterruptedException {
+        long fromTimeId = insertTime("10:00");
+        long toTimeId = insertTime("11:00");
+        long themeId = insertTheme("동시성테마-변경경합");
+        long moverId = reservationService.create(
+                new ReservationCreateCommand("mover", DATE, fromTimeId, themeId)).id();
+
+        int creators = 9;
+        int total = creators + 1;
+        ExecutorService pool = Executors.newFixedThreadPool(total);
+        CountDownLatch ready = new CountDownLatch(total);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(total);
+
+        pool.submit(() -> {
+            ready.countDown();
+            try {
+                start.await();
+                userReservationService.update(new ReservationUpdateCommand(moverId, "mover", DATE, toTimeId));
+            } catch (Exception ignored) {
+            } finally {
+                done.countDown();
+            }
+        });
+        for (int i = 0; i < creators; i++) {
+            String name = "newuser" + i;
+            pool.submit(() -> {
+                ready.countDown();
+                try {
+                    start.await();
+                    reservationService.create(new ReservationCreateCommand(name, DATE, toTimeId, themeId));
+                } catch (Exception ignored) {
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+
+        ready.await();
+        start.countDown();
+        done.await();
+        pool.shutdown();
+
+        int confirmed = countConfirmed(toTimeId, themeId);
+        assertThat(confirmed)
+                .as("변경 진입과 신규 예약이 경합해도 슬롯 확정은 1건이어야 한다")
+                .isEqualTo(1);
+    }
+
     private int countConfirmed(long timeId, long themeId) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation "
@@ -115,7 +170,11 @@ class ReservationConcurrencyTest {
     }
 
     private long insertTime() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES ('10:00')");
+        return insertTime("10:00");
+    }
+
+    private long insertTime(String startAt) {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt);
         return jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_time", Long.class);
     }
 
