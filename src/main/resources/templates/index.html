@@ -704,15 +704,15 @@
     ], 'editReservationError');
 
     const id = document.getElementById('editReservationId').value;
+    const name = document.getElementById('editReservationName').value;
     const body = {
-      name: document.getElementById('editReservationName').value,
       date: document.getElementById('editReservationDate').value,
       themeId: document.getElementById('editReservationThemeId').value,
       timeId: document.getElementById('editReservationTimeId').value
     };
 
     try {
-      await requestJson(`/api/reservations/${id}`, {
+      await requestJson(`/api/reservations/${id}?name=${encodeURIComponent(name)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
