@@ -88,4 +88,30 @@ public class ReservationTest {
                 .statusCode(200)
                 .body("size()", is(2));
     }
+
+    @Test
+    @DisplayName("예약이 성공적으로 삭제 및 승격되는지 확인한다.")
+    void deleteReservationAndPromoteWaitingTest() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().delete("/admin/reservations/2")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(3))
+                .body("[2].id", is(4))
+                .body("[2].name", is("user_d"))
+                .body("[2].date", is("2026-06-05"))
+                .body("[2].time.id", is(2))
+                .body("[2].time.startAt", is("12:00"))
+                .body("[2].theme.id", is(1))
+                .body("[2].theme.name", is("공포의 저택"))
+                .body("[2].theme.thumbnailUrl", is("https://picsum.photos/seed/horror/400/300"))
+                .body("[2].theme.description", is("어둠 속에 숨겨진 공포를 체험하세요"));
+    }
 }
