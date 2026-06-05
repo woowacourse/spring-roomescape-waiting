@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
@@ -24,6 +25,7 @@ import roomescape.waiting.repository.dto.WaitingWithRank;
 import roomescape.waiting.service.WaitingService;
 import roomescape.waiting.service.dto.response.WaitingResponse;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationApplicationService {
@@ -46,7 +48,8 @@ public class ReservationApplicationService {
 
     public ReservationsAndWaitingsResponse findReservationsAndWaitingsByCustomerName(final String customerName) {
         final List<Reservation> reservations = reservationService.findAllByCustomerNameAndAfterNow(customerName);
-        final List<WaitingWithRank> waitingsWithRank = waitingService.findAllWithRankByCustomerNameAfterNow(customerName);
+        final List<WaitingWithRank> waitingsWithRank = waitingService.findAllWithRankByCustomerNameAfterNow(
+            customerName);
 
         return ReservationsAndWaitingsResponse.from(
             reservations,
@@ -95,14 +98,22 @@ public class ReservationApplicationService {
     }
 
     public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest request) {
+        final Reservation oldReservation = reservationService.getReservation(reservationId);
         final ReservationTime time = reservationTimeService.getById(request.timeId());
+
         final Reservation reservation = reservationService.updateByCustomer(reservationId, request.date(), time);
+
+        promoteIfFutureSlot(oldReservation);
         return ReservationResponse.from(reservation);
     }
 
     public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest request) {
+        final Reservation oldReservation = reservationService.getReservation(reservationId);
         final ReservationTime time = reservationTimeService.getById(request.timeId());
+
         final Reservation reservation = reservationService.updateByAdmin(reservationId, request.date(), time);
+
+        promoteIfFutureSlot(oldReservation);
         return ReservationResponse.from(reservation);
     }
 
@@ -125,10 +136,15 @@ public class ReservationApplicationService {
             return;
         }
 
-        waitingPromotionService.promoteBySlot(
-            reservation.getDate(),
-            reservation.getTimeId(),
-            reservation.getThemeId()
-        );
+        try {
+            waitingPromotionService.promoteBySlot(
+                reservation.getDate(),
+                reservation.getTimeId(),
+                reservation.getThemeId()
+            );
+        } catch (RuntimeException e) {
+            log.error("대기 승격 실패 - slot=[{} time={} theme={}]",
+                reservation.getDate(), reservation.getTimeId(), reservation.getThemeId(), e);
+        }
     }
 }

@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.service.WaitingService;
 
 @Service
@@ -32,6 +30,5 @@ public class WaitingPromotionService {
                 waiting.getTheme()
             );
         });
-
     }
 }

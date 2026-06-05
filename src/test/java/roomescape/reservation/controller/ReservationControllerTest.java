@@ -13,10 +13,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -39,12 +41,20 @@ class ReservationControllerTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @MockitoSpyBean
+    WaitingPromotionService waitingPromotionService;
+
     @LocalServerPort
     int port;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(waitingPromotionService);
     }
 
     @TestConfiguration
@@ -436,9 +446,6 @@ class ReservationControllerTest {
     @DisplayName("예약을 취소하면 대기를 예약으로 승격한다")
     class CancelReservationAndPromoteWaiting {
 
-        @MockitoSpyBean
-        WaitingPromotionService waitingPromotionService;
-
         @Test
         void 예약_취소_시_대기가_있으면_첫_번째_대기가_예약으로_승격된다() {
             // given
@@ -448,17 +455,15 @@ class ReservationControllerTest {
             insertWaiting("코로구", "2026-08-05", 1L, 1L);
 
             // when
-            RestAssured.given().log().all()
-                .delete("/reservations/{id}", 1L)
-                .then().log().all()
-                .statusCode(HttpStatus.NO_CONTENT.value());
+            final Response response = RestAssured.given().log().all()
+                .delete("/reservations/{id}", 1L);
 
             // then
-            final String promotedName = jdbcTemplate.queryForObject("SELECT name FROM reservation", String.class);
-            assertThat(promotedName).isEqualTo("코로구");
+            response.then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
-            final Integer waitingCount = jdbcTemplate.queryForObject("SELECT count(1) FROM waiting", Integer.class);
-            assertThat(waitingCount).isZero();
+            assertThat(findReservationName()).isEqualTo("코로구");
+            assertThat(countWaitings()).isZero();
         }
 
         @Test
@@ -467,6 +472,7 @@ class ReservationControllerTest {
             insertReservationTime("12:00");
             insertTheme("themeName", "description", "url");
             insertReservation("customer", "2026-05-20", 1L, 1L);
+            insertWaiting("수달", "2026-05-20", 1L, 1L);
 
             doThrow(RuntimeException.class)
                 .when(waitingPromotionService).promoteBySlot(any(), anyLong(), anyLong());
@@ -479,9 +485,91 @@ class ReservationControllerTest {
             response.then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
-            final Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
-            assertThat(reservationCount).isZero();
+            assertThat(countReservations()).isZero();
+            assertThat(countWaitings()).isEqualTo(1);
         }
+    }
+
+    @Nested
+    @DisplayName("예약 슬롯을 변경하면 기존 슬롯의 대기를 예약으로 승격한다")
+    class UpdateReservationAndPromoteWaiting {
+
+        @Test
+        void 예약_슬롯_변경_시_대기가_있으면_첫_번째_대기가_예약으로_승격된다() {
+            // given
+            final String oldSlotDate = "2026-08-05";
+            insertReservationTime("12:00");
+            insertTheme("themeName", "description", "url");
+            insertReservation("customer", oldSlotDate, 1L, 1L);
+            insertWaiting("수달", oldSlotDate, 1L, 1L);
+
+            // when
+            final Response response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                    "date", "2026-08-07",
+                    "timeId", 1))
+                .put("/reservations/{id}", 1L);
+
+            // then
+            response.then().log().all()
+                .statusCode(HttpStatus.OK.value());
+
+            assertThat(findReservationNameBySlot(oldSlotDate, 1L, 1L)).isEqualTo("수달");
+            assertThat(countWaitings()).isZero();
+        }
+
+        @Test
+        void 승격이_실패해도_예약_변경은_성공한다() {
+            // given
+            final String oldSlotDate = "2026-08-05";
+            insertReservationTime("12:00");
+            insertTheme("themeName", "description", "url");
+            insertReservation("customer", oldSlotDate, 1L, 1L);
+            insertWaiting("수달", oldSlotDate, 1L, 1L);
+
+            doThrow(RuntimeException.class)
+                .when(waitingPromotionService).promoteBySlot(any(), anyLong(), anyLong());
+
+            // when
+            final String newSlotDate = "2026-08-07";
+            final Response response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                    "date", newSlotDate,
+                    "timeId", 1))
+                .put("/reservations/{id}", 1L);
+
+            // then
+            response.then().log().all()
+                .statusCode(HttpStatus.OK.value());
+
+            assertThat(findReservationNameBySlot(newSlotDate, 1L, 1L)).isEqualTo("customer");
+            assertThat(countWaitings()).isEqualTo(1);
+        }
+    }
+
+    private String findReservationName() {
+        return jdbcTemplate.queryForObject("SELECT name FROM reservation", String.class);
+    }
+
+    private String findReservationNameBySlot(final String date, final long timeId, final long themeId) {
+        return jdbcTemplate.queryForObject("""
+                SELECT name FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?
+                """,
+            String.class,
+            date,
+            timeId,
+            themeId
+        );
+    }
+
+    private int countReservations() {
+        return jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+    }
+
+    private int countWaitings() {
+        return jdbcTemplate.queryForObject("SELECT count(1) FROM waiting", Integer.class);
     }
 
     private void insertWaiting(final String customerName, final String date, final long timeId, final long themeId) {
@@ -526,10 +614,10 @@ class ReservationControllerTest {
 
     private static List<ReservationTimesWithStatus> getReservationTimeStatusResponses() {
         return RestAssured.given().log().all()
-                .when().get("/reservations/available-times?date=2026-05-05&themeId=1")
-                .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationTimesWithStatus.class);
+            .when().get("/reservations/available-times?date=2026-05-05&themeId=1")
+            .then().log().all()
+            .statusCode(200).extract()
+            .jsonPath().getList(".", ReservationTimesWithStatus.class);
     }
 
     private static int countReservableTimes(final List<ReservationTimesWithStatus> timeStatuses) {
