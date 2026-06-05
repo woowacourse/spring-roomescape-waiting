@@ -29,18 +29,6 @@ public class SlotService {
     }
 
     @Transactional
-    public Slot create(LocalDate date, long timeId, long themeId) {
-        ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
-
-        return slotRepository.findByDateAndTimeAndTheme(date, time, theme)
-                .orElseThrow(() -> new RoomEscapeException(ErrorCode.SLOT_NOT_FOUND));
-
-    }
-
-    @Transactional
     public Slot findOrCreate(LocalDate date, long timeId, long themeId) {
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new RoomEscapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
