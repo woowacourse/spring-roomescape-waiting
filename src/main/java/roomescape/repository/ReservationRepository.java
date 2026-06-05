@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
 
 public interface ReservationRepository {
@@ -21,7 +22,7 @@ public interface ReservationRepository {
 
     void cancel(Long id);
 
-    void lockTheme(Long themeId);
+    Optional<Theme> lockTheme(Long themeId);
 
     boolean promoteEarliestWaiting(LocalDate date, Long timeId, Long themeId);
 

@@ -183,8 +183,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void lockTheme(Long themeId) {
-        jdbcTemplate.queryForObject("SELECT id FROM theme WHERE id = ? FOR UPDATE", Long.class, themeId);
+    public Optional<Theme> lockTheme(Long themeId) {
+        String sql = "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? FOR UPDATE";
+        try {
+            Theme theme = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Theme(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getString("thumbnail_url")
+            ), themeId);
+            return Optional.ofNullable(theme);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

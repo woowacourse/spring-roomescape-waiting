@@ -25,7 +25,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.ReservationConflictException;
@@ -55,8 +54,6 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
-    @Mock
-    private ThemeRepository themeRepository;
     @InjectMocks
     private AdminReservationService reservationService;
 
@@ -64,7 +61,7 @@ class ReservationServiceTest {
     @DisplayName("같은 이름+날짜+시간+테마에 이미 예약이 있으면 ReservationConflictException이 발생한다")
     void 같은_날짜_시간_테마에_이미_예약이_있으면_예외가_발생한다() {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+        given(reservationRepository.lockTheme(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(true);
@@ -75,7 +72,7 @@ class ReservationServiceTest {
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).lockTheme(1L);
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
     }
@@ -87,7 +84,7 @@ class ReservationServiceTest {
                 1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
                 ReservationStatus.CONFIRMED, new WaitingOrder(0));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+        given(reservationRepository.lockTheme(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(false);
@@ -96,7 +93,7 @@ class ReservationServiceTest {
         assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).lockTheme(1L);
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
@@ -113,14 +110,14 @@ class ReservationServiceTest {
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(themeRepository, reservationRepository);
+        verifyNoInteractions(reservationRepository);
     }
 
     @Test
     @DisplayName("존재하지 않는 themeId로 예약을 생성하면 ThemeNotFoundException이 발생한다")
     void 존재하지_않는_themeId로_예약시_예외가_발생한다() {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findById(1L)).willReturn(Optional.empty());
+        given(reservationRepository.lockTheme(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ThemeNotFoundException.class,
@@ -128,8 +125,7 @@ class ReservationServiceTest {
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationRepository);
+        verify(reservationRepository, times(1)).lockTheme(1L);
     }
 
     @Test
@@ -143,7 +139,7 @@ class ReservationServiceTest {
         );
 
         verify(reservationRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationTimeRepository, themeRepository);
+        verifyNoInteractions(reservationTimeRepository);
     }
 
     @Test
@@ -158,7 +154,7 @@ class ReservationServiceTest {
         verify(reservationRepository, times(2)).findById(1L);
         verify(reservationRepository, times(1)).cancel(1L);
         verify(reservationRepository, times(1)).promoteEarliestWaiting(VALID_RESERVATION_DATE, 1L, 1L);
-        verifyNoInteractions(reservationTimeRepository, themeRepository);
+        verifyNoInteractions(reservationTimeRepository);
     }
 
     @Nested
@@ -169,7 +165,7 @@ class ReservationServiceTest {
         void 해당_타임_슬롯에_예약이_없다면_예약을_허용한다() {
 
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-            given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+            given(reservationRepository.lockTheme(1L)).willReturn(Optional.of(VALID_THEME));
             given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                     1L))
                     .willReturn(false);
@@ -180,7 +176,7 @@ class ReservationServiceTest {
             assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
             verify(reservationTimeRepository, times(1)).findById(1L);
-            verify(themeRepository, times(1)).findById(1L);
+            verify(reservationRepository, times(1)).lockTheme(1L);
             verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId("모아",
                     VALID_COMMAND_MOA.date(), 1L,
                     1L);
@@ -194,7 +190,7 @@ class ReservationServiceTest {
             @DisplayName("기존 예약자와 동일한 사용자의 예약 요청이라면 거부한다")
             void 사용자_이름이_같으면_ReservationConflictException을_던진다() {
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-                given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+                given(reservationRepository.lockTheme(1L)).willReturn(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                         VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                         .willReturn(true);
@@ -205,7 +201,7 @@ class ReservationServiceTest {
                 );
 
                 verify(reservationTimeRepository, times(1)).findById(1L);
-                verify(themeRepository, times(1)).findById(1L);
+                verify(reservationRepository, times(1)).lockTheme(1L);
                 verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                         VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
 
@@ -215,7 +211,7 @@ class ReservationServiceTest {
             @DisplayName("기존 예약자와 다른 사용자의 예약 요청이라면 허용한다")
             void 사용자_이름이_다르면_예약_대기_순번을_부여한다() {
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-                given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+                given(reservationRepository.lockTheme(1L)).willReturn(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                         1L))
                         .willReturn(false);
@@ -228,7 +224,7 @@ class ReservationServiceTest {
                 assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
                 verify(reservationTimeRepository, times(1)).findById(1L);
-                verify(themeRepository, times(1)).findById(1L);
+                verify(reservationRepository, times(1)).lockTheme(1L);
                 verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId("모아",
                         VALID_COMMAND_MOA.date(), 1L,
                         1L);

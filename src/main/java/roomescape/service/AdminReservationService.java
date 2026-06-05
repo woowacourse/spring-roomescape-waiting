@@ -12,7 +12,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationWithWaitingOrder;
@@ -28,16 +27,13 @@ public class AdminReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
 
     public AdminReservationService(
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
+            ReservationTimeRepository reservationTimeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
     }
 
 
@@ -56,14 +52,12 @@ public class AdminReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
 
-        Theme theme = themeRepository.findById(command.themeId())
+        Theme theme = reservationRepository.lockTheme(command.themeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 테마로 예약 생성 시도: themeId={}", command.themeId());
                     return new ThemeNotFoundException(
                             "존재하지 않는 테마입니다: themeId=" + command.themeId());
                 });
-
-        reservationRepository.lockTheme(theme.getId());
 
         validateNoConflict(command);
 
