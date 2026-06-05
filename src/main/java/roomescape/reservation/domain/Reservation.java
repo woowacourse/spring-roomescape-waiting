@@ -8,6 +8,7 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.domain.ReservationWaiting;
 
 public class Reservation {
     private final Long id;
@@ -79,6 +80,16 @@ public class Reservation {
         if (this.slot.isExpired(requestTime)) {
             throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_TIME);
         }
+    }
+
+    public void validate(boolean hasSameTimeBooking, boolean hasSameTimeWaiting) {
+        if (hasSameTimeBooking || hasSameTimeWaiting) {
+            throw new InvalidBusinessStateException(ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
+        }
+    }
+
+    public ReservationWaiting toWaiting() {
+        return new ReservationWaiting(null, name, slot, updatedAt);
     }
 
     public Long getId() {

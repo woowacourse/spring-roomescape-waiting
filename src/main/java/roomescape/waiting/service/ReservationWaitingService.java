@@ -46,7 +46,11 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
-        validateWaiting(newReservationWaiting);
+        Reservation targetReservation = validateTargetReservationExists(newReservationWaiting.getSlot());
+        boolean hasSameTimeBooking = reservationRepository.hasBookingAtSameTime(newReservationWaiting.toReservation(requestTime));
+        boolean hasDuplicateWaiting = reservationWaitingRepository.hasWaitingAtSameTime(newReservationWaiting);
+        newReservationWaiting.validate(targetReservation, hasSameTimeBooking, hasDuplicateWaiting);
+
 
         try {
             ReservationWaiting saved = reservationWaitingRepository.save(newReservationWaiting);
@@ -84,26 +88,7 @@ public class ReservationWaitingService {
         );
     }
 
-    private void validateWaiting(ReservationWaiting reservationWaiting) {
-        Reservation targetReservation = validateTargetReservationExists(reservationWaiting.getSlot());
-        validateNoSameTimeReservation(reservationWaiting);
-        boolean hasDuplicateWaiting = reservationWaitingRepository.hasWaitingAtSameTime(reservationWaiting);
-        reservationWaiting.validateNoConflictWithReservation(targetReservation);
-        reservationWaiting.validateNoDuplicateWaiting(hasDuplicateWaiting);
-    }
 
-    private void validateNoSameTimeReservation(ReservationWaiting reservationWaiting) {
-        List<Reservation> reservations = reservationRepository.findAllByName(reservationWaiting.getName());
-        boolean hasSameTimeReservation = reservations.stream()
-                .anyMatch(reservation ->
-                        reservation.getDate().equals(reservationWaiting.getDate())
-                                && reservation.getTimeId().equals(reservationWaiting.getTime().getId())
-                );
-
-        if (hasSameTimeReservation) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
-        }
-    }
 
     private Reservation validateTargetReservationExists(ReservationSlot slot) {
         return reservationRepository.findBySlot(slot)

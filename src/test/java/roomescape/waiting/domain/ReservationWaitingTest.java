@@ -158,8 +158,8 @@ class ReservationWaitingTest {
         assertThat(waitings).containsExactly(third, second, first);
     }
     @Test
-    @DisplayName("대기 신청 슬롯의 예약자가 본인과 다르면 예외가 발생하지 않는다.")
-    void validateNoConflictWithReservation_DifferentName_Success() {
+    @DisplayName("예약, 동시간대 예약, 중복 대기 모두 충돌이 없으면 validate는 성공한다.")
+    void validate_Success() {
         // given
         ReservationSlot slot = new ReservationSlot(
                 LocalDate.of(2026, 5, 5),
@@ -170,13 +170,13 @@ class ReservationWaitingTest {
         Reservation targetReservation = new Reservation(1L, "포비", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatCode(() -> waiting.validateNoConflictWithReservation(targetReservation))
+        assertThatCode(() -> waiting.validate(targetReservation, false, false))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("대기 신청 슬롯의 예약자가 본인이면 InvalidBusinessStateException이 발생한다.")
-    void validateNoConflictWithReservation_SameName_ThrowsException() {
+    @DisplayName("대기 신청 슬롯의 예약자가 본인이면 validate 시 예외가 발생한다.")
+    void validate_SameName_ThrowsException() {
         // given
         ReservationSlot slot = new ReservationSlot(
                 LocalDate.of(2026, 5, 5),
@@ -187,14 +187,14 @@ class ReservationWaitingTest {
         Reservation targetReservation = new Reservation(1L, "브라운", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateNoConflictWithReservation(targetReservation))
+        assertThatThrownBy(() -> waiting.validate(targetReservation, false, false))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 
     @Test
-    @DisplayName("동일 슬롯에 대기가 없으면 validateNoDuplicateWaiting은 예외가 발생하지 않는다.")
-    void validateNoDuplicateWaiting_NoDuplicate_Success() {
+    @DisplayName("동일 시간에 이미 다른 예약이 있으면 validate 시 예외가 발생한다.")
+    void validate_SameTimeBooking_ThrowsException() {
         // given
         ReservationSlot slot = new ReservationSlot(
                 LocalDate.of(2026, 5, 5),
@@ -202,15 +202,17 @@ class ReservationWaitingTest {
                 new Theme(1L, "테마", "설명", "url")
         );
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
+        Reservation targetReservation = new Reservation(1L, "포비", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatCode(() -> waiting.validateNoDuplicateWaiting(false))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> waiting.validate(targetReservation, true, false))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 
     @Test
-    @DisplayName("동일 슬롯에 이미 대기가 있으면 validateNoDuplicateWaiting은 InvalidBusinessStateException이 발생한다.")
-    void validateNoDuplicateWaiting_Duplicate_ThrowsException() {
+    @DisplayName("동일 슬롯에 이미 대기가 있으면 validate 시 예외가 발생한다.")
+    void validate_DuplicateWaiting_ThrowsException() {
         // given
         ReservationSlot slot = new ReservationSlot(
                 LocalDate.of(2026, 5, 5),
@@ -218,9 +220,10 @@ class ReservationWaitingTest {
                 new Theme(1L, "테마", "설명", "url")
         );
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot, slot.date().atStartOfDay());
+        Reservation targetReservation = new Reservation(1L, "포비", slot, slot.date().atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateNoDuplicateWaiting(true))
+        assertThatThrownBy(() -> waiting.validate(targetReservation, false, true))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }

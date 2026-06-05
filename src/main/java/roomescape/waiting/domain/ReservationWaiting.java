@@ -48,14 +48,18 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
         }
     }
 
-    public void validateNoConflictWithReservation(Reservation targetReservation) {
-        if (Objects.equals(this.name, targetReservation.getName())) {
+    public void validate(Reservation targetReservation, boolean hasSameTimeBooking, boolean hasDuplicateWaiting) {
+        validateNoConflictWithReservation(targetReservation);
+        if (hasSameTimeBooking) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
+        }
+        if (hasDuplicateWaiting) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 
-    public void validateNoDuplicateWaiting(boolean hasDuplicate) {
-        if (hasDuplicate) {
+    private void validateNoConflictWithReservation(Reservation targetReservation) {
+        if (Objects.equals(this.name, targetReservation.getName())) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }

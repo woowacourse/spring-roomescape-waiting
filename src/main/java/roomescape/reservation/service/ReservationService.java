@@ -6,7 +6,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
-import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -45,7 +44,9 @@ public class ReservationService {
     public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
         try {
             Reservation saved = createReservation(command, requestTime);
-            validateReservation(saved);
+            boolean hasBooking = reservationRepository.hasBookingAtSameTime(saved);
+            boolean hasWaiting = reservationWaitingRepository.hasWaitingAtSameTime(saved.toWaiting());
+            saved.validate(hasBooking, hasWaiting);
             saved = reservationRepository.save(saved);
             return ReservationResult.from(saved);
         } catch (DataIntegrityViolationException e) {
@@ -56,7 +57,9 @@ public class ReservationService {
     @Transactional
     public void update(ReservationUpdateCommand command, long id, String name, LocalDateTime requestTime) {
         Reservation updated = updateReservation(command, id, name, requestTime);
-        validateUpdatedReservation(updated);
+        boolean hasBooking = reservationRepository.isAlreadyBookedByOthers(updated);
+        boolean hasWaiting = reservationWaitingRepository.hasWaitingAtSameTime(updated.toWaiting());
+        updated.validate(hasBooking, hasWaiting);
         try {
             reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
@@ -90,30 +93,6 @@ public class ReservationService {
         return new Reservation(command.name(), command.date(), time, theme, requestTime);
     }
 
-    private void validateReservation(Reservation newReservation) {
-        validateNoSameTimeBooking(newReservation);
-        validateNoSameTimeWaiting(newReservation);
-    }
-
-    private void validateNoSameTimeBooking(Reservation newReservation) {
-        if (reservationRepository.hasBookingAtSameTime(newReservation)) {
-            throw new InvalidBusinessStateException(
-                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
-        }
-    }
-
-    private void validateNoSameTimeWaiting(Reservation newReservation) {
-        ReservationWaiting dummy = new ReservationWaiting(
-                null,
-                newReservation.getName(),
-                newReservation.getSlot(),
-                newReservation.getUpdatedAt()
-        );
-        if (reservationWaitingRepository.hasWaitingAtSameTime(dummy)) {
-            throw new InvalidBusinessStateException(
-                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
-        }
-    }
 
     private Reservation updateReservation(ReservationUpdateCommand command, long id, String name,
                                           LocalDateTime requestTime) {
@@ -122,13 +101,6 @@ public class ReservationService {
         return reservation.update(command.date(), newTime, name, requestTime);
     }
 
-    private void validateUpdatedReservation(Reservation updated) {
-        if (reservationRepository.isAlreadyBookedByOthers(updated)) {
-            throw new InvalidBusinessStateException(
-                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
-        }
-        validateNoSameTimeWaiting(updated);
-    }
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
         for (ReservationWaiting waiting : lockedWaitings) {
