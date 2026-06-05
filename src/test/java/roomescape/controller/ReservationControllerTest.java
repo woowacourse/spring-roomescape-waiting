@@ -181,18 +181,18 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 200을 반환하고 로그인 사용자로 서비스에 위임한다")
-    void cancelReservationReturns200AndDelegatesWithLoginUser() throws Exception {
+    void deleteReservationReturns200AndDelegatesWithLoginUser() throws Exception {
         mockMvc.perform(post("/reservations/3/cancel"))
                 .andExpect(status().isOk());
 
-        verify(reservationService).cancelOwnReservation(Fixtures.cancelCommand(3L, 1L));
+        verify(reservationService).deleteOwnReservation(Fixtures.deleteCommand(3L, 1L));
     }
 
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
-    void cancelReservationReturns404OnResourceNotFoundException() throws Exception {
+    void deleteReservationReturns404OnResourceNotFoundException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
-                .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(9999L, 1L));
+                .given(reservationService).deleteOwnReservation(Fixtures.deleteCommand(9999L, 1L));
 
         mockMvc.perform(post("/reservations/9999/cancel"))
                 .andExpect(status().isNotFound())
@@ -201,9 +201,9 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 소유자 불일치면 403과 메시지를 반환한다")
-    void cancelReservationReturns403OnOwnerMismatch() throws Exception {
+    void deleteReservationReturns403OnOwnerMismatch() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
-                .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(1L, 1L));
+                .given(reservationService).deleteOwnReservation(Fixtures.deleteCommand(1L, 1L));
 
         mockMvc.perform(post("/reservations/1/cancel"))
                 .andExpect(status().isForbidden())

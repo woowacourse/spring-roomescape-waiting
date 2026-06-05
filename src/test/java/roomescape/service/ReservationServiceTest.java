@@ -281,38 +281,38 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelReservation - 없는 id이면 ResourceNotFoundException")
-    void cancelReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
-        assertThatThrownBy(() -> service.cancelReservation(9999L, manager))
+    @DisplayName("deleteReservation - 없는 id이면 ResourceNotFoundException")
+    void deleteReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
+        assertThatThrownBy(() -> service.deleteReservation(9999L, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
-    @DisplayName("cancelReservation - 취소 후 조회되지 않는다")
-    void cancelReservationMakesReservationUnqueryable() {
+    @DisplayName("deleteReservation - 취소 후 조회되지 않는다")
+    void deleteReservationMakesReservationUnqueryable() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(1));
 
-        service.cancelReservation(reservationId, manager);
+        service.deleteReservation(reservationId, manager);
 
         ReservationResponses responses = service.getReservations(0, 10, null, manager);
         assertThat(responses.reservations()).extracting("id").doesNotContain(reservationId);
     }
 
     @Test
-    @DisplayName("cancelReservation - 담당하지 않는 매장 예약이면 StoreManagementForbiddenException")
-    void cancelReservationThrowsStoreManagementForbiddenExceptionForUnmanagedStore() {
+    @DisplayName("deleteReservation - 담당하지 않는 매장 예약이면 StoreManagementForbiddenException")
+    void deleteReservationThrowsStoreManagementForbiddenExceptionForUnmanagedStore() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         insertOtherStore();
         long reservationId = saveReservationInStore(user, themeId, timeId, Fixtures.daysFromNow(1), OTHER_STORE_ID);
 
-        assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
+        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.STORE_MANAGEMENT_FORBIDDEN);
@@ -320,14 +320,14 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelReservation - 과거 예약이면 PastReservationModificationException")
-    void cancelReservationThrowsPastReservationModificationExceptionWhenPast() {
+    @DisplayName("deleteReservation - 과거 예약이면 PastReservationModificationException")
+    void deleteReservationThrowsPastReservationModificationExceptionWhenPast() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-1));
 
-        assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
+        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
@@ -409,15 +409,15 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelOwnReservation - userId 불일치면 예외")
-    void cancelOwnReservationThrowsWhenUserIdMismatch() {
+    @DisplayName("deleteOwnReservation - userId 불일치면 예외")
+    void deleteOwnReservationThrowsWhenUserIdMismatch() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other)))
+        assertThatThrownBy(() -> service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, other)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESERVATION_OWNER_MISMATCH);
@@ -425,25 +425,25 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelOwnReservation - 없는 id이면 ResourceNotFoundException")
-    void cancelOwnReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
+    @DisplayName("deleteOwnReservation - 없는 id이면 ResourceNotFoundException")
+    void deleteOwnReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         User brown = member("브라운");
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(9999L, brown)))
+        assertThatThrownBy(() -> service.deleteOwnReservation(Fixtures.deleteCommand(9999L, brown)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
-    @DisplayName("cancelOwnReservation - 과거 예약이면 예외")
-    void cancelOwnReservationThrowsWhenReservationIsPast() {
+    @DisplayName("deleteOwnReservation - 과거 예약이면 예외")
+    void deleteOwnReservationThrowsWhenReservationIsPast() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown)))
+        assertThatThrownBy(() -> service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, brown)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);

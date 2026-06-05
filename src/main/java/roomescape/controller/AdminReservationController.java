@@ -41,8 +41,8 @@ public class AdminReservationController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelReservation(@LoginUser User manager, @PathVariable Long id) {
-        reservationService.cancelReservation(id, manager);
+    public ResponseEntity<Void> deleteReservation(@LoginUser User manager, @PathVariable Long id) {
+        reservationService.deleteReservation(id, manager);
         return ResponseEntity.ok().build();
     }
 

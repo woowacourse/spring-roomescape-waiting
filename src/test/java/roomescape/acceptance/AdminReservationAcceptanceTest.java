@@ -103,7 +103,7 @@ class AdminReservationAcceptanceTest {
 
     @Test
     @DisplayName("POST /admin/reservations/{id}/cancel - 예약을 취소한다")
-    void cancelReservation() {
+    void deleteReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
                 .date(Fixtures.daysFromNow(1).toString()).onStore(managedStoreId).save();
 
@@ -116,7 +116,7 @@ class AdminReservationAcceptanceTest {
 
     @Test
     @DisplayName("POST /admin/reservations/{id}/cancel - 과거 예약이면 422와 메시지를 반환한다")
-    void cancelReservationReturns422WhenReservationIsPast() {
+    void deleteReservationReturns422WhenReservationIsPast() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
                 .date(Fixtures.daysFromNow(-1).toString()).onStore(managedStoreId).save();
 
@@ -172,7 +172,7 @@ class AdminReservationAcceptanceTest {
 
     @Test
     @DisplayName("POST /admin/reservations/{id}/cancel - 담당하지 않는 매장 예약이면 403과 메시지를 반환한다")
-    void cancelReservationReturns403WhenStoreIsNotManaged() {
+    void deleteReservationReturns403WhenStoreIsNotManaged() {
         long reservationId = insertReservationInOtherStore(Fixtures.daysFromNow(1).toString());
 
         RestAssured.given().log().all()

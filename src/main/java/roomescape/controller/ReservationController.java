@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.dto.reservation.command.CancelReservationCommand;
+import roomescape.dto.reservation.command.DeleteReservationCommand;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.request.CreateReservationRequest;
 import roomescape.dto.reservation.response.ReservationResponse;
@@ -89,10 +89,10 @@ public class ReservationController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelReservation(
+    public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id,
             @LoginUser User loginUser) {
-        reservationService.cancelOwnReservation(CancelReservationCommand.of(id, loginUser));
+        reservationService.deleteOwnReservation(DeleteReservationCommand.of(id, loginUser));
         return ResponseEntity.ok().build();
     }
 }

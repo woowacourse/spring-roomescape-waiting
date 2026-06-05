@@ -17,7 +17,7 @@ import roomescape.domain.Slot;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.reservation.command.CancelReservationCommand;
+import roomescape.dto.reservation.command.DeleteReservationCommand;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
@@ -136,7 +136,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservation(Long reservationId, User manager) {
+    public void deleteReservation(Long reservationId, User manager) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", reservationId));
         validateManagesStore(manager.getId(), reservation.getStore().getId());
@@ -154,7 +154,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelOwnReservation(CancelReservationCommand command) {
+    public void deleteOwnReservation(DeleteReservationCommand command) {
         Reservation reservation = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", command.reservationId()));
         validateReservationOwner(command.user(), reservation);

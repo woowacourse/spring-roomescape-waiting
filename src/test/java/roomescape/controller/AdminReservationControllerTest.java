@@ -142,18 +142,18 @@ class AdminReservationControllerTest {
 
     @Test
     @DisplayName("POST /admin/reservations/{id}/cancel - 200을 반환하고 서비스에 위임한다")
-    void cancelReservationReturns200AndDelegates() throws Exception {
+    void deleteReservationReturns200AndDelegates() throws Exception {
         mockMvc.perform(post("/admin/reservations/3/cancel"))
                 .andExpect(status().isOk());
 
-        verify(reservationService).cancelReservation(3L, MANAGER);
+        verify(reservationService).deleteReservation(3L, MANAGER);
     }
 
     @Test
     @DisplayName("POST /admin/reservations/{id}/cancel - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
-    void cancelReservationReturns404OnResourceNotFoundException() throws Exception {
+    void deleteReservationReturns404OnResourceNotFoundException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
-                .given(reservationService).cancelReservation(9999L, MANAGER);
+                .given(reservationService).deleteReservation(9999L, MANAGER);
 
         mockMvc.perform(post("/admin/reservations/9999/cancel"))
                 .andExpect(status().isNotFound())
