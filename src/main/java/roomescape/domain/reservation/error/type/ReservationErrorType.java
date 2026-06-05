@@ -6,6 +6,7 @@ import roomescape.global.error.type.ErrorType;
 public enum ReservationErrorType implements ErrorType {
     ALREADY_RESERVED(HttpStatus.CONFLICT, "이미 예약된 날짜, 시간, 테마입니다."),
     ALREADY_WAITING(HttpStatus.CONFLICT, "이미 대기 중인 이름, 날짜, 시간, 테마입니다."),
+    WAITING_RESERVATION_NOT_AVAILABLE(HttpStatus.CONFLICT, "예약 가능한 시간은 대기할 수 없습니다."),
     FIELD_RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "조회할 자원이 존재하지 않습니다."),
     UPDATE_FIELD_RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "수정할 자원이 존재하지 않습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),

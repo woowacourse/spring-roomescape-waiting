@@ -125,6 +125,45 @@ class ReservationAvailabilityFlowTest {
     }
 
     @Test
+    void 활성_예약이_없는_날짜_시간_테마에는_대기_예약을_생성할_수_없다() {
+        // given
+        LocalDate date = LocalDate.of(2099, 5, 1);
+        Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+
+        // when & then
+        given()
+            .contentType(ContentType.JSON)
+            .body(new ReservationCreateRequestDto("대기자", date, time.getId(), theme.getId()))
+            .when().post("/api/reservations/waitings")
+            .then()
+            .statusCode(409)
+            .body("message", equalTo("예약 가능한 시간은 대기할 수 없습니다."));
+    }
+
+    @Test
+    void 활성_예약을_취소하면_첫_번째_대기_예약이_승인된다() {
+        // given
+        LocalDate date = LocalDate.of(2099, 5, 1);
+        Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        ReservationCreateResponseDto active = saveReservation("예약자", date, time, theme);
+        saveWaitingReservation("대기자1", date, time, theme);
+        saveWaitingReservation("대기자2", date, time, theme);
+
+        // when
+        cancelReservation(active.id(), "예약자");
+
+        // then
+        ReservationResponseDto approved = findReservationsByName("대기자1").getFirst();
+        ReservationResponseDto waiting = findReservationsByName("대기자2").getFirst();
+        assertThat(approved.status()).isEqualTo(ReservationEditableStatus.EDITABLE);
+        assertThat(approved.waitingNumber()).isNull();
+        assertThat(waiting.status()).isEqualTo(ReservationEditableStatus.WAITING);
+        assertThat(waiting.waitingNumber()).isEqualTo(1);
+    }
+
+    @Test
     void 같은_이름의_활성_예약이_있으면_대기_예약을_생성할_수_없다() {
         // given
         LocalDate date = LocalDate.of(2099, 5, 1);
@@ -148,6 +187,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("기존예약자", date, time, theme);
         saveWaitingReservation("예약자", date, time, theme);
 
         // when & then
@@ -166,6 +206,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("예약자", date, time, theme);
 
         // when
         ReservationCreateResponseDto first = saveWaitingReservation("대기자1", date, time, theme);
@@ -183,6 +224,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("예약자", date, time, theme);
         ReservationCreateResponseDto waiting = saveWaitingReservation("대기자", date, time, theme);
 
         // when
@@ -202,6 +244,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("예약자", date, time, theme);
         saveWaitingReservation("대기자1", date, time, theme);
         saveWaitingReservation("대기자2", date, time, theme);
         saveWaitingReservation("대기자3", date, time, theme);
@@ -223,6 +266,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("예약자", date, time, theme);
         ReservationCreateResponseDto first = saveWaitingReservation("대기자1", date, time, theme);
         saveWaitingReservation("대기자2", date, time, theme);
         saveWaitingReservation("대기자3", date, time, theme);
@@ -241,6 +285,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("예약자", date, time, theme);
         saveWaitingReservation("대기자1", date, time, theme);
         ReservationCreateResponseDto second = saveWaitingReservation("대기자2", date, time, theme);
         saveWaitingReservation("대기자3", date, time, theme);
@@ -259,6 +304,7 @@ class ReservationAvailabilityFlowTest {
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        saveReservation("예약자", date, time, theme);
         ReservationCreateResponseDto waiting = saveWaitingReservation("대기자", date, time, theme);
 
         // when
@@ -296,6 +342,14 @@ class ReservationAvailabilityFlowTest {
         given()
             .queryParam("name", name)
             .when().patch("/api/reservations/{id}/waitings/cancel", id)
+            .then()
+            .statusCode(200);
+    }
+
+    private void cancelReservation(Long id, String name) {
+        given()
+            .queryParam("name", name)
+            .when().patch("/api/reservations/{id}/cancel", id)
             .then()
             .statusCode(200);
     }

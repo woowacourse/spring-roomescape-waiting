@@ -14,7 +14,17 @@ public interface ReservationRepository {
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);
 
+    Optional<Reservation> findReservationByIdAndNotDeletedForUpdate(Long id);
+
     List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate localDate, Long themeId);
+
+    boolean existsActiveReservationByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
+
+    Optional<Reservation> findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+        LocalDate date, Long themeId, Long timeId);
+
+    Optional<Reservation> findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+        LocalDate date, Long themeId, Long timeId);
 
     Reservation save(Reservation reservation);
 

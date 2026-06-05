@@ -157,6 +157,30 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findReservationByIdAndNotDeletedForUpdate(Long id) {
+        String sql = """
+            SELECT r.id, r.name, r.date, r.status,
+                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
+                   t.deleted_at AS theme_deleted_at
+            FROM reservation r
+            JOIN reservation_time rt ON r.time_id = rt.id
+            JOIN theme t ON r.theme_id = t.id
+            WHERE r.id = :id
+              AND r.deleted_at IS NULL
+            FOR UPDATE
+            """;
+        SqlParameterSource parameters = new MapSqlParameterSource("id", id);
+        List<Reservation> reservations = jdbcTemplate.query(
+            sql,
+            parameters,
+            (rs, rowNum) -> mapReservation(rs)
+        );
+
+        return reservations.stream().findFirst();
+    }
+
+    @Override
     public List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate date, Long themeId) {
         String sql = """
             SELECT r.time_id
@@ -179,6 +203,105 @@ public class JdbcReservationRepository implements ReservationRepository {
             sql,
             parameters,
             (resultSet, rowNum) -> resultSet.getLong("time_id"));
+    }
+
+    @Override
+    public boolean existsActiveReservationByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM reservation r
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                WHERE r.date = :date
+                  AND r.theme_id = :themeId
+                  AND r.time_id = :timeId
+                  AND r.status = 'ACTIVE'
+                  AND r.deleted_at IS NULL
+                  AND rt.deleted_at IS NULL
+                  AND t.deleted_at IS NULL
+            )
+            """;
+        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
+            "date", date,
+            "themeId", themeId,
+            "timeId", timeId
+        ));
+
+        Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
+        return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public Optional<Reservation> findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+        LocalDate date, Long themeId, Long timeId) {
+        String sql = """
+            SELECT r.id, r.name, r.date, r.status,
+                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
+                   t.deleted_at AS theme_deleted_at
+            FROM reservation r
+            JOIN reservation_time rt ON r.time_id = rt.id
+            JOIN theme t ON r.theme_id = t.id
+            WHERE r.date = :date
+              AND r.theme_id = :themeId
+              AND r.time_id = :timeId
+              AND r.status = 'ACTIVE'
+              AND r.deleted_at IS NULL
+              AND rt.deleted_at IS NULL
+              AND t.deleted_at IS NULL
+            FOR UPDATE
+            """;
+        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
+            "date", date,
+            "themeId", themeId,
+            "timeId", timeId
+        ));
+
+        List<Reservation> reservations = jdbcTemplate.query(
+            sql,
+            parameters,
+            (rs, rowNum) -> mapReservation(rs)
+        );
+
+        return reservations.stream().findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+        LocalDate date, Long themeId, Long timeId) {
+        String sql = """
+            SELECT r.id, r.name, r.date, r.status,
+                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
+                   t.deleted_at AS theme_deleted_at
+            FROM reservation r
+            JOIN reservation_time rt ON r.time_id = rt.id
+            JOIN theme t ON r.theme_id = t.id
+            WHERE r.date = :date
+              AND r.theme_id = :themeId
+              AND r.time_id = :timeId
+              AND r.status = 'WAITING'
+              AND r.deleted_at IS NULL
+              AND rt.deleted_at IS NULL
+              AND t.deleted_at IS NULL
+            ORDER BY r.id ASC
+            LIMIT 1
+            FOR UPDATE
+            """;
+        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
+            "date", date,
+            "themeId", themeId,
+            "timeId", timeId
+        ));
+
+        List<Reservation> reservations = jdbcTemplate.query(
+            sql,
+            parameters,
+            (rs, rowNum) -> mapReservation(rs)
+        );
+
+        return reservations.stream().findFirst();
     }
 
     @Override

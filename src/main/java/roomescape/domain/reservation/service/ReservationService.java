@@ -143,7 +143,14 @@ public class ReservationService {
 
         Reservation updateReservation = createUpdateReservation(existingReservation, command);
         try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.update(updateReservation));
+            ReservationCreateResponseDto responseDto = reservationMapper.toCreateResponseDto(
+                reservationRepository.update(updateReservation));
+
+            if (isScheduleChanged(existingReservation, updateReservation)) {
+                approveNextWaitingReservationIfVacant(existingReservation);
+            }
+
+            return responseDto;
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
@@ -198,6 +205,13 @@ public class ReservationService {
         }
     }
 
+    private boolean isScheduleChanged(Reservation existingReservation, Reservation updateReservation) {
+        return !existingReservation.getDate().equals(updateReservation.getDate())
+            || !existingReservation.getTheme().getId().equals(updateReservation.getTheme().getId())
+            || !existingReservation.getTime().getId().equals(updateReservation.getTime().getId());
+    }
+
+
     @Transactional
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
@@ -215,16 +229,22 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
         }
 
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+        ReservationCancelResponseDto cancelResponseDto = reservationMapper.toCancelResponseDto(
+            reservationRepository.update(reservation.cancel()));
+
+        approveNextWaitingReservationIfVacant(reservation);
+
+        return cancelResponseDto;
     }
 
     @Transactional
     public void deleteReservationById(Long id) {
-        if (!reservationRepository.existsReservationByIdAndNotDeleted(id)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
-        }
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
+            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         reservationRepository.deleteReservationById(id);
+
+        approveNextWaitingReservationIfVacant(reservation);
     }
 
     @Transactional
@@ -232,9 +252,7 @@ public class ReservationService {
         Reservation reservation = createReservation(command);
         Reservation waitingReservation = reservation.toWaiting();
 
-        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        validateWaitingReservationCanBeCreated(reservation);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
@@ -243,9 +261,23 @@ public class ReservationService {
         }
     }
 
+    private void validateWaitingReservationCanBeCreated(Reservation reservation) {
+        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
+            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
+        }
+
+        if (reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+            reservation.getDate(),
+            reservation.getTheme().getId(),
+            reservation.getTime().getId()
+        ).isEmpty()) {
+            throw new GeneralException(ReservationErrorType.WAITING_RESERVATION_NOT_AVAILABLE);
+        }
+    }
+
     @Transactional
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
-        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeletedForUpdate(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         if (!reservation.getName().equals(name)) {
@@ -261,5 +293,25 @@ public class ReservationService {
         }
 
         return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+    }
+
+    private void approveNextWaitingReservationIfVacant(Reservation reservation) {
+        if (existsActiveReservationBySchedule(reservation)) {
+            return;
+        }
+
+        reservationRepository.findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+            reservation.getDate(),
+            reservation.getTheme().getId(),
+            reservation.getTime().getId()
+        ).ifPresent(waiting -> reservationRepository.update(waiting.toActive()));
+    }
+
+    private boolean existsActiveReservationBySchedule(Reservation reservation) {
+        return reservationRepository.existsActiveReservationByDateAndThemeIdAndTimeId(
+            reservation.getDate(),
+            reservation.getTheme().getId(),
+            reservation.getTime().getId()
+        );
     }
 }

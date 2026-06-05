@@ -28,8 +28,7 @@ public class Reservation {
     }
 
     public static Reservation reconstruct(
-        Long id, ReserverName name, LocalDate date,
-        Time time, Theme theme, ReservationStatus status) {
+        Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
         return new Reservation(id, name, date, time, theme, status);
     }
 
@@ -39,6 +38,10 @@ public class Reservation {
 
     public Reservation toWaiting() {
         return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.WAITING);
+    }
+
+    public Reservation toActive() {
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.ACTIVE);
     }
 
     public Long getId() {
