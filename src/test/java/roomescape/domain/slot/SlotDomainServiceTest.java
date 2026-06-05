@@ -13,9 +13,9 @@ import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.fake.FakeReservationTimeQueryingDao;
-import roomescape.fake.FakeSlotDao;
-import roomescape.fake.FakeThemeQueryingDao;
+import roomescape.fake.FakeReservationTimeRepository;
+import roomescape.fake.FakeSlotRepository;
+import roomescape.fake.FakeThemeRepository;
 
 class SlotDomainServiceTest {
 
@@ -23,18 +23,18 @@ class SlotDomainServiceTest {
     private static final Long THEME_ID = 2L;
     private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
-    private FakeSlotDao slotDao;
+    private FakeSlotRepository slotRepository;
     private SlotDomainService slotDomainService;
 
     @BeforeEach
     void setUp() {
-        slotDao = new FakeSlotDao();
-        FakeReservationTimeQueryingDao timeDao = new FakeReservationTimeQueryingDao();
-        FakeThemeQueryingDao themeDao = new FakeThemeQueryingDao();
-        slotDomainService = new SlotDomainService(slotDao, timeDao, themeDao);
+        slotRepository = new FakeSlotRepository();
+        FakeReservationTimeRepository timeRepository = new FakeReservationTimeRepository();
+        FakeThemeRepository themeRepository = new FakeThemeRepository();
+        slotDomainService = new SlotDomainService(slotRepository, timeRepository, themeRepository);
 
-        timeDao.save(new ReservationTime(TIME_ID, LocalTime.of(10, 0)));
-        themeDao.save(new Theme(THEME_ID, "테마", "설명", "url"));
+        timeRepository.save(new ReservationTime(TIME_ID, LocalTime.of(10, 0)));
+        themeRepository.save(new Theme(THEME_ID, "테마", "설명", "url"));
     }
 
     @Test

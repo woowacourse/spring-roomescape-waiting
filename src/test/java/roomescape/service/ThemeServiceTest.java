@@ -9,27 +9,24 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.slot.SlotDomainService;
 import roomescape.dto.reservation.ReservationRequest;
-import roomescape.dto.reservationtime.ReservationTimeRequest;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.ReferencedDataException;
-import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationTimeUpdatingDao;
-import roomescape.repository.ReservationUpdatingDao;
-import roomescape.repository.ReservationWaitingDao;
-import roomescape.repository.SlotDao;
-import roomescape.repository.ThemeQueryingDao;
-import roomescape.repository.ThemeUpdatingDao;
+import roomescape.repository.JdbcReservationRepository;
+import roomescape.repository.JdbcReservationTimeRepository;
+import roomescape.repository.JdbcReservationWaitingRepository;
+import roomescape.repository.JdbcSlotRepository;
+import roomescape.repository.JdbcThemeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
-@Import({ThemeService.class, ThemeQueryingDao.class, ThemeUpdatingDao.class,
-        ReservationService.class, SlotDomainService.class, SlotDao.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
-        ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
-        ReservationWaitingDao.class})
+@Import({ThemeService.class, JdbcThemeRepository.class,
+        ReservationService.class, SlotDomainService.class, JdbcSlotRepository.class, JdbcReservationRepository.class,
+        JdbcReservationTimeRepository.class, JdbcReservationWaitingRepository.class})
 class ThemeServiceTest {
 
     @Autowired
@@ -39,7 +36,7 @@ class ThemeServiceTest {
     private ReservationService reservationService;
 
     @Autowired
-    private ReservationTimeUpdatingDao reservationTimeUpdatingDao;
+    private ReservationTimeRepository reservationTimeUpdatingDao;
 
     @Test
     void 테마_생성_성공() {
@@ -73,7 +70,7 @@ class ThemeServiceTest {
     @Test
     void 예약이_존재하는_테마_삭제시_예외가_발생한다() {
         ThemeResponse savedTheme = themeService.create(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
-        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTime(null,LocalTime.of(10, 0)));
         reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, savedTheme.getId()));
 
         assertThatThrownBy(() -> themeService.delete(savedTheme.getId()))
