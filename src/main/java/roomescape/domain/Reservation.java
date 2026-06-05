@@ -30,6 +30,7 @@ public class Reservation {
     }
 
     public Reservation withUpdated(LocalDate date, ReservationTime newTime, LocalDateTime now) {
+        validateModifiable(this.date, this.time, now);
         validateNotPast(date, newTime, now);
         return new Reservation(id, name, date, this.createdAt, newTime, theme);
     }
@@ -105,6 +106,12 @@ public class Reservation {
     private static void validateNotPast(LocalDate date, ReservationTime time, LocalDateTime now) {
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
             throw new PastReservationException("과거 날짜로는 예약할 수 없습니다.");
+        }
+    }
+
+    private static void validateModifiable(LocalDate date, ReservationTime time, LocalDateTime now) {
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
+            throw new PastReservationException("과거 예약은 변경할 수 없습니다.");
         }
     }
 }

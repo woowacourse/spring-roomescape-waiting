@@ -65,7 +65,9 @@ public class ReservationService {
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
-        return reservationDao.update(updated);
+        Reservation resultReservation = reservationDao.update(updated);
+        convertFirstWaitingToReservation(reservation);
+        return resultReservation;
     }
 
     @Transactional
