@@ -76,7 +76,7 @@ public class ReservationService {
 
     public Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", id));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=" + id));
     }
 
     @Transactional(readOnly = true)
@@ -120,15 +120,15 @@ public class ReservationService {
     @Transactional
     public Reservation updateOwnReservation(UpdateReservationCommand command) {
         Reservation existing = reservationRepository.findById(command.reservationId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", command.reservationId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=" + command.reservationId()));
         validateReservationOwner(command.user(), existing);
         validateExistingNotInPast(existing);
         validateIsReserved(existing);
 
         Theme theme = themeRepository.findById(command.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", command.themeId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마을(를) 찾을 수 없습니다. id=" + command.themeId()));
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", command.timeId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간을(를) 찾을 수 없습니다. id=" + command.timeId()));
         Slot slot = resolveSlot(command.date(), theme, time, existing.getStore());
         Reservation updated = new Reservation(command.reservationId(), existing.getUser(), slot,
                 existing.getStatus());
@@ -143,7 +143,7 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long reservationId, User manager) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", reservationId));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=" + reservationId));
         validateManagesStore(manager.getId(), reservation.getStore().getId());
         validateExistingNotInPast(reservation);
         reservationRepository.deleteById(reservationId);
@@ -153,7 +153,7 @@ public class ReservationService {
     @Transactional
     public void deletePastReservation(Long reservationId, User manager) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", reservationId));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=" + reservationId));
         validateManagesStore(manager.getId(), reservation.getStore().getId());
         validateExistingInPast(reservation);
         reservationRepository.deleteById(reservationId);
@@ -162,7 +162,7 @@ public class ReservationService {
     @Transactional
     public void deleteOwnReservation(DeleteReservationCommand command) {
         Reservation reservation = reservationRepository.findById(command.reservationId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", command.reservationId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=" + command.reservationId()));
         validateReservationOwner(command.user(), reservation);
         validateExistingNotInPast(reservation);
 
@@ -172,11 +172,11 @@ public class ReservationService {
 
     private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
         Theme theme = themeRepository.findById(command.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", command.themeId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마을(를) 찾을 수 없습니다. id=" + command.themeId()));
         ReservationTime reservationTime = reservationTimeRepository.findById(command.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", command.timeId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간을(를) 찾을 수 없습니다. id=" + command.timeId()));
         Store store = storeRepository.findById(command.storeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "매장", command.storeId()));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "매장을(를) 찾을 수 없습니다. id=" + command.storeId()));
         Slot slot = resolveSlot(command.date(), theme, reservationTime, store);
         return new Reservation(null, command.user(), slot, status);
     }
@@ -191,7 +191,8 @@ public class ReservationService {
 
     private void validateIsReserved(Reservation existing) {
         if (!existing.isReserved()) {
-            throw new RoomescapeException(ErrorType.RESERVATION_NOT_RESERVED, existing.getStatus().toString());
+            throw new RoomescapeException(ErrorType.RESERVATION_NOT_RESERVED,
+                    "해당 예약은 예약 확정 상태가 아닙니다. 현재 예약 상태 값: " + existing.getStatus());
         }
     }
 
@@ -211,7 +212,8 @@ public class ReservationService {
         );
 
         if (!isReservedExist) {
-            throw new RoomescapeException(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING);
+            throw new RoomescapeException(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING,
+                    "확정 예약이 없으므로 대기 예약 생성이 불가능합니다.");
         }
     }
 
@@ -224,31 +226,36 @@ public class ReservationService {
 
     private void validateManagesStore(Long managerId, Long storeId) {
         if (!storeRepository.existsByStoreIdAndUserId(storeId, managerId)) {
-            throw new RoomescapeException(ErrorType.STORE_MANAGEMENT_FORBIDDEN);
+            throw new RoomescapeException(ErrorType.STORE_MANAGEMENT_FORBIDDEN,
+                    "본인이 관리하는 매장의 예약만 관리할 수 있습니다.");
         }
     }
 
     private static void validateReservationOwner(User user, Reservation reservation) {
         if (!reservation.getUser().getId().equals(user.getId())) {
-            throw new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH);
+            throw new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH,
+                    "본인의 예약만 취소 혹은 변경 가능합니다.");
         }
     }
 
     private void validateNotPastDateTime(Reservation reservation) {
         if (reservation.isInPast(LocalDateTime.now())) {
-            throw new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION);
+            throw new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION,
+                    "예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다.");
         }
     }
 
     private void validateExistingNotInPast(Reservation existing) {
         if (existing.isInPast(LocalDateTime.now())) {
-            throw new RoomescapeException(ErrorType.PAST_RESERVATION_MODIFICATION);
+            throw new RoomescapeException(ErrorType.PAST_RESERVATION_MODIFICATION,
+                    "이미 지난 예약은 수정할 수 없습니다.");
         }
     }
 
     private void validateExistingInPast(Reservation existing) {
         if (!existing.isInPast(LocalDateTime.now())) {
-            throw new RoomescapeException(ErrorType.NON_PAST_RESERVATION_DELETION);
+            throw new RoomescapeException(ErrorType.NON_PAST_RESERVATION_DELETION,
+                    "아직 지나지 않은 예약은 삭제할 수 없습니다.");
         }
     }
 
@@ -256,7 +263,8 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeAndThemeAndStore(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
                 reservation.getStore().getId())) {
-            throw new RoomescapeException(ErrorType.DUPLICATE_RESERVATION);
+            throw new RoomescapeException(ErrorType.DUPLICATE_RESERVATION,
+                    "해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요.");
         }
     }
 
@@ -265,7 +273,8 @@ public class ReservationService {
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
                 reservation.getStore().getId(),
                 reservation.getUser().getId())) {
-            throw new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION);
+            throw new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION,
+                    "이미 해당 슬롯에 예약 대기 중입니다.");
         }
     }
 }

@@ -67,7 +67,8 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new RoomescapeException(ErrorType.UNAUTHENTICATED);
+            throw new RoomescapeException(ErrorType.UNAUTHENTICATED,
+                    "인증이 필요합니다. 로그인 후 이용해주세요.");
         }
     }
 }

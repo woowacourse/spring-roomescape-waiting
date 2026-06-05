@@ -24,10 +24,10 @@ public class AuthService {
         String password = command.password();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.INVALID_LOGIN));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.INVALID_LOGIN, "로그인 정보가 올바르지 않습니다. 아이디와 비밀번호를 확인해주세요."));
 
         if (!user.getPassword().matches(password)) {
-            throw new RoomescapeException(ErrorType.INVALID_LOGIN);
+            throw new RoomescapeException(ErrorType.INVALID_LOGIN, "로그인 정보가 올바르지 않습니다. 아이디와 비밀번호를 확인해주세요.");
         }
 
         return jwtProvider.createToken(user.getId(), user.getUsername(), user.getRole());

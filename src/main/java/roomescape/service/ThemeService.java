@@ -43,7 +43,7 @@ public class ThemeService {
 
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", id));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마을(를) 찾을 수 없습니다. id=" + id));
     }
 
     @Transactional
@@ -56,7 +56,7 @@ public class ThemeService {
     public void deleteTheme(Long id) {
         int affected = themeRepository.deleteById(id);
         if (affected == 0) {
-            throw new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", id);
+            throw new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마을(를) 찾을 수 없습니다. id=" + id);
         }
     }
 

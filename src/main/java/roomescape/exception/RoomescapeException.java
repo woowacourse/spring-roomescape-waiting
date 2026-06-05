@@ -4,8 +4,8 @@ public class RoomescapeException extends RuntimeException {
 
     private final ErrorType errorType;
 
-    public RoomescapeException(ErrorType errorType, Object... args) {
-        super(errorType.format(args));
+    public RoomescapeException(ErrorType errorType, String message) {
+        super(message);
         this.errorType = errorType;
     }
 

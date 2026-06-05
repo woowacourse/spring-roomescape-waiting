@@ -65,7 +65,7 @@ class ReservationTimeControllerTest {
     @DisplayName("GET /times/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void getReservationTimeReturns404OnResourceNotFoundException() throws Exception {
         given(reservationTimeService.getReservationTime(9999L))
-                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", 9999L));
+                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간을(를) 찾을 수 없습니다. id=9999"));
 
         mockMvc.perform(get("/times/9999"))
                 .andExpect(status().isNotFound())

@@ -98,7 +98,7 @@ class AdminReservationTimeControllerTest {
     @Test
     @DisplayName("DELETE /admin/times - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void deleteReservationTimeReturns404OnResourceNotFoundException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간을(를) 찾을 수 없습니다. id=9999"))
                 .given(reservationTimeService).deleteReservationTime(9999L);
 
         mockMvc.perform(delete("/admin/times/9999"))
@@ -109,7 +109,7 @@ class AdminReservationTimeControllerTest {
     @Test
     @DisplayName("DELETE /admin/times - 서비스가 ReservationTimeInUseException을 던지면 409과 메시지를 반환한다")
     void deleteReservationTimeReturns409OnReservationTimeInUseException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESERVATION_TIME_IN_USE))
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_TIME_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다."))
                 .given(reservationTimeService).deleteReservationTime(3L);
 
         mockMvc.perform(delete("/admin/times/3"))

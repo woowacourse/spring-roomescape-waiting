@@ -152,7 +152,7 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("POST /admin/reservations/{id}/cancel - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void deleteReservationReturns404OnResourceNotFoundException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=9999"))
                 .given(reservationService).deleteReservation(9999L, MANAGER);
 
         mockMvc.perform(post("/admin/reservations/9999/cancel"))
@@ -172,7 +172,7 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("DELETE /admin/reservations/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void deletePastReservationReturns404OnResourceNotFoundException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=9999"))
                 .given(reservationService).deletePastReservation(9999L, MANAGER);
 
         mockMvc.perform(delete("/admin/reservations/9999"))

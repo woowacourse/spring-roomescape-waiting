@@ -35,7 +35,8 @@ public class UserService {
 
     private void validatePossibleUsername(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw new RoomescapeException(ErrorType.DUPLICATE_USERNAME);
+            throw new RoomescapeException(ErrorType.DUPLICATE_USERNAME,
+                    "이미 존재하는 username입니다. 다른 username을 입력해주세요.");
         }
     }
 }

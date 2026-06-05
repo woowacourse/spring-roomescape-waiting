@@ -122,7 +122,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations - 서비스가 DuplicateReservationException을 던지면 409과 메시지를 반환한다")
     void createReservationReturns409OnDuplicateReservationException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION))
+        willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION, "해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
         Map<String, Object> body = Map.of(
@@ -141,7 +141,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations - 서비스가 PastDateTimeReservationException을 던지면 422와 메시지를 반환한다")
     void createReservationReturns422OnPastDateTimeReservationException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
+        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION, "예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
         Map<String, Object> body = Map.of(
@@ -161,7 +161,7 @@ class ReservationControllerTest {
     @DisplayName("GET /reservations/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void getReservationReturns404OnResourceNotFoundException() throws Exception {
         given(reservationService.getReservation(9999L))
-                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L));
+                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=9999"));
 
         mockMvc.perform(get("/reservations/9999"))
                 .andExpect(status().isNotFound())
@@ -191,7 +191,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void deleteReservationReturns404OnResourceNotFoundException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약을(를) 찾을 수 없습니다. id=9999"))
                 .given(reservationService).deleteOwnReservation(Fixtures.deleteCommand(9999L, 1L));
 
         mockMvc.perform(post("/reservations/9999/cancel"))
@@ -202,7 +202,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 소유자 불일치면 403과 메시지를 반환한다")
     void deleteReservationReturns403OnOwnerMismatch() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH, "본인의 예약만 취소 혹은 변경 가능합니다."))
                 .given(reservationService).deleteOwnReservation(Fixtures.deleteCommand(1L, 1L));
 
         mockMvc.perform(post("/reservations/1/cancel"))
@@ -233,7 +233,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("PUT /reservations/{id} - 서비스가 ReservationOwnerMismatchException을 던지면 403과 메시지를 반환한다")
     void updateReservationReturns403OnReservationOwnerMismatchException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH, "본인의 예약만 취소 혹은 변경 가능합니다."))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -251,7 +251,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("PUT /reservations/{id} - 서비스가 PastDateTimeReservationException을 던지면 422과 메시지를 반환한다")
     void updateReservationReturns422OnPastDateTimeReservationException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
+        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION, "예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -269,7 +269,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("PUT /reservations/{id} - 서비스가 DuplicateReservationException을 던지면 409과 메시지를 반환한다")
     void updateReservationReturns409OnDuplicateReservationException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION))
+        willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION, "해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -287,7 +287,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("PUT /reservations/{id} - 서비스가 ReservationNotReservedException을 던지면 409과 메시지를 반환한다")
     void updateReservationReturns409OnReservationNotReservedException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_RESERVED, "WAITING"))
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_RESERVED, "해당 예약은 예약 확정 상태가 아닙니다. 현재 예약 상태 값: WAITING"))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -417,7 +417,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations/waiting - 서비스가 ReservationNotFoundForWaitingException을 던지면 409과 메시지를 반환한다")
     void createWaitingReservationReturns409OnReservationNotFoundForWaitingException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING))
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING, "확정 예약이 없으므로 대기 예약 생성이 불가능합니다."))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
@@ -436,7 +436,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations/waiting - 서비스가 PastDateTimeReservationException을 던지면 422과 메시지를 반환한다")
     void createWaitingReservationReturns422OnPastDateTimeReservationException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
+        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION, "예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
@@ -455,7 +455,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations/waiting - 서비스가 DuplicateWaitingReservationException을 던지면 409과 메시지를 반환한다")
     void createWaitingReservationReturns409OnDuplicateWaitingReservationException() throws Exception {
-        willThrow(new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION))
+        willThrow(new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION, "이미 해당 슬롯에 예약 대기 중입니다."))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(

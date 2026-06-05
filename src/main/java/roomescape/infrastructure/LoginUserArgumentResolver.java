@@ -37,6 +37,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         Long userId = (Long) request.getAttribute(AuthContext.LOGIN_USER_ID);
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.UNAUTHENTICATED));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.UNAUTHENTICATED,
+                        "인증이 필요합니다. 로그인 후 이용해주세요."));
     }
 }
