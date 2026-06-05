@@ -107,4 +107,50 @@ public class ReservationDaoTest {
 
         assertThat(actual).isFalse();
     }
+
+    @Test
+    void 미래_날짜_예약이_있으면_upcoming_true() {
+        Long timeId = 5L; // data.sql: 14:00, 시드 예약 없음
+        reservationDao.insert(new Reservation("초록", 1L, LocalDate.now().plusDays(1),
+                new ReservationTime(timeId, LocalTime.parse("14:00"))));
+
+        boolean actual = reservationDao.existsUpcomingByTimeId(timeId, LocalDate.now(), LocalTime.now());
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void 과거_날짜_예약만_있으면_upcoming_false() {
+        Long timeId = 5L;
+        reservationDao.insert(new Reservation("초록", 1L, LocalDate.now().minusDays(1),
+                new ReservationTime(timeId, LocalTime.parse("14:00"))));
+
+        boolean actual = reservationDao.existsUpcomingByTimeId(timeId, LocalDate.now(), LocalTime.now());
+
+        assertThat(actual).isFalse();
+    }
+
+    @Test
+    void 당일_아직_지나지_않은_시간이면_upcoming_true() {
+        Long timeId = 5L; // 14:00
+        reservationDao.insert(new Reservation("초록", 1L, LocalDate.now(),
+                new ReservationTime(timeId, LocalTime.parse("14:00"))));
+
+        // now=13:00 기준 → 14:00 은 아직 안 지남
+        boolean actual = reservationDao.existsUpcomingByTimeId(timeId, LocalDate.now(), LocalTime.of(13, 0));
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void 당일_이미_지난_시간이면_upcoming_false() {
+        Long timeId = 5L; // 14:00
+        reservationDao.insert(new Reservation("초록", 1L, LocalDate.now(),
+                new ReservationTime(timeId, LocalTime.parse("14:00"))));
+
+        // now=15:00 기준 → 14:00 은 이미 지남
+        boolean actual = reservationDao.existsUpcomingByTimeId(timeId, LocalDate.now(), LocalTime.of(15, 0));
+
+        assertThat(actual).isFalse();
+    }
 }

@@ -1,6 +1,7 @@
 package roomescape.reservation.dao;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -145,6 +146,20 @@ public class ReservationDao {
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId, now);
         return count > 0;
+    }
+
+    public boolean existsUpcomingByTimeId(Long timeId, LocalDate today, LocalTime now) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation r
+                    JOIN reservation_time t ON r.time_id = t.id
+                    WHERE r.time_id = ?
+                      AND (r.date > ? OR (r.date = ? AND t.start_at >= ?))
+                )
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, timeId, today, today, now) == Boolean.TRUE;
     }
 
     public boolean existsByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
