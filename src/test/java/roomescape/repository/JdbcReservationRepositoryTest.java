@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
@@ -48,6 +50,17 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = new Reservation("브라운", themeSlot);
         Reservation savedReservation = jdbcReservationRepository.save(reservation);
         assertThat(savedReservation.getId()).isPositive();
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에는 확정 예약을 하나만 저장할 수 있다.")
+    void saveConfirmedReservationOnlyOncePerThemeSlot() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
+        Reservation reservation = new Reservation(2L, "네오", themeSlot, ConfirmedStatus.getInstance());
+
+        assertThatThrownBy(() -> jdbcReservationRepository.save(reservation))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

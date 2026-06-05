@@ -406,7 +406,7 @@ public class PolicyAcceptanceTest {
             PreparedStatement ps = connection.prepareStatement("""
                     INSERT INTO reservation (name, status, theme_slot_id)
                     VALUES (?, ?, ?)
-                    """, Statement.RETURN_GENERATED_KEYS);
+                    """, new String[]{"id"});
             ps.setString(1, name);
             ps.setString(2, status);
             ps.setLong(3, themeSlotId);

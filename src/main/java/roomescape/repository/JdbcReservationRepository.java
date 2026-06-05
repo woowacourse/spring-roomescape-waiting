@@ -27,6 +27,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingColumns("name", "theme_slot_id", "status")
                 .usingGeneratedKeyColumns("id");
     }
 

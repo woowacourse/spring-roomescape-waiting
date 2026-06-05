@@ -34,10 +34,14 @@ CREATE TABLE IF NOT EXISTS theme_slot
 
 CREATE TABLE IF NOT EXISTS reservation
 (
-    id            BIGINT       NOT NULL AUTO_INCREMENT,
-    name          VARCHAR(255) NOT NULL,
-    status        VARCHAR(255) NOT NULL,
-    theme_slot_id BIGINT       NOT NULL,
+    id                      BIGINT       NOT NULL AUTO_INCREMENT,
+    name                    VARCHAR(255) NOT NULL,
+    status                  VARCHAR(255) NOT NULL,
+    theme_slot_id           BIGINT       NOT NULL,
+    confirmed_theme_slot_id BIGINT GENERATED ALWAYS AS (
+        CASE WHEN status = 'CONFIRMED' THEN theme_slot_id ELSE NULL END
+    ),
     PRIMARY KEY (id),
-    FOREIGN KEY (theme_slot_id) REFERENCES theme_slot (id)
+    FOREIGN KEY (theme_slot_id) REFERENCES theme_slot (id),
+    UNIQUE (confirmed_theme_slot_id)
 );

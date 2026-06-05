@@ -40,12 +40,14 @@ class ReservationServiceConcurrencyTest {
     }
 
     @Test
-    @DisplayName("서로 다른 슬롯의 예약을 동시에 교차 변경해도 제한 시간 안에 완료된다.")
+    @DisplayName("서로 다른 슬롯의 대기 예약을 동시에 교차 변경해도 제한 시간 안에 완료된다.")
     void modifyReservationsAcrossThemeSlotsConcurrently() throws Exception {
         long firstThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(30), 1L);
         long secondThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(31), 2L);
-        long firstReservationId = insertReservation("브라운", "CONFIRMED", firstThemeSlotId);
-        long secondReservationId = insertReservation("네오", "CONFIRMED", secondThemeSlotId);
+        insertReservation("첫확정", "CONFIRMED", firstThemeSlotId);
+        insertReservation("둘확정", "CONFIRMED", secondThemeSlotId);
+        long firstReservationId = insertReservation("브라운", "PENDING", firstThemeSlotId);
+        long secondReservationId = insertReservation("네오", "PENDING", secondThemeSlotId);
 
         CountDownLatch ready = new CountDownLatch(2);
         CountDownLatch start = new CountDownLatch(1);
@@ -69,8 +71,8 @@ class ReservationServiceConcurrencyTest {
 
         assertThat(findThemeSlotId(firstReservationId)).isEqualTo(secondThemeSlotId);
         assertThat(findThemeSlotId(secondReservationId)).isEqualTo(firstThemeSlotId);
-        assertThat(findStatus(firstReservationId)).isEqualTo("CONFIRMED");
-        assertThat(findStatus(secondReservationId)).isEqualTo("CONFIRMED");
+        assertThat(findStatus(firstReservationId)).isEqualTo("PENDING");
+        assertThat(findStatus(secondReservationId)).isEqualTo("PENDING");
     }
 
     private Future<Reservation> modifyReservationAsync(
@@ -108,7 +110,7 @@ class ReservationServiceConcurrencyTest {
             PreparedStatement ps = connection.prepareStatement("""
                     INSERT INTO reservation (name, status, theme_slot_id)
                     VALUES (?, ?, ?)
-                    """, Statement.RETURN_GENERATED_KEYS);
+                    """, new String[]{"id"});
             ps.setString(1, name);
             ps.setString(2, status);
             ps.setLong(3, themeSlotId);

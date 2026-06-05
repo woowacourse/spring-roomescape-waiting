@@ -143,6 +143,11 @@ public class ReservationService {
                 themeSlot,
                 reservation.getReservationStatus()
         );
+        if (expectedStatus.equals(ConfirmedStatus.getInstance().getName()) && updateReservation.isPendingStatus()) {
+            updateStatusOrElseThrow(updateReservation, expectedStatus);
+            reservationRepository.updateThemeSlot(updateReservation);
+            return updateReservation;
+        }
         reservationRepository.updateThemeSlot(updateReservation);
         updateStatusOrElseThrow(updateReservation, expectedStatus);
         return updateReservation;
