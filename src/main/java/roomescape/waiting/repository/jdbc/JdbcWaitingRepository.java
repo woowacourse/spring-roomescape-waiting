@@ -171,6 +171,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<WaitingWithRank> findAllWithRank() {
+        final String sql = """
+            WITH ranked AS (
+                 SELECT w.id, w.customer_name, w.reservation_date, w.created_at,
+                        w.time_id, w.theme_id,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY w.reservation_date, w.time_id, w.theme_id
+                            ORDER BY w.created_at
+                        ) AS rank
+                 FROM waiting w
+            )
+            SELECT r.id, r.customer_name, r.reservation_date, r.created_at, r.rank,
+                   t.id AS t_id, t.start_at AS t_time,
+                   th.id AS th_id, th.name AS th_name, th.description AS th_description, th.thumbnail_url AS th_thumbnail_url
+            FROM ranked r
+            JOIN reservation_time t ON r.time_id = t.id
+            JOIN theme th ON r.theme_id = th.id
+            ORDER BY r.reservation_date ASC, t.start_at ASC, r.rank ASC
+            """;
+        return jdbcTemplate.query(sql, WAITING_WITH_RANK_ROW_MAPPER);
+    }
+
+    @Override
     public boolean existsBySlot(final LocalDate reservationDate, final long timeId, final long themeId) {
         final String sql = """
             SELECT COUNT(1)
