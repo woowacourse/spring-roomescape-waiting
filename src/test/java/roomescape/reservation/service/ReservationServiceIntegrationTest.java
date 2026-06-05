@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -62,6 +64,7 @@ public class ReservationServiceIntegrationTest extends ServiceIntegrationTest {
     @MockitoSpyBean
     ReservationWaitingRepository reservationWaitingRepository;
 
+    @Transactional(propagation =  Propagation.NOT_SUPPORTED)
     @DisplayName("예약 변경 후 기존 슬롯의 대기 삭제가 실패하면 예약 변경이 롤백된다.")
     @Test
     void updateReservationTest_roll_back_when_waiting_delete_fails() {
@@ -133,6 +136,7 @@ public class ReservationServiceIntegrationTest extends ServiceIntegrationTest {
         ).toLocalDate()).isEqualTo(date);
     }
 
+    @Transactional(propagation =  Propagation.NOT_SUPPORTED)
     @DisplayName("예약 변경 후 기존 슬롯의 대기 승격 저장이 실패하면 예약 변경과 대기 삭제가 롤백된다.")
     @Test
     void updateReservationTest_rolls_back_when_promotion_save_Fails() {
@@ -196,6 +200,7 @@ public class ReservationServiceIntegrationTest extends ServiceIntegrationTest {
         )).isEqualTo(expectedCount);
     }
 
+    @Transactional(propagation =  Propagation.NOT_SUPPORTED)
     @DisplayName("예약 삭제 후 기존 슬롯의 대기 승격 저장이 실패하면 예약 삭제와 대기 삭제가 롤백된다.")
     @Test
     void deleteReservationByIdTest_rolls_back_when_promotion_save_fails() {

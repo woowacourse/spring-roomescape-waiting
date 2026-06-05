@@ -12,14 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional(propagation =  Propagation.NOT_SUPPORTED)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @ActiveProfiles("test")
 @Import(ServiceIntegrationTest.ServiceIntegrationTestConfig.class)
-public class ServiceIntegrationTest {
+public abstract class ServiceIntegrationTest {
 
     @Autowired
     DatabaseHelper databaseHelper;
