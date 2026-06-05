@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.command.ReservationCreateCommand;
 import roomescape.application.dto.command.ReservationUpdateCommand;
 import roomescape.application.dto.result.MyReservationResult;
@@ -94,6 +95,7 @@ public class ReservationService {
         return results;
     }
 
+    @Transactional
     public void deleteByOwner(Long id, String name) {
         Reservation reservation = findByIdAndName(id, name);
         reservationPolicy.validateCancellable(reservation.scheduledAt());
