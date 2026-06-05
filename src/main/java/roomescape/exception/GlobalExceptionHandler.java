@@ -20,6 +20,13 @@ public class GlobalExceptionHandler {
                 .body(new GlobalErrorResponse(e.getMessage()));
     }
 
+    @ExceptionHandler(DuplicateReservationException.class)
+    public ResponseEntity<GlobalErrorResponse> handleDuplicateReservationException(DuplicateReservationException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new GlobalErrorResponse(e.getMessage()));
+    }
+
     @ExceptionHandler(DuplicateKeyException.class)
     public ResponseEntity<GlobalErrorResponse> handleDuplicateKeyException(DuplicateKeyException e) {
         return ResponseEntity

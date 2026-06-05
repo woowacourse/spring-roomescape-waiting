@@ -3,7 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +19,7 @@ import roomescape.dto.response.ReservationOrderResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.IdNotFoundException;
 
 @Service
@@ -75,8 +76,12 @@ public class ReservationService {
 
         Reservation reservation = new Reservation(request.name(), request.date(), time, theme, requestedAt);
 
-        Reservation saved = reservationDao.save(reservation);
-        return ReservationResponse.from(saved);
+        try {
+            Reservation saved = reservationDao.save(reservation);
+            return ReservationResponse.from(saved);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateReservationException("이미 동일한 예약 또는 대기 신청이 존재합니다.");
+        }
     }
 
     @Transactional
