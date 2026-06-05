@@ -14,6 +14,10 @@ import roomescape.exception.EntityNotFoundException;
 
 class ReservationEntriesTest {
 
+    private ReservationEntry entry(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        return ReservationEntry.restore(id, name, status, createdAt);
+    }
+
     @Nested
     class 추가 {
         @Test
@@ -223,9 +227,5 @@ class ReservationEntriesTest {
             assertThatThrownBy(() -> entries.cancel(999L))
                     .isInstanceOf(EntityNotFoundException.class);
         }
-    }
-
-    private ReservationEntry entry(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return ReservationEntry.restore(id, name, status, createdAt);
     }
 }

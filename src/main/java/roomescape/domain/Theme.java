@@ -31,7 +31,8 @@ public class Theme {
     }
 
     public static Theme restore(Long id, String name, String description, String thumbnailImageUrl, boolean isActive) {
-        return new Theme(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), name, description, thumbnailImageUrl, isActive);
+        return new Theme(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), name, description, thumbnailImageUrl,
+                isActive);
     }
 
     private static void validateTheme(String name, String description, String thumbnailImageUrl) {

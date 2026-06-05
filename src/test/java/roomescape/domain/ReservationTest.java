@@ -13,10 +13,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
-import roomescape.support.TestDateTimes;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.exception.RoomEscapeException;
+import roomescape.support.TestDateTimes;
 
 class ReservationTest {
 
@@ -40,7 +40,7 @@ class ReservationTest {
     @ParameterizedTest(name = "날짜 {0}, 테마 {1}, 시간 {2} 일 때, {3} 예외가 발생한다")
     @MethodSource("roomescape.domain.fixture.ReservationFixture#invalidReservationConstructor")
     void 슬롯_생성_시_날짜_테마_시간_누락_검증_통합_테스트(LocalDate date, Theme theme, ReservationTime reservationTime,
-                                          String expectedMessage) {
+                                       String expectedMessage) {
         // when & then
         assertThatThrownBy(() -> Reservation.createSlot(date, theme, reservationTime))
                 .isInstanceOf(RoomEscapeException.class)

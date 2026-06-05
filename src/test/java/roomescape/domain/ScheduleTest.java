@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import static roomescape.support.TestDateTimes.FIXED;
 
 import java.time.LocalDate;
@@ -64,7 +63,8 @@ class ScheduleTest {
     void 날짜와_시간을_조합했을_때_미래라면_false를_반환한다() {
         // given
         LocalDateTime futureDateTime = FIXED.plusDays(1);
-        Schedule schedule = Schedule.of(futureDateTime.toLocalDate(), ReservationTime.create(futureDateTime.toLocalTime()));
+        Schedule schedule = Schedule.of(futureDateTime.toLocalDate(),
+                ReservationTime.create(futureDateTime.toLocalTime()));
 
         // when
         boolean isPast = schedule.isPast(FIXED);
@@ -81,7 +81,8 @@ class ScheduleTest {
 
         // when
         Schedule first = Schedule.of(date, time);
-        Schedule second = Schedule.of(date, ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE));
+        Schedule second = Schedule.of(date,
+                ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE));
 
         // then
         assertThat(first).isEqualTo(second);

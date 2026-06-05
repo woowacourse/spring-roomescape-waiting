@@ -24,11 +24,11 @@ import roomescape.support.TestDateTimes;
 @Sql("/integration-fixture.sql")
 class JdbcReservationRepositoryIntegrationTest {
 
+    private final ReservationTime reservationTime = ReservationTime.restore(1L, TestDateTimes.defaultTime(),
+            TimeStatus.ACTIVE);
+    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
     @Autowired
     private ReservationRepository reservationRepository;
-
-    private final ReservationTime reservationTime = ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
-    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
 
     @Test
     void 예약을_저장하면_예약_슬롯과_엔트리를_함께_저장한다() {

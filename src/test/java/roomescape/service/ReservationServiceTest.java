@@ -160,7 +160,8 @@ class ReservationServiceTest {
     void 비활성화된_테마_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID가 등록되지 않음
         themeRepository.save(ThemeFixture.createdInactive());
-        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
 
         // when & then: EntityNotFoundException 발생 확인
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -171,7 +172,8 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_테마_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID가 등록되지 않음
-        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
 
         // when & then: EntityNotFoundException 발생 확인
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -182,7 +184,8 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_시간_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID는 등록되고 시간 ID가 등록되지 않음
-        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
         themeRepository.save(ThemeFixture.createDefaultTheme());
 
         // when & then: EntityNotFoundException 발생 확인
@@ -194,7 +197,8 @@ class ReservationServiceTest {
     @Test
     void 비활성화_된_시간_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID는 등록되고 시간 ID가 등록되지 않음
-        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createInactive());
 

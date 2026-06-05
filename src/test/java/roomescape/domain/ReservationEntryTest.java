@@ -11,6 +11,14 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 class ReservationEntryTest {
 
+    private ReservationEntry entry(Long id, ReservationStatus status) {
+        return ReservationEntry.restore(id, "이프", status, FIXED);
+    }
+
+    private ReservationEntry entry(ReservationStatus status) {
+        return entry(1L, status);
+    }
+
     @Nested
     class 생성 {
         @Test
@@ -157,13 +165,5 @@ class ReservationEntryTest {
             // when & then
             assertThatThrownBy(canceledEntry::promote).isInstanceOf(IllegalStateException.class);
         }
-    }
-
-    private ReservationEntry entry(Long id, ReservationStatus status) {
-        return ReservationEntry.restore(id, "이프", status, FIXED);
-    }
-
-    private ReservationEntry entry(ReservationStatus status) {
-        return entry(1L, status);
     }
 }

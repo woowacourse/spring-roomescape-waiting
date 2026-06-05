@@ -20,14 +20,12 @@ import roomescape.support.TestDateTimes;
 @Sql("/integration-fixture.sql")
 class AdminReservationQueryIntegrationTest {
 
-    @Autowired
-    private ReservationQueryRepository reservationQueryRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
     private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", true);
     private final ReservationTime time = ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
+    @Autowired
+    private ReservationQueryRepository reservationQueryRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     void 관리자_예약_목록을_예약_엔트리_정보와_함께_조회한다() {

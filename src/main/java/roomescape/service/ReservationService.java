@@ -78,7 +78,8 @@ public class ReservationService {
         reservationRepository.save(current);
 
         Reservation saved = reservationRepository.save(target);
-        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(entry.getReserverName(), moved.getStatus()));
+        return ReservationResult.from(saved,
+                saved.findEntryByNameAndStatus(entry.getReserverName(), moved.getStatus()));
     }
 
     @Transactional
