@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.LoginMember;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservation.application.dto.request.ReservationSaveRequest;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.dto.response.ReservationSaveResponse;
@@ -29,14 +33,16 @@ import java.util.List;
 @Validated
 public class UserReservationController {
 
-    private final ReservationService reservationService;
+    private final CreateReservationUseCase createReservationUseCase;
+    private final CancelReservationUseCase cancelReservationUseCase;
+    private final FindReservationUseCase findReservationUseCase;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationSaveResponse>> save(
             @RequestBody @Valid ReservationSaveRequest body,
             @LoginMember AuthenticatedMember member
     ) {
-        ReservationSaveResponse response = reservationService.save(body, member.id());
+        ReservationSaveResponse response = createReservationUseCase.save(body, member.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
@@ -45,7 +51,7 @@ public class UserReservationController {
             @PathVariable @Positive long id,
             @LoginMember AuthenticatedMember member
     ) {
-        reservationService.deleteByIdForUser(id, member.id());
+        cancelReservationUseCase.deleteByIdForUser(id, member.id());
         return ResponseEntity.noContent().build();
     }
 
@@ -53,7 +59,7 @@ public class UserReservationController {
     public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findMyReservations(
             @LoginMember AuthenticatedMember member
     ) {
-        List<ReservationDetailFindResponse> response = reservationService.findMyReservations(member.id());
+        List<ReservationDetailFindResponse> response = findReservationUseCase.findMyReservations(member.id());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 

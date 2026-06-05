@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 
 import java.util.List;
@@ -20,11 +23,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ManagerReservationController {
 
-    private final ReservationService reservationService;
+    private final FindReservationUseCase findReservationUseCase;
+    private final CancelReservationUseCase cancelReservationUseCase;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findReservationDetails() {
-        List<ReservationDetailFindResponse> responses = reservationService.findReservationDetails();
+        List<ReservationDetailFindResponse> responses = findReservationUseCase.findReservationDetails();
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 
@@ -32,7 +36,7 @@ public class ManagerReservationController {
     public ResponseEntity<ApiResponse<Void>> deleteByManager(
             @PathVariable @Positive long reservationId
     ) {
-        reservationService.deleteById(reservationId);
+        cancelReservationUseCase.deleteById(reservationId);
         return ResponseEntity.noContent().build();
     }
 

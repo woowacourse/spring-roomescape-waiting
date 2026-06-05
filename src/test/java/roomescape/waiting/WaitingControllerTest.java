@@ -15,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.Role;
-import roomescape.waiting.application.WaitingService;
+import roomescape.waiting.application.port.in.CancelWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.adapter.in.web.WaitingController;
@@ -24,7 +25,10 @@ import roomescape.waiting.adapter.in.web.WaitingController;
 class WaitingControllerTest {
 
     @Mock
-    private WaitingService waitingService;
+    private CreateWaitingUseCase createWaitingUseCase;
+
+    @Mock
+    private CancelWaitingUseCase cancelWaitingUseCase;
 
     @InjectMocks
     private WaitingController waitingController;
@@ -34,7 +38,7 @@ class WaitingControllerTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         AuthenticatedMember member = AuthenticatedMember.of(2L, Role.USER);
         WaitingResponse serviceResponse = new WaitingResponse(10L, 2L, 1L, 1L);
-        when(waitingService.save(request, member.id())).thenReturn(serviceResponse);
+        when(createWaitingUseCase.save(request, member.id())).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<WaitingResponse>> response = waitingController.save(request, member);
 
@@ -52,6 +56,6 @@ class WaitingControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(response.getBody()).isNull();
-        verify(waitingService).deleteByIdForUser(10L, member.id());
+        verify(cancelWaitingUseCase).deleteByIdForUser(10L, member.id());
     }
 }

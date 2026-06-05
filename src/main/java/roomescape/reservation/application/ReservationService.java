@@ -25,9 +25,15 @@ import roomescape.waiting.domain.WaitingPromotionPolicy;
 import roomescape.waiting.application.port.out.WaitingRepository;
 import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
+
 @Service
 @RequiredArgsConstructor
-public class ReservationService {
+public class ReservationService implements CreateReservationUseCase, FindReservationUseCase, CancelReservationUseCase {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final SlotAssembler slotAssembler;

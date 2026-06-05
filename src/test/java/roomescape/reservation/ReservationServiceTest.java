@@ -26,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;

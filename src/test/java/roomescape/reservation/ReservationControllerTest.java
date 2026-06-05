@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.Role;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservation.application.dto.request.ReservationSaveRequest;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.dto.response.ReservationSaveResponse;
@@ -29,15 +31,21 @@ import roomescape.theme.application.dto.response.ThemeFindResponse;
 class ReservationControllerTest {
 
     @Mock
-    private ReservationService reservationService;
+    private CreateReservationUseCase createReservationUseCase;
+
+    @Mock
+    private CancelReservationUseCase cancelReservationUseCase;
+
+    @Mock
+    private FindReservationUseCase findReservationUseCase;
 
     private UserReservationController userReservationController;
     private ManagerReservationController managerReservationController;
 
     @BeforeEach
     void setUp() {
-        userReservationController = new UserReservationController(reservationService);
-        managerReservationController = new ManagerReservationController(reservationService);
+        userReservationController = new UserReservationController(createReservationUseCase, cancelReservationUseCase, findReservationUseCase);
+        managerReservationController = new ManagerReservationController(findReservationUseCase, cancelReservationUseCase);
     }
 
     @Test
@@ -45,7 +53,7 @@ class ReservationControllerTest {
         ReservationSaveRequest request = new ReservationSaveRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
         ReservationSaveResponse serviceResponse = new ReservationSaveResponse(5L, 1L, 4L);
-        when(reservationService.save(request, member.id())).thenReturn(serviceResponse);
+        when(createReservationUseCase.save(request, member.id())).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<ReservationSaveResponse>> response = userReservationController.save(request, member);
 
@@ -63,13 +71,13 @@ class ReservationControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(response.getBody()).isNull();
-        verify(reservationService).deleteByIdForUser(1L, member.id());
+        verify(cancelReservationUseCase).deleteByIdForUser(1L, member.id());
     }
 
     @Test
     void 매니저_예약_목록_조회_응답_테스트() {
         List<ReservationDetailFindResponse> serviceResponse = List.of(reservationDetailResponse());
-        when(reservationService.findReservationDetails()).thenReturn(serviceResponse);
+        when(findReservationUseCase.findReservationDetails()).thenReturn(serviceResponse);
 
         ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> response =
                 managerReservationController.findReservationDetails();

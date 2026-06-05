@@ -14,6 +14,7 @@ import roomescape.slot.domain.Slot;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.application.WaitingService;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.application.port.out.WaitingRepository;

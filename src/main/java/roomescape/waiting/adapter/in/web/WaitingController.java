@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.LoginMember;
-import roomescape.waiting.application.WaitingService;
+import roomescape.waiting.application.port.in.CancelWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 
@@ -23,14 +25,15 @@ import roomescape.waiting.application.dto.response.WaitingResponse;
 @RequiredArgsConstructor
 public class WaitingController {
 
-    private final WaitingService waitingService;
+    private final CreateWaitingUseCase createWaitingUseCase;
+    private final CancelWaitingUseCase cancelWaitingUseCase;
 
     @PostMapping
     public ResponseEntity<ApiResponse<WaitingResponse>> save(
             @RequestBody @Valid WaitingRequest body,
             @LoginMember AuthenticatedMember member
     ) {
-        WaitingResponse response = waitingService.save(body, member.id());
+        WaitingResponse response = createWaitingUseCase.save(body, member.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
@@ -39,7 +42,7 @@ public class WaitingController {
             @PathVariable @Positive long id,
             @LoginMember AuthenticatedMember member
     ) {
-        waitingService.deleteByIdForUser(id, member.id());
+        cancelWaitingUseCase.deleteByIdForUser(id, member.id());
         return ResponseEntity.noContent().build();
     }
 }

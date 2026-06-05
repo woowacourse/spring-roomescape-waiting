@@ -15,9 +15,13 @@ import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.application.port.out.WaitingRepository;
 
+import roomescape.waiting.application.port.in.CancelWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+
 @Service
 @RequiredArgsConstructor
-public class WaitingService {
+public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCase {
 
     private final SlotAssembler slotAssembler;
     private final WaitingRepository waitingRepository;
