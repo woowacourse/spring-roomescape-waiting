@@ -4,6 +4,7 @@ import roomescape.domain.ThemeSlot;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,17 @@ public class FakeThemeSlotDao implements ThemeSlotRepository {
     public Optional<ThemeSlot> findByIdForUpdate(long id) {
         findByIdForUpdateHistory.add(id);
         return findById(id);
+    }
+
+    @Override
+    public List<ThemeSlot> findAllByIdsForUpdateInOrder(Long firstId, Long secondId) {
+        List<ThemeSlot> themeSlots = storage.values()
+                .stream()
+                .filter(themeSlot -> themeSlot.hasSameId(firstId) || themeSlot.hasSameId(secondId))
+                .sorted(Comparator.comparing(ThemeSlot::getId))
+                .toList();
+        themeSlots.forEach(themeSlot -> findByIdForUpdateHistory.add(themeSlot.getId()));
+        return themeSlots;
     }
 
     @Override

@@ -16,5 +16,7 @@ public interface ThemeSlotRepository {
 
     Optional<ThemeSlot> findByIdForUpdate(long id);
 
+    List<ThemeSlot> findAllByIdsForUpdateInOrder(Long firstId, Long secondId);
+
     void updateReserved(ThemeSlot themeSlot);
 }

@@ -102,6 +102,30 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
         return jdbcTemplate.query(sql, rowMapper(), id).stream().findFirst();
     }
 
+    @Override
+    public List<ThemeSlot> findAllByIdsForUpdateInOrder(Long firstId, Long secondId) {
+        String sql = """
+                SELECT
+                    ts.id AS id,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    ts.date AS date,
+                    t.id AS time_id,
+                    t.start_at AS start_at,
+                    ts.is_reserved AS is_reserved
+                FROM
+                    theme_slot ts
+                        INNER JOIN time t ON ts.time_id = t.id
+                        INNER JOIN theme th ON ts.theme_id = th.id
+                WHERE ts.id IN (?, ?)
+                ORDER BY ts.id
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(sql, rowMapper(), firstId, secondId);
+    }
+
     private Map<String, Object> createParams(ThemeSlot themeSlot) {
         return Map.of(
                 "theme_id", themeSlot.getTheme().getId(),

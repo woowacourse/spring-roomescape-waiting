@@ -17,7 +17,6 @@ import roomescape.repository.ThemeSlotRepository;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static roomescape.global.exception.ErrorCode.RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT;
@@ -226,19 +225,11 @@ public class ReservationService {
 
     @NonNull
     private ThemeSlot getThemeSlotWithOrderedLock(Long currentThemeSlotId, Long targetThemeSlotId) {
-        if (Objects.equals(currentThemeSlotId, targetThemeSlotId)) {
-            return getThemeSlotForUpdateOrElseThrow(targetThemeSlotId);
-        }
-
-        Long firstLockId = Math.min(currentThemeSlotId, targetThemeSlotId);
-        Long secondLockId = Math.max(currentThemeSlotId, targetThemeSlotId);
-        ThemeSlot firstLockedThemeSlot = getThemeSlotForUpdateOrElseThrow(firstLockId);
-        ThemeSlot secondLockedThemeSlot = getThemeSlotForUpdateOrElseThrow(secondLockId);
-
-        if (firstLockedThemeSlot.hasSameId(targetThemeSlotId)) {
-            return firstLockedThemeSlot;
-        }
-        return secondLockedThemeSlot;
+        return themeSlotRepository.findAllByIdsForUpdateInOrder(currentThemeSlotId, targetThemeSlotId)
+                .stream()
+                .filter(themeSlot -> themeSlot.hasSameId(targetThemeSlotId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
     }
 
     private void validateBeforeDate(ThemeSlot themeSlot) {
