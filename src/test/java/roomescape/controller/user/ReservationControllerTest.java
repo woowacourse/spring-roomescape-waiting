@@ -1,6 +1,7 @@
 package roomescape.controller.user;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -228,6 +229,34 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
                 .andExpect(jsonPath("$.detail").value("요청 본문 형식이 올바르지 않습니다."));
 
+        verifyNoMoreInteractions(reservationService);
+    }
+
+    @Test
+    void 일시적_DB_실패가_발생하면_재시도_가능한_에러_응답() throws Exception {
+        // given
+        given(reservationService.createByUser(
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class)))
+                .willThrow(new CannotAcquireLockException("lock timeout"));
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validRequest()))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("TEMPORARY_UNAVAILABLE"))
+                .andExpect(jsonPath("$.detail").value("요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요."));
+
+        verify(reservationService, times(1)).createByUser(
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationService);
     }
 

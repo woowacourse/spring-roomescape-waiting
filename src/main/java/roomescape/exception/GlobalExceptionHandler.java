@@ -3,6 +3,7 @@ package roomescape.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,10 +77,16 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.from(errorCode, e.getMessage()));
     }
 
+    @ExceptionHandler(TransientDataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleTransientDataAccessException() {
+        ErrorCode errorCode = ErrorCode.TEMPORARY_UNAVAILABLE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException() {
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
     }
