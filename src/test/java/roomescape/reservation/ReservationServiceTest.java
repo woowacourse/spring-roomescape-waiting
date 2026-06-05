@@ -118,7 +118,7 @@ class ReservationServiceTest {
         assertThat(responses).extracting(ReservationDetailFindResponse::waitingOrder)
                 .containsExactly(2L, 2L);
         verify(waitingRepository).findAllBySlotIds(List.of(10L, 20L));
-        verify(waitingRepository, never()).findAllBySlotIdOrderById(anyLong());
+        verify(waitingRepository, never()).findAllBySlotIdOrderByIdForUpdate(anyLong());
     }
 
     private WaitingDetailProjection waitingDetail(Long waitingId, Long slotId) {
@@ -144,7 +144,7 @@ class ReservationServiceTest {
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
         );
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId())).thenReturn(List.of());
+        when(waitingRepository.findAllBySlotIdOrderByIdForUpdate(oldReservation.getSlotId())).thenReturn(List.of());
 
         assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
                 .doesNotThrowAnyException();
@@ -159,7 +159,7 @@ class ReservationServiceTest {
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
         );
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId())).thenReturn(List.of());
+        when(waitingRepository.findAllBySlotIdOrderByIdForUpdate(oldReservation.getSlotId())).thenReturn(List.of());
 
         assertThatCode(() -> reservationService.deleteById(reservationId))
                 .doesNotThrowAnyException();
@@ -192,7 +192,7 @@ class ReservationServiceTest {
         Reservation promotedReservation = Reservation.create(firstWaiting.getMemberId(), oldReservation.getSlot());
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId()))
+        when(waitingRepository.findAllBySlotIdOrderByIdForUpdate(oldReservation.getSlotId()))
                 .thenReturn(List.of(firstWaiting, secondWaiting));
         when(waitingPromotionPolicy.promote(firstWaiting, oldReservation.getSlot()))
                 .thenReturn(promotedReservation);
@@ -218,7 +218,7 @@ class ReservationServiceTest {
         Reservation promotedReservation = Reservation.create(firstWaiting.getMemberId(), oldReservation.getSlot());
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(waitingRepository.findAllBySlotIdOrderById(oldReservation.getSlotId()))
+        when(waitingRepository.findAllBySlotIdOrderByIdForUpdate(oldReservation.getSlotId()))
                 .thenReturn(List.of(firstWaiting));
         when(waitingPromotionPolicy.promote(firstWaiting, oldReservation.getSlot()))
                 .thenReturn(promotedReservation);

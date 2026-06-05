@@ -134,7 +134,7 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
     }
 
     private WaitingLine findWaitingLineFor(Reservation reservation) {
-        return WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(reservation.getSlotId()));
+        return WaitingLine.of(waitingRepository.findAllBySlotIdOrderByIdForUpdate(reservation.getSlotId()));
     }
 
     private void deleteReservationOnly(Reservation reservation) {

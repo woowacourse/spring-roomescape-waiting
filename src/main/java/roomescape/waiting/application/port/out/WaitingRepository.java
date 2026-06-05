@@ -13,6 +13,8 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long waitingId);
 
+    Optional<Waiting> findByIdForUpdate(long waitingId);
+
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
     boolean existsBySlotIdAndMemberId(long memberId, long slotId);
@@ -20,6 +22,8 @@ public interface WaitingRepository {
     boolean existsBySlotId(long slotId);
 
     List<Waiting> findAllBySlotIdOrderById(long slotId);
+
+    List<Waiting> findAllBySlotIdOrderByIdForUpdate(long slotId);
 
     List<Waiting> findAllBySlotIds(List<Long> slotIds);
 

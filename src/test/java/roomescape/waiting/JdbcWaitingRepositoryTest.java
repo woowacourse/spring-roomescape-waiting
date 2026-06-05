@@ -69,6 +69,19 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
+    @DisplayName("대기 id로 락을 걸고 대기를 조회할 수 있다.")
+    void findByIdForUpdate_테스트() {
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
+
+        Waiting result = waitingRepository.findByIdForUpdate(savedWaiting.getId())
+                .orElseThrow();
+
+        assertThat(result.getId()).isEqualTo(savedWaiting.getId());
+        assertThat(result.getMemberId()).isEqualTo(MEMBER_ID);
+        assertThat(result.getSlotId()).isEqualTo(SLOT_ID);
+    }
+
+    @Test
     @DisplayName("대기 id로 대기를 삭제할 수 있다.")
     void deleteById_테스트() {
         Waiting savedWaiting = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
@@ -87,6 +100,22 @@ class JdbcWaitingRepositoryTest {
         Waiting third = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
 
         List<Waiting> result = waitingRepository.findAllBySlotIdOrderById(SLOT_ID);
+
+        assertThat(result).extracting(Waiting::getId)
+                .containsExactly(first.getId(), second.getId(), third.getId());
+        assertThat(result).extracting(Waiting::getId)
+                .doesNotContain(otherSlotWaiting.getId());
+    }
+
+    @Test
+    @DisplayName("특정 슬롯의 대기 목록을 락을 걸고 신청 순서대로 조회할 수 있다.")
+    void findAllBySlotIdOrderByIdForUpdate_테스트() {
+        Waiting first = waitingRepository.save(Waiting.create(3L, SLOT_ID));
+        Waiting second = waitingRepository.save(Waiting.create(2L, SLOT_ID));
+        Waiting otherSlotWaiting = waitingRepository.save(Waiting.create(4L, 2L));
+        Waiting third = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
+
+        List<Waiting> result = waitingRepository.findAllBySlotIdOrderByIdForUpdate(SLOT_ID);
 
         assertThat(result).extracting(Waiting::getId)
                 .containsExactly(first.getId(), second.getId(), third.getId());

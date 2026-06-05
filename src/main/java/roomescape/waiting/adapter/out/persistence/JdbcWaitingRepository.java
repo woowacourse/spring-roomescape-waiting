@@ -77,6 +77,23 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findByIdForUpdate(long waitingId) {
+        String sql = """
+                SELECT id, member_id, slot_id
+                FROM waiting
+                WHERE id = :waitingId
+                FOR UPDATE
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("waitingId", waitingId);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper)
+                .stream()
+                .findFirst();
+    }
+
+    @Override
     public Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId) {
         String sql = """
                 SELECT s.time_id
@@ -125,6 +142,21 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 FROM waiting
                 WHERE slot_id = :slotId
                 ORDER BY id
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("slotId", slotId);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper);
+    }
+
+    @Override
+    public List<Waiting> findAllBySlotIdOrderByIdForUpdate(long slotId) {
+        String sql = """
+                SELECT id, member_id, slot_id
+                FROM waiting
+                WHERE slot_id = :slotId
+                ORDER BY id
+                FOR UPDATE
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("slotId", slotId);

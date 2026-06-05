@@ -43,8 +43,9 @@ public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCas
         return WaitingResponse.of(waiting, waitingOrder);
     }
 
+    @Transactional
     public void deleteByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findById(waitingId)
+        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
                 .orElse(null);
         if (waiting == null) {
             return;
