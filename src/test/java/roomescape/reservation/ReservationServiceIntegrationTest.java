@@ -15,15 +15,20 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.Role;
 import roomescape.auth.exception.WrongStoreAccessException;
 import roomescape.member.Member;
+import java.util.List;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservationhistory.ReservationHistory;
+import roomescape.reservationhistory.ReservationHistoryDao;
+import roomescape.reservationhistory.ReservationHistoryStatus;
 import roomescape.reservationtime.ReservationTimeDao;
 import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationwait.ReservationWaitDao;
 
 @JdbcTest
 @ActiveProfiles("test")
-@Import({ReservationService.class, ReservationDao.class, ReservationTimeDao.class, ReservationWaitDao.class})
+@Import({ReservationService.class, ReservationDao.class, ReservationTimeDao.class,
+        ReservationWaitDao.class, ReservationHistoryDao.class})
 public class ReservationServiceIntegrationTest {
 
     private static final long BROWN_ID = 1L;
@@ -80,12 +85,28 @@ public class ReservationServiceIntegrationTest {
           VALUES (1, 1, '2020-01-01', 1, 1, 1);
           """;
 
+    private static final String INSERT_BROWN_CONFIRMED_HISTORY_SQL = """
+            INSERT INTO reservation_history
+                (reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
+            VALUES (1, 1, '2026-12-01', 1, 1, 1, 'CONFIRMED', 1);
+            """;
+
+    private static final String INSERT_BROWN_PAST_CONFIRMED_HISTORY_SQL = """
+            INSERT INTO reservation_history
+                (reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
+            VALUES (1, 1, '2020-01-01', 1, 1, 1, 'CONFIRMED', 1);
+            """;
+
     private final ReservationService reservationService;
+    private final ReservationHistoryDao reservationHistoryDao;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ReservationServiceIntegrationTest(ReservationService reservationService, JdbcTemplate jdbcTemplate) {
+    public ReservationServiceIntegrationTest(ReservationService reservationService,
+                                             ReservationHistoryDao reservationHistoryDao,
+                                             JdbcTemplate jdbcTemplate) {
         this.reservationService = reservationService;
+        this.reservationHistoryDao = reservationHistoryDao;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -180,10 +201,11 @@ public class ReservationServiceIntegrationTest {
                 INSERT_GANGNAM_MANAGER_SQL,
                 INSERT_DEFAULT_THEME_SQL,
                 INSERT_TWO_TIMES_SQL,
-                INSERT_BROWN_RESERVATION_SQL
+                INSERT_BROWN_RESERVATION_SQL,
+                INSERT_BROWN_CONFIRMED_HISTORY_SQL
         })
         void 매니저가_자기_매장_예약을_변경할_수_있다() {
-            // given: 강남 매니저 + BROWN 예약 (같은 매장)
+            // given: 강남 매니저 + BROWN 예약 + 기존 CONFIRMED 이력
             Member gangnamManager = new Member(
                     10L, "gangnam@email.com", "password", "강남매니저", Role.MANAGER, 1L);
             LocalDate newDate = LocalDate.of(2026, 12, 5);
@@ -197,6 +219,12 @@ public class ReservationServiceIntegrationTest {
                     "SELECT time_id FROM reservation WHERE id = ?",
                     Long.class, RESERVATION_ID);
             assertThat(currentTimeId).isEqualTo(OTHER_TIME_ID);
+
+            // then: 이력 스냅샷도 새 time_id / date 로 동기화됨
+            ReservationHistory history = reservationHistoryDao.findByReservationId(RESERVATION_ID).get(0);
+            assertThat(history.getTimeId()).isEqualTo(OTHER_TIME_ID);
+            assertThat(history.getDate()).isEqualTo(newDate);
+            assertThat(history.getStatus()).isEqualTo(ReservationHistoryStatus.CONFIRMED);
         }
 
         @Test
@@ -232,10 +260,11 @@ public class ReservationServiceIntegrationTest {
                     INSERT_TWO_MEMBERS_SQL,
                     INSERT_DEFAULT_THEME_SQL,
                     INSERT_TWO_TIMES_SQL,
-                    INSERT_BROWN_RESERVATION_SQL
+                    INSERT_BROWN_RESERVATION_SQL,
+                    INSERT_BROWN_CONFIRMED_HISTORY_SQL
             })
             void 대기자_없는_예약을_취소하면_삭제된다() {
-                // given: BROWN 예약, 대기자 없음
+                // given: BROWN 예약 + CONFIRMED 이력, 대기자 없음
 
                 // when: BROWN 이 본인 예약 취소
                 reservationService.deleteReservation(RESERVATION_ID, BROWN_ID);
@@ -245,6 +274,10 @@ public class ReservationServiceIntegrationTest {
                         "SELECT COUNT(*) FROM reservation WHERE id = ?",
                         Integer.class, RESERVATION_ID);
                 assertThat(count).isZero();
+
+                // then: BROWN 의 이력이 CANCELED 로 전환됨
+                ReservationHistory history = reservationHistoryDao.findByMemberId(BROWN_ID).get(0);
+                assertThat(history.getStatus()).isEqualTo(ReservationHistoryStatus.CANCELED);
             }
 
             @Test
@@ -254,10 +287,11 @@ public class ReservationServiceIntegrationTest {
                     INSERT_DEFAULT_THEME_SQL,
                     INSERT_TWO_TIMES_SQL,
                     INSERT_BROWN_RESERVATION_SQL,
+                    INSERT_BROWN_CONFIRMED_HISTORY_SQL,
                     INSERT_JEONGKONG_WAIT_SQL
             })
             void 대기자_있는_예약을_취소하면_대기_1번에게_양도된다() {
-                // given: BROWN 예약 + 정콩이 대기
+                // given: BROWN 예약 + 정콩이 대기 + BROWN 의 CONFIRMED 이력
 
                 // when: BROWN 이 본인 예약 취소
                 reservationService.deleteReservation(RESERVATION_ID, BROWN_ID);
@@ -273,6 +307,13 @@ public class ReservationServiceIntegrationTest {
                         "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ?",
                         Integer.class, RESERVATION_ID);
                 assertThat(waitCount).isZero();
+
+                // then: BROWN 이력은 CANCELED, 정콩이 이력은 신규 CONFIRMED
+                ReservationHistory brownHistory = reservationHistoryDao.findByMemberId(BROWN_ID).get(0);
+                assertThat(brownHistory.getStatus()).isEqualTo(ReservationHistoryStatus.CANCELED);
+                ReservationHistory jeongkongHistory = reservationHistoryDao.findByMemberId(JEONGKONG_ID).get(0);
+                assertThat(jeongkongHistory.getStatus()).isEqualTo(ReservationHistoryStatus.CONFIRMED);
+                assertThat(jeongkongHistory.getActorId()).isEqualTo(BROWN_ID);
             }
 
             @Test
@@ -349,10 +390,11 @@ public class ReservationServiceIntegrationTest {
                     INSERT_DEFAULT_THEME_SQL,
                     INSERT_TWO_TIMES_SQL,
                     INSERT_BROWN_RESERVATION_SQL,
+                    INSERT_BROWN_CONFIRMED_HISTORY_SQL,
                     INSERT_JEONGKONG_WAIT_SQL
             })
             void 미래_예약을_취소하면_대기_1번에게_양도된다() {
-                // given: 강남 매니저 + BROWN 미래 예약 + 정콩이 대기
+                // given: 강남 매니저 + BROWN 미래 예약 + 정콩이 대기 + BROWN 의 CONFIRMED 이력
                 Member gangnamManager = new Member(
                         10L, "gangnam@email.com", "password", "강남매니저", Role.MANAGER, 1L);
 
@@ -370,6 +412,13 @@ public class ReservationServiceIntegrationTest {
                         "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ?",
                         Integer.class, RESERVATION_ID);
                 assertThat(waitCount).isZero();
+
+                // then: BROWN 이력은 CANCELED, 정콩이 이력은 신규 CONFIRMED (actor=매니저)
+                ReservationHistory brownHistory = reservationHistoryDao.findByMemberId(BROWN_ID).get(0);
+                assertThat(brownHistory.getStatus()).isEqualTo(ReservationHistoryStatus.CANCELED);
+                ReservationHistory jeongkongHistory = reservationHistoryDao.findByMemberId(JEONGKONG_ID).get(0);
+                assertThat(jeongkongHistory.getStatus()).isEqualTo(ReservationHistoryStatus.CONFIRMED);
+                assertThat(jeongkongHistory.getActorId()).isEqualTo(gangnamManager.getId());
             }
 
             @Test
@@ -380,10 +429,11 @@ public class ReservationServiceIntegrationTest {
                     INSERT_DEFAULT_THEME_SQL,
                     INSERT_TWO_TIMES_SQL,
                     INSERT_BROWN_PAST_RESERVATION_SQL,
+                    INSERT_BROWN_PAST_CONFIRMED_HISTORY_SQL,
                     INSERT_JEONGKONG_WAIT_SQL
             })
             void 과거_예약을_취소하면_대기자가_있어도_양도되지_않는다() {
-                // given: 강남 매니저 + BROWN 과거 예약 + 정콩이 대기
+                // given: 강남 매니저 + BROWN 과거 예약 + CONFIRMED 이력 + 정콩이 대기
                 Member gangnamManager = new Member(
                         10L, "gangnam@email.com", "password", "강남매니저", Role.MANAGER, 1L);
 
@@ -407,6 +457,12 @@ public class ReservationServiceIntegrationTest {
                         "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ?",
                         Integer.class, RESERVATION_ID);
                 assertThat(waitCount).isZero();
+
+                // then: BROWN 이력은 CANCELED, 정콩이 이력은 *생성되지 않음* (양도 X)
+                ReservationHistory brownHistory = reservationHistoryDao.findByMemberId(BROWN_ID).get(0);
+                assertThat(brownHistory.getStatus()).isEqualTo(ReservationHistoryStatus.CANCELED);
+                List<ReservationHistory> jeongkongHistories = reservationHistoryDao.findByMemberId(JEONGKONG_ID);
+                assertThat(jeongkongHistories).isEmpty();
             }
 
             @Test

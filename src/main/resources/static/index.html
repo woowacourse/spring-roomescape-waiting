@@ -684,6 +684,22 @@
             color: #92400e;
         }
 
+        .pill--canceled {
+            background: var(--surface-soft);
+            color: var(--muted);
+        }
+
+        .reservation-row.canceled .row-title,
+        .reservation-row.canceled .row-meta {
+            color: var(--muted);
+            text-decoration: line-through;
+        }
+
+        .reservation-row.canceled .date-chip {
+            background: var(--surface-soft);
+            color: var(--muted);
+        }
+
         .btn-icon {
             width: 30px;
             height: 30px;
@@ -1080,6 +1096,9 @@
             <button id="tabWaitings" class="tab-btn" type="button" role="tab" data-tab="waitings">
                 대기 <span id="waitingsCount" class="tab-count">0</span>
             </button>
+            <button id="tabHistory" class="tab-btn" type="button" role="tab" data-tab="history">
+                이력 <span id="historyCount" class="tab-count">0</span>
+            </button>
         </div>
 
         <div id="reservationsPane" class="tab-pane" role="tabpanel">
@@ -1090,6 +1109,11 @@
         <div id="waitingsPane" class="tab-pane hidden" role="tabpanel">
             <div id="myWaitingsList" class="reservation-list"></div>
             <p id="myWaitingsEmpty" class="empty">대기 목록을 불러와 주세요.</p>
+        </div>
+
+        <div id="historyPane" class="tab-pane hidden" role="tabpanel">
+            <div id="myHistoryList" class="reservation-list"></div>
+            <p id="myHistoryEmpty" class="empty">이력을 불러와 주세요.</p>
         </div>
     </section>
 </main>
@@ -1206,19 +1230,28 @@
     const myReservationsEmpty = document.getElementById("myReservationsEmpty");
     const myWaitingsList = document.getElementById("myWaitingsList");
     const myWaitingsEmpty = document.getElementById("myWaitingsEmpty");
+    const myHistoryList = document.getElementById("myHistoryList");
+    const myHistoryEmpty = document.getElementById("myHistoryEmpty");
     const reservationsCount = document.getElementById("reservationsCount");
     const waitingsCount = document.getElementById("waitingsCount");
+    const historyCount = document.getElementById("historyCount");
     const tabReservations = document.getElementById("tabReservations");
     const tabWaitings = document.getElementById("tabWaitings");
+    const tabHistory = document.getElementById("tabHistory");
     const reservationsPane = document.getElementById("reservationsPane");
     const waitingsPane = document.getElementById("waitingsPane");
+    const historyPane = document.getElementById("historyPane");
 
     function switchTab(tab) {
-        const isReservations = tab === "reservations";
-        tabReservations.classList.toggle("active", isReservations);
-        tabWaitings.classList.toggle("active", !isReservations);
-        reservationsPane.classList.toggle("hidden", !isReservations);
-        waitingsPane.classList.toggle("hidden", isReservations);
+        tabReservations.classList.toggle("active", tab === "reservations");
+        tabWaitings.classList.toggle("active", tab === "waitings");
+        tabHistory.classList.toggle("active", tab === "history");
+        reservationsPane.classList.toggle("hidden", tab !== "reservations");
+        waitingsPane.classList.toggle("hidden", tab !== "waitings");
+        historyPane.classList.toggle("hidden", tab !== "history");
+        if (tab === "history") {
+            loadMyHistory();
+        }
     }
 
     // ─── lookup helpers ──────────────────────────
@@ -1627,7 +1660,8 @@
     async function loadMyReservations() {
         try {
             const data = await getJson("/api/v1/reservations");
-            const reservations = data.reservations || [];
+            const today = new Date().toISOString().split("T")[0];
+            const reservations = (data.reservations || []).filter(r => r.date >= today);
             const waitings = data.waitings || [];
 
             reservationsCount.textContent = reservations.length;
@@ -1723,6 +1757,53 @@
                     });
                 });
             }
+        } catch (e) {
+            setStatus(userStatus, "error", e.message);
+        }
+    }
+
+    async function loadMyHistory() {
+        try {
+            const data = await getJson("/api/v1/reservation-history");
+            historyCount.textContent = data.length;
+
+            if (!data.length) {
+                myHistoryList.innerHTML = "";
+                myHistoryEmpty.classList.remove("hidden");
+                myHistoryEmpty.classList.add("empty--rich");
+                myHistoryEmpty.innerHTML = `
+                    <span class="empty-icon" aria-hidden="true">📜</span>
+                    <span>예약 이력이 없습니다</span>
+                    <span class="empty-hint">예약을 생성하면 여기에 이력이 쌓입니다</span>
+                `;
+                return;
+            }
+
+            myHistoryEmpty.classList.add("hidden");
+            myHistoryList.innerHTML = data.map(h => {
+                const isCanceled = h.status === "CANCELED";
+                const pillClass = isCanceled ? "pill--canceled" : "pill--confirmed";
+                const pillLabel = isCanceled ? "취소" : "확정";
+                const rowClass = isCanceled ? "reservation-row compact canceled" : "reservation-row compact";
+                return `
+                    <div class="${rowClass}">
+                        <div class="row-left">
+                            ${dateChip(h.date)}
+                            <div class="row-body">
+                                <div class="row-title">${themeName(h.themeId)}</div>
+                                <div class="row-meta">
+                                    <span>${storeName(h.storeId)}</span>
+                                    <span>·</span>
+                                    <span>변경 ${formatCreatedAt(h.createdAt)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-actions">
+                            <span class="pill ${pillClass}">${pillLabel}</span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
         } catch (e) {
             setStatus(userStatus, "error", e.message);
         }
@@ -1865,6 +1946,7 @@
     loadMyReservationsButton.addEventListener("click", loadMyReservations);
     tabReservations.addEventListener("click", () => switchTab("reservations"));
     tabWaitings.addEventListener("click", () => switchTab("waitings"));
+    tabHistory.addEventListener("click", () => switchTab("history"));
 
     refreshManagerButton.addEventListener("click", loadManagerReservations);
     editModalCancelButton.addEventListener("click", closeEditModal);

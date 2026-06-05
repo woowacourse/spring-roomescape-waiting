@@ -25,7 +25,7 @@ import roomescape.reservationwait.ReservationWaitDao;
 import roomescape.reservationwait.ReservationWaitService;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql("/cleanup.sql")
 @SqlMergeMode(MergeMode.MERGE)
 public class ReservationServiceConcurrencyTest {

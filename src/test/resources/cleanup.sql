@@ -7,6 +7,7 @@ TRUNCATE TABLE theme;
 TRUNCATE TABLE reservation_time;
 TRUNCATE TABLE store;
 TRUNCATE TABLE reservation_wait;
+TRUNCATE TABLE reservation_history;
 
 ALTER TABLE reservation
     ALTER COLUMN id RESTART WITH 1;
@@ -19,6 +20,8 @@ ALTER TABLE reservation_time
 ALTER TABLE store
     ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE reservation_wait
+    ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE reservation_history
     ALTER COLUMN id RESTART WITH 1;
 
 SET
