@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationRepository;
@@ -40,6 +41,9 @@ class WaitingServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private ReservationPromotionService reservationPromotionService;
 
     @InjectMocks
     private WaitingService waitingService;
@@ -162,7 +166,10 @@ class WaitingServiceTest {
         WaitingResponse response = waitingService.save(request, MEMBER_ID);
 
         assertThat(response.id()).isEqualTo(11L);
-        verify(reservationRepository).deleteById(10L);
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(
+                request.reservationId(),
+                reservation.getScheduleId()
+        );
     }
 
     @Test
@@ -192,6 +199,7 @@ class WaitingServiceTest {
 
         verify(waitingRepository, never()).save(any(Waiting.class));
         verify(reservationRepository, never()).deleteById(anyLong());
+        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(anyLong(), anyLong());
     }
 
     @Test
@@ -228,16 +236,17 @@ class WaitingServiceTest {
 
         verify(reservationRepository, never()).findById(anyLong());
         verify(reservationRepository, never()).deleteById(anyLong());
+        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(anyLong(), anyLong());
         verify(waitingRepository).save(any(Waiting.class));
     }
 
     @Test
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
-    void deleteByIdForUser_테스트_1() {
+    void cancelByIdForUser_테스트_1() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
         when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
 
-        assertThatCode(() -> waitingService.deleteByIdForUser(1L, 1L))
+        assertThatCode(() -> waitingService.cancelByIdForUser(1L, 1L))
                 .doesNotThrowAnyException();
 
         verify(waitingRepository).deleteById(1L);
@@ -245,11 +254,11 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
-    void deleteByIdForUser_테스트_2() {
+    void cancelByIdForUser_테스트_2() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
         when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
 
-        assertThatThrownBy(() -> waitingService.deleteByIdForUser(1L, 2L))
+        assertThatThrownBy(() -> waitingService.cancelByIdForUser(1L, 2L))
                 .isInstanceOf(EscapeRoomException.class);
 
         verify(waitingRepository, never()).deleteById(1L);
@@ -257,10 +266,10 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
-    void deleteByIdForUser_테스트_3() {
+    void cancelByIdForUser_테스트_3() {
         when(waitingRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> waitingService.deleteByIdForUser(999L, 1L))
+        assertThatCode(() -> waitingService.cancelByIdForUser(999L, 1L))
                 .doesNotThrowAnyException();
 
         verify(waitingRepository, never()).deleteById(999L);

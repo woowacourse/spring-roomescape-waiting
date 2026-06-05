@@ -37,7 +37,7 @@ public class ManagerReservationController {
     public ResponseEntity<ApiResponse<Void>> deleteByManager(
             @PathVariable @Positive long reservationId
     ) {
-        reservationService.deleteByIdForManager(reservationId);
+        reservationService.cancelByIdForManager(reservationId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

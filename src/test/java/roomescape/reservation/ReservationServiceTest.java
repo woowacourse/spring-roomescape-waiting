@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
@@ -47,6 +48,9 @@ class ReservationServiceTest {
     private ScheduleService scheduleService;
 
     @Mock
+    private ReservationPromotionService reservationPromotionService;
+
+    @Mock
     private WaitingRepository waitingRepository;
 
     @Mock
@@ -83,7 +87,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("유저는 본인 예약 삭제에 성공한다.")
-    void deleteByIdForUser_테스트_1() {
+    void cancelByIdForUser_테스트_1() {
         long reservationId = 1L;
         Reservation reservation = reservation(reservationId, 1L, 99L);
         ReservationDetailProjection oldReservation = reservationDetail(
@@ -91,54 +95,46 @@ class ReservationServiceTest {
         );
         when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(waitingRepository.findFirstByScheduleIdForUpdate(99L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, 1L))
+        assertThatCode(() -> reservationService.cancelByIdForUser(reservationId, 1L))
                 .doesNotThrowAnyException();
-        verify(reservationRepository).deleteById(reservationId);
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
     }
 
     @Test
     @DisplayName("유저는 타인 예약 삭제를 할 수 없다.")
-    void deleteByIdForUser_테스트_2() {
+    void cancelByIdForUser_테스트_2() {
         long reservationId = 1L;
         Reservation reservation = reservation(reservationId, 1L, 1L);
 
         when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
 
-        assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, 2L))
+        assertThatThrownBy(() -> reservationService.cancelByIdForUser(reservationId, 2L))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).deleteById(anyLong());
     }
 
     @Test
     @DisplayName("유저 예약 삭제 시 해당 슬롯의 선두 대기자는 자동 승격된다.")
-    void deleteByIdForUser_테스트_3() {
+    void cancelByIdForUser_테스트_3() {
         long reservationId = 1L;
         Reservation reservation = reservation(reservationId, 1L, 99L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
-        Waiting waiting = new Waiting(100L, 3L, 99L);
 
         when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(waitingRepository.findFirstByScheduleIdForUpdate(99L)).thenReturn(Optional.of(waiting));
 
-        reservationService.deleteByIdForUser(reservationId, 1L);
+        reservationService.cancelByIdForUser(reservationId, 1L);
 
-        verify(reservationRepository).deleteById(reservationId);
-        verify(reservationRepository).save(argThat(promoted ->
-                promoted.getMemberId().equals(waiting.getMemberId())
-                        && promoted.getScheduleId().equals(waiting.getScheduleId())
-        ));
-        verify(waitingRepository).deleteById(waiting.getId());
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
     }
 
 
     @Test
     @DisplayName("매니저는 예약 삭제에 성공한다.")
-    void deleteByIdForManager_테스트_1() {
+    void cancelByIdForManager_테스트_1() {
         long reservationId = 1L;
         Reservation reservation = reservation(reservationId, 1L, 1L);
         ReservationDetailProjection reservationDetail = reservationDetail(
@@ -146,11 +142,10 @@ class ReservationServiceTest {
         );
         when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(reservationDetail));
-        when(waitingRepository.findFirstByScheduleIdForUpdate(1L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> reservationService.deleteByIdForManager(reservationId))
+        assertThatCode(() -> reservationService.cancelByIdForManager(reservationId))
                 .doesNotThrowAnyException();
-        verify(reservationRepository).deleteById(reservationId);
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
     }
 
     @Test

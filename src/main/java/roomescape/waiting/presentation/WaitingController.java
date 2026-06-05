@@ -39,7 +39,7 @@ public class WaitingController {
             @PathVariable @Positive long id,
             @LoginMember AuthenticatedMember member
     ) {
-        waitingService.deleteByIdForUser(id, member.id());
+        waitingService.cancelByIdForUser(id, member.id());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
     }
 }

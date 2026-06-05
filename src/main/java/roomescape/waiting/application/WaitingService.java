@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
@@ -21,6 +22,7 @@ public class WaitingService {
     private final ScheduleService scheduleService;
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationPromotionService reservationPromotionService;
 
     @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
@@ -42,7 +44,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void deleteByIdForUser(long waitingId, long memberId) {
+    public void cancelByIdForUser(long waitingId, long memberId) {
         Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
                 .orElse(null);
         if (waiting == null) {
@@ -91,14 +93,6 @@ public class WaitingService {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
         }
 
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForUpdate(reservation.getScheduleId())
-                .orElse(null);
-        if (firstWaiting != null) {
-            waitingRepository.deleteById(firstWaiting.getId());
-            reservationRepository.deleteById(reservationId);
-            reservationRepository.save(new Reservation(null, firstWaiting.getMemberId(), reservation.getScheduleId()));
-            return;
-        }
-        reservationRepository.deleteById(reservationId);
+        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
     }
 }
