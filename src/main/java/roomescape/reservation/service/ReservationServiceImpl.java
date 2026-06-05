@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.service.HolidayService;
@@ -63,12 +64,12 @@ public class ReservationServiceImpl implements ReservationService {
         Theme theme = themeRepository.findById(themeId);
         validateNotDuplicated(request.name(), themeId, time);
         Status status = Status.from(reservationRepository.hasConfirmedReservation(themeId, time));
-        Reservation newReservation = new Reservation(request.name(),
-                time,
-                theme,
-                status,
-                LocalDateTime.now());
-        return reservationRepository.save(newReservation);
+        Reservation newReservation = new Reservation(request.name(), time, theme, status, LocalDateTime.now());
+        try {
+            return reservationRepository.save(newReservation);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateReservationException();
+        }
     }
 
     private ReservationTime findTime(Long timeId) {
@@ -102,7 +103,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public void cancel(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         promoteNextWaiting(reservation);
         reservationRepository.deleteById(id);
@@ -111,7 +112,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public void cancelForUser(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.validateOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
@@ -122,7 +123,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public Reservation update(Long id, Long timeId) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.getTime().validateUpdatableReservation();
         Long themeId = reservation.getTheme().getId();

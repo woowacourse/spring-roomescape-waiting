@@ -65,6 +65,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdForUpdate(Long id) {
+        List<Reservation> results = jdbcTemplate.query(
+                BASE_SELECT + "WHERE r.id = ? FOR UPDATE",
+                new ReservationRowMapper(),
+                id
+        );
+        return results.stream().findFirst();
+    }
+
+    @Override
     public boolean update(Long id, Long timeId, LocalDateTime now, Status status) {
         int affected = jdbcTemplate.update(
                 "UPDATE reservation SET time_id = ?, created_at = ?, status = ? WHERE id = ?",

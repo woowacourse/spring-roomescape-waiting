@@ -14,6 +14,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findByIdForUpdate(Long id);
+
     Reservation save(Reservation reservation);
 
     boolean update(Long id, Long timeId, LocalDateTime now, Status status);
