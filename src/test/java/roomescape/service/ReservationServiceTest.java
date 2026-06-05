@@ -21,6 +21,7 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
+import roomescape.exception.ReservationConcurrentModificationException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
@@ -260,29 +261,38 @@ class ReservationServiceTest {
                 Fixtures.DEFAULT_STORE_ID)).isFalse();
     }
 
-    /**
-     * 동시에 삭제 요청이 들어오는 경우, 기존 예약을 두 트랜잭션이 모두 읽은 이후, 트랜잭션 A가 먼저 삭제했을 때, 트랜잭션 B는 삭제에 실패하며
-     * ReservationConcurrentModificationException가 발생한다.
-     */
     @Test
     void cancelOwnReservation_두명의_사용자가_동시에_삭제를_요청하는_경우_ReservationConcurrentModificationException() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
 
+        reservationRepository.failDeleteOnce();
+
+        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
+                .isInstanceOf(ReservationConcurrentModificationException.class)
+                .hasMessage("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요.");
     }
 
-    /**
-     * 트랜잭션A가 삭제 시점에 대기 1번을 조회 완료하고 아직 승격하지 않은 사이, 대기 1번 사용자가 해당 대기를 삭제하는 경우 트랜잭션A는 업데이트에 실패하며
-     * ReservationConcurrentModificationException가 발생한다.
-     */
     @Test
     void cancelOwnReservation_대기_예약을_승격시키기_직전에_해당_대기가_삭제되는_경우_ReservationConcurrentModificationException() {
+        User brown = buildUser("브라운");
+        User charles = buildUser("샤를");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        LocalDate date = LocalDate.of(2026, 5, 8);
+        Long reservationId = reservationRepository.save(buildReservation(brown, themeId, timeId, date));
+        Long waitingId = reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, date));
 
-    }
+        reservationRepository.failUpdateWaitingToReservedOnce();
 
-    void cancelOwnReservation_삭제_대상이_동시에_변경되면_ReservationConcurrentModificationException() {
-
-    }
-
-    void cancelOwnReservation_승격할_대기가_동시에_변경되면_ReservationConcurrentModificationException() {
+        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
+                .isInstanceOf(ReservationConcurrentModificationException.class)
+                .hasMessage("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요.");
+        assertThat(reservationRepository.findById(waitingId).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
