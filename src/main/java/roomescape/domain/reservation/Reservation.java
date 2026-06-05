@@ -66,4 +66,16 @@ public class Reservation {
     public void validateCancellable(LocalDateTime now) {
         slot.validateIsNotInPast(now);
     }
+
+    public Reservation update(int waitingNumber, ReservationStatus status) {
+        return new Reservation(id, user, slot, waitingNumber, status, reservedAt);
+    }
+
+    public Reservation updateConfirmed() {
+        return new Reservation(id, user, slot, 0, ReservationStatus.CONFIRMED, reservedAt);
+    }
+
+    public Reservation updateWaiting(int waitingNumber) {
+        return new Reservation(id, user, slot, waitingNumber, ReservationStatus.WAITING, reservedAt);
+    }
 }

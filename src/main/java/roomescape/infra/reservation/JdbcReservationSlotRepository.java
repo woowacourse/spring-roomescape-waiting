@@ -21,7 +21,7 @@ import roomescape.domain.theme.Theme;
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
 
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_NAME = "username";
     private static final String COLUMN_DATE_ID = "date_id";
     private static final String COLUMN_DATE = "date";
     private static final String COLUMN_TIME_ID = "time_id";

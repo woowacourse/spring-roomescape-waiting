@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public record ReservationCreateRequest(
     @NotBlank(message = "이름은 비어있을 수 없습니다.")
-    String name,
+    String username,
 
     @NotNull(message = "날짜는 필수 선택 사항 입니다. 날짜를 선택해주세요.")
     LocalDate date,

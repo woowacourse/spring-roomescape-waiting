@@ -49,7 +49,8 @@ public class ReservationController {
     public ResponseEntity<Void> cancelReservation(
             @PathVariable Long id
     ) {
-        reservationService.cancelReservationByUser(id);
+        String username = "";
+        reservationService.cancelReservationByUser(id, username);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -18,7 +18,7 @@ import roomescape.domain.user.UserRepository;
 public class JdbcUserRepository implements UserRepository {
 
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_NAME = "username";
 
     private static final String INSERT_SQL = "insert into users(name) values (?)";
     private static final String FIND_ALL_SQL = "select id, name from users order by id";

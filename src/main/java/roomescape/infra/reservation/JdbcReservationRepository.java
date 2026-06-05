@@ -221,8 +221,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllReservationsByUsername(String username) {
-        return jdbcTemplate.query(FIND_ALL_BY_USERNAME_SQL, userReservationRowMapper(), username);
+    public List<Reservation> findAllReservationsByUserId(Long userId) {
+        return jdbcTemplate.query(FIND_ALL_BY_USERNAME_SQL, userReservationRowMapper(), userId);
     }
 
     @Override
@@ -235,7 +235,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllBySlotIdOrderByWaitingNumber(Long reservationId) {
+    public List<Reservation> findAllBySlotIdOrderByReservedAt(Long reservationId) {
         return jdbcTemplate.query(FIND_ALL_BY_RESERVATION_ID_ORDER_SQL, userReservationRowMapper(), reservationId);
     }
 

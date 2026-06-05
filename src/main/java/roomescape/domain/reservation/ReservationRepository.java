@@ -9,9 +9,9 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findAllBySlotIdOrderByWaitingNumber(Long reservationId);
+    List<Reservation> findAllBySlotIdOrderByReservedAt(Long reservationId);
 
-    List<Reservation> findAllReservationsByUsername(String username);
+    List<Reservation> findAllReservationsByUserId(Long userId);
 
     Reservation save(Reservation userReservation);
 
@@ -23,7 +23,7 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    boolean existsByUserIdAndSlotId(Long userId, Long slotId);
+    boolean existsBySlotIdAndUserId(Long userId, Long slotId);
 
     boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId);
 

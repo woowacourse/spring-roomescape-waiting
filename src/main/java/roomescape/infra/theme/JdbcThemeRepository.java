@@ -22,7 +22,7 @@ import roomescape.domain.exception.errors.RoomescapeErrors;
 public class JdbcThemeRepository implements ThemeRepository {
 
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_NAME = "username";
     private static final String COLUMN_CONTENT = "content";
     private static final String COLUMN_URL = "url";
 

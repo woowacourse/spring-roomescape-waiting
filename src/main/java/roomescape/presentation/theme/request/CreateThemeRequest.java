@@ -13,12 +13,4 @@ public record CreateThemeRequest(
     @NotBlank(message = "테마 URL은 비어있을 수 없습니다.")
     String url
 ) {
-
-    public Theme toEntity() {
-        return Theme.createWithoutId(
-            name,
-            content,
-            url
-        );
-    }
 }
