@@ -31,10 +31,9 @@ public interface ReservationRepository {
 
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 
-    boolean existsByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
+    boolean existsBySlotId(Long slotId);
 
-    boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
-                                                       Long userId);
+    boolean existsBySlotIdAndUserId(Long slotId, Long userId);
 
     boolean existsByReservationTimeId(Long timeId);
 }

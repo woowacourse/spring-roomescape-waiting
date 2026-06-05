@@ -246,19 +246,15 @@ public class ReservationService {
     }
 
     private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeAndThemeAndStore(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getStore().getId())) {
+        if (reservationRepository.existsBySlotId(reservation.getSlot().getId())) {
             throw new RoomescapeException(ErrorType.DUPLICATE_RESERVATION,
                     "해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요.");
         }
     }
 
     private void validateNotDuplicatedWaiting(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeAndThemeAndStoreAndUser(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getStore().getId(),
-                reservation.getUser().getId())) {
+        if (reservationRepository.existsBySlotIdAndUserId(
+                reservation.getSlot().getId(), reservation.getUser().getId())) {
             throw new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION,
                     "이미 해당 슬롯에 예약 대기 중입니다.");
         }

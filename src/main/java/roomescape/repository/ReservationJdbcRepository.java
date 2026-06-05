@@ -278,13 +278,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId) {
-        String sql = """
-                select exists(
-                    select 1 from reservation r join reservation_slot rs on r.slot_id = rs.id
-                    where rs.date = ? and rs.time_id = ? and rs.theme_id = ? and rs.store_id = ?)
-                """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId));
+    public boolean existsBySlotId(Long slotId) {
+        String sql = "select exists(select 1 from reservation where slot_id = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, slotId));
     }
 
     @Override
@@ -298,15 +294,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long store_id,
-                                                              Long userId) {
-        String sql = """
-                select exists(
-                    select 1 from reservation r join reservation_slot rs on r.slot_id = rs.id
-                    where rs.date = ? and rs.time_id = ? and rs.theme_id = ? and rs.store_id = ? and r.user_id = ?)
-                """;
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, store_id, userId));
+    public boolean existsBySlotIdAndUserId(Long slotId, Long userId) {
+        String sql = "select exists(select 1 from reservation where slot_id = ? and user_id = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, slotId, userId));
     }
 
 }
