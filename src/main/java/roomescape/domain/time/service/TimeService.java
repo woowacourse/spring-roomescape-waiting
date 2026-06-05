@@ -19,6 +19,7 @@ import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeService {
 
     private final ReservationRepository reservationRepository;

@@ -15,6 +15,7 @@ import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.global.error.exception.GeneralException;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
