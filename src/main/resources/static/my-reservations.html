@@ -217,6 +217,15 @@
             color: #86868b;
         }
 
+        .status-canceled {
+            background: #fff0f0;
+            color: #ff3b30;
+        }
+
+        .res-card.canceled {
+            opacity: 0.6;
+        }
+
         .res-when {
             margin: 0;
             color: #666;
@@ -306,6 +315,9 @@
     }
 
     function statusBadge(status, waitingOrder, past) {
+        if (status === 'CANCELED') {
+            return '<span class="status-badge status-canceled">취소됨</span>';
+        }
         if (past) {
             return '<span class="status-badge status-past">지난 예약</span>';
         }
@@ -321,12 +333,14 @@
 
     function cardHtml(r) {
         const past = isPast(r.date, r.time.startAt);
-        const actions = past ? '' : `
+        const canceled = r.status === 'CANCELED';
+        const locked = past || canceled;
+        const actions = locked ? '' : `
                     <div class="res-actions">
                         <button class="btn btn-light btn-edit">변경</button>
                         <button class="btn btn-danger btn-cancel">취소</button>
                     </div>`;
-        const editForm = past ? '' : `
+        const editForm = locked ? '' : `
                 <div class="res-edit hidden">
                     <p class="step-label">새 날짜</p>
                     <input type="date" class="edit-date">
@@ -337,7 +351,7 @@
                     <button class="submit-btn btn-save" disabled>변경 저장</button>
                 </div>`;
         return `
-            <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
+            <div class="res-card${canceled ? ' canceled' : ''}" data-id="${r.id}" data-theme-id="${r.theme.id}">
                 <div class="res-head">
                     <div>
                         <p class="res-theme">${r.theme.name} ${statusBadge(r.status, r.waitingOrder, past)}</p>

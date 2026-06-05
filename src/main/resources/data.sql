@@ -231,3 +231,14 @@ INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user20', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
 INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user24', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
+
+-- 취소된 예약 데이터 (soft delete / 내 예약 취소 이력 표시 확인용)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status)
+VALUES ('user1', DATEADD('DAY', 2, CURRENT_DATE), 3, 2, 'CANCELED');
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status)
+VALUES ('user1', DATEADD('DAY', 4, CURRENT_DATE), 5, 1, 'CANCELED');
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status)
+VALUES ('user2', DATEADD('DAY', 2, CURRENT_DATE), 4, 2, 'CANCELED');
+-- 과거(최근 7일 내) 취소 건: 인기 테마 집계에서 제외되는지 확인용
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status)
+VALUES ('user5', DATEADD('DAY', -3, CURRENT_DATE), 1, 1, 'CANCELED');
