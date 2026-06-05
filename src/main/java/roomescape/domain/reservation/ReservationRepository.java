@@ -102,16 +102,8 @@ public class ReservationRepository {
         return count != null && count > 0;
     }
 
-    public List<Long> findThemeIdTop10(LocalDate startDate, LocalDate endDate) {
-        String query = """
-                SELECT r.theme_id AS theme_id
-                FROM reservation r
-                WHERE r.date BETWEEN ? AND ?
-                GROUP BY r.theme_id
-                ORDER BY COUNT(r.id) DESC
-                LIMIT 10
-                """;
-
+    public List<Long> findThemeIdsByDateRange(LocalDate startDate, LocalDate endDate) {
+        String query = "SELECT theme_id FROM reservation WHERE date BETWEEN ? AND ?";
         return jdbcTemplate.query(query, idRowMapper, startDate, endDate);
     }
 

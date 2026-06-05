@@ -186,22 +186,23 @@ class ReservationRepositoryTest {
     }
 
     @Nested
-    @DisplayName("인기 테마 id 조회")
-    class FindThemeIdTop10 {
+    @DisplayName("날짜 범위로 테마 ID 조회")
+    class FindThemeIdsByDateRange {
 
         @Test
-        void 기간_내_예약이_많은_테마_id부터_최대_10개를_반환한다() {
+        void 기간_내_예약의_테마_id를_모두_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             reservationRepository.save(Reservation.of("유저2", LocalDate.of(2099, 12, 30), time, theme));
             reservationRepository.save(Reservation.of("유저3", LocalDate.of(2099, 12, 30), anotherTime, theme));
             reservationRepository.save(Reservation.of("다른유저", LocalDate.of(2099, 12, 31), time, anotherTheme));
             reservationRepository.save(Reservation.of("기간밖유저", LocalDate.of(2099, 12, 29), time, anotherTheme));
 
-            List<Long> result = reservationRepository.findThemeIdTop10(
+            List<Long> result = reservationRepository.findThemeIdsByDateRange(
                     LocalDate.of(2099, 12, 30), LocalDate.of(2099, 12, 31)
             );
 
-            assertThat(result).containsExactly(theme.getId(), anotherTheme.getId());
+            assertThat(result).hasSize(4)
+                    .containsOnly(theme.getId(), anotherTheme.getId());
         }
     }
 
