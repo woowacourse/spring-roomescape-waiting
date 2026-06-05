@@ -71,21 +71,6 @@ class ThemeRepositoryImplTest {
         assertThat(found.getThumbnailUrl()).isEqualTo(saved.getThumbnailUrl());
     }
 
-    @Test
-    @DisplayName("테마 이름을 기준으로 조회한다.")
-    void existsByName() {
-        //given
-        themeRepository.save(
-                Theme.of("테마", "테마 설명", "썸네일_url")
-        );
-
-        //when & then
-        assertThat(themeRepository.existsByName(Theme.of("테마", "테마 설명", "썸네일_url")))
-                .isTrue();
-
-        assertThat(themeRepository.existsByName(Theme.of("없는_것", "설명", "썸네일_url")))
-                .isFalse();
-    }
 
     @Test
     @DisplayName("존재하는 모든 테마 목록을 리스트로 조회한다.")

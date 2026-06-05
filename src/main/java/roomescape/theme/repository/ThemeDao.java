@@ -10,8 +10,6 @@ public interface ThemeDao {
 
     Optional<Theme> findById(Long id);
 
-    boolean existsByName(String name);
-
     List<Theme> findAll();
 
     void delete(Theme theme);

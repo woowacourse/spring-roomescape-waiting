@@ -26,11 +26,6 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     @Override
-    public boolean existsByName(Theme theme) {
-        return themeDao.existsByName(theme.getName());
-    }
-
-    @Override
     public List<Theme> findAll() {
         return themeDao.findAll();
     }

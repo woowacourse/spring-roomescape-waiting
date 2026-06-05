@@ -9,8 +9,6 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(long id);
 
-    boolean existsByName(Theme theme);
-
     List<Theme> findAll();
 
     void delete(Theme theme);
