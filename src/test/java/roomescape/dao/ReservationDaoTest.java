@@ -115,24 +115,6 @@ class ReservationDaoTest {
     }
 
     @Test
-    void 예약_존재_여부_확인_존재하는_경우() {
-        LocalDate date = LocalDate.now();
-        reservationDao.save(new Reservation("브라운", date, time, theme, ReservationStatus.CONFIRMED));
-
-        boolean exists = reservationDao.existsByDateAndThemeAndTime(date, theme, time);
-
-        assertThat(exists).isTrue();
-    }
-
-    @Test
-    void 예약_존재_여부_확인_존재하지_않는_경우() {
-        LocalDate date = LocalDate.now().plusDays(10);
-
-        boolean exists = reservationDao.existsByDateAndThemeAndTime(date, theme, time);
-        assertThat(exists).isFalse();
-    }
-
-    @Test
     void 예약_저장() {
         Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time, theme,
                 ReservationStatus.CONFIRMED);

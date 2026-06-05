@@ -97,24 +97,6 @@ public class ReservationDao {
         );
     }
 
-    public boolean existsByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time) {
-        Boolean result = jdbcTemplate.queryForObject("""
-                        SELECT EXISTS(
-                            SELECT *
-                            FROM reservation
-                            WHERE date = ?
-                                AND time_id = ?
-                                AND theme_id = ?
-                        )
-                        """,
-                Boolean.class,
-                date,
-                time.getId(),
-                theme.getId()
-        );
-        return Boolean.TRUE.equals(result);
-    }
-
     public boolean existsByDateAndThemeAndTimeAndName(LocalDate date, long themeId, long timeId, String name) {
         Boolean result = jdbcTemplate.queryForObject("""
                         SELECT EXISTS(
