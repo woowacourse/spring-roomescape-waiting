@@ -29,10 +29,8 @@ public class ReservationApplicationService {
     }
 
     public void cancelReservation(Long id, String name) {
-        // 1. 예약 삭제
         Reservation reservation = reservationService.deleteByIdAndName(id, name);
 
-        // 2. 첫번째 대기 유무 확인
         reservationWaitingService.findFirstWaiting(
                 reservation.getDate(),
                 reservation.getTheme().getId(),

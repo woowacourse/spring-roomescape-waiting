@@ -79,9 +79,6 @@ public class ReservationPageController {
         LocalDate parsedDate = reservationPageRequestParser.parseDate(date);
         reservationService.save(name, parsedDate, parsedThemeId, parsedTimeId);
 
-        addReservationNameAttribute(redirectAttributes, name);
-        addThemeIdAttribute(redirectAttributes, parsedThemeId);
-        addDateAttribute(redirectAttributes, parsedDate);
         return "redirect:/pages/user/reservations";
     }
 
@@ -128,7 +125,7 @@ public class ReservationPageController {
             @RequestParam(required = false) final String reservationName,
             final RedirectAttributes redirectAttributes
     ) {
-        reservationService.deleteByIdAndName(id, reservationName);
+        reservationApplicationService.cancelReservation(id, reservationName);
         addReservationNameAttribute(redirectAttributes, reservationName);
         return "redirect:/pages/user/reservations";
     }
