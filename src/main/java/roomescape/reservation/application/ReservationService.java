@@ -41,7 +41,7 @@ public class ReservationService {
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = resolveScheduleId(body.date(), body.timeId(), body.themeId());
-        validateNotReservationAlreadyExists(scheduleId);
+        validateNoReservationExists(scheduleId);
         Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
 
         return ReservationSaveResponse.from(reservation);
@@ -262,7 +262,7 @@ public class ReservationService {
         }
     }
 
-    private void validateNotReservationAlreadyExists(long scheduleId) {
+    private void validateNoReservationExists(long scheduleId) {
         if (reservationRepository.existsByScheduleId(scheduleId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
         }
