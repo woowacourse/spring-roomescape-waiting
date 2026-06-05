@@ -276,6 +276,35 @@ public class ReservationServiceIntegrationTest {
             }
 
             @Test
+            @Sql(statements = {
+                    INSERT_DEFAULT_STORE_SQL,
+                    INSERT_TWO_MEMBERS_SQL,
+                    INSERT_DEFAULT_THEME_SQL,
+                    INSERT_TWO_TIMES_SQL,
+                    INSERT_BROWN_RESERVATION_SQL,
+                    """
+                    INSERT INTO member (id, email, password, name, role)
+                    VALUES (3, 'third@email.com', 'password', '세번째', 'USER');
+                    """,
+                    """
+                    INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
+                    VALUES (1, 1, 2, '2026-06-05 10:00:00'),
+                           (2, 1, 3, '2026-06-05 10:00:00');
+                    """
+            })
+            void 대기_created_at이_같으면_id가_작은_대기자에게_예약을_양도한다() {
+                reservationService.deleteReservation(RESERVATION_ID, BROWN_ID);
+
+                Long currentOwner = jdbcTemplate.queryForObject(
+                        "SELECT member_id FROM reservation WHERE id = ?",
+                        Long.class,
+                        RESERVATION_ID
+                );
+
+                assertThat(currentOwner).isEqualTo(2L);
+            }
+
+            @Test
             void 존재하지_않는_예약은_취소할_수_없다() {
                 // given: 빈 DB
 

@@ -226,4 +226,24 @@ class ReservationWaitDaoTest {
 
         assertThat(reservationWaitDao.findReservationWaitById(3L)).isPresent();
     }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_RESERVATIONS_SQL,
+            """
+            INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
+            VALUES (1, 1, 2, '2026-06-05 10:00:00'),
+                   (2, 1, 1, '2026-06-05 10:00:00');
+            """
+    })
+    void created_at이_같으면_id가_작은_대기자를_먼저_반환한다() {
+        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberId(1L);
+
+        assertThat(earliestMemberId).isPresent();
+        assertThat(earliestMemberId.get()).isEqualTo(2L);
+    }
 }
