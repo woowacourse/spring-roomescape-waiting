@@ -37,9 +37,4 @@ public interface ReservationRepository {
                                                        Long userId);
 
     boolean existsByReservationTimeId(Long timeId);
-
-    boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId, Long storeId,
-                                                         ReservationStatus reservationStatus);
-
-    int countWaitingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
 }

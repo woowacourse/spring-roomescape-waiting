@@ -310,27 +310,4 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, store_id, userId));
     }
 
-    @Override
-    public boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId,
-                                                                Long storeId,
-                                                                ReservationStatus reservationStatus) {
-        String sql = """
-                select exists(
-                    select 1 from reservation r join reservation_slot rs on r.slot_id = rs.id
-                    where rs.date = ? and rs.time_id = ? and rs.theme_id = ? and rs.store_id = ? and r.status = ?)
-                """;
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId, reservationStatus.name()));
-    }
-
-    @Override
-    public int countWaitingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId) {
-        String sql = """
-                select count(*) from reservation r join reservation_slot rs on r.slot_id = rs.id
-                where rs.date = ? and rs.time_id = ? and rs.theme_id = ? and rs.store_id = ? and r.status = ?
-                """;
-        Integer count = jdbcTemplate.queryForObject(
-                sql, Integer.class, date, timeId, themeId, storeId, ReservationStatus.WAITING.name());
-        return count == null ? 0 : count;
-    }
 }

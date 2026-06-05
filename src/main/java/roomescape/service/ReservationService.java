@@ -206,9 +206,8 @@ public class ReservationService {
     }
 
     private void validateReservationIsFullyBooked(Reservation reservation) {
-        boolean isReservedExist = reservationRepository.existsByDateAndTimeAndThemeAndStoreAndStatus(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getStore().getId(), ReservationStatus.RESERVED
+        boolean isReservedExist = reservationRepository.existsBySlotIdAndStatus(
+                reservation.getSlot().getId(), ReservationStatus.RESERVED
         );
 
         if (!isReservedExist) {
