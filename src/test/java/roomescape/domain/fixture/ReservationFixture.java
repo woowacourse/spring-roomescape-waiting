@@ -1,10 +1,15 @@
 package roomescape.domain.fixture;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationActiveStatus;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -54,7 +59,7 @@ public class ReservationFixture {
     }
 
     public static ReservationSlot createDefaultReservationWithName(String name) {
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = LocalDate.now().plusDays(2);
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
         ReservationSlot slot = ReservationSlot.createSlot(date, theme, time);
@@ -74,5 +79,52 @@ public class ReservationFixture {
         ReservationSlot slot = ReservationSlot.createSlot(date, theme, time);
         slot.reserve(name);
         return slot;
+    }
+
+    public static ReservationSlot createSlotWithReservations(
+            List<Reservation> reservations,
+            Theme theme,
+            ReservationTime time
+    ) {
+        return new ReservationSlot(1L, LocalDate.now().plusDays(2), theme, time, reservations);
+    }
+
+    public static Reservation createEntry(Long id, ReservationStatus status) {
+        return createEntry(id, "이프", status);
+    }
+
+    public static Reservation createEntry(Long id, String name, ReservationStatus status) {
+        return createEntry(id, name, status, LocalDateTime.now());
+    }
+
+    public static Reservation createEntry(
+            Long id,
+            String name,
+            ReservationStatus status,
+            LocalDateTime createdAt
+    ) {
+        return new Reservation(id, name, status, createdAt);
+    }
+
+    public static Reservation createCanceledEntry(
+            Long id,
+            String name,
+            ReservationStatus status,
+            LocalDateTime createdAt
+    ) {
+        return new Reservation(id, name, status, ReservationActiveStatus.CANCELED, createdAt);
+    }
+
+    public static Reservation createCanceledEntry(Long id, String name, ReservationStatus status) {
+        return createCanceledEntry(id, name, status, LocalDateTime.now());
+    }
+
+    public static long reservedReservationId(ReservationSlot slot) {
+        return slot.getReservations()
+                .stream()
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                .findFirst()
+                .orElseThrow()
+                .getId();
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationSlot;
+import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.dto.ReservationCondition;
 import roomescape.persistence.jdbc.mapper.ReservationSlotRowMapper;
 import roomescape.persistence.util.RepositoryExceptionTranslator;
@@ -44,14 +45,17 @@ public class ReservationSlotDao {
                 WHERE id = ?
                 """;
 
-        RepositoryExceptionTranslator.execute(() ->
-                jdbcTemplate.update(
+        int updatedRows = RepositoryExceptionTranslator.execute(
+                () -> jdbcTemplate.update(
                         sql,
                         Date.valueOf(slot.getDate()),
                         slot.getTheme().getId(),
                         slot.getTime().getId(),
                         slot.getId()
                 ), "이미 예약이 존재하는 시간입니다.");
+        if (updatedRows == 0) {
+            throw new EntityNotFoundException("존재하지 않는 예약 슬롯입니다.");
+        }
     }
 
     public Optional<ReservationSlot> findById(long id) {

@@ -1,8 +1,11 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
+import static roomescape.domain.fixture.ReservationFixture.createEntry;
+import static roomescape.domain.fixture.ReservationFixture.createSlotWithReservations;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -150,10 +153,10 @@ class ReservationSlotTest {
     @Test
     void 예약된_엔트리를_식별자로_조회한다() {
         // given
-        ReservationSlot slot = createReservationWithReservations(List.of(
-                reservation(1L, "이프", ReservationStatus.RESERVED),
-                reservation(2L, "라텔", ReservationStatus.WAITING)
-        ));
+        ReservationSlot slot = createSlotWithReservations(List.of(
+                createEntry(1L, "이프", ReservationStatus.RESERVED),
+                createEntry(2L, "라텔", ReservationStatus.WAITING)
+        ), theme, reservationTime);
 
         // when
         Reservation result = slot.findReservedReservation(1L);
@@ -165,9 +168,22 @@ class ReservationSlotTest {
     @Test
     void 예약_상태가_아닌_엔트리를_예약된_엔트리로_조회하면_예외가_발생한다() {
         // given
-        ReservationSlot slot = createReservationWithReservations(List.of(
-                reservation(1L, "이프", ReservationStatus.WAITING)
-        ));
+        ReservationSlot slot = createSlotWithReservations(List.of(
+                createEntry(1L, "이프", ReservationStatus.WAITING)
+        ), theme, reservationTime);
+
+        // when & then
+        assertThatThrownBy(() -> slot.findReservedReservation(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("예약 정보를 찾을 수 없습니다.");
+    }
+
+    @Test
+    void 취소된_예약_엔트리를_예약된_엔트리로_조회하면_예외가_발생한다() {
+        // given
+        Reservation reservation = createEntry(1L, "이프", ReservationStatus.RESERVED);
+        reservation.cancel();
+        ReservationSlot slot = createSlotWithReservations(List.of(reservation), theme, reservationTime);
 
         // when & then
         assertThatThrownBy(() -> slot.findReservedReservation(1L))
@@ -178,35 +194,96 @@ class ReservationSlotTest {
     @Test
     void 예약된_엔트리를_취소하면_가장_먼저_등록된_대기_엔트리가_예약된다() {
         // given
-        Reservation reserved = reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
-        Reservation firstWaiting = reservation(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(2));
-        Reservation secondWaiting = reservation(3L, "도기", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(1));
-        ReservationSlot slot = createReservationWithReservations(List.of(reserved, firstWaiting, secondWaiting));
+        Reservation reserved = createEntry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
+        Reservation firstWaiting = createEntry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(2));
+        Reservation secondWaiting = createEntry(3L, "도기", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(1));
+        ReservationSlot slot = createSlotWithReservations(List.of(reserved, firstWaiting, secondWaiting), theme, reservationTime);
 
         // when
         slot.cancelReservation(1L);
 
         // then
         assertThat(slot.getReservations())
-                .extracting(Reservation::getId, Reservation::getStatus)
+                .extracting(Reservation::getId, Reservation::getStatus, Reservation::getActiveStatus)
                 .containsExactly(
-                        tuple(1L, ReservationStatus.DELETED),
-                        tuple(2L, ReservationStatus.RESERVED),
-                        tuple(3L, ReservationStatus.WAITING)
+                        tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple(2L, ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE),
+                        tuple(3L, ReservationStatus.WAITING, ReservationActiveStatus.ACTIVE)
                 );
     }
 
     @Test
-    void 존재하지_않는_엔트리를_취소하면_예외가_발생한다() {
+    void 취소된_예약_엔트리를_다시_취소해도_대기_엔트리를_승격하지_않는다() {
         // given
-        ReservationSlot slot = createReservationWithReservations(List.of(
-                reservation(1L, "이프", ReservationStatus.RESERVED)
-        ));
+        Reservation canceled = createEntry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
+        canceled.cancel();
+        Reservation waiting = createEntry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now());
+        ReservationSlot slot = createSlotWithReservations(List.of(canceled, waiting), theme, reservationTime);
+
+        // when
+        slot.cancelReservation(1L);
+
+        // then
+        assertThat(slot.getReservations())
+                .extracting(Reservation::getId, Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(
+                        tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple(2L, ReservationStatus.WAITING, ReservationActiveStatus.ACTIVE)
+                );
+    }
+
+    @Test
+    void 예약_하루_전에는_예약을_취소할_수_없다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                1L,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(createEntry(1L, "이프", ReservationStatus.RESERVED))
+        );
 
         // when & then
-        assertThatThrownBy(() -> slot.cancelReservation(999L))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("예약 정보를 찾을 수 없습니다.");
+        assertThatThrownBy(() -> slot.cancelReservation(1L))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("예약 하루 전에는 취소할 수 없습니다.");
+    }
+
+    @Test
+    void 예약_하루_전에도_대기를_취소할_수_있다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                1L,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(createEntry(1L, "이프", ReservationStatus.WAITING))
+        );
+
+        // when
+        slot.cancelReservation(1L);
+
+        // then
+        assertThat(slot.getReservations())
+                .singleElement()
+                .extracting(Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(ReservationStatus.WAITING, ReservationActiveStatus.CANCELED);
+    }
+
+    @Test
+    void 존재하지_않는_엔트리를_취소하면_아무_일도_일어나지_않는다() {
+        // given
+        ReservationSlot slot = createSlotWithReservations(List.of(
+                createEntry(1L, "이프", ReservationStatus.RESERVED)
+        ), theme, reservationTime);
+
+        // when & then
+        assertThatCode(() -> slot.cancelReservation(999L))
+                .doesNotThrowAnyException();
+        assertThat(slot.getReservations())
+                .singleElement()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
     }
 
     @Test
@@ -233,17 +310,5 @@ class ReservationSlotTest {
         // when & then
         assertThat(slot.isSameSlot(date.plusDays(1), reservationTime)).isFalse();
         assertThat(slot.isSameSlot(date, anotherTime)).isFalse();
-    }
-
-    private ReservationSlot createReservationWithReservations(List<Reservation> reservations) {
-        return new ReservationSlot(1L, LocalDate.now().plusDays(1), theme, reservationTime, reservations);
-    }
-
-    private Reservation reservation(long id, String name, ReservationStatus status) {
-        return reservation(id, name, status, LocalDateTime.now());
-    }
-
-    private Reservation reservation(long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new Reservation(id, name, status, createdAt);
     }
 }

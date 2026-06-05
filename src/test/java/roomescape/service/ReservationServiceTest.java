@@ -2,15 +2,18 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 import static roomescape.domain.fixture.ReservationFixture.createDefaultReservationWithName;
 import static roomescape.domain.fixture.ReservationFixture.createWithNameAndDate;
+import static roomescape.domain.fixture.ReservationFixture.reservedReservationId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationActiveStatus;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -20,6 +23,7 @@ import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.ReservationTimeRepository;
+import roomescape.persistence.dto.ReservationCondition;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fake.FakeReservationSlotRepository;
@@ -126,6 +130,27 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 변경하려는_시간에_같은_이름의_대기가_있으면_중복_예외가_발생한다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        themeRepository.save(ThemeFixture.createDefaultTheme());
+
+        LocalDate currentDate = LocalDate.now().plusDays(2);
+        LocalDate targetDate = currentDate.plusDays(1);
+
+        ReservationSlot current = reservationRepository.save(createWithNameAndDate("이프", currentDate));
+        reservationService.reserve(new ReservationCommand("찰리", targetDate, 1L, time.getId()));
+        reservationService.addWaiting(new ReservationCommand("이프", targetDate, 1L, time.getId()));
+
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(targetDate, time.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.change(reservedReservationId(current), command))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
+    }
+
+    @Test
     void 기존_예약_정보에서_예약_시간을_변경할_수_있다() {
         // given
         ReservationSlot slot = createDefaultReservationWithName("이프");
@@ -141,6 +166,33 @@ class ReservationServiceTest {
         // then
         assertThat(result.date()).isEqualTo(nextDate);
         assertThat(result.time().id()).isEqualTo(1L);
+    }
+
+    @Test
+    void 예약_변경_시_기존_예약의_첫_번째_대기가_예약으로_승격된다() {
+        // given
+        ReservationSlot slot = createDefaultReservationWithName("이프");
+        slot.joinWaitingList("찰리");
+
+        ReservationTime time = slot.getTime();
+        reservationTimeRepository.save(time);
+        ReservationSlot saved = reservationRepository.save(slot);
+
+        LocalDate nextDate = slot.getDate().plusDays(1);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(nextDate, time.getId());
+
+        // when
+        reservationService.change(reservedReservationId(saved), command);
+
+        // then
+        ReservationCondition condition = new ReservationCondition(slot.getDate(), slot.getTheme().getId(), slot.getTime().getId());
+        ReservationSlot current = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition).orElseThrow();
+        assertThat(current.getReservations())
+                .extracting(Reservation::getName, Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(
+                        tuple("이프", ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple("찰리", ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE)
+                );
     }
 
     @Test
@@ -259,16 +311,8 @@ class ReservationServiceTest {
         assertThat(reservationRepository.findByReservationIdForUpdate(reservationId).orElseThrow()
                 .getReservations())
                 .singleElement()
-                .extracting(Reservation::getStatus)
-                .isEqualTo(ReservationStatus.DELETED);
+                .extracting(Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED);
     }
 
-    private long reservedReservationId(ReservationSlot slot) {
-        return slot.getReservations()
-                .stream()
-                .filter(Reservation::isReserved)
-                .findFirst()
-                .orElseThrow()
-                .getId();
-    }
 }

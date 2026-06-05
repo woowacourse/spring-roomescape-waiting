@@ -42,10 +42,7 @@ export default class SearchResultView extends View {
         page.content.forEach((slot) => {
             const item = createElement("div", "reservation-item");
             const isWaiting = slot.status === "WAITING";
-            const expired = this.isPastReservation(
-                slot.date,
-                slot.startAt
-            );
+            const cancellationRestricted = !isWaiting && this.isCancellationRestricted(slot.date);
 
             item.dataset.id = slot.id;
 
@@ -70,14 +67,15 @@ export default class SearchResultView extends View {
                 <div class="res-actions">
                     <button
                         class="btn-change"
-                        ${expired || isWaiting ? "disabled" : ""}
+                        ${cancellationRestricted || isWaiting ? "disabled" : ""}
                     >
                         변경
                     </button>
 
                     <button
                         class="btn-cancel"
-                        ${expired ? "disabled" : ""}
+                        ${cancellationRestricted ? "disabled" : ""}
+                        title="${cancellationRestricted ? "예약일 하루 전부터는 취소할 수 없습니다." : ""}"
                     >
                         취소
                     </button>
@@ -88,18 +86,14 @@ export default class SearchResultView extends View {
         });
     }
 
-    isPastReservation(date, startAt) {
+    isCancellationRestricted(date) {
         const [year, month, day] = date.split("-").map(Number);
-        const [hour, minute] = startAt.split(":").map(Number);
 
-        const reservationDateTime = new Date(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute
-        );
+        const reservationDate = new Date(year, month - 1, day);
+        const tomorrow = new Date();
+        tomorrow.setHours(0, 0, 0, 0);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-        return reservationDateTime < new Date();
+        return reservationDate <= tomorrow;
     }
 }

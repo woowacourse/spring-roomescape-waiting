@@ -37,6 +37,7 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
                         reservation.getId() == null ? reservationCounter.getAndIncrement() : reservation.getId(),
                         reservation.getName(),
                         reservation.getStatus(),
+                        reservation.getActiveStatus(),
                         reservation.getCreatedAt()
                 ))
                 .toList();

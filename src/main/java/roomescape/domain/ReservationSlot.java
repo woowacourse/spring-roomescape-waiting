@@ -15,6 +15,8 @@ import roomescape.exception.RoomEscapeException;
 @ToString
 public class ReservationSlot {
 
+    private static final int CANCELLABLE_DAYS = 1;
+
     private final Long id;
     private final Theme theme;
     private final LocalDate date;
@@ -59,10 +61,6 @@ public class ReservationSlot {
         }
     }
 
-    public boolean isSameSlot(LocalDate date, ReservationTime time) {
-        return this.date.isEqual(date) && this.time.equals(time);
-    }
-
     public Reservation reserve(String name) {
         validateNotPast();
         validateDuplicateReservation(name);
@@ -81,8 +79,39 @@ public class ReservationSlot {
         return reservations.addReserved(name);
     }
 
+    public void cancelReservation(long reservationId) {
+        reservations.findActiveById(reservationId)
+                .ifPresent(reservation -> {
+                    validateCancelable(reservation);
+                    boolean wasReserved = reservation.isActiveReserved();
+                    reservation.cancel();
+                    promoteFirstWaiting(wasReserved);
+                });
+    }
+
     public List<Reservation> getReservations() {
         return reservations.getReservations();
+    }
+
+    public Reservation findReservedReservation(long reservationId) {
+        return reservations.findActiveById(reservationId)
+                .filter(Reservation::isActiveReserved)
+                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
+    }
+
+    public Reservation findActiveEntryByName(String name) {
+        return reservations.findActiveEntryByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 찾을 수 없습니다."));
+    }
+
+    public boolean isSameSlot(LocalDate date, ReservationTime time) {
+        return this.date.isEqual(date) && this.time.equals(time);
+    }
+
+    private void promoteFirstWaiting(boolean wasReserved) {
+        if (wasReserved) {
+            reservations.promoteFirstWaiting();
+        }
     }
 
     private void validateNotPast() {
@@ -97,26 +126,13 @@ public class ReservationSlot {
         }
     }
 
-    public Reservation findReservedReservation(long reservationId) {
-        return reservations.findById(reservationId)
-                .filter(Reservation::isReserved)
-                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
-    }
-
-    public Reservation findReservationByNameAndStatus(String name, ReservationStatus status) {
-        return reservations.findByNameAndStatus(name, status)
-                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 찾을 수 없습니다."));
-    }
-
-    public void cancelReservation(long reservationId) {
-        Reservation reservation = reservations.findById(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
-
-        boolean wasReserved = reservation.isReserved();
-        reservation.cancel();
-
-        if (wasReserved) {
-            reservations.promoteFirstWaiting();
+    private void validateCancelable(Reservation reservation) {
+        if (reservation.isActiveReserved() && canNotCancel()) {
+            throw new RoomEscapeException("예약 하루 전에는 취소할 수 없습니다.");
         }
+    }
+
+    private boolean canNotCancel() {
+        return !date.isAfter(LocalDate.now().plusDays(CANCELLABLE_DAYS));
     }
 }

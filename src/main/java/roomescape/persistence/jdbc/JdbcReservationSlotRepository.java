@@ -1,8 +1,10 @@
 package roomescape.persistence.jdbc;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.dto.ReservationCondition;
@@ -19,28 +21,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     @Override
     public ReservationSlot save(ReservationSlot slot) {
         Long slotId = saveReservationSlot(slot);
-        reservationDao.saveAll(slotId, slot.getReservations());
-        return findById(slotId)
-                .orElseGet(() -> new ReservationSlot(
-                        slotId,
-                        slot.getDate(),
-                        slot.getTheme(),
-                        slot.getTime(),
-                        slot.getReservations()
-                ));
-    }
-
-    private Long saveReservationSlot(ReservationSlot slot) {
-        if (slot.getId() == null) {
-            return reservationSlotDao.insert(slot);
-        }
-        reservationSlotDao.update(slot);
-        return slot.getId();
-    }
-
-    private Optional<ReservationSlot> findById(long id) {
-        return reservationSlotDao.findById(id)
-                .map(this::withReservations);
+        List<Reservation> savedReservations = reservationDao.saveAll(slotId, slot.getReservations());
+        return new ReservationSlot(slotId, slot.getDate(), slot.getTheme(), slot.getTime(), savedReservations);
     }
 
     @Override
@@ -53,6 +35,14 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     public Optional<ReservationSlot> findByReservationIdForUpdate(long reservationId) {
         return reservationSlotDao.findByReservationIdForUpdate(reservationId)
                 .map(this::withReservations);
+    }
+
+    private Long saveReservationSlot(ReservationSlot slot) {
+        if (slot.getId() == null) {
+            return reservationSlotDao.insert(slot);
+        }
+        reservationSlotDao.update(slot);
+        return slot.getId();
     }
 
     private ReservationSlot withReservations(ReservationSlot slot) {

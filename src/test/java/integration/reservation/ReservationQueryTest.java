@@ -84,16 +84,31 @@ class ReservationQueryTest extends BaseIntegrationTest {
     }
 
     @Test
+    void 예약_상태의_대기_순번은_null이다() {
+        // when
+        ReservationSearchResponse result = reservationQuery.search(
+                new ReservationSearchCondition("채원"),
+                new Pageable(1, 10)
+        ).content().getFirst();
+
+        // then
+        assertAll(
+                () -> assertThat(result.status()).isEqualTo("RESERVED"),
+                () -> assertThat(result.waitingRank()).isNull()
+        );
+    }
+
+    @Test
     void 먼저_생성된_대기_예약이_더_낮은_대기_순번을_가진다() {
         // given
         LocalDateTime now = LocalDateTime.now();
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, slot_id, status, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                VALUES (?, ?, ?, 'ACTIVE', ?)
                 """, "라텔", 2L, "WAITING", Timestamp.valueOf(now.minusMinutes(2)));
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, slot_id, status, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                VALUES (?, ?, ?, 'ACTIVE', ?)
                 """, "찰리", 2L, "WAITING", Timestamp.valueOf(now.minusMinutes(1)));
 
         // when

@@ -10,11 +10,23 @@ public class Reservation {
     private final String name;
     private final LocalDateTime createdAt;
     private ReservationStatus status;
+    private ReservationActiveStatus activeStatus;
 
     public Reservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        this(id, name, status, ReservationActiveStatus.ACTIVE, createdAt);
+    }
+
+    public Reservation(
+            Long id,
+            String name,
+            ReservationStatus status,
+            ReservationActiveStatus activeStatus,
+            LocalDateTime createdAt
+    ) {
         this.id = id;
         this.name = name;
         this.status = status;
+        this.activeStatus = activeStatus;
         this.createdAt = createdAt;
     }
 
@@ -26,35 +38,47 @@ public class Reservation {
         return new Reservation(null, name, ReservationStatus.WAITING, LocalDateTime.now());
     }
 
-    public boolean isReserved() {
-        return this.status == ReservationStatus.RESERVED;
-    }
-
-    public boolean isSameId(long id) {
-        return this.id != null && this.id.equals(id);
-    }
-
     public void cancel() {
-        this.status = ReservationStatus.DELETED;
-    }
-
-    public boolean isWaiting() {
-        return this.status == ReservationStatus.WAITING;
-    }
-
-    public boolean isDeleted() {
-        return this.status == ReservationStatus.DELETED;
+        this.activeStatus = ReservationActiveStatus.CANCELED;
     }
 
     public void promote() {
         this.status = ReservationStatus.RESERVED;
     }
 
-    public boolean hasSameName(String name) {
+    public boolean isSameId(long id) {
+        return this.id != null && this.id.equals(id);
+    }
+
+    public boolean isActiveReserved() {
+        return isActive() && isReserved();
+    }
+
+    public boolean isActiveWaiting() {
+        return isActive() && isWaiting();
+    }
+
+    public boolean isActiveWithId(long id) {
+        return isActive() && isSameId(id);
+    }
+
+    public boolean hasSameActiveName(String name) {
+        return isActive() && hasSameName(name);
+    }
+
+    private boolean hasSameName(String name) {
         return this.name.equals(name);
     }
 
-    public boolean matches(String name, ReservationStatus status) {
-        return this.name.equals(name) && this.status == status;
+    private boolean isWaiting() {
+        return this.status == ReservationStatus.WAITING;
+    }
+
+    private boolean isActive() {
+        return this.activeStatus == ReservationActiveStatus.ACTIVE;
+    }
+
+    private boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
     }
 }

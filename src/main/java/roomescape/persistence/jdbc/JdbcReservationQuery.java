@@ -41,6 +41,7 @@ public class JdbcReservationQuery implements ReservationQuery {
                 JOIN reservation_time rt ON r.time_id = rt.id
                 WHERE re.id = ?
                   AND re.status = 'RESERVED'
+                  AND re.active_status = 'ACTIVE'
                 """;
 
         return jdbcTemplate.query(sql, ReservationQueryRowMapper.RESERVATION_DETAIL_ROW_MAPPER, reservationId)
@@ -61,7 +62,7 @@ public class JdbcReservationQuery implements ReservationQuery {
 
         String joinClause = """
             FROM reservation_slot r
-            JOIN reservation re ON re.slot_id = r.id AND re.status != 'DELETED'
+            JOIN reservation re ON re.slot_id = r.id AND re.active_status = 'ACTIVE'
             JOIN theme t ON r.theme_id = t.id
             JOIN reservation_time rt ON r.time_id = rt.id
             """;
@@ -81,6 +82,7 @@ public class JdbcReservationQuery implements ReservationQuery {
                                   FROM reservation re2
                                   WHERE re2.slot_id = re.slot_id
                                     AND re2.status = 'WAITING'
+                                    AND re2.active_status = 'ACTIVE'
                                     AND re2.created_at < re.created_at)
                             ELSE NULL
                        END AS waiting_rank

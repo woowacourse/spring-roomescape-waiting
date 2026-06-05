@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import lombok.Getter;
 
-@Getter
 public class Reservations {
 
     private final List<Reservation> reservations;
@@ -27,18 +25,25 @@ public class Reservations {
         return reservation;
     }
 
-    public boolean hasReservationByName(String name) {
-        return reservations.stream()
-                .anyMatch(reservation -> reservation.hasSameName(name));
-    }
-
-    public boolean hasReservedReservation() {
-        return reservations.stream()
-                .anyMatch(Reservation::isReserved);
+    public void promoteFirstWaiting() {
+        reservations.stream()
+                .filter(Reservation::isActiveWaiting)
+                .min(Comparator.comparing(Reservation::getCreatedAt))
+                .ifPresent(Reservation::promote);
     }
 
     public List<Reservation> getReservations() {
         return List.copyOf(reservations);
+    }
+
+    public boolean hasReservationByName(String name) {
+        return reservations.stream()
+                .anyMatch(reservation -> reservation.hasSameActiveName(name));
+    }
+
+    public boolean hasReservedReservation() {
+        return reservations.stream()
+                .anyMatch(Reservation::isActiveReserved);
     }
 
     public Optional<Reservation> findById(long id) {
@@ -47,16 +52,15 @@ public class Reservations {
                 .findFirst();
     }
 
-    public Optional<Reservation> findByNameAndStatus(String name, ReservationStatus status) {
+    public Optional<Reservation> findActiveById(long id) {
         return reservations.stream()
-                .filter(reservation -> reservation.matches(name, status))
+                .filter(reservation -> reservation.isActiveWithId(id))
                 .findFirst();
     }
 
-    public void promoteFirstWaiting() {
-        reservations.stream()
-                .filter(Reservation::isWaiting)
-                .min(Comparator.comparing(Reservation::getCreatedAt))
-                .ifPresent(Reservation::promote);
+    public Optional<Reservation> findActiveEntryByName(String name) {
+        return reservations.stream()
+                .filter(reservation -> reservation.hasSameActiveName(name))
+                .findFirst();
     }
 }

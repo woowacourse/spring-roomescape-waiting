@@ -2,10 +2,13 @@ package integration.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
+import static roomescape.domain.fixture.ReservationFixture.createCanceledEntry;
+import static roomescape.domain.fixture.ReservationFixture.createEntry;
+import static roomescape.domain.fixture.ReservationFixture.reservedReservationId;
 
 import integration.BaseIntegrationTest;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationActiveStatus;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -20,6 +24,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
+import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.dto.ReservationCondition;
 
@@ -71,7 +76,33 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    void 같은_슬롯에_같은_이름의_예약_엔트리를_저장하면_DB_제약조건_에러가_발생한다() {
+    void 같은_슬롯에_같은_이름의_취소_이력을_여러_번_저장할_수_있다() {
+        // given
+        Reservation firstCanceled = createCanceledEntry(null, "이프", ReservationStatus.RESERVED);
+        Reservation secondCanceled = createCanceledEntry(null, "이프", ReservationStatus.WAITING);
+
+        ReservationSlot slot = new ReservationSlot(
+                null,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(firstCanceled, secondCanceled)
+        );
+
+        // when
+        ReservationSlot saved = reservationRepository.save(slot);
+
+        // then
+        assertThat(saved.getReservations())
+                .extracting(Reservation::getName, Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactlyInAnyOrder(
+                        tuple("이프", ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple("이프", ReservationStatus.WAITING, ReservationActiveStatus.CANCELED)
+                );
+    }
+
+    @Test
+    void 같은_슬롯에_같은_이름의_활성_엔트리를_저장하면_DB_제약조건_에러가_발생한다() {
         // given
         ReservationSlot slot = new ReservationSlot(
                 null,
@@ -79,8 +110,8 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
                 theme,
                 reservationTime,
                 List.of(
-                        new Reservation(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
-                        new Reservation(null, "이프", ReservationStatus.WAITING, LocalDateTime.now())
+                        createEntry(null, "이프", ReservationStatus.RESERVED),
+                        createEntry(null, "이프", ReservationStatus.WAITING)
                 )
         );
 
@@ -94,7 +125,7 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     void 예약_슬롯을_수정한다() {
         // given
         ReservationSlot saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(2), theme, reservationTime)
         );
 
         ReservationSlot updated = new ReservationSlot(
@@ -121,10 +152,27 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
+    void 존재하지_않는_예약_슬롯을_수정하면_예외가_발생한다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                999L,
+                LocalDate.now().plusDays(2),
+                theme,
+                reservationTime,
+                List.of()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationRepository.save(slot))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("존재하지 않는 예약 슬롯입니다.");
+    }
+
+    @Test
     void 예약_엔트리_상태를_수정한다() {
         // given
         ReservationSlot saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(2), theme, reservationTime)
         );
         long reservationId = reservedReservationId(saved);
 
@@ -136,8 +184,8 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
         ReservationSlot find = reservationRepository.findByReservationIdForUpdate(reservationId).orElseThrow();
         assertThat(find.getReservations())
                 .singleElement()
-                .extracting(Reservation::getStatus)
-                .isEqualTo(ReservationStatus.DELETED);
+                .extracting(Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED);
     }
 
     @Test
@@ -183,12 +231,4 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
-    private long reservedReservationId(ReservationSlot slot) {
-        return slot.getReservations()
-                .stream()
-                .filter(Reservation::isReserved)
-                .findFirst()
-                .orElseThrow()
-                .getId();
-    }
 }
