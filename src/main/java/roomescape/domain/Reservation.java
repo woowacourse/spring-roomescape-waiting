@@ -90,19 +90,21 @@ public class Reservation {
         if (getTime().isReservationBefore(now, date)) {
             throw new BusinessRuleViolationException("지난 예약은 취소 불가능합니다.");
         }
-        doCancel(now);
+        cancel(now);
     }
 
     public void cancelByAdmin(LocalDateTime now) {
-        doCancel(now);
+        cancel(now);
     }
 
-    private void doCancel(LocalDateTime now) {
+    private void cancel(LocalDateTime now) {
+        validateActive();
         this.status = ReservationStatus.CANCELED;
         this.deletedAt = now;
     }
 
     public void update(LocalDate date, Time time) {
+        validateActive();
         LocalDateTime now = LocalDateTime.now();
         if (time.isReservationBefore(now, date)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 수정은 불가능합니다.");
@@ -113,6 +115,12 @@ public class Reservation {
 
     public boolean isActive() {
         return status == ReservationStatus.BOOKED;
+    }
+
+    private void validateActive() {
+        if (!isActive()) {
+            throw new BusinessRuleViolationException("이미 취소된 예약입니다.");
+        }
     }
 
     public boolean isOwnedBy(Long memberId) {

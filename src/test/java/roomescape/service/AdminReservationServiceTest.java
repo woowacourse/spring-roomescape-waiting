@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
@@ -218,6 +219,16 @@ class AdminReservationServiceTest {
         void throwsWhenIdNotFound() {
             assertThatThrownBy(() -> adminReservationService.cancelByAdmin(-1L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("이미 취소된 예약을 다시 취소하면 예외를 반환한다")
+        void throwsWhenAlreadyCanceled() {
+            Reservation saved = adminReservationService.createByAdmin(requestDto1);
+            adminReservationService.cancelByAdmin(saved.getId());
+
+            assertThatThrownBy(() -> adminReservationService.cancelByAdmin(saved.getId()))
+                    .isInstanceOf(BusinessRuleViolationException.class);
         }
     }
 
