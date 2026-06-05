@@ -90,7 +90,6 @@ public class ReservationRepository {
         return result.stream().findFirst();
     }
 
-    
 
     public Reservations findByName(String name) {
         MapSqlParameterSource param = new MapSqlParameterSource("name", name);
@@ -144,6 +143,20 @@ public class ReservationRepository {
                         )
                         """,
                 param,
+                Boolean.class));
+    }
+
+    public boolean existsApprovedBySlotIdExcluding(Long slotId, Long excludeId) {
+        MapSqlParameterSource params = new MapSqlParameterSource("slotId", slotId)
+                .addValue("excludeId", excludeId);
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
+                        SELECT EXISTS (
+                            SELECT 1 FROM reservation
+                            WHERE slot_id = :slotId AND status = 'APPROVED' AND id != :excludeId
+                        )
+                        """,
+                params,
                 Boolean.class));
     }
 

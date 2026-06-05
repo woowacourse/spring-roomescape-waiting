@@ -63,7 +63,7 @@ class ReservationServiceTest {
     @Test
     void 예약_취소_성공() {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
-        given(slotRepository.findByIdForUpdate(1L)).willReturn(Optional.of(DUMMY_SLOT));
+        given(slotRepository.findById(1L)).willReturn(Optional.of(DUMMY_SLOT));
         reservationService.cancel(1L, NAME, LocalDateTime.MIN);
         verify(reservationRepository).deleteById(1L);
     }
@@ -101,7 +101,7 @@ class ReservationServiceTest {
         Slot mockSlot = Slot.load(1L, LocalDate.of(2026, 4, 5), reservationTime, theme);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(slotRepository.findByDateAndTimeAndThemeForUpdate(any(), any(), any())).willReturn(Optional.of(mockSlot));
+        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(mockSlot));
         given(reservationRepository.existsBySlotIdAndName(1L, NAME)).willReturn(false);
         given(reservationRepository.existsApprovedBySlotId(1L)).willReturn(false);
         given(reservationRepository.save(any())).willReturn(DUMMY);
@@ -128,7 +128,7 @@ class ReservationServiceTest {
         Slot mockSlot = Slot.load(1L, LocalDate.parse("2026-04-05"), reservationTime, theme);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(slotRepository.findByDateAndTimeAndThemeForUpdate(any(), any(), any())).willReturn(Optional.of(mockSlot));
+        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(mockSlot));
         given(reservationRepository.existsBySlotIdAndName(1L, "zeze")).willReturn(false);
         given(reservationRepository.existsApprovedBySlotId(1L)).willReturn(false);
         given(reservationRepository.save(any())).willReturn(DUMMY);
@@ -145,7 +145,7 @@ class ReservationServiceTest {
 
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(slotRepository.findByDateAndTimeAndThemeForUpdate(any(), any(), any())).willReturn(Optional.of(mockSlot));
+        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(mockSlot));
         given(reservationRepository.existsBySlotIdAndName(1L, "zeze")).willReturn(true);
 
         Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MIN))
@@ -161,7 +161,7 @@ class ReservationServiceTest {
 
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(slotRepository.findByDateAndTimeAndThemeForUpdate(any(), any(), any())).willReturn(Optional.of(existingSlot));
+        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(existingSlot));
         given(reservationRepository.existsBySlotIdAndName(1L, "zeze")).willReturn(false);
         given(reservationRepository.existsApprovedBySlotId(1L)).willReturn(false);
         given(reservationRepository.save(any())).willReturn(DUMMY);
@@ -211,7 +211,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(slotRepository.findByDateAndTimeAndThemeForUpdate(any(), any(), any())).willReturn(Optional.of(newSlot));
+        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(newSlot));
         given(reservationRepository.existsBySlotIdAndName(2L, "zeze")).willReturn(true);
 
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
@@ -239,11 +239,11 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(existing));
         given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(time));
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(slotRepository.findByDateAndTimeAndThemeForUpdate(any(), any(), any())).willReturn(Optional.of(slot));
+        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(slot));
 
         // 자기 자신은 제외되므로 조건 불충족 (같은 slotId)
         given(reservationRepository.existsBySlotIdAndName(1L, name)).willReturn(true);
-        given(reservationRepository.existsApprovedBySlotId(1L)).willReturn(true);
+        given(reservationRepository.existsApprovedBySlotIdExcluding(1L, 1L)).willReturn(false);
         given(reservationRepository.update(eq(1L), any())).willReturn(existing);
 
         // when & then — 자기 자신이므로 성공해야 한다
@@ -262,7 +262,7 @@ class ReservationServiceTest {
     void 예약_삭제_시_이름이_다르면_예외가_발생한다() {
         Reservation reservation = RoomEscapeFixture.reservation();
         given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
-        given(slotRepository.findByIdForUpdate(1L)).willReturn(Optional.of(DUMMY_SLOT));
+        given(slotRepository.findById(1L)).willReturn(Optional.of(DUMMY_SLOT));
         Assertions.assertThatThrownBy(() -> reservationService.cancel(EXISTS_ID, "diff", TODAY))
                 .isInstanceOf(RoomEscapeException.class);
     }
@@ -271,7 +271,7 @@ class ReservationServiceTest {
     void 예약_삭제_시_문제가_없으면_삭제되어야_한다() {
         Reservation reservation = RoomEscapeFixture.reservation();
         given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
-        given(slotRepository.findByIdForUpdate(1L)).willReturn(Optional.of(DUMMY_SLOT));
+        given(slotRepository.findById(1L)).willReturn(Optional.of(DUMMY_SLOT));
         assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue(),
                 TODAY)).doesNotThrowAnyException();
     }

@@ -87,27 +87,6 @@ public class SlotRepository {
         return result.stream().findFirst();
     }
 
-    public Optional<Slot> findByDateAndTimeAndThemeForUpdate(ReservationDate date, ReservationTime time, Theme theme) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date.getDate())
-                .addValue("timeId", time.getId())
-                .addValue("themeId", theme.getId());
-
-        List<Slot> result = jdbcTemplate.query(
-                SELECT_BASE + "WHERE s.date = :date AND s.time_id = :timeId AND s.theme_id = :themeId FOR UPDATE",
-                params,
-                SLOT_ROW_MAPPER);
-        return result.stream().findFirst();
-    }
-
-    public Optional<Slot> findByIdForUpdate(long slotId) {
-        List<Slot> result = jdbcTemplate.query(
-                SELECT_BASE + "WHERE s.id = :slotId FOR UPDATE",
-                new MapSqlParameterSource("slotId", slotId),
-                SLOT_ROW_MAPPER);
-        return result.stream().findFirst();
-    }
-
     public Slot save(Slot slot) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", slot.getDate().getDate())

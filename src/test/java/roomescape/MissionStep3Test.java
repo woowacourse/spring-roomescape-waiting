@@ -40,7 +40,7 @@ public class MissionStep3Test {
                 .contentType(ContentType.JSON)
                 .when().delete("/admin/times/1")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
     }
 
     @Test
