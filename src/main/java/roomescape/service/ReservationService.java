@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
@@ -67,11 +68,19 @@ public class ReservationService {
 
     public Reservation updateByUser(Long id, Long memberId, ReservationPatchDto request) {
         authorizationService.validateMemberCanAccess(memberId, id);
+        LocalDateTime now = LocalDateTime.now();
         Reservation reservation = findActiveById(id);
+        LocalDate previousDate = reservation.getDate();
+        Time previousTime = reservation.getTime();
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time);
-        return reservationDao.update(reservation);
+        Reservation updated = reservationDao.update(reservation);
+        if (!previousDate.equals(updated.getDate()) || !previousTime.equals(updated.getTime())) {
+            waitingService.promoteFirstWaiting(previousDate, previousTime.getId(),
+                    updated.getTheme().getId(), updated.getStoreId(), now);
+        }
+        return updated;
     }
 
     public void cancel(Long id, Long memberId) {

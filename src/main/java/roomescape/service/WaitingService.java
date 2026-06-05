@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
@@ -63,8 +64,12 @@ public class WaitingService {
     }
 
     public void promoteFirstWaiting(Reservation vacated, LocalDateTime now) {
-        waitingDao.findFirst(vacated.getDate(), vacated.getTime().getId(), vacated.getTheme().getId(),
-                        vacated.getStoreId())
+        promoteFirstWaiting(vacated.getDate(), vacated.getTime().getId(), vacated.getTheme().getId(),
+                vacated.getStoreId(), now);
+    }
+
+    public void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId, Long storeId, LocalDateTime now) {
+        waitingDao.findFirst(date, timeId, themeId, storeId)
                 .ifPresent(first -> promote(first, now));
     }
 

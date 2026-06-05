@@ -190,6 +190,33 @@ class ReservationServiceTest {
     }
 
     @Nested
+    class UpdateWithPromotion {
+
+        @Test
+        @DisplayName("예약을 다른 슬롯으로 변경하면 비워진 슬롯의 1순위 대기가 전환된다")
+        void promotesWaitingOnVacatedSlotAfterUpdate() {
+            Reservation reservation = reservationService.create(member, requestDto1);
+            jdbcTemplate.update(
+                    "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                    "대기자", "waiter@test.com", "password", "USER");
+            Member waiter = memberDao.findByEmail("waiter@test.com").orElseThrow();
+            waitingService.create(
+                    new WaitingRequestDto(requestDto1.date(), requestDto1.timeId(), requestDto1.themeId(),
+                            requestDto1.storeId()),
+                    waiter);
+
+            reservationService.updateByUser(reservation.getId(), member.getId(),
+                    new ReservationPatchDto(requestDto1.date(), savedTime2.getId()));
+
+            assertThat(reservationService.findAllByMemberId(waiter.getId()))
+                    .singleElement()
+                    .extracting(Reservation::getStatus)
+                    .isEqualTo(ReservationStatus.BOOKED);
+            assertThat(waitingService.findAllByMemberId(waiter.getId())).isEmpty();
+        }
+    }
+
+    @Nested
     class FindAllByMemberId {
 
         @Test
