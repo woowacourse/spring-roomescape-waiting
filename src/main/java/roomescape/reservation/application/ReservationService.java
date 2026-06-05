@@ -42,7 +42,7 @@ public class ReservationService {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = resolveScheduleId(body.date(), body.timeId(), body.themeId());
         validateNoReservationExists(scheduleId);
-        Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
+        Reservation reservation = saveReservation(body, memberId, scheduleId);
 
         return ReservationSaveResponse.from(reservation);
     }
@@ -120,6 +120,14 @@ public class ReservationService {
         return MyReservationsAndWaitingsDetailResponse.from(reservationReadModels);
     }
 
+    private Reservation saveReservation(ReservationSaveRequest body, long memberId, long scheduleId) {
+        try {
+            return reservationRepository.save(body.toDomain(memberId, scheduleId));
+        } catch (DuplicateKeyException e) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
+        }
+    }
+
     private ReservationDetailProjection getReservationDetailOrThrow(long reservationId) {
         return reservationRepository.findDetailById(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
@@ -191,7 +199,7 @@ public class ReservationService {
             int affectedRow = reservationRepository.updateScheduleById(reservationId, newScheduleId);
             validateReservationUpdated(affectedRow);
         } catch (DuplicateKeyException e) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, newScheduleId);
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
         }
     }
 
@@ -258,13 +266,13 @@ public class ReservationService {
 
     private void validateNotDuplicatedReservation(long reservationId, long scheduleId) {
         if (reservationRepository.existsByScheduleIdAndIdNot(scheduleId, reservationId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
         }
     }
 
     private void validateNoReservationExists(long scheduleId) {
         if (reservationRepository.existsByScheduleId(scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
         }
     }
 

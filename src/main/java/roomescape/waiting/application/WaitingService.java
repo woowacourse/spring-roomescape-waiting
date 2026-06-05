@@ -1,6 +1,7 @@
 package roomescape.waiting.application;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -34,7 +35,7 @@ public class WaitingService {
             deleteReservationAndPromoteWaiting(body.reservationId(), memberId);
         }
 
-        Waiting waiting = waitingRepository.save(body.toDomain(memberId, scheduleId));
+        Waiting waiting = saveWaiting(body.toDomain(memberId, scheduleId));
         long waitingOrder = waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, waiting.getId());
 
         return WaitingResponse.of(waiting, waitingOrder);
@@ -53,6 +54,14 @@ public class WaitingService {
         }
 
         waitingRepository.deleteById(waitingId);
+    }
+
+    private Waiting saveWaiting(Waiting waiting) {
+        try {
+            return waitingRepository.save(waiting);
+        } catch (DuplicateKeyException e) {
+            throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
+        }
     }
 
     private void validateMemberNotAlreadyReserved(long memberId, long scheduleId) {
