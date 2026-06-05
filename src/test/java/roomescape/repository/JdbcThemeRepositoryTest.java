@@ -102,6 +102,22 @@ class JdbcThemeRepositoryTest {
         assertThat(popular.get(0).reservationCount()).isEqualTo(2);
     }
 
+    @Test
+    @DisplayName("취소된 예약은 인기 테마 집계에서 제외된다")
+    void findPopularExcludesCanceled() {
+        long themeId = insertTheme("무인도 탈출");
+        long timeId = insertTime(LocalTime.of(10, 0));
+        LocalDate recent = LocalDate.now().minusDays(1);
+        insertReservation("브라운", recent, timeId, themeId, "CONFIRMED");
+        insertReservation("리사", recent, timeId, themeId, "CANCELED");
+        insertReservation("모아", recent, timeId, themeId, "CANCELED");
+
+        List<PopularTheme> popular = themeRepository.findPopular();
+
+        assertThat(popular).hasSize(1);
+        assertThat(popular.get(0).reservationCount()).isEqualTo(1);
+    }
+
     private long insertTheme(String name) {
         jdbcTemplate.update(
                 "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
@@ -119,6 +135,13 @@ class JdbcThemeRepositoryTest {
         jdbcTemplate.update(
                 "INSERT INTO reservation (reserver_name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name, date.toString(), timeId, themeId
+        );
+    }
+
+    private void insertReservation(String name, LocalDate date, long timeId, long themeId, String status) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation (reserver_name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?)",
+                name, date.toString(), timeId, themeId, status
         );
     }
 }

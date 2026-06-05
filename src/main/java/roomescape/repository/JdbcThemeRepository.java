@@ -107,6 +107,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 INNER JOIN reservation r ON t.id = r.theme_id
                 WHERE r.date >= DATEADD('DAY', -7, CURRENT_DATE)
                   AND r.date <  CURRENT_DATE
+                  AND r.status <> 'CANCELED'
                 GROUP BY t.id, t.name, t.description, t.thumbnail_url
                 ORDER BY reservation_count DESC
                 LIMIT 10
