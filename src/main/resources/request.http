@@ -1,6 +1,5 @@
 ### 예약 추가
 POST http://localhost:8080/reservations
-Authorization: ADMIN
 Content-Type: application/json
 
 {
@@ -22,7 +21,14 @@ Authorization: ADMIN
 GET http://localhost:8080/reservations/me?name=홍길동
 
 ### 내 예약 날짜/시간 변경
-PATCH http://localhost:8080/reservations/me/1?name=홍길동&date=2026-05-05&timeId=2
+PATCH http://localhost:8080/reservations/me/1
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "date": "2026-05-05",
+  "timeId": 2
+}
 
 ### 내 예약 취소
 DELETE http://localhost:8080/reservations/me/1?name=홍길동
@@ -66,7 +72,6 @@ Authorization: ADMIN
 
 ### 시간 추가
 POST http://localhost:8080/times
-Authorization: ADMIN
 Content-Type: application/json
 
 {
@@ -81,7 +86,6 @@ GET http://localhost:8080/times?date=2026-05-04&themeId=1
 
 ### 시간 삭제
 DELETE http://localhost:8080/times/1
-Authorization: ADMIN
 
 ### 테마 추가
 POST http://localhost:8080/themes
@@ -103,3 +107,17 @@ GET http://localhost:8080/themes?sortBy=popular&from=2026-05-01&to=2026-05-31&li
 ### 테마 삭제
 DELETE http://localhost:8080/themes/1
 Authorization: ADMIN
+
+### 대기 추가
+POST http://localhost:8080/waiting
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "date": "2026-05-04",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 내 대기 취소
+DELETE http://localhost:8080/waiting/me/1?name=홍길동
