@@ -44,4 +44,5 @@ public class Reservation {
     public Long getSlotId() {
         return slot.getId();
     }
+
 }

@@ -12,8 +12,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.application.port.out.WaitingRepository;
-import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
+import roomescape.waiting.domain.Waiting;
 
 @Repository
 @RequiredArgsConstructor

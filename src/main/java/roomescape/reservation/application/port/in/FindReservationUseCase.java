@@ -5,5 +5,6 @@ import roomescape.reservation.application.dto.response.ReservationDetailFindResp
 
 public interface FindReservationUseCase {
     List<ReservationDetailFindResponse> findReservationDetails();
+
     List<ReservationDetailFindResponse> findMyReservations(long memberId);
 }

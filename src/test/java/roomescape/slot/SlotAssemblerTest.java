@@ -16,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.application.port.out.SlotRepository;
-import roomescape.theme.domain.Theme;
 import roomescape.theme.application.port.out.ThemeRepository;
+import roomescape.theme.domain.Theme;
 
 @ExtendWith(MockitoExtension.class)
 class SlotAssemblerTest {
@@ -67,6 +67,13 @@ class SlotAssemblerTest {
         assertThat(slot.getThemeId()).isEqualTo(themeId);
     }
 
+    private void givenNow(LocalDate date) {
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        when(clock.instant()).thenReturn(
+                date.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        );
+    }
+
     @Test
     @DisplayName("새 슬롯을 도메인으로 조립한다.")
     void assembles_new_slot_successfully() {
@@ -109,10 +116,4 @@ class SlotAssemblerTest {
                 .isInstanceOf(EscapeRoomException.class);
     }
 
-    private void givenNow(LocalDate date) {
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-        when(clock.instant()).thenReturn(
-                date.atStartOfDay(ZoneId.systemDefault()).toInstant()
-        );
-    }
 }

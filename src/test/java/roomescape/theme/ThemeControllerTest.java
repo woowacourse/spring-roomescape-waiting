@@ -15,14 +15,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
-import roomescape.theme.application.port.in.CreateThemeUseCase;
-import roomescape.theme.application.port.in.DeleteThemeUseCase;
-import roomescape.theme.application.port.in.FindThemeUseCase;
+import roomescape.theme.adapter.in.web.ManagerThemeController;
+import roomescape.theme.adapter.in.web.UserThemeController;
 import roomescape.theme.application.dto.request.ThemeSaveRequest;
 import roomescape.theme.application.dto.response.ThemeFindResponse;
 import roomescape.theme.application.dto.response.ThemeSaveResponse;
-import roomescape.theme.adapter.in.web.ManagerThemeController;
-import roomescape.theme.adapter.in.web.UserThemeController;
+import roomescape.theme.application.port.in.CreateThemeUseCase;
+import roomescape.theme.application.port.in.DeleteThemeUseCase;
+import roomescape.theme.application.port.in.FindThemeUseCase;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeControllerTest {
@@ -59,6 +59,10 @@ class ThemeControllerTest {
         assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
+    private ThemeFindResponse themeFindResponse() {
+        return new ThemeFindResponse(1L, "theme", "description", "thumbnail");
+    }
+
     @Test
     @DisplayName("테마 생성 응답을 반환한다.")
     void returns_theme_create_response() {
@@ -83,7 +87,4 @@ class ThemeControllerTest {
         verify(deleteThemeUseCase).delete(1L);
     }
 
-    private ThemeFindResponse themeFindResponse() {
-        return new ThemeFindResponse(1L, "theme", "description", "thumbnail");
-    }
 }

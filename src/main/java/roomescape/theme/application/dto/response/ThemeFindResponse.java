@@ -1,8 +1,7 @@
 package roomescape.theme.application.dto.response;
 
-import roomescape.theme.domain.Theme;
-
 import java.util.List;
+import roomescape.theme.domain.Theme;
 
 public record ThemeFindResponse(
         Long id,

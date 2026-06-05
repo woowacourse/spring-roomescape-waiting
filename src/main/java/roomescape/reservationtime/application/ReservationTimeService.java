@@ -10,24 +10,24 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.port.out.ReservationRepository;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.application.dto.response.AvailableTimeFindResponse;
 import roomescape.reservationtime.application.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.application.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.application.dto.response.TimeInformation;
 import roomescape.reservationtime.application.dto.response.TimeSlotStatus;
-import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
-import roomescape.slot.application.SlotUsageValidator;
-import roomescape.waiting.application.port.out.WaitingRepository;
-
 import roomescape.reservationtime.application.port.in.CreateReservationTimeUseCase;
 import roomescape.reservationtime.application.port.in.DeleteReservationTimeUseCase;
 import roomescape.reservationtime.application.port.in.FindReservationTimeUseCase;
+import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.slot.application.SlotUsageValidator;
+import roomescape.waiting.application.port.out.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationTimeService implements CreateReservationTimeUseCase, FindReservationTimeUseCase, DeleteReservationTimeUseCase {
+public class ReservationTimeService implements CreateReservationTimeUseCase, FindReservationTimeUseCase,
+        DeleteReservationTimeUseCase {
     private final SlotUsageValidator slotUsageValidator;
     private final ReservationTimeAssembler reservationTimeAssembler;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -38,6 +38,12 @@ public class ReservationTimeService implements CreateReservationTimeUseCase, Fin
         validateAlreadyTimeNot(body.startAt());
         ReservationTime reservationTime = reservationTimeAssembler.assemble(body.startAt());
         return ReservationTimeSaveResponse.from(reservationTimeRepository.save(reservationTime));
+    }
+
+    private void validateAlreadyTimeNot(LocalTime startAt) {
+        if (reservationTimeRepository.existsAlreadyTime(startAt)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATIONTIME_ALREADY_EXIST);
+        }
     }
 
     public List<ReservationTimeFindResponse> findAll() {
@@ -73,9 +79,4 @@ public class ReservationTimeService implements CreateReservationTimeUseCase, Fin
         return TimeSlotStatus.RESERVABLE;
     }
 
-    private void validateAlreadyTimeNot(LocalTime startAt) {
-        if (reservationTimeRepository.existsAlreadyTime(startAt)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATIONTIME_ALREADY_EXIST);
-        }
-    }
 }

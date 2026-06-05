@@ -1,9 +1,8 @@
 package roomescape.slot.application.dto.response;
 
-import roomescape.slot.domain.Slot;
-
 import java.time.LocalDate;
 import java.util.List;
+import roomescape.slot.domain.Slot;
 
 public record SlotFindResponse(
         Long id,

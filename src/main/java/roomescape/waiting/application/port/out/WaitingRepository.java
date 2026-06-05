@@ -1,12 +1,11 @@
 package roomescape.waiting.application.port.out;
 
 import java.time.LocalDate;
-import java.util.Set;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
+import roomescape.waiting.domain.Waiting;
 
 public interface WaitingRepository {
     Waiting save(Waiting waiting);

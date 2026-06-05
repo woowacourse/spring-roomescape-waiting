@@ -1,34 +1,17 @@
 package roomescape.reservation.domain;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.support.ControllerTestSupport;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 public class ReservationApiIntegrationTest extends ControllerTestSupport {
-
-    private Map<String, Object> reservationRequest() {
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", "2026-05-05");
-        reservation.put("timeId", 4);
-        reservation.put("themeId", 4);
-        return reservation;
-    }
-
-    private Map<String, Object> waitingRequest() {
-        Map<String, Object> waiting = new HashMap<>();
-        waiting.put("date", "2026-05-05");
-        waiting.put("timeId", 1);
-        waiting.put("themeId", 1);
-        return waiting;
-    }
 
     @Test
     @DisplayName("예약을 생성할 수 있다.")
@@ -46,6 +29,14 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
                 .body("data.id", is(5))
                 .body("data.memberId", is(1))
                 .body("data.slotId", is(4));
+    }
+
+    private Map<String, Object> reservationRequest() {
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", "2026-05-05");
+        reservation.put("timeId", 4);
+        reservation.put("themeId", 4);
+        return reservation;
     }
 
     @Test
@@ -119,6 +110,14 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
                 .body("data[0].id", is(waitingId))
                 .body("data[0].status", is("WAITING"))
                 .body("data[0].waitingOrder", is(1));
+    }
+
+    private Map<String, Object> waitingRequest() {
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("date", "2026-05-05");
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+        return waiting;
     }
 
     @Test

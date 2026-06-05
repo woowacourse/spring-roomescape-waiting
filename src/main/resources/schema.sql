@@ -37,8 +37,8 @@ CREATE TABLE member
 
 CREATE TABLE waiting
 (
-    id          BIGINT NOT NULL AUTO_INCREMENT,
-    member_id   BIGINT NOT NULL,
+    id        BIGINT NOT NULL AUTO_INCREMENT,
+    member_id BIGINT NOT NULL,
     slot_id   BIGINT NOT NULL,
     CONSTRAINT uk_waiting_member_slot UNIQUE (member_id, slot_id),
     FOREIGN KEY (member_id) REFERENCES member (id),
@@ -48,8 +48,8 @@ CREATE TABLE waiting
 
 CREATE TABLE reservation
 (
-    id          BIGINT NOT NULL AUTO_INCREMENT,
-    member_id   BIGINT NOT NULL,
+    id        BIGINT NOT NULL AUTO_INCREMENT,
+    member_id BIGINT NOT NULL,
     slot_id   BIGINT NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT uk_reservation_slot UNIQUE (slot_id),

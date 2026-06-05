@@ -16,11 +16,11 @@ import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.Role;
-import roomescape.waiting.application.port.in.CancelWaitingUseCase;
-import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+import roomescape.waiting.adapter.in.web.WaitingController;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
-import roomescape.waiting.adapter.in.web.WaitingController;
+import roomescape.waiting.application.port.in.CancelWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingControllerTest {

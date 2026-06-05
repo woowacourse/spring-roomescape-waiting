@@ -6,18 +6,16 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.port.out.ReservationRepository;
+import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.domain.Slot;
 import roomescape.slot.domain.SlotOccupancy;
-import roomescape.slot.application.SlotAssembler;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingLine;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
-import roomescape.waiting.application.port.out.WaitingRepository;
-
 import roomescape.waiting.application.port.in.CancelWaitingUseCase;
 import roomescape.waiting.application.port.in.CreateWaitingUseCase;
-import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingLine;
 
 @Service
 @RequiredArgsConstructor
@@ -43,19 +41,6 @@ public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCas
         return WaitingResponse.of(waiting, waitingOrder);
     }
 
-    @Transactional
-    public void deleteByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
-                .orElse(null);
-        if (waiting == null) {
-            return;
-        }
-
-        waiting.validateOwnedBy(memberId);
-
-        waitingRepository.deleteById(waitingId);
-    }
-
     private void validateReservedByMemberNotExists(long memberId, long slotId) {
         if (reservationRepository.existsByMemberIdAndSlotId(memberId, slotId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION);
@@ -78,4 +63,18 @@ public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCas
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }
     }
+
+    @Transactional
+    public void deleteByIdForUser(long waitingId, long memberId) {
+        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
+                .orElse(null);
+        if (waiting == null) {
+            return;
+        }
+
+        waiting.validateOwnedBy(memberId);
+
+        waitingRepository.deleteById(waitingId);
+    }
+
 }

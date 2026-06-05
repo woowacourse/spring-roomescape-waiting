@@ -1,5 +1,12 @@
 package roomescape.reservation.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +18,6 @@ import roomescape.reservation.application.port.out.projection.ReservationDetailP
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -43,6 +42,15 @@ class JdbcReservationRepositoryTest {
             softly.assertThat(savedReservation.getMemberId()).isEqualTo(MEMBER_ID);
             softly.assertThat(savedReservation.getSlotId()).isEqualTo(4L);
         });
+    }
+
+    private Slot slot(long slotId) {
+        return Slot.of(
+                slotId,
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "theme", "description", "thumbnail")
+        );
     }
 
     @Test
@@ -110,12 +118,4 @@ class JdbcReservationRepositoryTest {
                 .contains(1L);
     }
 
-    private Slot slot(long slotId) {
-        return Slot.of(
-                slotId,
-                LocalDate.of(2026, 5, 5),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "theme", "description", "thumbnail")
-        );
-    }
 }

@@ -1,45 +1,18 @@
 package roomescape.waiting.domain;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.support.ControllerTestSupport;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 public class WaitingApiIntegrationTest extends ControllerTestSupport {
-
-    private Map<String, Object> waitingRequest() {
-        return waitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
-    }
-
-    private Map<String, Object> waitingRequest(LocalDate date, long timeId, long themeId) {
-        Map<String, Object> request = new HashMap<>();
-        request.put("date", date);
-        request.put("timeId", timeId);
-        request.put("themeId", themeId);
-        return request;
-    }
-
-    private Integer createWaiting(String accessToken) {
-        return RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(waitingRequest())
-                .when().post("/api/user/waitings")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true))
-                .body("data.id", notNullValue())
-                .extract()
-                .path("data.id");
-    }
 
     @Test
     @DisplayName("이미 예약된 슬롯에 대기를 신청할 수 있다.")
@@ -58,6 +31,18 @@ public class WaitingApiIntegrationTest extends ControllerTestSupport {
                 .body("data.memberId", is(2))
                 .body("data.slotId", is(1))
                 .body("data.waitingOrder", is(1));
+    }
+
+    private Map<String, Object> waitingRequest() {
+        return waitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
+    }
+
+    private Map<String, Object> waitingRequest(LocalDate date, long timeId, long themeId) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("date", date);
+        request.put("timeId", timeId);
+        request.put("themeId", themeId);
+        return request;
     }
 
     @Test
@@ -124,6 +109,20 @@ public class WaitingApiIntegrationTest extends ControllerTestSupport {
                 .body("error.code", is("WAITING_409"));
     }
 
+    private Integer createWaiting(String accessToken) {
+        return RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.id", notNullValue())
+                .extract()
+                .path("data.id");
+    }
+
     @Test
     @DisplayName("본인이 이미 예약한 슬롯에는 대기를 신청할 수 없다.")
     void member_cannot_wait_for_own_reserved_slot() {
@@ -188,4 +187,5 @@ public class WaitingApiIntegrationTest extends ControllerTestSupport {
                 .body("success", is(false))
                 .body("error.code", is("WAITING_403_OWNER"));
     }
+
 }

@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
-import roomescape.slot.domain.Slot;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.application.port.out.SlotRepository;
-import roomescape.theme.domain.Theme;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.application.port.out.ThemeRepository;
+import roomescape.theme.domain.Theme;
 
 @Component
 @RequiredArgsConstructor
@@ -40,13 +40,14 @@ public class SlotAssembler {
         return slot;
     }
 
+    private ReservationTime getReservationTimeOrThrow(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATIONTIME_NOT_FOUND, timeId));
+    }
+
     private Theme getThemeOrThrow(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.THEME_NOT_FOUND, themeId));
     }
 
-    private ReservationTime getReservationTimeOrThrow(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATIONTIME_NOT_FOUND, timeId));
-    }
 }

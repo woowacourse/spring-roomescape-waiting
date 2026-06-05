@@ -1,5 +1,10 @@
 package roomescape.reservationtime.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +12,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservationtime.adapter.out.persistence.JdbcReservationTimeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -44,7 +43,8 @@ public class JdbcReservationTimeRepositoryTest {
         assertThat(reservationTimes).hasSize(4);
         assertThat(reservationTimes)
                 .extracting(ReservationTime::startAt)
-                .containsExactly(LocalTime.of(10, 00), LocalTime.of(11, 00), LocalTime.of(12, 00), LocalTime.of(13, 00));
+                .containsExactly(LocalTime.of(10, 00), LocalTime.of(11, 00), LocalTime.of(12, 00),
+                        LocalTime.of(13, 00));
     }
 
     @Test

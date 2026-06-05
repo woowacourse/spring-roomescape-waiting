@@ -1,5 +1,11 @@
 package roomescape.slot.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.adapter.out.persistence.JdbcSlotRepository;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -36,6 +35,14 @@ class JdbcSlotRepositoryTest {
         assertThat(savedSlot.getDate()).isEqualTo(LocalDate.of(2026, 5, 7));
         assertThat(savedSlot.getTimeId()).isEqualTo(1L);
         assertThat(savedSlot.getThemeId()).isEqualTo(2L);
+    }
+
+    private Slot slot(LocalDate date, long timeId, long themeId) {
+        return Slot.create(
+                date,
+                new ReservationTime(timeId, LocalTime.of(10, 0)),
+                new Theme(themeId, "theme", "description", "thumbnail")
+        );
     }
 
     @Test
@@ -109,11 +116,4 @@ class JdbcSlotRepositoryTest {
         assertThat(result).isFalse();
     }
 
-    private Slot slot(LocalDate date, long timeId, long themeId) {
-        return Slot.create(
-                date,
-                new ReservationTime(timeId, LocalTime.of(10, 0)),
-                new Theme(themeId, "theme", "description", "thumbnail")
-        );
-    }
 }

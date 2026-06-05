@@ -8,16 +8,16 @@ public class WaitingLines {
 
     private final Map<Long, WaitingLine> linesBySlotId;
 
-    public static WaitingLines of(List<Waiting> waitings) {
-        return new WaitingLines(waitings);
-    }
-
     private WaitingLines(List<Waiting> waitings) {
         this.linesBySlotId = waitings.stream()
                 .collect(Collectors.groupingBy(
                         Waiting::getSlotId,
                         Collectors.collectingAndThen(Collectors.toList(), WaitingLine::of)
                 ));
+    }
+
+    public static WaitingLines of(List<Waiting> waitings) {
+        return new WaitingLines(waitings);
     }
 
     public long orderOf(Waiting waiting) {

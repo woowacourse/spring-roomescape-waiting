@@ -17,14 +17,14 @@ import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.Role;
-import roomescape.reservation.application.port.in.CancelReservationUseCase;
-import roomescape.reservation.application.port.in.CreateReservationUseCase;
-import roomescape.reservation.application.port.in.FindReservationUseCase;
+import roomescape.reservation.adapter.in.web.ManagerReservationController;
+import roomescape.reservation.adapter.in.web.UserReservationController;
 import roomescape.reservation.application.dto.request.ReservationSaveRequest;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.dto.response.ReservationSaveResponse;
-import roomescape.reservation.adapter.in.web.ManagerReservationController;
-import roomescape.reservation.adapter.in.web.UserReservationController;
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservationtime.application.dto.response.TimeInformation;
 import roomescape.theme.application.dto.response.ThemeFindResponse;
 
@@ -45,8 +45,10 @@ class ReservationControllerTest {
 
     @BeforeEach
     void setUp() {
-        userReservationController = new UserReservationController(createReservationUseCase, cancelReservationUseCase, findReservationUseCase);
-        managerReservationController = new ManagerReservationController(findReservationUseCase, cancelReservationUseCase);
+        userReservationController = new UserReservationController(createReservationUseCase, cancelReservationUseCase,
+                findReservationUseCase);
+        managerReservationController = new ManagerReservationController(findReservationUseCase,
+                cancelReservationUseCase);
     }
 
     @Test

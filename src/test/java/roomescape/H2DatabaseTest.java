@@ -1,7 +1,14 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,14 +21,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
 import roomescape.reservation.domain.Reservation;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ActiveProfiles("test")
 @Import(TestTimeConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -33,21 +32,6 @@ public class H2DatabaseTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = 8080;
-    }
-
-    private String login() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "a");
-        loginRequest.put("password", "test1");
-
-        return RestAssured.given().log().all()
-                .body(loginRequest)
-                .contentType(ContentType.JSON)
-                .post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
     }
 
     @Test
@@ -74,8 +58,25 @@ public class H2DatabaseTest {
                 .statusCode(200).extract()
                 .jsonPath().getList("data");
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation where member_id = 1", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation where member_id = 1",
+                Integer.class);
 
         assertThat(reservations.size()).isEqualTo(count);
     }
+
+    private String login() {
+        Map<String, Object> loginRequest = new HashMap<>();
+        loginRequest.put("name", "a");
+        loginRequest.put("password", "test1");
+
+        return RestAssured.given().log().all()
+                .body(loginRequest)
+                .contentType(ContentType.JSON)
+                .post("/api/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("data.accessToken");
+    }
+
 }

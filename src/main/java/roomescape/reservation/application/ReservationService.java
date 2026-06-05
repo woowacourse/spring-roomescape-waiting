@@ -10,26 +10,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.application.dto.request.ReservationSaveRequest;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.dto.response.ReservationSaveResponse;
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservation.application.port.out.ReservationRepository;
-import roomescape.slot.domain.SlotOccupancy;
-import roomescape.slot.domain.Slot;
+import roomescape.reservation.domain.Reservation;
 import roomescape.slot.application.SlotAssembler;
+import roomescape.slot.domain.Slot;
+import roomescape.slot.domain.SlotOccupancy;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingLine;
 import roomescape.waiting.domain.WaitingLines;
 import roomescape.waiting.domain.WaitingPromotionPolicy;
-import roomescape.waiting.application.port.out.WaitingRepository;
-import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
-
-import roomescape.reservation.application.port.in.CancelReservationUseCase;
-import roomescape.reservation.application.port.in.CreateReservationUseCase;
-import roomescape.reservation.application.port.in.FindReservationUseCase;
-import roomescape.reservation.application.port.in.CreateReservationUseCase;
-import roomescape.reservation.application.port.in.FindReservationUseCase;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +45,16 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
         return ReservationSaveResponse.from(reservation);
     }
 
+    private void throwIfSlotUnavailableForReservation(long slotId) {
+        boolean hasReservation = reservationRepository.existsBySlotId(slotId);
+        boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
+        SlotOccupancy slotOccupancy = SlotOccupancy.of(hasReservation, hasWaiting);
+
+        if (!slotOccupancy.isReservable()) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
+        }
+    }
+
     public List<ReservationDetailFindResponse> findReservationDetails() {
         return ReservationDetailFindResponse.from(reservationRepository.findAll());
     }
@@ -58,10 +65,49 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
                 .ifPresent(this::cancelReservation);
     }
 
+    private Optional<Reservation> findReservationIfExists(long reservationId) {
+        return reservationRepository.findById(reservationId);
+    }
+
     @Transactional
     public void deleteByIdForUser(long reservationId, long memberId) {
         findReservationIfExists(reservationId)
                 .ifPresent(reservation -> cancelReservationByUser(reservation, memberId));
+    }
+
+    private void cancelReservationByUser(Reservation reservation, long memberId) {
+        reservation.validateOwnedBy(memberId);
+        cancelReservation(reservation);
+    }
+
+    private void cancelReservation(Reservation reservation) {
+        validateCancelable(reservation);
+
+        WaitingLine waitingLine = findWaitingLineFor(reservation);
+        deleteReservationOnly(reservation);
+        promoteFirstWaitingIfExists(reservation, waitingLine);
+    }
+
+    private void validateCancelable(Reservation reservation) {
+        reservation.validateNotPast(LocalDateTime.now(clock));
+    }
+
+    private WaitingLine findWaitingLineFor(Reservation reservation) {
+        return WaitingLine.of(waitingRepository.findAllBySlotIdOrderByIdForUpdate(reservation.getSlotId()));
+    }
+
+    private void deleteReservationOnly(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+    }
+
+    private void promoteFirstWaitingIfExists(Reservation canceledReservation, WaitingLine waitingLine) {
+        waitingLine.first()
+                .ifPresent(waiting -> {
+                    Reservation promotedReservation = waitingPromotionPolicy.promote(waiting,
+                            canceledReservation.getSlot());
+                    reservationRepository.save(promotedReservation);
+                    waitingRepository.deleteById(waiting.getId());
+                });
     }
 
     public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
@@ -90,14 +136,6 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
                 .toList();
     }
 
-    private List<ReservationDetailFindResponse> mergeMyReservations(
-            List<ReservationDetailFindResponse> reservations,
-            List<ReservationDetailFindResponse> waitings
-    ) {
-        return Stream.concat(reservations.stream(), waitings.stream())
-                .toList();
-    }
-
     private WaitingLines findWaitingLines(List<WaitingDetailProjection> waitingDetails) {
         List<Long> slotIds = waitingDetails.stream()
                 .map(WaitingDetailProjection::slotId)
@@ -116,51 +154,12 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
         return waitingLines.orderOf(waiting);
     }
 
-    private Optional<Reservation> findReservationIfExists(long reservationId) {
-        return reservationRepository.findById(reservationId);
+    private List<ReservationDetailFindResponse> mergeMyReservations(
+            List<ReservationDetailFindResponse> reservations,
+            List<ReservationDetailFindResponse> waitings
+    ) {
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .toList();
     }
 
-    private void cancelReservationByUser(Reservation reservation, long memberId) {
-        reservation.validateOwnedBy(memberId);
-        cancelReservation(reservation);
-    }
-
-    private void cancelReservation(Reservation reservation) {
-        validateCancelable(reservation);
-
-        WaitingLine waitingLine = findWaitingLineFor(reservation);
-        deleteReservationOnly(reservation);
-        promoteFirstWaitingIfExists(reservation, waitingLine);
-    }
-
-    private WaitingLine findWaitingLineFor(Reservation reservation) {
-        return WaitingLine.of(waitingRepository.findAllBySlotIdOrderByIdForUpdate(reservation.getSlotId()));
-    }
-
-    private void deleteReservationOnly(Reservation reservation) {
-        reservationRepository.deleteById(reservation.getId());
-    }
-
-    private void promoteFirstWaitingIfExists(Reservation canceledReservation, WaitingLine waitingLine) {
-        waitingLine.first()
-                .ifPresent(waiting -> {
-                    Reservation promotedReservation = waitingPromotionPolicy.promote(waiting, canceledReservation.getSlot());
-                    reservationRepository.save(promotedReservation);
-                    waitingRepository.deleteById(waiting.getId());
-                });
-    }
-
-    private void throwIfSlotUnavailableForReservation(long slotId) {
-        boolean hasReservation = reservationRepository.existsBySlotId(slotId);
-        boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
-        SlotOccupancy slotOccupancy = SlotOccupancy.of(hasReservation, hasWaiting);
-
-        if (!slotOccupancy.isReservable()) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
-        }
-    }
-
-    private void validateCancelable(Reservation reservation) {
-        reservation.validateNotPast(LocalDateTime.now(clock));
-    }
 }

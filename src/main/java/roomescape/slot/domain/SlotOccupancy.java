@@ -21,4 +21,5 @@ public class SlotOccupancy {
     public boolean isWaitable() {
         return reserved || waitingExists;
     }
+
 }

@@ -2,6 +2,7 @@ package roomescape.slot.adapter.in.web;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,14 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
-import roomescape.slot.application.port.in.CreateSlotUseCase;
-import roomescape.slot.application.port.in.DeleteSlotUseCase;
-import roomescape.slot.application.port.in.FindSlotUseCase;
 import roomescape.slot.application.dto.request.SlotSaveRequest;
 import roomescape.slot.application.dto.response.SlotFindResponse;
 import roomescape.slot.application.dto.response.SlotSaveResponse;
-
-import java.util.List;
+import roomescape.slot.application.port.in.CreateSlotUseCase;
+import roomescape.slot.application.port.in.DeleteSlotUseCase;
+import roomescape.slot.application.port.in.FindSlotUseCase;
 
 @RestController
 @RequestMapping("/api/manager/slots")

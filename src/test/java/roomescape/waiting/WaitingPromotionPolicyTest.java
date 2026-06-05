@@ -29,6 +29,15 @@ class WaitingPromotionPolicyTest {
         assertThat(reservation.getSlot()).isEqualTo(slot);
     }
 
+    private Slot slot(long slotId) {
+        return Slot.of(
+                slotId,
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "theme", "description", "thumbnail")
+        );
+    }
+
     @Test
     @DisplayName("대기 슬롯과 예약 슬롯이 다르면 전환에 실패한다.")
     void promotion_fails_for_different_waiting_and_reservation_slots() {
@@ -39,12 +48,4 @@ class WaitingPromotionPolicyTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    private Slot slot(long slotId) {
-        return Slot.of(
-                slotId,
-                LocalDate.of(2026, 5, 5),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "theme", "description", "thumbnail")
-        );
-    }
 }

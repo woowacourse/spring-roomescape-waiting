@@ -7,5 +7,6 @@ import roomescape.reservationtime.application.dto.response.ReservationTimeFindRe
 
 public interface FindReservationTimeUseCase {
     List<ReservationTimeFindResponse> findAll();
+
     List<AvailableTimeFindResponse> findTimesByDateAndThemeId(LocalDate date, long themeId);
 }

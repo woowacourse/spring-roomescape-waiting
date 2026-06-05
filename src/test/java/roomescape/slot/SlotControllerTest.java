@@ -15,13 +15,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
-import roomescape.slot.application.port.in.CreateSlotUseCase;
-import roomescape.slot.application.port.in.DeleteSlotUseCase;
-import roomescape.slot.application.port.in.FindSlotUseCase;
+import roomescape.slot.adapter.in.web.ManagerSlotController;
 import roomescape.slot.application.dto.request.SlotSaveRequest;
 import roomescape.slot.application.dto.response.SlotFindResponse;
 import roomescape.slot.application.dto.response.SlotSaveResponse;
-import roomescape.slot.adapter.in.web.ManagerSlotController;
+import roomescape.slot.application.port.in.CreateSlotUseCase;
+import roomescape.slot.application.port.in.DeleteSlotUseCase;
+import roomescape.slot.application.port.in.FindSlotUseCase;
 
 @ExtendWith(MockitoExtension.class)
 class SlotControllerTest {

@@ -15,18 +15,18 @@ public class Waiting {
     private final Long memberId;
     private final Long slotId;
 
-    public void validateOwnedBy(long memberId) {
-        if (!isOwnedBy(memberId)) {
-            throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, id);
-        }
-    }
-
     public static Waiting create(long memberId, long slotId) {
         return new Waiting(null, memberId, slotId);
     }
 
     public static Waiting of(Long id, Long memberId, Long slotId) {
         return new Waiting(id, memberId, slotId);
+    }
+
+    public void validateOwnedBy(long memberId) {
+        if (!isOwnedBy(memberId)) {
+            throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, id);
+        }
     }
 
     public boolean isOwnedBy(Long memberId) {

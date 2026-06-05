@@ -1,10 +1,10 @@
 package roomescape.reservation.domain;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,15 @@ public class ReservationTest {
         Reservation reservation = Reservation.of(1L, 1L, slot());
 
         assertThat(reservation.isOwnedBy(1L)).isTrue();
+    }
+
+    private Slot slot() {
+        return Slot.of(
+                1L,
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "theme", "description", "thumbnail")
+        );
     }
 
     @Test
@@ -49,12 +58,4 @@ public class ReservationTest {
                 .isInstanceOf(EscapeRoomException.class);
     }
 
-    private Slot slot() {
-        return Slot.of(
-                1L,
-                LocalDate.of(2026, 5, 5),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "theme", "description", "thumbnail")
-        );
-    }
 }

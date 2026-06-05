@@ -9,15 +9,15 @@ public class WaitingLine {
 
     private final List<Waiting> waitings;
 
-    public static WaitingLine of(List<Waiting> waitings) {
-        return new WaitingLine(waitings);
-    }
-
     private WaitingLine(List<Waiting> waitings) {
         validateSameSlot(waitings);
         this.waitings = waitings.stream()
                 .sorted(Comparator.comparing(Waiting::getId))
                 .toList();
+    }
+
+    public static WaitingLine of(List<Waiting> waitings) {
+        return new WaitingLine(waitings);
     }
 
     private void validateSameSlot(List<Waiting> waitings) {

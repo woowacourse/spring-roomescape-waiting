@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.domain.AuthenticatedMember;
 import roomescape.member.domain.LoginMember;
-import roomescape.waiting.application.port.in.CancelWaitingUseCase;
-import roomescape.waiting.application.port.in.CreateWaitingUseCase;
-import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
+import roomescape.waiting.application.port.in.CancelWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 
 @RestController
 @RequestMapping("/api/user/waitings")

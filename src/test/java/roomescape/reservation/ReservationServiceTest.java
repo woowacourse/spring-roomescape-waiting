@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doThrow;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -26,43 +26,35 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.application.port.in.CreateReservationUseCase;
-import roomescape.reservation.application.port.in.FindReservationUseCase;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.slot.domain.Slot;
 import roomescape.slot.application.SlotAssembler;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingPromotionPolicy;
 import roomescape.waiting.application.port.out.WaitingRepository;
 import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingPromotionPolicy;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
     private static final long MEMBER_ID = 1L;
     private static final long OTHER_MEMBER_ID = 2L;
-
-    @Mock
-    private ReservationRepository reservationRepository;
-
-    @Mock
-    private SlotAssembler slotAssembler;
-
-    @Mock
-    private WaitingRepository waitingRepository;
-
-    @Mock
-    private WaitingPromotionPolicy waitingPromotionPolicy;
-
-    private ReservationService reservationService;
-
     private final Clock clock = Clock.fixed(
             Instant.parse("2026-05-01T00:00:00Z"),
             ZoneId.systemDefault()
     );
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private SlotAssembler slotAssembler;
+    @Mock
+    private WaitingRepository waitingRepository;
+    @Mock
+    private WaitingPromotionPolicy waitingPromotionPolicy;
+    private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
@@ -72,27 +64,6 @@ class ReservationServiceTest {
                 slotAssembler,
                 waitingPromotionPolicy,
                 clock
-        );
-    }
-
-    private Reservation reservation(
-            Long reservationId,
-            Long memberId,
-            LocalDate date,
-            Long themeId,
-            Long timeId,
-            LocalTime startAt,
-            Long slotId
-    ) {
-        return Reservation.of(reservationId, memberId, slot(slotId, date, themeId, timeId, startAt));
-    }
-
-    private Slot slot(Long slotId, LocalDate date, Long themeId, Long timeId, LocalTime startAt) {
-        return Slot.of(
-                slotId,
-                date,
-                new ReservationTime(timeId, startAt),
-                new Theme(themeId, "theme", "description", "thumbnail")
         );
     }
 
@@ -149,6 +120,27 @@ class ReservationServiceTest {
         assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
                 .doesNotThrowAnyException();
         verify(reservationRepository).deleteById(reservationId);
+    }
+
+    private Reservation reservation(
+            Long reservationId,
+            Long memberId,
+            LocalDate date,
+            Long themeId,
+            Long timeId,
+            LocalTime startAt,
+            Long slotId
+    ) {
+        return Reservation.of(reservationId, memberId, slot(slotId, date, themeId, timeId, startAt));
+    }
+
+    private Slot slot(Long slotId, LocalDate date, Long themeId, Long timeId, LocalTime startAt) {
+        return Slot.of(
+                slotId,
+                date,
+                new ReservationTime(timeId, startAt),
+                new Theme(themeId, "theme", "description", "thumbnail")
+        );
     }
 
     @Test

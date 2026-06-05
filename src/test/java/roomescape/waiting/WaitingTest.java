@@ -1,7 +1,7 @@
 package roomescape.waiting.domain;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -47,14 +47,6 @@ public class WaitingTest {
         assertThat(waiting.isFor(slot(1L))).isTrue();
     }
 
-    @Test
-    @DisplayName("대기가 속한 슬롯과 전달받은 슬롯이 다르면 false를 반환한다.")
-    void waiting_for_different_slot_returns_false() {
-        Waiting waiting = Waiting.of(1L, 1L, 1L);
-
-        assertThat(waiting.isFor(slot(2L))).isFalse();
-    }
-
     private Slot slot(long slotId) {
         return Slot.of(
                 slotId,
@@ -63,4 +55,13 @@ public class WaitingTest {
                 new Theme(1L, "theme", "description", "thumbnail")
         );
     }
+
+    @Test
+    @DisplayName("대기가 속한 슬롯과 전달받은 슬롯이 다르면 false를 반환한다.")
+    void waiting_for_different_slot_returns_false() {
+        Waiting waiting = Waiting.of(1L, 1L, 1L);
+
+        assertThat(waiting.isFor(slot(2L))).isFalse();
+    }
+
 }

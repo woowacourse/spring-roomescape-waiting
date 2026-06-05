@@ -1,10 +1,9 @@
 package roomescape.slot.application.port.out;
 
-import roomescape.slot.domain.Slot;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.slot.domain.Slot;
 
 public interface SlotRepository {
     Slot save(Slot slot);

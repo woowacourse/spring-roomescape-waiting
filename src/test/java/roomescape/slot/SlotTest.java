@@ -37,6 +37,15 @@ class SlotTest {
         assertThat(slot.isPast(LocalDateTime.of(2026, 5, 5, 10, 1))).isTrue();
     }
 
+    private Slot slot(LocalDate date, LocalTime startAt) {
+        return Slot.of(
+                1L,
+                date,
+                new ReservationTime(1L, startAt),
+                new Theme(1L, "theme", "description", "thumbnail")
+        );
+    }
+
     @Test
     @DisplayName("슬롯 시작 시각이 현재와 같거나 이후이면 과거 슬롯이 아니다.")
     void slot_start_time_at_or_after_now_is_not_past() {
@@ -55,12 +64,4 @@ class SlotTest {
                 .isInstanceOf(EscapeRoomException.class);
     }
 
-    private Slot slot(LocalDate date, LocalTime startAt) {
-        return Slot.of(
-                1L,
-                date,
-                new ReservationTime(1L, startAt),
-                new Theme(1L, "theme", "description", "thumbnail")
-        );
-    }
 }

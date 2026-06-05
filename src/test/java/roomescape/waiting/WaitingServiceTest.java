@@ -1,5 +1,17 @@
 package roomescape.waiting.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,27 +22,13 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.slot.domain.Slot;
 import roomescape.slot.application.SlotAssembler;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.application.WaitingService;
-import roomescape.waiting.application.port.in.CreateWaitingUseCase;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.application.port.out.WaitingRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -82,6 +80,15 @@ class WaitingServiceTest {
         verify(waitingRepository).save(any(Waiting.class));
     }
 
+    private Slot slot(long slotId, WaitingRequest request) {
+        return Slot.of(
+                slotId,
+                request.date(),
+                new ReservationTime(request.timeId(), LocalTime.of(10, 0)),
+                new Theme(request.themeId(), "theme", "description", "thumbnail")
+        );
+    }
+
     @Test
     @DisplayName("똑같은 사람이 같은 슬롯에 대한 중복 대기를 하면 예외가 발생한다.")
     void duplicate_waiting_by_same_member_for_same_slot_throws_exception() {
@@ -115,7 +122,8 @@ class WaitingServiceTest {
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
                 .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION)
+                        assertThat(exception.getErrorCode()).isEqualTo(
+                                ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION)
                 );
 
         verify(waitingRepository, never()).save(any(Waiting.class));
@@ -209,12 +217,4 @@ class WaitingServiceTest {
         verify(waitingRepository, never()).deleteById(999L);
     }
 
-    private Slot slot(long slotId, WaitingRequest request) {
-        return Slot.of(
-                slotId,
-                request.date(),
-                new ReservationTime(request.timeId(), LocalTime.of(10, 0)),
-                new Theme(request.themeId(), "theme", "description", "thumbnail")
-        );
-    }
 }

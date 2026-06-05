@@ -1,13 +1,12 @@
 package roomescape.reservation.application.dto.response;
 
-import roomescape.reservation.domain.ReservationStatus;
+import java.time.LocalDate;
+import java.util.List;
 import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.application.dto.response.TimeInformation;
 import roomescape.theme.application.dto.response.ThemeFindResponse;
 import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public record ReservationDetailFindResponse(
         Long id,

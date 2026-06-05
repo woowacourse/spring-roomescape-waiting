@@ -31,12 +31,12 @@ public class TokenLoginMemberProvider {
         return member;
     }
 
-    public AuthenticatedMember getRequiredAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
-        AuthenticatedMember member = findAuthenticatedMemberFromRequestAttribute(request);
-        if (member == null) {
-            throw new EscapeRoomException(ErrorCode.UNAUTHORIZED);
+    private AuthenticatedMember findAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
+        Object member = request.getAttribute(LOGIN_MEMBER_ATTRIBUTE);
+        if (member instanceof AuthenticatedMember authenticatedMember) {
+            return authenticatedMember;
         }
-        return member;
+        return null;
     }
 
     private String extractAccessToken(HttpServletRequest request) {
@@ -52,11 +52,12 @@ public class TokenLoginMemberProvider {
         return token;
     }
 
-    private AuthenticatedMember findAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
-        Object member = request.getAttribute(LOGIN_MEMBER_ATTRIBUTE);
-        if (member instanceof AuthenticatedMember authenticatedMember) {
-            return authenticatedMember;
+    public AuthenticatedMember getRequiredAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
+        AuthenticatedMember member = findAuthenticatedMemberFromRequestAttribute(request);
+        if (member == null) {
+            throw new EscapeRoomException(ErrorCode.UNAUTHORIZED);
         }
-        return null;
+        return member;
     }
+
 }

@@ -53,4 +53,5 @@ public class Slot {
             throw new EscapeRoomException(ErrorCode.PAST_SLOT);
         }
     }
+
 }
