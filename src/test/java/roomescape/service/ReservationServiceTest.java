@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.exception.DuplicateReservationException;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationOrderResponse;
@@ -92,6 +92,6 @@ class ReservationServiceTest {
         reservationService.save(new ReservationRequest("그해", FUTURE_DATE, 1L, 1L), now);
 
         assertThatThrownBy(() -> reservationService.save(new ReservationRequest("그해", FUTURE_DATE, 1L, 1L), now))
-                .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(DuplicateReservationException.class);
     }
 }
