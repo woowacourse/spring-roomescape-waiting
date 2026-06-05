@@ -59,10 +59,6 @@ public class ReservationService {
         }
         Slot slot = slotDomainService.create(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId());
 
-        if (slot.isExpired()) {
-            throw new ExpiredDateTimeException();
-        }
-
         Reservation reservation = Reservation.create(reservationReq.name(), slot);
         Long reservationId = reservationRepository.insert(reservation);
         return ReservationResponse.from(reservation.withId(reservationId));
