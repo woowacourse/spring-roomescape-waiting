@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class WaitingDao {
+public class ReservationWaitingDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
@@ -76,7 +76,7 @@ public class WaitingDao {
         );
     };
 
-    public WaitingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationWaitingDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.insertExecutor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
@@ -163,6 +163,35 @@ public class WaitingDao {
                 WHERE ranked_waiting.name = ?
                 """;
         return jdbcTemplate.query(sql, withRankRowMapper, name);
+    }
+
+    public List<ReservationWaiting> findAllBySlot(Slot slot) {
+        String sql = """
+                SELECT
+                    waiting.id as waiting_id,
+                    waiting.name,
+                    waiting.date,
+                    time.id as time_id,
+                    time.start_at as time_value,
+                    theme.id as theme_id,
+                    theme.name as theme_name,
+                    theme.thumbnail_url as thumbnail_url,
+                    theme.description as theme_description,
+                    waiting.created_at as created_at
+                FROM reservation_waiting as waiting
+                INNER JOIN reservation_time as time ON waiting.time_id = time.id
+                INNER JOIN theme as theme ON waiting.theme_id = theme.id
+                WHERE waiting.date = ? AND waiting.time_id = ? AND waiting.theme_id = ?
+                ORDER BY waiting.created_at ASC 
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                rowMapper,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId()
+        );
     }
 
     public void delete(ReservationWaiting waiting) {
