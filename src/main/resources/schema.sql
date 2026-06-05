@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS reservation;
+DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
 DROP TABLE IF EXISTS holiday;
@@ -18,6 +19,17 @@ CREATE TABLE theme
     description VARCHAR(255) NOT NULL,
     image_url   VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
+);
+
+CREATE TABLE reservation_slot
+(
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    theme_id BIGINT NOT NULL,
+    time_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    CONSTRAINT uk_reservationslot_theme_time UNIQUE (theme_id, time_id)
 );
 
 CREATE TABLE reservation
