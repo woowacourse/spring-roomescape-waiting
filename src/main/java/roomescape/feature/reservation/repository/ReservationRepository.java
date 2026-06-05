@@ -28,7 +28,7 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
-    int changeStatus(Long id, ReservationStatus from, ReservationStatus to);
+    void changeStatus(Long id, long version, ReservationStatus from, ReservationStatus to);
 
     int countByIdLessThanEqualAndSlot(Long id, SlotKey slotKey);
 

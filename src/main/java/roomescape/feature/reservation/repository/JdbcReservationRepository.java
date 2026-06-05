@@ -282,20 +282,28 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int changeStatus(Long id, ReservationStatus from, ReservationStatus to) {
+    public void changeStatus(Long id, long version, ReservationStatus from, ReservationStatus to) {
         String sql = """
                 UPDATE reservation
                 SET status = :to,
                     version = version + 1
                 WHERE id = :id
                   AND status = :from
+                  AND version = :version
                 """;
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("id", id)
+                .addValue("version", version)
                 .addValue("from", from.name())
                 .addValue("to", to.name());
 
-        return jdbcTemplate.update(sql, parameters);
+        int updatedRowCount = jdbcTemplate.update(sql, parameters);
+        if (updatedRowCount == 0) {
+            throw new OptimisticLockingFailureException(
+                    "예약 상태가 다른 요청에 의해 먼저 변경되었습니다."
+                            + " id: " + id
+                            + " version: " + version);
+        }
     }
 
     @Override

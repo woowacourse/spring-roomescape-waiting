@@ -136,16 +136,18 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         Reservation canceledReservation = reservation.cancelActive(name);
-        int changedRowCount = reservationRepository.changeStatus(
-                id, ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
-        if (changedRowCount == 0) {
-            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
-        }
+        reservationRepository.changeStatus(
+                id, reservation.getVersion(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
 
         eventPublisher.publishEvent(new SlotReleasedEvent(canceledReservation.getSlot().toSlotKey()));
 
@@ -188,16 +190,18 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         Reservation canceledReservation = reservation.cancelWaiting(name);
-        int changedRowCount = reservationRepository.changeStatus(
-                id, ReservationStatus.WAITING, ReservationStatus.CANCELED);
-        if (changedRowCount <= 0) {
-            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
-        }
+        reservationRepository.changeStatus(
+                id, reservation.getVersion(), ReservationStatus.WAITING, ReservationStatus.CANCELED);
 
         return reservationMapper.toCancelResponseDto(canceledReservation);
     }

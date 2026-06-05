@@ -605,19 +605,18 @@ class JdbcReservationRepositoryTest {
         }
 
         @Test
-        void 현재_상태가_기대값과_일치하면_상태를_변경하고_1을_반환한다() {
+        void 현재_상태와_버전이_기대값과_일치하면_상태를_변경한다() {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            Reservation active = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.ACTIVE));
+
+            Reservation active = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
-            int changed = reservationRepository.changeStatus(
-                active.getId(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+            reservationRepository.changeStatus(
+                active.getId(), active.getVersion(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
 
             // then
-            assertThat(changed).isEqualTo(1);
             assertThat(reservationRepository.findAllReservations())
                 .filteredOn(found -> found.getId().equals(active.getId()))
                 .extracting(Reservation::getStatus)
@@ -625,19 +624,39 @@ class JdbcReservationRepositoryTest {
         }
 
         @Test
-        void 현재_상태가_기대값과_다르면_변경하지_않고_0을_반환한다() {
+        void 현재_상태가_기대값과_다르면_낙관적_락_예외가_발생하고_변경하지_않는다() {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            Reservation active = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.ACTIVE));
 
-            // when: 기대 상태를 WAITING으로 주지만 실제는 ACTIVE
-            int changed = reservationRepository.changeStatus(
-                active.getId(), ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+            Reservation active = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
-            // then
-            assertThat(changed).isZero();
+            // when & then: 기대 상태를 WAITING으로 주지만 실제는 ACTIVE
+            assertThatThrownBy(() -> reservationRepository.changeStatus(
+                active.getId(), active.getVersion(), ReservationStatus.WAITING, ReservationStatus.ACTIVE))
+                .isInstanceOf(OptimisticLockingFailureException.class)
+                .hasMessageContaining("예약 상태가 다른 요청에 의해 먼저 변경되었습니다.");
+
+            assertThat(reservationRepository.findAllReservations())
+                .filteredOn(found -> found.getId().equals(active.getId()))
+                .extracting(Reservation::getStatus)
+                .containsExactly(ReservationStatus.ACTIVE);
+        }
+
+        @Test
+        void 상태가_일치해도_버전이_다르면_낙관적_락_예외가_발생하고_변경하지_않는다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+
+            Reservation active = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
+
+            // when & then: 상태(ACTIVE)는 일치하지만 오래된 버전(현재 버전 + 1)으로 시도
+            assertThatThrownBy(() -> reservationRepository.changeStatus(
+                active.getId(), active.getVersion() + 1, ReservationStatus.ACTIVE, ReservationStatus.CANCELED))
+                .isInstanceOf(OptimisticLockingFailureException.class)
+                .hasMessageContaining("예약 상태가 다른 요청에 의해 먼저 변경되었습니다.");
+
             assertThat(reservationRepository.findAllReservations())
                 .filteredOn(found -> found.getId().equals(active.getId()))
                 .extracting(Reservation::getStatus)
@@ -684,7 +703,7 @@ class JdbcReservationRepositoryTest {
             Reservation saved = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE));
             // 동시 수정 시뮬레이션: 같은 행을 먼저 변경해 버전을 올린다
-            reservationRepository.changeStatus(saved.getId(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+            reservationRepository.changeStatus(saved.getId(), saved.getVersion(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
 
             // when & then: 오래된 버전(0)을 가진 객체로 수정 시도
             Reservation stale = saved.update(new ReserverName("예약자"), date.plusDays(1), time, theme);

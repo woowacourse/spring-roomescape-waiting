@@ -1,6 +1,8 @@
 package roomescape.feature.reservation.cancel;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.OptimisticLockingFailureException;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -57,14 +60,12 @@ class WaitingPromoterTest {
                     1L, new ReserverName("예약자"), DATE, time(), theme(), ReservationStatus.WAITING);
             when(reservationRepository.findLowestIdWaitingReservation(SLOT_KEY))
                     .thenReturn(Optional.of(waiting));
-            when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
-                    .thenReturn(1);
 
             // when
             waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
-            verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+            verify(reservationRepository).changeStatus(1L, 0L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
         }
 
         @Test
@@ -78,7 +79,7 @@ class WaitingPromoterTest {
 
             // then
             verify(reservationRepository, never()).findLowestIdWaitingReservation(any());
-            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), anyLong(), any(), any());
         }
 
         @Test
@@ -91,11 +92,11 @@ class WaitingPromoterTest {
             waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
-            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), anyLong(), any(), any());
         }
 
         @Test
-        void 후보_대기가_그_사이_취소되면_다음_순번을_승격한다() {
+        void 후보_대기가_그_사이_변경되어_낙관적_락_예외가_발생하면_다음_순번을_승격한다() {
             // given
             Reservation first = Reservation.reconstruct(
                     1L, new ReserverName("1순위"), DATE, time(), theme(), ReservationStatus.WAITING);
@@ -104,17 +105,16 @@ class WaitingPromoterTest {
             when(reservationRepository.findLowestIdWaitingReservation(SLOT_KEY))
                     .thenReturn(Optional.of(first))
                     .thenReturn(Optional.of(second));
-            when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
-                    .thenReturn(0);
-            when(reservationRepository.changeStatus(2L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
-                    .thenReturn(1);
+            doThrow(new OptimisticLockingFailureException("후보 대기가 그 사이 변경됨"))
+                    .when(reservationRepository)
+                    .changeStatus(1L, 0L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
 
             // when
             waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
             // then
-            verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
-            verify(reservationRepository).changeStatus(2L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+            verify(reservationRepository).changeStatus(1L, 0L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+            verify(reservationRepository).changeStatus(2L, 0L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
         }
     }
 }

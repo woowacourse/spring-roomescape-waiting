@@ -4,6 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -42,11 +43,12 @@ public class WaitingPromoter {
             return;
         }
 
-        int changedRowCount = reservationRepository.changeStatus(
-                candidate.get().getId(), ReservationStatus.WAITING, ReservationStatus.ACTIVE);
-
-        // 후보 대기가 그 사이 사라졌다면 다음 순번으로 재시도한다.
-        if (changedRowCount <= 0) {
+        try {
+            reservationRepository.changeStatus(
+                    candidate.get().getId(), candidate.get().getVersion(),
+                    ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+        } catch (OptimisticLockingFailureException exception) {
+            // 후보 대기가 그 사이 변경되었다면 다음 순번으로 재시도한다.
             promoteFastestWaiting(slotKey);
         }
     }

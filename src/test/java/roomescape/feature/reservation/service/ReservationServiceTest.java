@@ -3,6 +3,8 @@ package roomescape.feature.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.OptimisticLockingFailureException;
 import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
@@ -524,8 +527,6 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(reservation));
-            when(reservationRepository.changeStatus(1L, ReservationStatus.ACTIVE, ReservationStatus.CANCELED))
-                .thenReturn(1);
 
             // when
             ReservationCancelResponseDto result = reservationService.cancelReservation(1L, new ReserverName("예약자"));
@@ -534,7 +535,7 @@ class ReservationServiceTest {
             assertThat(result.id()).isEqualTo(1L);
             assertThat(result.name()).isEqualTo("예약자");
 
-            verify(reservationRepository).changeStatus(1L, ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+            verify(reservationRepository).changeStatus(1L, 0L, ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
         }
 
         @Test
@@ -547,8 +548,6 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(reservation));
-            when(reservationRepository.changeStatus(1L, ReservationStatus.ACTIVE, ReservationStatus.CANCELED))
-                .thenReturn(1);
 
             // when
             reservationService.cancelReservation(1L, new ReserverName("예약자"));
@@ -563,7 +562,7 @@ class ReservationServiceTest {
         }
 
         @Test
-        void 취소_직전_상태가_바뀌어_갱신되지_않으면_예외가_발생하고_이벤트를_발행하지_않는다() {
+        void 취소_직전_상태가_바뀌어_갱신되지_않으면_낙관적_락_예외가_발생하고_이벤트를_발행하지_않는다() {
             // given
             LocalDate futureDate = LocalDate.now().plusYears(1);
             Time time = timeWithId(1L);
@@ -572,13 +571,13 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(reservation));
-            when(reservationRepository.changeStatus(1L, ReservationStatus.ACTIVE, ReservationStatus.CANCELED))
-                .thenReturn(0);
+            doThrow(new OptimisticLockingFailureException("동시 변경 충돌"))
+                .when(reservationRepository)
+                .changeStatus(1L, 0L, ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
 
             // when & then
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("활성된 예약이 아닙니다.");
+                .isInstanceOf(OptimisticLockingFailureException.class);
 
             verify(eventPublisher, never()).publishEvent(any());
         }
@@ -594,7 +593,7 @@ class ReservationServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
 
-            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), anyLong(), any(), any());
             verify(eventPublisher, never()).publishEvent(any(SlotReleasedEvent.class));
         }
 
@@ -614,7 +613,7 @@ class ReservationServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 취소할 권한이 없습니다.");
 
-            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), anyLong(), any(), any());
             verify(eventPublisher, never()).publishEvent(any(SlotReleasedEvent.class));
         }
 
@@ -634,7 +633,7 @@ class ReservationServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("활성된 예약이 아닙니다.");
 
-            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), anyLong(), any(), any());
             verify(eventPublisher, never()).publishEvent(any());
         }
 
@@ -654,7 +653,7 @@ class ReservationServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 취소할 수 없습니다.");
 
-            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), anyLong(), any(), any());
             verify(eventPublisher, never()).publishEvent(any());
         }
     }

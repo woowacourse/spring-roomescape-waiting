@@ -3,6 +3,7 @@ package roomescape.feature.reservation.cancel;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,15 +80,13 @@ class WaitingPromoterRetryTest {
         when(reservationRepository.findLowestIdWaitingReservation(SLOT_KEY))
                 .thenThrow(new CannotAcquireLockException("일시적 락 획득 실패"))
                 .thenReturn(Optional.of(waiting()));
-        when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
-                .thenReturn(1);
 
         // when
         waitingPromoter.promoteFastestWaiting(SLOT_KEY);
 
         // then: 재시도되어 총 2회 조회, 승격 1회 수행
         verify(reservationRepository, times(2)).findLowestIdWaitingReservation(SLOT_KEY);
-        verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+        verify(reservationRepository).changeStatus(1L, 0L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
     }
 
     @Test
@@ -100,7 +99,7 @@ class WaitingPromoterRetryTest {
         assertThatNoException().isThrownBy(() ->
                 waitingPromoter.promoteFastestWaiting(SLOT_KEY));
         verify(reservationRepository, times(5)).findLowestIdWaitingReservation(SLOT_KEY);
-        verify(reservationRepository, times(0)).changeStatus(any(), any(), any());
+        verify(reservationRepository, times(0)).changeStatus(any(), anyLong(), any(), any());
     }
 
     @Test
