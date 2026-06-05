@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -35,9 +36,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        Reservation reservation = Reservation.create("루드비코", LocalDate.parse("2026-05-06"),
-                reservationTime,
+        ReservationSlot slot = ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime,
                 theme);
+        Reservation reservation = Reservation.create("루드비코", slot);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -52,9 +53,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        Reservation reservation = Reservation.create("루드비코", LocalDate.parse("2026-05-06"),
-                reservationTime,
+        ReservationSlot slot = ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime,
                 theme);
+        Reservation reservation = Reservation.create("루드비코", slot);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -74,15 +75,13 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime1 = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        Reservation rudevicoReservation = Reservation.create("루드비코", LocalDate.parse("2026-05-06"),
-                reservationTime1,
-                theme);
+        Reservation rudevicoReservation = Reservation.create("루드비코",
+                ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime1, theme));
 
         ReservationTime reservationTime2 = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("11:00")));
-        Reservation cocoReservation = Reservation.create("코코", LocalDate.parse("2026-05-06"),
-                reservationTime2,
-                theme);
+        Reservation cocoReservation = Reservation.create("코코",
+                ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime2, theme));
 
         // when
         Reservation savedRudevicoReservation = reservationRepository.save(rudevicoReservation);
@@ -105,9 +104,8 @@ class JdbcReservationRepositoryTest {
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
         Reservation reservation = reservationRepository.save(
-                Reservation.create("루드비코", LocalDate.parse("2026-05-06"),
-                        reservationTime,
-                        theme));
+                Reservation.create("루드비코",
+                        ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime, theme)));
 
         // when
         reservationRepository.delete(reservation.getId());

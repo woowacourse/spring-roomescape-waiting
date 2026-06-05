@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -37,8 +38,8 @@ class JdbcWaitingRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        Waiting waiting = Waiting.create("루드비코", LocalDate.parse("2026-05-06"), reservationTime,
-                theme, 1L);
+        Waiting waiting = Waiting.create("루드비코",
+                ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime, theme), 1L);
 
         // when
         Waiting saved = waitingRepository.save(waiting);
@@ -53,8 +54,8 @@ class JdbcWaitingRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        Waiting waiting = Waiting.create("루드비코", LocalDate.parse("2026-05-06"), reservationTime,
-                theme, 1L);
+        Waiting waiting = Waiting.create("루드비코",
+                ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime, theme), 1L);
 
         // when
         Waiting saved = waitingRepository.save(waiting);
@@ -84,11 +85,17 @@ class JdbcWaitingRepositoryTest {
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
         Waiting waiting1 = waitingRepository.save(
-                Waiting.create(name, LocalDate.parse("2026-05-06"), reservationTime1, theme, 1L));
+                Waiting.create(name,
+                        ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime1, theme),
+                        1L));
         Waiting waiting2 = waitingRepository.save(
-                Waiting.create(name, LocalDate.parse("2026-05-07"), reservationTime2, theme, 1L));
+                Waiting.create(name,
+                        ReservationSlot.of(LocalDate.parse("2026-05-07"), reservationTime2, theme),
+                        1L));
         waitingRepository.save(
-                Waiting.create("코코", LocalDate.parse("2026-05-06"), reservationTime1, theme, 2L));
+                Waiting.create("코코",
+                        ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime1, theme),
+                        2L));
 
         // when
         List<Waiting> result = waitingRepository.findByName(name);
@@ -108,11 +115,17 @@ class JdbcWaitingRepositoryTest {
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
         waitingRepository.save(
-                Waiting.create("루드비코", LocalDate.parse("2026-05-06"), reservationTime1, theme, 1L));
+                Waiting.create("루드비코",
+                        ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime1, theme),
+                        1L));
         waitingRepository.save(
-                Waiting.create("루드비코", LocalDate.parse("2026-05-07"), reservationTime2, theme, 1L));
+                Waiting.create("루드비코",
+                        ReservationSlot.of(LocalDate.parse("2026-05-07"), reservationTime2, theme),
+                        1L));
         waitingRepository.save(
-                Waiting.create("네오", LocalDate.parse("2026-05-06"), reservationTime1, theme, 2L));
+                Waiting.create("네오",
+                        ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime1, theme),
+                        2L));
 
         // when
         List<Waiting> result = waitingRepository.findByName(name);
@@ -128,7 +141,9 @@ class JdbcWaitingRepositoryTest {
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
         Waiting saved = waitingRepository.save(
-                Waiting.create("루드비코", LocalDate.parse("2026-05-06"), reservationTime, theme, 1L));
+                Waiting.create("루드비코",
+                        ReservationSlot.of(LocalDate.parse("2026-05-06"), reservationTime, theme),
+                        1L));
 
         // when
         waitingRepository.delete(saved.getId());
@@ -157,13 +172,12 @@ class JdbcWaitingRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-
-        Waiting waiting = Waiting.create(name, date, reservationTime, theme, 1L);
+        ReservationSlot slot = ReservationSlot.of(date, reservationTime, theme);
+        Waiting waiting = Waiting.create(name, slot, 1L);
         waitingRepository.save(waiting);
 
         // when
-        boolean exists = waitingRepository.existsByNameAndDateAndTimeAndTheme(name, date,
-                reservationTime, theme);
+        boolean exists = waitingRepository.existsByNameAndSlot(name, slot);
 
         // then
         assertThat(exists).isTrue();
@@ -177,10 +191,10 @@ class JdbcWaitingRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        ReservationSlot slot = ReservationSlot.of(date, reservationTime, theme);
 
         // when
-        boolean exists = waitingRepository.existsByNameAndDateAndTimeAndTheme(name, date,
-                reservationTime, theme);
+        boolean exists = waitingRepository.existsByNameAndSlot(name, slot);
 
         // then
         assertThat(exists).isFalse();
@@ -195,11 +209,12 @@ class JdbcWaitingRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        waitingRepository.save(Waiting.create(name, date, reservationTime, theme, 1L));
+        ReservationSlot slot = ReservationSlot.of(date, reservationTime, theme);
+        ReservationSlot worngSlot = ReservationSlot.of(wrongDate, reservationTime, theme);
+        waitingRepository.save(Waiting.create(name, slot, 1L));
 
         // when
-        boolean exists = waitingRepository.existsByNameAndDateAndTimeAndTheme(name, wrongDate,
-                reservationTime, theme);
+        boolean exists = waitingRepository.existsByNameAndSlot(name, worngSlot);
 
         // then
         assertThat(exists).isFalse();
@@ -214,9 +229,12 @@ class JdbcWaitingRepositoryTest {
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
-        waitingRepository.save(Waiting.create("루드비코", date, reservationTime, theme, 1L));
-        waitingRepository.save(Waiting.create("코코", date, reservationTime, theme, 4L));
-        waitingRepository.save(Waiting.create("네오", date, reservationTime, theme, 2L));
+        waitingRepository.save(
+                Waiting.create("루드비코", ReservationSlot.of(date, reservationTime, theme), 1L));
+        waitingRepository.save(
+                Waiting.create("코코", ReservationSlot.of(date, reservationTime, theme), 4L));
+        waitingRepository.save(
+                Waiting.create("네오", ReservationSlot.of(date, reservationTime, theme), 2L));
 
         // when
         Optional<Long> maxNum = waitingRepository.findMaxWaitingNumberBy(date, reservationTime,
@@ -236,13 +254,19 @@ class JdbcWaitingRepositoryTest {
                 ReservationTime.create(LocalTime.parse("11:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
-        waitingRepository.save(Waiting.create("루드비코", date, reservationTime, theme, 1L));
-        waitingRepository.save(Waiting.create("코코", date, reservationTime, theme, 4L));
-        waitingRepository.save(Waiting.create("네오", date, reservationTime, theme, 2L));
+        waitingRepository.save(
+                Waiting.create("루드비코", ReservationSlot.of(date, reservationTime, theme), 1L));
+        waitingRepository.save(
+                Waiting.create("코코", ReservationSlot.of(date, reservationTime, theme), 4L));
+        waitingRepository.save(
+                Waiting.create("네오", ReservationSlot.of(date, reservationTime, theme), 2L));
 
-        waitingRepository.save(Waiting.create("루드비코", date, otherReservationTime, theme, 2L));
-        waitingRepository.save(Waiting.create("코코", date, otherReservationTime, theme, 10L));
-        waitingRepository.save(Waiting.create("네오", date, otherReservationTime, theme, 5L));
+        waitingRepository.save(
+                Waiting.create("루드비코", ReservationSlot.of(date, otherReservationTime, theme), 2L));
+        waitingRepository.save(
+                Waiting.create("코코", ReservationSlot.of(date, otherReservationTime, theme), 10L));
+        waitingRepository.save(
+                Waiting.create("네오", ReservationSlot.of(date, otherReservationTime, theme), 5L));
 
         // when
         Optional<Long> maxNum = waitingRepository.findMaxWaitingNumberBy(date, reservationTime,
@@ -278,11 +302,12 @@ class JdbcWaitingRepositoryTest {
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
         // when
-        waitingRepository.save(Waiting.create(name, date, reservationTime, theme, 1L));
+        waitingRepository.save(
+                Waiting.create(name, ReservationSlot.of(date, reservationTime, theme), 1L));
 
         // then
         assertThatThrownBy(() -> waitingRepository.save(
-                Waiting.create(name, date, reservationTime, theme, 4L))
+                Waiting.create(name, ReservationSlot.of(date, reservationTime, theme), 4L))
         ).isInstanceOf(DuplicateKeyException.class);
     }
 
@@ -296,11 +321,14 @@ class JdbcWaitingRepositoryTest {
         Long waitingNumber = 3L;
 
         // when
-        waitingRepository.save(Waiting.create("루드비코", date, reservationTime, theme, waitingNumber));
+        waitingRepository.save(
+                Waiting.create("루드비코", ReservationSlot.of(date, reservationTime, theme),
+                        waitingNumber));
 
         // then
         assertThatThrownBy(() -> waitingRepository.save(
-                Waiting.create("코코", date, reservationTime, theme, waitingNumber))
+                Waiting.create("코코", ReservationSlot.of(date, reservationTime, theme),
+                        waitingNumber))
         ).isInstanceOf(DuplicateKeyException.class);
     }
 }

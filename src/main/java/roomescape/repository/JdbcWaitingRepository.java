@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -42,27 +42,34 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     resultSet.getString("reservation_theme_image_url")
             );
 
+            ReservationSlot slot = ReservationSlot.of(resultSet.getDate("date").toLocalDate(), time,
+                    theme);
+
             return Waiting.of(
                     resultSet.getLong("id"),
                     resultSet.getString("name"),
-                    resultSet.getDate("date").toLocalDate(),
-                    time,
-                    theme,
+                    slot,
                     resultSet.getLong("waiting_number"));
         };
     }
 
     @Override
     public Waiting save(Waiting waiting) {
+        ReservationSlot slot = waiting.getReservationSlot();
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", waiting.getName())
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId())
+                .addValue("theme_id", slot.getTheme().getId())
+                .addValue("waiting_number", waiting.getWaitingNumber());
+
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(
-                new BeanPropertySqlParameterSource(waiting)).longValue();
+                params).longValue();
 
         return Waiting.of(
                 generatedKey,
                 waiting.getName(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getTheme(),
+                waiting.getReservationSlot(),
                 waiting.getWaitingNumber());
     }
 
@@ -172,8 +179,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
-            ReservationTime time, Theme theme) {
+    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
         String sql = """
                     SELECT EXISTS (
                       SELECT 1
@@ -187,9 +193,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", name)
-                .addValue("date", date)
-                .addValue("time_id", time.getId())
-                .addValue("theme_id", theme.getId());
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId())
+                .addValue("theme_id", slot.getTheme().getId());
 
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, params, Boolean.class)

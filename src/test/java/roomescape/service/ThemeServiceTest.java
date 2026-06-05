@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ThemeRequestDTO;
@@ -63,14 +64,12 @@ class ThemeServiceTest {
                 .isEqualTo(ThemeErrorCode.THEME_DUPLICATE);
     }
 
-
     @Test
     void 존재하지_않는_테마를_조회하면_예외가_발생한다() {
         // when & then
         assertThatThrownBy(() -> themeService.findById(1L)).isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode").isEqualTo(ThemeErrorCode.THEME_NOT_FOUND);
     }
-
 
     @Test
     void 예약이_존재하는_테마를_삭제하면_예외가_발생한다() {
@@ -79,7 +78,8 @@ class ThemeServiceTest {
                 ReservationTime.create(LocalTime.parse("10:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png"));
         reservationRepository.save(
-                Reservation.create("브라운", LocalDate.parse("2026-08-05"), time, theme));
+                Reservation.create("브라운",
+                        ReservationSlot.of(LocalDate.parse("2026-08-05"), time, theme)));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId())).isInstanceOf(

@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.exception.ReservationErrorCode;
+import roomescape.exception.ReservationSlotErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.ThemeErrorCode;
 
@@ -308,8 +309,8 @@ public class ReservationAcceptanceTest {
                 .body(reservation)
                 .when().post("/api/reservations")
                 .then().log().all()
-                .statusCode(ReservationErrorCode.RESERVATION_PAST_TIME.getHttpStatus().value())
-                .body("code", is(ReservationErrorCode.RESERVATION_PAST_TIME.getErrorName()));
+                .statusCode(ReservationSlotErrorCode.SLOT_PAST_TIME.getHttpStatus().value())
+                .body("code", is(ReservationSlotErrorCode.SLOT_PAST_TIME.getErrorName()));
 
     }
 

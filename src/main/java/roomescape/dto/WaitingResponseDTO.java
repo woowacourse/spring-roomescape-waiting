@@ -16,9 +16,11 @@ public record WaitingResponseDTO(
         return new WaitingResponseDTO(
                 waiting.getId(),
                 waiting.getName(),
-                waiting.getDate(),
-                ReservationTimeResponseDTO.from(waiting.getTime()),
-                ThemeResponseDTO.from(waiting.getTheme()),
+                waiting.getReservationSlot().getDate(),
+                ReservationTimeResponseDTO.from(
+                        waiting.getReservationSlot().getTime()
+                ),
+                ThemeResponseDTO.from(waiting.getReservationSlot().getTheme()),
                 waiting.getWaitingNumber()
         );
     }

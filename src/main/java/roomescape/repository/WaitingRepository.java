@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -22,7 +23,6 @@ public interface WaitingRepository {
     Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
             Theme theme);
 
-    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time,
-            Theme theme);
+    boolean existsByNameAndSlot(String name, ReservationSlot slot);
 
 }

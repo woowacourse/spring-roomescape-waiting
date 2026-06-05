@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.RoomescapeApplication;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -58,9 +59,10 @@ class WaitingConcurrencyTest {
         Theme theme = themeRepository.save(
                 Theme.create("귀신찾기", "귀신을 찾는다", "example.com")
         );
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
 
         reservationRepository.save(
-                Reservation.create("코코", date, time, theme)
+                Reservation.create("코코", slot)
         );
 
         for (int i = 0; i < threadCount; i++) {
@@ -91,9 +93,7 @@ class WaitingConcurrencyTest {
         executorService.shutdown();
 
         List<Long> numbers = waitingRepository.findAll().stream()
-                .filter(w -> w.getDate().equals(date))
-                .filter(w -> w.getTime().equals(time))
-                .filter(w -> w.getTheme().equals(theme))
+                .filter(w -> w.getReservationSlot().equals(slot))
                 .map(Waiting::getWaitingNumber)
                 .toList();
 

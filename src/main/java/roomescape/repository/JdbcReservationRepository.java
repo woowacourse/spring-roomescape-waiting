@@ -1,19 +1,18 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.ReservationErrorCode;
@@ -40,22 +39,34 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("reservation_theme_name"),
                     resultSet.getString("reservation_theme_description"),
                     resultSet.getString("reservation_theme_image_url"));
-            return Reservation.of(resultSet.getLong("reservation_id"), resultSet.getString("name"),
-                    resultSet.getDate("date").toLocalDate(), time, theme);
+
+            ReservationSlot slot = ReservationSlot.of(resultSet.getDate("date").toLocalDate(), time,
+                    theme);
+
+            return Reservation.of(resultSet.getLong("reservation_id"),
+                    resultSet.getString("name"),
+                    slot);
         };
     }
 
     @Override
     public Reservation save(Reservation reservation) {
-        long generatedKey = simpleJdbcInsert.executeAndReturnKey(
-                new BeanPropertySqlParameterSource(reservation)).longValue();
+        ReservationSlot slot = reservation.getReservationSlot();
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", reservation.getName())
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId())
+                .addValue("theme_id", slot.getTheme().getId());
 
-        return Reservation.of(generatedKey, reservation.getName(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme());
+        long generatedKey = simpleJdbcInsert.executeAndReturnKey(
+                params).longValue();
+
+        return Reservation.of(generatedKey, reservation.getName(),
+                reservation.getReservationSlot());
     }
 
     @Override
-    public Reservation update(Long id, LocalDate date, ReservationTime time) {
+    public Reservation update(Long id, ReservationSlot slot) {
         String sql = """
                     UPDATE reservation
                     SET date = :date,
@@ -64,8 +75,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", time.getId())
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId())
                 .addValue("id", id);
 
         jdbcTemplate.update(sql, params);
@@ -157,8 +168,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndTimeAndThemeWithLock(LocalDate date,
-            ReservationTime time, Theme theme) {
+    public Optional<Reservation> findBySlotWithLock(ReservationSlot slot) {
         String sql = """
                     SELECT r.id AS reservation_id,
                            r.name,
@@ -181,9 +191,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", time.getId()).
-                addValue("theme_id", theme.getId());
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId()).
+                addValue("theme_id", slot.getTheme().getId());
 
         List<Reservation> results = jdbcTemplate.query(sql, params, getReservationRowMapper());
         return results.stream().findFirst();
@@ -220,9 +230,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+    public boolean existsBySlot(ReservationSlot slot) {
         String sql = """
-                    SELECT EXISTS (
+                SELECT EXISTS (
                       SELECT 1
                       FROM reservation
                       WHERE date = :date
@@ -231,9 +241,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                     )
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", time.getId())
-                .addValue("theme_id", theme.getId());
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId())
+                .addValue("theme_id", slot.getTheme().getId());
 
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, params, Boolean.class)
