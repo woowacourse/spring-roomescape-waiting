@@ -9,8 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.web.context.WebServerInitializedEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,9 +25,13 @@ public abstract class E2ETest {
     @Autowired
     DatabaseHelper databaseHelper;
 
+    @LocalServerPort
+    int port;
+
     @BeforeEach
     void setup() {
         databaseHelper.clear();
+        RestAssured.port = port;
     }
 
     @TestConfiguration
@@ -45,11 +48,6 @@ public abstract class E2ETest {
         @Bean
         public DatabaseHelper databaseHelper(JdbcTemplate jdbcTemplate) {
             return new DatabaseHelper(jdbcTemplate);
-        }
-
-        @Bean
-        public ApplicationListener<WebServerInitializedEvent> restAssuredPortInitializer() {
-            return event -> RestAssured.port = event.getWebServer().getPort();
         }
     }
 }
