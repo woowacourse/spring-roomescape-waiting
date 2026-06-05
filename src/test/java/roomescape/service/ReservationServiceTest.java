@@ -511,6 +511,40 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("updateOwnReservation - 다른 슬롯으로 수정하면 기존 슬롯의 ReservationCanceledEvent를 발행한다")
+    void updateOwnReservationPublishesCanceledEventForOldSlot() {
+        User brown = member("브라운");
+        long themeId = theme("공포");
+        long themeId2 = theme("추리");
+        long timeId = time("10:00");
+        long timeId2 = time("11:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+        long oldSlotId = DbFixtures.slotId(jdbcTemplate, themeId, Fixtures.daysFromNow(25).toString(), timeId,
+                DEFAULT_STORE_ID);
+
+        service.updateOwnReservation(
+                Fixtures.updateCommand(reservationId, brown, themeId2, Fixtures.daysFromNow(26), timeId2));
+
+        assertThat(events.stream(ReservationCanceledEvent.class))
+                .extracting(ReservationCanceledEvent::slotId)
+                .containsExactly(oldSlotId);
+    }
+
+    @Test
+    @DisplayName("updateOwnReservation - 동일 슬롯으로 수정하면 ReservationCanceledEvent를 발행하지 않는다")
+    void updateOwnReservationDoesNotPublishEventWhenSlotUnchanged() {
+        User brown = member("브라운");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+
+        service.updateOwnReservation(
+                Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(25), timeId));
+
+        assertThat(events.stream(ReservationCanceledEvent.class)).isEmpty();
+    }
+
+    @Test
     @DisplayName("updateOwnReservation - userId 불일치면 예외")
     void updateOwnReservationThrowsWhenUserIdMismatch() {
         User brown = member("브라운");

@@ -137,6 +137,9 @@ public class ReservationService {
         validateNotDuplicatedForUpdate(existing, updated);
 
         reservationRepository.update(updated);
+        if (!existing.hasSameSlot(updated)) {
+            eventPublisher.publishEvent(ReservationCanceledEvent.from(existing));
+        }
         return updated;
     }
 
