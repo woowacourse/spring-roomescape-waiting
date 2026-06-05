@@ -9,7 +9,7 @@ public class ReservationTimeFixture {
     public static final LocalTime START_AT = LocalTime.of(12, 0);
     public static final ReservationTime SAVED = ReservationTime.of(ID, START_AT);
 
-    public static ReservationTime savedWith(Long id, LocalTime startAt) {
+    public static ReservationTime saved(final Long id, final LocalTime startAt) {
         return ReservationTime.of(id, startAt);
     }
 }
