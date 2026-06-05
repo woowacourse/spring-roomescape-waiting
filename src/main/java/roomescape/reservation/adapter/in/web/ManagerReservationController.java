@@ -1,4 +1,4 @@
-package roomescape.reservation.presentation;
+package roomescape.reservation.adapter.in.web;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 
 import java.util.List;
 

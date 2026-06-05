@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;

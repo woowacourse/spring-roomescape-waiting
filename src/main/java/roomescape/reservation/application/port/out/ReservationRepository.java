@@ -1,7 +1,7 @@
-package roomescape.reservation.infrastructure;
+package roomescape.reservation.application.port.out;
 
-import roomescape.reservation.Reservation;
-import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
 import java.util.List;

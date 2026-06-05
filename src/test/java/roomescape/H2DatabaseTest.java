@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.domain.Reservation;
 
 import java.sql.Connection;
 import java.sql.SQLException;

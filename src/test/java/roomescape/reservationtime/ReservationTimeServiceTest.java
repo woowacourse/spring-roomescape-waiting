@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.application.ReservationTimeAssembler;
 import roomescape.reservationtime.application.ReservationTimeService;
 import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;

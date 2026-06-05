@@ -1,7 +1,7 @@
-package roomescape.reservation.dto.response;
+package roomescape.reservation.application.dto.response;
 
-import roomescape.reservation.ReservationStatus;
-import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.theme.dto.response.ThemeFindResponse;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;

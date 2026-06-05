@@ -1,4 +1,4 @@
-package roomescape.reservation.infrastructure.projection;
+package roomescape.reservation.application.port.out.projection;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

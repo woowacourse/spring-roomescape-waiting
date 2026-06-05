@@ -1,4 +1,4 @@
-package roomescape.reservation.presentation;
+package roomescape.reservation.adapter.in.web;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -17,9 +17,9 @@ import roomescape.common.api.ApiResponse;
 import roomescape.member.AuthenticatedMember;
 import roomescape.member.LoginMember;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
-import roomescape.reservation.dto.response.ReservationSaveResponse;
+import roomescape.reservation.application.dto.request.ReservationSaveRequest;
+import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.application.dto.response.ReservationSaveResponse;
 
 import java.util.List;
 

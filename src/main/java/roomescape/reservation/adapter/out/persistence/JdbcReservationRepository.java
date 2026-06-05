@@ -1,4 +1,4 @@
-package roomescape.reservation.infrastructure;
+package roomescape.reservation.adapter.out.persistence;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
@@ -7,8 +7,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.reservation.application.port.out.ReservationRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.theme.Theme;

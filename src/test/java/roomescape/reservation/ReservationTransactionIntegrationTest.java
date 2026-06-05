@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

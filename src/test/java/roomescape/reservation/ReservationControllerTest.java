@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -17,11 +17,11 @@ import roomescape.common.api.ApiResponse;
 import roomescape.member.AuthenticatedMember;
 import roomescape.member.Role;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
-import roomescape.reservation.dto.response.ReservationSaveResponse;
-import roomescape.reservation.presentation.ManagerReservationController;
-import roomescape.reservation.presentation.UserReservationController;
+import roomescape.reservation.application.dto.request.ReservationSaveRequest;
+import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.application.dto.response.ReservationSaveResponse;
+import roomescape.reservation.adapter.in.web.ManagerReservationController;
+import roomescape.reservation.adapter.in.web.UserReservationController;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.theme.dto.response.ThemeFindResponse;
 

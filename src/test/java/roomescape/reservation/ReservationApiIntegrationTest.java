@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.domain;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

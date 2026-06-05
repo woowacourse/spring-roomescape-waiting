@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.slot.Slot;
 import roomescape.slot.SlotOccupancy;
 import roomescape.slot.application.SlotAssembler;

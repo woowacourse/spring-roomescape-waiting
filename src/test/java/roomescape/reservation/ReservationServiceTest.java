@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -26,8 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;

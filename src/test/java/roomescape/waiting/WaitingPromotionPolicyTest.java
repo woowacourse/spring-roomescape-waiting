@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.theme.Theme;

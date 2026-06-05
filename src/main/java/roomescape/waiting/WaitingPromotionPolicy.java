@@ -1,7 +1,7 @@
 package roomescape.waiting;
 
 import org.springframework.stereotype.Component;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.slot.Slot;
 
 @Component

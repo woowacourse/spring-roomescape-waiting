@@ -1,6 +1,6 @@
-package roomescape.reservation.dto.response;
+package roomescape.reservation.application.dto.response;
 
-import roomescape.reservation.Reservation;
+import roomescape.reservation.domain.Reservation;
 
 public record ReservationSaveResponse(
         Long id,

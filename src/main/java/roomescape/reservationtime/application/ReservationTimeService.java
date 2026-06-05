@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.dto.response.AvailableTimeFindResponse;
