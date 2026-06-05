@@ -87,12 +87,12 @@ public class ReservationApplicationService {
     }
 
     public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest request) {
-        final Reservation reservation = reservationService.updateByCustomer(reservationId, request);
+        final Reservation reservation = reservationService.updateByCustomer(reservationId, request.date(), request.timeId());
         return ReservationResponse.from(reservation);
     }
 
     public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest request) {
-        final Reservation reservation = reservationService.updateByAdmin(reservationId, request);
+        final Reservation reservation = reservationService.updateByAdmin(reservationId, request.date(), request.timeId());
         return ReservationResponse.from(reservation);
     }
 

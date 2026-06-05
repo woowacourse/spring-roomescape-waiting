@@ -16,7 +16,7 @@ import roomescape.reservation.domain.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
+
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -93,17 +93,17 @@ public class ReservationService {
         return saveReservation(reservation);
     }
 
-    public Reservation updateByCustomer(final Long reservationId, final ReservationUpdateRequest data) {
+    public Reservation updateByCustomer(final Long reservationId, final LocalDate date, final Long timeId) {
         final Reservation originReservation = getReservation(reservationId);
         originReservation.validateModifiableByCustomer(LocalDate.now(clock));
 
-        return updateSchedule(data, originReservation);
+        return updateSchedule(date, timeId, originReservation);
     }
 
-    public Reservation updateByAdmin(final Long reservationId, final ReservationUpdateRequest data) {
+    public Reservation updateByAdmin(final Long reservationId, final LocalDate date, final Long timeId) {
         final Reservation originReservation = getReservation(reservationId);
 
-        return updateSchedule(data, originReservation);
+        return updateSchedule(date, timeId, originReservation);
     }
 
     public void cancel(final Long reservationId) {
@@ -117,11 +117,11 @@ public class ReservationService {
         deleteReservation(reservationId);
     }
 
-    private Reservation updateSchedule(final ReservationUpdateRequest data, final Reservation originReservation) {
-        final ReservationTime newReservationTime = getReservationTime(data.timeId());
+    private Reservation updateSchedule(final LocalDate date, final Long timeId, final Reservation originReservation) {
+        final ReservationTime newReservationTime = getReservationTime(timeId);
 
         final Reservation updatedReservation = originReservation.changeSchedule(
-                data.date(),
+                date,
                 newReservationTime,
                 LocalDateTime.now(clock)
         );

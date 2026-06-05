@@ -11,7 +11,7 @@ import roomescape.reservation.domain.exception.ReservationAlreadyExistsException
 import roomescape.reservation.domain.exception.ReservationCancellationException;
 import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
-import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
+
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.support.FakeReservationRepository;
 import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
@@ -72,7 +72,7 @@ class ReservationServiceTest {
         // when
         Reservation reservation = reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 6), 2L)
+                LocalDate.of(2026, 8, 6), 2L
         );
 
         // then
@@ -92,7 +92,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 5), 1L)
+                LocalDate.of(2026, 8, 5), 1L
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -111,7 +111,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 5), 999L)
+                LocalDate.of(2026, 8, 5), 999L
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -131,7 +131,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 5, 8), 1L)
+                LocalDate.of(2026, 5, 8), 1L
         ))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -151,7 +151,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 5, 9), 2L)
+                LocalDate.of(2026, 5, 9), 2L
         ))
                 .isInstanceOf(ReservationModificationException.class);
     }
@@ -171,7 +171,7 @@ class ReservationServiceTest {
         // when
         Reservation reservation = reservationService.updateByAdmin(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 5, 9), 2L)
+                LocalDate.of(2026, 5, 9), 2L
         );
 
         // then
@@ -195,7 +195,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 6), 2L)
+                LocalDate.of(2026, 8, 6), 2L
         ))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
     }
@@ -216,7 +216,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
-                new ReservationUpdateRequest(LocalDate.of(2026, 8, 6), 2L)
+                LocalDate.of(2026, 8, 6), 2L
         ))
                 .isInstanceOf(ReservationOptionChangedException.class);
     }
