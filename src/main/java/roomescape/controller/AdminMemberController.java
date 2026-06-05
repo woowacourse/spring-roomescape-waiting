@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.controller.dto.LoginMemberResponse;
-import roomescape.global.auth.AdminOnly;
 import roomescape.service.MemberService;
 
-@AdminOnly
 @RequestMapping("/admin/members")
 @RestController
 public class AdminMemberController {

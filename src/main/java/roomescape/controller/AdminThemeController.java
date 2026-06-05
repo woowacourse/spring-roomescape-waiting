@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import roomescape.controller.dto.ThemeRequest;
-import roomescape.global.auth.AdminOnly;
 import roomescape.service.ThemeService;
 
-@AdminOnly
 @RequestMapping("/admin/themes")
 @RestController
 @Validated

@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import roomescape.domain.Member;
@@ -25,10 +24,6 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if (!isAdminOnly(handler)) {
-            return true;
-        }
-
         HttpSession session = request.getSession(false);
         if (session == null) {
             throw unauthenticated();
@@ -45,15 +40,6 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
         }
 
         return true;
-    }
-
-    private boolean isAdminOnly(Object handler) {
-        if (!(handler instanceof HandlerMethod handlerMethod)) {
-            return false;
-        }
-
-        return handlerMethod.hasMethodAnnotation(AdminOnly.class)
-                || handlerMethod.getBeanType().isAnnotationPresent(AdminOnly.class);
     }
 
     private RoomescapeException unauthenticated() {
