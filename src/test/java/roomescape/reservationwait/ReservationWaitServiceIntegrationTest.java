@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.ReservationDao;
+import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationwait.dto.WaitingResult;
 import roomescape.reservationwait.exception.ReservationWaitAlreadyExistsException;
 
@@ -150,5 +151,14 @@ public class ReservationWaitServiceIntegrationTest {
 
         assertThat(youngheeWaitings).hasSize(1);
         assertThat(youngheeWaitings.get(0).order()).isEqualTo(2L);
+    }
+
+    @Test
+    void 존재하지_않는_예약에는_대기를_걸_수_없다() {
+        // given: 빈 DB
+
+        // when & then: 없는 reservation(999) 으로 대기 신청 시도
+        assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, 999L))
+                .isInstanceOf(ReservationNotFoundException.class);
     }
 }
