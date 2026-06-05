@@ -63,11 +63,13 @@ node FE/dev-server.mjs
 ```
 
 - 기본 주소: `http://localhost:3000`
+- 루트 주소(`http://localhost:3000/`)는 사용자 예약 페이지를 보여준다.
 - 사용자 예약 페이지: `http://localhost:3000/user/index.html`
 - 사용자 마이페이지: `http://localhost:3000/user/mypage.html`
 - 관리자 페이지: `http://localhost:3000/admin/index.html`
 - API 요청은 기본적으로 `http://localhost:8080`으로 프록시된다.
 - 다른 백엔드 주소를 사용하려면 `BE_ORIGIN=http://localhost:8081 node FE/dev-server.mjs`처럼 실행한다.
+- 정상 실행 시 터미널에 `FE server: http://localhost:3000` 로그가 출력된다.
 
 ---
 
