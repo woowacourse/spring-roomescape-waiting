@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationSummary;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
@@ -219,8 +220,8 @@ class ReservationServiceTest {
 
         @Test
         void 이름으로_조회() {
-            Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
-            when(reservationRepository.findByName("유저1")).thenReturn(List.of(reservation));
+            ReservationSummary summary = new ReservationSummary(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), "테마1");
+            when(reservationRepository.findByName("유저1")).thenReturn(List.of(summary));
 
             MyReservationsResponse response = reservationService.getMyReservations("유저1");
 
@@ -259,7 +260,7 @@ class ReservationServiceTest {
             InOrder inOrder = inOrder(reservationTimeRepository, reservationRepository);
             inOrder.verify(reservationTimeRepository).findByIdForUpdate(1L);
             inOrder.verify(reservationRepository).findById(1L);
-            verify(reservationRepository, times(1)).updateDateAndTime(1L, request.date(), 1L);
+            verify(reservationRepository, times(1)).update(any(Reservation.class));
         }
 
         @Test
@@ -299,15 +300,14 @@ class ReservationServiceTest {
         }
 
         @Test
-        void updateDateAndTime_시_DuplicateKeyException_발생하면_DUPLICATE_RESERVATION_NAME_예외로_변환() {
+        void update_시_DuplicateKeyException_발생하면_DUPLICATE_RESERVATION_NAME_예외로_변환() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsBySlot(any(ReservationSlot.class))).thenReturn(false);
-            doThrow(DuplicateKeyException.class).when(reservationRepository)
-                    .updateDateAndTime(1L, request.date(), 1L);
+            doThrow(DuplicateKeyException.class).when(reservationRepository).update(any(Reservation.class));
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
                     .isInstanceOf(RoomescapeException.class)

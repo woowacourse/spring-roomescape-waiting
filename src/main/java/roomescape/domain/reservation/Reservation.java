@@ -41,6 +41,12 @@ public class Reservation {
         return this.name.equals(name);
     }
 
+    public void changeSchedule(LocalDate newDate, ReservationTime newTime) {
+        newTime.validateIfTimePast(newDate);
+        this.date = newDate;
+        this.time = newTime;
+    }
+
     public Long getId() {
         return id;
     }

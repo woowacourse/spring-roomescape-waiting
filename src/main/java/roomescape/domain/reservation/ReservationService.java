@@ -12,6 +12,7 @@ import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationtime.ReservationTimes;
 import roomescape.domain.reservationtime.dto.TimeResponse;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
@@ -68,11 +69,10 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<TimeResponse> getReservations(LocalDate date, Long themeId) {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        ReservationTimes allTimes = ReservationTimes.of(reservationTimeRepository.findAll());
         List<Long> bookedTimeIds = reservationRepository.findTimeByDateAndThemeId(date, themeId);
 
-        return reservationTimes.stream()
-                .filter(reservationTime -> !bookedTimeIds.contains(reservationTime.getId()))
+        return allTimes.availableExcluding(bookedTimeIds).stream()
                 .map(TimeResponse::from)
                 .toList();
     }
@@ -97,25 +97,23 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public MyReservationsResponse getMyReservations(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
-        return MyReservationsResponse.from(reservations);
+        return MyReservationsResponse.from(reservationRepository.findByName(name));
     }
 
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
         ReservationTime newTime = reservationTimeRepository.findByIdForUpdate(fixRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
-        newTime.validateIfTimePast(fixRequest.date());
 
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
-        ReservationSlot newSlot = ReservationSlot.of(fixRequest.date(), newTime, reservation.getTheme());
-        validateDuplicateReservation(newSlot);
 
         reservation.validateOwner(fixRequest.name());
+        validateDuplicateReservation(ReservationSlot.of(fixRequest.date(), newTime, reservation.getTheme()));
+        reservation.changeSchedule(fixRequest.date(), newTime);
 
         try {
-            reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
+            reservationRepository.update(reservation);
         } catch (DuplicateKeyException exception) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }

@@ -41,12 +41,12 @@ public class ReservationRepository {
     private final RowMapper<Long> idRowMapper = (resultSet, rowNum)
             -> resultSet.getLong("theme_id");
 
-    private final RowMapper<Reservation> myReservationMapper = (resultSet, rowNum) -> Reservation.of(
+    private final RowMapper<ReservationSummary> summaryMapper = (resultSet, rowNum) -> new ReservationSummary(
             resultSet.getLong("reservation_id"),
             resultSet.getString("name"),
             resultSet.getDate("date").toLocalDate(),
-            ReservationTime.of(null, resultSet.getTime("time_start_at").toLocalTime(), null),
-            Theme.of(null, resultSet.getString("theme_name"), null, null)
+            resultSet.getTime("time_start_at").toLocalTime(),
+            resultSet.getString("theme_name")
     );
 
     public ReservationRepository(JdbcTemplate jdbcTemplate) {
@@ -107,7 +107,7 @@ public class ReservationRepository {
         return jdbcTemplate.query(query, idRowMapper, startDate, endDate);
     }
 
-    public List<Reservation> findByName(String name) {
+    public List<ReservationSummary> findByName(String name) {
         String query = """
                 SELECT r.id AS reservation_id, r.name, r.date,
                        t.start_at AS time_start_at,
@@ -118,7 +118,7 @@ public class ReservationRepository {
                 WHERE r.name = ?
                 """;
 
-        return jdbcTemplate.query(query, myReservationMapper, name);
+        return jdbcTemplate.query(query, summaryMapper, name);
     }
 
     public Optional<Reservation> findById(Long id) {
@@ -155,8 +155,8 @@ public class ReservationRepository {
                 .findFirst();
     }
 
-    public void updateDateAndTime(Long id, LocalDate date, Long timeId) {
+    public void update(Reservation reservation) {
         String query = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(query, date, timeId, id);
+        jdbcTemplate.update(query, reservation.getDate(), reservation.getTime().getId(), reservation.getId());
     }
 }

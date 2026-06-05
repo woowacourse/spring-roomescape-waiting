@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationSummary;
 
 @JdbcTest
 @Import(ReservationRepository.class)
@@ -215,14 +216,14 @@ class ReservationRepositoryTest {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             reservationRepository.save(Reservation.of("유저2", LocalDate.of(2099, 12, 31), anotherTime, anotherTheme));
 
-            List<Reservation> result = reservationRepository.findByName("유저1");
+            List<ReservationSummary> result = reservationRepository.findByName("유저1");
 
             assertAll(
                     () -> assertThat(result).hasSize(1),
-                    () -> assertThat(result.get(0).getName()).isEqualTo("유저1"),
-                    () -> assertThat(result.get(0).getDate()).isEqualTo(LocalDate.of(2099, 12, 31)),
-                    () -> assertThat(result.get(0).getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
-                    () -> assertThat(result.get(0).getTheme().getName()).isEqualTo("테마1")
+                    () -> assertThat(result.get(0).name()).isEqualTo("유저1"),
+                    () -> assertThat(result.get(0).date()).isEqualTo(LocalDate.of(2099, 12, 31)),
+                    () -> assertThat(result.get(0).startAt()).isEqualTo(LocalTime.of(10, 0)),
+                    () -> assertThat(result.get(0).themeName()).isEqualTo("테마1")
             );
         }
 
@@ -230,7 +231,7 @@ class ReservationRepositoryTest {
         void 이름에_해당하는_예약이_없으면_빈_리스트를_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            List<Reservation> result = reservationRepository.findByName("없는유저");
+            List<ReservationSummary> result = reservationRepository.findByName("없는유저");
 
             assertThat(result).isEmpty();
         }
@@ -304,7 +305,8 @@ class ReservationRepositoryTest {
                     Reservation.of("유저1", LocalDate.of(2099, 12, 30), time, theme)
             );
 
-            reservationRepository.updateDateAndTime(saved.getId(), LocalDate.of(2099, 12, 31), anotherTime.getId());
+            saved.changeSchedule(LocalDate.of(2099, 12, 31), anotherTime);
+            reservationRepository.update(saved);
 
             Optional<Reservation> result = reservationRepository.findById(saved.getId());
             assertAll(
