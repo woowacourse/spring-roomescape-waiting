@@ -25,9 +25,9 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(long reservationId);
 
-    Optional<Reservation> findByIdForUpdate(long reservationId);
+    Optional<Reservation> findByIdForPromotion(long reservationId);
 
-    Optional<Reservation> findByScheduleIdForUpdate(long scheduleId);
+    Optional<Reservation> findByScheduleIdForPromotion(long scheduleId);
 
     boolean existsByScheduleId(long scheduleId);
 

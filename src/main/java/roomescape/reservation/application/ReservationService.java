@@ -50,7 +50,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelByIdForUser(long reservationId, long memberId) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
+        Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
                 .orElse(null);
         if (reservation == null) {
             return;
@@ -65,7 +65,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelByIdForManager(long reservationId) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
+        Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
                 .orElse(null);
         if (reservation == null) {
             return;
@@ -187,7 +187,7 @@ public class ReservationService {
     }
 
     private Waiting popFirstWaiting(long scheduleId) {
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForUpdate(scheduleId)
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForPromotion(scheduleId)
                 .orElse(null);
         if (firstWaiting != null) {
             waitingRepository.deleteById(firstWaiting.getId());
@@ -211,7 +211,7 @@ public class ReservationService {
     }
 
     private Reservation getReservationOrThrow(long reservationId) {
-        return reservationRepository.findByIdForUpdate(reservationId)
+        return reservationRepository.findByIdForPromotion(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
     }
 

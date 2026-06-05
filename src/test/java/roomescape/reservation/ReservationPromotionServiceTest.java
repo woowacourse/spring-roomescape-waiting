@@ -36,7 +36,7 @@ class ReservationPromotionServiceTest {
     void cancelReservationAndPromoteFirstWaiting_테스트_1() {
         long reservationId = 1L;
         long scheduleId = 10L;
-        when(waitingRepository.findFirstByScheduleIdForUpdate(scheduleId))
+        when(waitingRepository.findFirstByScheduleIdForPromotion(scheduleId))
                 .thenReturn(Optional.empty());
 
         reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId);
@@ -52,7 +52,7 @@ class ReservationPromotionServiceTest {
         long reservationId = 1L;
         long scheduleId = 10L;
         Waiting firstWaiting = new Waiting(100L, 3L, scheduleId);
-        when(waitingRepository.findFirstByScheduleIdForUpdate(scheduleId))
+        when(waitingRepository.findFirstByScheduleIdForPromotion(scheduleId))
                 .thenReturn(Optional.of(firstWaiting));
 
         reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId);

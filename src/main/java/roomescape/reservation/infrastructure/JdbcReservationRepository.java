@@ -185,7 +185,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByIdForUpdate(long reservationId) {
+    public Optional<Reservation> findByIdForPromotion(long reservationId) {
         String sql = "SELECT * FROM reservation WHERE id = :id FOR UPDATE";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -201,7 +201,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByScheduleIdForUpdate(long scheduleId) {
+    public Optional<Reservation> findByScheduleIdForPromotion(long scheduleId) {
         String sql = "SELECT * FROM reservation WHERE schedule_id = :scheduleId FOR UPDATE";
 
         MapSqlParameterSource params = new MapSqlParameterSource()

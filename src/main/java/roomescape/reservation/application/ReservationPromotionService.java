@@ -16,7 +16,7 @@ public class ReservationPromotionService {
 
     @Transactional
     public void cancelReservationAndPromoteFirstWaiting(long reservationId, long scheduleId) {
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForUpdate(scheduleId)
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForPromotion(scheduleId)
                 .orElse(null);
         if (firstWaiting != null) {
             waitingRepository.deleteById(firstWaiting.getId());

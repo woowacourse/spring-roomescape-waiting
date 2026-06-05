@@ -45,7 +45,7 @@ public class WaitingService {
 
     @Transactional
     public void cancelByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
+        Waiting waiting = waitingRepository.findByIdForPromotion(waitingId)
                 .orElse(null);
         if (waiting == null) {
             return;
@@ -79,14 +79,14 @@ public class WaitingService {
     }
 
     private void validateWaitingTargetExists(long scheduleId) {
-        if (reservationRepository.findByScheduleIdForUpdate(scheduleId).isEmpty()
+        if (reservationRepository.findByScheduleIdForPromotion(scheduleId).isEmpty()
                 && !waitingRepository.existsByScheduleId(scheduleId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }
     }
 
     private void deleteReservationAndPromoteWaiting(long reservationId, long memberId) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
+        Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
 
         if (!reservation.isSameMemberId(memberId)) {

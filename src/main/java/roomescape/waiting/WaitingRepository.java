@@ -11,11 +11,9 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long waitingId);
 
-    Optional<Waiting> findByIdForUpdate(long waitingId);
+    Optional<Waiting> findByIdForPromotion(long waitingId);
 
-    Optional<Waiting> findFirstByScheduleId(long scheduleId);
-
-    Optional<Waiting> findFirstByScheduleIdForUpdate(long scheduleId);
+    Optional<Waiting> findFirstByScheduleIdForPromotion(long scheduleId);
 
     boolean existsByScheduleIdAndMemberId(long scheduleId, long memberId);
 
