@@ -79,20 +79,24 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
 
         int deleted = reservationRepository.deleteById(id);
 
         if (deleted > 0) {
-            Waitings waitings = Waitings.of(waitingRepository.findAllBySlot(reservation.getSlot()));
+            Waitings waitings = Waitings.of(waitingRepository.findAllBySlotForUpdate(reservation.getSlot()));
             waitings.first().ifPresent(this::promoteToReservation);
         }
     }
 
     private void promoteToReservation(Waiting waiting) {
-        reservationRepository.save(waiting.toReservation());
-        waitingRepository.deleteById(waiting.getId());
+        try {
+            reservationRepository.save(waiting.toReservation());
+            waitingRepository.deleteById(waiting.getId());
+        } catch (DuplicateKeyException e) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
+        }
     }
 
     @Transactional(readOnly = true)

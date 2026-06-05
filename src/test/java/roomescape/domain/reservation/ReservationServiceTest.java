@@ -179,9 +179,9 @@ class ReservationServiceTest {
         @Test
         void 정상_삭제() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
-            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.deleteById(1L)).thenReturn(1);
-            when(waitingRepository.findAllBySlot(any(ReservationSlot.class))).thenReturn(List.of());
+            when(waitingRepository.findAllBySlotForUpdate(any(ReservationSlot.class))).thenReturn(List.of());
 
             reservationService.deleteReservation(1L);
 
@@ -193,9 +193,9 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             Waiting waiting1 = Waiting.of(10L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
             Waiting waiting2 = Waiting.of(11L, "대기자2", LocalDate.of(2099, 12, 31), time, theme);
-            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.deleteById(1L)).thenReturn(1);
-            when(waitingRepository.findAllBySlot(any(ReservationSlot.class))).thenReturn(List.of(waiting1, waiting2));
+            when(waitingRepository.findAllBySlotForUpdate(any(ReservationSlot.class))).thenReturn(List.of(waiting1, waiting2));
 
             reservationService.deleteReservation(1L);
 
@@ -206,7 +206,7 @@ class ReservationServiceTest {
 
         @Test
         void 존재하지_않는_id면_예외() {
-            when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
+            when(reservationRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.deleteReservation(99L))
                     .isInstanceOf(RoomescapeException.class)

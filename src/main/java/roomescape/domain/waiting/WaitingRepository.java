@@ -77,6 +77,23 @@ public class WaitingRepository {
                 slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
+    public List<Waiting> findAllBySlotForUpdate(ReservationSlot slot) {
+        String query = """
+                SELECT w.id AS waiting_id, w.name, w.date,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url
+                FROM waiting w
+                JOIN reservation_time rt ON w.time_id = rt.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.id
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(query, waitingRowMapper,
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
+    }
+
 
     public List<Waiting> findByName(String name) {
         String query = """
