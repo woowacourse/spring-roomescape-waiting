@@ -6,22 +6,17 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThumbnailUrl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class JdbcReservationRepository implements ReservationRepository {
+public class ReservationRepository {
     private static final String SELECT_BASE = """
         SELECT r.id          AS reservation_id,
                r.name        AS reservation_name,
@@ -71,7 +66,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public JdbcReservationRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    public ReservationRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("reservation")
@@ -79,12 +74,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .usingColumns("slot_id", "name", "status");
     }
 
-    @Override
+    
+
     public Reservations findAll() {
         return new Reservations(jdbcTemplate.query(SELECT_BASE, ROW_MAPPER));
     }
 
-    @Override
+    
+
     public Optional<Reservation> findById(Long id) {
         List<Reservation> result = jdbcTemplate.query(
                 SELECT_BASE + "WHERE r.id = :id",
@@ -93,7 +90,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         return result.stream().findFirst();
     }
 
-    @Override
+    
+
     public Reservations findByName(String name) {
         MapSqlParameterSource param = new MapSqlParameterSource("name", name);
         return new Reservations(jdbcTemplate.query(
@@ -102,7 +100,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ROW_MAPPER));
     }
 
-    @Override
+    
     public Reservations findBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
         return new Reservations(jdbcTemplate.query(
@@ -111,7 +109,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ROW_MAPPER));
     }
 
-    @Override
+    
     public Optional<Reservation> findFirstWaitingBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
         List<Reservation> result = jdbcTemplate.query(
@@ -121,7 +119,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return result.stream().findFirst();
     }
 
-    @Override
+    
     public boolean existsBySlotIdAndName(Long slotId, String name) {
         MapSqlParameterSource params = new MapSqlParameterSource("slotId", slotId)
                 .addValue("name", name);
@@ -135,7 +133,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 Boolean.class));
     }
 
-    @Override
+    
+
     public boolean existsApprovedBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
 
@@ -148,7 +147,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 Boolean.class));
     }
 
-    @Override
+    
+
     public Reservation update(Long id, Reservation reservation) {
         MapSqlParameterSource params = new MapSqlParameterSource("id", id)
                 .addValue("slot_id", reservation.getSlotId())
@@ -158,7 +158,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         return findById(id).orElseThrow();
     }
 
-    @Override
+    
+
     public void updateStatusById(Long id, Status status) {
         MapSqlParameterSource params = new MapSqlParameterSource("id", id)
                 .addValue("status", status.name());
@@ -166,7 +167,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update("UPDATE reservation SET status = :status WHERE id = :id", params);
     }
 
-    @Override
+    
+
     public Reservation save(Reservation reservation) {
         MapSqlParameterSource params = new MapSqlParameterSource("slot_id", reservation.getSlotId())
                 .addValue("name", reservation.getName().getValue())
@@ -176,13 +178,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         return reservation.withId(generatedKey);
     }
 
-    @Override
+    
+
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = :id",
                 new MapSqlParameterSource("id", id));
     }
 
-    @Override
+
     public boolean existsById(Long id) {
         MapSqlParameterSource param = new MapSqlParameterSource("id", id);
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""

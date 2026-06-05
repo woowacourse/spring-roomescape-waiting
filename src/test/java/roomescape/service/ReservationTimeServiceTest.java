@@ -11,15 +11,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
-import roomescape.repository.JdbcSlotRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @Mock
-    private JdbcSlotRepository slotRepository;
+    private SlotRepository slotRepository;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;

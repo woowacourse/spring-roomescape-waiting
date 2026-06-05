@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
@@ -31,8 +30,8 @@ import roomescape.domain.theme.ThumbnailUrl;
 @Import(value = {
         ReservationTimeRepository.class,
         ThemeRepository.class,
-        JdbcSlotRepository.class,
-        JdbcReservationRepository.class
+        SlotRepository.class,
+        ReservationRepository.class
 })
 class SlotRepositoryTest {
     private final static Clock FIXED_CLOCK = Clock.fixed(
@@ -49,10 +48,10 @@ class SlotRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private JdbcSlotRepository slotRepository;
+    private SlotRepository slotRepository;
 
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
 
     private ReservationTime givenTime(int hour) {
         return reservationTimeRepository.save(ReservationTime.of(LocalTime.of(hour, 0)));

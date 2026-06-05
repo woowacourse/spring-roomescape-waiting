@@ -11,7 +11,7 @@ import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
-import roomescape.repository.JdbcSlotRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -21,9 +21,9 @@ public class ThemeService {
     private static final long DEFAULT_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
-    private final JdbcSlotRepository slotRepository;
+    private final SlotRepository slotRepository;
 
-    public ThemeService(ThemeRepository themeRepository, JdbcSlotRepository slotRepository) {
+    public ThemeService(ThemeRepository themeRepository, SlotRepository slotRepository) {
         this.themeRepository = themeRepository;
         this.slotRepository = slotRepository;
     }

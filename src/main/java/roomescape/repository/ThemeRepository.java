@@ -9,8 +9,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThumbnailUrl;
 
 @Repository
 public class ThemeRepository {

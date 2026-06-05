@@ -1,8 +1,6 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,25 +12,24 @@ import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.JdbcSlotRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
-    private final JdbcSlotRepository slotRepository;
+    private final SlotRepository slotRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationService(JdbcSlotRepository slotRepository,
+    public ReservationService(SlotRepository slotRepository,
                               ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository) {
@@ -48,7 +45,7 @@ public class ReservationService {
         Theme theme = findThemeById(request.getThemeId());
         ReservationDate date = new ReservationDate(request.getDate());
 
-        Slot slot = slotRepository.findByDateAndTimeAndTheme(date, time, theme)
+        Slot slot = slotRepository.findByDateAndTimeAndThemeForUpdate(date, time, theme)
                 .orElseGet(() -> slotRepository.save(Slot.create(date, time, theme, now)));
         if (slot.isPast(now)) {
             throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
@@ -92,7 +89,7 @@ public class ReservationService {
         Theme newTheme = findThemeById(request.getThemeId());
         ReservationDate newDate = new ReservationDate(request.getDate());
 
-        Slot newSlot = slotRepository.findByDateAndTimeAndTheme(newDate, newTime, newTheme)
+        Slot newSlot = slotRepository.findByDateAndTimeAndThemeForUpdate(newDate, newTime, newTheme)
                 .orElseGet(() -> slotRepository.save(Slot.create(newDate, newTime, newTheme, now)));
         if (newSlot.isPast(now)) {
             throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
@@ -122,7 +119,7 @@ public class ReservationService {
     public void cancel(long reservationId, String name, LocalDateTime now) {
         Reservation reservation = find(reservationId);
 
-        Slot slot = slotRepository.findById(reservation.getSlotId())
+        Slot slot = slotRepository.findByIdForUpdate(reservation.getSlotId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 슬롯입니다."));
 
         if (slot.isPast(now)) {

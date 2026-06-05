@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
-import roomescape.repository.JdbcSlotRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,7 +23,7 @@ public class ThemeServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
-    private JdbcSlotRepository slotRepository;
+    private SlotRepository slotRepository;
 
     @InjectMocks
     private ThemeService themeService;

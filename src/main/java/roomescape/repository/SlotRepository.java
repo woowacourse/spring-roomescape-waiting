@@ -13,7 +13,7 @@ import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class JdbcSlotRepository {
+public class SlotRepository {
     private static final String SELECT_BASE = """
             SELECT s.id            AS slot_id,
                    s.date          AS slot_date,
@@ -47,7 +47,7 @@ public class JdbcSlotRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public JdbcSlotRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    public SlotRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("slot")
@@ -83,6 +83,27 @@ public class JdbcSlotRepository {
         List<Slot> result = jdbcTemplate.query(
                 SELECT_BASE + "WHERE s.date = :date AND s.time_id = :timeId AND s.theme_id = :themeId",
                 params,
+                SLOT_ROW_MAPPER);
+        return result.stream().findFirst();
+    }
+
+    public Optional<Slot> findByDateAndTimeAndThemeForUpdate(ReservationDate date, ReservationTime time, Theme theme) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", date.getDate())
+                .addValue("timeId", time.getId())
+                .addValue("themeId", theme.getId());
+
+        List<Slot> result = jdbcTemplate.query(
+                SELECT_BASE + "WHERE s.date = :date AND s.time_id = :timeId AND s.theme_id = :themeId FOR UPDATE",
+                params,
+                SLOT_ROW_MAPPER);
+        return result.stream().findFirst();
+    }
+
+    public Optional<Slot> findByIdForUpdate(long slotId) {
+        List<Slot> result = jdbcTemplate.query(
+                SELECT_BASE + "WHERE s.id = :slotId FOR UPDATE",
+                new MapSqlParameterSource("slotId", slotId),
                 SLOT_ROW_MAPPER);
         return result.stream().findFirst();
     }

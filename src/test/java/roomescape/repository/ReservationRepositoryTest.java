@@ -1,9 +1,7 @@
 package roomescape.repository;
 
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -11,7 +9,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
@@ -20,7 +17,6 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
 
-import java.sql.Time;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,8 +34,8 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 @Import(value = {
         ReservationTimeRepository.class,
         ThemeRepository.class,
-        JdbcSlotRepository.class,
-        JdbcReservationRepository.class
+        SlotRepository.class,
+        ReservationRepository.class
 })
 class ReservationRepositoryTest {
     private final static Clock FIXED_CLOCK = Clock.fixed(
@@ -56,7 +52,7 @@ class ReservationRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private JdbcSlotRepository slotRepository;
+    private SlotRepository slotRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;

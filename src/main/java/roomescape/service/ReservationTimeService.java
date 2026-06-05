@@ -10,17 +10,17 @@ import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.repository.JdbcSlotRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final JdbcSlotRepository slotRepository;
+    private final SlotRepository slotRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  JdbcSlotRepository slotRepository) {
+                                  SlotRepository slotRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.slotRepository = slotRepository;
     }
