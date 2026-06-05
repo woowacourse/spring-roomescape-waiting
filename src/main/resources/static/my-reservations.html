@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 내 예약</title>
+  <meta name="description" content="Roomescape 예약 조회 및 변경. 이름으로 내 예약을 확인하고 변경하세요." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab" href="/">홈</a>
+        <a class="nav-tab" href="/reservation">예약</a>
+        <a class="nav-tab active" href="/my-reservations">내 예약</a>
+        <a class="nav-tab" href="/admin">관리자</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="app-container">
+
+    <div class="my-res-header">
+      <h1 class="my-res-title">내 예약</h1>
+      <p class="my-res-sub">예약자 이름으로 예약 및 대기 내역을 확인하고 변경 또는 취소할 수 있습니다.</p>
+    </div>
+
+    <!-- 검색 폼 -->
+    <div class="my-res-search-wrap">
+      <input
+        class="form-input my-res-search-input"
+        type="text"
+        id="search-name"
+        placeholder="예약자 이름 입력 (예: 홍길동)"
+        autocomplete="name"
+      />
+      <button class="btn-primary my-res-search-btn" id="search-btn">조회</button>
+    </div>
+
+    <!-- 검색 결과 -->
+    <div id="search-results" style="display:none">
+
+      <!-- 탭 -->
+      <div class="my-res-tabs">
+        <button class="my-res-tab active" id="tab-reservations" data-target="panel-reservations">예약</button>
+        <button class="my-res-tab" id="tab-waitings" data-target="panel-waitings">대기</button>
+        <span class="my-res-tab-count" id="tab-count-label"></span>
+      </div>
+
+      <!-- 패널: 예약 -->
+      <div class="my-res-panel active" id="panel-reservations">
+        <div class="data-table-wrap">
+          <table class="data-table" aria-label="내 예약 목록">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>날짜</th>
+                <th>시간</th>
+                <th>테마</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="my-reservations-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 패널: 대기 -->
+      <div class="my-res-panel" id="panel-waitings">
+        <div class="data-table-wrap">
+          <table class="data-table" aria-label="내 대기 목록">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>날짜</th>
+                <th>시간</th>
+                <th>테마</th>
+                <th>대기 순번</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="my-waitings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<!-- ── 예약 변경 모달 ─────────────────────────────────────── -->
+<div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+  <div class="modal modal-edit">
+    <div class="modal-header">
+      <h2 class="modal-title" id="edit-modal-title">예약 변경</h2>
+      <button class="modal-close" id="edit-modal-close-btn" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 변경 불가 정보 -->
+      <div class="edit-fixed-info">
+        <div class="edit-fixed-item">
+          <span class="summary-item-label">예약자</span>
+          <span class="summary-item-value" id="edit-modal-name">—</span>
+        </div>
+        <div class="edit-fixed-item">
+          <span class="summary-item-label">테마</span>
+          <span class="summary-item-value" id="edit-modal-theme">—</span>
+        </div>
+      </div>
+
+      <div class="edit-section-label">변경할 날짜 선택</div>
+
+      <!-- 달력 -->
+      <div class="edit-calendar-wrap">
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" id="edit-cal-prev" aria-label="이전 달">&#8249;</button>
+          <span class="calendar-month-label" id="edit-cal-month-label"></span>
+          <button class="calendar-nav-btn" id="edit-cal-next" aria-label="다음 달">&#8250;</button>
+        </div>
+        <div class="calendar-grid edit-calendar-grid" id="edit-calendar-grid">
+          <div class="calendar-day-label">일</div>
+          <div class="calendar-day-label">월</div>
+          <div class="calendar-day-label">화</div>
+          <div class="calendar-day-label">수</div>
+          <div class="calendar-day-label">목</div>
+          <div class="calendar-day-label">금</div>
+          <div class="calendar-day-label">토</div>
+        </div>
+      </div>
+
+      <div class="edit-section-label" style="margin-top:18px">변경할 시간 선택</div>
+
+      <!-- 시간 슬롯 -->
+      <div id="edit-time-slots-wrap">
+        <div class="empty-state edit-empty-state">날짜를 먼저 선택하세요.</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="edit-modal-cancel-btn">취소</button>
+      <button class="btn-primary" id="confirm-edit-btn" disabled>변경하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 대기 취소 모달 ─────────────────────────────────────── -->
+<div class="modal-overlay" id="cancel-waiting-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-waiting-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="cancel-waiting-modal-title">대기 취소</h2>
+      <button class="modal-close" id="cancel-waiting-close-btn" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="booking-summary" id="cancel-waiting-summary" style="grid-template-columns:1fr 1fr;">
+        <div><div class="summary-item-label">날짜</div><div class="summary-item-value" id="cwm-date">—</div></div>
+        <div><div class="summary-item-label">테마</div><div class="summary-item-value" id="cwm-theme">—</div></div>
+        <div><div class="summary-item-label">시간</div><div class="summary-item-value" id="cwm-time">—</div></div>
+        <div><div class="summary-item-label">대기 순번</div><div class="summary-item-value" id="cwm-rank">—</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cancel-waiting-name">본인 이름 입력</label>
+        <input class="form-input" type="text" id="cancel-waiting-name" placeholder="홍길동" autocomplete="name" />
+        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">본인 확인을 위해 이름을 입력해주세요.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="cancel-waiting-cancel-btn">닫기</button>
+      <button class="btn-primary" id="confirm-cancel-waiting-btn" style="background:var(--danger);color:#fff;">대기 취소</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+<script src="/my-reservations.js"></script>
+</body>
+</html>

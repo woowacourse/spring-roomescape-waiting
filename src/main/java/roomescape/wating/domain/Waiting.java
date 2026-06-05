@@ -1,0 +1,132 @@
+package roomescape.wating.domain;
+
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import lombok.Getter;
+import roomescape.reservation.domain.CustomerName;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
+import roomescape.wating.domain.exception.PastDateTimeWaitingException;
+
+@Getter
+public class Waiting {
+
+    private final Long id;
+    private final CustomerName customerName;
+    private final LocalDateTime createdAt;
+    private final ReservationSlot slot;
+
+    private Waiting(
+            Long id,
+            CustomerName customerName,
+            LocalDateTime createdAt,
+            ReservationSlot slot
+    ) {
+        validateRequiredValues(slot);
+        this.id = id;
+        this.customerName = customerName;
+        this.createdAt = createdAt;
+        this.slot = slot;
+    }
+
+    public static Waiting create(
+            final String customerName,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final LocalDateTime now
+    ) {
+        return create(customerName, ReservationSlot.create(date, time, theme), now);
+    }
+
+    public static Waiting create(
+            final String customerName,
+            final ReservationSlot slot,
+            final LocalDateTime now
+    ) {
+        final Waiting waiting = new Waiting(
+                null,
+                new CustomerName(customerName),
+                null,
+                slot);
+
+        waiting.validateNotPast(now);
+        return waiting;
+    }
+
+    public static Waiting of(
+            final Long id,
+            final String customerName,
+            final Date date,
+            final LocalDateTime createdAt,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        return of(
+                id,
+                customerName,
+                ReservationSlot.create(date.toLocalDate(), time, theme),
+                createdAt
+        );
+    }
+
+    public static Waiting of(
+            final Long id,
+            final String customerName,
+            final ReservationSlot slot,
+            final LocalDateTime createdAt
+    ) {
+        return new Waiting(
+                id,
+                new CustomerName(customerName),
+                createdAt,
+                slot
+        );
+    }
+
+    public boolean isOwnedBy(final String customerName) {
+        return this.customerName.equals(new CustomerName(customerName));
+    }
+
+    public boolean isCancelable(final LocalDateTime now) {
+        return !isPastReservation(now);
+    }
+
+    public Long getSlotId() {
+        return slot.getId();
+    }
+
+    public LocalDate getReservationDate() {
+        return slot.getDate();
+    }
+
+    public ReservationTime getTime() {
+        return slot.getTime();
+    }
+
+    public Theme getTheme() {
+        return slot.getTheme();
+    }
+
+    private void validateRequiredValues(final ReservationSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯을 입력해야 합니다.");
+        }
+    }
+
+    private void validateNotPast(final LocalDateTime now) {
+        if (isPastReservation(now)) {
+            throw new PastDateTimeWaitingException();
+        }
+    }
+
+    private boolean isPastReservation(final LocalDateTime now) {
+        return reservationDateTime().isBefore(now);
+    }
+
+    private LocalDateTime reservationDateTime() {
+        return slot.dateTime();
+    }
+}
