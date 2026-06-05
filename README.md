@@ -19,8 +19,11 @@
 - `Waiting` — 그 슬롯을 기다리는 줄. 순번을 가진다.
 - `Waitings` — 대기들의 일급 컬렉션. 순번 부여·중복 검증·재정렬 같은 비즈니스 규칙을 소유한다.
 
-예약이 취소되면 슬롯이 비고, 첫 대기가 예약으로 승격된다.
-`reservation` 테이블에는 `UNIQUE(date, time_id, theme_id)`, `waiting` 테이블에는 `UNIQUE(date, time_id, theme_id, name)` 제약을 둔다.
+예약이 취소되면 슬롯이 비고, 첫 대기가 예약으로 승격된다.   
+reservation 테이블에는 UNIQUE(date, time_id, theme_id), waiting 테이블에는 UNIQUE(date, time_id, theme_id, name)(같은 사람 중복 대기 방어)과
+UNIQUE(date, time_id, theme_id, order_index)(순번 충돌 방어)를 둔다. 전자는 모델이 바뀌어도 남는 도메인 불변식, 후자는 저장된 순번 모델에 종속된 제약이다.
+
+
 
 > 통합 모델(status 컬럼)·절충 모델(FK 참조) 대신 분리 모델을 택한 자세한 근거는 PR 본문에 포함.
 
