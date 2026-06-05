@@ -209,9 +209,9 @@ class ReservationServiceTest {
 
         when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
 
-        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 999L))
                 .isInstanceOf(EscapeRoomException.class);
-        verify(reservationRepository).findDetailById(reservationId);
+        verify(reservationRepository, never()).findDetailById(reservationId);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
     }
 
