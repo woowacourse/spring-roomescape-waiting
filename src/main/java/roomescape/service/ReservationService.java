@@ -35,6 +35,7 @@ public class ReservationService {
         this.themeSlotRepository = themeSlotRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> allReservations() {
         return reservationRepository.findAll();
     }

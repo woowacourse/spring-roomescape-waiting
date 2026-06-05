@@ -36,6 +36,7 @@ public class TimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Time> allTimes() {
         return timeRepository.findAll();
     }

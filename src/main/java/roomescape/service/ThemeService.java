@@ -23,6 +23,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> allTheme() {
         return themeRepository.findAll();
     }
@@ -48,6 +49,7 @@ public class ThemeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findPopularThemes(Long topCount, Long during) {
         LocalDate fromDate = LocalDate.now().minusDays(during);
         LocalDate toDate = LocalDate.now();
