@@ -69,6 +69,7 @@ public class ReservationService {
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time, LocalDateTime.now());
+        waitingService.enqueuePromotion(reservation.getSlot());
         return reservationDao.update(reservation);
     }
 
