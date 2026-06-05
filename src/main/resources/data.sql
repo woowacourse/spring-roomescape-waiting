@@ -208,29 +208,42 @@ VALUES ('user5', DATEADD('DAY', 12, CURRENT_DATE), 5, 1);
 -- 인기 슬롯: 동일 (날짜+시간+테마)에 여러 유저 예약 (대기열 테스트용)
 -- ============================================
 
--- 슬롯 A: 내일 15:00 무인도 탈출 (theme_id=1)
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user2', DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user6', DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user11', DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
+-- 각 슬롯: 먼저 줄 선 1명이 확정(CONFIRMED), 나머지는 대기(WAITING).
+-- enqueued_at을 1초씩 늦춰 대기 순번이 결정적으로 정해지게 한다.
 
--- 슬롯 B: 7일 후 14:00 도시 탈출 (theme_id=2)
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user3', DATEADD('DAY', 7, CURRENT_DATE), 5, 2);
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user8', DATEADD('DAY', 7, CURRENT_DATE), 5, 2);
+-- 슬롯 A: 내일 15:00 무인도 탈출 (theme_id=1) — 확정 1 + 대기 2
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user2', DATEADD('DAY', 1, CURRENT_DATE), 6, 1, 'CONFIRMED', DATEADD('SECOND', 0, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user6', DATEADD('DAY', 1, CURRENT_DATE), 6, 1, 'WAITING', DATEADD('SECOND', 1, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user11', DATEADD('DAY', 1, CURRENT_DATE), 6, 1, 'WAITING', DATEADD('SECOND', 2, CURRENT_TIMESTAMP));
 
--- 슬롯 C: 3일 후 15:00 열기구 탈출 (theme_id=3)
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user14', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user17', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user20', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (reserver_name, date, time_id, theme_id)
-VALUES ('user24', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
+-- 슬롯 B: 7일 후 14:00 도시 탈출 (theme_id=2) — 확정 1 + 대기 1
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user3', DATEADD('DAY', 7, CURRENT_DATE), 5, 2, 'CONFIRMED', DATEADD('SECOND', 0, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user8', DATEADD('DAY', 7, CURRENT_DATE), 5, 2, 'WAITING', DATEADD('SECOND', 1, CURRENT_TIMESTAMP));
+
+-- 슬롯 C: 3일 후 15:00 열기구 탈출 (theme_id=3) — 확정 1 + 대기 3
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user14', DATEADD('DAY', 3, CURRENT_DATE), 6, 3, 'CONFIRMED', DATEADD('SECOND', 0, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user17', DATEADD('DAY', 3, CURRENT_DATE), 6, 3, 'WAITING', DATEADD('SECOND', 1, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user20', DATEADD('DAY', 3, CURRENT_DATE), 6, 3, 'WAITING', DATEADD('SECOND', 2, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user24', DATEADD('DAY', 3, CURRENT_DATE), 6, 3, 'WAITING', DATEADD('SECOND', 3, CURRENT_TIMESTAMP));
+
+-- 슬롯 D: 2일 후 13:00 도시 탈출 (theme_id=2) — 확정 1 + 대기 3 (긴 대기열)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user7', DATEADD('DAY', 2, CURRENT_DATE), 4, 2, 'CONFIRMED', DATEADD('SECOND', 0, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user1', DATEADD('DAY', 2, CURRENT_DATE), 4, 2, 'WAITING', DATEADD('SECOND', 1, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user5', DATEADD('DAY', 2, CURRENT_DATE), 4, 2, 'WAITING', DATEADD('SECOND', 2, CURRENT_TIMESTAMP));
+INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at)
+VALUES ('user9', DATEADD('DAY', 2, CURRENT_DATE), 4, 2, 'WAITING', DATEADD('SECOND', 3, CURRENT_TIMESTAMP));
 
 -- 취소된 예약 데이터 (soft delete / 내 예약 취소 이력 표시 확인용)
 INSERT INTO reservation (reserver_name, date, time_id, theme_id, status)
