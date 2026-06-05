@@ -1,4 +1,4 @@
-package roomescape.theme;
+package roomescape.theme.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -15,11 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.theme.application.ThemeService;
-import roomescape.theme.dto.request.ThemeSaveRequest;
-import roomescape.theme.dto.response.ThemeFindResponse;
-import roomescape.theme.dto.response.ThemeSaveResponse;
-import roomescape.theme.presentation.ManagerThemeController;
-import roomescape.theme.presentation.UserThemeController;
+import roomescape.theme.application.dto.request.ThemeSaveRequest;
+import roomescape.theme.application.dto.response.ThemeFindResponse;
+import roomescape.theme.application.dto.response.ThemeSaveResponse;
+import roomescape.theme.adapter.in.web.ManagerThemeController;
+import roomescape.theme.adapter.in.web.UserThemeController;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeControllerTest {

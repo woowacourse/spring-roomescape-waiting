@@ -16,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.application.port.out.SlotRepository;
-import roomescape.theme.Theme;
-import roomescape.theme.infrastructure.ThemeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.application.port.out.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class SlotAssemblerTest {

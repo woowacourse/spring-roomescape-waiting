@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.slot.application.SlotUsageValidator;
-import roomescape.theme.Theme;
-import roomescape.theme.dto.request.ThemeSaveRequest;
-import roomescape.theme.dto.response.ThemeFindResponse;
-import roomescape.theme.dto.response.ThemeSaveResponse;
-import roomescape.theme.infrastructure.ThemeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.application.dto.request.ThemeSaveRequest;
+import roomescape.theme.application.dto.response.ThemeFindResponse;
+import roomescape.theme.application.dto.response.ThemeSaveResponse;
+import roomescape.theme.application.port.out.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;

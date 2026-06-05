@@ -2,7 +2,7 @@ package roomescape.reservationtime.application;
 
 import java.time.LocalTime;
 import org.springframework.stereotype.Component;
-import roomescape.reservationtime.ReservationTime;
+import roomescape.reservationtime.domain.ReservationTime;
 
 @Component
 public class ReservationTimeAssembler {

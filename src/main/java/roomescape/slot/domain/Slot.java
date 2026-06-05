@@ -7,8 +7,8 @@ import java.util.Objects;
 import lombok.Getter;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.Theme;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Getter
 public class Slot {

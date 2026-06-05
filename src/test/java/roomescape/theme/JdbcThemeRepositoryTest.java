@@ -1,4 +1,4 @@
-package roomescape.theme;
+package roomescape.theme.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.theme.infrastructure.JdbcThemeRepository;
+import roomescape.theme.adapter.out.persistence.JdbcThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,7 +1,7 @@
 package roomescape.theme.application;
 
 import org.springframework.stereotype.Component;
-import roomescape.theme.Theme;
+import roomescape.theme.domain.Theme;
 
 @Component
 public class ThemeAssembler {

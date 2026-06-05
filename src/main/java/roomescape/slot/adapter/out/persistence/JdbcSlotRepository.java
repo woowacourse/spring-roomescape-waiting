@@ -10,10 +10,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservationtime.ReservationTime;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.application.port.out.SlotRepository;
 import roomescape.slot.domain.Slot;
-import roomescape.theme.Theme;
+import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.List;

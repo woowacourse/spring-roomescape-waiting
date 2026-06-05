@@ -22,8 +22,8 @@ import roomescape.reservation.application.dto.response.ReservationDetailFindResp
 import roomescape.reservation.application.dto.response.ReservationSaveResponse;
 import roomescape.reservation.adapter.in.web.ManagerReservationController;
 import roomescape.reservation.adapter.in.web.UserReservationController;
-import roomescape.reservationtime.dto.response.TimeInformation;
-import roomescape.theme.dto.response.ThemeFindResponse;
+import roomescape.reservationtime.application.dto.response.TimeInformation;
+import roomescape.theme.application.dto.response.ThemeFindResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationControllerTest {

@@ -1,4 +1,4 @@
-package roomescape.reservationtime;
+package roomescape.reservationtime.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,10 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.application.ReservationTimeAssembler;
 import roomescape.reservationtime.application.ReservationTimeService;
-import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
-import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
-import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
+import roomescape.reservationtime.application.dto.request.ReservationTimeSaveRequest;
+import roomescape.reservationtime.application.dto.response.ReservationTimeFindResponse;
+import roomescape.reservationtime.application.dto.response.ReservationTimeSaveResponse;
+import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
 import roomescape.slot.application.SlotUsageValidator;
 
 import java.time.LocalTime;

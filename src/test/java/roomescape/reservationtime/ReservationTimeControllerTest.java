@@ -1,4 +1,4 @@
-package roomescape.reservationtime;
+package roomescape.reservationtime.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -16,14 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.api.ApiResponse;
 import roomescape.reservationtime.application.ReservationTimeService;
-import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
-import roomescape.reservationtime.dto.response.AvailableTimeFindResponse;
-import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
-import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
-import roomescape.reservationtime.dto.response.TimeInformation;
-import roomescape.reservationtime.dto.response.TimeSlotStatus;
-import roomescape.reservationtime.presentation.ManagerReservationTimeController;
-import roomescape.reservationtime.presentation.UserReservationTimeController;
+import roomescape.reservationtime.application.dto.request.ReservationTimeSaveRequest;
+import roomescape.reservationtime.application.dto.response.AvailableTimeFindResponse;
+import roomescape.reservationtime.application.dto.response.ReservationTimeFindResponse;
+import roomescape.reservationtime.application.dto.response.ReservationTimeSaveResponse;
+import roomescape.reservationtime.application.dto.response.TimeInformation;
+import roomescape.reservationtime.application.dto.response.TimeSlotStatus;
+import roomescape.reservationtime.adapter.in.web.ManagerReservationTimeController;
+import roomescape.reservationtime.adapter.in.web.UserReservationTimeController;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeControllerTest {

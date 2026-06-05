@@ -8,9 +8,9 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservationtime.ReservationTime;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.domain.Slot;
-import roomescape.theme.Theme;
+import roomescape.theme.domain.Theme;
 
 public class WaitingTest {
 

@@ -1,4 +1,4 @@
-package roomescape.theme;
+package roomescape.theme.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.slot.application.SlotUsageValidator;
 import roomescape.theme.application.ThemeService;
-import roomescape.theme.infrastructure.ThemeRepository;
+import roomescape.theme.application.port.out.ThemeRepository;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
