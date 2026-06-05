@@ -3,11 +3,16 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+@Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Reservation {
 
     private final Long id;
@@ -16,16 +21,6 @@ public class Reservation {
     private final ReservationTime time;
     private final Theme theme;
     private final LocalDateTime createdAt;
-
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
-                        LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.createdAt = createdAt;
-    }
 
     public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateCreatableDateTime(date, time);
@@ -50,30 +45,6 @@ public class Reservation {
 
     public Reservation appendId(Long id) {
         return new Reservation(id, name, date, time, theme, createdAt);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     private static void validateCreatableDateTime(LocalDate date, ReservationTime time) {

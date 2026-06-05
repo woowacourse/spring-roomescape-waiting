@@ -2,6 +2,7 @@ package roomescape.waiting.presentation;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,13 +18,10 @@ import roomescape.waiting.presentation.dto.response.WaitingResponse;
 
 @RestController
 @RequestMapping("/waiting")
+@RequiredArgsConstructor
 public class WaitingController {
 
     private final WaitingService waitingService;
-
-    public WaitingController(WaitingService waitingService) {
-        this.waitingService = waitingService;
-    }
 
     @PostMapping
     public ResponseEntity<WaitingResponse> saveWaiting(

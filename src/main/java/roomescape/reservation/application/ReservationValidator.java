@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.customException.BusinessException;
@@ -9,13 +10,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 
 @Component
+@RequiredArgsConstructor
 public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
-
-    public ReservationValidator(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
-    }
 
     public void validateAlreadyReservation(ReservationCreateCommand createCommand) {
         boolean exists = reservationRepository

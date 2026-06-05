@@ -2,6 +2,7 @@ package roomescape.waiting.application;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,6 +20,7 @@ import roomescape.waiting.domain.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -26,20 +28,6 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final WaitingReference waitingReference;
     private final WaitingValidator waitingValidator;
-
-    public WaitingService(
-            WaitingRepository waitingRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            WaitingReference waitingReference,
-            WaitingValidator waitingValidator
-    ) {
-        this.waitingRepository = waitingRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.waitingReference = waitingReference;
-        this.waitingValidator = waitingValidator;
-    }
 
     @Transactional
     public Waiting save(WaitingCreateCommand command) {

@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import roomescape.waiting.domain.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -32,22 +34,6 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
     private final ReservationValidator reservationValidator;
     private final WaitingService waitingService;
-
-    public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            WaitingRepository waitingRepository,
-            ReservationValidator reservationValidator,
-            WaitingService waitingService
-    ) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
-        this.reservationValidator = reservationValidator;
-        this.waitingService = waitingService;
-    }
 
     @Transactional
     public Reservation saveReservation(ReservationCreateCommand createCommand) {

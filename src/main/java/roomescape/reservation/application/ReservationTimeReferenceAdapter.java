@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.global.exception.ReservationTimeErrorCode;
 import roomescape.global.exception.customException.BusinessException;
@@ -11,13 +12,10 @@ import roomescape.reservationTime.application.ReservationTimeReference;
 import roomescape.reservationTime.domain.ReservationTime;
 
 @Component
+@RequiredArgsConstructor
 public class ReservationTimeReferenceAdapter implements ReservationTimeReference {
 
     private final ReservationRepository reservationRepository;
-
-    public ReservationTimeReferenceAdapter(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
-    }
 
     @Override
     public void validateReservationTimeNotReferenced(Long timeId) {

@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
@@ -10,13 +11,10 @@ import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 
 @Component
+@RequiredArgsConstructor
 public class WaitingReferenceAdapter implements WaitingReference {
 
     private final ReservationRepository reservationRepository;
-
-    public WaitingReferenceAdapter(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
-    }
 
     @Override
     public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {

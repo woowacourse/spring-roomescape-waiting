@@ -5,6 +5,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +22,10 @@ import roomescape.reservationTime.presentation.dto.response.ReservationTimeRespo
 
 @RestController
 @RequestMapping("/times")
+@RequiredArgsConstructor
 public class ReservationTimeController {
 
     private final ReservationTimeService service;
-
-    public ReservationTimeController(ReservationTimeService service) {
-        this.service = service;
-    }
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> saveTime(

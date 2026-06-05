@@ -1,7 +1,11 @@
 package roomescape.global.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+@Getter
+@RequiredArgsConstructor
 public enum WaitingErrorCode implements ErrorCode {
 
     WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),
@@ -21,20 +25,4 @@ public enum WaitingErrorCode implements ErrorCode {
 
     private final HttpStatus status;
     private final String message;
-
-    WaitingErrorCode(
-            HttpStatus status,
-            String message
-    ) {
-        this.status = status;
-        this.message = message;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

@@ -3,11 +3,16 @@ package roomescape.waiting.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+@Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Waiting {
 
     private final Long id;
@@ -17,17 +22,6 @@ public class Waiting {
     private final Theme theme;
     private final Long rank;
     private final LocalDateTime createdAt;
-
-    private Waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long rank,
-                        LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.rank = rank;
-        this.createdAt = createdAt;
-    }
 
     public static Waiting create(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateCreatableDateTime(date, time);
@@ -52,34 +46,6 @@ public class Waiting {
 
     public Waiting appendId(Long id) {
         return new Waiting(id, name, date, time, theme, rank, createdAt);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Long getRank() {
-        return rank;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     private static void validateCreatableDateTime(LocalDate date, ReservationTime time) {
