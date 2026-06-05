@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,21 +51,14 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(long reservationId) {
-        Reservation reservation = findReservationOrNull(reservationId);
-        if (reservation == null) {
-            return;
-        }
-        deleteReservation(reservation);
+        findReservationIfExists(reservationId)
+                .ifPresent(this::cancelReservation);
     }
 
     @Transactional
     public void deleteByIdForUser(long reservationId, long memberId) {
-        Reservation reservation = findReservationOrNull(reservationId);
-        if (reservation == null) {
-            return;
-        }
-        reservation.validateOwnedBy(memberId);
-        deleteReservation(reservation);
+        findReservationIfExists(reservationId)
+                .ifPresent(reservation -> cancelReservationByUser(reservation, memberId));
     }
 
     public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
@@ -142,16 +136,29 @@ public class ReservationService {
         }
     }
 
-    private Reservation findReservationOrNull(long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElse(null);
+    private Optional<Reservation> findReservationIfExists(long reservationId) {
+        return reservationRepository.findById(reservationId);
     }
 
-    private void deleteReservation(Reservation reservation) {
-        validateNotPast(reservation);
-        WaitingLine waitingLine = WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(reservation.getSlotId()));
-        reservationRepository.deleteById(reservation.getId());
+    private void cancelReservationByUser(Reservation reservation, long memberId) {
+        reservation.validateOwnedBy(memberId);
+        cancelReservation(reservation);
+    }
+
+    private void cancelReservation(Reservation reservation) {
+        validateCancelable(reservation);
+
+        WaitingLine waitingLine = findWaitingLineFor(reservation);
+        deleteReservationOnly(reservation);
         promoteFirstWaitingIfExists(reservation, waitingLine);
+    }
+
+    private WaitingLine findWaitingLineFor(Reservation reservation) {
+        return WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(reservation.getSlotId()));
+    }
+
+    private void deleteReservationOnly(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
     }
 
     private void promoteFirstWaitingIfExists(Reservation canceledReservation, WaitingLine waitingLine) {
@@ -164,7 +171,7 @@ public class ReservationService {
     }
 
     private ReservationSaveResponse updateReservation(ReservationUpdateRequest body, Reservation oldReservation) {
-        validateNotPast(oldReservation);
+        validateUpdatable(oldReservation);
         validateNotEmptyUpdateRequest(body);
 
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.getSlot().getDate());
@@ -211,7 +218,11 @@ public class ReservationService {
         }
     }
 
-    private void validateNotPast(Reservation reservation) {
+    private void validateCancelable(Reservation reservation) {
+        reservation.validateNotPast(LocalDateTime.now(clock));
+    }
+
+    private void validateUpdatable(Reservation reservation) {
         reservation.validateNotPast(LocalDateTime.now(clock));
     }
 }
