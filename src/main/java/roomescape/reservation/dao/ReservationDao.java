@@ -163,7 +163,7 @@ public class ReservationDao {
     return jdbcTemplate.queryForObject(sql, rowMapper, id);
   }
 
-  public boolean findByDateTimeTheme(String date, Long timeId, Long themeId) {
+  public boolean existsReservedReservationByDateTimeTheme(String date, Long timeId, Long themeId) {
     String sql = """
         select count(*)
         from reservation
@@ -174,7 +174,7 @@ public class ReservationDao {
     return count != null && count > 0;
   }
 
-  public boolean findByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
+  public boolean existsByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
     String sql = """
         select count(*)
         from reservation
