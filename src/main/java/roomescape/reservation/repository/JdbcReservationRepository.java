@@ -38,9 +38,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                    r.time_id,
                    r.theme_id,
                    r.status,
-                   r.order_id,
-                   r.amount,
-                   r.payment_key,
                    r.created_at,
                    rt.start_time,
                    rt.end_time,
@@ -69,12 +66,12 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findByIdForUpdate(Long id) {
-        jdbcTemplate.query(
-                "SELECT id FROM reservation WHERE id = ? FOR UPDATE",
-                (rs, rowNum) -> rs.getLong("id"),
+        List<Reservation> results = jdbcTemplate.query(
+                BASE_SELECT + "WHERE r.id = ? FOR UPDATE",
+                new ReservationRowMapper(),
                 id
         );
-        return findById(id);
+        return results.stream().findFirst();
     }
 
     @Override
@@ -93,41 +90,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
-                .addValue("order_id", reservation.getOrderId())
-                .addValue("amount", reservation.getAmount())
                 .addValue("created_at", reservation.getCreatedAt()));
         return reservation.withId(id.longValue());
     }
 
     @Override
-    public Optional<Reservation> findByOrderId(String orderId) {
-        List<Reservation> results = jdbcTemplate.query(
-                BASE_SELECT + "WHERE r.order_id = ?",
-                new ReservationRowMapper(),
-                orderId
-        );
-        return results.stream().findFirst();
-    }
-
-    @Override
-    public boolean confirmPayment(Long reservationId, String paymentKey) {
-        int affected = jdbcTemplate.update(
-                "UPDATE reservation SET status = ?, payment_key = ? WHERE id = ?",
-                Status.CONFIRMED.name(), paymentKey, reservationId
-        );
-        return affected > 0;
-    }
-
-    @Override
     public boolean hasConfirmedReservation(Long themeId, ReservationTime time) {
         Integer exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ? AND status IN (?, ?, ?))",
+                "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ? AND status = ?)",
                 Integer.class,
                 themeId,
                 time.getId(),
-                Status.RESERVED.name(),
-                Status.CONFIRMED.name(),
-                Status.PAYMENT_PENDING.name()
+                Status.RESERVED.name()
         );
         return exists != null && exists == 1;
     }
@@ -210,9 +184,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             }
 
             Status status = Status.valueOf(rs.getString("status"));
-            String orderId = rs.getString("order_id");
-            long amountVal = rs.getLong("amount");
-            Long amount = rs.wasNull() ? null : amountVal;
             LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
 
             return new Reservation(
@@ -220,8 +191,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                     time,
                     theme,
                     status,
-                    orderId,
-                    amount,
                     createdAt
             ).withId(rs.getLong("id"));
         }
