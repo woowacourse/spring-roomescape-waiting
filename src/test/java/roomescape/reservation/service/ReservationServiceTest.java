@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.EmptyResultDataAccessException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.reservation.MyReservation;
@@ -279,12 +278,15 @@ public class ReservationServiceTest {
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
 
-        given(reservationDao.selectById(reservationId))
+        given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(originReservation));
+        given(reservationWaitingDao.selectFirstWaitingForUpdate(originReservation))
+                .willReturn(Optional.empty());
 
         reservationService.deleteByIdIfNameMatches(reservationId, name);
 
         verify(reservationDao, times(1)).deleteById(reservationId);
+        verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(any(Reservation.class));
     }
 
     @Test
@@ -305,7 +307,7 @@ public class ReservationServiceTest {
                 2L
         );
 
-        given(reservationDao.selectById(reservationId))
+        given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservationId, request.name()))
@@ -346,7 +348,7 @@ public class ReservationServiceTest {
                 LocalDate.now().minusDays(1),
                 new ReservationTime(2L, LocalTime.of(11, 0))
         );
-        given(reservationDao.selectById(pastReserved)).willReturn(Optional.of(reservation));
+        given(reservationDao.selectByIdForUpdate(pastReserved)).willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(pastReserved, request.name()))
                 .isInstanceOf(RoomescapeException.class)
@@ -380,9 +382,8 @@ public class ReservationServiceTest {
                 waitingNumber
         );
 
-        when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
-        when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
-        when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(waiting);
+        when(reservationDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.selectFirstWaitingForUpdate(reservation)).thenReturn(Optional.of(waiting));
         when(reservationDao.updateNameByThemeIdAndDateAndTimeId(any(Reservation.class)))
                 .thenReturn(Optional.of(new Reservation(id, waiting.getName(), themeId, date, reservationTime)));
 
@@ -402,7 +403,7 @@ public class ReservationServiceTest {
     }
 
     @Test
-    void 자동_예약_전환_중_첫번째_대기_조회_실패_예외발생() {
+    void 자동_예약_전환_대상이_없으면_예약_삭제_성공() {
         Long id = 1L;
         Long themeId = 1L;
         LocalDate date = LocalDate.now().plusDays(1);
@@ -417,16 +418,13 @@ public class ReservationServiceTest {
                 reservationTime
         );
 
-        when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
-        when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
-        when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId))
-                .thenThrow(new EmptyResultDataAccessException(1));
+        when(reservationDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.selectFirstWaitingForUpdate(reservation)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName()))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+        reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName());
 
         verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(any(Reservation.class));
-        verify(reservationDao, times(0)).deleteById(id);
+        verify(reservationDao, times(1)).deleteById(id);
         verify(reservationWaitingDao, times(0)).deleteById(anyLong());
     }
 
@@ -457,9 +455,8 @@ public class ReservationServiceTest {
                 waitingNumber
         );
 
-        when(reservationDao.selectById(id)).thenReturn(Optional.of(reservation));
-        when(reservationWaitingDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(true);
-        when(reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(themeId, date, timeId)).thenReturn(waiting);
+        when(reservationDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.selectFirstWaitingForUpdate(reservation)).thenReturn(Optional.of(waiting));
         when(reservationDao.updateNameByThemeIdAndDateAndTimeId(any(Reservation.class)))
                 .thenReturn(Optional.empty());
 

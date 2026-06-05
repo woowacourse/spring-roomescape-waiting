@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -107,46 +108,28 @@ public class ReservationService {
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        Reservation reservation = reservationDao.selectById(id)
+        Reservation reservation = reservationDao.selectByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
 
         reservation.validateSameName(name, ErrorCode.CANNOT_DELETE_OTHER_RESERVATION);
-
         reservation.validateDateTime(reservation.getDate(), reservation.getTime(),
                 ErrorCode.CANNOT_DELETE_PAST_RESERVATION);
 
-        if (validateExistsWaiting(reservation)) {
-            autoApprove(reservation);
+        Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.selectFirstWaitingForUpdate(reservation);
+        if (firstWaiting.isEmpty()) {
+            reservationDao.deleteById(id);
             return;
         }
 
-        reservationDao.deleteById(id);
+        Reservation approvedReservation = reservation.approve(firstWaiting.get());
+        reservationDao.updateNameByThemeIdAndDateAndTimeId(approvedReservation)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+        reservationWaitingDao.deleteById(firstWaiting.get().getId());
     }
 
     private Theme getThemeById(Long themeId, Map<Long, Theme> themes) {
         return themes.computeIfAbsent(themeId, id -> themeDao.selectById(themeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND)));
-    }
-
-    private void autoApprove(Reservation reservation) {
-        ReservationWaiting firstWaiting = reservationWaitingDao.selectFirstWaitingByThemeIdAndDateAndTimeId(
-                reservation.getThemeId(),
-                reservation.getDate(),
-                reservation.getTime().getId()
-        );
-
-        Reservation approvedReservation = reservation.approve(firstWaiting);
-        reservationDao.updateNameByThemeIdAndDateAndTimeId(approvedReservation)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
-        reservationWaitingDao.deleteById(firstWaiting.getId());
-    }
-
-    private boolean validateExistsWaiting(Reservation reservation) {
-        return reservationWaitingDao.existsByThemeIdAndDateAndTimeId(
-                reservation.getThemeId(),
-                reservation.getDate(),
-                reservation.getTime().getId()
-        );
     }
 
     private void validateReserved(Long timeId, ReservationTime reservedTime) {

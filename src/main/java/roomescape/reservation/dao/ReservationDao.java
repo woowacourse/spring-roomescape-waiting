@@ -51,8 +51,23 @@ public class ReservationDao {
                         on r.time_id = t.id
                         where r.id = ?
                         """;
-        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, id);
-        return reservations.stream().findFirst();
+
+        return jdbcTemplate.query(sql, rowMapper, id).stream().findFirst();
+    }
+
+    public Optional<Reservation> selectByIdForUpdate(Long id) {
+        String sql = """
+                select r.id as reservation_id, r.name, r.date,
+                       t.id as time_id, t.start_at as start_at,
+                       r.theme_id as theme_id
+                from reservation r
+                inner join reservation_time t
+                on r.time_id = t.id
+                where r.id = ?
+                for update
+                """;
+
+        return jdbcTemplate.query(sql, rowMapper, id).stream().findFirst();
     }
 
     public List<Reservation> selectByThemeIdAndDate(Long themeId, LocalDate date) {
@@ -65,6 +80,7 @@ public class ReservationDao {
                         where r.theme_id = ?
                         and r.date = ?
                         """;
+
         return jdbcTemplate.query(sql, rowMapper, themeId, date);
     }
 
@@ -77,6 +93,7 @@ public class ReservationDao {
                         on r.time_id = t.id
                         where r.time_id = ?
                         """;
+
         return jdbcTemplate.query(sql, rowMapper, timeId);
     }
 
@@ -88,7 +105,23 @@ public class ReservationDao {
                         where theme_id = ?
                         and date = ?
                         """;
+
         return jdbcTemplate.queryForList(sql, Long.class, themeId, date);
+    }
+
+    public Optional<Reservation> selectByThemeIdAndDateAndTimeIdForUpdate(Long themeId, LocalDate date, Long timeId) {
+        String sql = """
+                select r.id as reservation_id, r.name, r.date,
+                       t.id as time_id, t.start_at as start_at,
+                       r.theme_id as theme_id
+                from reservation r
+                inner join reservation_time t
+                on r.time_id = t.id
+                where r.theme_id = ? and r.date = ? and r.time_id = ?
+                for update
+                """;
+
+        return jdbcTemplate.query(sql, rowMapper, themeId, date, timeId).stream().findFirst();
     }
 
     public List<Reservation> selectByName(String name) {
@@ -100,6 +133,7 @@ public class ReservationDao {
                         on r.time_id = t.id
                         where r.name = ?
                         """;
+
         return jdbcTemplate.query(sql, rowMapper, name);
     }
 
@@ -163,18 +197,6 @@ public class ReservationDao {
                 """;
 
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, themeId, date, timeId) == Boolean.TRUE;
-    }
-
-    public boolean notExistsByDateAndThemeIdAndTimeId(Long themeId, LocalDate date, Long timeId) {
-        String sql = """
-                SELECT EXISTS (
-                                SELECT 1
-                                    FROM reservation
-                                    WHERE  theme_id = ? AND date = ? AND time_id = ?
-                            )
-                """;
-
-        return jdbcTemplate.queryForObject(sql, Boolean.class, themeId, date, timeId) == Boolean.FALSE;
     }
 
     public void deleteById(Long id) {
