@@ -2,7 +2,9 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -44,20 +46,20 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<MyReservation> findAllByName(String name) {
         List<MyReservation> myReservations = new ArrayList<>();
+        Map<Long, Theme> themes = new HashMap<>();
 
         List<Reservation> reservations = reservationDao.selectByName(name);
         for (Reservation reservation : reservations) {
-            Theme theme = themeDao.selectById(reservation.getThemeId())
-                    .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+            Theme theme = getThemeById(reservation.getThemeId(), themes);
             myReservations.add(new MyReservation(reservation, theme));
         }
 
         List<ReservationWaiting> reservationWaitings = reservationWaitingDao.selectByName(name);
         for (ReservationWaiting reservationWaiting : reservationWaitings) {
-            Theme theme = themeDao.selectById(reservationWaiting.getThemeId())
-                    .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+            Theme theme = getThemeById(reservationWaiting.getThemeId(), themes);
             myReservations.add(new MyReservation(reservationWaiting, theme));
         }
+
         return myReservations;
     }
 
@@ -120,6 +122,11 @@ public class ReservationService {
         }
 
         reservationDao.deleteById(id);
+    }
+
+    private Theme getThemeById(Long themeId, Map<Long, Theme> themes) {
+        return themes.computeIfAbsent(themeId, id -> themeDao.selectById(themeId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND)));
     }
 
     private void autoApprove(Long id, Long themeId, LocalDate date, Long timeId) {
