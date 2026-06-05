@@ -95,6 +95,25 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
+    @DisplayName("여러 슬롯의 대기 목록을 한 번에 조회할 수 있다.")
+    void findAllBySlotIds_테스트() {
+        Waiting firstSlotFirst = waitingRepository.save(Waiting.create(3L, SLOT_ID));
+        Waiting firstSlotSecond = waitingRepository.save(Waiting.create(2L, SLOT_ID));
+        Waiting secondSlotFirst = waitingRepository.save(Waiting.create(4L, 2L));
+        Waiting firstSlotThird = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
+
+        List<Waiting> result = waitingRepository.findAllBySlotIds(List.of(2L, SLOT_ID));
+
+        assertThat(result).extracting(Waiting::getId)
+                .containsExactlyInAnyOrder(
+                        firstSlotFirst.getId(),
+                        firstSlotSecond.getId(),
+                        firstSlotThird.getId(),
+                        secondSlotFirst.getId()
+                );
+    }
+
+    @Test
     @DisplayName("날짜와 테마로 대기가 있는 시간 id를 조회할 수 있다.")
     void findTimeIdByDateAndThemeId_테스트() {
         waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));

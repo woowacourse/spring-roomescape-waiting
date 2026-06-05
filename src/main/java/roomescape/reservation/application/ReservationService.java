@@ -4,10 +4,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +22,7 @@ import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingLine;
+import roomescape.waiting.WaitingLines;
 import roomescape.waiting.WaitingPromotionPolicy;
 import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
@@ -69,33 +68,55 @@ public class ReservationService {
     }
 
     public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
-        List<WaitingDetailProjection> waitingDetails = waitingRepository.findAllWaitingDetailsByMemberId(memberId);
-        Map<Long, WaitingLine> waitingLinesBySlotId = createWaitingLinesBySlotId(waitingDetails);
+        List<ReservationDetailFindResponse> reservations = findMyReservationResponses(memberId);
+        List<ReservationDetailFindResponse> waitings = findMyWaitingResponses(memberId);
 
-        return ReservationDetailFindResponse.merge(
-                reservationRepository.findAllReservationDetailsByMemberId(memberId),
-                waitingDetails,
-                waitingDetail -> waitingOrderOf(memberId, waitingDetail, waitingLinesBySlotId)
-        );
+        return mergeMyReservations(reservations, waitings);
     }
 
-    private Map<Long, WaitingLine> createWaitingLinesBySlotId(List<WaitingDetailProjection> waitingDetails) {
+    private List<ReservationDetailFindResponse> findMyReservationResponses(long memberId) {
+        return reservationRepository.findAllReservationDetailsByMemberId(memberId)
+                .stream()
+                .map(ReservationDetailFindResponse::from)
+                .toList();
+    }
+
+    private List<ReservationDetailFindResponse> findMyWaitingResponses(long memberId) {
+        List<WaitingDetailProjection> waitingDetails = waitingRepository.findAllWaitingDetailsByMemberId(memberId);
+        WaitingLines waitingLines = findWaitingLines(waitingDetails);
+
         return waitingDetails.stream()
+                .map(waitingDetail -> ReservationDetailFindResponse.from(
+                        waitingDetail,
+                        waitingOrderOf(memberId, waitingDetail, waitingLines)
+                ))
+                .toList();
+    }
+
+    private List<ReservationDetailFindResponse> mergeMyReservations(
+            List<ReservationDetailFindResponse> reservations,
+            List<ReservationDetailFindResponse> waitings
+    ) {
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .toList();
+    }
+
+    private WaitingLines findWaitingLines(List<WaitingDetailProjection> waitingDetails) {
+        List<Long> slotIds = waitingDetails.stream()
                 .map(WaitingDetailProjection::slotId)
                 .distinct()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        slotId -> WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(slotId))
-                ));
+                .toList();
+
+        return WaitingLines.of(waitingRepository.findAllBySlotIds(slotIds));
     }
 
     private long waitingOrderOf(
             long memberId,
             WaitingDetailProjection waitingDetail,
-            Map<Long, WaitingLine> waitingLinesBySlotId
+            WaitingLines waitingLines
     ) {
         Waiting waiting = Waiting.of(waitingDetail.id(), memberId, waitingDetail.slotId());
-        return waitingLinesBySlotId.get(waitingDetail.slotId()).orderOf(waiting);
+        return waitingLines.orderOf(waiting);
     }
 
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {

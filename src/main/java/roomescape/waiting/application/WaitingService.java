@@ -46,9 +46,7 @@ public class WaitingService {
             return;
         }
 
-        if (!waiting.isOwnedBy(memberId)) {
-            throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, waitingId);
-        }
+        waiting.validateOwnedBy(memberId);
 
         waitingRepository.deleteById(waitingId);
     }

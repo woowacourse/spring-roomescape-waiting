@@ -8,8 +8,6 @@ import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public record ReservationDetailFindResponse(
         Long id,
@@ -66,18 +64,4 @@ public record ReservationDetailFindResponse(
         );
     }
 
-    public static List<ReservationDetailFindResponse> merge(
-            List<ReservationDetailProjection> reservationProjections,
-            List<WaitingDetailProjection> waitingProjections,
-            Function<WaitingDetailProjection, Long> waitingOrderResolver
-    ) {
-        return Stream.concat(
-                reservationProjections.stream().map(ReservationDetailFindResponse::from),
-                waitingProjections.stream()
-                        .map(projection -> ReservationDetailFindResponse.from(
-                                projection,
-                                waitingOrderResolver.apply(projection)
-                        ))
-        ).toList();
-    }
 }

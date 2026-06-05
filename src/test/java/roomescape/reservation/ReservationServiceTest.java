@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
@@ -36,6 +37,7 @@ import roomescape.theme.Theme;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingPromotionPolicy;
 import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -91,6 +93,46 @@ class ReservationServiceTest {
                 date,
                 new ReservationTime(timeId, startAt),
                 new Theme(themeId, "theme", "description", "thumbnail")
+        );
+    }
+
+    @Test
+    @DisplayName("나의 예약 목록 조회 시 여러 슬롯의 대기열을 한 번에 조회해 대기 순번을 계산한다.")
+    void findMyReservations_uses_bulk_waiting_line_query() {
+        WaitingDetailProjection firstWaitingDetail = waitingDetail(11L, 10L);
+        WaitingDetailProjection secondWaitingDetail = waitingDetail(22L, 20L);
+
+        when(reservationRepository.findAllReservationDetailsByMemberId(MEMBER_ID)).thenReturn(List.of());
+        when(waitingRepository.findAllWaitingDetailsByMemberId(MEMBER_ID))
+                .thenReturn(List.of(firstWaitingDetail, secondWaitingDetail));
+        when(waitingRepository.findAllBySlotIds(List.of(10L, 20L)))
+                .thenReturn(List.of(
+                        Waiting.of(11L, MEMBER_ID, 10L),
+                        Waiting.of(9L, OTHER_MEMBER_ID, 10L),
+                        Waiting.of(22L, MEMBER_ID, 20L),
+                        Waiting.of(21L, OTHER_MEMBER_ID, 20L)
+                ));
+
+        List<ReservationDetailFindResponse> responses = reservationService.findMyReservations(MEMBER_ID);
+
+        assertThat(responses).extracting(ReservationDetailFindResponse::waitingOrder)
+                .containsExactly(2L, 2L);
+        verify(waitingRepository).findAllBySlotIds(List.of(10L, 20L));
+        verify(waitingRepository, never()).findAllBySlotIdOrderById(anyLong());
+    }
+
+    private WaitingDetailProjection waitingDetail(Long waitingId, Long slotId) {
+        return new WaitingDetailProjection(
+                waitingId,
+                slotId,
+                "member",
+                LocalDate.of(2026, 6, 1),
+                1L,
+                "theme",
+                "description",
+                "thumbnail",
+                1L,
+                LocalTime.of(10, 0)
         );
     }
 

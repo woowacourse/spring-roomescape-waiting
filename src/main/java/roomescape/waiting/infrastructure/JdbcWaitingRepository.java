@@ -132,6 +132,23 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findAllBySlotIds(List<Long> slotIds) {
+        if (slotIds.isEmpty()) {
+            return List.of();
+        }
+
+        String sql = """
+                SELECT id, member_id, slot_id
+                FROM waiting
+                WHERE slot_id IN (:slotIds)
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("slotIds", slotIds);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper);
+    }
+
+    @Override
     public List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId) {
         String sql = """
                 SELECT
