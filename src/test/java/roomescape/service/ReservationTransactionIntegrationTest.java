@@ -12,6 +12,7 @@ import roomescape.common.FixedClockConfig;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.dto.WaitingWithRank;
+import roomescape.domain.common.UserName;
 import roomescape.domain.reservation.Reservation;
 import roomescape.exception.InvalidDomainStateException;
 
@@ -23,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/reservation-transaction-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @MockitoSpyBeans({
         @MockitoSpyBean(types = ReservationWaitingDao.class),
@@ -58,7 +59,7 @@ class ReservationTransactionIntegrationTest {
         List<Reservation> allReservation = reservationQueryService.getAllReservations();
         assertThat(allReservation).hasSize(2);
 
-        List<Reservation> reservations = reservationQueryService.getByName("user_a");
+        List<Reservation> reservations = reservationQueryService.getByName(UserName.from("user_a"));
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getReservationDate()).isEqualTo(LocalDate.parse("2026-06-05"));
         assertThat(reservations.getFirst().getReservationTime().getId()).isEqualTo(1);
@@ -80,7 +81,7 @@ class ReservationTransactionIntegrationTest {
         List<Reservation> allReservation = reservationQueryService.getAllReservations();
         assertThat(allReservation).hasSize(2);
 
-        List<Reservation> reservations = reservationQueryService.getByName("user_b");
+        List<Reservation> reservations = reservationQueryService.getByName(UserName.from("user_b"));
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getReservationDate()).isEqualTo(LocalDate.parse("2026-06-06"));
         assertThat(reservations.getFirst().getReservationTime().getId()).isEqualTo(1);
@@ -102,13 +103,13 @@ class ReservationTransactionIntegrationTest {
         List<Reservation> allReservation = reservationQueryService.getAllReservations();
         assertThat(allReservation).hasSize(2);
 
-        List<Reservation> reservations = reservationQueryService.getByName("user_b");
+        List<Reservation> reservations = reservationQueryService.getByName(UserName.from("user_b"));
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getReservationDate()).isEqualTo(LocalDate.parse("2026-06-06"));
         assertThat(reservations.getFirst().getReservationTime().getId()).isEqualTo(1);
         assertThat(reservations.getFirst().getReservationTheme().getId()).isEqualTo(1);
 
-        List<WaitingWithRank> waitings = waitingQueryService.getByName("user_c");
+        List<WaitingWithRank> waitings = waitingQueryService.getByName(UserName.from("user_c"));
         assertThat(waitings).hasSize(1);
         assertThat(waitings.getFirst().reservationDate()).isEqualTo(LocalDate.parse("2026-06-06"));
         assertThat(waitings.getFirst().reservationTime().getId()).isEqualTo(1);
