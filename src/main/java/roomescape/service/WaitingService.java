@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -63,11 +64,11 @@ public class WaitingService {
         return WaitingResult.from(saved);
     }
 
-    //TODO @Transactional은 사이클 2에서 다루는 내용이므로 사이클 1에서는 다루지 않음.
+    @Transactional
     public void cancelByOwner(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
                 .filter(w -> w.isOwnedBy(name))
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 대기입니다."));//남의 대기
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 대기입니다."));
 
         waitingRepository.deleteById(id);
 
