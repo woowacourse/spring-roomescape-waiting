@@ -72,12 +72,22 @@ import roomescape.exception.client.ResourceNotFoundException;
  * </ul>
  * → 통합(WaitingServiceTest)을 메인으로 두고, 이 Mock 비교본은 학습 기록으로 park한다.
  *
- * <p>=== 사이클 2에서 다시 본다 ===
- * 트랜잭션 경계는 "결과로 안 보이는 협력"의 전형이라 Mock 가치가 결정적으로 살아날 수 있는 자리다.
+ * <p>=== 사이클 2 재검토 결과 (park 유지) ===
  *
+ * @Transactional이 들어온 뒤 두 기준으로 다시 봤다. (1) 분기/조합 폭발? — create 분기는 5개 그대로다. 사이클 2의 트랜잭션 작업은 cancelByOwner/deleteByOwner에
+ * 경계를 준 것이고, create는 단일 INSERT라 손대지 않았다. 분기 상황이 안 변했으니 분기 검증은 여전히 통합(WaitingServiceTest)이 메인이다. (2) 결과로 안 보이는 협력? —
+ * 도착했다. 다만 그 협력(트랜잭션 롤백)을 검증한 도구는 이 파일의 "create 분기 순수 mock"이 아니라 spy 결함 주입이다. → ReservationPromotionTransactionTest /
+ * WaitingCancelTransactionTest 가 @MockitoSpyBean으로 한 메서드만 던지게 해 롤백을 증명한다. "Mock 가치가 살아나는 자리"라는 사이클 1의 예측은 맞았지만, 그 자리는
+ * create 분기가 아니라 cancel/delete의 경계였고 도구도 full mock이 아니라 spy였다.
+ * <p>
+ * 결론: 승격 사유가 없어 park 유지. 이 비교가 끝내 가른 것은 "Mock의 적정 범위"다 — 결함 주입(경계 증명)엔 적정, 분기 단위 검증엔 이 규모에선 통합이 메인. 다음 재검토 트리거: 알림
+ * 전송·외부 시스템 호출 등 "결과로 안 보이는 협력"이 create/promote 흐름 자체에 들어올 때(통합으로 흉내 내기 어려운 의존이 생겨 Mock 필요성이 올라가는 시점).
+ * <p>
+ * <p>
+ * 트랜잭션 경계는 "결과로 안 보이는 협력"의 전형이라 Mock 가치가 결정적으로 살아날 수 있는 자리다.
  * @Transactional을 넣으며 "분기/조합이 폭발하는가, 결과로 안 보이는 협력이 생기는가"를 다시 보고, 그때 이 park를 풀지(= Mock 단위를 메인 검증의 하나로 승격할지) 다시 결정한다.
  */
-@Disabled("사이클 1 'Mock vs 통합' 학습 비교 기록 — 활성 검증은 WaitingServiceTest(통합)가 맡는다. 사이클 2 트랜잭션에서 Mock 필요성 재검토")
+@Disabled("Mock vs 통합 학습 비교 + 사이클 2 재검토 완료(park 유지). 활성 검증은 WaitingServiceTest(통합). 다음 트리거=알림/외부 호출 도입 시")
 class WaitingServiceMockTest {
 
     private static final LocalDate FUTURE = LocalDate.of(2050, 12, 31);
