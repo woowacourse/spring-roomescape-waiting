@@ -20,18 +20,13 @@ import roomescape.theme.service.dto.response.ThemeResponse;
 public class ThemeService {
 
     private static final int POPULAR_THEME_PERIOD_DAYS = 7;
+
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
-    public ThemeResponse create(final ThemeCreateRequest request) {
-        final Theme themeWithoutId = Theme.create(
-                request.name(),
-                request.description(),
-                request.thumbnailUrl()
-        );
-
-        Theme theme = themeRepository.save(themeWithoutId);
-        return ThemeResponse.from(theme);
+    @Transactional(readOnly = true)
+    public List<Theme> findAll() {
+        return themeRepository.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -40,23 +35,34 @@ public class ThemeService {
             .orElseThrow(ThemeNotFoundException::new);
     }
 
-    public void delete(final Long themeId) {
-        boolean deleted = deleteTheme(themeId);
-
-        if (!deleted) {
-            throw new ThemeNotFoundException();
-        }
-    }
-
     @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate today = LocalDate.now(clock);
         final LocalDate startDate = today.minusDays(POPULAR_THEME_PERIOD_DAYS);
 
         return themeRepository.findPopularThemes(startDate, today)
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
+            .stream()
+            .map(ThemeResponse::from)
+            .toList();
+    }
+
+    public ThemeResponse create(final ThemeCreateRequest request) {
+        final Theme themeWithoutId = Theme.create(
+            request.name(),
+            request.description(),
+            request.thumbnailUrl()
+        );
+
+        Theme theme = themeRepository.save(themeWithoutId);
+        return ThemeResponse.from(theme);
+    }
+
+    public void delete(final Long themeId) {
+        boolean deleted = deleteTheme(themeId);
+
+        if (!deleted) {
+            throw new ThemeNotFoundException();
+        }
     }
 
     private boolean deleteTheme(final Long themeId) {

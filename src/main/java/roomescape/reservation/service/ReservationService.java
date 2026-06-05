@@ -16,29 +16,15 @@ import roomescape.reservation.domain.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-
-import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeNotFoundException;
-import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.dto.response.ThemeResponse;
-import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private static final int RESERVABLE_DAYS_RANGE = 14;
-
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final WaitingRepository waitingRepository;
     private final Clock clock;
 
     @Transactional(readOnly = true)
@@ -60,21 +46,14 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationOptionResponse getReservationOptions() {
-        LocalDate today = LocalDate.now(clock);
-        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
-
-        List<ThemeResponse> themes = themeRepository.findAll()
-            .stream()
-            .map(ThemeResponse::from)
-            .toList();
-
-        return new ReservationOptionResponse(dates, themes);
+    public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
+        return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
     }
 
     @Transactional(readOnly = true)
-    public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
-        return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
+    public Reservation getReservation(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+            .orElseThrow(ReservationNotFoundException::new);
     }
 
     public Reservation create(
@@ -93,17 +72,17 @@ public class ReservationService {
         return saveReservation(reservation);
     }
 
-    public Reservation updateByCustomer(final Long reservationId, final LocalDate date, final Long timeId) {
+    public Reservation updateByCustomer(final Long reservationId, final LocalDate date, final ReservationTime time) {
         final Reservation originReservation = getReservation(reservationId);
         originReservation.validateModifiableByCustomer(LocalDate.now(clock));
 
-        return updateSchedule(date, timeId, originReservation);
+        return updateSchedule(date, time, originReservation);
     }
 
-    public Reservation updateByAdmin(final Long reservationId, final LocalDate date, final Long timeId) {
+    public Reservation updateByAdmin(final Long reservationId, final LocalDate date, final ReservationTime time) {
         final Reservation originReservation = getReservation(reservationId);
 
-        return updateSchedule(date, timeId, originReservation);
+        return updateSchedule(date, time, originReservation);
     }
 
     public void cancel(final Long reservationId) {
@@ -117,12 +96,10 @@ public class ReservationService {
         deleteReservation(reservationId);
     }
 
-    private Reservation updateSchedule(final LocalDate date, final Long timeId, final Reservation originReservation) {
-        final ReservationTime newReservationTime = getReservationTime(timeId);
-
+    private Reservation updateSchedule(final LocalDate date, final ReservationTime time, final Reservation originReservation) {
         final Reservation updatedReservation = originReservation.changeSchedule(
                 date,
-                newReservationTime,
+                time,
                 LocalDateTime.now(clock)
         );
 
@@ -160,15 +137,5 @@ public class ReservationService {
         if (!deleted) {
             throw new ReservationNotFoundException();
         }
-    }
-
-    public Reservation getReservation(final Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(ReservationNotFoundException::new);
-    }
-
-    private ReservationTime getReservationTime(final Long reservationTimeId) {
-        return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(ReservationTimeNotFoundException::new);
     }
 }

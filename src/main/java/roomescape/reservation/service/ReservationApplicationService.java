@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.exception.WaitingExistsForSlotException;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
@@ -20,6 +19,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.dto.response.ThemeResponse;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 import roomescape.waiting.service.WaitingService;
 import roomescape.waiting.service.dto.response.WaitingResponse;
@@ -27,6 +27,8 @@ import roomescape.waiting.service.dto.response.WaitingResponse;
 @Service
 @RequiredArgsConstructor
 public class ReservationApplicationService {
+
+    private static final int RESERVABLE_DAYS_RANGE = 14;
 
     private final ReservationService reservationService;
     private final WaitingPromotionService waitingPromotionService;
@@ -60,7 +62,13 @@ public class ReservationApplicationService {
     }
 
     public ReservationOptionResponse getReservationOptions() {
-        return reservationService.getReservationOptions();
+        final LocalDate today = LocalDate.now(clock);
+        final List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
+
+        final List<ThemeResponse> themes = themeService.findAll().stream()
+            .map(ThemeResponse::from)
+            .toList();
+        return new ReservationOptionResponse(dates, themes);
     }
 
     @Transactional
@@ -87,12 +95,14 @@ public class ReservationApplicationService {
     }
 
     public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest request) {
-        final Reservation reservation = reservationService.updateByCustomer(reservationId, request.date(), request.timeId());
+        final ReservationTime time = reservationTimeService.getById(request.timeId());
+        final Reservation reservation = reservationService.updateByCustomer(reservationId, request.date(), time);
         return ReservationResponse.from(reservation);
     }
 
     public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest request) {
-        final Reservation reservation = reservationService.updateByAdmin(reservationId, request.date(), request.timeId());
+        final ReservationTime time = reservationTimeService.getById(request.timeId());
+        final Reservation reservation = reservationService.updateByAdmin(reservationId, request.date(), time);
         return ReservationResponse.from(reservation);
     }
 

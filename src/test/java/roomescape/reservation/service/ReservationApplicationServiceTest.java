@@ -66,9 +66,6 @@ class ReservationApplicationServiceTest {
 
         final ReservationService reservationService = new ReservationService(
             reservationRepository,
-            reservationTimeRepository,
-            themeRepository,
-            waitingRepository,
             FIXED_CLOCK
         );
         final WaitingPromotionService waitingPromotionService = new WaitingPromotionService(
