@@ -12,11 +12,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.service.command.ReservationCommand;
-import roomescape.support.BaseIntegrationTest;
+import roomescape.support.IntegrationTest;
 import roomescape.support.TestDateTimes;
 
+@IntegrationTest
 @Sql("/integration-fixture.sql")
-class ReservationServiceIntegrationTest extends BaseIntegrationTest {
+class ReservationServiceIntegrationTest {
 
     @Autowired
     private ReservationService reservationService;

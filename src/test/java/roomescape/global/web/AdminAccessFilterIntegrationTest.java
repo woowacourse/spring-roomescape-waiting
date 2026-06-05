@@ -5,11 +5,17 @@ import static org.hamcrest.Matchers.containsString;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import roomescape.support.BaseIntegrationTest;
+import org.springframework.test.context.ActiveProfiles;
 
-class AdminAccessFilterIntegrationTest extends BaseIntegrationTest {
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "spring.datasource.url=jdbc:h2:mem:filter"
+)
+@ActiveProfiles("test")
+class AdminAccessFilterIntegrationTest {
 
     @LocalServerPort
     private int port;

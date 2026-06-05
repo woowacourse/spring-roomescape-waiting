@@ -17,11 +17,12 @@ import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.repository.dto.ReservationCondition;
-import roomescape.support.BaseIntegrationTest;
+import roomescape.support.IntegrationTest;
 import roomescape.support.TestDateTimes;
 
+@IntegrationTest
 @Sql("/integration-fixture.sql")
-class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
+class JdbcReservationRepositoryIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;

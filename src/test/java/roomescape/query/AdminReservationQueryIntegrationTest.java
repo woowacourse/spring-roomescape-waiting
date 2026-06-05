@@ -13,11 +13,12 @@ import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.result.ReservationResult;
-import roomescape.support.BaseIntegrationTest;
+import roomescape.support.IntegrationTest;
 import roomescape.support.TestDateTimes;
 
+@IntegrationTest
 @Sql("/integration-fixture.sql")
-class AdminReservationQueryIntegrationTest extends BaseIntegrationTest {
+class AdminReservationQueryIntegrationTest {
 
     @Autowired
     private ReservationQueryRepository reservationQueryRepository;

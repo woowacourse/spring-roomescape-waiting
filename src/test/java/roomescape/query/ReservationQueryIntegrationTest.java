@@ -10,10 +10,11 @@ import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.service.command.ReservationSearchCommand;
 import roomescape.service.result.ReservationSearchResult;
-import roomescape.support.BaseIntegrationTest;
+import roomescape.support.IntegrationTest;
 
+@IntegrationTest
 @Sql("/reservation-test-query.sql") // 총 21개 데이터
-class ReservationQueryIntegrationTest extends BaseIntegrationTest {
+class ReservationQueryIntegrationTest {
 
     @Autowired
     private ReservationQueryRepository reservationQueryRepository;
