@@ -16,7 +16,8 @@ public interface ReservationRepository {
 
     Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId);
 
-    Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
+    Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+            LocalDate date, Long timeId, Long themeId, Long storeId);
 
     Optional<Reservation> findById(Long id);
 

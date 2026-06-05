@@ -66,8 +66,10 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId,
-                                                                                          Long themeId, Long storeId) {
+    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(LocalDate date,
+                                                                                                   Long timeId,
+                                                                                                   Long themeId,
+                                                                                                   Long storeId) {
         return store.values().stream()
                 .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
                 .filter(r -> r.getDate().equals(date))

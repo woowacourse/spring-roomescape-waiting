@@ -165,8 +165,10 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId,
-                                                                                Long themeId, Long storeId) {
+    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(LocalDate date,
+                                                                                                   Long timeId,
+                                                                                                   Long themeId,
+                                                                                                   Long storeId) {
         String sql = SELECT_BASE + """
                 where r.date = ?
                   and r.time_id = ?
@@ -175,6 +177,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
                   and r.status = ?
                 order by r.created_at asc, r.id asc
                 limit 1
+                for update
                 """;
 
         try {

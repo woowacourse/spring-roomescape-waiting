@@ -128,7 +128,7 @@ public class ReservationService {
         validateIsReserved(reservation);
         validateExistingNotInPast(reservation);
 
-        Optional<Reservation> firstWaitingReservation = findFirstWaitingReservation(reservation);
+        Optional<Reservation> firstWaitingReservation = findFirstWaitingReservationForUpdate(reservation);
 
         deleteReservation(command.reservationId());
 
@@ -222,8 +222,8 @@ public class ReservationService {
         }
     }
 
-    private Optional<Reservation> findFirstWaitingReservation(Reservation reservation) {
-        return reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStore(
+    private Optional<Reservation> findFirstWaitingReservationForUpdate(Reservation reservation) {
+        return reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),

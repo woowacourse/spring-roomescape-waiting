@@ -185,7 +185,7 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findFirstWaitingReservationByDateAndTimeAndThemeAndStore_가장_먼저_등록된_대기를_반환한다() {
+    void findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate_가장_먼저_등록된_대기를_반환한다() {
         Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
         Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
@@ -208,7 +208,7 @@ class ReservationJdbcRepositoryTest {
         jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 08:00:00",
                 firstWaitingId);
 
-        Reservation result = repository.findFirstWaitingReservationByDateAndTimeAndThemeAndStore(
+        Reservation result = repository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
                 date, time, themeA, storeId).orElseThrow();
 
         assertThat(result.getId()).isEqualTo(firstWaitingId);
@@ -216,7 +216,7 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findFirstWaitingReservationByDateAndTimeAndThemeAndStore_매칭되는_대기가_없으면_empty를_반환한다() {
+    void findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate_매칭되는_대기가_없으면_empty를_반환한다() {
         Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
@@ -224,7 +224,7 @@ class ReservationJdbcRepositoryTest {
         DbFixtures.insertReservation(jdbcTemplate, brown, themeId, "2026-06-01", timeId,
                 ReservationStatus.RESERVED.name());
 
-        assertThat(repository.findFirstWaitingReservationByDateAndTimeAndThemeAndStore(
+        assertThat(repository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
                 LocalDate.of(2026, 6, 1), timeId, themeId, storeId)).isEmpty();
     }
 

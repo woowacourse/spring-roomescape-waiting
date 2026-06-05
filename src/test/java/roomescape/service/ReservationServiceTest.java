@@ -254,7 +254,7 @@ class ReservationServiceTest {
         service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
 
         assertThat(reservationRepository.findById(reservationId)).isEmpty();
-        assertThat(reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStore(date, timeId, themeId,
+        assertThat(reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(date, timeId, themeId,
                 Fixtures.DEFAULT_STORE_ID).isEmpty()).isTrue();
         assertThat(reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(date, timeId, themeId,
                 Fixtures.DEFAULT_STORE_ID)).isFalse();
