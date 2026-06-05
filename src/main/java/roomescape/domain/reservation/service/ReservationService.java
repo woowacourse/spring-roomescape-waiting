@@ -267,7 +267,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
 
-        if (reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+        if (reservationRepository.lockActiveReservationBySchedule(
             reservation.getDate(),
             reservation.getTheme().getId(),
             reservation.getTime().getId()
@@ -278,7 +278,8 @@ public class ReservationService {
 
     @Transactional
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
-        Reservation reservation = reservationRepository.findReservationByIdAndNotDeletedForUpdate(id)
+        Reservation reservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
+            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         if (!reservation.getName().equals(name)) {
@@ -301,11 +302,12 @@ public class ReservationService {
             return;
         }
 
-        reservationRepository.findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+        reservationRepository.lockFirstWaitingReservationBySchedule(
             reservation.getDate(),
             reservation.getTheme().getId(),
             reservation.getTime().getId()
-        ).ifPresent(waiting -> reservationRepository.update(waiting.toActive()));
+        ).flatMap(reservationRepository::findReservationByIdAndNotDeleted)
+            .ifPresent(waiting -> reservationRepository.update(waiting.toActive()));
     }
 
     private boolean existsActiveReservationBySchedule(Reservation reservation) {

@@ -290,9 +290,8 @@ class ReservationServiceTest {
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(date, 1L, 1L))
-                .thenReturn(Optional.of(Reservation.reconstruct(
-                    2L, new ReserverName("기존예약자"), date, time, theme, ReservationStatus.ACTIVE)));
+            when(reservationRepository.lockActiveReservationBySchedule(date, 1L, 1L))
+                .thenReturn(Optional.of(2L));
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
             // when
@@ -316,9 +315,8 @@ class ReservationServiceTest {
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
                 .thenReturn(false);
-            when(reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(date, 1L, 1L))
-                .thenReturn(Optional.of(Reservation.reconstruct(
-                    2L, new ReserverName("기존예약자"), date, time, theme, ReservationStatus.ACTIVE)));
+            when(reservationRepository.lockActiveReservationBySchedule(date, 1L, 1L))
+                .thenReturn(Optional.of(2L));
             when(reservationRepository.save(any(Reservation.class))).thenThrow(new DuplicateKeyException("duplicate"));
 
             // when & then
@@ -340,7 +338,7 @@ class ReservationServiceTest {
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
                 .thenReturn(false);
-            when(reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(date, 1L, 1L))
+            when(reservationRepository.lockActiveReservationBySchedule(date, 1L, 1L))
                 .thenReturn(Optional.empty());
 
             // when & then
@@ -660,7 +658,9 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
             Reservation canceledWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findReservationByIdAndNotDeletedForUpdate(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(1L));
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceledWaiting);
 
@@ -675,7 +675,7 @@ class ReservationServiceTest {
         @Test
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
-            when(reservationRepository.findReservationByIdAndNotDeletedForUpdate(999L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(999L))
                 .thenReturn(Optional.empty());
 
             // when & then
@@ -692,7 +692,9 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
-            when(reservationRepository.findReservationByIdAndNotDeletedForUpdate(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(1L));
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
 
             // when & then
@@ -709,7 +711,9 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation active = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationByIdAndNotDeletedForUpdate(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(1L));
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(active));
 
             // when & then
@@ -726,7 +730,9 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation pastWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.WAITING);
-            when(reservationRepository.findReservationByIdAndNotDeletedForUpdate(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(1L));
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(pastWaiting));
 
             // when & then

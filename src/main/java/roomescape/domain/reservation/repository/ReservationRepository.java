@@ -14,16 +14,16 @@ public interface ReservationRepository {
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);
 
-    Optional<Reservation> findReservationByIdAndNotDeletedForUpdate(Long id);
+    Optional<Long> lockReservationByIdAndNotDeleted(Long id);
 
     List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate localDate, Long themeId);
 
     boolean existsActiveReservationByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 
-    Optional<Reservation> findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+    Optional<Long> lockActiveReservationBySchedule(
         LocalDate date, Long themeId, Long timeId);
 
-    Optional<Reservation> findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+    Optional<Long> lockFirstWaitingReservationBySchedule(
         LocalDate date, Long themeId, Long timeId);
 
     Reservation save(Reservation reservation);

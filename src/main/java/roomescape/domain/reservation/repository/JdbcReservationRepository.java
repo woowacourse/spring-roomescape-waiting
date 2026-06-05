@@ -157,27 +157,22 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findReservationByIdAndNotDeletedForUpdate(Long id) {
+    public Optional<Long> lockReservationByIdAndNotDeleted(Long id) {
         String sql = """
-            SELECT r.id, r.name, r.date, r.status,
-                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
-                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                   t.deleted_at AS theme_deleted_at
-            FROM reservation r
-            JOIN reservation_time rt ON r.time_id = rt.id
-            JOIN theme t ON r.theme_id = t.id
-            WHERE r.id = :id
-              AND r.deleted_at IS NULL
+            SELECT id
+            FROM reservation
+            WHERE id = :id
+              AND deleted_at IS NULL
             FOR UPDATE
             """;
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
-        List<Reservation> reservations = jdbcTemplate.query(
+        List<Long> reservationIds = jdbcTemplate.query(
             sql,
             parameters,
-            (rs, rowNum) -> mapReservation(rs)
+            (rs, rowNum) -> rs.getLong("id")
         );
 
-        return reservations.stream().findFirst();
+        return reservationIds.stream().findFirst();
     }
 
     @Override
@@ -233,23 +228,28 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+    public Optional<Long> lockActiveReservationBySchedule(
         LocalDate date, Long themeId, Long timeId) {
         String sql = """
-            SELECT r.id, r.name, r.date, r.status,
-                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
-                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                   t.deleted_at AS theme_deleted_at
+            SELECT r.id
             FROM reservation r
-            JOIN reservation_time rt ON r.time_id = rt.id
-            JOIN theme t ON r.theme_id = t.id
             WHERE r.date = :date
               AND r.theme_id = :themeId
               AND r.time_id = :timeId
               AND r.status = 'ACTIVE'
               AND r.deleted_at IS NULL
-              AND rt.deleted_at IS NULL
-              AND t.deleted_at IS NULL
+              AND EXISTS (
+                  SELECT 1
+                  FROM reservation_time rt
+                  WHERE rt.id = r.time_id
+                    AND rt.deleted_at IS NULL
+              )
+              AND EXISTS (
+                  SELECT 1
+                  FROM theme t
+                  WHERE t.id = r.theme_id
+                    AND t.deleted_at IS NULL
+              )
             FOR UPDATE
             """;
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
@@ -258,33 +258,38 @@ public class JdbcReservationRepository implements ReservationRepository {
             "timeId", timeId
         ));
 
-        List<Reservation> reservations = jdbcTemplate.query(
+        List<Long> reservationIds = jdbcTemplate.query(
             sql,
             parameters,
-            (rs, rowNum) -> mapReservation(rs)
+            (rs, rowNum) -> rs.getLong("id")
         );
 
-        return reservations.stream().findFirst();
+        return reservationIds.stream().findFirst();
     }
 
     @Override
-    public Optional<Reservation> findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+    public Optional<Long> lockFirstWaitingReservationBySchedule(
         LocalDate date, Long themeId, Long timeId) {
         String sql = """
-            SELECT r.id, r.name, r.date, r.status,
-                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
-                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                   t.deleted_at AS theme_deleted_at
+            SELECT r.id
             FROM reservation r
-            JOIN reservation_time rt ON r.time_id = rt.id
-            JOIN theme t ON r.theme_id = t.id
             WHERE r.date = :date
               AND r.theme_id = :themeId
               AND r.time_id = :timeId
               AND r.status = 'WAITING'
               AND r.deleted_at IS NULL
-              AND rt.deleted_at IS NULL
-              AND t.deleted_at IS NULL
+              AND EXISTS (
+                  SELECT 1
+                  FROM reservation_time rt
+                  WHERE rt.id = r.time_id
+                    AND rt.deleted_at IS NULL
+              )
+              AND EXISTS (
+                  SELECT 1
+                  FROM theme t
+                  WHERE t.id = r.theme_id
+                    AND t.deleted_at IS NULL
+              )
             ORDER BY r.id ASC
             LIMIT 1
             FOR UPDATE
@@ -295,13 +300,13 @@ public class JdbcReservationRepository implements ReservationRepository {
             "timeId", timeId
         ));
 
-        List<Reservation> reservations = jdbcTemplate.query(
+        List<Long> reservationIds = jdbcTemplate.query(
             sql,
             parameters,
-            (rs, rowNum) -> mapReservation(rs)
+            (rs, rowNum) -> rs.getLong("id")
         );
 
-        return reservations.stream().findFirst();
+        return reservationIds.stream().findFirst();
     }
 
     @Override

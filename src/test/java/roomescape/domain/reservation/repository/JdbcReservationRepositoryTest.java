@@ -584,22 +584,15 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme));
 
             // when
-            Optional<Reservation> actual =
-                reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+            Optional<Long> actual =
+                reservationRepository.lockActiveReservationBySchedule(
                     date, targetTheme.getId(), targetTime.getId());
-            Optional<Reservation> notFound =
-                reservationRepository.findActiveReservationByDateAndThemeIdAndTimeIdForUpdate(
+            Optional<Long> notFound =
+                reservationRepository.lockActiveReservationBySchedule(
                     date.minusDays(1), targetTheme.getId(), targetTime.getId());
 
             // then
-            assertThat(actual)
-                .get()
-                .extracting(
-                    Reservation::getId,
-                    reservation -> reservation.getName().value(),
-                    Reservation::getStatus
-                )
-                .containsExactly(active.getId(), "예약자1", ReservationStatus.ACTIVE);
+            assertThat(actual).contains(active.getId());
             assertThat(notFound).isEmpty();
         }
 
@@ -626,19 +619,12 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme).toWaiting());
 
             // when
-            Optional<Reservation> actual =
-                reservationRepository.findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+            Optional<Long> actual =
+                reservationRepository.lockFirstWaitingReservationBySchedule(
                     date, targetTheme.getId(), targetTime.getId());
 
             // then
-            assertThat(actual)
-                .get()
-                .extracting(
-                    Reservation::getId,
-                    reservation -> reservation.getName().value(),
-                    Reservation::getStatus
-                )
-                .containsExactly(firstWaiting.getId(), "대기자1", ReservationStatus.WAITING);
+            assertThat(actual).contains(firstWaiting.getId());
         }
 
         @Test
@@ -652,8 +638,8 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(deletedReservation.getId());
 
             // when
-            Optional<Reservation> actual =
-                reservationRepository.findFirstWaitingReservationByDateAndThemeIdAndTimeIdForUpdate(
+            Optional<Long> actual =
+                reservationRepository.lockFirstWaitingReservationBySchedule(
                     date, theme.getId(), time.getId());
 
             // then
