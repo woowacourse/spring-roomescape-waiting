@@ -228,24 +228,4 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
                 .statusCode(204);
     }
 
-    @Test
-    void 매니저_예약_수정() {
-        String accessToken = loginManagerToken();
-
-        Map<String, Object> updateRequest = new HashMap<>();
-        updateRequest.put("date", "2026-05-05");
-        updateRequest.put("timeId", 1);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(updateRequest)
-                .pathParam("id", 1)
-                .when().patch("/api/manager/reservations/{id}")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.id", is(1))
-                .body("data.memberId", is(1));
-    }
 }

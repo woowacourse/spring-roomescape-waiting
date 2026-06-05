@@ -23,20 +23,11 @@ const confirmCancelEl = document.getElementById("confirm-cancel");
 const myReservationOwnerEl = document.getElementById("my-reservation-owner");
 const myReservationCardsEl = document.getElementById("my-reservation-cards");
 const myReservationSectionEl = document.getElementById("my-reservation-section");
-const editReservationModalEl = document.getElementById("edit-reservation-modal");
-const editReservationFormEl = document.getElementById("edit-reservation-form");
-const editReservationIdEl = document.getElementById("edit-reservation-id");
-const editReservationDateEl = document.getElementById("edit-reservation-date");
-const editReservationThemeEl = document.getElementById("edit-reservation-theme");
-const editAvailableTimesEl = document.getElementById("edit-available-times");
-const editReservationCancelEl = document.getElementById("edit-reservation-cancel");
 const AUTH_TOKEN_KEY = "roomescapeAccessToken";
 let selectedThemeId = null;
 let selectedTimeId = null;
 let selectedTimeLabel = null;
 let selectedThemeName = null;
-let editingReservation = null;
-let selectedEditTimeId = null;
 let currentLoginName = null;
 let isAuthenticated = false;
 
@@ -323,19 +314,7 @@ function renderMyReservationCards(reservations) {
     const statusLabel = isWaiting ? "대기" : "예약";
     const menuItems = isWaiting
       ? `<button type="button" class="menu-item delete" data-waiting-delete-id="${reservation.id}">대기 취소</button>`
-      : `
-            <button
-              type="button"
-              class="menu-item edit"
-              data-edit-id="${reservation.id}"
-              data-edit-date="${reservation.date}"
-              data-edit-time-id="${reservation.time.id}"
-              data-edit-time-label="${reservation.time.time}"
-              data-edit-theme-id="${reservation.theme.id}"
-              data-edit-theme-name="${reservation.theme.name}"
-            >수정</button>
-            <button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>
-          `;
+      : `<button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>`;
 
     card.className = `reservation-card${isWaiting ? " waiting-card" : ""}`;
     card.innerHTML = `
@@ -374,45 +353,6 @@ async function loadMyReservations() {
 
 function closeMenuPanels() {
   document.querySelectorAll(".menu-panel").forEach((panel) => panel.classList.add("hidden"));
-}
-
-function renderEditAvailableTimes(items, currentTime) {
-  editAvailableTimesEl.innerHTML = "";
-  selectedEditTimeId = currentTime.id;
-
-  if (!items.length) {
-    const empty = document.createElement("span");
-    empty.className = "empty-message";
-    empty.textContent = "선택 가능한 시간이 없습니다.";
-    editAvailableTimesEl.appendChild(empty);
-    return;
-  }
-
-  items.forEach((item) => {
-    const button = document.createElement("button");
-    const isCurrent = item.timeInformation.id === currentTime.id;
-    const available = item.status === "RESERVABLE" || isCurrent;
-    button.type = "button";
-    button.className = `chip${available ? "" : " disabled"}${isCurrent ? " selected" : ""}`;
-    button.textContent = `${item.timeInformation.time}`;
-    if (!available) {
-      button.disabled = true;
-      editAvailableTimesEl.appendChild(button);
-      return;
-    }
-    button.addEventListener("click", () => {
-      editAvailableTimesEl.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("selected"));
-      button.classList.add("selected");
-      selectedEditTimeId = item.timeInformation.id;
-    });
-    editAvailableTimesEl.appendChild(button);
-  });
-}
-
-async function loadEditTimesByDate(date) {
-  if (!editingReservation) return;
-  const items = await api(`/user/times/availability?date=${date}&themeId=${editingReservation.themeId}`);
-  renderEditAvailableTimes(items, editingReservation.time);
 }
 
 document.getElementById("theme-by-date-form").addEventListener("submit", async (e) => {
@@ -535,27 +475,6 @@ myReservationCardsEl.addEventListener("click", async (e) => {
     return;
   }
 
-  const editButton = e.target.closest(".menu-item.edit");
-  if (editButton) {
-    closeMenuPanels();
-    editingReservation = {
-      id: editButton.dataset.editId,
-      date: editButton.dataset.editDate,
-      time: {
-        id: Number(editButton.dataset.editTimeId),
-        label: editButton.dataset.editTimeLabel,
-      },
-      themeId: Number(editButton.dataset.editThemeId),
-      themeName: editButton.dataset.editThemeName,
-    };
-    editReservationIdEl.value = editButton.dataset.editId;
-    editReservationDateEl.value = editButton.dataset.editDate;
-    editReservationThemeEl.textContent = `테마: ${editingReservation.themeName}`;
-    await loadEditTimesByDate(editReservationDateEl.value);
-    editReservationModalEl.classList.remove("hidden");
-    return;
-  }
-
   const waitingDeleteButton = e.target.closest(".menu-item.delete[data-waiting-delete-id]");
   if (waitingDeleteButton) {
     closeMenuPanels();
@@ -609,42 +528,6 @@ myReservationCardsEl.addEventListener("click", async (e) => {
     });
   } catch (error) {
     await showErrorModal("예약 취소 실패", error);
-  }
-});
-
-editReservationCancelEl.addEventListener("click", () => {
-  editReservationModalEl.classList.add("hidden");
-});
-
-editReservationDateEl.addEventListener("change", async () => {
-  try {
-    await loadEditTimesByDate(editReservationDateEl.value);
-  } catch (error) {
-    await showErrorModal("수정 가능 시간 조회 실패", error);
-  }
-});
-
-editReservationFormEl.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const id = editReservationIdEl.value;
-    if (!selectedEditTimeId) throw new Error("수정할 시간을 선택해주세요.");
-    await api(`/user/reservations/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        date: editReservationDateEl.value,
-        timeId: Number(selectedEditTimeId),
-      }),
-    });
-    editReservationModalEl.classList.add("hidden");
-    await loadMyReservations();
-    setStatus(`예약 #${id} 수정 완료`);
-    await showResultModal({
-      title: "예약 수정 성공",
-      message: `예약 ID ${id}가 수정되었습니다.`,
-    });
-  } catch (error) {
-    await showErrorModal("예약 수정 실패", error);
   }
 });
 

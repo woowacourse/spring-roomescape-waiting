@@ -206,31 +206,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsBySlotIdAndIdNot(long slotId, long reservationId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation r WHERE r.slot_id = :slotId AND r.id <> :reservationId)";
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("reservationId", reservationId)
-                .addValue("slotId", slotId);
-
-        return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
-    }
-
-    @Override
-    public int updateSlotById(long reservationId, long slotId) {
-        String sql = """ 
-                UPDATE reservation
-                SET slot_id = :slotId
-                WHERE id = :reservationId
-                """;
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("reservationId", reservationId)
-                .addValue("slotId", slotId);
-
-        return template.update(sql, params);
-    }
-
-    @Override
     public Optional<Reservation> findById(long reservationId) {
         String sql = """
                 SELECT

@@ -1,10 +1,8 @@
 package roomescape.reservation.application;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -113,29 +110,6 @@ public class ReservationService {
         return waitingLines.orderOf(waiting);
     }
 
-    public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
-        Reservation oldReservation = getOldReservationOrThrow(reservationId);
-        oldReservation.validateOwnedBy(memberId);
-        return updateReservation(body, oldReservation);
-    }
-
-    public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        Reservation oldReservation = getOldReservationOrThrow(reservationId);
-        return updateReservation(body, oldReservation);
-    }
-
-    private static void validateReservationUpdated(int affectedRow) {
-        if (affectedRow != 1) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
-        }
-    }
-
-    private static void validateNotEmptyUpdateRequest(ReservationUpdateRequest body) {
-        if (body.date() == null && body.timeId() == null) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_EMPTY);
-        }
-    }
-
     private Optional<Reservation> findReservationIfExists(long reservationId) {
         return reservationRepository.findById(reservationId);
     }
@@ -170,44 +144,6 @@ public class ReservationService {
                 });
     }
 
-    private ReservationSaveResponse updateReservation(ReservationUpdateRequest body, Reservation oldReservation) {
-        validateUpdatable(oldReservation);
-        validateNotEmptyUpdateRequest(body);
-
-        LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.getSlot().getDate());
-        long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getSlot().getTimeId());
-        long themeId = oldReservation.getSlot().getThemeId();
-        Slot slot = slotAssembler.assembleExisting(newDate, newTimeId, themeId);
-        long slotId = slot.getId();
-        throwIfSlotUnavailableForUpdate(oldReservation.getId(), slotId);
-
-        int affectedRow = reservationRepository.updateSlotById(oldReservation.getId(), slotId);
-        validateReservationUpdated(affectedRow);
-
-        return ReservationSaveResponse.from(getNewReservationOrThrow(oldReservation.getId()));
-    }
-
-    private Reservation getNewReservationOrThrow(long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(
-                        () -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
-    }
-
-    private Reservation getOldReservationOrThrow(long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
-    }
-
-    private void throwIfSlotUnavailableForUpdate(long reservationId, long slotId) {
-        boolean hasOtherReservation = reservationRepository.existsBySlotIdAndIdNot(slotId, reservationId);
-        boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
-        SlotOccupancy slotOccupancy = SlotOccupancy.of(hasOtherReservation, hasWaiting);
-
-        if (!slotOccupancy.isReservable()) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
-        }
-    }
-
     private void throwIfSlotUnavailableForReservation(long slotId) {
         boolean hasReservation = reservationRepository.existsBySlotId(slotId);
         boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
@@ -219,10 +155,6 @@ public class ReservationService {
     }
 
     private void validateCancelable(Reservation reservation) {
-        reservation.validateNotPast(LocalDateTime.now(clock));
-    }
-
-    private void validateUpdatable(Reservation reservation) {
         reservation.validateNotPast(LocalDateTime.now(clock));
     }
 }

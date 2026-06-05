@@ -21,10 +21,6 @@ public interface ReservationRepository {
 
     Optional<ReservationDetailProjection> findDetailById(long reservationId);
 
-    boolean existsBySlotIdAndIdNot(long slotId, long reservationId);
-
-    int updateSlotById(long reservationId, long slotId);
-
     Optional<Reservation> findById(long reservationId);
 
     boolean existsBySlotId(long slotId);

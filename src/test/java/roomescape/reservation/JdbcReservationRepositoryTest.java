@@ -107,34 +107,6 @@ class JdbcReservationRepositoryTest {
                 .contains(1L);
     }
 
-    @Test
-    @DisplayName("같은 슬롯에 본인 제외 다른 예약이 있으면 true를 반환한다.")
-    void existsBySlotIdAndIdNot_true반환_테스트() {
-        boolean result = reservationRepository.existsBySlotIdAndIdNot(2L, 1L);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("같은 슬롯에 본인 제외 다른 예약이 없으면 false를 반환한다.")
-    void existsBySlotIdAndIdNot_false반환_테스트() {
-        boolean result = reservationRepository.existsBySlotIdAndIdNot(4L, 1L);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    @DisplayName("회원 본인의 기존 예약을 변경 가능한 슬롯로 변경할 수 있다.")
-    void updateSlotByIdAndMemberId_테스트() {
-        int affectedRow = reservationRepository.updateSlotById(1L, 4L);
-
-        assertThat(affectedRow).isEqualTo(1);
-        assertThat(reservationRepository.findById(1L))
-                .get()
-                .extracting(Reservation::getSlotId)
-                .isEqualTo(4L);
-    }
-
     private Slot slot(long slotId) {
         return Slot.of(
                 slotId,

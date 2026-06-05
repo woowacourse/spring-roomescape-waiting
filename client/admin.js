@@ -367,47 +367,6 @@ document.getElementById("reservation-delete-form").addEventListener("submit", as
   }
 });
 
-document.getElementById("reservation-update-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const id = Number(document.getElementById("reservation-update-id").value);
-    const dateInput = document.getElementById("reservation-update-date").value;
-    const timeIdInput = document.getElementById("reservation-update-time-id").value;
-    const payload = {};
-    if (dateInput) payload.date = dateInput;
-    if (timeIdInput) payload.timeId = Number(timeIdInput);
-
-    const confirmed = await confirmAction({
-      title: "예약 수정 확인",
-      message: `예약 ID ${id}를 수정할까요?`,
-      okLabel: "수정",
-    });
-    if (!confirmed) {
-      setStatus("예약 수정 취소");
-      return;
-    }
-
-    await api(`/manager/reservations/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
-    await loadReservations();
-    setStatus(`예약 #${id} 수정 완료`);
-    e.target.reset();
-    await showResultModal({
-      title: "예약 수정 성공",
-      message: `예약 ID ${id}가 수정되었습니다.`,
-    });
-  } catch (error) {
-    setStatus(error.message, true);
-    await showResultModal({
-      title: "예약 수정 실패",
-      message: error.message,
-      isError: true,
-    });
-  }
-});
-
 document.getElementById("reservation-refresh").addEventListener("click", async () => {
   try {
     await loadReservations();

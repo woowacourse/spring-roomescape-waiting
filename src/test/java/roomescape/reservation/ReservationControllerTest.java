@@ -18,7 +18,6 @@ import roomescape.member.AuthenticatedMember;
 import roomescape.member.Role;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.presentation.ManagerReservationController;
@@ -78,20 +77,6 @@ class ReservationControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().success()).isTrue();
-        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
-    }
-
-    @Test
-    void 매니저_예약_수정_응답_테스트() {
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 5, 6), 2L);
-        ReservationSaveResponse serviceResponse = new ReservationSaveResponse(1L, 1L, 5L);
-        when(reservationService.update(request, 1L)).thenReturn(serviceResponse);
-
-        ResponseEntity<ApiResponse<ReservationSaveResponse>> response =
-                managerReservationController.updateByManager(request, 1L);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 

@@ -28,7 +28,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://127.0.0.1:*"
                 )
                 .allowCredentials(true)
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
 
