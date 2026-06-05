@@ -4,7 +4,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,17 @@ import roomescape.reservationwaiting.ReservationWaiting;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
+
+    private static final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) ->
+            new ReservationWaiting(
+                    rs.getLong("id"),
+                    rs.getDate("date").toLocalDate(),
+                    rs.getLong("theme_id"),
+                    rs.getLong("time_id"),
+                    rs.getString("name"),
+                    rs.getTimestamp("requested_at").toLocalDateTime()
+            );
+
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
@@ -43,6 +56,13 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public int deleteById(Long id) {
+        String sql = "DELETE FROM reservation_waiting WHERE id = ?";
+
+        return jdbcTemplate.update(sql, id);
+    }
+
+    @Override
     public int deleteByIdAndName(Long id, String name) {
         String sql = "DELETE FROM reservation_waiting WHERE id = ? AND name = ?";
         return jdbcTemplate.update(sql, id, name);
@@ -53,5 +73,19 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE date = ? AND theme_id = ? AND time_id = ? AND name = ?)";
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, Date.valueOf(date), themeId, timeId, name));
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findFirstWaiting(LocalDate date, Long themeId, Long timeId) {
+        String sql = """
+            SELECT id, date, theme_id, time_id, name, requested_at
+            FROM reservation_waiting
+            WHERE date = ? AND theme_id = ? AND time_id = ?
+            ORDER BY requested_at ASC
+            LIMIT 1
+            """;
+
+        return jdbcTemplate.query(sql, waitingRowMapper, Date.valueOf(date), themeId, timeId)
+                .stream().findFirst();
     }
 }

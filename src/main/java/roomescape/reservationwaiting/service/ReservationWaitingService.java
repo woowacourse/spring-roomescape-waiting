@@ -2,6 +2,7 @@ package roomescape.reservationwaiting.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -32,6 +33,10 @@ public class ReservationWaitingService {
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 
+    public void deleteById(Long id) {
+        reservationWaitingRepository.deleteById(id);
+    }
+
     public void deleteByIdAndName(Long waitingId, String name) {
         int affectedRowCount = reservationWaitingRepository.deleteByIdAndName(waitingId, name);
 
@@ -40,5 +45,9 @@ public class ReservationWaitingService {
                     ErrorCode.RESERVATION_WAITING_NOT_FOUND,
                     "본인의 대기만 취소할 수 있습니다.");
         }
+    }
+
+    public Optional<ReservationWaiting> findFirstWaiting(LocalDate date, Long themeId, Long timeId) {
+        return reservationWaitingRepository.findFirstWaiting(date, themeId, timeId);
     }
 }

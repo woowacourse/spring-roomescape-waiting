@@ -1,4 +1,4 @@
-package roomescape.reservation.controller;
+package roomescape.reservation.controller.page;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;

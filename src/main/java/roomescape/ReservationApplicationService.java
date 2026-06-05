@@ -28,6 +28,25 @@ public class ReservationApplicationService {
         return reservationWaitingService.save(name, date, themeId, timeId);
     }
 
+    public void cancelReservation(Long id, String name) {
+        // 1. 예약 삭제
+        Reservation reservation = reservationService.deleteByIdAndName(id, name);
+
+        // 2. 첫번째 대기 유무 확인
+        reservationWaitingService.findFirstWaiting(
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getTime().getId()
+        ).ifPresent(waiting -> {
+            reservationService.save(
+                    waiting.getName(),
+                    waiting.getDate(),
+                    waiting.getThemeId(),
+                    waiting.getTimeId());
+            reservationWaitingService.deleteById(waiting.getId());
+        });
+    }
+
     private void validateWaiting(String name, LocalDate date, Long themeId, Long timeId) {
 
         Reservation reservation = reservationService.findByDateAndThemeIdAndTimeId(date, themeId, timeId);

@@ -1,7 +1,7 @@
 package roomescape.reservationwaiting.service;
 
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;

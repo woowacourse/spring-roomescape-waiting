@@ -52,10 +52,6 @@ public class ReservationService {
         return reservationRepository.save(nonIdReservation);
     }
 
-    public boolean existsByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId, final Long timeId) {
-        return (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId));
-    }
-
     public Reservation findByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId, final Long timeId) {
         return reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -72,7 +68,7 @@ public class ReservationService {
         }
     }
 
-    public void deleteByIdAndName(final long id, final String name) {
+    public Reservation deleteByIdAndName(final long id, final String name) {
         reservationValidator.validateLookupName(name);
 
         Reservation reservation = reservationRepository.findByIdAndName(id, name)
@@ -86,8 +82,10 @@ public class ReservationService {
         int affectedRowCount = reservationRepository.deleteById(reservation.getId());
 
         if(affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "해당 예약 데이터가 존재하지 않습니다.");
         }
+
+        return reservation;
     }
 
     public Reservation updateByIdAndName(
