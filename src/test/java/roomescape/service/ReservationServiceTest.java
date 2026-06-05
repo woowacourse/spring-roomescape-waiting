@@ -273,6 +273,30 @@ class ReservationServiceTest extends ServiceTest {
         );
     }
 
+    @Test
+    void 예약_취소_시_동일한_슬롯의_대기자가_2명_이상일_경우_첫_번째_대기자만_승격된다() {
+        // given
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
+        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+
+        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
+        ReservationResponse response = reservationService.create(request);
+        Slot slot = reservationDao.findById(response.id()).orElseThrow().getSlot();
+
+        saveWaiting("대기자1", slot);
+        saveWaiting("대기자2", slot);
+
+        // when
+        reservationService.delete(response.id());
+
+        // then
+        assertAll(
+                () -> assertThat(reservationService.getReservationsByName("대기자1")).hasSize(1),
+                () -> assertThat(waitingService.getWaitingsByName("대기자2")).hasSize(1),
+                () -> assertThat(waitingDao.findAllWithRankByName("대기자2").getFirst().rank()).isEqualTo(1)
+        );
+    }
+
     private void saveWaiting(String userName, Slot slot) {
         waitingDao.save(new Waiting(LocalDateTime.now(clock), slot.getId(), userName));
     }
