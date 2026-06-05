@@ -1,0 +1,172 @@
+package roomescape;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.is;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.exception.client.ResourceNotFoundException;
+import roomescape.service.WaitingService;
+import roomescape.support.ReservationTestHelper;
+
+public class WaitingStepTest extends IntegrationTest {
+
+    private static final LocalDate FUTURE_DATE = LocalDate.of(2050, 12, 31);
+    public static final String RESERVATION_NAME = "브라운";
+
+    @Autowired
+    private ReservationTestHelper helper;
+
+    @Autowired
+    private WaitingService waitingService;
+
+    private Long timeId;
+    private Long themeId;
+
+    @BeforeEach
+    void setUp() {
+        // 시간, 테마, 예약을 하나씩 생성
+        timeId = helper.insertTime(LocalTime.of(10, 0));
+        themeId = helper.insertTheme("테마A", "설명", "url");
+        helper.insertReservation(RESERVATION_NAME, FUTURE_DATE, timeId, themeId);
+    }
+
+    @Nested
+    @DisplayName("대기 신청")
+    class CreateWaiting {
+        @Test
+        @DisplayName("예약된 슬롯에 대기 신청하면 순번 1로 생성된다")
+        void 첫_대기() {
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", "콘");
+            body.put("date", FUTURE_DATE.toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON).body(body)
+                    .when().post("/user/waitings")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("name", is("콘"))
+                    .body("orderIndex", is(1));
+        }
+
+        @Test
+        @DisplayName("두 번째 대기는 순번 2를 받는다")
+        void 두번째_대기() {
+            helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", "모카");
+            body.put("date", FUTURE_DATE.toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON).body(body)
+                    .when().post("/user/waitings")
+                    .then().statusCode(201)
+                    .body("orderIndex", is(2));
+        }
+
+        @Test
+        @DisplayName("예약이 없는 슬롯에 대기 신청 시 400")
+        void 예약_없는_슬롯() {
+            Long otherTimeId = helper.insertTime(LocalTime.of(11, 0));
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", "콘");
+            body.put("date", FUTURE_DATE.toString());
+            body.put("timeId", otherTimeId);
+            body.put("themeId", themeId);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON).body(body)
+                    .when().post("/user/waitings")
+                    .then().statusCode(400)
+                    .body("message", is("예약 가능한 시간입니다. 대기가 아닌 예약을 신청해 주세요."));
+        }
+
+        @Test
+        @DisplayName("본인이 예약한  슬롯에 대기 시 400")
+        void 예약한_슬롯에_대기() {
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", RESERVATION_NAME);
+            body.put("date", FUTURE_DATE.toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON).body(body)
+                    .when().post("/user/waitings")
+                    .then().statusCode(400)
+                    .body("message", is("이미 본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
+        }
+
+        @Test
+        @DisplayName("같은 사용자가 같은 슬롯에 중복 대기 시 400")
+        void 중복_대기() {
+            helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", "콘");
+            body.put("date", FUTURE_DATE.toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON).body(body)
+                    .when().post("/user/waitings")
+                    .then().statusCode(400)
+                    .body("message", is("이미 해당 시간에 대기 신청한 내역이 있습니다."));
+        }
+    }
+
+    @Nested
+    @DisplayName("대기 취소")
+    class CancelWaiting {
+
+        @Test
+        @DisplayName("본인 대기를 취소하면 204")
+        void 본인_취소() {
+            Long waitingId = helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
+
+            waitingService.cancelByOwner(waitingId, "콘");
+            assertThat(helper.existsWaiting(waitingId)).isFalse();
+        }
+
+        @Test
+        @DisplayName("다른 사람의 대기를 취소하려 하면 에러 반환")
+        void 타인_취소_거부() {
+            Long waitingId = helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
+
+            assertThatThrownBy(() -> waitingService.cancelByOwner(waitingId, "모카"))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("존재하지 않는 대기입니다.");
+        }
+
+        @Test
+        @DisplayName("중간 대기 취소 시 뒤 대기의 순번이 당겨진다")
+        void 중간_취소_순번_재정렬() {
+            Long w1 = helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
+            Long w2 = helper.insertWaiting("모카", FUTURE_DATE, timeId, themeId, 2);
+            Long w3 = helper.insertWaiting("핀", FUTURE_DATE, timeId, themeId, 3);
+
+            waitingService.cancelByOwner(w2, "모카");
+
+            assertThat(helper.findWaitingOrder(w1)).isEqualTo(1);
+            assertThat(helper.findWaitingOrder(w3)).isEqualTo(2);
+        }
+    }
+}
