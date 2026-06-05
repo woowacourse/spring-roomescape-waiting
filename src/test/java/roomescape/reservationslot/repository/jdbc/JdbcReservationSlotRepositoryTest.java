@@ -63,8 +63,8 @@ class JdbcReservationSlotRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약과 대기가 모두 없어지면 빈 슬롯을 삭제한다")
-    void deleteEmptySlotWhenReservationAndWaitingDoNotExist() {
+    @DisplayName("예약과 대기가 모두 없어져도 슬롯은 유지한다")
+    void keepSlotWhenReservationAndWaitingDoNotExist() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
@@ -78,7 +78,7 @@ class JdbcReservationSlotRepositoryTest {
         Integer slotCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation_slot", Integer.class);
 
         assertThat(reservationCount).isZero();
-        assertThat(slotCount).isZero();
+        assertThat(slotCount).isEqualTo(1);
     }
 
     @Test

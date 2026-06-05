@@ -61,7 +61,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     @Override
     public ReservationSlot findOrCreate(final java.time.LocalDate date, final ReservationTime time, final Theme theme) {
         return findByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())
-                .orElseGet(() -> saveOrFind(date, time, theme));
+                .orElseGet(() -> createSlot(date, time, theme));
     }
 
     @Override
@@ -146,17 +146,24 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
         findEarliestWaitingBySlotId(slot.getId())
                 .ifPresent(this::promoteWaiting);
-
-        deleteSlotIfEmpty(slot.getId());
     }
 
-    private ReservationSlot saveOrFind(final java.time.LocalDate date, final ReservationTime time, final Theme theme) {
+    private ReservationSlot createSlot(final java.time.LocalDate date, final ReservationTime time, final Theme theme) {
         try {
             return save(ReservationSlot.create(date, time, theme));
         } catch (DuplicateKeyException exception) {
-            return findByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())
-                    .orElseThrow(() -> exception);
+            return findCreatedSlot(date, time, theme, exception);
         }
+    }
+
+    private ReservationSlot findCreatedSlot(
+            final java.time.LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final DuplicateKeyException exception
+    ) {
+        return findByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())
+                .orElseThrow(() -> exception);
     }
 
     private ReservationSlot save(final ReservationSlot slot) {
@@ -269,17 +276,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 """;
 
         return jdbcTemplate.update(sql, waitingId) > 0;
-    }
-
-    private boolean deleteSlotIfEmpty(final Long slotId) {
-        final String sql = """
-                DELETE FROM reservation_slot
-                WHERE id = ?
-                  AND NOT EXISTS (SELECT 1 FROM reservation WHERE slot_id = ?)
-                  AND NOT EXISTS (SELECT 1 FROM waiting WHERE slot_id = ?)
-                """;
-
-        return jdbcTemplate.update(sql, slotId, slotId, slotId) > 0;
     }
 
     private static ReservationSlot mapToDomain(final ResultSet resultSet) throws SQLException {
