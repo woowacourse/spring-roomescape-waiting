@@ -44,9 +44,13 @@ class ReservationServiceTest {
         this.reservationRepository = new FakeReservationRepository();
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
-        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
+        this.reservationService = new ReservationService(
+                reservationRepository,
+                reservationTimeRepository,
                 themeRepository,
-                Mockito.mock(ReservationQueryRepository.class), TestDateTimes.fixedClock());
+                Mockito.mock(ReservationQueryRepository.class),
+                TestDateTimes.fixedClock()
+        );
     }
 
     @Test
@@ -55,7 +59,8 @@ class ReservationServiceTest {
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(TestDateTimes.defaultTime()));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
         LocalDate reservationDate = FIXED.toLocalDate().plusDays(1);
-        ReservationCommand command = new ReservationCommand("이프", reservationDate, theme.getId(), time.getId());
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", reservationDate,
+                theme.getId(), time.getId());
 
         // when: 예약 진행
         ReservationResult result = reservationService.reserve(command);
@@ -155,7 +160,7 @@ class ReservationServiceTest {
     void 비활성화된_테마_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID가 등록되지 않음
         themeRepository.save(ThemeFixture.createdInactive());
-        ReservationCommand command = new ReservationCommand("이프", FIXED.toLocalDate().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
 
         // when & then: EntityNotFoundException 발생 확인
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -166,7 +171,7 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_테마_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID가 등록되지 않음
-        ReservationCommand command = new ReservationCommand("이프", FIXED.toLocalDate().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
 
         // when & then: EntityNotFoundException 발생 확인
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -177,7 +182,7 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_시간_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID는 등록되고 시간 ID가 등록되지 않음
-        ReservationCommand command = new ReservationCommand("이프", FIXED.toLocalDate().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
         themeRepository.save(ThemeFixture.createDefaultTheme());
 
         // when & then: EntityNotFoundException 발생 확인
@@ -189,7 +194,7 @@ class ReservationServiceTest {
     @Test
     void 비활성화_된_시간_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID는 등록되고 시간 ID가 등록되지 않음
-        ReservationCommand command = new ReservationCommand("이프", FIXED.toLocalDate().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", FIXED.toLocalDate().plusDays(1));
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createInactive());
 
@@ -202,14 +207,13 @@ class ReservationServiceTest {
     @Test
     void 같은_날짜와_같은_시간에_예약을_시도하면_중복_예외가_발생한다() {
         // given: 이미 10시 예약이 존재함
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        saveDefaultThemeAndTime();
 
         Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
-        ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("새예약자", date);
 
         // when & then
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -220,14 +224,13 @@ class ReservationServiceTest {
     @Test
     void 대기_신청_시_같은_슬롯에_다른_이름으로_신청하면_대기로_등록된다() {
         // given
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        saveDefaultThemeAndTime();
 
         Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
-        ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("새예약자", date);
 
         // when
         ReservationResult result = reservationService.addWaiting(command);
@@ -240,11 +243,10 @@ class ReservationServiceTest {
     @Test
     void 대기_신청_시_슬롯이_비어있으면_예약으로_승격된다() {
         // given
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        saveDefaultThemeAndTime();
 
         LocalDate date = FIXED.toLocalDate().plusDays(1);
-        ReservationCommand command = new ReservationCommand("이프", date, 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", date);
 
         // when
         ReservationResult result = reservationService.addWaiting(command);
@@ -267,6 +269,11 @@ class ReservationServiceTest {
                 .singleElement()
                 .extracting(ReservationEntry::getStatus)
                 .isEqualTo(ReservationStatus.DELETED);
+    }
+
+    private void saveDefaultThemeAndTime() {
+        themeRepository.save(ThemeFixture.createDefaultTheme());
+        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
     }
 
     private long reservedEntryId(Reservation reservation) {

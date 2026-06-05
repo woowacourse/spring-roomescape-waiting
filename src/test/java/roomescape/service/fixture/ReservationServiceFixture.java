@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import roomescape.service.command.ReservationChangeCommand;
+import roomescape.service.command.ReservationCommand;
 import roomescape.service.result.ReservationEntryResult;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationTimeResult;
@@ -27,5 +28,13 @@ public class ReservationServiceFixture {
 
     public static ReservationChangeCommand createChangeCommand(LocalDate date, long timeId) {
         return new ReservationChangeCommand(date, timeId);
+    }
+
+    public static ReservationCommand createReserveCommand(String name, LocalDate date) {
+        return createReserveCommand(name, date, 1L, 1L);
+    }
+
+    public static ReservationCommand createReserveCommand(String name, LocalDate date, long themeId, long timeId) {
+        return new ReservationCommand(name, date, themeId, timeId);
     }
 }
