@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

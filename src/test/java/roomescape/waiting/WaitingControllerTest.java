@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -16,9 +16,9 @@ import roomescape.common.api.ApiResponse;
 import roomescape.member.AuthenticatedMember;
 import roomescape.member.Role;
 import roomescape.waiting.application.WaitingService;
-import roomescape.waiting.dto.request.WaitingRequest;
-import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.presentation.WaitingController;
+import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingResponse;
+import roomescape.waiting.adapter.in.web.WaitingController;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingControllerTest {

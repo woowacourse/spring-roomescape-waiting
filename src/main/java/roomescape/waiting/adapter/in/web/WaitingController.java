@@ -1,4 +1,4 @@
-package roomescape.waiting.presentation;
+package roomescape.waiting.adapter.in.web;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -15,8 +15,8 @@ import roomescape.common.api.ApiResponse;
 import roomescape.member.AuthenticatedMember;
 import roomescape.member.LoginMember;
 import roomescape.waiting.application.WaitingService;
-import roomescape.waiting.dto.request.WaitingRequest;
-import roomescape.waiting.dto.response.WaitingResponse;
+import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingResponse;
 
 @RestController
 @RequestMapping("/api/user/waitings")

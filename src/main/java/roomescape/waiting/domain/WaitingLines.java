@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import java.util.List;
 import java.util.Map;

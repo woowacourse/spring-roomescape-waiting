@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import org.springframework.stereotype.Component;
 import roomescape.reservation.domain.Reservation;

@@ -1,4 +1,4 @@
-package roomescape.waiting.infrastructure;
+package roomescape.waiting.adapter.out.persistence;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,8 +11,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 
 @Repository
 @RequiredArgsConstructor

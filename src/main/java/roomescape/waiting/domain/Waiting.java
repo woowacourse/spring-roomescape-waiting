@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import java.util.Objects;
 import lombok.AccessLevel;

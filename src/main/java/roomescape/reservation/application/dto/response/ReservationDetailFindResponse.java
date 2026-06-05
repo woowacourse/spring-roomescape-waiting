@@ -4,7 +4,7 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.theme.dto.response.ThemeFindResponse;
-import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 
 import java.time.LocalDate;
 import java.util.List;

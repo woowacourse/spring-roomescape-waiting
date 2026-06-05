@@ -32,10 +32,10 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.theme.Theme;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.WaitingPromotionPolicy;
-import roomescape.waiting.infrastructure.WaitingRepository;
-import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingPromotionPolicy;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {

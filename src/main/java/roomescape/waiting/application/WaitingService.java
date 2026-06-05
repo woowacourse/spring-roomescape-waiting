@@ -9,11 +9,11 @@ import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.slot.Slot;
 import roomescape.slot.SlotOccupancy;
 import roomescape.slot.application.SlotAssembler;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.WaitingLine;
-import roomescape.waiting.dto.request.WaitingRequest;
-import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingLine;
+import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingResponse;
+import roomescape.waiting.application.port.out.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor

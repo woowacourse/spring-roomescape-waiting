@@ -14,8 +14,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.slot.Slot;
 import roomescape.support.ControllerTestSupport;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.WaitingPromotionPolicy;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingPromotionPolicy;
 
 public class ReservationTransactionIntegrationTest extends ControllerTestSupport {
 

@@ -18,12 +18,12 @@ import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.slot.SlotOccupancy;
 import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.WaitingLine;
-import roomescape.waiting.WaitingLines;
-import roomescape.waiting.WaitingPromotionPolicy;
-import roomescape.waiting.infrastructure.WaitingRepository;
-import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingLine;
+import roomescape.waiting.domain.WaitingLines;
+import roomescape.waiting.domain.WaitingPromotionPolicy;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 
 @Service
 @RequiredArgsConstructor

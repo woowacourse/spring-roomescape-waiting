@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,9 +14,9 @@ import roomescape.slot.Slot;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.theme.Theme;
 import roomescape.waiting.application.WaitingService;
-import roomescape.waiting.dto.request.WaitingRequest;
-import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingResponse;
+import roomescape.waiting.application.port.out.WaitingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

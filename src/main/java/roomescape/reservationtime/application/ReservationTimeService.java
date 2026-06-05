@@ -19,7 +19,7 @@ import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.reservationtime.dto.response.TimeSlotStatus;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.slot.application.SlotUsageValidator;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.application.port.out.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
