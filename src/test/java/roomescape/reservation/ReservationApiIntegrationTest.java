@@ -150,8 +150,57 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 대기_승격_트랜젝션_테스트() {
+    void 남은_대기_순번_재정렬_테스트() {
+        String reservationUserToken = loginUserToken();
+        String waitingUserToken1 = loginOtherUserToken();
+        String waitingUserToken2 = loginWaitingUserToken();
 
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + waitingUserToken1)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.waitingOrder", is(1));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + waitingUserToken2)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.waitingOrder", is(2));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + reservationUserToken)
+                .pathParam("id", 1)
+                .when().delete("/api/user/reservations/{id}")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(waitingUserToken1))
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(1))
+                .body("data[0].status", is("RESERVED"))
+                .body("data[0].waitingOrder", is((Object) null));
+
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(waitingUserToken2))
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(1))
+                .body("data[0].status", is("WAITING"))
+                .body("data[0].waitingOrder", is(1));
     }
 
     @Test
