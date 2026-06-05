@@ -22,7 +22,8 @@ public class JdbcReservationTimeRepositoryTest {
     private JdbcReservationTimeRepository repository;
 
     @Test
-    void 시간_저장_레포지토리_테스트() {
+    @DisplayName("시간을 저장할 수 있다.")
+    void saves_reservation_time_successfully() {
         // given
         ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(15, 40));
 
@@ -35,7 +36,7 @@ public class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("테스트 더미데이터에 4개가 등록되어 있으므로 사이즈는 4가 나와야한다.")
-    void 전체_시간_조회_레포지토리_테스트() {
+    void finds_four_reservation_times_from_test_data() {
         // given -> 더미데이터 4개
         // when
         List<ReservationTime> reservationTimes = repository.findAll();
@@ -48,7 +49,7 @@ public class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("테스트 더미데이터에 4개가 등록되어 있으므로 삭제 후 사이즈는 4가 나와야한다.")
-    void 시간_삭제_레포지토리_테스트() {
+    void keeps_four_reservation_times_after_deleting_one_from_test_data() {
         // given
         ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(15, 40));
         ReservationTime savedTime = repository.save(reservationTime);
@@ -65,7 +66,7 @@ public class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("일정표에 등록된 특정 날짜와 테마의 모든 시간을 가져올 수 있다.")
-    void findTimesDateAndThemeId_테스트() {
+    void finds_reservation_times_by_date_and_theme_id() {
         // when
         List<ReservationTime> result = repository.findTimesByDateAndThemeId(LocalDate.parse("2026-05-05"), 1L);
 
@@ -77,7 +78,7 @@ public class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("이미 존재하는 시간이면 성공을 반환한다.")
-    void existsAlreadyTime_테스트_1() {
+    void existing_reservation_time_returns_true() {
         // given
         LocalTime time = LocalTime.of(10, 0);
 
@@ -90,7 +91,7 @@ public class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 시간이면 실패를 반환한다.")
-    void existsAlreadyTime_테스트_2() {
+    void missing_reservation_time_returns_false() {
         // given
         LocalTime time = LocalTime.of(18, 23);
 

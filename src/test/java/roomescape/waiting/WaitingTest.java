@@ -16,7 +16,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("대기자가 같으면 본인 대기다.")
-    void 대기_테스트_1() {
+    void same_member_is_owner_of_waiting() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
 
         assertThat(waiting.isOwnedBy(1L)).isTrue();
@@ -24,7 +24,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("대기자가 다르면 본인 대기가 아니다.")
-    void 대기_테스트_2() {
+    void different_member_is_not_owner_of_waiting() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
 
         assertThat(waiting.isOwnedBy(2L)).isFalse();
@@ -32,7 +32,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("대기자가 다르면 소유자 검증에 실패한다.")
-    void validateOwnedBy_fail() {
+    void different_member_fails_waiting_owner_validation() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
 
         assertThatThrownBy(() -> waiting.validateOwnedBy(2L))
@@ -41,7 +41,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("대기가 속한 슬롯과 전달받은 슬롯이 같으면 true를 반환한다.")
-    void isFor_true() {
+    void waiting_for_same_slot_returns_true() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
 
         assertThat(waiting.isFor(slot(1L))).isTrue();
@@ -49,7 +49,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("대기가 속한 슬롯과 전달받은 슬롯이 다르면 false를 반환한다.")
-    void isFor_false() {
+    void waiting_for_different_slot_returns_false() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
 
         assertThat(waiting.isFor(slot(2L))).isFalse();

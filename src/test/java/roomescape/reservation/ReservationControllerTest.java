@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -49,7 +50,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 유저_예약_생성_응답_테스트() {
+    @DisplayName("유저 예약 생성 응답을 반환한다.")
+    void returns_user_reservation_create_response() {
         ReservationSaveRequest request = new ReservationSaveRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
         ReservationSaveResponse serviceResponse = new ReservationSaveResponse(5L, 1L, 4L);
@@ -64,7 +66,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 유저_예약_삭제_응답_테스트() {
+    @DisplayName("유저 예약 삭제 응답을 반환한다.")
+    void returns_user_reservation_delete_response() {
         AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
 
         ResponseEntity<ApiResponse<Void>> response = userReservationController.deleteByUser(1L, member);
@@ -75,7 +78,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 매니저_예약_목록_조회_응답_테스트() {
+    @DisplayName("매니저 예약 목록 조회 응답을 반환한다.")
+    void returns_manager_reservation_list_response() {
         List<ReservationDetailFindResponse> serviceResponse = List.of(reservationDetailResponse());
         when(findReservationUseCase.findReservationDetails()).thenReturn(serviceResponse);
 

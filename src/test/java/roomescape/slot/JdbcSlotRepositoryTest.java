@@ -26,7 +26,8 @@ class JdbcSlotRepositoryTest {
     private JdbcSlotRepository repository;
 
     @Test
-    void 슬롯_저장_레포지토리_테스트() {
+    @DisplayName("슬롯을 저장할 수 있다.")
+    void saves_slot_successfully() {
         Slot slot = slot(LocalDate.of(2026, 5, 7), 1L, 2L);
 
         Slot savedSlot = repository.save(slot);
@@ -38,7 +39,8 @@ class JdbcSlotRepositoryTest {
     }
 
     @Test
-    void 슬롯_조회_레포지토리_테스트() {
+    @DisplayName("슬롯을 조회할 수 있다.")
+    void finds_slot_successfully() {
         Optional<Slot> slot = repository.findById(1L);
 
         assertThat(slot).isPresent();
@@ -48,14 +50,16 @@ class JdbcSlotRepositoryTest {
     }
 
     @Test
-    void 슬롯_전체_조회_레포지토리_테스트() {
+    @DisplayName("전체 슬롯을 조회할 수 있다.")
+    void finds_all_slots_successfully() {
         List<Slot> slots = repository.findAll();
 
         assertThat(slots).hasSize(5);
     }
 
     @Test
-    void 슬롯_삭제_레포지토리_테스트() {
+    @DisplayName("슬롯을 삭제할 수 있다.")
+    void deletes_slot_successfully() {
         Slot savedSlot = repository.save(slot(LocalDate.of(2026, 5, 8), 3L, 4L));
 
         repository.deleteById(savedSlot.getId());
@@ -65,7 +69,7 @@ class JdbcSlotRepositoryTest {
 
     @Test
     @DisplayName("날짜, 시간id, 테마id을 가진 슬롯을 찾을 수 있다.")
-    void findByDateAndTimeIdAndThemeId_레포지토리_테스트() {
+    void finds_slot_by_date_time_id_and_theme_id() {
         Slot slot = repository.findByDateAndTimeIdAndThemeId(LocalDate.of(2026, 5, 5), 1L, 1L)
                 .orElseThrow();
 
@@ -77,7 +81,7 @@ class JdbcSlotRepositoryTest {
 
     @Test
     @DisplayName("이미 존재하는 슬롯이면 true를 반환한다.")
-    void existsByDateAndThemeIdAndTimeId_테스트_1() {
+    void existing_slot_returns_true() {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
         long themeId = 1L;
@@ -92,7 +96,7 @@ class JdbcSlotRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 슬롯이면 false를 반환한다.")
-    void existsByDateAndThemeIdAndTimeId_테스트_2() {
+    void missing_slot_returns_false() {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
         long themeId = 1L;

@@ -2,6 +2,7 @@ package roomescape.reservation.domain;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.support.ControllerTestSupport;
 
@@ -30,7 +31,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 예약_생성() {
+    @DisplayName("예약을 생성할 수 있다.")
+    void creates_reservation_successfully() {
         String accessToken = loginUserToken();
 
         RestAssured.given().log().all()
@@ -47,7 +49,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 나의_특정_예약_삭제_및_나의_예약_목록_조회() {
+    @DisplayName("나의 특정 예약을 삭제하고 나의 예약 목록을 조회할 수 있다.")
+    void deletes_my_reservation_and_returns_my_reservation_list() {
         String accessToken = loginUserToken();
 
         RestAssured.given().log().all()
@@ -75,7 +78,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 양수가_아닌_예약_id로_삭제를_요청하면_400을_응답한다() {
+    @DisplayName("양수가 아닌 예약 id로 삭제를 요청하면 400을 응답한다.")
+    void non_positive_reservation_id_delete_request_returns_bad_request() {
         String accessToken = loginUserToken();
 
         RestAssured.given().log().all()
@@ -89,7 +93,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 나의_예약_목록에서_대기도_함께_조회한다() {
+    @DisplayName("나의 예약 목록에서 대기도 함께 조회한다.")
+    void my_reservation_list_includes_waitings() {
         String accessToken = loginWaitingUserToken();
 
         Integer waitingId = RestAssured.given().log().all()
@@ -117,7 +122,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 예약_취소_시_1번_대기가_자동_승격된다() {
+    @DisplayName("예약 취소 시 첫 번째 대기가 자동 승격된다.")
+    void canceling_reservation_promotes_first_waiting_automatically() {
         String reservationUserToken = loginUserToken();
         String waitingUserToken = loginWaitingUserToken();
 
@@ -150,7 +156,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 남은_대기_순번_재정렬_테스트() {
+    @DisplayName("남은 대기 순번을 재정렬한다.")
+    void reorders_remaining_waiting_positions() {
         String reservationUserToken = loginUserToken();
         String waitingUserToken1 = loginOtherUserToken();
         String waitingUserToken2 = loginWaitingUserToken();
@@ -204,7 +211,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 매니저_예약_목록_조회() {
+    @DisplayName("매니저는 예약 목록을 조회할 수 있다.")
+    void manager_finds_reservation_list_successfully() {
         String accessToken = loginManagerToken();
 
         RestAssured.given().log().all()
@@ -217,7 +225,8 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 매니저_예약_삭제() {
+    @DisplayName("매니저는 예약을 삭제할 수 있다.")
+    void manager_deletes_reservation_successfully() {
         String accessToken = loginManagerToken();
 
         RestAssured.given().log().all()

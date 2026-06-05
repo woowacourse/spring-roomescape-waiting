@@ -43,7 +43,7 @@ class SlotAssemblerTest {
 
     @Test
     @DisplayName("조건에 맞는 기존 슬롯을 도메인으로 조립한다.")
-    void assembleExisting_success() {
+    void assembles_existing_slot_matching_condition() {
         LocalDate date = LocalDate.of(2026, 5, 7);
         long timeId = 1L;
         long themeId = 2L;
@@ -69,7 +69,7 @@ class SlotAssemblerTest {
 
     @Test
     @DisplayName("새 슬롯을 도메인으로 조립한다.")
-    void assembleNew_success() {
+    void assembles_new_slot_successfully() {
         LocalDate date = LocalDate.of(2026, 5, 7);
         long timeId = 1L;
         long themeId = 2L;
@@ -90,7 +90,7 @@ class SlotAssemblerTest {
 
     @Test
     @DisplayName("조립한 슬롯이 과거이면 예외가 발생한다.")
-    void assembleExisting_past_fail() {
+    void past_assembled_slot_throws_exception() {
         LocalDate date = LocalDate.of(2026, 5, 5);
         long timeId = 1L;
         long themeId = 2L;

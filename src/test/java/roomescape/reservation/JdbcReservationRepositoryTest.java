@@ -31,7 +31,8 @@ class JdbcReservationRepositoryTest {
     private JdbcReservationRepository reservationRepository;
 
     @Test
-    void 예약_저장_레포지토리_테스트() {
+    @DisplayName("예약을 저장할 수 있다.")
+    void saves_reservation_successfully() {
         Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -45,7 +46,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 전체_예약_상세_조회_레포지토리_테스트() {
+    @DisplayName("전체 예약 상세를 조회할 수 있다.")
+    void finds_all_reservation_details_successfully() {
         Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -57,7 +59,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 예약_삭제_레포지토리_테스트() {
+    @DisplayName("예약을 삭제할 수 있다.")
+    void deletes_reservation_successfully() {
         Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -71,7 +74,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("이용 가능한 시간을 조회할 수 있다.")
-    void findTimeIdByDateAndThemeId_테스트() {
+    void finds_available_time_ids_successfully() {
         Set<Long> result = reservationRepository.findTimeIdByDateAndThemeId(LocalDate.parse("2026-05-05"), 1L);
 
         assertThat(result).containsExactlyInAnyOrder(1L);
@@ -79,7 +82,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 회원의 모든 예약 상세를 조회할 수 있다.")
-    void findAllReservationDetailsByMemberId_테스트() {
+    void finds_all_reservation_details_by_member_id_successfully() {
         List<ReservationDetailProjection> result = reservationRepository.findAllReservationDetailsByMemberId(MEMBER_ID);
 
         assertThat(result).hasSize(4);
@@ -89,7 +92,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약 id와 회원 id가 일치하면 예약을 삭제할 수 있다.")
-    void deleteByIdAndMemberId_테스트() {
+    void matching_reservation_and_member_ids_delete_reservation() {
         reservationRepository.deleteByIdAndMemberId(1L, MEMBER_ID);
 
         assertThat(reservationRepository.findAll())
@@ -99,7 +102,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("회원 id가 일치하지 않으면 예약은 삭제되지 않는다.")
-    void deleteByIdAndMemberId_회원불일치_테스트() {
+    void mismatched_member_id_does_not_delete_reservation() {
         reservationRepository.deleteByIdAndMemberId(1L, 999L);
 
         assertThat(reservationRepository.findAll())

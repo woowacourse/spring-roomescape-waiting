@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -43,7 +44,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void 날짜별_테마_목록_조회_응답_테스트() {
+    @DisplayName("날짜별 테마 목록 조회 응답을 반환한다.")
+    void returns_themes_by_date_response() {
         LocalDate date = LocalDate.of(2026, 5, 5);
         List<ThemeFindResponse> serviceResponse = List.of(themeFindResponse());
         when(findThemeUseCase.findThemesBySlotDate(date)).thenReturn(serviceResponse);
@@ -58,7 +60,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void 테마_생성_응답_테스트() {
+    @DisplayName("테마 생성 응답을 반환한다.")
+    void returns_theme_create_response() {
         ThemeSaveRequest request = new ThemeSaveRequest("theme", "description", "thumbnail");
         ThemeSaveResponse serviceResponse = new ThemeSaveResponse(1L, "theme", "description", "thumbnail");
         when(createThemeUseCase.save(request)).thenReturn(serviceResponse);
@@ -71,7 +74,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void 테마_삭제_응답_테스트() {
+    @DisplayName("테마 삭제 응답을 반환한다.")
+    void returns_theme_delete_response() {
         ResponseEntity<ApiResponse<Void>> response = managerThemeController.delete(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);

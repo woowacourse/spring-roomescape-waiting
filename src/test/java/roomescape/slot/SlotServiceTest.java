@@ -39,7 +39,7 @@ class SlotServiceTest {
 
     @Test
     @DisplayName("슬롯 저장에 성공한다.")
-    void save_성공_테스트() {
+    void saves_slot_successfully() {
         SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 10), 1L, 2L);
         ReservationTime reservationTime = new ReservationTime(request.timeId(), LocalTime.of(10, 0));
         Theme theme = new Theme(request.themeId(), "test", "testDescription", "testUrl");
@@ -59,7 +59,7 @@ class SlotServiceTest {
 
     @Test
     @DisplayName("ID로 슬롯 단건 조회에 성공한다.")
-    void findById_성공_테스트() {
+    void finds_slot_by_id_successfully() {
         Slot slot = Slot.of(
                 1L,
                 LocalDate.of(2026, 5, 5),
@@ -78,7 +78,7 @@ class SlotServiceTest {
 
     @Test
     @DisplayName("슬롯 삭제를 요청한다.")
-    void deleteById_테스트() {
+    void requests_slot_delete_successfully() {
         // when
         slotService.deleteById(1L);
 
@@ -88,7 +88,7 @@ class SlotServiceTest {
 
     @Test
     @DisplayName("슬롯 저장 시 중복 슬롯이면 예외가 발생한다.")
-    void save_중복_슬롯_실패_테스트() {
+    void duplicate_slot_save_throws_exception() {
         SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 10), 1L, 2L);
         ReservationTime reservationTime = new ReservationTime(request.timeId(), LocalTime.of(10, 0));
         Theme theme = new Theme(request.themeId(), "test", "testDescription", "testUrl");

@@ -51,7 +51,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("예약 대기를 저장할 수 있다.")
-    void save_테스트_1() {
+    void saves_reservation_waiting_successfully() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
         Waiting firstWaiting = Waiting.of(8L, 3L, slotId);
@@ -84,7 +84,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("똑같은 사람이 같은 슬롯에 대한 중복 대기를 하면 예외가 발생한다.")
-    void save_테스트_2() {
+    void duplicate_waiting_by_same_member_for_same_slot_throws_exception() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
 
@@ -104,7 +104,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("유저가 이미 예약한 슬롯이면 다시 대기를 신청할 수 없다.")
-    void save_테스트_3() {
+    void member_with_existing_reservation_cannot_create_waiting() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
 
@@ -123,7 +123,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("해당 슬롯에 예약/대기가 모두 없으면 대기를 신청할 수 없다.")
-    void save_테스트_4() {
+    void empty_slot_cannot_accept_waiting() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 4L, 4L);
         long slotId = 4L;
 
@@ -146,7 +146,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("예약된 슬롯에는 첫 번째 대기를 신청할 수 있다.")
-    void save_테스트_5() {
+    void reserved_slot_accepts_first_waiting() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
         Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
@@ -176,7 +176,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
-    void deleteByIdForUser_테스트_1() {
+    void member_cancels_own_waiting_successfully() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
         when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
 
@@ -188,7 +188,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
-    void deleteByIdForUser_테스트_2() {
+    void canceling_other_members_waiting_throws_exception() {
         Waiting waiting = Waiting.of(1L, 1L, 1L);
         when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
 
@@ -200,7 +200,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
-    void deleteByIdForUser_테스트_3() {
+    void canceling_missing_waiting_is_treated_as_success() {
         when(waitingRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
 
         assertThatCode(() -> waitingService.deleteByIdForUser(999L, 1L))

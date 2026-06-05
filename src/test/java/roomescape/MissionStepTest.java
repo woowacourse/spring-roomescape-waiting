@@ -3,6 +3,7 @@ package roomescape;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -26,7 +27,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약_조회() {
+    @DisplayName("예약을 조회할 수 있다.")
+    void finds_reservations_successfully() {
         String accessToken = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("name", "a", "password", "test1"))

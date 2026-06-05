@@ -3,6 +3,7 @@ package roomescape;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,7 +51,8 @@ public class H2DatabaseTest {
     }
 
     @Test
-    void 데이터베이스_연동() {
+    @DisplayName("데이터베이스 연동에 성공한다.")
+    void connects_to_database_successfully() {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isNotBlank();
@@ -61,7 +63,8 @@ public class H2DatabaseTest {
     }
 
     @Test
-    void DB_조회_API_전환() {
+    @DisplayName("DB 조회 API 전환에 성공한다.")
+    void returns_reservations_from_database_backed_api() {
         String accessToken = login();
 
         List<Reservation> reservations = RestAssured.given().log().all()

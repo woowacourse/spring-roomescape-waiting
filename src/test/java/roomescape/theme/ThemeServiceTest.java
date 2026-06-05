@@ -29,7 +29,7 @@ public class ThemeServiceTest {
 
     @Test
     @DisplayName("슬롯에 테마에 대한 참조가 존재하면 테마 삭제에 실패한다.")
-    void delete_실패_테스트_1() {
+    void theme_referenced_by_slot_cannot_be_deleted() {
         // given
         long themeId = 1L;
         doThrow(new IllegalStateException()).when(slotUsageValidator).validateThemeDeletable(themeId);
@@ -43,7 +43,7 @@ public class ThemeServiceTest {
 
     @Test
     @DisplayName("슬롯에 테마에 대한 참조가 존재하지 않으면 테마 삭제에 성공한다.")
-    void delete_성공_테스트() {
+    void unreferenced_theme_is_deleted_successfully() {
         // given
         long themeId = 1L;
 

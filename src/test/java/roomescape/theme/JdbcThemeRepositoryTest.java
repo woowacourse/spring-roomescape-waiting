@@ -21,7 +21,8 @@ class JdbcThemeRepositoryTest {
     private JdbcThemeRepository repository;
 
     @Test
-    void 테마_저장_레포지토리_테스트() {
+    @DisplayName("테마를 저장할 수 있다.")
+    void saves_theme_successfully() {
         Theme theme = new Theme(null, "무서운게 딱 좋아", "무서운 분위기의 방탈출", "https://example.com/theme.jpg");
 
         Theme savedTheme = repository.save(theme);
@@ -32,7 +33,8 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 테마_삭제_레포지토리_테스트() {
+    @DisplayName("테마를 삭제할 수 있다.")
+    void deletes_theme_successfully() {
         // given
         Theme theme = new Theme(null, "무서운게 딱 좋아", "무서운 분위기의 방탈출", "https://example.com/theme.jpg");
         Theme savedTheme = repository.save(theme);
@@ -48,7 +50,8 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 각_날짜에_존재하는_모든_테마_조회_레포토지리_테스트() {
+    @DisplayName("각 날짜에 존재하는 모든 테마를 조회할 수 있다.")
+    void finds_themes_available_on_each_date() {
         List<Theme> themes = repository.findThemesBySlotDate(LocalDate.of(2026, 5, 5));
 
         assertThat(themes).hasSize(4);
@@ -57,7 +60,8 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 최근_7일_예약_개수에_따른_인기_테마_조회_레포지토리_테스트() {
+    @DisplayName("최근 7일 예약 개수에 따른 인기 테마를 조회할 수 있다.")
+    void finds_popular_themes_by_reservations_in_last_seven_days() {
         // given
         LocalDate currentDate = LocalDate.of(2026, 5, 10);
 
@@ -70,7 +74,8 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 테마_전체_조회_레포지토리_테스트() {
+    @DisplayName("전체 테마를 조회할 수 있다.")
+    void finds_all_themes_successfully() {
         List<Theme> themes = repository.findAll();
 
         assertThat(themes).hasSize(4);
@@ -81,7 +86,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("이미 존재하는 테마이면 true를 반환한다.")
-    void existsAlreadyTheme_테스트_1() {
+    void existing_theme_returns_true() {
         // given
         String themeName = "세기의 도둑";
 
@@ -94,7 +99,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 테마이면 false를 반환한다.")
-    void existsAlreadyTheme_테스트_2() {
+    void missing_theme_returns_false() {
         // given
         String themeName = "이삭";
 

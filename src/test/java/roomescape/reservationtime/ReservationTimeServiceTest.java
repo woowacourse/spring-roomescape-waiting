@@ -45,7 +45,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("매니저는 시간 슬롯을 저장할 수 있다.")
-    void save_성공_테스트() {
+    void manager_saves_reservation_time_successfully() {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(14, 0));
         ReservationTime saved = new ReservationTime(5L, LocalTime.of(14, 0));
         ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(14, 0));
@@ -62,7 +62,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("매니저는 전체 시간 슬롯을 조회할 수 있다.")
-    void findAll_성공_테스트() {
+    void manager_finds_all_reservation_times_successfully() {
         List<ReservationTime> reservationTimes = List.of(
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new ReservationTime(2L, LocalTime.of(11, 0))
@@ -78,7 +78,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("슬롯에 시간에 대한 참조가 존재하면 시간 삭제에 실패한다.")
-    void delete_실패_테스트_1() {
+    void reservation_time_referenced_by_slot_cannot_be_deleted() {
         // given
         long timeId = 1L;
         doThrow(new IllegalStateException()).when(slotUsageValidator).validateTimeDeletable(timeId);
@@ -92,7 +92,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("슬롯에 시간에 대한 참조가 존재하지 않으면 시간 삭제에 성공한다.")
-    void delete_성공_테스트() {
+    void unreferenced_reservation_time_is_deleted_successfully() {
         // given
         long timeId = 1L;
 

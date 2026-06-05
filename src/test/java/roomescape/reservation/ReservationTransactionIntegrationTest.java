@@ -27,7 +27,7 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
 
     @Test
     @DisplayName("대기 승격 중 실패하면 예약 삭제가 롤백된다.")
-    void 대기_승격_중_실패하면_예약_삭제가_롤백된다() {
+    void failed_waiting_promotion_rolls_back_reservation_delete() {
         String reservationUserToken = loginUserToken();
         String waitingUserToken = loginWaitingUserToken();
 

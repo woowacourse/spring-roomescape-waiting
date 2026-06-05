@@ -98,7 +98,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("나의 예약 목록 조회 시 여러 슬롯의 대기열을 한 번에 조회해 대기 순번을 계산한다.")
-    void findMyReservations_uses_bulk_waiting_line_query() {
+    void calculates_waiting_order_with_bulk_waiting_line_lookup_for_my_reservations() {
         WaitingDetailProjection firstWaitingDetail = waitingDetail(11L, 10L);
         WaitingDetailProjection secondWaitingDetail = waitingDetail(22L, 20L);
 
@@ -138,7 +138,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("유저는 본인 예약 삭제에 성공한다.")
-    void deleteById_user_success() {
+    void user_deletes_own_reservation_successfully() {
         long reservationId = 1L;
         Reservation oldReservation = reservation(
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
@@ -153,7 +153,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("매니저는 예약 삭제에 성공한다.")
-    void deleteById_manager_success() {
+    void manager_deletes_reservation_successfully() {
         long reservationId = 1L;
         Reservation oldReservation = reservation(
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
@@ -168,7 +168,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("유저는 타인 예약 삭제를 할 수 없다.")
-    void deleteById_user_other_member_forbidden() {
+    void user_cannot_delete_other_members_reservation() {
         long reservationId = 1L;
         Reservation oldReservation = reservation(
                 reservationId, OTHER_MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
@@ -182,7 +182,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약을 삭제하면 같은 슬롯의 첫 번째 대기가 예약으로 승격된다.")
-    void delete_promotes_first_waiting() {
+    void deleting_reservation_promotes_first_waiting_in_same_slot() {
         long reservationId = 1L;
         Reservation oldReservation = reservation(
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
@@ -209,7 +209,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("승격 예약 저장에 실패하면 승격된 대기를 삭제하지 않는다.")
-    void delete_promote_save_fail() {
+    void failed_promotion_reservation_save_keeps_promoted_waiting() {
         long reservationId = 1L;
         Reservation oldReservation = reservation(
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L

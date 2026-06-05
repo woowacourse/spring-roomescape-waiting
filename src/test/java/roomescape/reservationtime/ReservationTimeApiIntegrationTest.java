@@ -14,7 +14,8 @@ import static org.hamcrest.Matchers.is;
 public class ReservationTimeApiIntegrationTest extends ControllerTestSupport {
 
     @Test
-    void 특정날짜와_테마에_예약_가능_시간들_조회_API() {
+    @DisplayName("특정 날짜와 테마의 예약 가능 시간들을 조회할 수 있다.")
+    void finds_available_reservation_times_by_date_and_theme() {
         String accessToken = loginUserToken();
 
         Map<String, Object> options = new HashMap<>();
@@ -34,7 +35,7 @@ public class ReservationTimeApiIntegrationTest extends ControllerTestSupport {
 
     @Test
     @DisplayName("예약 가능 시간 조회 및 예약 생성 이후 예약 가능 시간을 재조회를 할 수 있다.")
-    void 정상_흐름_테스트() {
+    void updates_available_times_after_creating_reservation() {
         String userToken = loginUserToken();
 
         Map<String, Object> options = new HashMap<>();
@@ -84,7 +85,8 @@ public class ReservationTimeApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 매니저_시간_관리_API() {
+    @DisplayName("매니저는 시간 관리 API를 사용할 수 있다.")
+    void manager_uses_reservation_time_management_api_successfully() {
         String accessToken = loginManagerToken();
 
         Map<String, String> params = new HashMap<>();

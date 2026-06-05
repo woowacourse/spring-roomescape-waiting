@@ -17,7 +17,7 @@ class SlotTest {
 
     @Test
     @DisplayName("슬롯은 날짜, 시간, 테마 없이 생성될 수 없다.")
-    void create_null_fail() {
+    void slot_without_date_time_or_theme_cannot_be_created() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "theme", "description", "thumbnail");
 
@@ -31,7 +31,7 @@ class SlotTest {
 
     @Test
     @DisplayName("슬롯 시작 시각이 현재보다 이전이면 과거 슬롯이다.")
-    void isPast_true() {
+    void slot_start_time_before_now_is_past() {
         Slot slot = slot(LocalDate.of(2026, 5, 5), LocalTime.of(10, 0));
 
         assertThat(slot.isPast(LocalDateTime.of(2026, 5, 5, 10, 1))).isTrue();
@@ -39,7 +39,7 @@ class SlotTest {
 
     @Test
     @DisplayName("슬롯 시작 시각이 현재와 같거나 이후이면 과거 슬롯이 아니다.")
-    void isPast_false() {
+    void slot_start_time_at_or_after_now_is_not_past() {
         Slot slot = slot(LocalDate.of(2026, 5, 5), LocalTime.of(10, 0));
 
         assertThat(slot.isPast(LocalDateTime.of(2026, 5, 5, 10, 0))).isFalse();
@@ -48,7 +48,7 @@ class SlotTest {
 
     @Test
     @DisplayName("과거 슬롯이면 검증에 실패한다.")
-    void validateNotPast_fail() {
+    void past_slot_fails_validation() {
         Slot slot = slot(LocalDate.of(2026, 5, 5), LocalTime.of(10, 0));
 
         assertThatThrownBy(() -> slot.validateNotPast(LocalDateTime.of(2026, 5, 5, 10, 1)))

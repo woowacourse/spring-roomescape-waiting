@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +35,8 @@ class WaitingControllerTest {
     private WaitingController waitingController;
 
     @Test
-    void 대기_생성_응답_테스트() {
+    @DisplayName("대기 생성 응답을 반환한다.")
+    void returns_waiting_create_response() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         AuthenticatedMember member = AuthenticatedMember.of(2L, Role.USER);
         WaitingResponse serviceResponse = new WaitingResponse(10L, 2L, 1L, 1L);
@@ -49,7 +51,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 대기_삭제_응답_테스트() {
+    @DisplayName("대기 삭제 응답을 반환한다.")
+    void returns_waiting_delete_response() {
         AuthenticatedMember member = AuthenticatedMember.of(2L, Role.USER);
 
         ResponseEntity<ApiResponse<Void>> response = waitingController.deleteByUser(10L, member);

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -47,7 +48,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    void 예약_가능_시간_조회_응답_테스트() {
+    @DisplayName("예약 가능 시간 조회 응답을 반환한다.")
+    void returns_available_reservation_time_response() {
         LocalDate date = LocalDate.of(2026, 5, 5);
         List<AvailableTimeFindResponse> serviceResponse = List.of(
                 new AvailableTimeFindResponse(new TimeInformation(1L, LocalTime.of(10, 0)), TimeSlotStatus.RESERVABLE)
@@ -63,7 +65,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    void 시간_생성_응답_테스트() {
+    @DisplayName("시간 생성 응답을 반환한다.")
+    void returns_reservation_time_create_response() {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(10, 0));
         ReservationTimeSaveResponse serviceResponse = new ReservationTimeSaveResponse(1L, LocalTime.of(10, 0));
         when(createReservationTimeUseCase.save(request)).thenReturn(serviceResponse);
@@ -76,7 +79,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    void 시간_삭제_응답_테스트() {
+    @DisplayName("시간 삭제 응답을 반환한다.")
+    void returns_reservation_time_delete_response() {
         ResponseEntity<ApiResponse<Void>> response = managerReservationTimeController.delete(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -85,7 +89,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    void 시간_목록_조회_응답_테스트() {
+    @DisplayName("시간 목록 조회 응답을 반환한다.")
+    void returns_reservation_time_list_response() {
         List<ReservationTimeFindResponse> serviceResponse = List.of(
                 new ReservationTimeFindResponse(1L, LocalTime.of(10, 0))
         );
