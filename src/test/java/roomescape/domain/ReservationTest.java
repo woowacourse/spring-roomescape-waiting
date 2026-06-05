@@ -26,7 +26,7 @@ class ReservationTest {
         String name = "밥".repeat(31);
         DomainValidationException exception = assertThrows(
                 DomainValidationException.class,
-                () -> new Reservation(1L, name, VALID_DATE, VALID_TIME, VALID_THEME)
+                () -> new Reservation(1L, name, new ReservationSlot(1L, VALID_DATE, VALID_TIME, VALID_THEME))
         );
         assertEquals("예약자 이름은 30자를 초과할 수 없습니다.", exception.getMessage());
     }

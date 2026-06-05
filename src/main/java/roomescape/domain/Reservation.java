@@ -9,17 +9,13 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, String name, ReservationSlot slot) {
         validateNameLength(name);
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
     private static void validateNameLength(String name) {
@@ -36,15 +32,19 @@ public class Reservation {
         return name;
     }
 
+    public ReservationSlot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 }

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -62,7 +63,7 @@ public class AdminReservationService {
 
         validateNoConflict(command);
 
-        Reservation reservation = new Reservation(null, command.name(), command.date(), time, theme);
+        Reservation reservation = new Reservation(null, command.name(), new ReservationSlot(null, command.date(), time, theme));
         ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
         log.info("예약 생성 완료: reservationId={}, name={}, date={}, timeId={}, themeId={}",
                 saved.id(), saved.name(), saved.date(), command.timeId(), command.themeId());

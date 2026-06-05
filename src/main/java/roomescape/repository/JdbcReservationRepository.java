@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,6 +14,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
@@ -25,7 +27,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id AS reservation_id,
                 r.name AS reservation_name,
-                r.date AS reservation_date,
+                s.id AS slot_id,
+                d.date AS reservation_date,
                 t.id AS time_id,
                 t.start_at AS time_start_at,
                 th.id AS theme_id,
@@ -33,15 +36,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.description AS theme_description,
                 th.thumbnail_url AS theme_thumbnail
             FROM reservation r
-            INNER JOIN reservation_time t ON r.time_id = t.id
-            INNER JOIN theme th ON r.theme_id = th.id
+            INNER JOIN reservation_slot s ON r.slot_id = s.id
+            INNER JOIN reservation_date d ON s.date_id = d.id
+            INNER JOIN reservation_time t ON s.time_id = t.id
+            INNER JOIN theme th ON s.theme_id = th.id
             """;
 
     private static final String SELECT_BASE_WITH_WAITING_ORDER = """
             SELECT
                 r.id           AS reservation_id,
                 r.name         AS reservation_name,
-                r.date         AS reservation_date,
+                s.id           AS slot_id,
+                d.date         AS reservation_date,
                 t.id           AS time_id,
                 t.start_at     AS time_start_at,
                 th.id          AS theme_id,
@@ -50,29 +56,32 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.thumbnail_url AS theme_thumbnail,
                 (SELECT COUNT(*)
                    FROM reservation r2
-                  WHERE r2.date = r.date
-                    AND r2.time_id = r.time_id
-                    AND r2.theme_id = r.theme_id
+                  WHERE r2.slot_id = r.slot_id
                     AND r2.id < r.id) AS waiting_order
             FROM reservation r
-            INNER JOIN reservation_time t ON r.time_id = t.id
-            INNER JOIN theme th ON r.theme_id = th.id
+            INNER JOIN reservation_slot s ON r.slot_id = s.id
+            INNER JOIN reservation_date d ON s.date_id = d.id
+            INNER JOIN reservation_time t ON s.time_id = t.id
+            INNER JOIN theme th ON s.theme_id = th.id
             """;
 
     private final RowMapper<Reservation> reservationRowMapper =
             (rs, rowNum) -> new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
-                    rs.getObject("reservation_date", LocalDate.class),
-                    new ReservationTime(
-                            rs.getLong("time_id"),
-                            rs.getObject("time_start_at", LocalTime.class)
-                    ),
-                    new Theme(
-                            rs.getLong("theme_id"),
-                            rs.getString("theme_name"),
-                            rs.getString("theme_description"),
-                            rs.getString("theme_thumbnail")
+                    new ReservationSlot(
+                            rs.getLong("slot_id"),
+                            rs.getObject("reservation_date", LocalDate.class),
+                            new ReservationTime(
+                                    rs.getLong("time_id"),
+                                    rs.getObject("time_start_at", LocalTime.class)
+                            ),
+                            new Theme(
+                                    rs.getLong("theme_id"),
+                                    rs.getString("theme_name"),
+                                    rs.getString("theme_description"),
+                                    rs.getString("theme_thumbnail")
+                            )
                     )
             );
 
@@ -80,16 +89,19 @@ public class JdbcReservationRepository implements ReservationRepository {
             (rs, rowNum) -> new ReservationWithWaitingOrder(
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
-                    rs.getObject("reservation_date", LocalDate.class),
-                    new ReservationTime(
-                            rs.getLong("time_id"),
-                            rs.getObject("time_start_at", LocalTime.class)
-                    ),
-                    new Theme(
-                            rs.getLong("theme_id"),
-                            rs.getString("theme_name"),
-                            rs.getString("theme_description"),
-                            rs.getString("theme_thumbnail")
+                    new ReservationSlot(
+                            rs.getLong("slot_id"),
+                            rs.getObject("reservation_date", LocalDate.class),
+                            new ReservationTime(
+                                    rs.getLong("time_id"),
+                                    rs.getObject("time_start_at", LocalTime.class)
+                            ),
+                            new Theme(
+                                    rs.getLong("theme_id"),
+                                    rs.getString("theme_name"),
+                                    rs.getString("theme_description"),
+                                    rs.getString("theme_thumbnail")
+                            )
                     ),
                     rs.getLong("waiting_order")
             );
@@ -125,24 +137,25 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public ReservationWithWaitingOrder save(Reservation reservation) {
         String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                SELECT ?, ?, t.id, th.id
-                FROM reservation_time t, theme th
-                WHERE t.id = ? AND th.id = ?
+                INSERT INTO reservation (name, slot_id)
+                SELECT ?, s.id
+                FROM reservation_slot s
+                JOIN reservation_date d ON s.date_id = d.id
+                WHERE d.date = ? AND s.time_id = ? AND s.theme_id = ?
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         int affectedRows = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
-            ps.setDate(2, Date.valueOf(reservation.getDate()));
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
+            ps.setDate(2, Date.valueOf(reservation.getSlot().getDate()));
+            ps.setLong(3, reservation.getSlot().getTime().getId());
+            ps.setLong(4, reservation.getSlot().getTheme().getId());
             return ps;
         }, keyHolder);
 
         if (affectedRows == 0) {
-            throw new ResourceNotFoundException("시간 또는 테마가 존재하지 않아 예약을 생성할 수 없습니다.");
+            throw new ResourceNotFoundException("해당 날짜, 시간 또는 테마를 가진 슬롯이 존재하지 않아 예약을 생성할 수 없습니다.");
         }
 
         Long id = keyHolder.getKey().longValue();
@@ -151,15 +164,25 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public ReservationWithWaitingOrder update(Reservation reservation) {
-        String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
-        jdbcTemplate.update(
+        String sql = """
+                UPDATE reservation r
+                SET r.name = ?,
+                    r.slot_id = (SELECT s.id FROM reservation_slot s JOIN reservation_date d ON s.date_id = d.id WHERE d.date = ? AND s.time_id = ? AND s.theme_id = ?)
+                WHERE r.id = ?
+                """;
+        int affectedRows = jdbcTemplate.update(
                 sql,
                 reservation.getName(),
-                Date.valueOf(reservation.getDate()),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+                Date.valueOf(reservation.getSlot().getDate()),
+                reservation.getSlot().getTime().getId(),
+                reservation.getSlot().getTheme().getId(),
                 reservation.getId()
         );
+
+        if (affectedRows == 0) {
+            throw new ResourceNotFoundException("해당 예약이 존재하지 않거나 슬롯 정보가 올바르지 않습니다.");
+        }
+
         return findWithWaitingOrderById(reservation.getId());
     }
 
@@ -185,8 +208,16 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation r
+                    JOIN reservation_slot s ON r.slot_id = s.id
+                    JOIN reservation_date d ON s.date_id = d.id
+                    WHERE r.name = ? AND d.date = ? AND s.time_id = ? AND s.theme_id = ?
+                )
+                """;
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM reservation WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?)",
+                sql,
                 Boolean.class,
                 name, Date.valueOf(date), timeId, themeId
         );
@@ -195,8 +226,16 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation r
+                    JOIN reservation_slot s ON r.slot_id = s.id
+                    JOIN reservation_date d ON s.date_id = d.id
+                    WHERE d.date = ? AND s.time_id = ? AND s.theme_id = ? AND r.id <> ?
+                )
+                """;
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? AND id <> ?)",
+                sql,
                 Boolean.class,
                 Date.valueOf(date), timeId, themeId, id
         );
@@ -205,21 +244,15 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByTimeId(Long timeId) {
-        Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id = ?)",
-                Boolean.class,
-                timeId
-        );
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation r JOIN reservation_slot s ON r.slot_id = s.id WHERE s.time_id = ?)";
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
         return Boolean.TRUE.equals(exists);
     }
 
     @Override
     public boolean existsByThemeId(Long themeId) {
-        Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id = ?)",
-                Boolean.class,
-                themeId
-        );
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation r JOIN reservation_slot s ON r.slot_id = s.id WHERE s.theme_id = ?)";
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
         return Boolean.TRUE.equals(exists);
     }
 }

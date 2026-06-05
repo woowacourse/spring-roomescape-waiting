@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.concurrent.CountDownLatch;
@@ -14,9 +15,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.ReservationCreateCommand;
+import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationTimeCreateCommand;
 import roomescape.service.dto.ThemeCreateCommand;
 
@@ -36,6 +39,8 @@ class ReservationConcurrencyTest {
     private ThemeService themeService;
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Long time1Id;
     private Long time2Id;
@@ -53,9 +58,12 @@ class ReservationConcurrencyTest {
 
         themeId = themeService.create(new ThemeCreateCommand("테스트 테마", "설명", "url")).id();
 
-        mattReservationId = adminReservationService.create(
-                new ReservationCreateCommand(매트, 예약_날짜, time1Id, themeId)).id();
-        rudevicoReservationId = adminReservationService.create(
+        슬롯_생성(예약_날짜, time1Id, themeId);
+        슬롯_생성(예약_날짜, time2Id, themeId);
+        슬롯_생성(예약_날짜, time3Id, themeId);
+
+        mattReservationId = 예약_생성(new ReservationCreateCommand(매트, 예약_날짜, time1Id, themeId)).id();
+        rudevicoReservationId = 예약_생성(
                 new ReservationCreateCommand(루드비코, 예약_날짜, time2Id, themeId)).id();
     }
 
@@ -64,7 +72,7 @@ class ReservationConcurrencyTest {
     void 동일한_예약_동시_생성시_하나만_성공한다() throws InterruptedException {
         ReservationCreateCommand command = new ReservationCreateCommand(매트, 예약_날짜, time3Id, themeId);
 
-        ConcurrencyResult result = 동시_실행(10, () -> adminReservationService.create(command));
+        ConcurrencyResult result = 동시_실행(10, () -> 예약_생성(command));
 
         assertThat(result.successCount()).isEqualTo(1);
         assertThat(result.failCount()).isEqualTo(9);
@@ -79,7 +87,7 @@ class ReservationConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             String userName = "사용자" + i;
             ReservationCreateCommand command = new ReservationCreateCommand(userName, 예약_날짜, time3Id, themeId);
-            actions[i] = () -> adminReservationService.create(command);
+            actions[i] = () -> 예약_생성(command);
         }
 
         ConcurrencyResult result = 동시_실행(actions);
@@ -89,15 +97,14 @@ class ReservationConcurrencyTest {
         assertThat(특정_시간의_예약_개수_조회(time3Id)).isEqualTo(threadCount);
     }
 
-    @Disabled("H2 DB 환경에서만 터져서 일단 비활성화")
-    @DisplayName("예약 생성과 해당 시간 삭제가 동시에 일어날 때 외래 키 제약 조건 등에 의해 정합성이 보장된다")
+    @DisplayName("예약 생성과 슬롯 삭제가 동시에 일어날 때 DB 외래키 제약조건에 의해 둘 중 하나만 성공하며 정합성이 보장된다")
     @Test
-    void 예약_생성과_해당_시간_삭제가_동시에_일어날_때_정합성이_보장된다() throws InterruptedException {
-        ReservationCreateCommand command = new ReservationCreateCommand("새로운사용자", 예약_날짜, time3Id, themeId);
+    void 예약_생성과_슬롯_삭제가_동시에_일어날_때_정합성이_보장된다() throws InterruptedException {
+        ReservationCreateCommand command = new ReservationCreateCommand("동시접근자", 예약_날짜, time3Id, themeId);
 
         ConcurrencyResult result = 동시_실행(
-                () -> adminReservationService.create(command),
-                () -> reservationTimeService.delete(time3Id)
+                () -> 예약_생성(command),
+                () -> 슬롯_삭제(예약_날짜, time3Id, themeId)
         );
 
         assertThat(result.successCount()).isEqualTo(1);
@@ -142,8 +149,40 @@ class ReservationConcurrencyTest {
 
     private long 특정_시간의_예약_개수_조회(Long timeId) {
         return reservationRepository.findAll().stream()
-                .filter(r -> r.time().getId().equals(timeId))
+                .filter(r -> r.slot().getTime().getId().equals(timeId))
                 .count();
+    }
+
+    private ReservationResult 예약_생성(ReservationCreateCommand reservationCreateCommand) {
+        return adminReservationService.create(reservationCreateCommand);
+    }
+
+    private void 슬롯_생성(LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_date (date) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM reservation_date WHERE date = ?)",
+                Date.valueOf(date), Date.valueOf(date)
+        );
+        Long dateId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_date WHERE date = ?",
+                Long.class,
+                Date.valueOf(date)
+        );
+        jdbcTemplate.update(
+                "INSERT INTO reservation_slot (date_id, time_id, theme_id) SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?)",
+                dateId, timeId, themeId, dateId, timeId, themeId
+        );
+    }
+
+    private void 슬롯_삭제(LocalDate date, Long timeId, Long themeId) {
+        Long dateId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_date WHERE date = ?",
+                Long.class,
+                Date.valueOf(date)
+        );
+        jdbcTemplate.update(
+                "DELETE FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
+                dateId, timeId, themeId
+        );
     }
 
     private record ConcurrencyResult(int successCount, int failCount) {
