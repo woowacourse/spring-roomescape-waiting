@@ -76,6 +76,7 @@ class ReservationApiTest {
                 .body("[0].time.startAt", is("15:40:00"));
 
         RestAssured.given().log().all()
+                .queryParam("name", "브라운")
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -90,10 +91,11 @@ class ReservationApiTest {
     @Test
     void 존재하지_않는_예약_삭제_시_404를_반환한다() {
         RestAssured.given().log().all()
+                .queryParam("name", "브라운")
                 .when().delete("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
-                .body("code", is("RESERVATION_NOT_FOUND"))
+                .body("code", is("MY_RESERVATION_NOT_FOUND"))
                 .body("status", is(404));
     }
 
@@ -139,6 +141,7 @@ class ReservationApiTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
+                .queryParam("name", "브라운")
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);

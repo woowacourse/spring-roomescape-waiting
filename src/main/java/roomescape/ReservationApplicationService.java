@@ -2,6 +2,7 @@ package roomescape;
 
 import java.time.LocalDate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.Reservation;
@@ -28,6 +29,7 @@ public class ReservationApplicationService {
         return reservationWaitingService.save(name, date, themeId, timeId);
     }
 
+    @Transactional
     public void cancelReservation(Long id, String name) {
         Reservation reservation = reservationService.deleteByIdAndName(id, name);
 

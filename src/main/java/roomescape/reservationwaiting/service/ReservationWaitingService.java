@@ -34,7 +34,14 @@ public class ReservationWaitingService {
     }
 
     public void deleteById(Long id) {
-        reservationWaitingRepository.deleteById(id);
+        int affectedRowCount = reservationWaitingRepository.deleteById(id);
+
+        if (affectedRowCount != 1) {
+            throw new ResourceNotFoundException(
+                    ErrorCode.RESERVATION_WAITING_NOT_FOUND,
+                    "이미 대기가 삭제되었습니다."
+            );
+        }
     }
 
     public void deleteByIdAndName(Long waitingId, String name) {

@@ -15,6 +15,7 @@ import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.Theme;
 
 @ExtendWith(SpringExtension.class)
@@ -23,8 +24,8 @@ class ReservationApplicationServiceTest {
     @Mock
     private ReservationService reservationService;
 
-//    @Mock
-//    private ReservationWaitingService reservationWaitingService;
+    @Mock
+    private ReservationWaitingService reservationWaitingService;
 
     @InjectMocks
     private ReservationApplicationService reservationApplicationService;
