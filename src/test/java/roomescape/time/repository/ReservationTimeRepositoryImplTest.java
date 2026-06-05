@@ -2,7 +2,6 @@ package roomescape.time.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
@@ -35,7 +35,7 @@ class ReservationTimeRepositoryImplTest {
     @Nested
     class save {
         @Test
-        @DisplayName("새로운 시간 정보를 저장하고 반환된 객체의 ID를 확인한다.")
+        @DisplayName("save persists a new reservation time and returns its id.")
         void save_validTime_returnsWithId() {
             // given
             LocalTime startTime = LocalTime.of(10, 0);
@@ -44,13 +44,13 @@ class ReservationTimeRepositoryImplTest {
             // when
             ReservationTime savedTime = reservationTimeRepository.save(time);
 
-            //then
+            // then
             assertThat(savedTime.getId()).isNotNull();
             assertThat(savedTime.getStartAt()).isEqualTo(startTime);
         }
 
         @Test
-        @DisplayName("기존에 이미 해당 시간이 있으면 예외가 발생한다.")
+        @DisplayName("save throws DataIntegrityViolationException when the time already exists.")
         void save_duplicateTime_throwsDataIntegrityViolation() {
             // given
             LocalTime startTime = LocalTime.of(10, 0);
@@ -59,14 +59,13 @@ class ReservationTimeRepositoryImplTest {
             reservationTimeRepository.save(time);
 
             // when & then
-            assertThatThrownBy(
-                    () -> reservationTimeRepository.save(time)
-            ).isInstanceOf(DataIntegrityViolationException.class);
+            assertThatThrownBy(() -> reservationTimeRepository.save(time))
+                    .isInstanceOf(DataIntegrityViolationException.class);
         }
     }
 
     @Test
-    @DisplayName("ID를 통해 저장된 시간 정보를 정확히 조회한다.")
+    @DisplayName("findById returns the persisted reservation time.")
     void findById_existingTime_returnsTime() {
         // given
         ReservationTime savedTime = createTime(LocalTime.of(11, 0));
@@ -75,26 +74,24 @@ class ReservationTimeRepositoryImplTest {
         Optional<ReservationTime> result = reservationTimeRepository.findById(savedTime.getId());
 
         // then
-        assertTrue(result.isPresent());
-        assertThat(result.get()).isEqualTo(savedTime);
+        assertThat(result).contains(savedTime);
     }
 
     @Test
-    @DisplayName("해당 시간이 저장돼 있는지 조회한다.")
+    @DisplayName("existsByStartAt returns whether a time exists at the given start time.")
     void existsByStartAt() {
-        //given
+        // given
         createTime(LocalTime.of(11, 0));
 
-        //when & then
+        // when & then
         assertThat(reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(11, 0))))
                 .isTrue();
-
         assertThat(reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(12, 0))))
                 .isFalse();
     }
 
     @Test
-    @DisplayName("존재하는 모든 시간 목록을 리스트로 조회한다.")
+    @DisplayName("findAll returns all persisted times.")
     void findAll_multipleTimes_returnsAllTimes() {
         // given
         ReservationTime saved1 = createTime(LocalTime.of(10, 0));
@@ -108,7 +105,7 @@ class ReservationTimeRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("모든 시간을 조회하고, 예약된 시간은 alreadyBooked=true 로 반환한다")
+    @DisplayName("queryAvailableTimes marks booked times as alreadyBooked.")
     void queryAvailableTimes() {
         // given
         ReservationTime time1 = createTime(LocalTime.of(10, 0));
@@ -136,7 +133,7 @@ class ReservationTimeRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("시간 정보를 삭제한다.")
+    @DisplayName("delete removes the persisted time.")
     void delete_existingId_removesTime() {
         // given
         ReservationTime saved = createTime(LocalTime.of(10, 0));
@@ -150,42 +147,50 @@ class ReservationTimeRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("다른 객체가 참조하고 있으면 예외가 발생한다.")
+    @DisplayName("delete throws NotFoundException when the time does not exist.")
+    void delete_nonExistentId_throwsNotFound() {
+        // given
+        ReservationTime missing = new ReservationTime(9999L, LocalTime.of(10, 0));
+
+        // when & then
+        assertThatThrownBy(() -> reservationTimeRepository.delete(missing))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("delete throws DataIntegrityViolationException when the time is in use.")
     void deleteById_timeInUse_throwsDataIntegrityViolation() {
-        //given
+        // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
 
         Long themeId = createTheme();
         createReservation(time, LocalDate.of(2026, 5, 6), themeId);
 
-        //when & then
-        assertThatThrownBy(
-                () -> reservationTimeRepository.delete(time)
-        ).isInstanceOf(DataIntegrityViolationException.class);
+        // when & then
+        assertThatThrownBy(() -> reservationTimeRepository.delete(time))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     private ReservationTime createTime(LocalTime time) {
-        return reservationTimeRepository.save(
-                new ReservationTime(time)
-        );
+        return reservationTimeRepository.save(new ReservationTime(time));
     }
 
     private Long createTheme() {
         jdbcTemplate.update(
-                "insert into theme(name, description, thumbnail_url) values ('테마', '설명', 'url')"
+                "insert into theme(name, description, thumbnail_url) values ('theme', 'description', 'url')"
         );
 
         return jdbcTemplate.queryForObject(
                 "SELECT id FROM theme WHERE name = ?",
                 Long.class,
-                "테마"
+                "theme"
         );
     }
 
     private void createReservation(ReservationTime time, LocalDate date, Long themeId) {
         jdbcTemplate.update(
                 "insert into reservation(name, reservation_date, time_id, theme_id) values (?, ?, ?, ?)",
-                "브라운", java.sql.Date.valueOf(date), time.getId(), themeId
+                "brown", java.sql.Date.valueOf(date), time.getId(), themeId
         );
     }
 }

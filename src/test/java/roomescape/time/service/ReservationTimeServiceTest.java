@@ -1,5 +1,6 @@
 package roomescape.time.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -21,6 +22,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.service.dto.ReservationTimeCommand;
+import roomescape.time.service.dto.ReservationTimeResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -31,10 +33,8 @@ class ReservationTimeServiceTest {
     @InjectMocks
     private ReservationTimeService reservationTimeService;
 
-    // --- save() Tests ---
-
     @Test
-    @DisplayName("예약 시간을 성공적으로 저장한다.")
+    @DisplayName("save returns the created reservation time.")
     void save_success() {
         // given
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
@@ -44,15 +44,16 @@ class ReservationTimeServiceTest {
         given(reservationTimeRepository.save(any(ReservationTime.class))).willReturn(savedTime);
 
         // when
-        reservationTimeService.save(command);
+        ReservationTimeResult result = reservationTimeService.save(command);
 
         // then
+        assertThat(result).isEqualTo(new ReservationTimeResult(1L, LocalTime.of(10, 0)));
         then(reservationTimeRepository).should().existsByStartAt(any(ReservationTime.class));
         then(reservationTimeRepository).should().save(any(ReservationTime.class));
     }
 
     @Test
-    @DisplayName("예약 시간 생성 시, 기존에 이미 동일한 시간이 있으면 예외가 발생한다.")
+    @DisplayName("save throws ConflictException when the start time already exists.")
     void save_duplicateTime_throwsConflictException() {
         // given
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
@@ -66,7 +67,7 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("예약 시간 생성 시, 데이터베이스 제약 조건 위반이 발생하면 예외가 발생한다.")
+    @DisplayName("save throws ConflictException when the database rejects a duplicate time.")
     void save_databaseDuplicate_throwsConflictException() {
         // given
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
@@ -81,24 +82,23 @@ class ReservationTimeServiceTest {
                 .hasMessage(TimeErrorCode.DUPLICATE_TIME.getMessage());
     }
 
-    // --- getById() Tests ---
-
     @Test
-    @DisplayName("ID에 해당하는 예약 시간을 성공적으로 조회한다.")
+    @DisplayName("getById returns the reservation time when it exists.")
     void getById_success() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
 
         // when
-        reservationTimeService.getById(1L);
+        ReservationTime result = reservationTimeService.getById(1L);
 
         // then
+        assertThat(result).isEqualTo(time);
         then(reservationTimeRepository).should().findById(1L);
     }
 
     @Test
-    @DisplayName("ID에 해당하는 예약 시간이 존재하지 않으면 예외가 발생한다.")
+    @DisplayName("getById throws NotFoundException when the time does not exist.")
     void getById_notFound_throwsNotFoundException() {
         // given
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
@@ -109,10 +109,8 @@ class ReservationTimeServiceTest {
                 .hasMessage(TimeErrorCode.TIME_NOT_FOUND.getMessage());
     }
 
-    // --- deleteById() Tests ---
-
     @Test
-    @DisplayName("예약 시간을 성공적으로 삭제한다.")
+    @DisplayName("deleteById deletes the reservation time when it exists.")
     void deleteById_success() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -127,7 +125,7 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("삭제하려는 예약 시간이 존재하지 않으면 예외가 발생한다.")
+    @DisplayName("deleteById throws NotFoundException when the time does not exist.")
     void deleteById_notFound_throwsNotFoundException() {
         // given
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
@@ -139,7 +137,7 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("삭제하려는 예약 시간이 사용 중이면 예외가 발생한다.")
+    @DisplayName("deleteById throws ConflictException when the time is in use.")
     void deleteById_timeInUse_throwsConflictException() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));

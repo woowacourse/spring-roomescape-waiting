@@ -1,5 +1,6 @@
 package roomescape.time.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -15,11 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.service.ThemeService;
 import roomescape.theme.exception.ThemeErrorCode;
+import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
+import roomescape.time.service.dto.ReservationTimeResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeQueryServiceTest {
@@ -42,31 +44,21 @@ class ReservationTimeQueryServiceTest {
         given(reservationTimeRepository.findAll()).willReturn(List.of(time1, time2));
 
         // when
-        reservationTimeQueryService.findAll();
+        List<ReservationTimeResult> result = reservationTimeQueryService.findAll();
 
         // then
+        assertThat(result).containsExactly(
+                new ReservationTimeResult(1L, LocalTime.of(10, 0)),
+                new ReservationTimeResult(2L, LocalTime.of(13, 0))
+        );
         then(reservationTimeRepository).should().findAll();
-    }
-
-    @Test
-    @DisplayName("ID에 해당하는 예약 시간 정보를 성공적으로 조회한다.")
-    void findById_success() {
-        // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        given(reservationTimeRepository.findById(1L)).willReturn(java.util.Optional.of(time));
-
-        // when
-        reservationTimeQueryService.findById(1L);
-
-        // then
-        then(reservationTimeRepository).should().findById(1L);
     }
 
     @Test
     @DisplayName("예약 가능한 시간 목록을 성공적으로 조회한다.")
     void queryAvailableTimes_success() {
         // given
-        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Theme theme = new Theme(1L, "theme", "description", "url");
         given(themeService.findById(1L)).willReturn(theme);
 
         AvailableTimeQueryResult queryResult = new AvailableTimeQueryResult(1L, LocalTime.of(10, 0), false);
@@ -74,9 +66,10 @@ class ReservationTimeQueryServiceTest {
                 .willReturn(List.of(queryResult));
 
         // when
-        reservationTimeQueryService.queryAvailableTimes(1L, LocalDate.of(2026, 5, 5));
+        var result = reservationTimeQueryService.queryAvailableTimes(1L, LocalDate.of(2026, 5, 5));
 
         // then
+        assertThat(result.availableTimeQueryResults()).containsExactly(queryResult);
         then(themeService).should().findById(1L);
         then(reservationTimeRepository).should().queryAvailableTimes(1L, LocalDate.of(2026, 5, 5));
     }
