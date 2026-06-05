@@ -440,6 +440,28 @@ class ReservationControllerTest {
         WaitingPromotionService waitingPromotionService;
 
         @Test
+        void 예약_취소_시_대기가_있으면_첫_번째_대기가_예약으로_승격된다() {
+            // given
+            insertReservationTime("12:00");
+            insertTheme("themeName", "description", "url");
+            insertReservation("customer", "2026-08-05", 1L, 1L);
+            insertWaiting("코로구", "2026-08-05", 1L, 1L);
+
+            // when
+            RestAssured.given().log().all()
+                .delete("/reservations/{id}", 1L)
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+            // then
+            final String promotedName = jdbcTemplate.queryForObject("SELECT name FROM reservation", String.class);
+            assertThat(promotedName).isEqualTo("코로구");
+
+            final Integer waitingCount = jdbcTemplate.queryForObject("SELECT count(1) FROM waiting", Integer.class);
+            assertThat(waitingCount).isZero();
+        }
+
+        @Test
         void 승격이_실패해도_예약_취소는_성공한다() {
             // given
             insertReservationTime("12:00");
@@ -457,7 +479,8 @@ class ReservationControllerTest {
             response.then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
-            assertThat(hasNoReservations()).isTrue();
+            final Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+            assertThat(reservationCount).isZero();
         }
     }
 
@@ -499,15 +522,6 @@ class ReservationControllerTest {
                 """,
             startAt
         );
-    }
-
-    private boolean hasNoReservations() {
-        Integer reservationCount = jdbcTemplate.queryForObject("""
-                SELECT count(1) FROM reservation
-                """,
-            Integer.class
-        );
-        return reservationCount != null && reservationCount == 0;
     }
 
     private static List<ReservationTimesWithStatus> getReservationTimeStatusResponses() {
