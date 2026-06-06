@@ -64,7 +64,7 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
-        validateNotToday(reservation.getDate());
+        validateModifiable(reservation.getDate(), reservation.getTime());
 
         reservationRepository.deleteById(id);
         Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
@@ -80,7 +80,7 @@ public class ReservationService {
 
     public ReservationResponse updateReservation(Long id, @Valid ReservationUpdateRequest request) {
         Reservation reservation = findById(id);
-        validateNotToday(reservation.getDate());
+        validateModifiable(reservation.getDate(), reservation.getTime());
 
         ReservationDate newReservationDate = reservationDateService.findById(request.dateId());
         ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
@@ -116,5 +116,10 @@ public class ReservationService {
         if (reservationDate.isToday()) {
             throw new RoomescapeException(ReservationDateErrorCode.TODAY_NOT_MODIFIED);
         }
+    }
+
+    private void validateModifiable(ReservationDate reservationDate, ReservationTime reservationTime) {
+        validateNotPast(reservationDate, reservationTime);
+        validateNotToday(reservationDate);
     }
 }

@@ -130,7 +130,7 @@ class WaitingReservationServiceTest {
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
             .isInstanceOf(RoomescapeException.class)
-            .hasMessageContaining("과거 시점의 데이터를 등록할 수 없습니다.");
+            .hasMessageContaining("과거 예약은 수정 및 취소가 불가능합니다.");
     }
 
     @Test
