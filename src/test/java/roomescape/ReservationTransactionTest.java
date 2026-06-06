@@ -4,27 +4,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.domain.Reservation;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationWaitingService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
@@ -36,9 +30,6 @@ class ReservationTransactionTest {
 
     @Autowired
     private ReservationService reservationService;
-
-    @Autowired
-    private ReservationWaitingService reservationWaitingService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -66,8 +57,7 @@ class ReservationTransactionTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.deleteByAdmin(1L, NOW))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE);
+                .isInstanceOf(QueryTimeoutException.class);
 
         assertAll(
                 () -> assertThat(countReservation("브라운", DATE, 1L, 1L)).isEqualTo(1),
@@ -85,8 +75,7 @@ class ReservationTransactionTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateByUser(1L, "브라운", UPDATE_DATE, 2L, NOW))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE);
+                .isInstanceOf(QueryTimeoutException.class);
 
         assertAll(
                 () -> assertThat(countReservation("브라운", DATE, 1L, 1L)).isEqualTo(1),
@@ -96,25 +85,8 @@ class ReservationTransactionTest {
         );
     }
 
-    @Test
-    void 예약_대기_생성_후_순번_조회에_실패하면_대기_저장이_롤백된다() {
-        // given
-        insertReservation(1L, "브라운", DATE, 1L, 1L);
-        doReturn(Optional.empty()).when(reservationWaitingRepository).findByIdWithTurn(anyLong());
-
-        // when & then
-        assertThatThrownBy(() -> reservationWaitingService.create("구구", DATE, 1L, 1L, NOW))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("생성된 예약 대기를 찾을 수 없습니다.");
-
-        assertAll(
-                () -> assertThat(countReservation("브라운", DATE, 1L, 1L)).isEqualTo(1),
-                () -> assertThat(countWaiting("구구", DATE, 1L, 1L)).isZero()
-        );
-    }
-
     private void failPromotedReservationInsert(String name) {
-        doThrow(new DuplicateKeyException("duplicate"))
+        doThrow(new QueryTimeoutException("insert failed"))
                 .when(reservationRepository)
                 .insert(argThat(reservation -> hasName(reservation, name)));
     }

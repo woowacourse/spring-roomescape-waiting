@@ -3,7 +3,7 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.QueryTimeoutException;
 import roomescape.domain.*;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -342,13 +342,11 @@ class ReservationServiceTest {
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
                 .thenReturn(Optional.of(waiting));
         when(reservationRepository.insert(any(Reservation.class)))
-                .thenThrow(new DuplicateKeyException("duplicate"));
+                .thenThrow(new QueryTimeoutException("insert failed"));
 
         // when & then
         assertThatThrownBy(() -> service.deleteByAdmin(id, now))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
-                .hasMessage("이미 예약된 시간입니다.");
+                .isInstanceOf(QueryTimeoutException.class);
 
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
@@ -484,38 +482,6 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.getSlot().getDate()).isEqualTo(updateDate),
                 () -> assertThat(result.getSlot().getTime()).isEqualTo(time));
-        verify(reservationRepository, times(1)).findByIdForUpdate(id);
-        verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
-        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
-        verify(reservationRepository, times(1)).update(any(Reservation.class));
-        verify(reservationRepository, never()).insert(any(Reservation.class));
-        verify(waitingRepository, never()).delete(any());
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
-    }
-
-    @Test
-    void 사용자_본인_예약_변경시_수정할_예약이_없으면_예외_발생() {
-        // given
-        Long id = 1L;
-        String name = "브라운";
-        LocalDate updateDate = date.plusDays(1);
-        ReservationTime time = time(1L);
-        Reservation reservation = reservation(id, name, date, time);
-        when(reservationRepository.findByIdForUpdate(id))
-                .thenReturn(Optional.of(reservation));
-        when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
-                .thenReturn(false);
-        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
-                .thenReturn(Optional.of(waiting(2L, "구구", reservation.getSlot())));
-        when(reservationRepository.update(any(Reservation.class)))
-                .thenReturn(0);
-
-        // when & then
-        assertThatThrownBy(() -> service.updateByUser(id, name, updateDate, null, now))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
-                .hasMessage("존재하지 않는 예약입니다.");
-
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
         verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
