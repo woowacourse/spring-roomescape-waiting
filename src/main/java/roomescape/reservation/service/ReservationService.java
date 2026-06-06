@@ -81,7 +81,7 @@ public class ReservationService {
         lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
             reservation.getTheme().getId());
         reservation.cancelByManager();
-        reservationRepository.updateStatus(reservation);
+        reservationRepository.updateStatusAndWaitingOrder(reservation);
         if (reservationStatus == RESERVED) {
             promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
@@ -96,7 +96,7 @@ public class ReservationService {
         lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
             reservation.getTheme().getId());
         reservation.cancel(requesterName);
-        reservationRepository.updateStatus(reservation);
+        reservationRepository.updateStatusAndWaitingOrder(reservation);
         if (reservationStatus == RESERVED) {
             promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
@@ -162,8 +162,8 @@ public class ReservationService {
         }
         reservationRepository.findFirstWaitingByDateTimeAndThemeId(dateId, timeId, themeId)
             .ifPresent(reservation -> {
-                reservation.updateStatus(RESERVED);
-                reservationRepository.updateStatus(reservation);
+                reservation.changeToReserved();
+                reservationRepository.updateStatusAndWaitingOrder(reservation);
             });
     }
 

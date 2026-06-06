@@ -15,7 +15,6 @@ import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
@@ -323,7 +322,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             Long savedId = saved.getId();
 
             // when & then
@@ -435,7 +434,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             Long savedId = saved.getId();
 
             // when & then
@@ -530,7 +529,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -661,7 +660,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 

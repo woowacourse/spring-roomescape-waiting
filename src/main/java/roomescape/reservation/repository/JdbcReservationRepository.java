@@ -246,11 +246,18 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
-    public boolean updateStatus(Reservation reservation) {
-        String sql = "UPDATE RESERVATION SET status = :status WHERE id = :id ";
+    @Override
+    public boolean updateStatusAndWaitingOrder(Reservation reservation) {
+        String sql = """
+            UPDATE reservation
+            SET status = :status,
+                waiting_order = :waitingOrder
+            WHERE id = :id
+            """;
         SqlParameterSource params = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
-            .addValue("status", reservation.getStatus().name());
+            .addValue("status", reservation.getStatus().name())
+            .addValue("waitingOrder", reservation.getWaitingOrder());
         int updatedCount = jdbcTemplate.update(sql, params);
         return updatedCount > 0;
     }

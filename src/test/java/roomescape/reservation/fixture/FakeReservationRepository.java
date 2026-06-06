@@ -74,13 +74,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateStatus(Reservation reservation) {
+    public boolean updateStatusAndWaitingOrder(Reservation reservation) {
         Optional<Reservation> findReservation = findById(reservation.getId());
         if (findReservation.isEmpty()) {
             return false;
         }
 
-        findReservation.get().updateStatus(reservation.getStatus());
+        store.put(reservation.getId(), reservation);
         return true;
     }
 

@@ -80,7 +80,7 @@ class ReservationRepositoryTest {
 
     private void updateStatus(Reservation beforeReservation) {
         beforeReservation.updateStatus(ReservationStatus.CANCELED);
-        jdbcReservationRepository.updateStatus(beforeReservation);
+        jdbcReservationRepository.updateStatusAndWaitingOrder(beforeReservation);
     }
 
 

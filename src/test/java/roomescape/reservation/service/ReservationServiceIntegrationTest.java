@@ -228,7 +228,40 @@ class ReservationServiceIntegrationTest {
                 () -> assertThat(changed.getDate().getId()).isEqualTo(newDate.getId()),
                 () -> assertThat(changed.getTime().getId()).isEqualTo(newTime.getId()),
                 () -> assertThat(changed.getStatus()).isEqualTo(ReservationStatus.RESERVED),
-                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED)
+                () -> assertThat(changed.getWaitingOrder()).isZero(),
+                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(promoted.getWaitingOrder()).isZero()
+            );
+        }
+
+        @Test
+        @DisplayName("확정 예약이 예약이 존재하는 슬롯으로 변경되면 새 슬롯 기준 대기 순서로 변경된다")
+        void 성공2() {
+            // given
+            String reservedName = "예약자";
+            String otherName = "다른 예약자";
+            String waitingName = "기존 대기자";
+
+            ReservationTime previousTime = saveTime();
+            ReservationTime newTime = saveSecondTime();
+            ReservationDate previousDate = saveDate();
+            ReservationDate newDate = saveSecondDate();
+            Theme theme = saveTheme("theme1");
+
+            Reservation reserved = reservationRepository.save(
+                reservation(reservedName, previousDate, previousTime, theme));
+            reservationRepository.save(reservation(otherName, newDate, newTime, theme));
+            reservationRepository.save(waitReservation(waitingName, newDate, newTime, theme, 1L));
+            ReservationChangeCommand command = new ReservationChangeCommand(
+                reserved.getId(), reservedName, newDate.getId(), newTime.getId());
+
+            // when
+            Reservation changed = reservationService.changeSchedule(command);
+
+            // then
+            assertAll(
+                () -> assertThat(changed.getStatus()).isEqualTo(ReservationStatus.WAITING),
+                () -> assertThat(changed.getWaitingOrder()).isEqualTo(2L)
             );
         }
     }
@@ -266,7 +299,40 @@ class ReservationServiceIntegrationTest {
                 () -> assertThat(changed.getDate().getId()).isEqualTo(newDate.getId()),
                 () -> assertThat(changed.getTime().getId()).isEqualTo(newTime.getId()),
                 () -> assertThat(changed.getStatus()).isEqualTo(ReservationStatus.RESERVED),
-                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED)
+                () -> assertThat(changed.getWaitingOrder()).isZero(),
+                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(promoted.getWaitingOrder()).isZero()
+            );
+        }
+
+        @Test
+        @DisplayName("확정 예약이 예약이 존재하는 슬롯으로 변경되면 새 슬롯 기준 대기 순서로 변경된다")
+        void 성공2() {
+            // given
+            String reservedName = "예약자";
+            String otherName = "다른 예약자";
+            String waitingName = "기존 대기자";
+
+            ReservationTime previousTime = saveTime();
+            ReservationTime newTime = saveSecondTime();
+            ReservationDate previousDate = saveDate();
+            ReservationDate newDate = saveSecondDate();
+            Theme theme = saveTheme("theme1");
+
+            Reservation reserved = reservationRepository.save(
+                reservation(reservedName, previousDate, previousTime, theme));
+            reservationRepository.save(reservation(otherName, newDate, newTime, theme));
+            reservationRepository.save(waitReservation(waitingName, newDate, newTime, theme, 1L));
+            ReservationChangeCommand command = new ReservationChangeCommand(
+                reserved.getId(), null, newDate.getId(), newTime.getId());
+
+            // when
+            Reservation changed = reservationService.changeScheduleByManager(command);
+
+            // then
+            assertAll(
+                () -> assertThat(changed.getStatus()).isEqualTo(ReservationStatus.WAITING),
+                () -> assertThat(changed.getWaitingOrder()).isEqualTo(2L)
             );
         }
     }
@@ -419,14 +485,14 @@ class ReservationServiceIntegrationTest {
             Reservation reservationToCancel = reservationRepository.findById(reserved.getId())
                 .get();
             reservationToCancel.cancel(reservationToCancel.getName());
-            reservationRepository.updateStatus(reservationToCancel);
+            reservationRepository.updateStatusAndWaitingOrder(reservationToCancel);
             reservationRepository.findFirstWaitingByDateTimeAndThemeId(
                     reservationToCancel.getDate().getId(),
                     reservationToCancel.getTime().getId(),
                     reservationToCancel.getTheme().getId())
                 .ifPresent(waiting -> {
                     waiting.changeToReserved();
-                    reservationRepository.updateStatus(waiting);
+                    reservationRepository.updateStatusAndWaitingOrder(waiting);
                 });
         });
     }

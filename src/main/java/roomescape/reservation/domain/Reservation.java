@@ -166,6 +166,7 @@ public class Reservation {
 
     public void changeToReserved() {
         this.status = ReservationStatus.RESERVED;
+        this.waitingOrder = 0L;
     }
 
     public void changeToWaitingWithOrder(Long waitingOrder) {

@@ -19,7 +19,7 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    boolean updateStatus(Reservation reservation);
+    boolean updateStatusAndWaitingOrder(Reservation reservation);
 
     boolean updateScheduleAndStatus(Reservation reservation);
 
