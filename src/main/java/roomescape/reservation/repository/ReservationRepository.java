@@ -14,11 +14,11 @@ public interface ReservationRepository {
 
     List<Reservation> findByName(String name);
 
-    void update(Long id, LocalDate date, Long timeId);
+    void update(Long id, ReservationSlot slot);
 
     boolean existsBySlot(ReservationSlot slot);
 
-    boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId);
+    boolean existsByNameAndSlot(String name, ReservationSlot slot);
 
     boolean existsBySlotExcludingId(ReservationSlot slot, Long id);
 

@@ -102,7 +102,7 @@ public class ReservationService {
         }
 
         Reservation validReservation = reservation.reschedule(request.date(), time, clock);
-        reservationRepository.update(id, validReservation.getDate(), validReservation.getTime().getId());
+        reservationRepository.update(id, validReservation.getSlot());
 
         try {
             reservationWaitingService.promoteWaiting(slot);

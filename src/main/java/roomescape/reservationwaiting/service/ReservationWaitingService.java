@@ -50,14 +50,13 @@ public class ReservationWaitingService {
         if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getSlot())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         }
-        if (reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(request.name(), reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId())) {
+        if (reservationRepository.existsByNameAndSlot(request.name(), reservation.getSlot())) {
             throw new BusinessException(ErrorCode.WAITING_ON_OWN_RESERVATION);
         }
         try {
-            ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
+            ReservationWaiting waiting = reservationWaitingRepository.save(
                     reservationWaitingFactory.create(request.name(), reservation));
-            return ReservationWaitingResponse.from(reservationWaiting);
+            return ReservationWaitingResponse.from(waiting);
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         }
@@ -65,8 +64,8 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteWaiting(Long id) {
-        ReservationWaiting reservationWaiting = getById(id);
-        if (reservationWaiting.isPast(clock)) {
+        ReservationWaiting waiting = getById(id);
+        if (waiting.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
         }
         reservationWaitingRepository.deleteById(id);
@@ -88,7 +87,7 @@ public class ReservationWaitingService {
                 .ifPresent(waiting -> {
                     try {
                         reservationRepository.save(
-                                reservationFactory.create(waiting.getName(), slot));
+                                reservationFactory.create(waiting.getName(), waiting.getSlot()));
                     } catch (DuplicateKeyException e) {
                         throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
                     }
@@ -98,16 +97,16 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationResponse approveWaiting(Long waitingId) {
-        ReservationWaiting reservationWaiting = getById(waitingId);
-        ReservationSlot slot = reservationWaiting.getSlot();
+        ReservationWaiting waiting = getById(waitingId);
+        ReservationSlot slot = waiting.getSlot();
         if (reservationRepository.existsBySlot(slot)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
-        reservationWaitingRepository.deleteById(reservationWaiting.getId());
+        reservationWaitingRepository.deleteById(waiting.getId());
 
         try {
             return ReservationResponse.from(
-                    reservationRepository.save(reservationFactory.create(reservationWaiting.getName(), slot)));
+                    reservationRepository.save(reservationFactory.create(waiting.getName(), waiting.getSlot())));
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }

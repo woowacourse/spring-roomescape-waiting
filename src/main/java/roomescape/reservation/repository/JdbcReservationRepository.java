@@ -94,9 +94,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void update(Long id, LocalDate date, Long timeId) {
+    public void update(Long id, ReservationSlot slot) {
         String query = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(query, date, timeId, id);
+        jdbcTemplate.update(query, slot.date(), slot.time().getId(), id);
     }
 
     @Override
@@ -108,9 +108,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
         String query = "select count(*) from reservation where name = ? and date = ? and time_id = ? and theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, name, slot.date(), slot.time().getId(),
+                slot.theme().getId());
         return count != null && count > 0;
     }
 
