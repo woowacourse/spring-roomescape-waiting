@@ -30,6 +30,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Import({ReservationService.class, ReservationRescheduleService.class})
@@ -187,6 +188,25 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             assertThatThrownBy(() -> reservationService.reserve(name, command))
                     .isInstanceOf(ReservationException.class)
                     .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_BOOKED.getMessage());
+        }
+
+        @Test
+        @DisplayName("slotId를 기반으로 예약을 생성할 수 있다.")
+        void reserve_with_slotId() {
+            // given
+            String name = "송송";
+            Long slot1Id = slot1.getId();
+            Reservation expected = Reservation.reserve(name, slot1, LocalDateTime.now());
+
+            // when
+            Reservation actual = reservationService.reserve(name, slot1Id);
+
+            // then
+            Assertions.assertThat(actual)
+                    .usingRecursiveComparison()
+                    .ignoringFields("reservedAt")
+                    .ignoringFields("id")
+                    .isEqualTo(expected);
         }
 
     }
