@@ -150,7 +150,8 @@ public class ReservationService {
         Long timeId = reservation.getTime().getId();
         Long themeId = reservation.getTheme().getId();
 
-        Optional<Waitlist> firstWaitlist = waitlistRepository.findBySlot(date, timeId, themeId).stream().findFirst();
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(date, timeId, themeId);
+        Optional<Waitlist> firstWaitlist = waitlistOrderPolicy.selectPromotionTarget(sameSlotWaitlists);
 
         reservationRepository.deleteById(reservation.getId());
 
