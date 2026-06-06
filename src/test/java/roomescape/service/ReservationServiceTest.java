@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
@@ -26,6 +27,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class ReservationServiceTest {
@@ -39,10 +42,10 @@ class ReservationServiceTest {
     @Autowired
     private ThemeDao themeDao;
 
-    @Autowired
+    @MockitoSpyBean
     private ReservationDao reservationDao;
 
-    @Autowired
+    @MockitoSpyBean
     private ReservationWaitingDao waitingDao;
 
     @Autowired
@@ -350,6 +353,71 @@ class ReservationServiceTest {
         reservationService.cancel(reservation.getId(), now);
         List<ReservationResponse> reservations = reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
+    }
+
+    @Test
+    void 자동_승격_중_예약_생성이_실패하면_예약_취소도_롤백된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        saveReservationWaiting("맥스", date, time, theme);
+
+        doThrow(new RuntimeException("승격 실패"))
+                .when(reservationDao)
+                .insert(argThat(newReservation -> newReservation.getName().equals("맥스")));
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 8, 10, 0);
+
+        assertThatThrownBy(() -> reservationService.cancel(reservation.getId(), now))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("승격 실패");
+
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+
+        assertThat(reservations)
+                .extracting(ReservationResponse::name)
+                .containsExactly("브라운");
+
+        List<MyReservationResponse> waitingResponses = reservationService.getMyReservations("맥스");
+
+        assertThat(waitingResponses).hasSize(1);
+        assertThat(waitingResponses.getFirst().status()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(waitingResponses.getFirst().order()).isEqualTo(1);
+    }
+
+    @Test
+    void 자동_승격중_대기_삭제가_실패하면_예약_취소와_예약_생성이_롤백된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        ReservationWaiting waiting = saveReservationWaiting("맥스", date, time, theme);
+
+        doThrow(new RuntimeException("대기 삭제 실패"))
+                .when(waitingDao)
+                .delete(waiting.getId());
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 8, 10, 0);
+
+        assertThatThrownBy(() -> reservationService.cancel(reservation.getId(), now))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("대기 삭제 실패");
+
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+
+        assertThat(reservations)
+                .extracting(ReservationResponse::name)
+                .containsExactly("브라운");
+
+        List<MyReservationResponse> waitingResponses = reservationService.getMyReservations("맥스");
+
+        assertThat(waitingResponses).hasSize(1);
+        assertThat(waitingResponses.getFirst().status()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(waitingResponses.getFirst().order()).isEqualTo(1);
+
     }
 
     private ReservationTime saveTime(int hour, int minute) {
