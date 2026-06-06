@@ -1,0 +1,176 @@
+package roomescape.repository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservation.Reservation;
+import roomescape.exception.ConflictException;
+import roomescape.repository.reservation.JdbcReservationRepository;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
+import roomescape.domain.theme.Theme;
+import roomescape.repository.theme.JdbcThemeRepository;
+
+@JdbcTest
+class JdbcThemeRepositoryTest {
+
+    private JdbcThemeRepository jdbcThemeRepository;
+    private JdbcReservationRepository jdbcReservationRepository;
+    private JdbcReservationTimeRepository jdbcReservationTimeRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void setup() {
+        clearTables();
+        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
+        jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
+    }
+
+    @Test
+    @DisplayName("테마 저장")
+    void theme_save_test() {
+        // given
+        Theme theme = Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png");
+
+        // when
+        Theme result = jdbcThemeRepository.save(theme);
+        Theme saved = jdbcThemeRepository.findById(result.getId())
+                .orElseThrow();
+
+        // then
+        assertThat(saved).isEqualTo(result);
+    }
+
+    @Test
+    @DisplayName("테마 전체 조회")
+    void theme_findAll_test() {
+        // given
+        jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+
+        // when
+        List<Theme> themes = jdbcThemeRepository.findAll();
+
+        // then
+        assertThat(themes).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("테마 이름 중복 저장 예외")
+    void theme_save_duplicate_test() {
+        // given
+        jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+
+        // when & then
+        assertThrows(ConflictException.class, () ->
+                jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "새 설명", "https://example.com/new-theme.png"))
+        );
+    }
+
+    @Test
+    @DisplayName("테마 삭제")
+    void theme_delete_test() {
+        // given
+        Theme saved = jdbcThemeRepository.save(
+                Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
+        );
+        int beforeSize = jdbcThemeRepository.findAll().size();
+
+        // when
+        int affectedRowCount = jdbcThemeRepository.deleteById(saved.getId());
+
+        // then
+        int afterSize = jdbcThemeRepository.findAll().size();
+        assertThat(affectedRowCount).isOne();
+        assertThat(afterSize).isEqualTo(beforeSize - 1);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 ID는 삭제 건수가 0이다")
+    void theme_delete_not_found_test() {
+        // when
+        int affectedRowCount = jdbcThemeRepository.deleteById(999L);
+
+        // then
+        assertThat(affectedRowCount).isZero();
+    }
+
+    @Test
+    @DisplayName("테마 이름 존재 여부 확인")
+    void theme_existsByName_test() {
+        // given
+        jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+
+        // when
+        boolean exists = jdbcThemeRepository.existsByName("미술관의 밤");
+        boolean notExists = jdbcThemeRepository.existsByName("놀이공원 탈출");
+
+        // then
+        assertThat(exists).isTrue();
+        assertThat(notExists).isFalse();
+    }
+
+    @Test
+    @DisplayName("최근 기간 기준 인기 테마를 예약 수 순서대로 조회한다")
+    void findPopularThemes_test() {
+        LocalDate today = LocalDate.now();
+        Theme firstTheme = createTheme("미술관의 밤");
+        Theme secondTheme = createTheme("심해 연구소");
+        Theme thirdTheme = createTheme("폐병원 탈출");
+
+        ReservationTime firstThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTime secondThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationTime thirdThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("12:00")));
+
+        jdbcReservationRepository.save(createHistoricalReservation("쿠다", today.minusDays(1), firstTheme, firstThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("아루", today.minusDays(2), firstTheme, firstThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("도기", today.minusDays(3), firstTheme, firstThemeTime));
+
+        jdbcReservationRepository.save(createHistoricalReservation("포비", today.minusDays(1), secondTheme, secondThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("솔라", today.minusDays(2), secondTheme, secondThemeTime));
+
+        jdbcReservationRepository.save(createHistoricalReservation("레오", today.minusDays(1), thirdTheme, thirdThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime));
+
+        List<Theme> popularThemes = jdbcThemeRepository.findPopularThemes(7, 2);
+
+        assertThat(popularThemes).hasSize(2);
+        assertThat(popularThemes.get(0).getId()).isEqualTo(firstTheme.getId());
+        assertThat(popularThemes.get(1).getId()).isEqualTo(secondTheme.getId());
+    }
+
+    private void clearTables() {
+        jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_time");
+        jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
+    }
+
+    private Theme createTheme(final String name) {
+        return jdbcThemeRepository.save(
+                Theme.createNew(name, "추리 테마", "https://example.com/theme.png")
+        );
+    }
+
+    private Reservation createHistoricalReservation(
+            final String name,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime reservationTime
+    ) {
+        return Reservation.createNew(name, date, theme, reservationTime, date.minusDays(1).atStartOfDay());
+    }
+}

@@ -1,0 +1,107 @@
+package roomescape.service.reservationwaiting;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
+import roomescape.exception.ConflictException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.InvalidInputException;
+import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
+import roomescape.service.reservationtime.ReservationTimeService;
+import roomescape.service.theme.ThemeService;
+
+@Service
+public class ReservationWaitingService {
+    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
+
+    public ReservationWaitingService(
+            final ReservationRepository reservationRepository,
+            final ReservationWaitingRepository reservationWaitingRepository,
+            final ThemeService themeService,
+            final ReservationTimeService reservationTimeService
+    ) {
+        this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
+    }
+
+    public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
+        ReservationName waitingName = ReservationName.from(name);
+        ReservationSlot slot = new ReservationSlot(
+                date,
+                themeService.getById(themeId),
+                reservationTimeService.getById(timeId)
+        );
+        Reservation reservation = reservationRepository.findBySlot(slot)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_NOT_FOUND,
+                        "예약 정보가 없으면 대기 생성이 불가능합니다."
+                ));
+
+        validateWaitableName(reservation, waitingName);
+
+        LocalDateTime requestedAt = LocalDateTime.now();
+
+        ReservationWaiting nonIdReservationWaiting = createNewWaiting(reservation, waitingName, requestedAt);
+        return reservationWaitingRepository.save(nonIdReservationWaiting);
+    }
+
+    private void validateWaitableName(final Reservation reservation, final ReservationName waitingName) {
+        if (reservation.getName().equals(waitingName.value())) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    "이미 예약한 사람은 같은 예약에 대기할 수 없습니다."
+            );
+        }
+
+        ReservationWaitingLine waitingLine = reservationWaitingRepository.findLineByReservation(reservation);
+
+        if (waitingLine.containsName(waitingName)) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    "이미 같은 예약에 대기 중입니다."
+            );
+        }
+    }
+
+    private ReservationWaiting createNewWaiting(
+            final Reservation reservation,
+            final ReservationName waitingName,
+            final LocalDateTime requestedAt
+    ) {
+        try {
+            return ReservationWaiting.createNew(reservation, waitingName.value(), requestedAt);
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
+        }
+    }
+
+    public void deleteByIdAndName(final Long waitingId, final String name) {
+        ReservationName waitingName = ReservationName.from(name);
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_WAITING_NOT_FOUND,
+                        "삭제된 대기 데이터가 없습니다."
+                ));
+
+        if (!reservationWaiting.hasName(waitingName.value())) {
+            throw new ResourceNotFoundException(
+                    ErrorCode.RESERVATION_WAITING_NOT_FOUND,
+                    "삭제된 대기 데이터가 없습니다."
+            );
+        }
+
+        reservationWaitingRepository.delete(reservationWaiting);
+    }
+}
