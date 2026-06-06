@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -23,17 +24,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> Reservation.restore(
             resultSet.getLong("reservation_id"),
             resultSet.getString("name"),
-            resultSet.getDate("date").toLocalDate(),
-            ReservationTime.restore(
-                    resultSet.getLong("time_id"),
-                    resultSet.getTime("time_start_at").toLocalTime(),
-                    resultSet.getTime("time_finish_at").toLocalTime()
-            ),
-            Theme.restore(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("theme_description"),
-                    resultSet.getString("theme_image_url")
+            new ReservationSlot(
+                    resultSet.getDate("date").toLocalDate(),
+                    ReservationTime.restore(
+                            resultSet.getLong("time_id"),
+                            resultSet.getTime("time_start_at").toLocalTime(),
+                            resultSet.getTime("time_finish_at").toLocalTime()
+                    ),
+                    Theme.restore(
+                            resultSet.getLong("theme_id"),
+                            resultSet.getString("theme_name"),
+                            resultSet.getString("theme_description"),
+                            resultSet.getString("theme_image_url")
+                    )
             )
     );
 
@@ -56,8 +59,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return Reservation.restore(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme());
+        return Reservation.restore(id, reservation.getName(),
+                new ReservationSlot(reservation.getDate(), reservation.getTime(),
+                        reservation.getTheme()));
     }
 
     @Override
@@ -72,6 +76,20 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE r.id = ?
                 """;
         return jdbcTemplate.query(query, rowMapper, id).stream().findFirst();
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        String query = """
+                SELECT r.id as reservation_id, r.name, r.date,
+                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                FROM reservation r
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                ORDER BY r.date DESC, rt.start_at DESC
+                """;
+        return jdbcTemplate.query(query, rowMapper);
     }
 
     @Override
@@ -90,29 +108,32 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void update(Long id, LocalDate date, Long timeId) {
+    public void update(Long id, ReservationSlot slot) {
         String query = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(query, date, timeId, id);
+        jdbcTemplate.update(query, slot.date(), slot.time().getId(), id);
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
+    public boolean isBooked(ReservationSlot slot) {
+        String sql = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slot.date(), slot.time().getId(),
+                slot.theme().getId());
         return count != null && count > 0;
     }
 
     @Override
-    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean isReservedBy(ReservationSlot slot, String name) {
         String query = "select count(*) from reservation where name = ? and date = ? and time_id = ? and theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, name, slot.date(), slot.time().getId(),
+                slot.theme().getId());
         return count != null && count > 0;
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdExcludingId(LocalDate date, Long timeId, Long themeId, Long id) {
+    public boolean isBookedByOther(ReservationSlot slot, Long id) {
         String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ? and id != ?";
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId, id);
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, slot.date(), slot.time().getId(),
+                slot.theme().getId(), id);
         return count != null && count > 0;
     }
 
@@ -123,7 +144,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
+    public ReservationIdResponse findIdBySlot(LocalDate date, Long themeId, Long timeId) {
         String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
         return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
     }

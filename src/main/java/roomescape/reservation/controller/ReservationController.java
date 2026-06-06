@@ -33,7 +33,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservationsByName(@RequestParam String name) {
+    public ResponseEntity<List<ReservationResponse>> getReservationsByName(
+            @RequestParam(required = false) String name) {
         return ResponseEntity.ok(reservationService.getReservationsByName(name));
     }
 

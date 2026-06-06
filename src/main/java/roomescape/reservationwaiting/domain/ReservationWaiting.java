@@ -3,30 +3,32 @@ package roomescape.reservationwaiting.domain;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.common.domain.ReservationSlot;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 public class ReservationWaiting {
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
-    private ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    private ReservationWaiting(Long id, String name, ReservationSlot slot) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
     public static ReservationWaiting restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new ReservationWaiting(id, name, date, time, theme);
+        return new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+    }
+
+    public Reservation toReservation() {
+        return Reservation.restore(null, name, slot);
     }
 
     public boolean isPast(Clock clock) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock));
+        return LocalDateTime.of(getDate(), getTime().getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
     public Long getId() {
@@ -38,14 +40,18 @@ public class ReservationWaiting {
     }
 
     public LocalDate getDate() {
-        return date;
+        return this.slot.date();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return this.slot.time();
     }
 
     public Theme getTheme() {
-        return theme;
+        return this.slot.theme();
+    }
+
+    public ReservationSlot getSlot() {
+        return this.slot;
     }
 }

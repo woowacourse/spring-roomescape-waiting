@@ -9,7 +9,7 @@ public interface ThemeRepository {
     Theme save(Theme theme);
     Optional<Theme> findById(Long id);
     List<Theme> findAll();
-    boolean existsReservationByThemeId(Long themeId);
+    boolean hasReservation(Long themeId);
     void deleteById(Long id);
     List<Long> findTopThemeIds(LocalDate startDate, LocalDate endDate, int limit);
     List<Theme> findAllByIds(List<Long> ids);

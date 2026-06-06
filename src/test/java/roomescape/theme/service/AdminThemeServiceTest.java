@@ -25,7 +25,7 @@ class AdminThemeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 테마는 삭제할 수 없다")
     void 예약_있는_테마_삭제_불가() {
-        when(themeRepository.existsReservationByThemeId(1L)).thenReturn(true);
+        when(themeRepository.hasReservation(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
                 .isInstanceOf(BusinessException.class)

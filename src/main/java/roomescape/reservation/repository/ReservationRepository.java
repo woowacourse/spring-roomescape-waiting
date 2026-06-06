@@ -3,6 +3,7 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 
@@ -11,17 +12,19 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    List<Reservation> findAll();
+
     List<Reservation> findByName(String name);
 
-    void update(Long id, LocalDate date, Long timeId);
+    void update(Long id, ReservationSlot slot);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean isBooked(ReservationSlot slot);
 
-    boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId);
+    boolean isReservedBy(ReservationSlot slot, String name);
 
-    boolean existsByDateAndTimeIdAndThemeIdExcludingId(LocalDate date, Long timeId, Long themeId, Long id);
+    boolean isBookedByOther(ReservationSlot slot, Long id);
 
     void deleteById(Long id);
 
-    ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId);
+    ReservationIdResponse findIdBySlot(LocalDate date, Long themeId, Long timeId);
 }

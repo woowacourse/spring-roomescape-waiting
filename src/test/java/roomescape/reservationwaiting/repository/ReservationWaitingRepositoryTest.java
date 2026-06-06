@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 public class ReservationWaitingRepositoryTest {
 
     @Autowired
-    private JdbcReservationWaitingRepository jdbcReservationWaitingRepository;
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -44,7 +45,8 @@ public class ReservationWaitingRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     private Reservation pastReservation;
-    private Reservation futureReservation;
+    private Reservation futureReservation1;
+    private Reservation futureReservation2;
 
     @BeforeEach
     void setUp() {
@@ -54,21 +56,27 @@ public class ReservationWaitingRepositoryTest {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
                 LocalDate.now().minusDays(1));
         Long pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
-        Long futureReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-
         pastReservation = reservationRepository.findById(pastReservationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-        futureReservation = reservationRepository.findById(futureReservationId)
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
+        Long futureReservationId1 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        futureReservation1 = reservationRepository.findById(futureReservationId1)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-02', 1, 1)");
+        Long futureReservationId2 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        futureReservation2 = reservationRepository.findById(futureReservationId2)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     @Test
     @DisplayName("예약 대기 신청에 성공한다.")
     void 예약_대기_성공() {
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥", futureReservation));
+        ReservationWaiting saved = reservationWaitingRepository.save(
+                reservationWaitingFactory.create("현미밥", futureReservation1));
         assertThat(saved.getId()).isNotNull();
     }
 
@@ -82,19 +90,19 @@ public class ReservationWaitingRepositoryTest {
     @Test
     @DisplayName("예약 대기 삭제한다.")
     void 예약_대기_삭제() {
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥", futureReservation));
-        jdbcReservationWaitingRepository.deleteById(saved.getId());
-        assertThat(jdbcReservationWaitingRepository.findByName("현미밥")).hasSize(0);
+        ReservationWaiting saved = reservationWaitingRepository.save(
+                reservationWaitingFactory.create("현미밥", futureReservation1));
+        reservationWaitingRepository.deleteById(saved.getId());
+        assertThat(reservationWaitingRepository.findByName("현미밥")).hasSize(0);
     }
 
     @Test
     @DisplayName("이름으로 예약 대기 목록을 조회한다.")
     void 예약_대기_findByName() {
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", futureReservation));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", futureReservation));
+        reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", futureReservation1));
+        reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", futureReservation2));
 
-        List<ReservationWaiting> result = jdbcReservationWaitingRepository.findByName("현미밥");
+        List<ReservationWaiting> result = reservationWaitingRepository.findByName("현미밥");
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getName()).isEqualTo("현미밥");
@@ -104,13 +112,23 @@ public class ReservationWaitingRepositoryTest {
     @Test
     @DisplayName("대기 순번을 계산한다.")
     void 예약_대기_calculateTurn() {
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", futureReservation));
-        ReservationWaiting waiting2 = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥2", futureReservation));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", futureReservation));
+        reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", futureReservation1));
+        ReservationWaiting waiting2 = reservationWaitingRepository.save(
+                reservationWaitingFactory.create("현미밥2", futureReservation1));
+        reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", futureReservation1));
 
-        Map<Long, Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");
+        Map<Long, Long> turns = reservationWaitingRepository.calculateTurn("현미밥2");
         assertThat(turns.get(waiting2.getId())).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("date, themeId, timdId로 대기 객체를 받아온다.")
+    void 예약_대기_조회() {
+        reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", futureReservation1));
+        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findOldestBySlot(
+                futureReservation1.getSlot());
+        assertThat(waiting).isPresent();
+        assertThat(waiting.get().getName()).isEqualTo("현미밥1");
     }
 
     @TestConfiguration

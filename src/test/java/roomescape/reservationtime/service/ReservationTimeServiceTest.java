@@ -38,7 +38,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 시간은 삭제할 수 없다")
     void 예약_있는_시간_삭제_불가() {
-        when(timeRepository.existsReservationByTimeId(1L)).thenReturn(true);
+        when(timeRepository.hasReservation(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(BusinessException.class)

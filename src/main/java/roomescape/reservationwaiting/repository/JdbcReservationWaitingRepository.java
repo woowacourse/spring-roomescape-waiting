@@ -1,6 +1,5 @@
 package roomescape.reservationwaiting.repository;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
@@ -89,8 +89,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 SELECT * FROM (
                 SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY rw.date, rw.time_id, rw.theme_id ORDER BY rw.created_at) as turn
                 FROM reservation_waiting rw) sub
-                WHERE sub.name = ?
-                ORDER BY sub.turn;
+                WHERE sub.name = ?;
                 """;
         return jdbcTemplate.query(query, turnExtractor, name);
     }
@@ -102,15 +101,23 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId) {
+    public Optional<ReservationWaiting> findById(Long reservationWaitingId) {
         String query = "SELECT * FROM (" + BASE_QUERY
                 + ") sub WHERE sub.reservation_waiting_id = ? ORDER BY sub.created_at";
         return jdbcTemplate.query(query, rowMapper, reservationWaitingId).stream().findFirst();
     }
 
     @Override
-    public boolean existsByNameAndSlot(String name, LocalDate date, Long timeId, Long themeId) {
+    public Optional<ReservationWaiting> findOldestBySlot(ReservationSlot slot) {
+
+        String query = "SELECT * FROM (" + BASE_QUERY
+                + ") sub WHERE sub.reservation_date = ? AND sub.time_id = ? AND sub.theme_id = ? ORDER BY sub.created_at";
+        return jdbcTemplate.query(query, rowMapper, slot.date(), slot.time().getId(), slot.theme().getId()).stream().findFirst();
+    }
+
+    @Override
+    public boolean isWaitingBy(ReservationSlot slot, String name) {
         String query = "select count(*) from reservation_waiting where name = ? and date = ? and time_id = ? and theme_id = ?";
-        return jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId) >= 1;
+        return jdbcTemplate.queryForObject(query, Integer.class, name, slot.date(), slot.time().getId(), slot.theme().getId()) >= 1;
     }
 }
