@@ -3,18 +3,24 @@ package roomescape.domain.reservationslot;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.dto.ReservationCountResult;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationslot.dto.ReservationSlotResponse;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.fake.FakeReservationDateRepository;
@@ -33,7 +39,7 @@ class ReservationSlotServiceTest {
         reservationSlotRepository = new FakeReservationSlotRepository();
         themeRepository = new FakeThemeRepository();
         reservationDateRepository = new FakeReservationDateRepository();
-        reservationRepository = org.mockito.Mockito.mock(ReservationRepository.class);
+        reservationRepository = mock(ReservationRepository.class);
     }
 
     @Test
@@ -96,6 +102,39 @@ class ReservationSlotServiceTest {
         assertThatThrownBy(() -> reservationSlotService.getReservationSlots(theme.getId(), 1L))
             .isInstanceOf(NotFoundException.class)
             .hasMessage("존재하지 않는 날짜 입니다.");
+    }
+
+    @Test
+    @DisplayName("unique 조건을 위반할 경우 재조회를 한다.")
+    void findExistingSlotWhenDuplicateKeyOccurs() {
+        // given
+        ReservationSlotRepository reservationSlotRepository = mock(ReservationSlotRepository.class);
+        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 6, 1));
+        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
+        ReservationSlot existingSlot = ReservationSlot.of(1L, date, time, theme);
+        when(
+            reservationSlotRepository.findByScheduleToUpdate(time.getId(), date.getId(), theme.getId())
+        )
+            .thenReturn(Optional.empty())
+            .thenReturn(Optional.of(existingSlot));
+        when(
+            reservationSlotRepository.save(any())
+        ).thenThrow(
+            new DuplicateKeyException("unique 제약조건을 위반했습니다.")
+        );
+        ReservationSlotService reservationSlotService = new ReservationSlotService(
+            reservationSlotRepository,
+            themeRepository,
+            reservationDateRepository,
+            reservationRepository
+        );
+
+        // when
+        ReservationSlot reservationSlot = reservationSlotService.findOrCreateReservationSlot(date, time, theme);
+
+        // then
+        assertThat(reservationSlot).isEqualTo(existingSlot);
     }
 
     private ReservationSlotService createReservationSlotService() {
