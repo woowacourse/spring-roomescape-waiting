@@ -25,6 +25,7 @@ import roomescape.reservation.application.exception.ConflictException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
@@ -36,6 +37,9 @@ class WaitingServiceTest {
 
     @Mock
     private WaitingRepository waitingRepository;
+
+    @Mock
+    private ReservationRepository reservationRepository;
 
     @Mock
     private ThemeRepository themeRepository;
@@ -64,6 +68,7 @@ class WaitingServiceTest {
 
         when(timeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+        when(reservationRepository.existsByNameAndDateAndThemeAndTime(any(), any(), any(), any())).thenReturn(false);
         when(waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(any(), any(), any(), any())).thenReturn(false);
         when(waitingRepository.save(any())).thenReturn(saved);
 
@@ -91,7 +96,21 @@ class WaitingServiceTest {
     void save_throws_on_duplicate_waiting() {
         when(timeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+        when(reservationRepository.existsByNameAndDateAndThemeAndTime(any(), any(), any(), any())).thenReturn(false);
         when(waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(any(), any(), any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> waitingService.save(
+                new ReservationCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
+                LocalDateTime.of(2000, 1, 1, 0, 0)))
+                .isExactlyInstanceOf(ConflictException.class);
+    }
+
+    @DisplayName("이미 예약이 있는 슬롯에 대기 신청 시 예외가 발생한다.")
+    @Test
+    void save_throws_when_reservation_already_exists() {
+        when(timeRepository.findById(1L)).thenReturn(Optional.of(time));
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+        when(reservationRepository.existsByNameAndDateAndThemeAndTime(any(), any(), any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(
                 new ReservationCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),

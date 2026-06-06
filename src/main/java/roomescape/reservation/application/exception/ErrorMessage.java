@@ -11,6 +11,7 @@ public enum ErrorMessage {
 
     WAITING_NOT_FOUND("해당하는 ID(%s)의 대기가 존재하지 않습니다."),
     DUPLICATE_WAITING("이미 중복된 대기가 존재합니다."),
+    ALREADY_RESERVED_CANNOT_WAIT("이미 예약이 존재하는 슬롯에는 대기 신청이 불가합니다."),
 
     TIME_NOT_FOUND("해당하는 ID(%s)의 시간이 존재하지 않습니다."),
     TIME_ALREADY_DELETED("이미 삭제된 시간입니다."),

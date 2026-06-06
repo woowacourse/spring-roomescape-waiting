@@ -15,6 +15,7 @@ import roomescape.reservation.application.exception.ConflictException;
 import roomescape.reservation.application.exception.ErrorMessage;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.event.schema.WaitingSaved;
 import roomescape.reservation.presentation.dto.WaitingResponse;
@@ -30,6 +31,7 @@ import roomescape.theme.domain.repository.ThemeRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
 
@@ -51,7 +53,15 @@ public class WaitingService {
 
         Waiting pending = Waiting.of(null, request.name(), request.date(), theme.getId(), time.getId());
 
-        if(waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(
+        if (reservationRepository.existsByNameAndDateAndThemeAndTime(
+                pending.getName(),
+                pending.getDate(),
+                pending.getThemeId(),
+                pending.getTimeId())) {
+            throw new ConflictException(ErrorMessage.ALREADY_RESERVED_CANNOT_WAIT);
+        }
+
+        if (waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(
                 pending.getName(),
                 pending.getDate(),
                 pending.getThemeId(),
