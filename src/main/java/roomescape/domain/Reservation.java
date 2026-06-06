@@ -53,10 +53,6 @@ public class Reservation {
         return this.slot.isSameDateAndTime(other.getDate(), other.getTimeSlot());
     }
 
-    public boolean hasSameSlot(Reservation other) {
-        return other != null && this.slot.hasSameSlot(other.slot);
-    }
-
     public boolean isSameReservation(Reservation other) {
         return other != null && id != null && id.equals(other.id);
     }

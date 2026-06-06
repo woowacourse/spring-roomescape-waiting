@@ -8,7 +8,9 @@ public interface ReservationSlotRepository {
 
     Optional<ReservationSlot> findById(long id);
 
-    Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<ReservationSlot> findByIdWithLock(long id);
+
+    Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     ReservationSlot save(ReservationSlot reservationSlot);
 }

@@ -15,21 +15,21 @@ public interface ReservationRepository {
 
     List<Reservation> findByName(String name);
 
-    List<Reservation> findWaitingsBySlotId(Long slotId);
+    List<Reservation> findBySlotId(long slotId);
+
+    List<Reservation> findWaitingsBySlotId(long slotId);
 
     Reservation save(Reservation reservation);
 
     void deleteById(long id);
 
-    Optional<Reservation> findReservedBySlot(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findReservedBySlot(LocalDate date, long timeId, long themeId);
 
     void update(Reservation reservation);
 
-    boolean existsReservedBySlot(LocalDate date, Long timeId, Long themeId);
+    boolean existsReservedBySlotId(long slotId);
 
-    boolean existsByNameAndSlotId(String name, Long slotId);
+    boolean existsByThemeId(long themeId);
 
-    boolean existsByThemeId(Long themeId);
-
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTimeId(long timeId);
 }

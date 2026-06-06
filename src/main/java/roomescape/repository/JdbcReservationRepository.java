@@ -102,7 +102,32 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findWaitingsBySlotId(Long slotId) {
+    public List<Reservation> findBySlotId(long slotId) {
+        String sql = """
+                SELECT
+                    r.id AS r_id,
+                    r.name,
+                    r.created_at,
+                    r.status,
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
+                    ts.start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url
+                FROM reservation r
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN time_slot ts ON rs.time_id = ts.id
+                INNER JOIN theme th ON rs.theme_id = th.id
+                WHERE r.slot_id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper(), slotId);
+    }
+
+    @Override
+    public List<Reservation> findWaitingsBySlotId(long slotId) {
         String sql = """
                 SELECT
                     r.id AS r_id,
@@ -149,7 +174,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findReservedBySlot(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findReservedBySlot(LocalDate date, long timeId, long themeId) {
         String sql = """
                 SELECT
                     r.id AS r_id,
@@ -191,36 +216,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedBySlot(LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-                SELECT count(*)
-                FROM reservation r
-                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
-                WHERE rs.date = ?
-                  AND rs.time_id = ?
-                  AND rs.theme_id = ?
-                  AND r.status = ?
-                """;
-        Integer count = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                date,
-                timeId,
-                themeId,
-                ReservationStatus.RESERVED.name()
-        );
+    public boolean existsReservedBySlotId(long slotId) {
+        String sql = "SELECT count(*) FROM reservation WHERE slot_id = ? AND status = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slotId, ReservationStatus.RESERVED.name());
         return count != null && count > 0;
     }
 
     @Override
-    public boolean existsByNameAndSlotId(String name, Long slotId) {
-        String sql = "SELECT count(*) FROM reservation WHERE name = ? AND slot_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, slotId);
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existsByThemeId(Long themeId) {
+    public boolean existsByThemeId(long themeId) {
         String sql = """
                 SELECT count(*)
                 FROM reservation r
@@ -232,7 +235,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByTimeId(Long timeId) {
+    public boolean existsByTimeId(long timeId) {
         String sql = """
                 SELECT count(*)
                 FROM reservation r
