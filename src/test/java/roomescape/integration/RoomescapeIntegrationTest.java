@@ -118,6 +118,59 @@ public class RoomescapeIntegrationTest {
                 .body("themeResponses[0].id", equalTo(2));
     }
 
+    @Test
+    @DisplayName("예약자가 예약을 취소하면 첫 번째 대기가 예약으로 자동 승급된다.")
+    void 예약_취소시_첫번째_대기_자동_승급() {
+        insertTestData();
+
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+
+        ReservationRequest firstWaitingRequest = new ReservationRequest("네오", tomorrow, 1L, 1L);
+        ReservationRequest secondWaitingRequest = new ReservationRequest("대길", tomorrow, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(firstWaitingRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("WAITING"));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(secondWaitingRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("WAITING"));
+
+        RestAssured.given().log().all()
+                .queryParam("userName", "브라운")
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("userName", "네오")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationAndWaitingResponses.size()", equalTo(1))
+                .body("reservationAndWaitingResponses[0].name", equalTo("네오"))
+                .body("reservationAndWaitingResponses[0].isReserved", equalTo(true))
+                .body("reservationAndWaitingResponses[0].waitingNumber", equalTo(null));
+
+        RestAssured.given().log().all()
+                .queryParam("userName", "대길")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationAndWaitingResponses.size()", equalTo(1))
+                .body("reservationAndWaitingResponses[0].name", equalTo("대길"))
+                .body("reservationAndWaitingResponses[0].isReserved", equalTo(false))
+                .body("reservationAndWaitingResponses[0].waitingNumber", equalTo(1));
+    }
+
     private void insertTestData() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",

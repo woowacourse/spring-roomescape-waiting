@@ -34,11 +34,11 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
-import roomescape.exception.ProblemDetailsAdvice;
+import roomescape.exception.GlobalExceptionHandler;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(ReservationController.class)
-@Import(ProblemDetailsAdvice.class)
+@Import(GlobalExceptionHandler.class)
 class ReservationControllerTest {
 
     @Autowired
