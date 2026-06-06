@@ -17,7 +17,6 @@ import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationWaitingResponse;
 import roomescape.controller.dto.response.ReservationWaitingsResponse;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationWaiting;
 import roomescape.service.ReservationWaitingService;
 
 @RequestMapping("/reservations/waiting")
