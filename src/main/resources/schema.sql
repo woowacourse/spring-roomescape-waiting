@@ -46,3 +46,6 @@ CREATE TABLE waiting
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
 );
+
+CREATE INDEX idx_reservation_name ON reservation (name);
+CREATE INDEX idx_waiting_name_slot ON waiting (name, date, time_id, theme_id);
