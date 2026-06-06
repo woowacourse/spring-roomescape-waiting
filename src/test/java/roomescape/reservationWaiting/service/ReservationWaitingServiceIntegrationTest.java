@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
@@ -28,6 +28,10 @@ import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.support.ConcurrentExecutor;
 import roomescape.support.ConcurrentResult;
 import roomescape.support.ServiceIntegrationTest;
+import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.dto.ThemeCommand;
+import roomescape.time.service.ReservationTimeService;
+import roomescape.time.service.dto.ReservationTimeCommand;
 
 public class ReservationWaitingServiceIntegrationTest extends ServiceIntegrationTest {
 
@@ -35,7 +39,10 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
     private static final long WAITING_ID = 1L;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    ReservationTimeService reservationTimeService;
+
+    @Autowired
+    ThemeService themeService;
 
     @Autowired
     ReservationWaitingService reservationWaitingService;
@@ -50,10 +57,20 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
     @Test
     void makeReservationWaitingTest_duplicate() throws InterruptedException {
         //given
-        saveReservationTime(LocalTime.of(10, 0));
-        saveTheme("테마", "설명", "url");
+        reservationTimeService.registerReservationTime(
+                new ReservationTimeCommand(LocalTime.of(10, 0))
+        );
+        themeService.registerTheme(
+                new ThemeCommand(
+                        "테마", "설명", "url"
+                )
+        );
 
-        saveReservation("brown", LocalDate.of(2026, 5, 5), 1L, 1L);
+        reservationService.makeReservation(
+                new ReservationCommand(
+                        "brown", LocalDate.of(2026, 5, 5), 1L, 1L
+                )
+        );
 
         //when
         List<ConcurrentResult> results = ConcurrentExecutor.executeConcurrently(100, () -> {
@@ -81,38 +98,27 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
                 .allMatch(DuplicateReservationWaitingException.class::isInstance);
     }
 
-    private void saveReservationTime(LocalTime startAt) {
-        jdbcTemplate.update("""
-                INSERT INTO reservation_time (start_at)
-                VALUES (?)
-                """, startAt);
-    }
-
-    private void saveTheme(String name, String description, String thumbnailUrl) {
-        jdbcTemplate.update("""
-                INSERT INTO theme (name, description, thumbnail_url)
-                VALUES (?, ?, ?)
-                """, name, description, thumbnailUrl);
-    }
-
-    private void saveReservation(String name, LocalDate date, Long timeId, Long themeId) {
-        jdbcTemplate.update("""
-                INSERT INTO reservation (name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
-                """, name, date, timeId, themeId);
-    }
-
-
     @DisplayName("예약 대기 생성 중에는 동일 슬롯의 예약을 삭제/변경할 수 없다.")
     @Test
     void makeReservationWaitingTest_update_lock() throws Exception {
         //given
-        saveReservationTime(LocalTime.of(10, 0));
-        saveReservationTime(LocalTime.of(11, 0));
+        reservationTimeService.registerReservationTime(
+                new ReservationTimeCommand(LocalTime.of(10, 0))
+        );
+        reservationTimeService.registerReservationTime(
+                new ReservationTimeCommand(LocalTime.of(11, 0))
+        );
+        themeService.registerTheme(
+                new ThemeCommand(
+                        "테마", "설명", "url"
+                )
+        );
 
-        saveTheme("테마", "설명", "url");
-
-        saveReservation("brown", LocalDate.of(2026, 5, 5), 1L, 1L);
+        reservationService.makeReservation(
+                new ReservationCommand(
+                        "brown", LocalDate.of(2026, 5, 5), 1L, 1L
+                )
+        );
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
@@ -159,7 +165,7 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
             assertAll(
                     () -> assertReservationName(LocalDate.of(2026, 5, 5), 1L, 1L, "pobi"),
                     () -> assertReservationName(LocalDate.of(2026, 5, 5), 2L, 1L, "brown"),
-                    () -> assertWaitingCount(WAITING_ID, 0)
+                    () -> assertWaitingNotExists(WAITING_ID)
             );
         } finally {
             executorService.shutdownNow();
@@ -170,10 +176,20 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
     @Test
     void makeReservationWaitingTest_delete_lock() throws Exception {
         //given
-        saveReservationTime(LocalTime.of(10, 0));
-        saveTheme("테마", "설명", "url");
+        reservationTimeService.registerReservationTime(
+                new ReservationTimeCommand(LocalTime.of(10, 0))
+        );
+        themeService.registerTheme(
+                new ThemeCommand(
+                        "테마", "설명", "url"
+                )
+        );
 
-        saveReservation("brown", LocalDate.of(2026, 5, 5), 1L, 1L);
+        reservationService.makeReservation(
+                new ReservationCommand(
+                        "brown", LocalDate.of(2026, 5, 5), 1L, 1L
+                )
+        );
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
@@ -215,39 +231,36 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
             //then
             assertAll(
                     () -> assertReservationName(LocalDate.of(2026, 5, 5), 1L, 1L, "pobi"),
-                    () -> assertWaitingCount(WAITING_ID, 0)
+                    () -> assertWaitingNotExists(WAITING_ID)
             );
         } finally {
             executorService.shutdownNow();
         }
     }
 
-    private void assertReservationName(LocalDate date, Long timeId, Long themeId, String expectedName) {
-        assertThat(jdbcTemplate.queryForObject(
-                "SELECT name FROM reservation WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
-                String.class,
-                date,
-                timeId,
-                themeId
-        )).isEqualTo(expectedName);
-    }
-
-    private void assertWaitingCount(Long id, int expectedCount) {
-        assertThat(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation_waiting WHERE id = ?",
-                Integer.class,
-                id
-        )).isEqualTo(expectedCount);
-    }
-
     @DisplayName("예약 대기 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
     void deleteReservationWaitingTest_duplicate() throws InterruptedException {
         //given
-        saveReservationTime(LocalTime.of(10, 0));
-        saveTheme("테마", "설명", "url");
-        saveReservation("brown", LocalDate.of(2026, 5, 5), 1L, 1L);
-        saveReservationWaiting("pobi", LocalDate.of(2026, 5, 5), 1L, 1L);
+        reservationTimeService.registerReservationTime(
+                new ReservationTimeCommand(LocalTime.of(10, 0))
+        );
+        themeService.registerTheme(
+                new ThemeCommand(
+                        "테마", "설명", "url"
+                )
+        );
+
+        reservationService.makeReservation(
+                new ReservationCommand(
+                        "brown", LocalDate.of(2026, 5, 5), 1L, 1L
+                )
+        );
+        reservationWaitingService.makeReservationWaiting(
+                new ReservationWaitingCommand(
+                        "pobi", LocalDate.of(2026, 5, 5), 1L, 1L
+                )
+        );
 
         //when
         List<ConcurrentResult> results = ConcurrentExecutor.executeConcurrently(100, () -> {
@@ -269,10 +282,4 @@ public class ReservationWaitingServiceIntegrationTest extends ServiceIntegration
                 .extracting(ConcurrentResult::exception)
                 .allMatch(ReservationWaitingNotFoundException.class::isInstance);
     }
-
-    private void saveReservationWaiting(String name, LocalDate date, Long timeId, Long themeId) {
-        jdbcTemplate.update("""
-                INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
-                """, name, date, timeId, themeId);
-    }}
+}

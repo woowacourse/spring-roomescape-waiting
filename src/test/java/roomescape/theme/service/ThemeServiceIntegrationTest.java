@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.support.ConcurrentExecutor;
 import roomescape.support.ConcurrentResult;
 import roomescape.support.ServiceIntegrationTest;
@@ -18,9 +17,6 @@ public class ThemeServiceIntegrationTest extends ServiceIntegrationTest {
 
     @Autowired
     ThemeService themeService;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
 
     @DisplayName("동일한 테마를 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
@@ -52,10 +48,13 @@ public class ThemeServiceIntegrationTest extends ServiceIntegrationTest {
     @Test
     void removeThemeByIdTest_duplicate() throws InterruptedException {
         //given
-        jdbcTemplate.update("""
-                INSERT INTO theme (name, description, thumbnail_url)
-                VALUES ('우주선 탈출', '고장 난 우주선에서 제한 시간 안에 탈출하세요.', 'https://example.com/themes/space-escape.jpg')
-                """);
+        themeService.registerTheme(
+                new ThemeCommand(
+                        "우주선 탈출",
+                        "고장 난 우주선에서 제한 시간 안에 탈출하세요.",
+                        "https://example.com/themes/space-escape.jpg"
+                )
+        );
 
         //when
         List<ConcurrentResult> results = ConcurrentExecutor.executeConcurrently(100, () -> {

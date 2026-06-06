@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.support.ConcurrentExecutor;
 import roomescape.support.ConcurrentResult;
 import roomescape.support.ServiceIntegrationTest;
@@ -19,9 +18,6 @@ public class ReservationTimeServiceIntegrationTest extends ServiceIntegrationTes
 
     @Autowired
     ReservationTimeService reservationTimeService;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
 
     @DisplayName("동일한 예약 시간을 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
@@ -53,10 +49,9 @@ public class ReservationTimeServiceIntegrationTest extends ServiceIntegrationTes
     @Test
     void removeReservationTimeByIdTest_duplicate() throws InterruptedException {
         //given
-        jdbcTemplate.update("""
-                INSERT INTO reservation_time (start_at)
-                VALUES ('10:00:00')
-                """);
+        reservationTimeService.registerReservationTime(
+                new ReservationTimeCommand(LocalTime.of(10, 0))
+        );
 
         //when
         List<ConcurrentResult> results = ConcurrentExecutor.executeConcurrently(100, () -> {
