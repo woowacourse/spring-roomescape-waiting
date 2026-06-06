@@ -7,6 +7,7 @@ import roomescape.time.controller.dto.request.ReservationTimeSaveDto;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeException;
 import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.repository.projection.AvailableSlotTime;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -26,6 +27,10 @@ public class ReservationTimeService {
 
     public List<ReservationTime> readAvailableTimes(Long dateId, Long themeId) {
         return reservationTimeRepository.findAvailableByDateIdAndThemeId(dateId, themeId);
+    }
+
+    public List<AvailableSlotTime> readAvailableSlotTimes(Long dateId, Long themeId) {
+        return reservationTimeRepository.findAvailableSlotTimeByDateIdAndThemeId(dateId, themeId);
     }
 
     @Transactional

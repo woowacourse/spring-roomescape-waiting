@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.projection.AvailableSlotTime;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -107,4 +108,37 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         return jdbcTemplate.query(sql, params, reservationTimeRowMapper);
     }
+
+    @Override
+    public List<AvailableSlotTime> findAvailableSlotTimeByDateIdAndThemeId(Long dateId, Long themeId) {
+        String sql = """
+                SELECT 
+                    rt.id as time_id,
+                    rt.start_at as start_at,
+                    rt.is_active as is_active,
+                    s.id as slot_id
+                FROM reservation_time rt
+                JOIN reservation_slot s
+                  ON s.time_id  = rt.id
+                 AND s.date_id  = :date_id
+                 AND s.theme_id = :theme_id
+                LEFT JOIN reservation r
+                  ON r.slot_id = s.id
+                 AND r.status  = 'RESERVED'
+                WHERE rt.is_active = true
+                  AND r.id IS NULL
+                ORDER BY rt.start_at ASC
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date_id", dateId)
+                .addValue("theme_id", themeId);
+        return jdbcTemplate.query(sql, params, (rs, rowNum) -> new AvailableSlotTime(
+                rs.getLong("slot_id"),
+                rs.getLong("time_id"),
+                rs.getObject("start_at", LocalTime.class),
+                rs.getBoolean("is_active")
+        ));
+    }
+
 }
