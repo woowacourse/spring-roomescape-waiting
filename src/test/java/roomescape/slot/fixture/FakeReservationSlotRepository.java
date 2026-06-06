@@ -27,7 +27,7 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<ReservationSlot> findById(Long slotId) {
+    public Optional<ReservationSlot> findByIdWithLock(Long slotId) {
         return store.stream()
                 .filter(slot -> slot.equals(slot))
                 .findFirst();
@@ -35,15 +35,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
 
     @Override
     public Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId) {
-        return store.stream()
-                .filter(slot -> slot.getDateId().equals(dateId)
-                        && slot.getTimeId().equals(timeId)
-                        && slot.getThemeId().equals(themeId))
-                .findFirst();
-    }
-
-    @Override
-    public Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeIdForUpdate(Long dateId, Long timeId, Long themeId) {
         return store.stream()
                 .filter(slot -> slot.getDateId().equals(dateId)
                         && slot.getTimeId().equals(timeId)

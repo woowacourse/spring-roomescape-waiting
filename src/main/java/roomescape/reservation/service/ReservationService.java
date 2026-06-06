@@ -13,7 +13,6 @@ import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
-import roomescape.reservation.service.dto.ReservationSaveCommand;
 
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation reserve(String requesterName, Long slotId) {
-        ReservationSlot slot = getSlot(slotId);
+        ReservationSlot slot = getSlotWithLock(slotId);
         Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
         Reservation reservation = reservationsOfTimeSlot.reserve(requesterName, slot, LocalDateTime.now());
         return reservationRepository.save(reservation);
@@ -75,7 +74,7 @@ public class ReservationService {
     @Transactional
     public Reservation changeSchedule(ReservationChangeCommand command) {
         Reservation reservation = getReservationWithSlotLocked(command.id());
-        ReservationSlot newSlot = getSlot(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
+        ReservationSlot newSlot = getSlotWithLock(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
         validateAlreadyBookedByOthers(newSlot);
 
         reservation.changeSchedule(command.requesterName(), newSlot, LocalDateTime.now());
@@ -86,7 +85,7 @@ public class ReservationService {
     @Transactional
     public Reservation changeScheduleByManager(ReservationChangeCommand command) {
         Reservation reservation = getReservationWithSlotLocked(command.id());
-        ReservationSlot newSlot = getSlot(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
+        ReservationSlot newSlot = getSlotWithLock(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
         validateAlreadyBookedByOthers(newSlot);
 
         reservation.changeScheduleByManager(newSlot, LocalDateTime.now());
@@ -109,18 +108,13 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
-    private ReservationSlot getSlot(Long dateId, Long timeId, Long themeId) {
+    private ReservationSlot getSlotWithLock(Long dateId, Long timeId, Long themeId) {
         return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(dateId, timeId, themeId)
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 
-    private ReservationSlot getSlotWithLock(Long dateId, Long timeId, Long themeId) {
-        return reservationSlotRepository.findAvailableByDateIdTimeIdThemeIdForUpdate(dateId, timeId, themeId)
-                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
-    }
-
-    private ReservationSlot getSlot(Long slotId) {
-        return reservationSlotRepository.findById(slotId)
+    private ReservationSlot getSlotWithLock(Long slotId) {
+        return reservationSlotRepository.findByIdWithLock(slotId)
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 
