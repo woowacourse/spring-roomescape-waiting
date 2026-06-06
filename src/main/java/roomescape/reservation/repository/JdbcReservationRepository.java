@@ -66,12 +66,12 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findByIdForUpdate(Long id) {
-        List<Reservation> results = jdbcTemplate.query(
-                BASE_SELECT + "WHERE r.id = ? FOR UPDATE",
-                new ReservationRowMapper(),
+        jdbcTemplate.query(
+                "SELECT id FROM reservation WHERE id = ? FOR UPDATE",
+                (rs, rowNum) -> rs.getLong("id"),
                 id
         );
-        return results.stream().findFirst();
+        return findById(id);
     }
 
     @Override
