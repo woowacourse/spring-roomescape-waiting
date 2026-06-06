@@ -53,22 +53,12 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
         ReservationCreator.class
 })
 class ReservationServiceTest {
-    @Autowired
-    ReservationService reservationService;
-    @Autowired
-    ReservationRepository reservationRepository;
-    @Autowired
-    ReservationSlotRepository reservationSlotRepository;
-    @Autowired
-    ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    ThemeRepository themeRepository;
-    @Autowired
-    ReservationValidator reservationValidator;
-    @Autowired
-    MutableClock clock;
-    @Autowired
-    ReservationCreator reservationCreator;
+    @Autowired ReservationService reservationService;
+    @Autowired ReservationRepository reservationRepository;
+    @Autowired ReservationSlotRepository reservationSlotRepository;
+    @Autowired ReservationTimeRepository reservationTimeRepository;
+    @Autowired ThemeRepository themeRepository;
+    @Autowired MutableClock clock;
 
 
     @Test
