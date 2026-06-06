@@ -1,106 +1,216 @@
 # 요구사항
 
-> 사이클1 - 관리자 여부(인가)는 판단하지 않는다. 인가는 구현하지 않는다.
+> API 명세는 [API_SPEC.md](./API_SPEC.md)를 참고한다.
+
+## 0. 공통
+
+### 인증/인가
+
+- 회원은 이름과 비밀번호로 가입할 수 있다.
+- 로그인에 성공하면 JWT 토큰을 발급한다.
+- 인증이 필요한 API는 요청 헤더에 `Authorization: Bearer {token}`을 포함해야 한다.
+- 관리자 API는 `MANAGER` 권한만 접근할 수 있다.
+- 사용자 예약 API는 `MEMBER`, `MANAGER` 권한 모두 접근할 수 있다.
+
+### 응답
+
+- 현재 구현의 생성/변경/조회 API는 `200 OK`를 반환한다.
+- 예외 응답은 공통 에러 형식을 따른다.
+
+```json
+{
+  "status": 400,
+  "error": "BAD_REQUEST",
+  "errorCode": "COMMON_001",
+  "message": "잘못된 요청입니다.",
+  "invalidParams": null
+}
+```
 
 ---
 
-## 1. Reservation
-
-`status` : `RESERVED` | `CANCELED`
-
-### 관리자
-
-**예약을 한다.**
-
-- 날짜와 테마를 선택하고 예약 가능한 시간을 선택하면 예약할 수 있다.
-- `dateId`, `timeId`, `themeId`, `status`를 검증한다. (이때, status가 `RESERVED`인지 검증)
-- 예약의 기본 상태는 `RESERVED`이다.
-
-**예약을 취소한다.**
-
-- 해당 API를 사용한다는 게, 관리자임을 보장한다고 가정한다. 즉, 관리자인지 별도로 검증하지 않는다.
-- 예약 상태를 `CANCELED`로 변경한다.
-
-**예약을 조회한다.**
-
-- 검색어(`username`)를 입력받을 수 있다. 검색어가 없다면 전체 조회한다.
-- 필터링 조건은 `RESERVED`와 `CANCELED`가 존재한다.
-- 예약 날짜와 예약 시간을 기준으로 내림차순 정렬한다.
+## 1. Member/Auth
 
 ### 사용자
 
-**예약을 한다.**
+**회원가입을 한다.**
 
-- 날짜와 테마를 선택하고 예약 가능한 시간을 선택하면 예약할 수 있다.
-- `dateId`, `timeId`, `themeId`, `status`를 검증한다. (이때, status가 `RESERVED`인지 검증)
-- 예약의 기본 상태는 `RESERVED`이다.
+- `name`, `password`를 받아 회원을 생성한다.
+- 회원의 기본 권한은 `MEMBER`이다.
 
-**예약을 취소한다.**
+**로그인을 한다.**
 
-- 예약자의 성함과 일치하는지 확인한다.
-- 예약 상태를 `CANCELED`로 변경한다.
-
-**예약을 조회한다.**
-
-- `username`로 예약을 조회한다.
-- Query Parameter로 `status`를 받는다. (nullable)
-    - `status`가 null이면 `RESERVED`, `CANCELED` 모두 시간순으로 조회한다.
-    - `status`가 하나 선택되면 해당 status로 필터링하고 시간순으로 조회한다.
+- `name`, `password`를 받아 인증한다.
+- 인증에 성공하면 JWT 토큰을 발급한다.
+- 일반 브라우저 요청에는 `Authorization` 응답 헤더로 토큰을 내려준다.
+- `User-Agent`가 `room-escape-app`을 포함하면 `Authorization` 쿠키로 토큰을 내려준다.
 
 ---
 
-## 2. ReservationDate
+## 2. Reservation
+
+`status` : `RESERVED` | `WAITING` | `CANCELED`
+
+`waitingOrder`
+
+- 확정 예약은 `0`을 가진다.
+- 대기 예약은 같은 슬롯의 대기 순서를 나타내는 `1` 이상의 값을 가진다.
+- 다음 대기 순서는 같은 슬롯의 `WAITING` 예약 중 가장 큰 `waitingOrder + 1`로 결정한다.
+
+`waitingTurn`
+
+- 사용자 내 예약 조회에서 `WAITING` 예약에 한해 노출되는 현재 대기 순번이다.
+- 지난 예약/대기는 대기 순번을 노출하지 않는다.
+- `RESERVED`, `CANCELED` 예약은 대기 순번을 가지지 않는다.
+
+`slot`
+
+- 슬롯은 `dateId + timeId + themeId` 조합이다.
+- 예약 생성/취소/변경/대기 승격은 슬롯 단위로 동시성 제어를 수행한다.
+- 같은 슬롯의 상태 판단과 상태 변경은 `reservation_slot` 락을 통해 직렬화한다.
+
+### 관리자
+
+**예약을 조회한다.**
+
+- 전체 예약을 조회한다.
+- 예약 상세에는 예약자 이름, 날짜, 시간, 테마 정보, 상태가 포함된다.
+
+**예약을 생성한다.**
+
+- 로그인한 관리자의 이름으로 예약을 생성한다.
+- `dateId`, `timeId`, `themeId`를 검증한다.
+- 비활성 날짜/시간/테마로는 예약할 수 없다.
+- 이미 같은 슬롯에 활성 예약(`RESERVED` 또는 `WAITING`)이 있으면 `WAITING`으로 생성한다.
+- 같은 사용자가 같은 슬롯에 이미 활성 예약을 가지고 있으면 예외가 발생한다.
+- 같은 슬롯에 활성 예약이 없으면 `RESERVED`로 생성한다.
+
+**예약을 취소한다.**
+
+- 예약 상태를 `CANCELED`로 변경한다.
+- 이미 취소된 예약은 취소할 수 없다.
+- 지난 예약은 취소할 수 없다.
+- `RESERVED` 예약이 취소되면 같은 슬롯의 첫 번째 `WAITING` 예약을 `RESERVED`로 자동 승격한다.
+- `WAITING` 예약이 취소되면 승격은 발생하지 않는다.
+
+**예약 일정을 변경한다.**
+
+- `dateId`, `timeId`를 받아 예약 일정을 변경한다.
+- `WAITING` 예약은 변경할 수 없다.
+- 이미 취소된 예약은 변경할 수 없다.
+- 지난 예약은 변경할 수 없다.
+- 과거 날짜/시간으로 변경할 수 없다.
+- 변경 대상 슬롯에 활성 예약이 없으면 변경 예약은 `RESERVED`가 된다.
+- 변경 대상 슬롯에 타인의 활성 예약이 있으면 변경 예약은 `WAITING`이 된다.
+- 변경 대상 슬롯에 같은 사용자의 활성 예약이 있으면 예외가 발생한다.
+- 예약이 다른 슬롯으로 이동하면 이전 슬롯의 첫 번째 `WAITING` 예약을 `RESERVED`로 자동 승격한다.
+
+### 사용자
+
+**예약을 생성한다.**
+
+- 로그인한 사용자의 이름으로 예약을 생성한다.
+- `dateId`, `timeId`, `themeId`를 검증한다.
+- 비활성 날짜/시간/테마로는 예약할 수 없다.
+- 이미 같은 슬롯에 활성 예약(`RESERVED` 또는 `WAITING`)이 있으면 `WAITING`으로 생성한다.
+- 같은 사용자가 같은 슬롯에 이미 활성 예약을 가지고 있으면 예외가 발생한다.
+- 같은 슬롯에 활성 예약이 없으면 `RESERVED`로 생성한다.
+
+**내 예약을 조회한다.**
+
+- 로그인한 사용자의 예약 목록을 조회한다.
+- `WAITING` 예약이면 현재 대기 순번을 함께 반환한다.
+- 지난 대기는 대기 순번을 반환하지 않는다.
+- 예약 ID 기준 내림차순으로 조회한다.
+
+**예약을 취소한다.**
+
+- 본인의 예약만 취소할 수 있다.
+- 예약 상태를 `CANCELED`로 변경한다.
+- 이미 취소된 예약은 취소할 수 없다.
+- 지난 예약은 취소할 수 없다.
+- `RESERVED` 예약이 취소되면 같은 슬롯의 첫 번째 `WAITING` 예약을 `RESERVED`로 자동 승격한다.
+- `WAITING` 예약이 취소되면 승격은 발생하지 않는다.
+
+**예약 일정을 변경한다.**
+
+- 본인의 예약만 변경할 수 있다.
+- `dateId`, `timeId`를 받아 예약 일정을 변경한다.
+- `WAITING` 예약은 변경할 수 없다.
+- 이미 취소된 예약은 변경할 수 없다.
+- 지난 예약은 변경할 수 없다.
+- 과거 날짜/시간으로 변경할 수 없다.
+- 변경 대상 슬롯에 활성 예약이 없으면 변경 예약은 `RESERVED`가 된다.
+- 변경 대상 슬롯에 타인의 활성 예약이 있으면 변경 예약은 `WAITING`이 된다.
+- 변경 대상 슬롯에 본인의 활성 예약이 있으면 예외가 발생한다.
+- 예약이 다른 슬롯으로 이동하면 이전 슬롯의 첫 번째 `WAITING` 예약을 `RESERVED`로 자동 승격한다.
+
+---
+
+## 3. ReservationDate
+
+`isActive` : `true` | `false`
 
 ### 관리자
 
 **예약 가능한 날짜를 생성한다.**
 
-- `date`를 보내 생성한다.
-    - 이미 존재하는 `date`라면 예외가 발생한다.
+- `date`를 받아 생성한다.
+- 이미 존재하는 날짜라면 예외가 발생한다.
+- 과거 날짜는 생성할 수 없다.
+- 기본 상태는 비활성화(`isActive: false`)이다.
 
-**예약 가능한 날짜를 조회한다.**
+**예약 날짜 목록을 조회한다.**
 
-- `id`, `date`를 포함한 `List<ReservationDateDto>`를 반환한다.
+- 모든 예약 날짜를 조회한다.
+- `id`, `date`, `isActive`를 반환한다.
 
-**예약 가능 날짜를 삭제한다.**
+**예약 날짜 상태를 변경한다.**
 
-- hard-delete 방식으로 삭제한다.
+- `isActive` 값을 받아 활성화/비활성화한다.
 
 ### 사용자
 
 **예약 가능한 날짜를 조회한다.**
 
-- 활성화 + 오늘 이후 날짜를 조회한다.
+- 활성화된 날짜 중 오늘 이후 날짜를 조회한다.
+- `id`, `date`, `isActive`를 반환한다.
 
 ---
 
-## 3. ReservationTime
+## 4. ReservationTime
+
+`isActive` : `true` | `false`
 
 ### 관리자
 
 **예약 가능한 시간을 생성한다.**
 
-- 예약 가능 시간은 1시간 단위이다.
-- `startAt`을 보내 생성한다.
-- 이미 존재하는 `startAt`이라면 예외가 발생한다.
+- `startAt`을 받아 생성한다.
+- 이미 존재하는 시간이면 예외가 발생한다.
+- 기본 상태는 비활성화(`isActive: false`)이다.
 
-**예약 가능한 시간을 조회한다.**
+**예약 시간 목록을 조회한다.**
 
-- `id`, `time`을 포함한 `List<ReservationTimeDto>`를 반환한다.
+- 모든 예약 시간을 조회한다.
+- `id`, `startAt`, `isActive`를 반환한다.
 
-**예약 가능한 시간을 삭제한다.**
+**예약 시간 상태를 변경한다.**
 
-- hard-delete 방식으로 삭제한다.
+- `isActive` 값을 받아 활성화/비활성화한다.
 
 ### 사용자
 
 **예약 가능한 시간을 조회한다.**
 
-- 활성화 + 오늘 + 지금 시간 이후를 조회한다.
+- `dateId`, `themeId`를 받아 예약 가능한 시간을 조회한다.
+- 활성화된 시간만 조회한다.
+- 현재 구현에서는 `dateId`, `themeId`를 요청 파라미터로 받지만, 시간 목록 조회 조건에는 사용하지 않는다.
+- 이미 예약된 시간도 목록에 포함될 수 있으며, 예약 생성 시 슬롯 상태에 따라 `RESERVED` 또는 `WAITING`으로 결정된다.
 
 ---
 
-## 4. Theme
+## 5. Theme
 
 `isActive` : `true` | `false`
 
@@ -111,567 +221,34 @@
 - `name`, `description`, `thumbnailUrl`을 받아 생성한다.
 - 기본 상태는 비활성화(`isActive: false`)이다.
 
-**인기 테마 Top10을 조회한다. (수요 파악용)**
+**모든 테마를 조회한다.**
 
-- 취소를 포함한(`RESERVED` + `CANCELED`) 예약 수 Top 10 테마를 반환한다.
-- 테마당 예약된 수를 함께 반환한다.
+- 활성/비활성 테마를 모두 조회한다.
 
-**테마의 상태를 변경한다.**
+**인기 테마 상위 N개를 조회한다.**
 
-- 활성화/비활성화를 전환한다.
+- `top` 값을 받아 최대 N개를 조회한다.
+- 활성화된 테마만 조회한다.
+- 어제부터 7일 전까지의 예약을 집계한다.
+- `RESERVED` 예약만 집계한다.
+- 예약 수를 함께 반환한다.
+
+**테마 상태를 변경한다.**
+
+- `isActive` 값을 받아 활성화/비활성화한다.
 
 ### 사용자
 
-**인기 테마 Top10을 조회한다. (추천용)**
-
-- 취소를 포함하지 않은(`RESERVED`) 예약 수 Top 10 테마를 조회한다.
-- 순위만 반환한다. (예약 수 X)
-
 **활성화된 테마 목록을 조회한다.**
 
----
+- 활성화된 테마만 조회한다.
+- 이름 오름차순으로 정렬한다.
 
-# API 명세서
+**인기 테마 상위 N개를 조회한다.**
 
----
-
-## 1. Reservation
-
-### 1-1. 관리자
-
-#### (관리자) 방탈출을 예약한다.
-
-- URL: `/admin/reservations`
-- Method: `POST`
-- 요청 본문
-
-```json
-{
-  "username": "송송",
-  "dateId": 1,
-  "timeId": 1,
-  "themeId": 1
-}
-```
-
-- 응답 본문 `201 Created`
-
-```json
-{
-  "id": 1,
-  "username": "송송",
-  "date": "2026-05-04",
-  "time": "12:00:00",
-  "theme": {
-    "id": 1,
-    "name": "공포",
-    "description": "테스트용 더미 설명1",
-    "thumbnailUrl": "https://~"
-  },
-  "status": "RESERVED"
-}
-```
+- `top` 값을 받아 최대 N개를 조회한다.
+- 활성화된 테마만 조회한다.
+- 어제부터 7일 전까지의 `RESERVED` 예약을 집계한다.
+- 예약 수는 응답에 포함하지 않는다.
 
 ---
-
-#### (관리자) 예약 상태를 변경한다. (방탈출 예약 취소)
-
-- URL: `/admin/reservations/{id}`
-- Method: `PATCH`
-- 요청 본문
-
-```json
-{
-  "status": "CANCELED"
-}
-```
-
-- 응답 본문 `200 OK`
-
-```json
-{
-  "id": 1,
-  "username": "송송",
-  "date": "2026-05-04",
-  "time": "12:00:00",
-  "theme": {
-    "id": 1,
-    "name": "공포",
-    "description": "테스트용 더미 설명1",
-    "thumbnailUrl": "https://~"
-  },
-  "status": "CANCELED"
-}
-```
-
----
-
-#### (관리자) 방탈출 예약을 조회한다.
-
-- URL: `/admin/reservations?username={username}&status={status}`
-- Method: `GET`
-- Query Parameters
-    - `username` (optional): 검색어, 없으면 전체 조회
-    - `status` (optional): `RESERVED` | `CANCELED`, 없으면 전체 조회
-- 정렬: 예약 날짜 및 예약 시간 기준 내림차순
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "username": "송송",
-  "date": "2026-05-04",
-  "time": "12:00:00",
-  "theme": {
-    "id": 1,
-    "name": "공포",
-    "description": "테스트용 더미 설명1",
-    "thumbnailUrl": "https://~"
-  },
-  "status": "RESERVED"
-}
-},
-...
-}
-```
-
----
-
-### 1-2. 사용자
-
-#### (사용자) 방탈출을 예약한다.
-
-- URL: `/member/reservations`
-- Method: `POST`
-- 요청 본문
-
-```json
-{
-  "username": "송송",
-  "dateId": 1,
-  "timeId": 1,
-  "themeId": 1
-}
-```
-
-- 응답 본문 `201 Created`
-
-```json
-{
-  "id": 1,
-  "username": "송송",
-  "date": "2026-05-04",
-  "time": "12:00:00",
-  "theme": {
-    "id": 1,
-    "name": "공포",
-    "description": "테스트용 더미 설명1",
-    "thumbnailUrl": "https://~"
-  },
-  "status": "RESERVED"
-}
-```
-
----
-
-#### (사용자) 예약 상태를 변경한다. (방탈출 예약 취소)
-
-> 생각해볼 요소: 프론트가 status 종류를 알기 위해 ReservationStatus(Enum)을 반환하는 API가 필요할까?
-
-- URL: `/member/reservations/{id}`
-- Method: `PATCH`
-- 요청 본문
-
-```json
-{
-  "status": "CANCELED"
-}
-```
-
-- 응답 본문 `200 OK`
-
-```json
-{
-  "id": 1,
-  "username": "송송",
-  "date": "2026-05-04",
-  "time": "12:00:00",
-  "theme": {
-    "id": 1,
-    "name": "공포",
-    "description": "테스트용 더미 설명1",
-    "thumbnailUrl": "https://~"
-  },
-  "status": "CANCELED"
-}
-```
-
----
-
-#### (사용자) 방탈출 예약을 조회한다.
-
-- URL: `/member/reservations`
-- Method: `GET`
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "username": "송송",
-  "date": "2026-05-04",
-  "time": "12:00:00",
-  "theme": {
-    "id": 1,
-    "name": "공포",
-    "description": "테스트용 더미 설명1",
-    "thumbnailUrl": "https://~"
-  },
-  "status": "RESERVED"
-}
-},
-...
-}
-```
-
----
-
-## 2. ReservationTime
-
-### 2-1. 관리자
-
-#### (관리자) 예약 시간을 등록한다.
-
-- URL: `/admin/times`
-- Method: `POST`
-- 요청 본문
-
-```json
-{
-  "startAt": "12:00:00"
-}
-```
-
-- 응답 본문 `201 Created`
-
-```json
-{
-  "id": 1,
-  "startAt": "12:00:00"
-}
-```
-
----
-
-#### (관리자) 예약 시간 목록을 조회한다.
-
-- URL: `/admin/times`
-- Method: `GET`
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "startAt": "12:00:00"
-}
-},
-...
-}
-```
-
----
-
-#### (관리자) 예약 시간을 삭제한다.
-
-- URL: `/admin/times/{id}`
-- Method: `DELETE`
-- 응답 본문 `200 OK`
-
-```json
-{
-  "id": 1,
-  "startAt": "12:00:00"
-}
-```
-
----
-
-### 2-2. 사용자
-
-#### (사용자) 예약 가능한 시간을 조회한다.
-
-- URL: `/member/times?date={date}&themeId={themeId}`
-- Method: `GET`
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "startAt": "10:00:00"
-}
-},
-...
-}
-```
-
----
-
-## 3. ReservationDate
-
-### 3-1. 관리자
-
-#### (관리자) 예약 날짜를 등록한다.
-
-- URL: `/admin/dates`
-- Method: `POST`
-- 요청 본문
-
-```json
-{
-  "date": "2026-05-04"
-}
-```
-
-- 응답 본문 `201 Created`
-
-```json
-{
-  "id": 1,
-  "date": "2026-05-04"
-}
-```
-
----
-
-#### (관리자) 예약 날짜를 삭제한다.
-
-> Reservation에서 dateId가 아닌 date를 가지므로 FK에 포함되지 않음
-
-- URL: `/admin/dates/{id}`
-- Method: `DELETE`
-- 응답 본문 `200 OK`
-
-```json
-{
-  "id": 1,
-  "date": "2026-05-04"
-}
-```
-
----
-
-### 3-2. 사용자
-
-#### (사용자) 예약 가능한 날짜를 조회한다.
-
-- URL: `/member/dates`
-- Method: `GET`
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "date": "2026-05-04"
-}
-},
-...
-}
-```
-
----
-
-## 4. Theme
-
-### 4-1. 관리자
-
-#### (관리자) 테마를 생성한다.
-
-- URL: `/admin/themes`
-- Method: `POST`
-- 요청 본문
-
-```json
-{
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~~"
-}
-```
-
-- 응답 본문 `201 Created`
-
-```json
-{
-  "id": 1,
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~~",
-  "isActive": false
-}
-```
-
----
-
-#### (관리자) 모든 테마를 조회한다.
-
-- URL: `/admin/themes`
-- Method: `GET`
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~~",
-  "isActive": false
-}
-},
-...
-}
-```
-
----
-
-#### (관리자) 인기 테마 목록을 조회한다.
-
-> 취소를 포함한 예약 수 기준 TopN + 활성화된 테마 목록 조회
-
-- URL: `/admin/themes/popular?top={top}`
-- Method: `GET`
-- Query Parameters: `top` (optional, default: 10)
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~",
-  "count": 7
-}
-},
-...
-}
-```
-
-> 선택사항: `isActive` 필드 포함 여부 검토 필요
-
----
-
-#### (관리자) 테마를 활성화/비활성화한다.
-
-- URL: `/admin/themes/{id}`
-- Method: `PATCH`
-- 요청 본문
-
-```json
-{
-  "isActive": true
-}
-```
-
-- 응답 본문 `200 OK`
-
-```json
-{
-  "id": 1,
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~",
-  "isActive": true
-}
-```
-
----
-
-### 4-2. 사용자
-
-#### (사용자) 인기 테마 목록을 조회한다.
-
-> 활성화된 테마 목록만 조회
-
-- URL: `/member/themes/popular?top={top}`
-- Method: `GET`
-- Query Parameters: `top` (optional, default: 10)
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~"
-}
-},
-...
-}
-```
-
----
-
-#### (사용자) 테마 목록을 조회한다.
-
-> 가나다순 정렬
-
-- URL: `/member/themes`
-- Method: `GET`
-- 응답 본문 `200 OK`
-
-```json
-{
-{
-  "id": 1,
-  "name": "공포",
-  "description": "테스트 더미 설명1",
-  "thumbnailUrl": "https://~"
-}
-},
-...
-}
-```
-
----
-
-## ERD
-
-```mermaid
-erDiagram
-    THEME ||--o{ RESERVATION : "하나의 테마는 여러 예약을 가짐"
-    RESERVATION_DATE ||--o{ RESERVATION : "특정 날짜에 여러 예약 가능"
-    RESERVATION_TIME ||--o{ RESERVATION : "특정 시간에 여러 예약 가능"
-
-    RESERVATION {
-        Long id PK
-        String username
-        Long date
-        Long time
-        Long themeId FK "Theme 참조"
-        Enum status "예약 상태"
-    }
-
-    THEME {
-        Long id PK
-        String name
-        String description
-        String thumbnailUrl
-        Boolean isActive
-    }
-
-    RESERVATION_DATE {
-        Long id PK
-        Date date
-    }
-
-    RESERVATION_TIME {
-        Long id PK
-        Time startAt
-    }
-```
