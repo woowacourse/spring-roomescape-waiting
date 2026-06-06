@@ -21,6 +21,9 @@ public class MemberService {
 
     @Transactional
     public Member signup(SignupRequest request) {
+        if (memberRepository.existsByEmail(request.email())) {
+            throw new BusinessException(HttpStatus.CONFLICT, "이미 가입된 이메일입니다.");
+        }
         Member member = Member.of(request.name(), request.email(), request.password());
         return memberRepository.save(member);
     }

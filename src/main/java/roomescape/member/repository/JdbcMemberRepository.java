@@ -53,4 +53,10 @@ public class JdbcMemberRepository implements MemberRepository {
         String query = "SELECT * FROM member WHERE email = ?";
         return jdbcTemplate.query(query, rowMapper, email).stream().findFirst();
     }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        String query = "SELECT EXISTS(SELECT 1 FROM member WHERE email = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, Boolean.class, email));
+    }
 }

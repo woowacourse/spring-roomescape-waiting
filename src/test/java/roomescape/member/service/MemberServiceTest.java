@@ -40,6 +40,16 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("이미 가입된 이메일로 회원가입하면 예외가 발생한다")
+    void 중복_이메일_회원가입_예외() {
+        memberService.signup(new SignupRequest("현미밥", "test@test.com", "1234"));
+
+        assertThatThrownBy(() -> memberService.signup(new SignupRequest("백미밥", "test@test.com", "5678")))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("이미 가입된 이메일입니다.");
+    }
+
+    @Test
     @DisplayName("이메일과 비밀번호가 일치하면 로그인에 성공한다")
     void 로그인_성공() {
         memberService.signup(new SignupRequest("현미밥", "test@test.com", "1234"));
