@@ -21,7 +21,7 @@ import roomescape.support.TestDataHelper;
 
 @JdbcTest
 @Import(JdbcReservationRepository.class)
-public class ReservationTableConstraintTest {
+class ReservationTableConstraintTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -38,7 +38,7 @@ public class ReservationTableConstraintTest {
 
     @DisplayName("동일한 PK 삽입 시 DuplicateKeyException(PK 제약 위반) 발생 테스트.")
     @Test
-    void test_1() {
+    void save_duplicate_id_exception() {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
@@ -55,7 +55,7 @@ public class ReservationTableConstraintTest {
 
     @DisplayName("유니크 제약 조건인 동일한 슬롯(date, theme_id, time_id)으로 삽입 시 DuplicateKeyException(Unique 제약 위반) 발생 테스트.")
     @Test
-    void test_2() {
+    void save_duplicate_slot_exception() {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
@@ -72,7 +72,7 @@ public class ReservationTableConstraintTest {
 
     @DisplayName("NOT NULL 컬럼(name)에 null 삽입 시 DataIntegrityViolationException(Not Null 제약 위반) 발생 테스트.")
     @Test
-    void test_3() {
+    void save_null_name_exception() {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
@@ -85,7 +85,7 @@ public class ReservationTableConstraintTest {
 
     @DisplayName("VARCHAR(255) 크기를 초과하는 name 삽입 시 DataIntegrityViolationException(크기 제한 위반) 발생 테스트.")
     @Test
-    void test_4() {
+    void save_too_long_name_exception() {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
@@ -99,7 +99,7 @@ public class ReservationTableConstraintTest {
 
     @DisplayName("존재하지 않는 theme_id로 예약 저장 시 DataIntegrityViolationException(FK 위반) 발생 테스트.")
     @Test
-    void test_5() {
+    void save_not_exist_theme_id_exception() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long notExistThemeId = 999L;
 
@@ -119,7 +119,7 @@ public class ReservationTableConstraintTest {
 
     @DisplayName("존재하지 않는 time_id로 예약 저장 시 DataIntegrityViolationException(FK 위반) 발생 테스트.")
     @Test
-    void test_6() {
+    void save_not_exist_time_id_exception() {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long notExistTimeId = 999L;
 
