@@ -44,6 +44,17 @@
                 <button type="button" class="filter-preset" data-range="nextMonth" onclick="selectDatePreset('nextMonth')">다음 달</button>
                 <button type="button" class="filter-preset" data-range="custom" onclick="selectDatePreset('custom', false)">기간 선택</button>
             </div>
+            <div class="status-filter-group" aria-label="보기 옵션">
+                <span>보기 옵션</span>
+                <label class="status-filter-option">
+                    <input type="checkbox" id="show-reserved-checkbox" checked>
+                    <span>예약</span>
+                </label>
+                <label class="status-filter-option">
+                    <input type="checkbox" id="show-waiting-checkbox" checked>
+                    <span>대기</span>
+                </label>
+            </div>
         </div>
         <div class="date-range-row">
             <label class="date-field">
@@ -95,6 +106,8 @@
         document.getElementById('date-input').value = getTodayString();
         selectDatePreset('thisMonth', false);
         document.getElementById('search-input').addEventListener('input', renderReservations);
+        document.getElementById('show-reserved-checkbox').addEventListener('change', updateStatusFilter);
+        document.getElementById('show-waiting-checkbox').addEventListener('change', updateStatusFilter);
         document.querySelectorAll('th[data-sort]').forEach(th => {
             th.addEventListener('click', () => {
                 toggleSort(th.dataset.sort);
@@ -144,6 +157,7 @@
         const body = document.getElementById('reservation-body');
         updateSortIndicators();
         const rows = reservations
+            .filter(matchesStatusFilter)
             .filter(reservation => {
                 const haystack = [
                     reservation.name,
@@ -174,6 +188,26 @@
                 <td class="right">${renderActions(reservation)}</td>
             </tr>
         `).join('');
+    }
+
+    function updateStatusFilter(event) {
+        if (!hasSelectedStatusFilter()) {
+            event.target.checked = true;
+            return;
+        }
+        renderReservations();
+    }
+
+    function hasSelectedStatusFilter() {
+        return document.getElementById('show-reserved-checkbox').checked
+            || document.getElementById('show-waiting-checkbox').checked;
+    }
+
+    function matchesStatusFilter(reservation) {
+        if (reservation.status === 'WAITING') {
+            return document.getElementById('show-waiting-checkbox').checked;
+        }
+        return document.getElementById('show-reserved-checkbox').checked;
     }
 
     function compareReservation(a, b) {

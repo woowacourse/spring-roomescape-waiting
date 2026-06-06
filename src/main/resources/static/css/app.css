@@ -638,6 +638,9 @@ button:disabled {
 .filter-preset-row {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .filter-preset-tabs {
@@ -678,6 +681,50 @@ button:disabled {
     border-color: rgba(200,169,110,0.5);
     background: var(--accent-dim);
     color: var(--accent);
+}
+
+.status-filter-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 34px;
+    padding: 0.25rem 0.35rem 0.25rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+}
+
+.status-filter-group > span {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.status-filter-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    min-height: 26px;
+    padding: 0 0.45rem;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.status-filter-option:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-primary);
+}
+
+.status-filter-option input {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
 }
 
 .date-range-row {
