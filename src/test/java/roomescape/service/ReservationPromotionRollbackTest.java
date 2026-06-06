@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.config.FailureInjectionConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.config.TestClockConfig;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
@@ -21,12 +22,10 @@ import roomescape.dto.ReservationRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @SpringBootTest
-@Import({
-    TestClockConfig.class,
-    FailureInjectionConfig.class
-})
+@Import(TestClockConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationPromotionRollbackTest {
 
@@ -40,8 +39,8 @@ class ReservationPromotionRollbackTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Autowired
-    private FailingWaitlistRepository waitlistRepository;
+    @MockitoSpyBean
+    private WaitlistRepository waitlistRepository;
 
     @Autowired
     private ReservationTimeRepository timeRepository;
@@ -69,13 +68,16 @@ class ReservationPromotionRollbackTest {
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
         reservationService.reserveOrWait(neoRequest);
+
         Waitlist promotedWaitlist = waitlistRepository.findBySlot(
             FUTURE_SECOND_DATE,
             tenClock.getId(),
             theme.getId()
         ).getFirst();
 
-        waitlistRepository.failOnDelete(promotedWaitlist.getId());
+        doThrow(new RuntimeException("대기 삭제 실패"))
+            .when(waitlistRepository)
+            .deleteById(promotedWaitlist.getId());
 
         assertThatThrownBy(() -> reservationService.cancelMyReservation(savedReservation.getId(), "브라운"))
             .isInstanceOf(RuntimeException.class);
