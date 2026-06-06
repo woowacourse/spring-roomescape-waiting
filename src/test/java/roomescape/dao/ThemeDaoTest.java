@@ -44,9 +44,9 @@ class ThemeDaoTest {
 
     @Test
     void 인기_테마_상위_3개_조회() {
-        Theme theme1 = themeDao.save(new Theme(null, "인기테마1", "설명", "url"));
-        Theme theme2 = themeDao.save(new Theme(null, "인기테마2", "설명", "url"));
-        Theme theme3 = themeDao.save(new Theme(null, "인기테마3", "설명", "url"));
+        Theme theme1 = themeDao.save(new Theme( "인기테마1", "설명", "url"));
+        Theme theme2 = themeDao.save(new Theme("인기테마2", "설명", "url"));
+        Theme theme3 = themeDao.save(new Theme("인기테마3", "설명", "url"));
         ReservationTime time = reservationTimeDao.save(new ReservationTime(LocalTime.of(9, 0)));
 
         reservationDao.save(new Reservation("A", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
@@ -68,7 +68,7 @@ class ThemeDaoTest {
 
     @Test
     void 테마_저장() {
-        Theme newTheme = new Theme(null, "새 테마", "설명", "/new-theme");
+        Theme newTheme = new Theme("새 테마", "설명", "/new-theme");
 
         Theme saved = themeDao.save(newTheme);
 
@@ -78,7 +78,7 @@ class ThemeDaoTest {
 
     @Test
     void 예약_없는_테마_삭제() {
-        Theme saved = themeDao.save(new Theme(null, "삭제 테마", "설명", "url"));
+        Theme saved = themeDao.save(new Theme("삭제 테마", "설명", "url"));
 
         themeDao.delete(saved.getId());
 

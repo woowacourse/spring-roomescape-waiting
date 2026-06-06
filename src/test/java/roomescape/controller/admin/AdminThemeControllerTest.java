@@ -29,14 +29,13 @@ class AdminThemeControllerTest {
     private ThemeService themeService;
 
     @Test
-    void 테마_관리_API() throws Exception {
+    void 테마_생성() throws Exception {
         String name = "추리물";
         String description = "추리";
         MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png",
                 "fake-image-content".getBytes());
 
         given(themeService.create(any())).willReturn(new ThemeResponse(1L, name, description, "http://image.url"));
-        willDoNothing().given(themeService).delete(16L);
 
         mockMvc.perform(multipart("/admin/themes")
                         .file(file)
@@ -44,6 +43,11 @@ class AdminThemeControllerTest {
                         .param("description", description)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void 테마_삭제() throws Exception {
+        willDoNothing().given(themeService).delete(16L);
 
         mockMvc.perform(delete("/admin/themes/16"))
                 .andExpect(status().isNoContent());

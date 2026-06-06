@@ -80,7 +80,7 @@ class ThemeServiceTest {
 
     @Test
     void 예약_존재하는_테마_삭제_시_예외() {
-        Theme theme = themeDao.save(new Theme(null, "사용 테마", "설명", "url"));
+        Theme theme = themeDao.save(new Theme("사용 테마", "설명", "url"));
         ReservationTime time = reservationTimeDao.save(new ReservationTime(LocalTime.of(9, 0)));
         reservationDao.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
 

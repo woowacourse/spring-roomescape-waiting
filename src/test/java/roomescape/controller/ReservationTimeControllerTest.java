@@ -4,12 +4,17 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.domain.ReservationTimeStatus;
+import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.TimeSlotResponse;
 import roomescape.service.ReservationTimeService;
 
 @WebMvcTest(ReservationTimeController.class)
@@ -22,10 +27,22 @@ public class ReservationTimeControllerTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    void 전체_시간_조회_API() throws Exception {
-        given(reservationTimeService.findAll()).willReturn(List.of());
+    void 전체_시간_조회() throws Exception {
+        ReservationTimeResponse response = new ReservationTimeResponse(1L, LocalTime.of(10, 0));
+        given(reservationTimeService.findAll()).willReturn(List.of(response));
 
         mockMvc.perform(get("/times"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void 예약_가능_시간_조회() throws Exception {
+        TimeSlotResponse response = new TimeSlotResponse(1L, LocalTime.of(10, 0), ReservationTimeStatus.AVAILABLE);
+        given(reservationTimeService.findAvailableTime(1L, LocalDate.now())).willReturn(List.of(response));
+
+        mockMvc.perform(get("/times/available-times")
+                        .param("themeId", "1")
+                        .param("date", LocalDate.now().toString()))
                 .andExpect(status().isOk());
     }
 }
