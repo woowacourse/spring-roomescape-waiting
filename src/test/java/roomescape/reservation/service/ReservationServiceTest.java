@@ -134,7 +134,7 @@ class ReservationServiceTest {
         reservationService.createReservation(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
         reservationService.createReservation(member, new ReservationRequest(futureDate, otherTime.getId(), theme.getId()));
 
-        List<Reservation> reservations = reservationService.getReservationsByMemberId(member.getId());
+        List<Reservation> reservations = reservationService.getReservationsByMember(member);
 
         assertThat(reservations).hasSize(2);
     }
@@ -145,7 +145,7 @@ class ReservationServiceTest {
         Long reservationId = reservationService.createReservation(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
-        reservationService.deleteReservation(reservationId, member.getId());
+        reservationService.deleteReservation(reservationId, member);
 
         assertThat(reservationRepository.findById(reservationId)).isEmpty();
         assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, time.getId(), theme.getId()))
@@ -161,7 +161,7 @@ class ReservationServiceTest {
         ReservationWaiting waiting = waitingRepository.save(
                 ReservationWaiting.of(waiter, futureDate, time, theme));
 
-        reservationService.deleteReservation(reservationId, member.getId());
+        reservationService.deleteReservation(reservationId, member);
 
         assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
         List<Reservation> promoted = reservationRepository.findByMemberId(waiter.getId());
@@ -176,7 +176,7 @@ class ReservationServiceTest {
         Long reservationId = reservationService.createReservation(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
-        reservationService.deleteReservation(reservationId, member.getId());
+        reservationService.deleteReservation(reservationId, member);
 
         assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, time.getId(), theme.getId()))
                 .isFalse();
@@ -188,7 +188,7 @@ class ReservationServiceTest {
         Reservation past = reservationRepository.save(
                 Reservation.restore(null, member, LocalDate.now().minusDays(1), time, theme));
 
-        assertThatThrownBy(() -> reservationService.deleteReservation(past.getId(), member.getId()))
+        assertThatThrownBy(() -> reservationService.deleteReservation(past.getId(), member))
                 .isInstanceOf(PastTimeCancelException.class);
     }
 
@@ -199,7 +199,7 @@ class ReservationServiceTest {
         Long reservationId = reservationService.createReservation(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
-        assertThatThrownBy(() -> reservationService.deleteReservation(reservationId, other.getId()))
+        assertThatThrownBy(() -> reservationService.deleteReservation(reservationId, other))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("접근 권한이 없습니다.");
     }
@@ -209,7 +209,7 @@ class ReservationServiceTest {
     void 존재하지_않는_예약_조회_시_예외가_발생한다() {
         Long reservationId = reservationService.createReservation(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
-        reservationService.deleteReservation(reservationId, member.getId());
+        reservationService.deleteReservation(reservationId, member);
 
         assertThatThrownBy(() -> reservationService.getById(reservationId))
                 .isInstanceOf(BusinessException.class)

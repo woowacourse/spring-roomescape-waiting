@@ -72,14 +72,14 @@ public class ReservationService {
         }
     }
 
-    public List<Reservation> getReservationsByMemberId(Long memberId) {
-        return reservationRepository.findByMemberId(memberId);
+    public List<Reservation> getReservationsByMember(Member member) {
+        return reservationRepository.findByMemberId(member.getId());
     }
 
     @Transactional
-    public void deleteReservation(Long id, Long memberId) {
+    public void deleteReservation(Long id, Member member) {
         Reservation reservation = getById(id);
-        if (!reservation.isOwnedBy(memberId)) {
+        if (!reservation.isOwnedBy(member.getId())) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
         }
         if (reservation.isPast()) {

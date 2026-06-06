@@ -35,7 +35,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getMyReservations(@LoginMember Member member) {
-        List<ReservationResponse> responses = reservationService.getReservationsByMemberId(member.getId()).stream()
+        List<ReservationResponse> responses = reservationService.getReservationsByMember(member).stream()
                 .map(ReservationResponse::from)
                 .toList();
         return ResponseEntity.ok(responses);
@@ -64,7 +64,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@LoginMember Member member, @PathVariable Long id) {
-        reservationService.deleteReservation(id, member.getId());
+        reservationService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }

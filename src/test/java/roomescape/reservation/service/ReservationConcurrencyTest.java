@@ -85,7 +85,7 @@ class ReservationConcurrencyTest {
 
         executor.submit(() -> {
             await(start);
-            reservationService.deleteReservation(reservation.getId(), reserver.getId());
+            reservationService.deleteReservation(reservation.getId(), reserver);
         });
         executor.submit(() -> {
             await(start);
