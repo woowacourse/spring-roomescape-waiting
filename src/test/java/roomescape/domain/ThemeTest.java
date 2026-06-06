@@ -14,7 +14,7 @@ class ThemeTest {
     @NullSource
     @ValueSource(strings = {"", " "})
     void 빈_이름으로_테마_생성시_예외(String name) {
-        // when
+        // when & then
         assertThatThrownBy(() -> new Theme(null, name, "설명", "썸네일 경로"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("name은 비어 있을 수 없습니다.");

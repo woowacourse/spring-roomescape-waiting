@@ -17,6 +17,7 @@ class ReservationSlotTest {
 
     @Test
     void 날짜가_null이면_예외() {
+        // when & then
         assertThatThrownBy(() -> new ReservationSlot(null, time, theme))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("date는 비어 있을 수 없습니다.");
@@ -24,6 +25,7 @@ class ReservationSlotTest {
 
     @Test
     void 예약_시간이_null이면_예외() {
+        // when & then
         assertThatThrownBy(() -> new ReservationSlot(date, null, theme))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("time은 비어있을 수 없습니다.");
@@ -31,6 +33,7 @@ class ReservationSlotTest {
 
     @Test
     void 테마가_null이면_예외() {
+        // when & then
         assertThatThrownBy(() -> new ReservationSlot(date, time, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("theme는 비어있을 수 없습니다.");

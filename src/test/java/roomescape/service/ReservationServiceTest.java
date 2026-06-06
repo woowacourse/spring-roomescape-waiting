@@ -49,7 +49,7 @@ class ReservationServiceTest {
         List<Reservation> reservations = List.of(
                 reservation(1L, name, date, time),
                 reservation(2L, name, date.plusDays(1), time));
-        when(reservationRepository.findByName(name))
+        when(reservationRepository.findByReserver(new Reserver(name)))
                 .thenReturn(reservations);
 
         // when
@@ -57,7 +57,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(reservations);
-        verify(reservationRepository, times(1)).findByName(name);
+        verify(reservationRepository, times(1)).findByReserver(new Reserver(name));
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
 
@@ -546,12 +546,12 @@ class ReservationServiceTest {
     private Reservation reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(
                 id,
-                name,
+                new Reserver(name),
                 new ReservationSlot(date, time, theme));
     }
 
     private ReservationWaiting waiting(Long id, String name, ReservationSlot slot) {
-        return new ReservationWaiting(id, name, slot);
+        return new ReservationWaiting(id, new Reserver(name), slot);
     }
 
     private ReservationTime time(Long id) {

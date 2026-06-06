@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -38,9 +39,9 @@ class ReservationWaitingValidatorTest {
         ReservationWaiting waiting = waiting("브라운", date);
         when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
+        when(reservationRepository.existsByReserverAndSlot(eq(new Reserver("브라운")), any(ReservationSlot.class)))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
+        when(reservationWaitingRepository.existsByReserverAndSlot(eq(new Reserver("브라운")), any(ReservationSlot.class)))
                 .thenReturn(false);
 
         // when & then
@@ -68,7 +69,7 @@ class ReservationWaitingValidatorTest {
         ReservationWaiting waiting = waiting("브라운", date);
         when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
+        when(reservationRepository.existsByReserverAndSlot(eq(new Reserver("브라운")), any(ReservationSlot.class)))
                 .thenReturn(true);
 
         // when & then
@@ -84,9 +85,9 @@ class ReservationWaitingValidatorTest {
         ReservationWaiting waiting = waiting("브라운", date);
         when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
+        when(reservationRepository.existsByReserverAndSlot(eq(new Reserver("브라운")), any(ReservationSlot.class)))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
+        when(reservationWaitingRepository.existsByReserverAndSlot(eq(new Reserver("브라운")), any(ReservationSlot.class)))
                 .thenReturn(true);
 
         // when & then
@@ -147,6 +148,6 @@ class ReservationWaitingValidatorTest {
     }
 
     private ReservationWaiting waiting(String name, LocalDate date) {
-        return new ReservationWaiting(1L, name, new ReservationSlot(date, time, theme));
+        return new ReservationWaiting(1L, new Reserver(name), new ReservationSlot(date, time, theme));
     }
 }

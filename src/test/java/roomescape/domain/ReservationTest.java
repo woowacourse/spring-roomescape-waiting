@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
@@ -17,35 +16,21 @@ class ReservationTest {
     private LocalDate date = LocalDate.parse("2026-05-05");
     private LocalTime startAt = LocalTime.parse("10:00");
 
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"", " "})
-    void 이름이_null_또는_blank이면_예외(String name) {
-        // given
-        ReservationSlot slot = slot(date, new ReservationTime(1L, startAt));
-
-        // when & then
-        assertThatThrownBy(() -> new Reservation(null, name, slot))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("name은 비어 있을 수 없습니다.");
-    }
-
     @Test
-    void 이름이_255자를_초과하면_예외() {
+    void 예약자가_null이면_예외() {
         // given
-        String name = "a".repeat(256);
         ReservationSlot slot = slot(date, new ReservationTime(1L, startAt));
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(null, name, slot))
+        assertThatThrownBy(() -> new Reservation(null, null, slot))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("name은 255자를 넘을 수 없습니다.");
+                .hasMessage("reserver는 비어 있을 수 없습니다.");
     }
 
     @Test
     void 슬롯이_null이면_예외() {
         // when & then
-        assertThatThrownBy(() -> new Reservation(null, "홍길동", null))
+        assertThatThrownBy(() -> new Reservation(null, new Reserver("홍길동"), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("slot은 비어 있을 수 없습니다.");
     }
@@ -59,7 +44,7 @@ class ReservationTest {
         ReservationSlot slot = slot(date, time);
 
         // when
-        Reservation result = new Reservation(null, name, slot);
+        Reservation result = new Reservation(null, new Reserver(name), slot);
 
         // then
         assertThat(result.getName()).isEqualTo(name);
@@ -71,8 +56,8 @@ class ReservationTest {
         Reservation reservation = reservation("브라운", date, new ReservationTime(1L, startAt));
 
         // when & then
-        assertThat(reservation.isOwnedBy("브라운")).isTrue();
-        assertThat(reservation.isOwnedBy("구구")).isFalse();
+        assertThat(reservation.isOwnedBy(new Reserver("브라운"))).isTrue();
+        assertThat(reservation.isOwnedBy(new Reserver("구구"))).isFalse();
     }
 
     @Test
@@ -101,7 +86,7 @@ class ReservationTest {
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time) {
-        return new Reservation(null, name, slot(date, time));
+        return new Reservation(null, new Reserver(name), slot(date, time));
     }
 
     private ReservationSlot slot(LocalDate date, ReservationTime time) {

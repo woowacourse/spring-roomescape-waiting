@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Component;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Reserver;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
@@ -47,7 +48,7 @@ public class ReservationWaitingValidator {
     }
 
     private void validateNotOwnReservationSlot(ReservationWaiting waiting) {
-        if (reservationRepository.existsByNameAndSlot(waiting.getName(), waiting.getSlot())) {
+        if (reservationRepository.existsByReserverAndSlot(waiting.getReserver(), waiting.getSlot())) {
             throw new RoomescapeException(
                     ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION, "본인이 예약한 시간에는 대기를 신청할 수 없습니다."
             );
@@ -55,13 +56,13 @@ public class ReservationWaitingValidator {
     }
 
     private void validateNotDuplicateWaiting(ReservationWaiting waiting) {
-        if (reservationWaitingRepository.existsByNameAndSlot(waiting.getName(), waiting.getSlot())) {
+        if (reservationWaitingRepository.existsByReserverAndSlot(waiting.getReserver(), waiting.getSlot())) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약 대기를 신청한 시간입니다.");
         }
     }
 
     private void validateOwner(ReservationWaiting waiting, String name) {
-        if (!waiting.isOwnedBy(name)) {
+        if (!waiting.isOwnedBy(new Reserver(name))) {
             throw new RoomescapeException(ErrorCode.FORBIDDEN_RESOURCE, "본인의 예약 대기만 취소할 수 있습니다.");
         }
     }

@@ -3,7 +3,12 @@ package roomescape.service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.*;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Reserver;
+import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
@@ -40,7 +45,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findByName(String name) {
-        return reservationRepository.findByName(name);
+        return reservationRepository.findByReserver(new Reserver(name));
     }
 
     public List<Reservation> findByDateRange(LocalDate startDate, LocalDate endDate) {
@@ -54,7 +59,7 @@ public class ReservationService {
     @Transactional
     public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
-        Reservation reservation = new Reservation(null, name, slot);
+        Reservation reservation = new Reservation(null, new Reserver(name), slot);
         reservationValidator.validateCreatableByUser(reservation, now);
 
         return insertReservation(reservation);
@@ -63,7 +68,7 @@ public class ReservationService {
     @Transactional
     public Reservation createByAdmin(String name, LocalDate date, Long timeId, Long themeId) {
         ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
-        Reservation reservation = new Reservation(null, name, slot);
+        Reservation reservation = new Reservation(null, new Reserver(name), slot);
         reservationValidator.validateCreatableByAdmin(reservation);
 
         return insertReservation(reservation);
@@ -133,7 +138,7 @@ public class ReservationService {
         ReservationSlot originalSlot = reservation.getSlot();
         return new Reservation(
                 reservation.getId(),
-                reservation.getName(),
+                reservation.getReserver(),
                 new ReservationSlot(
                         resolveUpdateDate(originalSlot.getDate(), updateDate),
                         resolveUpdateTime(originalSlot.getTime(), updateTimeId),

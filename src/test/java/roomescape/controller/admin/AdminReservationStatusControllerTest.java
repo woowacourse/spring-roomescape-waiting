@@ -34,13 +34,11 @@ class AdminReservationStatusControllerTest {
 
     @Test
     void 기간으로_예약과_예약_대기를_함께_조회한다() throws Exception {
-        // given
         LocalDate startDate = LocalDate.of(2023, 8, 1);
         LocalDate endDate = LocalDate.of(2023, 8, 31);
         given(reservationLookupService.findByDateRange(eq(startDate), eq(endDate)))
                 .willReturn(List.of(reservedStatus(), waitingStatus()));
 
-        // when & then
         mockMvc.perform(get("/admin/reservation-statuses")
                         .param("startDate", "2023-08-01")
                         .param("endDate", "2023-08-31"))
@@ -64,7 +62,6 @@ class AdminReservationStatusControllerTest {
 
     @Test
     void 시작일이_없으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/admin/reservation-statuses")
                         .param("endDate", "2023-08-31"))
                 .andExpect(status().isBadRequest())
@@ -76,7 +73,6 @@ class AdminReservationStatusControllerTest {
 
     @Test
     void 종료일_형식이_올바르지_않으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/admin/reservation-statuses")
                         .param("startDate", "2023-08-01")
                         .param("endDate", "invalid-date"))

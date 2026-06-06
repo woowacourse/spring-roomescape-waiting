@@ -31,7 +31,6 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 예약_대기를_생성한다() throws Exception {
-        // given
         given(reservationWaitingService.create(
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
@@ -40,7 +39,6 @@ class ReservationWaitingControllerTest {
                 any(LocalDateTime.class)))
                 .willReturn(waitingResult());
 
-        // when & then
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
@@ -66,11 +64,9 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 이름으로_예약_대기_목록을_조회한다() throws Exception {
-        // given
         given(reservationWaitingService.findByName(eq("브라운")))
                 .willReturn(List.of(waitingResult()));
 
-        // when & then
         mockMvc.perform(get("/waitings")
                         .param("name", "브라운"))
                 .andExpect(status().isOk())
@@ -88,7 +84,6 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 예약_대기를_취소한다() throws Exception {
-        // when & then
         mockMvc.perform(delete("/waitings/1")
                         .param("name", "브라운"))
                 .andExpect(status().isNoContent());
@@ -99,7 +94,6 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 예약_대기_생성시_유효하지_않은_입력값이면_에러_응답() throws Exception {
-        // given
         String request = """
                 {
                   "name": "",
@@ -109,7 +103,6 @@ class ReservationWaitingControllerTest {
                 }
                 """;
 
-        // when & then
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -122,7 +115,6 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 예약_대기_생성시_요청_본문_형식이_올바르지_않으면_에러_응답() throws Exception {
-        // given
         String request = """
                 {
                   "name": "브라운",
@@ -132,7 +124,6 @@ class ReservationWaitingControllerTest {
                 }
                 """;
 
-        // when & then
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -145,7 +136,6 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 예약_대기_조회시_이름이_비어있으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/waitings")
                         .param("name", ""))
                 .andExpect(status().isBadRequest())
@@ -157,7 +147,6 @@ class ReservationWaitingControllerTest {
 
     @Test
     void 예약_대기_취소시_id가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(delete("/waitings/0")
                         .param("name", "브라운"))
                 .andExpect(status().isBadRequest())
@@ -182,7 +171,7 @@ class ReservationWaitingControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
         return new WaitingWithTurn(
-                new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.of(2099, 1, 1), time, theme)),
+                new ReservationWaiting(1L, new Reserver("브라운"), new ReservationSlot(LocalDate.of(2099, 1, 1), time, theme)),
                 2L);
     }
 }

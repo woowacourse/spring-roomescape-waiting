@@ -28,11 +28,9 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간_목록을_조회한다() throws Exception {
-        // given
         given(reservationTimeService.findAll())
                 .willReturn(List.of(new ReservationTime(1L, LocalTime.of(10, 0))));
 
-        // when & then
         mockMvc.perform(get("/admin/times"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -44,11 +42,9 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간을_생성한다() throws Exception {
-        // given
         given(reservationTimeService.create(LocalTime.of(10, 0)))
                 .willReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
 
-        // when & then
         mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -67,7 +63,6 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간_생성_요청값이_유효하지_않으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -84,7 +79,6 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간을_삭제한다() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/times/1"))
                 .andExpect(status().isNoContent());
 
@@ -94,7 +88,6 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 삭제_id가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/times/0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))

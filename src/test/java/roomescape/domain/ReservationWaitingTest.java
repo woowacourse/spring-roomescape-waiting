@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
@@ -16,35 +15,21 @@ class ReservationWaitingTest {
     private LocalDate date = LocalDate.parse("2026-05-05");
     private LocalTime startAt = LocalTime.parse("10:00");
 
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"", " "})
-    void 이름이_null_또는_blank이면_예외(String name) {
-        // given
-        ReservationSlot slot = slot(date, new ReservationTime(1L, startAt));
-
-        // when & then
-        assertThatThrownBy(() -> new ReservationWaiting(null, name, slot))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("name은 비어 있을 수 없습니다.");
-    }
-
     @Test
-    void 이름이_255자를_초과하면_예외() {
+    void 예약자가_null이면_예외() {
         // given
-        String name = "a".repeat(256);
         ReservationSlot slot = slot(date, new ReservationTime(1L, startAt));
 
         // when & then
-        assertThatThrownBy(() -> new ReservationWaiting(null, name, slot))
+        assertThatThrownBy(() -> new ReservationWaiting(null, null, slot))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("name은 255자를 넘을 수 없습니다.");
+                .hasMessage("reserver는 비어 있을 수 없습니다.");
     }
 
     @Test
     void 슬롯이_null이면_예외() {
         // when & then
-        assertThatThrownBy(() -> new ReservationWaiting(null, "홍길동", null))
+        assertThatThrownBy(() -> new ReservationWaiting(null, new Reserver("홍길동"), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("slot은 비어 있을 수 없습니다.");
     }
@@ -58,7 +43,7 @@ class ReservationWaitingTest {
         ReservationSlot slot = slot(date, time);
 
         // when
-        ReservationWaiting result = new ReservationWaiting(null, name, slot);
+        ReservationWaiting result = new ReservationWaiting(null, new Reserver(name), slot);
 
         // then
         assertThat(result.getName()).isEqualTo(name);
@@ -70,8 +55,8 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = waiting("브라운", date, new ReservationTime(1L, startAt));
 
         // when & then
-        assertThat(waiting.isOwnedBy("브라운")).isTrue();
-        assertThat(waiting.isOwnedBy("구구")).isFalse();
+        assertThat(waiting.isOwnedBy(new Reserver("브라운"))).isTrue();
+        assertThat(waiting.isOwnedBy(new Reserver("구구"))).isFalse();
     }
 
     @Test
@@ -90,7 +75,7 @@ class ReservationWaitingTest {
     void 예약_대기를_예약으로_승격한다() {
         // given
         ReservationSlot slot = slot(date, new ReservationTime(1L, startAt));
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot);
+        ReservationWaiting waiting = new ReservationWaiting(1L, new Reserver("브라운"), slot);
 
         // when
         Reservation result = waiting.promoteToReservation();
@@ -102,7 +87,7 @@ class ReservationWaitingTest {
     }
 
     private ReservationWaiting waiting(String name, LocalDate date, ReservationTime time) {
-        return new ReservationWaiting(null, name, slot(date, time));
+        return new ReservationWaiting(null, new Reserver(name), slot(date, time));
     }
 
     private ReservationSlot slot(LocalDate date, ReservationTime time) {

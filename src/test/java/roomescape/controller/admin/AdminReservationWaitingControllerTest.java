@@ -23,7 +23,6 @@ class AdminReservationWaitingControllerTest {
 
     @Test
     void 관리자_예약_대기를_삭제한다() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/waitings/1"))
                 .andExpect(status().isNoContent());
 
@@ -33,7 +32,6 @@ class AdminReservationWaitingControllerTest {
 
     @Test
     void 삭제_id가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/waitings/0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))

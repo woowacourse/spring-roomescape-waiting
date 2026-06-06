@@ -5,24 +5,24 @@ import java.time.LocalDateTime;
 public class Reservation {
 
     private final Long id;
-    private final String name;
+    private final Reserver reserver;
     private final ReservationSlot slot;
 
-    public Reservation(Long id, String name, ReservationSlot slot) {
-        validateName(name);
+    public Reservation(Long id, Reserver reserver, ReservationSlot slot) {
+        validateReserver(reserver);
         validateSlot(slot);
 
         this.id = id;
-        this.name = name;
+        this.reserver = reserver;
         this.slot = slot;
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, name, slot);
+        return new Reservation(id, reserver, slot);
     }
 
-    public boolean isOwnedBy(String name) {
-        return this.name.equals(name);
+    public boolean isOwnedBy(Reserver reserver) {
+        return this.reserver.equals(reserver);
     }
 
     public boolean isPast(LocalDateTime now) {
@@ -37,20 +37,21 @@ public class Reservation {
         return id;
     }
 
+    public Reserver getReserver() {
+        return reserver;
+    }
+
     public String getName() {
-        return name;
+        return reserver.getName();
     }
 
     public ReservationSlot getSlot() {
         return slot;
     }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name은 비어 있을 수 없습니다.");
-        }
-        if (name.length() > 255) {
-            throw new IllegalArgumentException("name은 255자를 넘을 수 없습니다.");
+    private void validateReserver(Reserver reserver) {
+        if (reserver == null) {
+            throw new IllegalArgumentException("reserver는 비어 있을 수 없습니다.");
         }
     }
 

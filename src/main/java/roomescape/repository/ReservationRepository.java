@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
 
 import java.sql.PreparedStatement;
@@ -36,7 +37,7 @@ public class ReservationRepository {
 
         return new Reservation(
                 resultSet.getLong("reservation_id"),
-                resultSet.getString("username"),
+                new Reserver(resultSet.getString("username")),
                 slot
         );
     };
@@ -110,7 +111,7 @@ public class ReservationRepository {
         return jdbcTemplate.query(sql, reservationRowMapper, startDate, endDate);
     }
 
-    public List<Reservation> findByName(String name) {
+    public List<Reservation> findByReserver(Reserver reserver) {
         String sql = """
                 SELECT
                     r.id as reservation_id,
@@ -130,7 +131,7 @@ public class ReservationRepository {
                 WHERE r.name = ?
                 ORDER BY r.id;
                 """;
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, reserver.getName());
     }
 
     public Reservation insert(Reservation reservation) {
@@ -199,12 +200,12 @@ public class ReservationRepository {
         return !ids.isEmpty();
     }
 
-    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+    public boolean existsByReserverAndSlot(Reserver reserver, ReservationSlot slot) {
         String sql = "SELECT count(*) FROM reservation WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(
                 sql,
                 Integer.class,
-                name,
+                reserver.getName(),
                 slot.getDate(),
                 slot.getTime().getId(),
                 slot.getTheme().getId()

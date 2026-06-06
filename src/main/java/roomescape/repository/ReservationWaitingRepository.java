@@ -5,8 +5,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.*;
-
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Reserver;
+import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithTurn;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -34,7 +38,7 @@ public class ReservationWaitingRepository {
 
         return new ReservationWaiting(
                 resultSet.getLong("reservation_waiting_id"),
-                resultSet.getString("username"),
+                new Reserver(resultSet.getString("username")),
                 slot
         );
     };
@@ -51,7 +55,7 @@ public class ReservationWaitingRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<WaitingWithTurn> findByNameWithTurn(String name) {
+    public List<WaitingWithTurn> findByReserverWithTurn(Reserver reserver) {
         String sql = """
                 SELECT
                     r.id AS reservation_waiting_id,
@@ -85,7 +89,7 @@ public class ReservationWaitingRepository {
                 WHERE r.name = ?
                 ORDER BY r.id;
                 """;
-        return jdbcTemplate.query(sql, waitingWithTurnRowMapper, name);
+        return jdbcTemplate.query(sql, waitingWithTurnRowMapper, reserver.getName());
     }
 
     public List<WaitingWithTurn> findByDateRange(LocalDate startDate, LocalDate endDate) {
@@ -141,7 +145,7 @@ public class ReservationWaitingRepository {
         return waiting.withId(id);
     }
 
-    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+    public boolean existsByReserverAndSlot(Reserver reserver, ReservationSlot slot) {
         String sql = """
                 SELECT
                     count(*)
@@ -153,7 +157,7 @@ public class ReservationWaitingRepository {
                   AND theme_id = ?
                 """;
         Integer count = jdbcTemplate.queryForObject(sql,
-                Integer.class, name,
+                Integer.class, reserver.getName(),
                 slot.getDate(),
                 slot.getTime().getId(),
                 slot.getTheme().getId()

@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 
@@ -37,7 +38,6 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_예약을_생성한다() throws Exception {
-        // given
         given(reservationService.createByUser(
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
@@ -46,7 +46,6 @@ class ReservationControllerTest {
                 any(LocalDateTime.class)))
                 .willReturn(reservation());
 
-        // when & then
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
@@ -71,11 +70,9 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약을_조회한다() throws Exception {
-        // given
         given(reservationService.findByName(eq("브라운")))
                 .willReturn(List.of(reservation()));
 
-        // when & then
         mockMvc.perform(get("/reservations")
                         .param("name", "브라운"))
                 .andExpect(status().isOk())
@@ -93,7 +90,6 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약_조회시_이름이_비어있으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/reservations")
                         .param("name", ""))
                 .andExpect(status().isBadRequest())
@@ -105,11 +101,9 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약을_취소한다() throws Exception {
-        // given
         Long id = 1L;
         String name = "브라운";
 
-        // when & then
         mockMvc.perform(delete("/reservations/{id}", id)
                         .param("name", name))
                 .andExpect(status().isNoContent());
@@ -120,7 +114,6 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약_취소시_id가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(delete("/reservations/0")
                         .param("name", "브라운"))
                 .andExpect(status().isBadRequest())
@@ -132,7 +125,6 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약을_변경한다() throws Exception {
-        // given
         Long id = 1L;
         given(reservationService.updateByUser(
                 eq(id),
@@ -142,7 +134,6 @@ class ReservationControllerTest {
                 any(LocalDateTime.class)))
                 .willReturn(updatedReservation());
 
-        // when & then
         mockMvc.perform(put("/reservations/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateRequest()))
@@ -166,7 +157,6 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약_변경시_유효하지_않은_입력값이면_에러_응답() throws Exception {
-        // given
         String request = """
                 {
                   "name": "",
@@ -175,7 +165,6 @@ class ReservationControllerTest {
                 }
                 """;
 
-        // when & then
         mockMvc.perform(put("/reservations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -188,14 +177,12 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_본인_예약_변경시_변경할_값이_없으면_에러_응답() throws Exception {
-        // given
         String request = """
                 {
                   "name": "브라운"
                 }
                 """;
 
-        // when & then
         mockMvc.perform(put("/reservations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -208,7 +195,6 @@ class ReservationControllerTest {
 
     @Test
     void 유효하지_않은_입력값이면_에러_응답() throws Exception {
-        // given
         String request = """
                 {
                   "name": "",
@@ -218,7 +204,6 @@ class ReservationControllerTest {
                 }
                 """;
 
-        // when & then
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -231,7 +216,6 @@ class ReservationControllerTest {
 
     @Test
     void 요청_본문_형식이_올바르지_않으면_에러_응답() throws Exception {
-        // given
         String request = """
                 {
                   "name": "브라운",
@@ -241,7 +225,6 @@ class ReservationControllerTest {
                 }
                 """;
 
-        // when & then
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -254,7 +237,6 @@ class ReservationControllerTest {
 
     @Test
     void 일시적_DB_실패가_발생하면_재시도_가능한_에러_응답() throws Exception {
-        // given
         given(reservationService.createByUser(
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
@@ -263,7 +245,6 @@ class ReservationControllerTest {
                 any(LocalDateTime.class)))
                 .willThrow(new CannotAcquireLockException("lock timeout"));
 
-        // when & then
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
@@ -304,12 +285,12 @@ class ReservationControllerTest {
     private Reservation reservation() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
-        return new Reservation(1L, "브라운", new ReservationSlot(LocalDate.of(2099, 1, 1), time, theme));
+        return new Reservation(1L, new Reserver("브라운"), new ReservationSlot(LocalDate.of(2099, 1, 1), time, theme));
     }
 
     private Reservation updatedReservation() {
         ReservationTime time = new ReservationTime(2L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
-        return new Reservation(1L, "브라운", new ReservationSlot(LocalDate.of(2099, 1, 2), time, theme));
+        return new Reservation(1L, new Reserver("브라운"), new ReservationSlot(LocalDate.of(2099, 1, 2), time, theme));
     }
 }

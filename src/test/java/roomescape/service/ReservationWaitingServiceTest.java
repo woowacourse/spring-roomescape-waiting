@@ -47,7 +47,7 @@ class ReservationWaitingServiceTest {
                 waitingWithTurn(1L, name, date, 1L),
                 waitingWithTurn(2L, name, date.plusDays(1), 2L));
 
-        when(reservationWaitingRepository.findByNameWithTurn(name))
+        when(reservationWaitingRepository.findByReserverWithTurn(new Reserver(name)))
                 .thenReturn(waitingWithTurns);
 
         // when
@@ -309,6 +309,6 @@ class ReservationWaitingServiceTest {
     }
 
     private ReservationWaiting waiting(Long id, String name, LocalDate date) {
-        return new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+        return new ReservationWaiting(id, new Reserver(name), new ReservationSlot(date, time, theme));
     }
 }

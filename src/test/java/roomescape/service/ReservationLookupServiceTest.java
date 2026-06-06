@@ -33,9 +33,9 @@ class ReservationLookupServiceTest {
     void 이름으로_예약과_예약_대기를_함께_조회한다() {
         // given
         String name = "브라운";
-        Reservation reservation = new Reservation(1L, name, new ReservationSlot(date, time, theme));
+        Reservation reservation = new Reservation(1L, new Reserver(name), new ReservationSlot(date, time, theme));
         WaitingWithTurn waiting = new WaitingWithTurn(
-                new ReservationWaiting(2L, name, new ReservationSlot(date.plusDays(1), time, theme)),
+                new ReservationWaiting(2L, new Reserver(name), new ReservationSlot(date.plusDays(1), time, theme)),
                 1L);
 
         when(reservationService.findByName(name))
@@ -64,10 +64,10 @@ class ReservationLookupServiceTest {
         ReservationTime earlyTime = new ReservationTime(1L, LocalTime.parse("10:00"));
         ReservationTime lateTime = new ReservationTime(2L, LocalTime.parse("12:00"));
 
-        Reservation earlyReservation = new Reservation(1L, name, new ReservationSlot(date, earlyTime, theme));
-        Reservation lateReservation = new Reservation(2L, name, new ReservationSlot(date, lateTime, theme));
+        Reservation earlyReservation = new Reservation(1L, new Reserver(name), new ReservationSlot(date, earlyTime, theme));
+        Reservation lateReservation = new Reservation(2L, new Reserver(name), new ReservationSlot(date, lateTime, theme));
         WaitingWithTurn futureWaiting = new WaitingWithTurn(
-                new ReservationWaiting(3L, name, new ReservationSlot(date.plusDays(1), earlyTime, theme)),
+                new ReservationWaiting(3L, new Reserver(name), new ReservationSlot(date.plusDays(1), earlyTime, theme)),
                 1L);
 
         when(reservationService.findByName(name))
@@ -94,14 +94,14 @@ class ReservationLookupServiceTest {
         Theme theme3 = new Theme(3L, "테마3", "테마 설명", "썸네일 주소");
 
         Reservation previousDateReservation = new Reservation(
-                4L, "아로", new ReservationSlot(date.minusDays(1), lateTime, theme1));
-        Reservation theme1Reservation = new Reservation(1L, "브라운", new ReservationSlot(date, sameTime, theme1));
-        Reservation lateReservation = new Reservation(5L, "포비", new ReservationSlot(date, lateTime, theme1));
+                4L, new Reserver("아로"), new ReservationSlot(date.minusDays(1), lateTime, theme1));
+        Reservation theme1Reservation = new Reservation(1L, new Reserver("브라운"), new ReservationSlot(date, sameTime, theme1));
+        Reservation lateReservation = new Reservation(5L, new Reserver("포비"), new ReservationSlot(date, lateTime, theme1));
         WaitingWithTurn theme3Waiting = new WaitingWithTurn(
-                new ReservationWaiting(3L, "구구", new ReservationSlot(date, sameTime, theme3)),
+                new ReservationWaiting(3L, new Reserver("구구"), new ReservationSlot(date, sameTime, theme3)),
                 1L);
         WaitingWithTurn theme1Waiting = new WaitingWithTurn(
-                new ReservationWaiting(2L, "도라", new ReservationSlot(date, sameTime, theme1)),
+                new ReservationWaiting(2L, new Reserver("도라"), new ReservationSlot(date, sameTime, theme1)),
                 1L);
 
         when(reservationService.findByDateRange(startDate, endDate))
