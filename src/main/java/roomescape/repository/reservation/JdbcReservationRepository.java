@@ -152,12 +152,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation update(final Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?
+                SET name = ?, date = ?, time_id = ?
                 WHERE id = ?
                 """;
 
         jdbcTemplate.update(
                 sql,
+                reservation.getName(),
                 Date.valueOf(reservation.getDate()),
                 reservation.getTime().getId(),
                 reservation.getId()

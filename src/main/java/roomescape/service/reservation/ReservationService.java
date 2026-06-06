@@ -3,8 +3,10 @@ package roomescape.service.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -55,15 +57,18 @@ public class ReservationService {
         return reservationRepository.save(nonIdReservation);
     }
 
+    @Transactional
     public void deleteById(final long id) {
-        validateReservationHasNoWaitings(id);
-        int affectedRowCount = reservationRepository.deleteById(id);
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_NOT_FOUND,
+                        "삭제할 예약이 없습니다."
+                ));
 
-        if(affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
-        }
+        cancelOrPromote(reservation);
     }
 
+    @Transactional
     public void deleteByIdAndName(final long id, final String name) {
         reservationValidator.validateLookupName(name);
 
@@ -74,13 +79,26 @@ public class ReservationService {
                 ));
 
         reservationValidator.validateCancelable(reservation);
-        validateReservationHasNoWaitings(reservation.getId());
 
-        int affectedRowCount = reservationRepository.deleteById(reservation.getId());
+        cancelOrPromote(reservation);
+    }
 
-        if(affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
-        }
+    /**
+     * 슬롯의 예약을 취소한다. 대기자가 있으면 1순위 대기를 예약으로 승격하고(소유자 교체 + 해당 대기 제거),
+     * 없으면 예약을 삭제한다. 승격의 두 변경은 "슬롯 소유권이 다음 대기자에게 넘어간다"는 단일 사실이므로
+     * deleteById/deleteByIdAndName의 트랜잭션 안에서 함께 일어나거나 함께 롤백된다.
+     */
+    private void cancelOrPromote(final Reservation reservation) {
+        reservationWaitingRepository.findEarliestByReservationId(reservation.getId())
+                .ifPresentOrElse(
+                        waiting -> promote(reservation, waiting),
+                        () -> reservationRepository.deleteById(reservation.getId())
+                );
+    }
+
+    private void promote(final Reservation reservation, final ReservationWaiting earliestWaiting) {
+        reservationRepository.update(reservation.withName(earliestWaiting.getName()));
+        reservationWaitingRepository.deleteById(earliestWaiting.getId());
     }
 
     public Reservation updateByIdAndName(
