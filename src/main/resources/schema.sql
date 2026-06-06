@@ -26,7 +26,7 @@ CREATE TABLE reservation (
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    UNIQUE (reservation_date, theme_id, time_id)
+    UNIQUE (reservation_date, time_id, theme_id)
 );
 
 CREATE INDEX idx_reservation_name
@@ -41,11 +41,8 @@ CREATE TABLE reservation_waiting (
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    UNIQUE (reservation_date, theme_id, time_id, name)
+    UNIQUE (reservation_date, time_id, theme_id, name)
 );
-
-CREATE INDEX idx_reservation_waiting_slot_id
-    ON reservation_waiting (reservation_date, theme_id, time_id, id);
 
 CREATE INDEX idx_reservation_waiting_name
     ON reservation_waiting (name);

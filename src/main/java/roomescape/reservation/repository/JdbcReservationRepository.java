@@ -135,11 +135,11 @@ public class JdbcReservationRepository implements ReservationRepository {
           ON r.time_id = t.id
         INNER JOIN theme h
           ON r.theme_id = h.id
-        WHERE  r.reservation_date = ? AND r.theme_id = ? AND r.time_id = ?
+        WHERE  r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
         FOR UPDATE
         """;
 
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date, themeId, timeId)
+        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date, timeId, themeId)
                 .stream().findFirst();
     }
 
@@ -149,11 +149,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         SELECT EXISTS (
             SELECT 1
             FROM reservation
-            WHERE reservation_date = ? AND theme_id = ? AND time_id = ?
+            WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
         )
         """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, themeId, timeId);
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
         return Boolean.TRUE.equals(exists);
     }
 
@@ -221,11 +221,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         SELECT EXISTS (
             SELECT 1
             FROM reservation
-            WHERE reservation_date = ?  AND theme_id = ? AND time_id = ? AND id != ?
+            WHERE reservation_date = ?  AND time_id = ? AND theme_id = ? AND id != ?
         )
         """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, themeId, timeId, id);
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, id);
         return Boolean.TRUE.equals(exists);
     }
 
