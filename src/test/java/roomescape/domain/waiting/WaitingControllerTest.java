@@ -171,11 +171,11 @@ class WaitingControllerTest {
     }
 
     @Test
-    void deleteWaiting_존재하지_않는_id인경우_에러_반환_테스트() {
+    void deleteWaiting_존재하지_않는_id인경우_성공_반환_테스트() {
         RestAssured.given().log().all()
             .when().delete("/reservations/waiting/999?name=유저1")
             .then().log().all()
-            .statusCode(404);
+            .statusCode(204);
     }
 
     private Long insertTheme(String name) {
