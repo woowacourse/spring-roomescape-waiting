@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class Session {
 
@@ -26,13 +25,6 @@ public class Session {
     public boolean isPast(LocalDateTime currentDateTime) {
         LocalDateTime sessionDateTime = LocalDateTime.of(this.date, this.timeSlot.getStartAt());
         return sessionDateTime.isBefore(currentDateTime);
-    }
-
-    public Session reschedule(LocalDate date, TimeSlot timeSlot, Theme theme) {
-        LocalDate patchedDate = Objects.requireNonNullElse(date, this.date);
-        TimeSlot patchedTimeSlot = Objects.requireNonNullElse(timeSlot, this.timeSlot);
-        Theme patchedTheme = Objects.requireNonNullElse(theme, this.theme);
-        return new Session(this.id, patchedDate, patchedTimeSlot, patchedTheme);
     }
 
     private void validate(LocalDate date, TimeSlot timeSlot, Theme theme) {
