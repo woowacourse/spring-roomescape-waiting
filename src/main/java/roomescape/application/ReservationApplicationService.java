@@ -23,7 +23,6 @@ import roomescape.service.ThemeService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -136,7 +135,7 @@ public class ReservationApplicationService {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
         }
-        promoteOrDelete(reservation);
+        promoteNextWaitingOrDelete(reservation);
     }
 
     @Transactional
@@ -146,19 +145,20 @@ public class ReservationApplicationService {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_DELETE_REJECTED);
         }
-        promoteOrDelete(reservation);
+        promoteNextWaitingOrDelete(reservation);
     }
 
-    private void promoteOrDelete(Reservation reservation) {
-        Long reservationId = reservation.getId();
-        Optional<ReservationWaiting> earliest = reservationWaitingService.findEarliestByReservationId(reservationId);
-        if (earliest.isEmpty()) {
-            reservationService.deleteReservation(reservationId);
-            return;
-        }
-        ReservationWaiting promoted = earliest.get();
-        reservationService.changeOwner(reservationId, promoted.getName());
-        reservationWaitingService.deleteById(promoted.getId());
+    private void promoteNextWaitingOrDelete(Reservation reservation) {
+        reservationWaitingService.findEarliestByReservationId(reservation.getId())
+                .ifPresentOrElse(
+                        waiting -> promoteToReservation(reservation, waiting),
+                        () -> reservationService.deleteReservation(reservation.getId())
+                );
+    }
+
+    private void promoteToReservation(Reservation reservation, ReservationWaiting waiting) {
+        reservationService.changeOwner(reservation.getId(), waiting.getName());
+        reservationWaitingService.deleteById(waiting.getId());
     }
 
     @Transactional
