@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.DuplicateException;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.application.dto.ThemeCommand;
 import roomescape.theme.application.dto.ThemeInfo;
@@ -27,8 +28,12 @@ public class ThemeService {
             throw new DuplicateThemeException("이미 존재하는 테마입니다.");
         }
 
-        Theme theme = themeRepository.save(command.toEntity());
-        return ThemeInfo.from(theme);
+        try {
+            Theme theme = themeRepository.save(command.toEntity());
+            return ThemeInfo.from(theme);
+        } catch (DuplicateException e) {
+            throw new DuplicateThemeException("이미 존재하는 테마입니다.");
+        }
     }
 
     @Transactional

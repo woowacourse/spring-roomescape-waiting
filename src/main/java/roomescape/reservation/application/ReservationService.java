@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
@@ -41,8 +42,11 @@ public class ReservationService {
         Status status = decideReservationStatus(command.date(), time, theme);
         Reservation reservation = command.toEntity(time, theme, status, clock);
 
-        return ReservationInfo.from(reservationRepository.save(reservation));
-
+        try {
+            return ReservationInfo.from(reservationRepository.save(reservation));
+        } catch (DuplicateException e) {
+            throw new ConflictException("이미 예약된 날짜와 시간대입니다.");
+        }
     }
 
     @Transactional
@@ -69,7 +73,11 @@ public class ReservationService {
 
         Status status = decideReservationStatus(command.date(), time, theme);
         Reservation changedReservation = reservation.modify(command.date(), time, theme, status, clock);
-        reservationRepository.update(changedReservation);
+        try {
+            reservationRepository.update(changedReservation);
+        } catch (DuplicateException e) {
+            throw new ConflictException("이미 예약된 날짜와 시간대입니다.");
+        }
 
         if (reservation.isReserved()) {
             promoteToReservation(reservation.getDate(), reservation.getTime(), reservation.getTheme());

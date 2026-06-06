@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -13,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DuplicateException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
@@ -72,54 +74,62 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        String sql = """
-                INSERT INTO reservation(name, date, time_id, theme_id, status, created_at)
-                VALUES(:name, :date, :timeId, :themeId, :status, :createdAt)
-                """;
+        try {
+            String sql = """
+                    INSERT INTO reservation(name, date, time_id, theme_id, status, created_at)
+                    VALUES(:name, :date, :timeId, :themeId, :status, :createdAt)
+                    """;
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.getName())
-                .addValue("date", reservation.getDate())
-                .addValue("timeId", reservation.getTime().getId())
-                .addValue("themeId", reservation.getTheme().getId())
-                .addValue("status", reservation.getStatus().name())
-                .addValue("createdAt", reservation.getCreatedAt());
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("name", reservation.getName())
+                    .addValue("date", reservation.getDate())
+                    .addValue("timeId", reservation.getTime().getId())
+                    .addValue("themeId", reservation.getTheme().getId())
+                    .addValue("status", reservation.getStatus().name())
+                    .addValue("createdAt", reservation.getCreatedAt());
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+            KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
-        long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-        return Reservation.restore(
-                generatedId,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getStatus(),
-                reservation.getCreatedAt()
-        );
+            jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
+            long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            return Reservation.restore(
+                    generatedId,
+                    reservation.getName(),
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    reservation.getTheme(),
+                    reservation.getStatus(),
+                    reservation.getCreatedAt()
+            );
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException(e.getMessage());
+        }
     }
 
     @Override
     public void update(Reservation reservation) {
-        String sql = """
-                UPDATE reservation
-                SET date = :date,
-                    time_id = :timeId,
-                    theme_id = :themeId,
-                    status = :status
-                WHERE id = :id
-                    AND status IN ('RESERVED', 'WAITING')
-                """;
+        try {
+            String sql = """
+                    UPDATE reservation
+                    SET date = :date,
+                        time_id = :timeId,
+                        theme_id = :themeId,
+                        status = :status
+                    WHERE id = :id
+                        AND status IN ('RESERVED', 'WAITING')
+                    """;
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", reservation.getDate())
-                .addValue("timeId", reservation.getTime().getId())
-                .addValue("themeId", reservation.getTheme().getId())
-                .addValue("status", reservation.getStatus().name())
-                .addValue("id", reservation.getId());
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("date", reservation.getDate())
+                    .addValue("timeId", reservation.getTime().getId())
+                    .addValue("themeId", reservation.getTheme().getId())
+                    .addValue("status", reservation.getStatus().name())
+                    .addValue("id", reservation.getId());
 
-        jdbcTemplate.update(sql, params);
+            jdbcTemplate.update(sql, params);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException(e.getMessage());
+        }
     }
 
     @Override
