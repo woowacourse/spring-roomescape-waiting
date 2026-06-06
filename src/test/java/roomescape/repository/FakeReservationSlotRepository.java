@@ -17,7 +17,12 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<ReservationSlot> findByIdWithLock(long id) {
+        return findById(id);
+    }
+
+    @Override
+    public Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return storage.values().stream()
                 .filter(slot -> slot.getDate().equals(date))
                 .filter(slot -> slot.getTimeSlot().getId().equals(timeId))

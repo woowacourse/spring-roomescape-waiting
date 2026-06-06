@@ -31,7 +31,14 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findWaitingsBySlotId(Long slotId) {
+    public List<Reservation> findBySlotId(long slotId) {
+        return storage.values().stream()
+                .filter(reservation -> Objects.equals(reservation.getSlot().getId(), slotId))
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findWaitingsBySlotId(long slotId) {
         return storage.values().stream()
                 .filter(Reservation::isWaiting)
                 .filter(reservation -> Objects.equals(reservation.getSlot().getId(), slotId))
@@ -58,7 +65,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findReservedBySlot(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findReservedBySlot(LocalDate date, long timeId, long themeId) {
         return storage.values().stream()
                 .filter(Reservation::isReserved)
                 .filter(reservation -> hasSameSlot(reservation, date, timeId, themeId))
@@ -74,27 +81,20 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedBySlot(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsReservedBySlotId(long slotId) {
         return storage.values().stream()
                 .filter(Reservation::isReserved)
-                .anyMatch(reservation -> hasSameSlot(reservation, date, timeId, themeId));
+                .anyMatch(reservation -> Objects.equals(reservation.getSlot().getId(), slotId));
     }
 
     @Override
-    public boolean existsByNameAndSlotId(String name, Long slotId) {
-        return storage.values().stream()
-                .anyMatch(reservation -> reservation.getName().equals(name)
-                        && Objects.equals(reservation.getSlot().getId(), slotId));
-    }
-
-    @Override
-    public boolean existsByThemeId(Long themeId) {
+    public boolean existsByThemeId(long themeId) {
         return storage.values().stream()
                 .anyMatch(reservation -> reservation.getTheme().getId().equals(themeId));
     }
 
     @Override
-    public boolean existsByTimeId(Long timeId) {
+    public boolean existsByTimeId(long timeId) {
         return storage.values().stream()
                 .anyMatch(reservation -> reservation.getTimeSlot().getId().equals(timeId));
     }
