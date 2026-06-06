@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,6 +51,20 @@ class WaitingServiceTest {
         savedTheme = new Theme(1L, "이름", "설명", "test.com");
         savedSlot = new Slot(1L, LocalDate.now().plusDays(1), savedTimeSlot, savedTheme);
         waitingService = new WaitingService(waitingRepository, reservationRepository, slotService);
+    }
+
+    @Test
+    @DisplayName("유효한 요청으로 예약 대기를 생성하고 반환한다.")
+    void saveWaiting() {
+        Waiting waiting = new Waiting(1L, "브라운", savedSlot, 1);
+        given(slotService.findSlotOrNull(any(), anyLong(), anyLong())).willReturn(savedSlot);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .willReturn(Optional.of(new Reservation(1L, "포비", savedSlot)));
+        given(waitingRepository.isExists(any(Waiting.class))).willReturn(false);
+        given(waitingRepository.save(any(Waiting.class))).willReturn(waiting);
+
+        Waiting result = waitingService.saveWaiting(createWaitingRequest(LocalDate.now().plusDays(1)));
+        assertThat(result.getName()).isEqualTo("브라운");
     }
 
     @Test

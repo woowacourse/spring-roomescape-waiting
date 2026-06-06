@@ -20,6 +20,7 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastSlotControlException;
 import roomescape.exception.PastTimeException;
+import roomescape.service.dto.Booking;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeSlotRepository;
 import roomescape.repository.FakeThemeRepository;
@@ -196,6 +197,15 @@ class ReservationServiceTest {
         List<Reservation> reservations = reservationService.allReservations();
         assertThat(reservations).hasSize(2);
         assertThat(reservations).extracting(Reservation::getName).containsExactlyInAnyOrder("브라운", "네오");
+    }
+
+    @Test
+    @DisplayName("사용자 이름으로 예약과 대기 목록을 통합하여 조회한다.")
+    void findReservationByName() {
+        reservationService.saveReservation(basicReservationRequest);
+        List<Booking> bookings = reservationService.findReservationByName("브라운");
+        assertThat(bookings).hasSize(1);
+        assertThat(bookings.getFirst().isReserved()).isTrue();
     }
 
     private Reservation savePastReservation(LocalDate pastDate) {

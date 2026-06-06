@@ -3,11 +3,15 @@ package roomescape.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.controller.dto.TimePatchRequest;
 import roomescape.controller.dto.TimeRequest;
+import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
+import roomescape.service.dto.AvailableTimeSlot;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -16,11 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TimeSlotServiceTest {
 
     private TimeSlotService reservationTimeSlotService;
+    private FakeThemeRepository fakeThemeRepository;
 
     @BeforeEach
     void setUp() {
         FakeTimeSlotRepository fakeTimeRepository = new FakeTimeSlotRepository();
-        FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
+        fakeThemeRepository = new FakeThemeRepository();
         reservationTimeSlotService = new TimeSlotService(fakeTimeRepository, fakeThemeRepository);
     }
 
@@ -53,5 +58,29 @@ class TimeSlotServiceTest {
         TimeSlot savedTimeSlot = reservationTimeSlotService.saveTime(new TimeRequest(LocalTime.of(10, 0)));
         TimeSlot foundTimeSlot = reservationTimeSlotService.findTimeSlotById(savedTimeSlot.getId());
         assertThat(foundTimeSlot.getStartAt()).isEqualTo(LocalTime.of(10, 0));
+    }
+
+    @Test
+    @DisplayName("예약 시간의 전체 정보를 수정(PUT)하고 반환한다.")
+    void putTime() {
+        TimeSlot saved = reservationTimeSlotService.saveTime(new TimeRequest(LocalTime.of(10, 0)));
+        TimeSlot updated = reservationTimeSlotService.putTime(saved.getId(), new TimeRequest(LocalTime.of(14, 0)));
+        assertThat(updated.getStartAt()).isEqualTo(LocalTime.of(14, 0));
+    }
+
+    @Test
+    @DisplayName("예약 시간의 일부 정보를 수정(PATCH)하고 반환한다.")
+    void patchTime() {
+        TimeSlot saved = reservationTimeSlotService.saveTime(new TimeRequest(LocalTime.of(10, 0)));
+        TimeSlot updated = reservationTimeSlotService.patchTime(saved.getId(), new TimePatchRequest(LocalTime.of(16, 0)));
+        assertThat(updated.getStartAt()).isEqualTo(LocalTime.of(16, 0));
+    }
+
+    @Test
+    @DisplayName("테마와 날짜를 기준으로 이용 가능한 예약 시간 목록을 조회한다.")
+    void findAvailableTimes() {
+        Theme theme = fakeThemeRepository.save(Theme.transientOf("공포", "설명", "https://url"));
+        List<AvailableTimeSlot> availableTimes = reservationTimeSlotService.findAvailableTimes(theme.getId(), LocalDate.now().plusDays(1));
+        assertThat(availableTimes).isNotNull();
     }
 }
