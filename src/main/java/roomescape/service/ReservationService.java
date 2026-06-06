@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,8 +74,12 @@ public class ReservationService {
     public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
         validateNoWaiting(command);
-        Reservation reserved = reservationDao.save(reservation);
-        return ReservationResult.from(reserved);
+        try {
+            Reservation reserved = reservationDao.save(reservation);
+            return ReservationResult.from(reserved);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException("이미 예약된 시간입니다. 다시 시도해주세요.");
+        }
     }
 
     @Transactional
@@ -88,7 +93,7 @@ public class ReservationService {
         boolean isSuccessful = reservationDao.update(modified);
 
         if (!isSuccessful) {
-            throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+            throw new ConflictException("이미 예약된 시간입니다. 다시 시도해주세요.");
         }
         promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
         return ReservationResult.from(modified);

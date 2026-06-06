@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
@@ -165,6 +166,20 @@ class ReservationServiceTest {
     }
 
     @Test
+    public void 다른_사용자가_먼저_같은_슬롯을_예약했으면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.existsBy(futureDate, theme, time)).willReturn(false);
+        given(waitingDao.existsBySlot(futureDate, timeId, themeId)).willReturn(false);
+        given(reservationDao.save(any())).willThrow(new DuplicateKeyException("UNIQUE"));
+
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다. 다시 시도해주세요.");
+    }
+
+    @Test
     public void 예약_변경_정상_테스트() {
         ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
@@ -234,7 +249,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+                .hasMessage("이미 예약된 시간입니다. 다시 시도해주세요.");
     }
 
     @Test
