@@ -52,9 +52,7 @@ public class ReservationService {
     @Transactional
     public void cancel(Long id, String username) {
         Reservation reservation = reservationRepository.getById(id);
-        if (!reservation.isOwner(username)) {
-            throw new ForbiddenException("예약 취소 권한이 없습니다.");
-        }
+        validateOwner(username, reservation);
 
         reservationRepository.update(reservation.cancel());
 
@@ -69,6 +67,7 @@ public class ReservationService {
         ReservationTime time = timeRepository.getById(command.timeId());
         Theme theme = themeRepository.getById(command.themeId());
 
+        validateOwner(command.username(), reservation);
         checkDuplicateReservation(command.username(), command.date(), time, theme);
 
         Status status = decideReservationStatus(command.date(), time, theme);
@@ -99,6 +98,12 @@ public class ReservationService {
         return reservations.stream()
                 .map(reservation -> ReservationWaitingInfo.from(reservation, findWaitingOrder(reservation)))
                 .toList();
+    }
+
+    private void validateOwner(String username, Reservation reservation) {
+        if (!reservation.isOwner(username)) {
+            throw new ForbiddenException("예약 취소 권한이 없습니다.");
+        }
     }
 
     private void promoteToReservation(LocalDate date, ReservationTime time, Theme theme) {
