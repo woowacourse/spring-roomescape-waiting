@@ -1,12 +1,12 @@
 package roomescape.domain.reservation;
 
 import jakarta.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.ReservationCreationRequest;
 import roomescape.domain.reservation.dto.ReservationCreationResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
@@ -42,14 +42,12 @@ public class ReservationService {
         Theme theme = themeService.findById(request.themeId());
         validateNotDuplicated(request.dateId(), request.timeId(), request.themeId());
         Reservation savedReservation = reservationRepository.save(
-                request.toEntity(reservationDate, reservationTime, theme));
+            request.toEntity(reservationDate, reservationTime, theme));
         return ReservationCreationResponse.from(savedReservation);
     }
 
     public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationRepository.findAll().stream().map(ReservationResponse::from).toList();
     }
 
     public void deleteReservation(Long id) {
@@ -60,31 +58,24 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationRepository.findByName(name).stream().map(ReservationResponse::from).toList();
     }
 
+    @Transactional
     public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
         validateNotToday(reservation.getDate());
 
+        reservationRepository.deleteById(id);
         Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
-                reservation.getDate().getId(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        );
+            reservation.getDate().getId(), reservation.getTime().getId(), reservation.getTheme().getId());
         if (waitingReservationOpt.isPresent()) {
             WaitingReservation waitingReservation = waitingReservationOpt.get();
-            reservationRepository.save(Reservation.createWithoutId(
-                    waitingReservation.getName(),
-                    waitingReservation.getDate(),
-                    waitingReservation.getTime(),
-                    waitingReservation.getTheme()
-            ));
+            reservationRepository.save(
+                Reservation.createWithoutId(waitingReservation.getName(), waitingReservation.getDate(),
+                    waitingReservation.getTime(), waitingReservation.getTheme()));
             waitingReservationRepository.deleteById(waitingReservation.getId());
         }
-        reservationRepository.deleteById(id);
     }
 
     public ReservationResponse updateReservation(Long id, @Valid ReservationUpdateRequest request) {
@@ -106,7 +97,7 @@ public class ReservationService {
 
     private Reservation findById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void validateNotDuplicated(Long dateId, Long timeId, Long themeId) {
@@ -116,7 +107,7 @@ public class ReservationService {
     }
 
     private void validateNotPast(ReservationDate reservationDate, ReservationTime reservationTime) {
-        if(reservationDate.isPast(reservationTime)) {
+        if (reservationDate.isPast(reservationTime)) {
             throw new RoomescapeException(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED);
         }
     }

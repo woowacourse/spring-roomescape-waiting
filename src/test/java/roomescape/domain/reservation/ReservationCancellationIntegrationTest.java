@@ -1,6 +1,9 @@
 package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
@@ -26,10 +30,10 @@ class ReservationCancellationIntegrationTest {
     @Autowired
     private ReservationService reservationService;
 
-    @Autowired
+    @MockitoSpyBean
     private ReservationRepository reservationRepository;
 
-    @Autowired
+    @MockitoSpyBean
     private WaitingReservationRepository waitingReservationRepository;
 
     @Autowired
@@ -77,6 +81,101 @@ class ReservationCancellationIntegrationTest {
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isEmpty();
         assertThat(waitingReservationRepository.findById(secondWaiting.getId())).isPresent();
         assertThat(waitingReservationRepository.findById(otherSlotOldest.getId())).isPresent();
+    }
+
+    @Test
+    void 예약_취소_중_1순위_예약_대기_추가가_실패하면_전체가_롤백된다() {
+        Reservation cancelledReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
+        waitingReservationRepository.save(
+            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+        );
+        WaitingReservation firstWaiting = waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        waitingReservationRepository.save(
+            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+        );
+
+        doThrow(new RuntimeException())
+            .when(reservationRepository)
+            .save(any(Reservation.class));
+
+        assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
+            .isInstanceOf(RuntimeException.class);
+
+        assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
+        assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
+        assertThat(reservationRepository.findByName("이산")).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_중_1순위_예약_대기_삭제가_실패하면_전체가_롤백된다() {
+        Reservation cancelledReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
+        waitingReservationRepository.save(
+            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+        );
+        WaitingReservation firstWaiting = waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        waitingReservationRepository.save(
+            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+        );
+
+        doThrow(new RuntimeException()).when(waitingReservationRepository).deleteById(firstWaiting.getId());
+
+        assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
+            .isInstanceOf(RuntimeException.class);
+
+        assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
+        assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
+        assertThat(reservationRepository.findByName("이산")).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_중_기존_예약_삭제가_실패하면_전체가_롤백된다() {
+        Reservation cancelledReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
+        waitingReservationRepository.save(
+            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+        );
+        WaitingReservation firstWaiting = waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        waitingReservationRepository.save(
+            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+        );
+
+        doThrow(new RuntimeException()).when(reservationRepository).deleteById(cancelledReservation.getId());
+
+        assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
+            .isInstanceOf(RuntimeException.class);
+
+        assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
+        assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
+        assertThat(reservationRepository.findByName("이산")).isEmpty();
     }
 
     private WaitingReservation waiting(String name, Slot slot, LocalDateTime createdAt) {
