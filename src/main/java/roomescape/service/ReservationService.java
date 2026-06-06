@@ -78,7 +78,28 @@ public class ReservationService {
     @Transactional
     public void removeReservation(long id, String requestName) {
         reservationRepository.findById(id)
-                .ifPresent(reservation -> deleteReservation(reservation, requestName));
+                .ifPresent(reservation -> deleteReservationAndPromoteWaiting(reservation, requestName));
+    }
+
+    private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName) {
+        deleteReservation(reservation, requestName);
+        if (reservation.isReserved()) {
+            promoteFirstWaiting(reservation.getSlot());
+        }
+    }
+
+    private void deleteReservation(Reservation reservation, String requestName) {
+        validateReservationOwner(reservation, requestName);
+        reservation.validateCancelable(LocalDateTime.now());
+        reservationRepository.deleteById(reservation.getId());
+    }
+
+    private void promoteFirstWaiting(ReservationSlot slot) {
+        WaitingLine waitings = new WaitingLine(slot, reservationRepository.findWaitingsBySlotId(slot.getId()));
+        if (waitings.isEmpty()) {
+            return;
+        }
+        reservationRepository.update(waitings.promoteFirstWaiting());
     }
 
     private ReservationSlot findOrCreateReservationSlot(LocalDate date, Long timeId, Long themeId) {
@@ -90,12 +111,6 @@ public class ReservationService {
         TimeSlot timeSlot = findTimeSlot(timeId);
         Theme theme = findTheme(themeId);
         return reservationSlotRepository.save(new ReservationSlot(date, timeSlot, theme));
-    }
-
-    private void deleteReservation(Reservation reservation, String requestName) {
-        validateReservationOwner(reservation, requestName);
-        reservation.validateCancelable(LocalDateTime.now());
-        reservationRepository.deleteById(reservation.getId());
     }
 
     @Transactional
@@ -142,7 +157,8 @@ public class ReservationService {
     }
 
     private WaitingWithNumber createWaitingWithNumber(Reservation waiting) {
-        WaitingLine waitingLine = new WaitingLine(reservationRepository.findWaitingsBySlotId(waiting.getSlot().getId()));
+        WaitingLine waitingLine = new WaitingLine(waiting.getSlot(),
+                reservationRepository.findWaitingsBySlotId(waiting.getSlot().getId()));
         return new WaitingWithNumber(waiting, waitingLine.findWaitingNumber(waiting));
     }
 
