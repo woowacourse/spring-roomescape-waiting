@@ -605,6 +605,55 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("대기 예약자가 대기를 취소하면 다른 예약이 승격되지 않는다.")
+    void notPromoteFirstWaitingReservation() {
+        // given
+        Clock confirmedClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        Clock firstWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 1));
+        Clock secondWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 2));
+        Clock cancelClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 3));
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId("공포", "무섭다", "theme-url")
+        );
+        ReservationSlot reservationSlot = reservationSlotRepository.save(ReservationSlot.createWithoutId(
+            reservationDate, reservationTime, theme
+        ));
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User firstWaitingUser = userRepository.save(User.createWithoutId("수민"));
+        User secondWaitingUser = userRepository.save(User.createWithoutId("말랑"));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, confirmedUser, ReservationStatus.CONFIRMED, confirmedClock
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, firstWaitingUser, ReservationStatus.WAITING, firstWaitingClock
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, secondWaitingUser, ReservationStatus.WAITING, secondWaitingClock
+        ));
+        ReservationService reservationService = createReservationService(cancelClock);
+
+        // when
+        reservationService.cancelUserReservation(firstWaitingUser.getId());
+        ReservationWithWaitingNumber confirmedReservation = reservationRepository.findReservations("보예").getFirst();
+        ReservationWithWaitingNumber cancelReservation = reservationRepository.findReservations("수민").getFirst();
+        ReservationWithWaitingNumber waitingReservation = reservationRepository.findReservations("말랑").getFirst();
+
+        // then
+        assertSoftly(softly -> {
+                assertThat(confirmedReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+                assertThat(cancelReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CANCELED);
+                assertThat(waitingReservation.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+            }
+        );
+    }
+
+    @Test
     @DisplayName("예약 날짜와 시간을 수정한다.")
     void updateReservationDateAndTime() {
         // given
