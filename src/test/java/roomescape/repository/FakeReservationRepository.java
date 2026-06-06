@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import roomescape.domain.Reservation;
 
@@ -30,12 +31,23 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findWaitingsBySlotId(Long slotId) {
+        return storage.values().stream()
+                .filter(Reservation::isWaiting)
+                .filter(reservation -> Objects.equals(reservation.getSlot().getId(), slotId))
+                .toList();
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         long id = sequence++;
-        Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getDate(),
-                reservation.getTimeSlot(),
-                reservation.getTheme(),
-                reservation.getCreatedAt());
+        Reservation savedReservation = new Reservation(
+                id,
+                reservation.getName(),
+                reservation.getSlot(),
+                reservation.getCreatedAt(),
+                reservation.getStatus()
+        );
         storage.put(id, savedReservation);
         return savedReservation;
     }
@@ -46,25 +58,33 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findReservedBySlot(LocalDate date, Long timeId, Long themeId) {
         return storage.values().stream()
-                .filter(reservation -> isDuplicate(reservation, date, timeId, themeId))
+                .filter(Reservation::isReserved)
+                .filter(reservation -> hasSameSlot(reservation, date, timeId, themeId))
                 .findAny();
     }
 
     @Override
-    public int update(Reservation reservation) {
+    public void update(Reservation reservation) {
         if (!storage.containsKey(reservation.getId())) {
-            return 0;
+            return;
         }
         storage.put(reservation.getId(), reservation);
-        return 1;
     }
 
     @Override
-    public boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsReservedBySlot(LocalDate date, Long timeId, Long themeId) {
         return storage.values().stream()
-                .anyMatch(reservation -> isDuplicate(reservation, date, timeId, themeId));
+                .filter(Reservation::isReserved)
+                .anyMatch(reservation -> hasSameSlot(reservation, date, timeId, themeId));
+    }
+
+    @Override
+    public boolean existsByNameAndSlotId(String name, Long slotId) {
+        return storage.values().stream()
+                .anyMatch(reservation -> reservation.getName().equals(name)
+                        && Objects.equals(reservation.getSlot().getId(), slotId));
     }
 
     @Override
@@ -79,7 +99,7 @@ public class FakeReservationRepository implements ReservationRepository {
                 .anyMatch(reservation -> reservation.getTimeSlot().getId().equals(timeId));
     }
 
-    private boolean isDuplicate(Reservation reservation, LocalDate date, Long timeId, Long themeId) {
+    private boolean hasSameSlot(Reservation reservation, LocalDate date, Long timeId, Long themeId) {
         return reservation.getDate().equals(date)
                 && reservation.getTimeSlot().getId().equals(timeId)
                 && reservation.getTheme().getId().equals(themeId);

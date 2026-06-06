@@ -35,8 +35,8 @@ public class WaitingLineTest {
     @Test
     @DisplayName("생성 시각이 빠른 예약 대기가 우선 순번이다.")
     void 생성_시각_기준_대기_순번_계산() {
-        Waiting first = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        Waiting second = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
+        Reservation first = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation second = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
         WaitingLine waitingLine = new WaitingLine(List.of(second, first));
 
         assertThat(waitingLine.findWaitingNumber(first)).isEqualTo(1);
@@ -47,8 +47,8 @@ public class WaitingLineTest {
     @DisplayName("생성 시각이 같으면 ID가 작은 예약 대기가 우선 순번이다.")
     void ID_기준_대기_순번_계산() {
         LocalDateTime sameCreatedAt = LocalDateTime.of(2026, 6, 3, 10, 0);
-        Waiting first = createWaiting(1L, "순번1", sameCreatedAt);
-        Waiting second = createWaiting(2L, "순번2", sameCreatedAt);
+        Reservation first = createWaiting(1L, "순번1", sameCreatedAt);
+        Reservation second = createWaiting(2L, "순번2", sameCreatedAt);
         WaitingLine waitingLine = new WaitingLine(List.of(second, first));
 
         assertThat(waitingLine.findWaitingNumber(first)).isEqualTo(1);
@@ -58,14 +58,13 @@ public class WaitingLineTest {
     @Test
     @DisplayName("다른 예약 슬롯의 대기가 섞이면 예외가 발생한다.")
     void 다른_예약_슬롯_대기_예외_발생() {
-        Waiting waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        Waiting otherSlot = new Waiting(
+        Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation otherSlot = new Reservation(
                 2L,
                 "순번2",
-                DATE.plusDays(1),
-                TIME_SLOT,
-                THEME,
-                LocalDateTime.of(2026, 6, 3, 10, 1)
+                new ReservationSlot(2L, DATE.plusDays(1), TIME_SLOT, THEME),
+                LocalDateTime.of(2026, 6, 3, 10, 1),
+                ReservationStatus.WAITING
         );
 
         assertThatThrownBy(() -> new WaitingLine(List.of(waiting, otherSlot)))
@@ -76,7 +75,7 @@ public class WaitingLineTest {
     @Test
     @DisplayName("null 예약 대기의 순번을 조회하면 예외가 발생한다.")
     void null_예약_대기_순번_조회_예외_발생() {
-        Waiting waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
         WaitingLine waitingLine = new WaitingLine(List.of(waiting));
 
         assertThatThrownBy(() -> waitingLine.findWaitingNumber(null))
@@ -87,14 +86,13 @@ public class WaitingLineTest {
     @Test
     @DisplayName("다른 예약 슬롯의 대기 순번을 조회하면 예외가 발생한다.")
     void 다른_예약_슬롯_대기_순번_조회_예외_발생() {
-        Waiting waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        Waiting otherSlot = new Waiting(
+        Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation otherSlot = new Reservation(
                 2L,
                 "순번2",
-                DATE.plusDays(1),
-                TIME_SLOT,
-                THEME,
-                LocalDateTime.of(2026, 6, 3, 10, 1)
+                new ReservationSlot(2L, DATE.plusDays(1), TIME_SLOT, THEME),
+                LocalDateTime.of(2026, 6, 3, 10, 1),
+                ReservationStatus.WAITING
         );
         WaitingLine waitingLine = new WaitingLine(List.of(waiting));
 
@@ -103,7 +101,8 @@ public class WaitingLineTest {
                 .hasMessage("대기 순번은 같은 예약 슬롯에 대해서만 계산 가능합니다.");
     }
 
-    private Waiting createWaiting(Long id, String name, LocalDateTime createdAt) {
-        return new Waiting(id, name, DATE, TIME_SLOT, THEME, createdAt);
+    private Reservation createWaiting(Long id, String name, LocalDateTime createdAt) {
+        return new Reservation(id, name, new ReservationSlot(1L, DATE, TIME_SLOT, THEME), createdAt,
+                ReservationStatus.WAITING);
     }
 }

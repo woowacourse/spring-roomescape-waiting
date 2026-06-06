@@ -28,6 +28,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.UpdateReservationRequest;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.NotOwnerException;
@@ -61,7 +63,10 @@ class ReservationControllerTest {
     @DisplayName("식별자를 통해 단건 예약을 조회하고 200 상태 코드를 반환한다.")
     void 식별자로_예약_조회() throws Exception {
         given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
-        mockMvc.perform(get("/reservations/1")).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("브라운"));
+        mockMvc.perform(get("/reservations/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("브라운"))
+                .andExpect(jsonPath("$.status").value("RESERVED"));
     }
 
     @Test
@@ -165,6 +170,7 @@ class ReservationControllerTest {
     private Reservation createMockReservation() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        return new Reservation(1L, "브라운", LocalDate.now(), timeSlot, theme, LocalDate.now().atStartOfDay());
+        ReservationSlot slot = new ReservationSlot(1L, LocalDate.now(), timeSlot, theme);
+        return new Reservation(1L, "브라운", slot, LocalDate.now().atStartOfDay(), ReservationStatus.RESERVED);
     }
 }

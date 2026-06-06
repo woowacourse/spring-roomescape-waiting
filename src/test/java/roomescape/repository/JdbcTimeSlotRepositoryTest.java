@@ -17,6 +17,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 
@@ -30,12 +32,14 @@ class JdbcTimeSlotRepositoryTest {
     private JdbcTimeSlotRepository timeRepository;
     private JdbcThemeRepository themeRepository;
     private JdbcReservationRepository reservationRepository;
+    private JdbcReservationSlotRepository reservationSlotRepository;
 
     @BeforeEach
     void setUp() {
         timeRepository = new JdbcTimeSlotRepository(jdbcTemplate);
         themeRepository = new JdbcThemeRepository(jdbcTemplate);
         reservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        reservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
     }
 
     @Test
@@ -76,9 +80,10 @@ class JdbcTimeSlotRepositoryTest {
     void 예약이_존재하는_시간_삭제_예외_발생() {
         TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url"));
+        ReservationSlot slot = reservationSlotRepository.save(
+                new ReservationSlot(LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
         reservationRepository.save(
-                new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme,
-                        LocalDateTime.now()));
+                new Reservation(null, "브라운", slot, LocalDateTime.now(), ReservationStatus.RESERVED));
 
         assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId()))
                 .isInstanceOf(DataIntegrityViolationException.class);

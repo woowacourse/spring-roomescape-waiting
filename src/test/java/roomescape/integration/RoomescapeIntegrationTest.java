@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -103,15 +104,9 @@ public class RoomescapeIntegrationTest {
     void 인기_테마_기간_경계_검증() {
         insertTestData();
         LocalDate today = LocalDate.now();
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)",
-                "유저1", today.minusDays(8), today.minusDays(9).atStartOfDay(), 1L, 1L);
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)",
-                "유저2", today.minusDays(3), today.minusDays(9).atStartOfDay(), 1L, 2L);
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)",
-                "유저3", today.plusDays(2), today.minusDays(9).atStartOfDay(), 1L, 1L);
+        insertReservation("유저1", today.minusDays(8), today.minusDays(9).atStartOfDay(), 1L, 1L);
+        insertReservation("유저2", today.minusDays(3), today.minusDays(9).atStartOfDay(), 1L, 2L);
+        insertReservation("유저3", today.plusDays(2), today.minusDays(9).atStartOfDay(), 1L, 1L);
 
         RestAssured.given().log().all()
                 .queryParam("limit", 10)
@@ -131,8 +126,20 @@ public class RoomescapeIntegrationTest {
                 "테마2", "설명2", "thumbnail2.png");
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "10:00:00");
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "11:00:00");
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('브라운', ?, ?, 1, 1)",
-                tomorrow, LocalDate.now().atStartOfDay());
+        insertReservation("브라운", tomorrow, LocalDate.now().atStartOfDay(), 1L, 1L);
+    }
+
+    private void insertReservation(String name, LocalDate date, LocalDateTime createdAt, Long timeId, Long themeId) {
+        jdbcTemplate.update("INSERT INTO reservation_slot (date, time_id, theme_id) VALUES (?, ?, ?)",
+                date, timeId, themeId);
+        Long slotId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Long.class,
+                date,
+                timeId,
+                themeId
+        );
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id, created_at, status) VALUES (?, ?, ?, ?)",
+                name, slotId, createdAt, "RESERVED");
     }
 }

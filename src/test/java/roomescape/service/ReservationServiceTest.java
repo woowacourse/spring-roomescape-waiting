@@ -11,28 +11,26 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeReservationRepository;
+import roomescape.repository.FakeReservationSlotRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
-import roomescape.repository.WaitingRepository;
 
 class ReservationServiceTest {
 
     private ReservationService reservationService;
     private FakeReservationRepository reservationRepository;
+    private FakeReservationSlotRepository reservationSlotRepository;
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
-
-    @Mock
-    private WaitingRepository waitingRepository;
 
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
@@ -41,11 +39,11 @@ class ReservationServiceTest {
     void setUp() {
         timeSlotRepository = new FakeTimeSlotRepository();
         reservationRepository = new FakeReservationRepository();
+        reservationSlotRepository = new FakeReservationSlotRepository();
         themeRepository = new FakeThemeRepository();
-        waitingRepository = Mockito.mock(WaitingRepository.class);
 
         reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
-                waitingRepository);
+                reservationSlotRepository);
 
         savedTimeSlot = timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com"));
@@ -61,15 +59,27 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약을 생성하려 하면 예외가 발생한다.")
-    void 중복_예약_예외_발생() {
+    @DisplayName("이미 예약된 슬롯에 예약을 생성하면 대기로 저장된다.")
+    void 중복_예약은_대기로_저장() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId());
+
+        Reservation waiting = reservationService.saveReservation("토미", futureDate, savedTimeSlot.getId(),
+                savedTheme.getId());
+
+        assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("같은 사용자가 같은 슬롯에 중복으로 예약하거나 대기할 수 없다.")
+    void 같은_사용자_같은_슬롯_중복_예외_발생() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId());
 
         assertThatThrownBy(
-                () -> reservationService.saveReservation("토미", futureDate, savedTimeSlot.getId(), savedTheme.getId()))
+                () -> reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()))
                 .isInstanceOf(DuplicateException.class)
-                .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
+                .hasMessage("이미 예약 또는 대기 중인 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
 
     @Test
@@ -137,7 +147,7 @@ class ReservationServiceTest {
     void 지난_예약_삭제_예외_발생() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         Reservation pastReservation = reservationRepository.save(
-                new Reservation(null, "브라운", pastDate, savedTimeSlot, savedTheme, pastDate.minusDays(1).atStartOfDay())
+                createReservation("브라운", pastDate, pastDate.minusDays(1).atStartOfDay())
         );
 
         assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운"))
@@ -150,7 +160,7 @@ class ReservationServiceTest {
     void 지난_예약_수정_예외_발생() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         Reservation pastReservation = reservationRepository.save(
-                new Reservation(null, "브라운", pastDate, savedTimeSlot, savedTheme, pastDate.minusDays(1).atStartOfDay())
+                createReservation("브라운", pastDate, pastDate.minusDays(1).atStartOfDay())
         );
 
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -164,7 +174,7 @@ class ReservationServiceTest {
     void 다른_사용자_예약_삭제_예외_발생() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(null, "브라운", futureDate, savedTimeSlot, savedTheme, LocalDateTime.now())
+                createReservation("브라운", futureDate, LocalDateTime.now())
         );
 
         assertThatThrownBy(() -> reservationService.removeReservation(savedReservation.getId(), "네오"))
@@ -200,5 +210,10 @@ class ReservationServiceTest {
         assertThat(reservation.getName()).isEqualTo("브라운");
         assertThat(reservation.getDate()).isEqualTo(futureDate);
         assertThat(reservation.getTimeSlot()).isEqualTo(savedTimeSlot);
+    }
+
+    private Reservation createReservation(String name, LocalDate date, LocalDateTime createdAt) {
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, savedTimeSlot, savedTheme));
+        return new Reservation(null, name, slot, createdAt, ReservationStatus.RESERVED);
     }
 }
