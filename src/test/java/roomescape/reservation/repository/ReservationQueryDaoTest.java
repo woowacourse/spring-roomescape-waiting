@@ -14,15 +14,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.query.dto.PopularThemeQueryResult;
 
 @JdbcTest
-class JdbcReservationQueryDaoTest {
+class ReservationQueryDaoTest {
 
     private final JdbcTemplate jdbcTemplate;
     private final ReservationQueryDao reservationQueryDao;
 
     @Autowired
-    JdbcReservationQueryDaoTest(JdbcTemplate jdbcTemplate) {
+    ReservationQueryDaoTest(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.reservationQueryDao = new JdbcReservationQueryDao(jdbcTemplate);
+        this.reservationQueryDao = new ReservationQueryDao(jdbcTemplate);
     }
 
     @Test

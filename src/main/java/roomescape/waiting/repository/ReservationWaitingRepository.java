@@ -6,38 +6,32 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
 
 @Repository
-public class ReservationWaitingRepositoryImpl implements ReservationWaitingRepository {
+public class ReservationWaitingRepository {
 
     private final ReservationWaitingDao reservationWaitingDao;
 
-    public ReservationWaitingRepositoryImpl(ReservationWaitingDao reservationWaitingDao) {
+    public ReservationWaitingRepository(ReservationWaitingDao reservationWaitingDao) {
         this.reservationWaitingDao = reservationWaitingDao;
     }
 
-    @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
         return reservationWaitingDao.save(reservationWaiting);
     }
 
-    @Override
     public Optional<ReservationWaiting> findById(long id) {
         return reservationWaitingDao.findById(id);
     }
 
-    @Override
     public List<ReservationWaiting> findAllByName(String name) {
         return reservationWaitingDao.findAllByName(name);
     }
 
-    @Override
     public void delete(ReservationWaiting reservationWaiting) throws NotFoundException {
         reservationWaitingDao.delete(reservationWaiting);
     }
 
-    @Override
     public boolean hasWaitingAtSameTime(ReservationWaiting reservationWaiting) {
         return reservationWaitingDao.existsByDateAndTimeIdAndName(
                 reservationWaiting.getDate(),
@@ -46,7 +40,6 @@ public class ReservationWaitingRepositoryImpl implements ReservationWaitingRepos
         );
     }
 
-    @Override
     public List<ReservationWaiting> queryAllBySlotForUpdate(ReservationSlot slot) {
         return reservationWaitingDao.findAllByDateAndTimeIdAndThemeIdForUpdate(
                 slot.date(),
@@ -55,7 +48,6 @@ public class ReservationWaitingRepositoryImpl implements ReservationWaitingRepos
         );
     }
 
-    @Override
     public List<ReservationWaiting> findAllBySlots(List<ReservationSlot> slots) {
         return reservationWaitingDao.findAllBySlots(slots);
     }

@@ -18,12 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.global.exception.BadRequestException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.exception.ThemeErrorCode;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.theme.service.dto.ThemeResult;
 

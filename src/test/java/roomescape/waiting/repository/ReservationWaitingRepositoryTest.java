@@ -19,19 +19,18 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
 
 @JdbcTest
-class ReservationWaitingRepositoryImplTest {
+class ReservationWaitingRepositoryTest {
 
     private final JdbcTemplate jdbcTemplate;
     private final ReservationWaitingRepository reservationWaitingRepository;
 
     @Autowired
-    public ReservationWaitingRepositoryImplTest(JdbcTemplate jdbcTemplate) {
+    public ReservationWaitingRepositoryTest(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.reservationWaitingRepository = new ReservationWaitingRepositoryImpl(
-                new JdbcReservationWaitingDao(jdbcTemplate)
+        this.reservationWaitingRepository = new ReservationWaitingRepository(
+                new ReservationWaitingDao(jdbcTemplate)
         );
     }
 
@@ -44,11 +43,13 @@ class ReservationWaitingRepositoryImplTest {
 
         // when
         ReservationWaiting saved1 = reservationWaitingRepository.save(
-                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay())
+                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
+                        LocalDate.of(2026, 5, 1).atStartOfDay())
         );
 
         ReservationWaiting saved2 = reservationWaitingRepository.save(
-                new ReservationWaiting(null, "포비", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay())
+                new ReservationWaiting(null, "포비", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
+                        LocalDate.of(2026, 5, 1).atStartOfDay())
         );
 
         // then
@@ -64,12 +65,14 @@ class ReservationWaitingRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         reservationWaitingRepository.save(
-                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay())
+                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
+                        LocalDate.of(2026, 5, 1).atStartOfDay())
         );
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
-                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay())
+                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
+                        LocalDate.of(2026, 5, 1).atStartOfDay())
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -82,7 +85,9 @@ class ReservationWaitingRepositoryImplTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
-                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), nonExistentTime, theme), LocalDate.of(2026, 5, 1).atStartOfDay())
+                new ReservationWaiting(null, "브라운",
+                        new ReservationSlot(LocalDate.of(2026, 5, 1), nonExistentTime, theme),
+                        LocalDate.of(2026, 5, 1).atStartOfDay())
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -95,7 +100,9 @@ class ReservationWaitingRepositoryImplTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
-                new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, nonExistentTheme), LocalDate.of(2026, 5, 1).atStartOfDay())
+                new ReservationWaiting(null, "브라운",
+                        new ReservationSlot(LocalDate.of(2026, 5, 1), time, nonExistentTheme),
+                        LocalDate.of(2026, 5, 1).atStartOfDay())
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -167,8 +174,10 @@ class ReservationWaitingRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
         saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
 
-        ReservationWaiting target1 = new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay());
-        ReservationWaiting target2 = new ReservationWaiting(null, "포비", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay());
+        ReservationWaiting target1 = new ReservationWaiting(null, "브라운",
+                new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay());
+        ReservationWaiting target2 = new ReservationWaiting(null, "포비",
+                new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay());
 
         // when & then
         assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target1)).isTrue();

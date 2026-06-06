@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.AuthInterceptor;
 import roomescape.auth.OwnerOnlyArgumentResolver;
 import roomescape.global.config.WebMvcConfig;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.dto.ThemeResult;
 import roomescape.time.domain.ReservationTime;

@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.reservation.repository.ReservationQueryDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @Service
 @Transactional(readOnly = true)

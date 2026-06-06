@@ -7,15 +7,15 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 import roomescape.waiting.service.dto.ReservationWaitingResult;
 

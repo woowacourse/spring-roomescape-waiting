@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -18,10 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationResult;
-import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.theme.service.dto.ThemeResult;
@@ -29,7 +27,7 @@ import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 import roomescape.waiting.service.ReservationWaitingService;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 
@@ -71,7 +69,8 @@ public class ReservationServiceTransactionTest {
         ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(1, 11));
         ThemeResult themeResult = saveTheme();
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
-        ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
+        ReservationResult reservationResult = reservationService.save(reservationCommand,
+                java.time.LocalDateTime.now());
         saveReservationWaiting(reservationResult);
 
         Long testTargetId = reservationResult.id();
@@ -82,7 +81,8 @@ public class ReservationServiceTransactionTest {
                 .save(any(Reservation.class));
 
         // when
-        assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
+        assertThatThrownBy(
+                () -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -98,7 +98,8 @@ public class ReservationServiceTransactionTest {
         ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(2, 22));
         ThemeResult themeResult = saveTheme();
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
-        ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
+        ReservationResult reservationResult = reservationService.save(reservationCommand,
+                java.time.LocalDateTime.now());
         saveReservationWaiting(reservationResult);
 
         Long testTargetId = reservationResult.id();
@@ -109,7 +110,8 @@ public class ReservationServiceTransactionTest {
                 .delete(any(ReservationWaiting.class));
 
         // when
-        assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
+        assertThatThrownBy(
+                () -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then

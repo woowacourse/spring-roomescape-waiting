@@ -22,7 +22,7 @@ import roomescape.auth.OwnerOnlyArgumentResolver;
 import roomescape.global.config.WebMvcConfig;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
 
 @WebMvcTest(MyReservationController.class)

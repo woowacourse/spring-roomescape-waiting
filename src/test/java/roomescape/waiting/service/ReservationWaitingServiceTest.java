@@ -24,15 +24,15 @@ import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 import roomescape.waiting.service.dto.ReservationWaitingResult;
 
@@ -199,7 +199,8 @@ class ReservationWaitingServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
+        assertThatThrownBy(
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
     }
@@ -217,7 +218,8 @@ class ReservationWaitingServiceTest {
         given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteOwnedWaitingById(1L, "포비", java.time.LocalDateTime.now()))
+        assertThatThrownBy(
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "포비", java.time.LocalDateTime.now()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationWaitingErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -235,7 +237,8 @@ class ReservationWaitingServiceTest {
         given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
+        assertThatThrownBy(
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
     }
@@ -274,7 +277,8 @@ class ReservationWaitingServiceTest {
                 .given(reservationWaitingRepository).delete(any(ReservationWaiting.class));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
+        assertThatThrownBy(
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
     }
@@ -319,6 +323,7 @@ class ReservationWaitingServiceTest {
         willDoNothing().given(reservationWaitingRepository).delete(any(ReservationWaiting.class));
 
         // when & then
-        assertDoesNotThrow(() -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()));
+        assertDoesNotThrow(
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()));
     }
 }

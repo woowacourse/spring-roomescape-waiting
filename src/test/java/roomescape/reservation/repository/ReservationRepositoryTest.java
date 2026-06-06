@@ -15,21 +15,19 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @JdbcTest
-class ReservationRepositoryImplTest {
+class ReservationRepositoryTest {
 
     private final JdbcTemplate jdbcTemplate;
     private final ReservationRepository reservationRepository;
 
     @Autowired
-    public ReservationRepositoryImplTest(JdbcTemplate jdbcTemplate) {
+    public ReservationRepositoryTest(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.reservationRepository = new ReservationRepositoryImpl(new JdbcReservationDao(jdbcTemplate));
+        this.reservationRepository = new ReservationRepository(new ReservationDao(jdbcTemplate));
     }
 
     @Test
@@ -108,12 +106,14 @@ class ReservationRepositoryImplTest {
 
     private ReservationTime createTime(LocalTime time) {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", Time.valueOf(time));
-        Long timeId = jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class, Time.valueOf(time));
+        Long timeId = jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class,
+                Time.valueOf(time));
         return new ReservationTime(timeId, time);
     }
 
     private Theme createTheme(String name, String description, String thumbnailUrl) {
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", name, description, thumbnailUrl);
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", name, description,
+                thumbnailUrl);
         Long themeId = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, name);
         return new Theme(themeId, name, description, thumbnailUrl);
     }

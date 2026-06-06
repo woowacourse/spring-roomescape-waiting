@@ -15,10 +15,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 @JdbcTest
-class ThemeRepositoryImplTest {
+class ThemeRepositoryTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -26,8 +25,8 @@ class ThemeRepositoryImplTest {
     ThemeRepository themeRepository;
 
     @Autowired
-    public ThemeRepositoryImplTest(JdbcTemplate jdbcTemplate) {
-        this.themeRepository = new ThemeRepositoryImpl(new JdbcThemeDao(jdbcTemplate));
+    public ThemeRepositoryTest(JdbcTemplate jdbcTemplate) {
+        this.themeRepository = new ThemeRepository(new ThemeDao(jdbcTemplate));
     }
 
     @Test
@@ -112,7 +111,8 @@ class ThemeRepositoryImplTest {
         Long themeId = insertTestTheme(testTheme);
 
         insertTestReservation(timeId, themeId);
-        Theme savedTheme = new Theme(themeId, testTheme.getName(), testTheme.getDescription(), testTheme.getThumbnailUrl());
+        Theme savedTheme = new Theme(themeId, testTheme.getName(), testTheme.getDescription(),
+                testTheme.getThumbnailUrl());
 
         //when & then
         assertThatThrownBy(

@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
@@ -19,7 +19,7 @@ import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
