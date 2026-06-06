@@ -14,7 +14,7 @@ public interface ThemeRepository {
 
     Theme save(Theme theme);
 
-    Integer delete(long id);
+    void delete(long id);
 
     Boolean existsByNameAndDescription(Theme theme);
 }

@@ -9,9 +9,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.global.NotFoundException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.AvailableReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
 
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
@@ -77,8 +79,11 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Integer delete(Long id) {
-        return jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
+    public void delete(Long id) {
+        int count = jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
+        if (count == 0) {
+            throw new NotFoundException(ReservationTimeErrorMessage.TIME_NOT_FOUND, id);
+        }
     }
 
     @Override

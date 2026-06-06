@@ -116,13 +116,13 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Integer delete(Long id) {
-        return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    public void delete(Long id) {
+        jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
     }
 
     @Override
-    public Integer deleteOldestBySlot(LocalDate date, Long themeId, Long timeId) {
-        return jdbcTemplate.update(
+    public void deleteOldestBySlot(LocalDate date, Long themeId, Long timeId) {
+        jdbcTemplate.update(
                 """
                         DELETE FROM waiting WHERE id = (
                             SELECT id FROM (

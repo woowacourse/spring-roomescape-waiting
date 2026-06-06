@@ -68,9 +68,9 @@ class ThemeServiceTest {
     @DisplayName("테마의 삭제를 테스트합니다.")
     @Test
     void delete_theme() {
-        when(themeRepository.delete(1L)).thenReturn(1);
+        themeService.delete(1L);
 
-        assertThat(themeService.delete(1L)).isEqualTo(1);
+        verify(themeRepository).delete(1L);
     }
 
     @DisplayName("테마 조회를 테스트합니다.")

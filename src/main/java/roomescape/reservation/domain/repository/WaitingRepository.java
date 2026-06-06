@@ -18,7 +18,7 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
-    Integer delete(Long id);
+    void delete(Long id);
 
-    Integer deleteOldestBySlot(LocalDate date, Long themeId, Long timeId);
+    void deleteOldestBySlot(LocalDate date, Long themeId, Long timeId);
 }

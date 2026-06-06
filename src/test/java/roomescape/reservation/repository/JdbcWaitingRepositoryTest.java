@@ -118,12 +118,9 @@ public class JdbcWaitingRepositoryTest {
                 .timeId(timeId)
                 .build());
 
-        Integer deletedCount = waitingRepository.delete(savedWaiting.getId());
+        waitingRepository.delete(savedWaiting.getId());
 
-        SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(deletedCount).isEqualTo(1);
-            assertSoftly.assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
-        });
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
     }
 
     @DisplayName("이름으로 대기 목록과 대기 순번 조회를 테스트합니다.")

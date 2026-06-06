@@ -8,8 +8,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.global.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.exception.ThemeErrorMessage;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {
@@ -83,8 +85,11 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Integer delete(long id) {
-        return jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+    public void delete(long id) {
+        int count = jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+        if (count == 0) {
+            throw new NotFoundException(ThemeErrorMessage.THEME_NOT_FOUND, id);
+        }
     }
 
     @Override

@@ -83,7 +83,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public int delete(Long id, String name) {
+    public void delete(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ReservationErrorMessage.WAITING_NOT_FOUND, id));
 
@@ -91,7 +91,7 @@ public class WaitingService {
             throw new ForbiddenException(ReservationErrorMessage.FORBIDDEN_WAITING_ACCESS);
         }
 
-        return waitingRepository.delete(id);
+        waitingRepository.delete(id);
     }
 
     private Theme findThemeById(Long id) {

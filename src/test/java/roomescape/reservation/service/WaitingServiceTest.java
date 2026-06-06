@@ -125,7 +125,6 @@ class WaitingServiceTest {
         Waiting waiting = Waiting.of(id, "타스", LocalDate.of(2026, 5, 27), 1L, 1L);
 
         when(waitingRepository.findById(id)).thenReturn(Optional.of(waiting));
-        when(waitingRepository.delete(id)).thenReturn(1);
 
         waitingService.delete(id, "타스");
 

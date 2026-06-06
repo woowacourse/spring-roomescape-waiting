@@ -47,8 +47,8 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedTime);
     }
 
-    public int delete(Long id) {
-        return timeRepository.delete(id);
+    public void delete(Long id) {
+        timeRepository.delete(id);
     }
 
     private void validateDuplicateTime(LocalTime startAt) {

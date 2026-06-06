@@ -33,12 +33,7 @@ public class AdminThemeController {
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        int deletedCount = themeService.delete(id);
-
-        if (deletedCount == 0) {
-            return ResponseEntity.notFound().build();
-        }
-
+        themeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

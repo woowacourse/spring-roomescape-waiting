@@ -27,12 +27,7 @@ public class WaitingController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        int deletedCount = waitingService.delete(id, name);
-
-        if (deletedCount == 0) {
-            return ResponseEntity.notFound().build();
-        }
-
+        waitingService.delete(id, name);
         return ResponseEntity.noContent().build();
     }
 

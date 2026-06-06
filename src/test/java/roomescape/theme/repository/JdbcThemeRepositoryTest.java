@@ -1,5 +1,6 @@
 package roomescape.theme.repository;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import java.time.LocalDate;
@@ -98,7 +99,7 @@ public class JdbcThemeRepositoryTest {
                 .thumbnailImgUrl("theme img url")
                 .build());
 
-        assertThat(themeRepository.delete(savedTheme.getId())).isEqualTo(1);
+        assertThatCode(() -> themeRepository.delete(savedTheme.getId())).doesNotThrowAnyException();
     }
 
     @DisplayName("db에서 테마를 전체 조회합니다.")

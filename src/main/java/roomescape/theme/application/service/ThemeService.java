@@ -47,8 +47,8 @@ public class ThemeService {
         return ThemeResponse.from(themeRepository.save(theme));
     }
 
-    public int delete(long id) {
-        return themeRepository.delete(id);
+    public void delete(long id) {
+        themeRepository.delete(id);
     }
 
     private void validateDuplicateTheme(Theme theme) {
