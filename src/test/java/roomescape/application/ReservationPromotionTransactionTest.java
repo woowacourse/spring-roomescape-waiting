@@ -26,9 +26,13 @@ class ReservationPromotionTransactionTest extends ServiceIntegrationTest {
     @MockitoSpyBean
     private WaitingRepository waitingRepository;
 
+    /**
+     * 부분 실패의 끝 상태는 셋이다 — [2]슬롯 텅 빔 / [3]예약·대기 이중 존재 / [4]순번 구멍. 하지만 셋 다 같은 @Transactional 경계 하나가 막는 같은 회귀라, 변경이 가장 많이
+     * 쌓인 [4](재정렬)를 대표로 검증한다. 지점별 예외 처리(예: 예약금 승격 실패)가 생겨 [2]가 [4]와 다른 회귀가 되면 그때 분리한다.
+     */
     @Test
-    @DisplayName("자동 승격 중 순번 재정렬([5])이 실패하면 취소·승격·대기삭제가 전부 롤백된다")
-    void 자동승격_중간실패_전체롤백() {
+    @DisplayName("[대표 검증·4단계 재정렬] 마지막 단계가 실패하면 취소·승격·대기삭제가 모두 롤백된다")
+    void 자동승격_여러단계변경_중간실패_전체롤백() {
         // given: 예약 브라운 + 대기 [콘:1, 모카:2, 핀:3]
         LocalDate date = LocalDate.of(2050, 12, 31);
         Long timeId = fixture.insertTime(LocalTime.of(10, 0));
@@ -38,11 +42,11 @@ class ReservationPromotionTransactionTest extends ServiceIntegrationTest {
         Long mochaId = fixture.insertWaiting("모카", date, timeId, themeId, 2);
         Long pinId = fixture.insertWaiting("핀", date, timeId, themeId, 3);
 
-        // [5] 재정렬 UPDATE에서 폭발 주입
+        // [4] 재정렬 UPDATE에 결함 주입 — 쌓인 변경이 가장 많은 지점 = 대표 케이스
         willThrow(new RuntimeException("재정렬 실패 주입"))
                 .given(waitingRepository).updateOrderIndex(anyLong(), anyInt());
 
-        // when: 브라운이 본인 예약 취소 → 자동 승격 → [5]에서 실패
+        // when: 브라운이 본인 예약 취소 → 자동 승격 → [4]에서 실패
         assertThatThrownBy(() -> reservationService.deleteByOwner(brownId, "브라운"))
                 .isInstanceOf(RuntimeException.class);
 
