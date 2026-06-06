@@ -130,9 +130,6 @@ public class ReservationService {
     }
 
     private Reservation createUpdatedReservation(Reservation reservation, LocalDate updateDate, Long updateTimeId) {
-        if (updateDate == null && updateTimeId == null) {
-            throw new RoomescapeException(ErrorCode.INVALID_INPUT, "변경할 날짜 또는 시간이 필요합니다.");
-        }
         ReservationSlot originalSlot = reservation.getSlot();
         return new Reservation(
                 reservation.getId(),

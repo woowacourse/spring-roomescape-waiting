@@ -492,27 +492,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 사용자_본인_예약_변경시_변경할_값이_없으면_예외_발생() {
-        // given
-        Long id = 1L;
-        String name = "브라운";
-        Reservation reservation = reservation(id, name, date);
-        when(reservationRepository.findByIdForUpdate(id))
-                .thenReturn(Optional.of(reservation));
-
-        // when & then
-        assertThatThrownBy(() -> service.updateByUser(id, name, null, null, now))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)
-                .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
-
-        verify(reservationRepository, times(1)).findByIdForUpdate(id);
-        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
-        verify(reservationRepository, never()).update(any(Reservation.class));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
-    }
-
-    @Test
     void 존재하지_않는_예약_변경시_예외_발생() {
         // given
         Long id = 999L;

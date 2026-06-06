@@ -58,6 +58,17 @@ class ReservationUpdateRequestTest {
                 .contains("timeId는 양수이어야 합니다.");
     }
 
+    @Test
+    void 날짜와_시간이_모두_null이면_예외() {
+        // when
+        Set<ConstraintViolation<ReservationUpdateRequest>> result = validator.validate(
+                new ReservationUpdateRequest("브라운", null, null));
+
+        // then
+        assertThat(result).extracting(ConstraintViolation::getMessage)
+                .contains("변경할 날짜 또는 시간이 필요합니다.");
+    }
+
     @ParameterizedTest
     @MethodSource("validRequests")
     void 정상_생성_테스트(LocalDate date, Long timeId) {

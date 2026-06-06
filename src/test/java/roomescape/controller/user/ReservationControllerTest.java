@@ -187,6 +187,26 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 사용자_본인_예약_변경시_변경할_값이_없으면_에러_응답() throws Exception {
+        // given
+        String request = """
+                {
+                  "name": "브라운"
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(put("/reservations/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
+                .andExpect(jsonPath("$.detail").value("변경할 날짜 또는 시간이 필요합니다."));
+
+        verifyNoMoreInteractions(reservationService);
+    }
+
+    @Test
     void 유효하지_않은_입력값이면_에러_응답() throws Exception {
         // given
         String request = """
