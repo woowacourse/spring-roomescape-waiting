@@ -198,13 +198,6 @@
             margin-top: 4px;
         }
 
-        .edit-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 12px;
-        }
-
         .reservation-actions {
             display: flex;
             gap: 8px;
@@ -230,7 +223,7 @@
                 padding: 18px;
             }
 
-            main, .edit-grid {
+            main {
                 grid-template-columns: 1fr;
             }
         }
@@ -269,17 +262,13 @@
         const searchReservationBtn = document.getElementById('search-reservation-btn');
         const reservationMessage = document.getElementById('reservation-message');
         const reservationList = document.getElementById('reservation-list');
-        let allTimes = [];
-
         Promise.all([
             fetchJson('/api/themes'),
-            fetchJson('/api/themes/popular-themes'),
-            fetchJson('/api/times')
+            fetchJson('/api/themes/popular-themes')
         ])
-            .then(([themes, popularThemes, times]) => {
+            .then(([themes, popularThemes]) => {
                 renderThemes(themes);
                 renderPopularThemes(popularThemes);
-                allTimes = times;
             })
             .catch(error => {
                 showReservationMessage(toErrorMessage(error, '화면 정보를 불러오지 못했습니다.'));
@@ -381,32 +370,8 @@
             head.appendChild(titleBox);
             head.appendChild(badge);
 
-            const dateInput = document.createElement('input');
-            dateInput.type = 'date';
-            dateInput.min = toDateValue(new Date());
-            dateInput.value = reservation.date;
-            dateInput.disabled = isPast;
-
-            const timeSelect = document.createElement('select');
-            timeSelect.disabled = isPast;
-            renderTimeOptions(timeSelect, dateInput.value, reservation.time.id);
-
-            dateInput.addEventListener('change', () => {
-                renderTimeOptions(timeSelect, dateInput.value, Number(timeSelect.value));
-            });
-
-            const editGrid = document.createElement('div');
-            editGrid.className = 'edit-grid';
-            editGrid.appendChild(wrapControl('변경 날짜', dateInput));
-            editGrid.appendChild(wrapControl('변경 시간', timeSelect));
-
             const actions = document.createElement('div');
             actions.className = 'reservation-actions';
-
-            const updateBtn = document.createElement('button');
-            updateBtn.textContent = '변경';
-            updateBtn.disabled = isPast;
-            updateBtn.addEventListener('click', () => updateReservation(reservation, dateInput.value, timeSelect.value));
 
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'danger-btn';
@@ -414,11 +379,9 @@
             deleteBtn.disabled = isPast;
             deleteBtn.addEventListener('click', () => deleteReservation(reservation.id));
 
-            actions.appendChild(updateBtn);
             actions.appendChild(deleteBtn);
 
             card.appendChild(head);
-            card.appendChild(editGrid);
             card.appendChild(actions);
             return card;
         }
@@ -464,66 +427,6 @@
             return card;
         }
 
-        function wrapControl(labelText, control) {
-            const wrapper = document.createElement('div');
-            const label = document.createElement('label');
-            label.textContent = labelText;
-            wrapper.appendChild(label);
-            wrapper.appendChild(control);
-            return wrapper;
-        }
-
-        function renderTimeOptions(select, date, selectedTimeId) {
-            select.innerHTML = '';
-            allTimes.forEach(time => {
-                const option = document.createElement('option');
-                const isPast = date && isPastDateTime(date, time.id);
-                option.value = time.id;
-                option.textContent = isPast ? `${time.startAt} (현재 시간 이전)` : time.startAt;
-                option.disabled = isPast;
-                option.selected = time.id === Number(selectedTimeId);
-                select.appendChild(option);
-            });
-
-            if (select.selectedOptions.length > 0 && select.selectedOptions[0].disabled) {
-                const firstAvailable = [...select.options].find(option => !option.disabled);
-                if (firstAvailable) {
-                    select.value = firstAvailable.value;
-                }
-            }
-        }
-
-        function updateReservation(reservation, date, timeId) {
-            clearReservationMessage();
-
-            if (!date || !timeId) {
-                showReservationMessage('변경할 날짜와 시간을 선택해주세요.');
-                return;
-            }
-
-            if (reservation.date === date && reservation.time.id === Number(timeId)) {
-                showReservationMessage('변경할 날짜나 시간을 새로 선택해주세요.', false, true);
-                return;
-            }
-
-            if (isPastDateTime(date, timeId)) {
-                showReservationMessage('현재 시간 이후의 예약으로만 변경할 수 있습니다.');
-                return;
-            }
-
-            fetch(`/api/reservations/${reservation.id}`, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({date, timeId: Number(timeId)})
-            })
-                .then(handleResponse)
-                .then(() => {
-                    showReservationMessage('예약을 변경했습니다.', true);
-                    searchReservations();
-                })
-                .catch(error => showReservationMessage(toErrorMessage(error, '예약을 변경하지 못했습니다.')));
-        }
-
         function deleteReservation(id) {
             clearReservationMessage();
 
@@ -539,7 +442,7 @@
         function deleteWaiting(id) {
             clearReservationMessage();
 
-            fetch(`/api/waiting/${id}`, {method: 'DELETE'})
+            fetch(`/api/reservations/${id}`, {method: 'DELETE'})
                 .then(handleResponse)
                 .then(() => {
                     showReservationMessage('대기 신청을 취소했습니다.', true);
@@ -549,14 +452,9 @@
         }
 
         function isPastReservation(reservation) {
-            return isPastDateTime(reservation.date, reservation.time.id);
-        }
+            if (!reservation.date || !reservation.time) return false;
 
-        function isPastDateTime(dateValue, timeId) {
-            const time = allTimes.find(item => item.id === Number(timeId));
-            if (!dateValue || !time) return false;
-
-            return new Date(`${dateValue}T${time.startAt}`) <= new Date();
+            return new Date(`${reservation.date}T${reservation.time.startAt}`) <= new Date();
         }
 
         function clearReservationMessage() {
@@ -570,11 +468,6 @@
             reservationMessage.classList.toggle('warning', warning);
         }
     });
-
-    function toDateValue(date) {
-        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-        return offsetDate.toISOString().slice(0, 10);
-    }
 
     function fetchJson(url) {
         return fetch(url).then(handleResponse);
