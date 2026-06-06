@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.slot.domain.Slot;
 import roomescape.support.ControllerTestSupport;
 import roomescape.waiting.domain.Waiting;
@@ -27,6 +29,9 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @MockitoBean
     private WaitingPromotionPolicy waitingPromotionPolicy;
@@ -70,12 +75,12 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
     }
 
     @Test
-    @DisplayName("예약 취소로 대기 승격 중이면 같은 대기 취소는 락이 풀릴 때까지 대기한다.")
-    void waiting_cancel_waits_while_waiting_promotion_holds_lock() throws Exception {
+    @DisplayName("예약 취소가 먼저 대기를 락으로 잡으면 대기는 승격되고 뒤늦은 대기 취소는 실패한다.")
+    void reservation_cancel_first_promotes_waiting_and_late_waiting_cancel_fails() throws Exception {
         String reservationUserToken = loginUserToken();
         String waitingUserToken = loginWaitingUserToken();
 
-        createWaiting(waitingUserToken);
+        Integer waitingId = createWaiting(waitingUserToken);
 
         CountDownLatch promotionStarted = new CountDownLatch(1);
         CountDownLatch allowPromotionToFinish = new CountDownLatch(1);
@@ -112,7 +117,7 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
         Future<Integer> cancelWaitingResult = executorService.submit(() ->
                 RestAssured.given().log().all()
                         .header("Authorization", bearer(waitingUserToken))
-                        .pathParam("id", 1)
+                        .pathParam("id", waitingId)
                         .when().delete("/api/user/waitings/{id}")
                         .then().log().all()
                         .extract()
@@ -144,8 +149,90 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
         executorService.shutdownNow();
     }
 
-    private void createWaiting(String accessToken) {
-        RestAssured.given().log().all()
+    @Test
+    @DisplayName("대기 취소가 먼저 대기를 락으로 잡으면 해당 대기는 승격되지 않는다.")
+    void waiting_cancel_first_deletes_waiting_and_reservation_cancel_does_not_promote_that_waiting() throws Exception {
+        String reservationUserToken = loginUserToken();
+        String waitingUserToken = loginWaitingUserToken();
+
+        Integer waitingId = createWaiting(waitingUserToken);
+
+        CountDownLatch waitingLockAcquired = new CountDownLatch(1);
+        CountDownLatch allowWaitingDeleteToFinish = new CountDownLatch(1);
+        AtomicBoolean reservationCancelFinishedBeforeWaitingRelease = new AtomicBoolean(false);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        Future<Void> waitingCancelTransaction = executorService.submit(() -> {
+            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+            transactionTemplate.executeWithoutResult(status -> {
+                jdbcTemplate.queryForObject(
+                        "select id from waiting where id = ? for update",
+                        Long.class,
+                        waitingId
+                );
+                waitingLockAcquired.countDown();
+
+                try {
+                    boolean released = allowWaitingDeleteToFinish.await(2, TimeUnit.SECONDS);
+                    if (!released) {
+                        throw new IllegalStateException("테스트 타임아웃: 대기 삭제 완료 신호를 받지 못했습니다.");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(e);
+                }
+
+                jdbcTemplate.update("delete from waiting where id = ?", waitingId);
+            });
+            return null;
+        });
+
+        assertThat(waitingLockAcquired.await(2, TimeUnit.SECONDS)).isTrue();
+
+        Future<Integer> cancelReservationResult = executorService.submit(() ->
+                RestAssured.given().log().all()
+                        .header("Authorization", bearer(reservationUserToken))
+                        .pathParam("id", 1)
+                        .when().delete("/api/user/reservations/{id}")
+                        .then().log().all()
+                        .extract()
+                        .statusCode()
+        );
+
+        Thread.sleep(200);
+        reservationCancelFinishedBeforeWaitingRelease.set(cancelReservationResult.isDone());
+
+        allowWaitingDeleteToFinish.countDown();
+
+        waitingCancelTransaction.get(2, TimeUnit.SECONDS);
+        assertThat(cancelReservationResult.get(2, TimeUnit.SECONDS)).isEqualTo(204);
+        assertThat(reservationCancelFinishedBeforeWaitingRelease).isFalse();
+
+        Integer promotedReservationCount = jdbcTemplate.queryForObject(
+                "select count(*) from reservation where member_id = 2 and slot_id = 1",
+                Integer.class
+        );
+
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "select count(*) from waiting where member_id = 2 and slot_id = 1",
+                Integer.class
+        );
+
+        Integer canceledReservationCount = jdbcTemplate.queryForObject(
+                "select count(*) from reservation where id = 1",
+                Integer.class
+        );
+
+        assertThat(promotedReservationCount).isEqualTo(0);
+        assertThat(waitingCount).isEqualTo(0);
+        assertThat(canceledReservationCount).isEqualTo(0);
+
+        executorService.shutdownNow();
+    }
+
+    private Integer createWaiting(String accessToken) {
+        return RestAssured.given().log().all()
                 .header("Authorization", bearer(accessToken))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
@@ -155,6 +242,8 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
                 ))
                 .when().post("/api/user/waitings")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract()
+                .path("data.id");
     }
 }
