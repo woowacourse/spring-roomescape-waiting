@@ -114,7 +114,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 JOIN reservation_time rt ON rw.time_id = rt.id
                 JOIN theme t ON rw.theme_id = t.id
                 WHERE rw.date = ? AND rw.time_id = ? AND rw.theme_id = ?
-                ORDER BY rw.created_at
+                ORDER BY rw.created_at, rw.id
                 LIMIT 1
                 """;
         return jdbcTemplate.query(query, rowMapper, date, timeId, themeId).stream().findFirst();
@@ -135,7 +135,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public Long calculateTurn(Long waitingId, LocalDate date, Long timeId, Long themeId) {
         String query = """
                 SELECT turn FROM (
-                    SELECT id, ROW_NUMBER() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at) AS turn
+                    SELECT id, ROW_NUMBER() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at, id) AS turn
                     FROM reservation_waiting
                     WHERE date = ? AND time_id = ? AND theme_id = ?
                 ) sub
