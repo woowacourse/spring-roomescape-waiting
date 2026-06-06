@@ -207,10 +207,10 @@ function submitBooking() {
       return res.json().then(body => { throw new Error(body.message || '신청에 실패했습니다.'); });
     })
     .then(booking => {
-      const message = booking.status === 'WAITING'
+      const fallback = booking.status === 'WAITING'
         ? '대기 신청이 완료되었습니다.'
         : '예약이 완료되었습니다.';
-      showToast(message, 'success');
+      showToast(booking.message || fallback, 'success');
       clearBookingBar();
       refreshTimes();
     })
