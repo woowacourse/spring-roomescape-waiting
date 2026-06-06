@@ -78,6 +78,8 @@ public class ReservationService {
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
+        lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
+            reservation.getTheme().getId());
         reservation.cancelByManager();
         reservationRepository.updateStatus(reservation);
         if (reservationStatus == RESERVED) {
@@ -91,6 +93,8 @@ public class ReservationService {
     public Reservation cancel(Long id, String requesterName) {
         Reservation reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
+        lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
+            reservation.getTheme().getId());
         reservation.cancel(requesterName);
         reservationRepository.updateStatus(reservation);
         if (reservationStatus == RESERVED) {
