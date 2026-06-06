@@ -1,9 +1,10 @@
 package roomescape.repository;
 
-import java.util.List;
-import java.util.Optional;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.WaitingWithOrder;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface ReservationWaitingRepository {
 

@@ -1,7 +1,8 @@
 package roomescape.domain;
 
-import java.util.List;
 import roomescape.exception.BusinessRuleViolationException;
+
+import java.util.List;
 
 public class Reservations {
 
