@@ -761,3 +761,14 @@ HTTP/1.1 204 No Content
 
 </div>
 </details>
+
+<details>
+<summary>동작 효과</summary>
+<div markdown="1">
+
+```
+예약 취소 시 대기 1순위 사용자가 자동으로 예약 승격
+```
+
+</div>
+</details>
