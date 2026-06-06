@@ -581,15 +581,9 @@ class ReservationServiceTest {
         User confirmedUser = userRepository.save(User.createWithoutId("보예"));
         User firstWaitingUser = userRepository.save(User.createWithoutId("수민"));
         User secondWaitingUser = userRepository.save(User.createWithoutId("말랑"));
-        reservationRepository.save(Reservation.createWithoutId(
-            reservationSlot, confirmedUser, ReservationStatus.CONFIRMED, confirmedClock
-        ));
-        reservationRepository.save(Reservation.createWithoutId(
-            reservationSlot, firstWaitingUser, ReservationStatus.WAITING, firstWaitingClock
-        ));
-        reservationRepository.save(Reservation.createWithoutId(
-            reservationSlot, secondWaitingUser, ReservationStatus.WAITING, secondWaitingClock
-        ));
+        saveConfirmedReservation(reservationSlot, confirmedUser, confirmedClock);
+        saveWaitingReservation(reservationSlot, firstWaitingUser, firstWaitingClock);
+        saveWaitingReservation(reservationSlot, secondWaitingUser, secondWaitingClock);
 
         // when
         ReservationService reservationService = createReservationService(cancelClock);
@@ -601,11 +595,12 @@ class ReservationServiceTest {
         assertSoftly(softly -> {
             assertThat(updatedReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
             assertThat(waitingReservation.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(waitingReservation.waitingNumber()).isEqualTo(1L);
         });
     }
 
     @Test
-    @DisplayName("대기 예약자가 대기를 취소하면 다른 예약이 승격되지 않는다.")
+    @DisplayName("대기 예약자가 대기를 취소한다면 다른 예약이 확정으로 승격되지 않는다.")
     void notPromoteFirstWaitingReservation() {
         // given
         Clock confirmedClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
@@ -649,6 +644,7 @@ class ReservationServiceTest {
                 assertThat(confirmedReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
                 assertThat(cancelReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CANCELED);
                 assertThat(waitingReservation.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+                assertThat(waitingReservation.waitingNumber()).isEqualTo(1);
             }
         );
     }
