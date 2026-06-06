@@ -1,7 +1,10 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -9,6 +12,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
@@ -21,6 +25,7 @@ import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -35,6 +40,9 @@ class ReservationCommandServiceTest {
 
     @Autowired
     private TestDataHelper testHelper;
+
+    @MockitoSpyBean
+    private WaitingRepository waitingRepository;
 
     @DisplayName("사용자의 방탈출 예약 생성을 테스트합니다.")
     @Test
@@ -310,5 +318,36 @@ class ReservationCommandServiceTest {
             softly.assertThat(changeReservation.getMemberName().name()).isEqualTo("피노");
             softly.assertThat(promoteReservation.getMemberName().name()).isEqualTo("스타크");
         });
+    }
+
+    @DisplayName("예약 취소 중 대기 승격이 실패하면, 기존 예약 취소도 롤백되어 DB에 남아있어야 한다.")
+    @Test
+    void delete_rollback_when_waiting_promotion_fails() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+
+        Long reservationId = testHelper.insertReservation("피노", ReservationFixture.futureReservationDate(), themeId,
+                timeId);
+        testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+
+        doThrow(new RuntimeException("대기 승격 중 에러 발생!"))
+                .when(waitingRepository)
+                .delete(anyLong());
+
+        assertThatThrownBy(() -> reservationCommandService.cancel(reservationId, NOW))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("에러 발생!");
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        Reservation survivedReservation = testHelper.findReservationBySlot(slot);
+
+        assertThat(survivedReservation).isNotNull();
+        assertThat(survivedReservation.getMemberName().name()).isEqualTo("피노");
     }
 }
