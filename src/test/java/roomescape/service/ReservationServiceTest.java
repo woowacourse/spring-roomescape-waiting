@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationAndWaiting;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
@@ -64,7 +65,7 @@ class ReservationServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId());
 
-        Reservation waiting = reservationService.saveReservation("토미", futureDate, savedTimeSlot.getId(),
+        Reservation waiting = reservationService.saveReservation("네오", futureDate, savedTimeSlot.getId(),
                 savedTheme.getId());
 
         assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.WAITING);
@@ -210,6 +211,47 @@ class ReservationServiceTest {
         assertThat(reservation.getName()).isEqualTo("브라운");
         assertThat(reservation.getDate()).isEqualTo(futureDate);
         assertThat(reservation.getTimeSlot()).isEqualTo(savedTimeSlot);
+    }
+
+    @Test
+    @DisplayName("예약을 취소하면 같은 슬롯의 첫 번째 대기가 예약으로 승급된다.")
+    void 예약_취소시_첫번째_대기_승급() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        Reservation reservation = reservationService.saveReservation(
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+        );
+        Reservation firstWaiting = reservationService.saveReservation(
+                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+        );
+
+        reservationService.removeReservation(reservation.getId(), "브라운");
+
+        Reservation promoted = reservationService.findReservationById(firstWaiting.getId());
+        assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    @DisplayName("두번째 대기 순번 예약 취소 시 대기 순번은 1번을 반환한다.")
+    void 예약_취소_후_두번째_대기_순번_1번_반() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        Reservation reservation = reservationService.saveReservation(
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+        );
+        reservationService.saveReservation(
+                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+        );
+        Reservation secondWaiting = reservationService.saveReservation(
+                "대길", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+        );
+
+        reservationService.removeReservation(reservation.getId(), "브라운");
+
+        List<ReservationAndWaiting> result = reservationService.findReservationAndWaitingByName("대길");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().id()).isEqualTo(secondWaiting.getId());
+        assertThat(result.getFirst().isReserved()).isFalse();
+        assertThat(result.getFirst().waitingNumber()).isEqualTo(1);
     }
 
     private Reservation createReservation(String name, LocalDate date, LocalDateTime createdAt) {
