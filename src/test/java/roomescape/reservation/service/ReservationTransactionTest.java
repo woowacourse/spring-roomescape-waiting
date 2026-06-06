@@ -2,8 +2,8 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +54,8 @@ class ReservationTransactionTest {
         reservationService.cancelForUser(reserved.getId(), "라이");
 
         // then
+        verify(reservationRepository).promoteToReserved(waiting.getId());
+        verify(reservationRepository).deleteById(reserved.getId());
         assertThat(reservationRepository.findById(reserved.getId())).isEmpty();
         Reservation promoted = reservationRepository.findById(waiting.getId()).get();
         assertThat(promoted.getStatus()).isEqualTo(Status.RESERVED);
@@ -72,7 +74,7 @@ class ReservationTransactionTest {
                 new Reservation("어셔", time, theme, Status.WAITING, LocalDateTime.now()));
 
         doThrow(new RuntimeException("강제 실패"))
-                .when(reservationRepository).deleteById(anyLong());
+                .when(reservationRepository).deleteById(reserved.getId());
 
         // when
         // 예외 강제 발생
@@ -80,7 +82,9 @@ class ReservationTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        // promoteToReserved가 롤백되어 대기 상태 그대로
+        // 같은 트랜잭션의 promoteToReserved가 롤백되어 대기 상태 그대로
+        verify(reservationRepository).promoteToReserved(waiting.getId());
+        verify(reservationRepository).deleteById(reserved.getId());
         Reservation stillWaiting = reservationRepository.findById(waiting.getId()).get();
         assertThat(stillWaiting.getStatus()).isEqualTo(Status.WAITING);
         assertThat(stillWaiting.getId()).isEqualTo(waiting.getId());
