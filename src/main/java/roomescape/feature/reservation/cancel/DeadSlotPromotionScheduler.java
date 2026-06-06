@@ -29,6 +29,8 @@ public class DeadSlotPromotionScheduler {
         for (SlotKey deadSlotKey : deadSlotKeys) {
             try {
                 waitingPromoter.promoteFastestWaiting(deadSlotKey);
+                log.info("죽은 슬롯 대기 승격에 성공했습니다. date={}, timeId={}, themeId={}",
+                        deadSlotKey.date(), deadSlotKey.timeId(), deadSlotKey.themeId());
             } catch (Exception exception) {
                 log.error(
                         "죽은 슬롯 대기 승격에 실패했습니다. date={}, timeId={}, themeId={}",
