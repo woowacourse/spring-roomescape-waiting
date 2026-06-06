@@ -70,10 +70,12 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservationWaiting(ReservationCreateCommand request) {
-        boolean alreadyReservedBySameName = reservationRepository.findByName(request.name()).stream()
-                .anyMatch(reservation -> reservation.getDate().equals(request.date())
-                        && reservation.getThemeId().equals(request.themeId())
-                        && reservation.getTimeId().equals(request.timeId()));
+        boolean alreadyReservedBySameName = reservationRepository.existsByNameAndDateAndThemeAndTime(
+                request.name(),
+                request.date(),
+                request.themeId(),
+                request.timeId()
+        );
 
         if (alreadyReservedBySameName) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
