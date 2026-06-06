@@ -92,31 +92,4 @@ class JdbcReservationRepositoryTest {
                 .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.message());
     }
 
-    @DisplayName("예약의 예약자를 변경할 수 있어야 한다.")
-    @Test
-    void update_waiting_owner() {
-        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
-        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
-
-        Reservation saved = reservationRepository.save(Reservation.builder()
-                .name("타스")
-                .date(LocalDate.of(2026, 5, 4))
-                .themeId(themeId)
-                .timeId(timeId)
-                .build());
-
-        reservationRepository.updateWaitingOwner(saved.getId(), "카야");
-
-        String updatedName = jdbcTemplate.queryForObject(
-                "SELECT name FROM reservation WHERE id = ?", String.class, saved.getId());
-        assertThat(updatedName).isEqualTo("카야");
-    }
-
-    @DisplayName("존재하지 않는 예약 id로 대기자 변경 시 예외가 발생해야 한다.")
-    @Test
-    void update_waiting_owner_not_found() {
-        assertThatThrownBy(() -> reservationRepository.updateWaitingOwner(999L, "타스"))
-                .isExactlyInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.message());
-    }
 }

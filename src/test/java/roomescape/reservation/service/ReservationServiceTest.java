@@ -18,12 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -36,9 +34,6 @@ class ReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
-
-    @Mock
-    private WaitingRepository waitingRepository;
 
     @Mock
     private ThemeRepository themeRepository;
@@ -60,41 +55,6 @@ class ReservationServiceTest {
     private final ReservationTime time2 = ReservationTime.builder()
             .id(2L).startAt(LocalTime.of(11, 0))
             .build();
-
-    @DisplayName("사용자의 방탈출 예약 시간 추가를 테스트합니다.")
-    @Test
-    void save_user_reservation_successfully() {
-        Reservation saved = Reservation.builder()
-                .id(1L).name("스타크").date(LocalDate.of(2026, 5, 6)).themeId(1L).timeId(1L)
-                .build();
-
-        when(timeRepository.findById(1L)).thenReturn(Optional.of(time1));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(reservationRepository.existsByDateAndThemeAndTime(any(), any(), any())).thenReturn(false);
-        when(reservationRepository.save(any())).thenReturn(saved);
-
-        ReservationResponse result = reservationService.save(
-                new ReservationCreateCommand("스타크", LocalDate.of(2026, 5, 6), 1L, 1L),
-                LocalDateTime.of(2000, 1, 1, 0, 0));
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.id()).isEqualTo(1L);
-            softly.assertThat(result.name()).isEqualTo("스타크");
-            softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 6));
-        });
-    }
-
-    @DisplayName("오늘보다 이전 날짜 혹은 시간 예약 시도 시 예외 발생을 테스트합니다.")
-    @Test
-    void validate_throw_exception_when_reserving_past_date_or_time() {
-        when(timeRepository.findById(1L)).thenReturn(Optional.of(time1));
-
-        assertThatThrownBy(() -> reservationService.save(
-                new ReservationCreateCommand("스타크", LocalDate.of(2026, 5, 6), 1L, 1L),
-                LocalDateTime.of(2026, 5, 6, 11, 0)))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
-    }
 
     @DisplayName("이름으로 본인 예약 목록 조회를 테스트합니다.")
     @Test
@@ -149,25 +109,6 @@ class ReservationServiceTest {
                 LocalDateTime.of(2000, 1, 1, 0, 0)))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("본인의 예약만 변경하거나 취소할 수 있습니다.");
-    }
-
-    @DisplayName("이미 예약된 날짜/테마/시간에 예약 요청 시 대기로 저장되어야 한다.")
-    @Test
-    void save_as_waiting_when_reservation_already_exists() {
-        when(timeRepository.findById(1L)).thenReturn(Optional.of(time1));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(reservationRepository.existsByDateAndThemeAndTime(any(), any(), any())).thenReturn(true);
-        when(waitingRepository.save(any())).thenReturn(
-                roomescape.reservation.domain.Waiting.of(1L, "카야", LocalDate.of(2026, 5, 6), 1L, 1L));
-
-        ReservationResponse result = reservationService.save(
-                new ReservationCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L),
-                LocalDateTime.of(2000, 1, 1, 0, 0));
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.name()).isEqualTo("카야");
-            softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 6));
-        });
     }
 
     @DisplayName("지난 예약은 취소할 수 없습니다.")

@@ -12,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.reservation.application.exception.BadRequestException;
+import roomescape.reservation.application.exception.ConflictException;
 
 @RestControllerAdvice(annotations = {RestController.class})
 public class GlobalExceptionHandler {
@@ -25,6 +27,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRoomEscape(RoomEscapeException e) {
         return ResponseEntity
                 .status(e.errorCode().status())
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException e) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(e.getMessage()));
     }
 

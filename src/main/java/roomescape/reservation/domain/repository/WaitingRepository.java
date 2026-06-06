@@ -5,19 +5,20 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
-import roomescape.reservation.domain.repository.dto.WaitingOrderDetail;
 
 public interface WaitingRepository {
 
-    Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId);
+    Optional<Waiting> findById(Long id);
 
-    Optional<WaitingDetail> findDetailById(Long id);
+    boolean existsByNameAndDateAndThemeIdAndTimeId(String name, LocalDate date, Long themeId, Long timeId);
 
     Optional<Waiting> findOldestByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
+
+    List<WaitingDetail> findByName(String name);
 
     Waiting save(Waiting waiting);
 
     Integer delete(Long id);
 
-    List<WaitingOrderDetail> findByName(String name);
+    Integer deleteOldestBySlot(LocalDate date, Long themeId, Long timeId);
 }

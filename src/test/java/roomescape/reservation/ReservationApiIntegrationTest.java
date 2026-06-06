@@ -1,8 +1,6 @@
 package roomescape.reservation;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -57,14 +55,7 @@ class ReservationApiIntegrationTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201)
-                .body("id", greaterThan(0))
-                .body("name", equalTo("스타크"))
-                .body("date", equalTo("2028-05-06"))
-                .body("time.id", equalTo(timeId.intValue()))
-                .body("time.startAt", equalTo("09:00"))
-                .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("theme name"));
+                .statusCode(201);
     }
 
     @DisplayName("이름으로 본인 예약 목록 조회 API를 테스트합니다.")

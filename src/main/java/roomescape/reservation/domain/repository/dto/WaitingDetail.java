@@ -11,5 +11,6 @@ public record WaitingDetail(Long waitingId,
                             String themeDescription,
                             String thumbnailImgUrl,
                             Long timeId,
-                            LocalTime startAt) {
+                            LocalTime startAt,
+                            Long order) {
 }

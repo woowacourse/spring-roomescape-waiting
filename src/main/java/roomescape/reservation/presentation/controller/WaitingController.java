@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @RequiredArgsConstructor
@@ -18,6 +20,7 @@ import roomescape.reservation.presentation.dto.WaitingResponse;
 public class WaitingController {
 
     private final WaitingService waitingService;
+    private final WaitingQueryService waitingQueryService;
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
@@ -35,6 +38,6 @@ public class WaitingController {
 
     @GetMapping
     public ResponseEntity<List<WaitingResponse>> findAll(@RequestParam String name) {
-        return ResponseEntity.ok(waitingService.findAllByName(name));
+        return ResponseEntity.ok(waitingQueryService.findAllByName(name));
     }
 }

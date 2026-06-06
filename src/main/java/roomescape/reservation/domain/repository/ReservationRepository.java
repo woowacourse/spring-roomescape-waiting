@@ -7,6 +7,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 
 public interface ReservationRepository {
+
     List<ReservationDetail> findAll();
 
     List<Reservation> findByName(String name);
@@ -25,5 +26,5 @@ public interface ReservationRepository {
 
     Boolean existsByDateAndThemeAndTimeExcludingId(LocalDate date, Long themeId, Long timeId, Long id);
 
-    void updateWaitingOwner(Long id, String name);
+    boolean insertFromOldestWaiting(LocalDate date, Long themeId, Long timeId);
 }

@@ -4,19 +4,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
+import roomescape.reservation.event.schema.ReservationCancelRequested;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationtime.application.exception.ReservationTimeErrorCode;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -31,9 +29,9 @@ import roomescape.theme.domain.repository.ThemeRepository;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
@@ -47,25 +45,6 @@ public class ReservationService {
         return reservationRepository.findByName(name).stream()
                 .map(this::toResponse)
                 .toList();
-    }
-
-    public ReservationResponse save(ReservationCreateCommand request, LocalDateTime currentDateTime) {
-        ReservationTime time = findTimeById(request.timeId());
-        validateReservationDateTime(request.date(), time.getStartAt(), currentDateTime);
-
-        Theme theme = findThemeById(request.themeId());
-        Reservation reservation = request.toEntity(theme.getId(), time.getId());
-
-        if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
-            Waiting savedWaiting = waitingRepository.save(Waiting.of(
-                    null,
-                    reservation.getName(),
-                    reservation.getDate(),
-                    reservation.getThemeId(),
-                    reservation.getTimeId()));
-            return ReservationResponse.from(savedWaiting, theme, time);
-        }
-        return ReservationResponse.from(reservationRepository.save(reservation), theme, time);
     }
 
     public ReservationResponse update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
@@ -83,23 +62,19 @@ public class ReservationService {
         return toResponse(savedReservation);
     }
 
-    public int delete(Long id, String name, LocalDateTime currentDateTime) {
+    public void delete(Long id, String name, LocalDateTime currentDateTime) {
         ReservationDetail reservationDetail = getReservationDetail(id);
         Reservation reservation = toReservation(reservationDetail);
         validateOwner(name, reservation);
         validateReservationNotPast(reservationDetail, currentDateTime);
 
-        Optional<Waiting> oldestWaiting = waitingRepository.findOldestByDateAndThemeIdAndTimeId(
-                reservation.getDate(), reservation.getThemeId(),
-                reservation.getTimeId());
-
-        if (oldestWaiting.isPresent()) {
-            Waiting waiting = oldestWaiting.get();
-            reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
-            return waitingRepository.delete(waiting.getId());
-        }
-
-        return reservationRepository.delete(id);
+        reservationRepository.delete(id);
+        eventPublisher.publishEvent(new ReservationCancelRequested(
+                reservation.getId(),
+                reservation.getDate(),
+                reservation.getThemeId(),
+                reservation.getTimeId()
+        ));
     }
 
     private Theme findThemeById(Long id) {
@@ -118,13 +93,9 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(ReservationUpdateCommand request, Reservation reservation) {
-        Boolean existsByDateAndTime = reservationRepository.existsByDateAndThemeAndTimeExcludingId(
-                request.date(),
-                reservation.getThemeId(),
-                request.timeId(),
-                reservation.getId()
-        );
-        if (existsByDateAndTime) {
+        Boolean exists = reservationRepository.existsByDateAndThemeAndTimeExcludingId(
+                request.date(), reservation.getThemeId(), request.timeId(), reservation.getId());
+        if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
     }
@@ -136,17 +107,13 @@ public class ReservationService {
     }
 
     private void validateReservationDateTime(LocalDate date, LocalTime startAt, LocalDateTime currentDateTime) {
-        LocalDateTime triedDateTime = LocalDateTime.of(date, startAt);
-
-        if (triedDateTime.isBefore(currentDateTime)) {
+        if (LocalDateTime.of(date, startAt).isBefore(currentDateTime)) {
             throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_TIME);
         }
     }
 
     private void validateReservationNotPast(ReservationDetail reservationDetail, LocalDateTime currentDateTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDetail.date(), reservationDetail.startAt());
-
-        if (reservationDateTime.isBefore(currentDateTime)) {
+        if (LocalDateTime.of(reservationDetail.date(), reservationDetail.startAt()).isBefore(currentDateTime)) {
             throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_MODIFICATION);
         }
     }
