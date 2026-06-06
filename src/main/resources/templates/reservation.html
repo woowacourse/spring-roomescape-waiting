@@ -748,6 +748,15 @@
             });
     };
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
     function renderThemes(themes) {
         themeGrid.innerHTML = '';
         const emojis = ['👻', '🚀', '🧙', '🔍', '🏴‍☠️', '🎭'];
@@ -755,14 +764,17 @@
             const card = document.createElement('div');
             card.className = 'theme-card';
             card.dataset.id = t.id;
+            const themeName = escapeHtml(t.name);
+            const themeDescription = escapeHtml(t.description || '');
+            const thumbnailUrl = escapeHtml(t.thumbnailUrl);
             card.innerHTML = `
-                ${t.thumbnailUrl
-                ? `<img class="theme-card-img" src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.parentElement.querySelector('.theme-card-img-placeholder').style.display='flex'; this.style.display='none';">`
+                ${thumbnailUrl
+                ? `<img class="theme-card-img" src="${thumbnailUrl}" alt="${themeName}" onerror="this.parentElement.querySelector('.theme-card-img-placeholder').style.display='flex'; this.style.display='none';">`
                 : ''}
-                <div class="theme-card-img-placeholder" style="display:${t.thumbnailUrl ? 'none' : 'flex'}">${emojis[i % emojis.length]}</div>
+                <div class="theme-card-img-placeholder" style="display:${thumbnailUrl ? 'none' : 'flex'}">${emojis[i % emojis.length]}</div>
                 <div class="theme-card-body">
-                    <div class="theme-card-name">${t.name}</div>
-                    <div class="theme-card-desc">${t.description || ''}</div>
+                    <div class="theme-card-name">${themeName}</div>
+                    <div class="theme-card-desc">${themeDescription}</div>
                 </div>
             `;
             card.onclick = () => selectTheme(t.id);
@@ -869,15 +881,15 @@
         summary.innerHTML = `
             <div class="summary-row">
                 <span class="summary-label">테마</span>
-                <span class="summary-value">${theme ? theme.name : ''}</span>
+                <span class="summary-value">${theme ? escapeHtml(theme.name) : ''}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">날짜</span>
-                <span class="summary-value">${dateSelect.value}</span>
+                <span class="summary-value">${escapeHtml(dateSelect.value)}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">시간</span>
-                <span class="summary-value accent">${selectedTimeLabel}</span>
+                <span class="summary-value accent">${escapeHtml(selectedTimeLabel)}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">신청 유형</span>
@@ -908,12 +920,7 @@
             name: name
         };
 
-        const url = selectedTimeMode === 'waiting' ? '/waitings' : '/reservations';
-        const successMessage = selectedTimeMode === 'waiting'
-            ? '예약 대기 신청이 완료되었습니다.'
-            : '예약이 성공적으로 완료되었습니다.';
-
-        fetch(url, {
+        fetch('/reservations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -926,8 +933,13 @@
                     }));
                     throw errorData;
                 }
+                return res.json();
+            })
+            .then((reservation) => {
+                const successMessage = reservation.status === 'WAITING'
+                    ? '예약 대기 신청이 완료되었습니다.'
+                    : '예약이 성공적으로 완료되었습니다.';
 
-                // 성공 시 성공 모달 호출 후, '확인' 버튼 클릭 시 메인으로 이동
                 showSuccessAlert(successMessage, () => {
                     window.location.href = '/';
                 });

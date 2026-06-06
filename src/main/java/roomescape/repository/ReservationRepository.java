@@ -15,15 +15,19 @@ public interface ReservationRepository {
 
     List<Reservation> findByName(String name);
 
+    List<Reservation> findWaitingsBySlotId(Long slotId);
+
     Reservation save(Reservation reservation);
 
     void deleteById(long id);
 
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findReservedBySlot(LocalDate date, Long timeId, Long themeId);
 
-    int update(Reservation reservation);
+    void update(Reservation reservation);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId);
+    boolean existsReservedBySlot(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByNameAndSlotId(String name, Long slotId);
 
     boolean existsByThemeId(Long themeId);
 

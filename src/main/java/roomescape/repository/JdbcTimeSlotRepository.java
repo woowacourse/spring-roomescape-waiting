@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.TimeSlot;
 import roomescape.service.dto.AvailableTimeSlot;
 
@@ -48,12 +49,15 @@ public class JdbcTimeSlotRepository implements TimeSlotRepository {
         String sql = """
                 SELECT t.id, t.start_at, r.id IS NULL AS is_available
                 FROM time_slot t
-                LEFT JOIN reservation r 
-                ON t.id = r.time_id 
-                       AND r.theme_id = ?
-                       AND r.date = ?
+                LEFT JOIN reservation_slot rs
+                  ON t.id = rs.time_id
+                 AND rs.theme_id = ?
+                 AND rs.date = ?
+                LEFT JOIN reservation r
+                  ON r.slot_id = rs.id
+                 AND r.status = ?
                 """;
-        return jdbcTemplate.query(sql, availableTimeSlotRowMapper(), themeId, date);
+        return jdbcTemplate.query(sql, availableTimeSlotRowMapper(), themeId, date, ReservationStatus.RESERVED.name());
     }
 
     @Override

@@ -1,7 +1,7 @@
 package roomescape.domain;
 
 public record WaitingWithNumber(
-        Waiting waiting,
+        Reservation waiting,
         int number
 ) {
 }

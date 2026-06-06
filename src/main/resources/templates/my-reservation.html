@@ -697,6 +697,15 @@
         return '오류가 발생했습니다.';
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
     function closeErrorModal() {
         document.getElementById('error-modal').classList.remove('active');
     }
@@ -748,7 +757,7 @@
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📭</div>
-                    <div class="empty-title">${name}님의 예약 또는 대기가 없습니다</div>
+                    <div class="empty-title">${escapeHtml(name)}님의 예약 또는 대기가 없습니다</div>
                     <p class="empty-desc">예약 또는 대기 신청 후 다시 조회해보세요</p>
                 </div>
             `;
@@ -768,24 +777,28 @@
             const isPast = reservationDate < now;
             const statusClass = isReserved ? (isPast ? 'status-past' : 'status-upcoming') : 'status-waiting';
             const statusText = isReserved ? (isPast ? '지난 예약' : '예정된 예약') : `예약 대기 ${r.waitingNumber ?? '-'}번`;
+            const themeName = escapeHtml(theme?.name ?? '-');
+            const reservationName = escapeHtml(r.name);
+            const reservationDateText = escapeHtml(r.date);
+            const reservationTimeText = escapeHtml(time?.startAt?.slice(0,5) ?? '-');
 
             const card = document.createElement('div');
             card.className = 'reservation-card';
             card.innerHTML = `
                 <div class="reservation-info">
-                    <div class="reservation-theme">${theme?.name ?? '-'}</div>
+                    <div class="reservation-theme">${themeName}</div>
                     <div class="reservation-meta">
                         <div class="reservation-meta-item">
                             <span class="meta-label">날짜</span>
-                            <span class="meta-value">${r.date}</span>
+                            <span class="meta-value">${reservationDateText}</span>
                         </div>
                         <div class="reservation-meta-item">
                             <span class="meta-label">시간</span>
-                            <span class="meta-value">${time?.startAt?.slice(0,5) ?? '-'}</span>
+                            <span class="meta-value">${reservationTimeText}</span>
                         </div>
                         <div class="reservation-meta-item">
                             <span class="meta-label">예약자</span>
-                            <span class="meta-value">${r.name}</span>
+                            <span class="meta-value">${reservationName}</span>
                         </div>
                         ${isReserved ? '' : `
                         <div class="reservation-meta-item">
@@ -833,7 +846,7 @@
         if (!confirm('예약 대기를 취소하시겠습니까?')) return;
         try {
             const name = document.getElementById('search-name').value.trim();
-            await api('DELETE', `/waitings/${id}?userName=${encodeURIComponent(name)}`);
+            await api('DELETE', `/reservations/${id}?userName=${encodeURIComponent(name)}`);
             showToast('예약 대기가 취소되었습니다.', 'success');
             searchReservations();
         } catch (error) {

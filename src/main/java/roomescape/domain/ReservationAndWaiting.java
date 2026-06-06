@@ -18,7 +18,7 @@ public record ReservationAndWaiting(
     }
 
     public static ReservationAndWaiting fromWaiting(WaitingWithNumber waitingWithNumber) {
-        Waiting waiting = waitingWithNumber.waiting();
+        Reservation waiting = waitingWithNumber.waiting();
         return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), waiting.getTimeSlot(),
                 waiting.getTheme(), false, waitingWithNumber.number());
     }
