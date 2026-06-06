@@ -14,13 +14,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
 public class ReservationServiceTest {
 
@@ -41,7 +41,7 @@ public class ReservationServiceTest {
 
     @Test
     void saveTest() {
-        ServiceReservationCreateRequest request = new ServiceReservationCreateRequest("fizz", LocalDate.of(2026, 5, 2),
+        ReservationCreateRequest request = new ReservationCreateRequest("fizz", LocalDate.of(2026, 5, 2),
                 reservationTime.getId(), theme.getId());
 
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);

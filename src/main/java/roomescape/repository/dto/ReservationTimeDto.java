@@ -13,8 +13,4 @@ public record ReservationTimeDto(
                 time.getStartAt()
         );
     }
-
-    public ReservationTime toEntity() {
-        return new ReservationTime(id, startAt);
-    }
 }

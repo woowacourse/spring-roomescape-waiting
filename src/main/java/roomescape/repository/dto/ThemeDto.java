@@ -16,8 +16,4 @@ public record ThemeDto(
                 theme.getThumbnailUrl()
         );
     }
-
-    public Theme toEntity() {
-        return new Theme(id, name, description, thumbnailUrl);
-    }
 }

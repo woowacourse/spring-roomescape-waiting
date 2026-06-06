@@ -1,21 +1,21 @@
 package roomescape.controller.dto.request;
 
+import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
-public record ControllerThemeCreateRequest(
+public record ThemeCreateRequest(
         String name,
         String description,
         String thumbnailUrl
 ) {
 
-    public ControllerThemeCreateRequest {
+    public ThemeCreateRequest {
         validate(name, description, thumbnailUrl);
     }
 
-    public ServiceThemeCreateRequest toServiceThemeRequest() {
-        return new ServiceThemeCreateRequest(name, description, thumbnailUrl);
+    public Theme toEntity() {
+        return new Theme(name, description, thumbnailUrl);
     }
 
     private void validate(String name, String description, String thumbnailUrl) {

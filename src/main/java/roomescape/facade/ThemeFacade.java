@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.request.ThemeCreateRequest;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
 @Service
 public class ThemeFacade {
@@ -25,20 +25,20 @@ public class ThemeFacade {
     }
 
     @Transactional
-    public ServiceThemeResponse save(ServiceThemeCreateRequest request) {
+    public ThemeResponse save(ThemeCreateRequest request) {
         Theme themeWithoutId = request.toEntity();
-        return ServiceThemeResponse.from(themeService.save(themeWithoutId));
+        return ThemeResponse.from(themeService.save(themeWithoutId));
     }
 
-    public List<ServiceThemeResponse> findAll() {
+    public List<ThemeResponse> findAll() {
         return themeService.findAll().stream()
-                .map(ServiceThemeResponse::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
-    public List<ServiceThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
+    public List<ThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
         return themeService.findRanking(startDate, endDate).stream()
-                .map(ServiceThemeResponse::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 

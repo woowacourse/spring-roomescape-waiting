@@ -9,6 +9,7 @@ import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.WaitRepository;
 import roomescape.repository.dto.WaitDetailDto;
+import roomescape.service.dto.WaitInfo;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,7 +24,7 @@ public class WaitService {
     }
 
     @Transactional
-    public WaitDetailDto save(Wait waitWithoutId) {
+    public WaitInfo save(Wait waitWithoutId) {
         List<WaitDetailDto> waits = waitRepository.findBySlot(
                 waitWithoutId.getReservationDate(),
                 waitWithoutId.getTime().getId(),
@@ -40,15 +41,20 @@ public class WaitService {
         }
 
         Wait newWait = waitRepository.save(waitWithoutId);
-        return WaitDetailDto.from(newWait, calculateOrder(newWait));
+        Long order = calculateOrder(newWait);
+        return WaitInfo.of(newWait, order);
     }
 
-    public List<WaitDetailDto> findByName(String name) {
-        return waitRepository.findByName(name);
+    public List<WaitInfo> findByName(String name) {
+        return waitRepository.findByName(name).stream()
+                .map(WaitInfo::from)
+                .toList();
     }
 
-    public List<WaitDetailDto> findAll() {
-        return waitRepository.findAll();
+    public List<WaitInfo> findAll() {
+        return waitRepository.findAll().stream()
+                .map(WaitInfo::from)
+                .toList();
     }
 
     @Transactional
@@ -56,13 +62,16 @@ public class WaitService {
         waitRepository.deleteById(id);
     }
 
-    public List<WaitDetailDto> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
-        return waitRepository.findBySlot(reservationDate, timeId, themeId);
+    public List<WaitInfo> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+        return waitRepository.findBySlot(reservationDate, timeId, themeId).stream()
+                .map(WaitInfo::from)
+                .toList();
     }
 
-    public WaitDetailDto findWait(Long waitId) {
-        return waitRepository.findById(waitId)
+    public WaitInfo findWait(Long waitId) {
+        WaitDetailDto waitDetailDto = waitRepository.findById(waitId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_WAIT));
+        return WaitInfo.from(waitDetailDto);
     }
 
     public Long calculateOrder(Wait wait) {

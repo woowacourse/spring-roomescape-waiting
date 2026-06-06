@@ -35,8 +35,8 @@ public class ReservationSteps {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body(key + ".size()", is(expectedSize))
-                .body(key + "[0].status", is(reservationStatus.name()));
+                .body(key + ".items.size()", is(expectedSize))
+                .body(key + ".items[0].status", is(reservationStatus.name()));
     }
 
     public static void checkAllReservationSize(int reservationSize, int waitSize) {
@@ -44,8 +44,8 @@ public class ReservationSteps {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservations.size()", is(reservationSize))
-                .body("waits.size()", is(waitSize));
+                .body("reservations.items.size()", is(reservationSize))
+                .body("waits.items.size()", is(waitSize));
     }
 
     public static void deleteReservation(Long id) {

@@ -10,12 +10,12 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.request.ThemeCreateRequest;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
 public class ThemeFacadeTest {
 
@@ -37,8 +37,8 @@ public class ThemeFacadeTest {
     void saveTest() {
         Theme themeWithoutId = new Theme("루크의 모험", "모험 이야기", "url");
         Theme theme = Theme.withId(1L, themeWithoutId);
-        ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("루크의 모험", "모험 이야기", "url");
-        ServiceThemeResponse response = ServiceThemeResponse.from(theme);
+        ThemeCreateRequest request = new ThemeCreateRequest("루크의 모험", "모험 이야기", "url");
+        ThemeResponse response = ThemeResponse.from(theme);
 
         when(themeService.save(themeWithoutId)).thenReturn(theme);
 
@@ -50,8 +50,8 @@ public class ThemeFacadeTest {
         Theme themeLuke = new Theme(1L, "루크의 모험", "모험 이야기", "url");
         Theme themeFizz = new Theme(2L, "피즈의 모험", "모험 이야기", "url");
         List<Theme> themes = List.of(themeLuke, themeFizz);
-        List<ServiceThemeResponse> responses = List.of(ServiceThemeResponse.from(themeLuke),
-                ServiceThemeResponse.from(themeFizz));
+        List<ThemeResponse> responses = List.of(ThemeResponse.from(themeLuke),
+                ThemeResponse.from(themeFizz));
 
         when(themeService.findAll()).thenReturn(themes);
 
@@ -66,8 +66,8 @@ public class ThemeFacadeTest {
         LocalDate endDate = LocalDate.of(2026, 5, 1);
 
         List<Theme> themeRanking = List.of(themeLuke, themeFizz);
-        List<ServiceThemeResponse> responseRanking = List.of(ServiceThemeResponse.from(themeLuke),
-                ServiceThemeResponse.from(themeFizz));
+        List<ThemeResponse> responseRanking = List.of(ThemeResponse.from(themeLuke),
+                ThemeResponse.from(themeFizz));
 
         when(themeService.findRanking(startDate, endDate)).thenReturn(themeRanking);
 

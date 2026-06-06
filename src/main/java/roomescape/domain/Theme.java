@@ -13,7 +13,6 @@ public class Theme {
 
     public Theme(Long id, String name, String description, String thumbnailUrl) {
         validate(name, description, thumbnailUrl);
-
         this.id = id;
         this.name = name;
         this.description = description;
@@ -21,12 +20,7 @@ public class Theme {
     }
 
     public Theme(String name, String description, String thumbnailUrl) {
-        validate(name, description, thumbnailUrl);
-
-        this.id = null;
-        this.name = name;
-        this.description = description;
-        this.thumbnailUrl = thumbnailUrl;
+        this(null, name, description, thumbnailUrl);
     }
 
     public static Theme withId(Long id, Theme theme) {

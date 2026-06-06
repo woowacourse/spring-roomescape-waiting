@@ -19,10 +19,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
 public class ThemeServiceTest {
 
@@ -39,7 +39,7 @@ public class ThemeServiceTest {
 
     @Test
     void saveTest() {
-        ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("피즈의 모험", "모험 이야기", "url");
+        ThemeCreateRequest request = new ThemeCreateRequest("피즈의 모험", "모험 이야기", "url");
         Theme themeWithoutId = request.toEntity();
         Theme theme = Theme.withId(1L, themeWithoutId);
 

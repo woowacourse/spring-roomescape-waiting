@@ -10,53 +10,47 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.request.ControllerReservationCreateRequest;
-import roomescape.controller.dto.response.ControllerReceptionListResponse;
-import roomescape.controller.dto.response.ControllerReceptionResponse;
-import roomescape.facade.ReceptionFacade;
-import roomescape.service.dto.response.ServiceReceptionListResponse;
-import roomescape.service.dto.response.ServiceReceptionResponse;
+import roomescape.controller.dto.request.ReservationCreateRequest;
+import roomescape.controller.dto.response.ReservationWaitListResponse;
+import roomescape.controller.dto.response.ReservationWaitResponse;
+import roomescape.facade.ReservationFacade;
 
 @RestController
 @RequestMapping(value = "/reservations")
 public class ReservationController {
 
-    private final ReceptionFacade receptionFacade;
+    private final ReservationFacade reservationFacade;
 
-    public ReservationController(ReceptionFacade receptionFacade) {
-        this.receptionFacade = receptionFacade;
+    public ReservationController(ReservationFacade reservationFacade) {
+        this.reservationFacade = reservationFacade;
     }
 
     @PostMapping
-    public ResponseEntity<ControllerReceptionResponse> save(
-            @RequestBody ControllerReservationCreateRequest request) {
-        ServiceReceptionResponse serviceResponse = receptionFacade.save(
-                request.toServiceReservationRequest());
-        ControllerReceptionResponse controllerResponse = ControllerReceptionResponse.from(serviceResponse);
+    public ResponseEntity<ReservationWaitResponse> save(
+            @RequestBody ReservationCreateRequest request) {
+        ReservationWaitResponse response = reservationFacade.save(request);
         return ResponseEntity.
                 status(HttpStatus.CREATED)
-                .body(controllerResponse);
+                .body(response);
     }
 
     @GetMapping(params = "name")
-    public ResponseEntity<ControllerReceptionListResponse> findByName(
+    public ResponseEntity<ReservationWaitListResponse> findByName(
             @RequestParam("name") String name
     ) {
-        ServiceReceptionListResponse serviceResponse = receptionFacade.findByName(name);
-        ControllerReceptionListResponse controllerResponse = ControllerReceptionListResponse.from(serviceResponse);
-        return ResponseEntity.ok(controllerResponse);
+        ReservationWaitListResponse response = reservationFacade.findByName(name);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<ControllerReceptionListResponse> findAll() {
-        ServiceReceptionListResponse serviceResponse = receptionFacade.findAll();
-        ControllerReceptionListResponse controllerResponse = ControllerReceptionListResponse.from(serviceResponse);
-        return ResponseEntity.ok(controllerResponse);
+    public ResponseEntity<ReservationWaitListResponse> findAll() {
+        ReservationWaitListResponse response = reservationFacade.findAll();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        receptionFacade.deleteReservation(id);
+        reservationFacade.deleteReservation(id);
         return ResponseEntity
                 .noContent()
                 .build();
@@ -64,7 +58,7 @@ public class ReservationController {
 
     @DeleteMapping("/waits/{id}")
     public ResponseEntity<Void> deleteWait(@PathVariable Long id) {
-        receptionFacade.deleteWait(id);
+        reservationFacade.deleteWait(id);
         return ResponseEntity
                 .noContent()
                 .build();

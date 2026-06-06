@@ -12,19 +12,20 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.request.ReservationTimeCreateRequest;
+import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
+import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.domain.ReservationAvailability;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.repository.dto.ReservationTimeDto;
-import roomescape.repository.dto.ThemeDto;
-import roomescape.repository.dto.WaitDetailDto;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
-import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
+import roomescape.service.dto.ReservationTimeInfo;
+import roomescape.service.dto.ThemeInfo;
+import roomescape.service.dto.WaitInfo;
 
 public class ReservationTimeFacadeTest {
 
@@ -58,8 +59,8 @@ public class ReservationTimeFacadeTest {
         ReservationTime reservationTimeWithoutId = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime reservationTime = ReservationTime.withId(1L, reservationTimeWithoutId);
 
-        ServiceReservationTimeCreateRequest request = new ServiceReservationTimeCreateRequest(LocalTime.of(10, 0));
-        ServiceReservationTimeResponse response = ServiceReservationTimeResponse.from(reservationTime);
+        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
+        ReservationTimeResponse response = ReservationTimeResponse.from(reservationTime);
 
         when(reservationTimeService.save(reservationTimeWithoutId)).thenReturn(reservationTime);
 
@@ -73,9 +74,9 @@ public class ReservationTimeFacadeTest {
                 new ReservationTime(2L, LocalTime.of(11, 0))
         );
 
-        List<ServiceReservationTimeResponse> responses = List.of(
-                ServiceReservationTimeResponse.from(reservationTimes.get(0)),
-                ServiceReservationTimeResponse.from(reservationTimes.get(1))
+        List<ReservationTimeResponse> responses = List.of(
+                ReservationTimeResponse.from(reservationTimes.get(0)),
+                ReservationTimeResponse.from(reservationTimes.get(1))
         );
 
         when(reservationTimeService.findAll()).thenReturn(reservationTimes);
@@ -92,20 +93,20 @@ public class ReservationTimeFacadeTest {
         List<ReservationTime> allReservationTimes = List.of(firstTime, secondTime, thirdTime);
         List<ReservationTime> reservedTimes = List.of(secondTime, thirdTime);
 
-        List<WaitDetailDto> thirdTimeWaits = List.of(
-                new WaitDetailDto(1L, LocalDateTime.now(), "fizz", reservationDate, ReservationTimeDto.from(thirdTime),
-                        ThemeDto.from(theme), 1L),
-                new WaitDetailDto(2L, LocalDateTime.now(), "luke", reservationDate, ReservationTimeDto.from(thirdTime),
-                        ThemeDto.from(theme), 2L),
-                new WaitDetailDto(3L, LocalDateTime.now(), "neo", reservationDate, ReservationTimeDto.from(thirdTime),
-                        ThemeDto.from(theme), 3L)
+        List<WaitInfo> thirdTimeWaits = List.of(
+                new WaitInfo(1L, "fizz", reservationDate, ReservationTimeInfo.from(thirdTime), ThemeInfo.from(theme),
+                        ReservationStatus.WAITING, 1L, LocalDateTime.now()),
+                new WaitInfo(2L, "luke", reservationDate, ReservationTimeInfo.from(thirdTime), ThemeInfo.from(theme),
+                        ReservationStatus.WAITING, 2L, LocalDateTime.now()),
+                new WaitInfo(3L, "neo", reservationDate, ReservationTimeInfo.from(thirdTime), ThemeInfo.from(theme),
+                        ReservationStatus.WAITING, 3L, LocalDateTime.now())
         );
 
-        List<ServiceReservationTimeAvailabilityResponse> responses = List.of(
-                ServiceReservationTimeAvailabilityResponse.from(firstTime,
+        List<ReservationTimeAvailabilityResponse> responses = List.of(
+                ReservationTimeAvailabilityResponse.from(firstTime,
                         ReservationAvailability.RESERVATION_AVAILABLE),
-                ServiceReservationTimeAvailabilityResponse.from(secondTime, ReservationAvailability.WAITING_AVAILABLE),
-                ServiceReservationTimeAvailabilityResponse.from(thirdTime, ReservationAvailability.NOTHING_AVAILABLE)
+                ReservationTimeAvailabilityResponse.from(secondTime, ReservationAvailability.WAITING_AVAILABLE),
+                ReservationTimeAvailabilityResponse.from(thirdTime, ReservationAvailability.NOTHING_AVAILABLE)
         );
 
         when(reservationTimeService.findReservedTimesByDateAndTheme(reservationDate, theme.getId())).thenReturn(

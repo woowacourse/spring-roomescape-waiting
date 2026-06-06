@@ -13,7 +13,7 @@ public record WaitDetailDto(
         ThemeDto theme,
         Long order
 ) {
-    public static WaitDetailDto from(Wait wait, Long order) {
+    public static WaitDetailDto of(Wait wait, Long order) {
         return new WaitDetailDto(
                 wait.getId(),
                 wait.getCreatedAt(),
@@ -22,17 +22,6 @@ public record WaitDetailDto(
                 ReservationTimeDto.from(wait.getTime()),
                 ThemeDto.from(wait.getTheme()),
                 order
-        );
-    }
-
-    public Wait toEntity() {
-        return new Wait(
-                id,
-                createdAt,
-                name,
-                reservationDate,
-                reservationTime.toEntity(),
-                theme.toEntity()
         );
     }
 }
