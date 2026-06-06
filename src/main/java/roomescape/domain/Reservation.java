@@ -83,7 +83,7 @@ public class Reservation {
     }
 
     public boolean isInStore(Store store) {
-        return slot.getStore().equals(store);
+        return slot.isInStore(store);
     }
 
     @Override

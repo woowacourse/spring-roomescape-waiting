@@ -53,7 +53,7 @@ public class Waitings {
 
     public List<Waiting> ofMember(Long memberId) {
         return waitings.stream()
-                .filter(waiting -> Objects.equals(waiting.getMember().getId(), memberId))
+                .filter(waiting -> Objects.equals(waiting.getMemberId(), memberId))
                 .toList();
     }
 

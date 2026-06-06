@@ -46,7 +46,7 @@ public class PromotionService {
         }
         waitingDao.findFirstBySlotKeyForUpdate(themeId, timeId, date, storeId)
                 .ifPresent(first -> {
-                    if (first.getSlot().isPast(LocalDateTime.now())) {
+                    if (first.isPast(LocalDateTime.now())) {
                         return;
                     }
                     reservationDao.insert(first.promote());

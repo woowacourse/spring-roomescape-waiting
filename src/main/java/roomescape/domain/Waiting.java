@@ -49,7 +49,11 @@ public class Waiting {
     }
 
     public boolean isInStore(Store store) {
-        return slot.getStore().equals(store);
+        return slot.isInStore(store);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
     }
 
     @Override
@@ -71,6 +75,10 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    public Long getMemberId() {
+        return member.getId();
     }
 
     public Slot getSlot() {

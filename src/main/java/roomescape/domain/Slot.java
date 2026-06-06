@@ -26,6 +26,10 @@ public class Slot {
         return time.isReservationBefore(now, date);
     }
 
+    public boolean isInStore(Store store) {
+        return this.store.equals(store);
+    }
+
     public LocalDate getDate() {
         return date;
     }
