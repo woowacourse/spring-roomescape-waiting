@@ -110,7 +110,7 @@ public class ReservationService {
     }
 
     private Reservation validateReservationOwner(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
             .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         reservation.validateOwner(name);
         return reservation;
