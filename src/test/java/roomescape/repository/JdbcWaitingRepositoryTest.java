@@ -331,4 +331,83 @@ class JdbcWaitingRepositoryTest {
                         waitingNumber))
         ).isInstanceOf(DuplicateKeyException.class);
     }
+
+    @Test
+    void 한_슬롯에_존재하는_대기_중_승격_가능한_대기를_반환한다() {
+        // given
+        LocalDate date = LocalDate.parse("2026-05-06");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        ReservationSlot slot = ReservationSlot.of(date, reservationTime, theme);
+
+        Waiting waiting1 = waitingRepository.save(
+                Waiting.create("루드비코", slot, 1L));
+        Waiting waiting2 = waitingRepository.save(
+                Waiting.create("코코", slot, 4L));
+        Waiting waiting3 = waitingRepository.save(
+                Waiting.create("네오", slot, 2L));
+
+        // when
+        Optional<Waiting> result = waitingRepository.findPromotableWaitingBySlot(slot);
+
+        // then
+        assertThat(result).isPresent().get().isEqualTo(waiting1);
+    }
+
+    @Test
+    void 한_슬롯에서_특정_대기자의_현재_대기_순번을_계산한다() {
+        // given
+        LocalDate date = LocalDate.parse("2026-05-06");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        ReservationSlot slot = ReservationSlot.of(date, reservationTime, theme);
+
+        Waiting waiting1 = waitingRepository.save(
+                Waiting.create("루드비코", slot, 1L));
+        Waiting waiting2 = waitingRepository.save(
+                Waiting.create("코코", slot, 2L));
+        Waiting waiting3 = waitingRepository.save(
+                Waiting.create("네오", slot, 5L));
+        Waiting waiting4 = waitingRepository.save(
+                Waiting.create("브라운", slot, 7L));
+
+        // when
+        Long waitingAheadNumber = waitingRepository.countWaitingOrder(waiting4);
+
+        // then
+        assertThat(waitingAheadNumber).isEqualTo(4L);
+    }
+
+    @Test
+    void 다른_슬롯에서_특정_대기자의_현재_대기_순번은_계산하지_않는다() {
+        // given
+        LocalDate date1 = LocalDate.parse("2026-05-06");
+        LocalDate date2 = LocalDate.parse("2026-06-06");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        ReservationSlot slot1 = ReservationSlot.of(date1, reservationTime, theme);
+        ReservationSlot slot2 = ReservationSlot.of(date2, reservationTime, theme);
+
+        Waiting waiting1 = waitingRepository.save(
+                Waiting.create("루드비코", slot1, 1L));
+        Waiting waiting2 = waitingRepository.save(
+                Waiting.create("코코", slot1, 2L));
+        Waiting waiting3 = waitingRepository.save(
+                Waiting.create("네오", slot1, 5L));
+        Waiting waiting4 = waitingRepository.save(
+                Waiting.create("브라운", slot1, 7L));
+
+        Waiting anotherWaiting1 = waitingRepository.save(
+                Waiting.create("루드비코", slot2, 2L));
+        Waiting anotherWaiting2 = waitingRepository.save(
+                Waiting.create("코코", slot2, 4L));
+        // when
+        Long waitingAheadNumber = waitingRepository.countWaitingOrder(waiting4);
+
+        // then
+        assertThat(waitingAheadNumber).isEqualTo(4L);
+    }
 }
