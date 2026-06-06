@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -96,6 +97,31 @@ class ReservationWaitingRepositoryTest {
                         .containsExactly(date, date.plusDays(1)),
                 () -> assertThat(result).extracting(WaitingWithTurn::turn)
                         .containsExactly(2L, 1L));
+    }
+
+    @Test
+    void 생성_시간이_같으면_아이디_순서로_대기_순번을_계산한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        LocalDateTime sameCreatedAt = LocalDateTime.of(2023, 8, 5, 10, 0);
+        Long id1 = insertWaitingWithCreatedAt("구구", slot, sameCreatedAt);
+        Long id2 = insertWaitingWithCreatedAt("브라운", slot, sameCreatedAt);
+
+        // when
+        List<WaitingWithTurn> result1 = waitingRepository.findByReserverWithTurn(new Reserver("구구"));
+        List<WaitingWithTurn> result2 = waitingRepository.findByReserverWithTurn(new Reserver("브라운"));
+
+        // then
+        assertAll(
+                () -> assertThat(result1)
+                        .extracting(waitingWithTurn -> waitingWithTurn.waiting().getId(), WaitingWithTurn::turn)
+                        .containsExactly(tuple(id1, 1L)),
+                () -> assertThat(result2)
+                        .extracting(waitingWithTurn -> waitingWithTurn.waiting().getId(), WaitingWithTurn::turn)
+                        .containsExactly(tuple(id2, 2L))
+        );
     }
 
     @Test
@@ -221,4 +247,16 @@ class ReservationWaitingRepositoryTest {
                 }, startAt);
     }
 
+    private Long insertWaitingWithCreatedAt(String name, ReservationSlot slot, LocalDateTime createdAt) {
+        jdbcTemplate.update("""
+                        INSERT INTO reservation_waiting(name, date, time_id, theme_id, created_at)
+                        VALUES (?, ?, ?, ?, ?);
+                        """,
+                name,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId(),
+                createdAt);
+        return jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_waiting;", Long.class);
+    }
 }
