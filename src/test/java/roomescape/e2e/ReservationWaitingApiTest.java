@@ -1,27 +1,19 @@
 package roomescape.e2e;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Test;
+import roomescape.exception.ProblemType;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import roomescape.exception.ProblemType;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationWaitingApiTest {
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+class ReservationWaitingApiTest extends AbstractE2eTest {
 
     @Test
     void 예약된_슬롯에_대기를_신청한다() {
@@ -261,47 +253,6 @@ class ReservationWaitingApiTest {
                 "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name, LocalDate.parse(date), timeId, themeId
         );
-    }
-
-    private Integer createReservation(String name, String date, Integer timeId, Integer themeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", name);
-        params.put("date", date);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTime(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTheme(String name, String description, String thumbnailImageUrl) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("description", description);
-        params.put("thumbnailImageUrl", thumbnailImageUrl);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
     }
 
     private Map<String, Object> waitingRequest(String name, String date, Integer timeId, Integer themeId) {
