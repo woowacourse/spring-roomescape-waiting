@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.exception.InvalidStateException;
 
 public class Reservation {
     private Long id;
@@ -36,7 +37,7 @@ public class Reservation {
     public void validateNotPast(LocalDate date, ReservationTime time) {
         LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
         if (targetDateTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
+            throw new InvalidStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
         }
     }
 

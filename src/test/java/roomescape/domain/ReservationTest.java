@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.InvalidStateException;
 
 class ReservationTest {
 
@@ -29,7 +30,7 @@ class ReservationTest {
                 ReservationStatus.WAITING);
 
         assertThatThrownBy(() -> reservation.validateNotPast(LocalDate.now().minusDays(1), time))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(InvalidStateException.class)
                 .hasMessage("이미 지난 시간/날짜는 예약할 수 없습니다.");
 
         assertThatCode(() -> reservation.validateNotPast(LocalDate.now().plusDays(1), time))

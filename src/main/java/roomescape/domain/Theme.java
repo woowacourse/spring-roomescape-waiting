@@ -34,7 +34,7 @@ public class Theme {
 
     private void validateUrl(String url) {
         if (url == null) {
-            throw new IllegalArgumentException("테마 사진 업로드에 실패했습니다.");
+            throw new IllegalArgumentException("URL이 유효하지 않습니다.");
         }
     }
 

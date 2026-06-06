@@ -22,6 +22,7 @@ import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.AlreadyExistsException;
+import roomescape.exception.InvalidStateException;
 import roomescape.exception.NotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -71,7 +72,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.now().minusDays(1), timeId, themeId);
 
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(InvalidStateException.class)
                 .hasMessageContaining("이미 지난 시간/날짜는 예약할 수 없습니다.");
     }
 
