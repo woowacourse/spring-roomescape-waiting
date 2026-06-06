@@ -3,8 +3,10 @@ package roomescape.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
+
 import java.time.LocalDate;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,7 +167,7 @@ public class ReservationControllerTest {
     void 예약을_삭제한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
-        int reservationId = createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId, themeId)
+        int reservationId = createReservation("브라운", LocalDate.now().plusDays(2).toString(), timeId, themeId)
                 .statusCode(201)
                 .extract().path("id");
 
@@ -173,6 +175,33 @@ public class ReservationControllerTest {
                 .when().delete("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void 예약을_취소하면_1순위_대기가_예약으로_자동_전환된다() {
+        int timeId = createTime("10:00");
+        int themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
+
+        String date = LocalDate.now().plusDays(2).toString();
+
+        int reservationId = createReservation("브라운", date, timeId, themeId)
+                .statusCode(201)
+                .extract().path("id");
+
+        createReservationWaiting("맥스", LocalDate.parse(date), timeId, themeId)
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=맥스")
+                .then().log().all()
+                .statusCode(200)
+                .body("status", hasItem("RESERVED"))
+                .body("status", not(hasItem("WAITING")));
     }
 
     private int createTime(String startAt) {
