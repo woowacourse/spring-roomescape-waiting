@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
@@ -24,6 +25,11 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
+    public List<ReservationWithSlotInformation> findByMemberName(String name) {
+        return List.of();
     }
 
     @Override

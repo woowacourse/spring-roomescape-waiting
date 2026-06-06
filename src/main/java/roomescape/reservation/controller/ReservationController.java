@@ -45,6 +45,15 @@ public class ReservationController {
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
+    @GetMapping("/my-reservations/v2")
+    public ResponseEntity<List<ReservationDetailDto>> getMyReservationsV2(@LoginMember Member member) {
+        List<ReservationDetailDto> responseData = reservationService.readAllByNameV2(member.getName()).stream()
+                .map(ReservationDetailDto::from)
+                .toList();
+        return ResponseEntity.ok(responseData);
+    }
+
+    @AuthGuard(roles = {MEMBER, MANAGER})
     @PatchMapping("/reservations/{id}/cancel")
     public ResponseEntity<ReservationDetailDto> cancel(
             @PathVariable Long id,

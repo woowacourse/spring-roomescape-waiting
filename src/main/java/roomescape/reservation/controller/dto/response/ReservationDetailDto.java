@@ -2,6 +2,7 @@ package roomescape.reservation.controller.dto.response;
 
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.time.LocalTime;
 
 public record ReservationDetailDto(
         Long id,
+        Long slotId,
         String name,
         LocalDate date,
         LocalTime time,
@@ -22,6 +24,7 @@ public record ReservationDetailDto(
     public static ReservationDetailDto from(Reservation reservation) {
         return new ReservationDetailDto(
                 reservation.getId(),
+                null,
                 reservation.getName(),
                 reservation.getDate().getDate(),
                 reservation.getTime().getStartAt(),
@@ -36,6 +39,7 @@ public record ReservationDetailDto(
     public static ReservationDetailDto from(ReservationWithWaitingTurn reservation) {
         return new ReservationDetailDto(
                 reservation.id(),
+                null,
                 reservation.name(),
                 reservation.date(),
                 reservation.startAt(),
@@ -44,6 +48,21 @@ public record ReservationDetailDto(
                 reservation.themeThumbnailUrl(),
                 reservation.status(),
                 reservation.waitingTurn()
+        );
+    }
+
+    public static ReservationDetailDto from(ReservationWithSlotInformation projection) {
+        return new ReservationDetailDto(
+                projection.id(),
+                projection.slotId(),
+                projection.name(),
+                projection.date(),
+                projection.time(),
+                projection.themeId(),
+                projection.themeName(),
+                projection.themeThumbnailUrl(),
+                projection.status(),
+                projection.waitingTurn()
         );
     }
 

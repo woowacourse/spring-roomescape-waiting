@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
 import roomescape.slot.repository.ReservationSlotRepository;
@@ -35,6 +36,10 @@ public class ReservationService {
 
     public List<ReservationWithWaitingTurn> readAllByName(String name) {
         return reservationRepository.findMyReservationsWithWaitingTurn(name);
+    }
+
+    public List<ReservationWithSlotInformation> readAllByNameV2(String name) {
+        return reservationRepository.findByMemberName(name);
     }
 
     @Transactional

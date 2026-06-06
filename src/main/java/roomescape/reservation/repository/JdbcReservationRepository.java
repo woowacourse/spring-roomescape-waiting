@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
@@ -94,6 +95,57 @@ public class JdbcReservationRepository implements ReservationRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<ReservationWithSlotInformation> findByMemberName(String name) {
+        String sql = """
+            SELECT
+                r.id            AS reservation_id,
+                r.name          AS name,
+                r.status        AS status,
+                r.reserved_at   AS reserved_at,
+                s.id            AS slot_id,
+                rd.date         AS date,
+                rt.start_at     AS start_at,
+                t.id            AS theme_id,
+                t.name          AS theme_name,
+                t.thumbnail_url AS thumbnail_url,
+                CASE
+                    WHEN r.status = 'WAITING' THEN (
+                        SELECT COUNT(*) + 1
+                        FROM reservation wait
+                        WHERE wait.slot_id = r.slot_id
+                          AND wait.status = 'WAITING'
+                          AND (wait.reserved_at < r.reserved_at
+                               OR (wait.reserved_at = r.reserved_at AND wait.id < r.id))
+                    )
+                    ELSE NULL
+                END AS waiting_turn
+            FROM reservation r
+                JOIN reservation_slot s  ON r.slot_id  = s.id
+                JOIN reservation_date rd ON s.date_id  = rd.id
+                JOIN reservation_time rt ON s.time_id  = rt.id
+                JOIN theme            t  ON s.theme_id = t.id
+            WHERE r.name = :name
+            ORDER BY rd.date ASC, rt.start_at ASC
+            """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", name);
+
+        return jdbcTemplate.query(sql, params, (rs, rowNum) -> new ReservationWithSlotInformation(
+                rs.getLong("reservation_id"),
+                rs.getLong("slot_id"),
+                rs.getString("name"),
+                rs.getObject("date", LocalDate.class),
+                rs.getObject("start_at", LocalTime.class),
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("thumbnail_url"),
+                ReservationStatus.valueOf(rs.getString("status")),
+                rs.getObject("waiting_turn", Long.class)
+        ));
     }
 
     @Override
