@@ -13,6 +13,7 @@ import roomescape.domain.exception.DomainConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
@@ -38,13 +39,16 @@ class ReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
+    @Mock
+    WaitingRepository waitingRepository;
+
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, reservationTimeRepository, themeRepository, fixedClock
+                reservationRepository, reservationTimeRepository, themeRepository, waitingRepository, fixedClock
         );
     }
 

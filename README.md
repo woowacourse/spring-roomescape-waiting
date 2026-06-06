@@ -1,136 +1,122 @@
 # 방탈출 예약 대기 (Room Escape Waiting)
 
-## 도메인 정책
+## 예약 대기 승인
 
-- 예약/예약 대기는 **지난 날짜·시간**으로 신청할 수 없다.
-- 같은 사용자가 **동일한 (날짜·시간·테마)** 에 중복으로 대기할 수 없다.
-- 이미 **본인의 예약이 있는** (날짜·시간·테마) 에는 대기를 신청할 수 없다.
-- 예약 대기는 **본인만** 취소할 수 있다.
-- 대기 순번은 같은 (날짜·시간·테마) 안에서 자신보다 먼저 신청한 대기 수 + 1 로 계산한다.
+### 변경 요구사항
 
-### 예약 대기
+- 예약 대기를 승인하여 예약으로 전환
+- 대기가 예약으로 전환되면 해당 슬롯의 나머지 대기 순번이 재정렬된다. 
+- 예약이 취소되면 해당 슬롯의 대기 순번이 재정렬된다.
+- 요구사항에 명시되지 않은 엣지 케이스를 스스로 식별하고 처리한다.
 
-#### 예약 대기 신청
+**추가된 요구사항**
 
-```http
-POST /waitings
-Content-Type: application/json
+토론에서 정한 트랜잭션 경계에 맞춰 함께 일어나야 하는 데이터 변경을 묶고, 중간 실패 시 데이터 일관성이 유지되는지 테스트로 확인한다.
 
-{
-  "name": "레서",
-  "date": "2026-06-20",
-  "timeId": 1,
-  "themeId": 1
-}
-```
+### 자동 전환 vs 수동 승인
 
-**`201 Created`**
+> 수동 전환 시 예약 회전성을 원할하게 하기 위해서는 관리자에게 알람 발송을 하여 최대한 빠른 시일 내에 반영할 수 있게 해야한다는 점
+> 예약 취소 후 예약 대기를 보장하기 위해 관리자가 예약 대기를 승인하기 전까지 예약이 불가능하게 해야하는 로직이 추가되어야 하기 떄문에
+> 현 코드 기준으로 작성비용이 더 크다는 점에서 **자동 전환**을 선택
 
-```json
-{
-  "id": 1,
-  "name": "레서",
-  "date": "2026-06-20",
-  "time": { "id": 1, "startAt": "10:00" },
-  "theme": { "id": 1, "name": "공포", "description": "무서운 테마", "thumbnail": "thumb.png" },
-  "order": 1
-}
-```
+### 자동 전환 시 예약 취소와 승격 트랜잭션을 묶을것인가 vs 분리할 것인가?
 
-| 상황 | 응답 |
-|---|---|
-| 존재하지 않는 `timeId` / `themeId` | `404 Not Found` |
-| 지난 날짜·시간 | `409 Conflict` (`DOMAIN_CONFLICT`) |
-| 이미 대기 중인 (날짜·시간·테마) | `409 Conflict` (`DUPLICATE_WAITING`) |
-| 이미 본인이 예약한 (날짜·시간·테마) | `409 Conflict` (`DUPLICATE_RESERVATION`) |
+자동 전환의 경우 예약 취소와 승격은 같이 발생해야하는 원자적인 단위로 볼 수 있음.
+다만 취소자는 예약 승격이 관심사가 아니기 때문에 승격이 실패했다고 취소까지 Rollback되어야 할 이유는 없다.
 
-#### 예약 대기 취소
+트랜잭션을 분리하면 취소 <-> 승격 사이에 예약이 발생할 수 있음
+트랜잭션을 분리하면 예약 취소만 되고 승격 유실이 발생할 해 대기열을 보장하지 못할 수 있다.
 
-```http
-DELETE /waitings/{id}?name=레서
-```
+// 결합
+유지가 맞고, README도 "승격은 부수효과가 아니라 슬롯 점유 불변식의 연속이라 같은 트랜잭션으로 묶는다"
 
-**`204 No Content`**
+예약 취소 = (name & date & time & theme)에 해당하는 예약 삭제 / 쿼리 1번
+예약 승격 =
+1. 예약 대기 findFirst() -> 예약 save()
+2. 서브쿼리로 한번에 예약 대기로 데이터 이관
 
-| 상황 | 응답 |
-|---|---|
-| 존재하지 않는 대기 `id` | `404 Not Found` |
-| 본인 소유가 아닌 대기 | `409 Conflict` (`DOMAIN_CONFLICT`) |
+### JOIN 최적화 트레이드오프
 
-### 내 예약 목록 조회 (예약 + 대기 통합)
+다건 단순 쿼리 vs 단건 복합 쿼리
 
-본인의 **확정 예약(`RESERVED`)** 과 **대기(`WAITING`)** 를 함께 반환합니다. 대기 항목은 `rank`(대기 순번)를 가집니다.
+**다건 단순 쿼리 (애플리케이션 조인)**
 
-```http
-GET /reservations?name=레서&page=0&size=10
-```
+장점
+- 결과셋이 작고 중복이 없다
+- 개별 결과 캐싱이 용이하다
+- 쿼리 단위가 단순해 디버깅과 유지보수가 쉽다
 
-**`200 OK`**
+단점
+- 네트워크 왕복 비용이 높다
+- 커넥션 점유 시간이 길어져 커넥션 풀 고갈 위험이 있다
+- 쿼리 간 데이터 일관성 보장이 어렵다 (읽기 스큐 가능)
+- N+1 문제에 빠지기 쉽다
+- DB 옵티마이저의 통합 최적화 기회를 잃는다
 
-```json
-{
-  "userReservations": [
-    {
-      "id": 1,
-      "name": "레서",
-      "date": "2026-06-20",
-      "time": { "id": 1, "startAt": "10:00" },
-      "theme": { "id": 1, "name": "공포", "description": "무서운 테마", "thumbnail": "thumb.png" },
-      "status": "RESERVED",
-      "rank": 0
-    },
-    {
-      "id": 5,
-      "name": "레서",
-      "date": "2026-06-21",
-      "time": { "id": 1, "startAt": "10:00" },
-      "theme": { "id": 1, "name": "공포", "description": "무서운 테마", "thumbnail": "thumb.png" },
-      "status": "WAITING",
-      "rank": 2
-    }
-  ]
-}
-```
+**단건 복합 쿼리 (DB 조인)**
 
-### 그 외 엔드포인트
+장점
+- 네트워크 왕복 비용이 낮다
+- 하나의 스냅샷에서 실행되어 읽기 일관성이 보장된다
+- DB 옵티마이저가 JOIN 순서, 인덱스 선택 등을 통합 최적화할 수 있다
 
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| `POST` | `/reservations` | 예약 생성 |
-| `PATCH` | `/reservations/{id}?name=` | 본인 예약 날짜·시간 변경 |
-| `DELETE` | `/reservations/{id}?name=` | 본인 예약 취소 |
-| `GET` | `/times` | 예약 시간 목록 조회 |
-| `GET` | `/themes` | 테마 목록 조회 |
-| `GET` | `/themes/{id}/available-times` | 특정 테마·날짜의 예약 가능 시간 조회 |
-| `GET` | `/themes/popular` | 인기 테마 조회 |
-| `GET` | `/admin/reservations?page=&size=` | (관리자) 전체 예약 목록 조회 |
-| `POST`/`DELETE` | `/admin/times`, `/admin/themes` | (관리자) 시간·테마 관리 |
+단점
+- JOIN 연산으로 인한 DB CPU·메모리 부하가 증가한다
+- 1:N:M 관계에서 행 수가 곱셈으로 폭발하여 전송량 및 중복 제거 비용이 커진다
+- 복잡한 JOIN이 슬로 쿼리가 되면 락 경합·커넥션 점유 문제가 동일하게 발생한다
 
-## 에러 응답 형식
+**공통 전제**
+- 어떤 전략이든 인덱스 설계가 선행되어야 한다
+- EXPLAIN으로 실행 계획을 확인하는 습관이 가장 중요하다
+- 데이터 규모와 아키텍처(샤딩 여부 등)에 따라 정답이 달라진다
 
-모든 에러는 아래 형식으로 반환됩니다.
+상황별 선택 기준
+DB 조인이 유리한 경우
 
-```json
-{
-  "code": "DUPLICATE_WAITING",
-  "message": "이미 대기 중인 시간입니다"
-}
-```
+1:1 또는 단순 1:N 관계이고 결과 행 수가 예측 가능할 때
+데이터 간 읽기 일관성이 중요할 때 (결제, 재고 등)
+인덱스가 잘 설계되어 있어서 옵티마이저가 효율적으로 처리할 수 있을 때
 
-| HTTP 상태 | 대표 `code` |
-|---|---|
-| `400 Bad Request` | `INVALID_INPUT`, `DOMAIN_RULE_VIOLATION` |
-| `404 Not Found` | `RESERVATION_NOT_FOUND`, `RESERVATION_TIME_NOT_FOUND`, `THEME_NOT_FOUND` |
-| `409 Conflict` | `DOMAIN_CONFLICT`, `DUPLICATE_WAITING`, `DUPLICATE_RESERVATION` |
-| `405 Method Not Allowed` | `METHOD_NOT_ALLOWED` |
-| `500 Internal Server Error` | `INTERNAL_ERROR` |
+애플리케이션 조인이 유리한 경우
 
-## 테스트 구성
+1:N:M이 겹쳐서 결과셋이 곱셈으로 폭발하는 구조일 때
+일부 데이터(사용자 프로필 등)가 자주 재사용되어 캐싱 효과가 클 때
+데이터가 서로 다른 DB나 샤드에 분산되어 있어 JOIN 자체가 불가능할 때
+각 데이터의 변경 주기가 달라서 독립적으로 캐싱·갱신하고 싶을 때
 
-| 레이어 | 클래스 | 도구 |
-|---|---|---|
-| 도메인 | `WaitingTest` | 순수 단위 |
-| 서비스 | `WaitingServiceTest` | Mockito |
-| 컨트롤러 | `WaitingControllerTest` | `@WebMvcTest` + MockMvc |
-| 저장소 | `WaitingRepositoryTest`, `ReservationRepositoryTest` | `@JdbcTest` + H2 |
-| 엔드투엔드 | `WaitingE2ETest` | `@SpringBootTest` + RestAssured |
+
+
+---
+
+        /**
+         * Query + 3
+         *  1. if (existBySchedule)
+         *  2. findPriorityWaitingBySchedule()
+         *  3. save(Reservation)
+         */
+
+        /**
+         * Query + 2
+         * 1. Optional<Waiting> findPriorityWaitingBySchedule()
+         * 2. if(waiting.isPresent)
+         * 3. save(Reservation)
+         */
+
+        /**
+         * Query + 2
+         * 모든 예약대기를 메모리에 로드하고 정렬비용
+         * 1. Optional<Waiting> findBySchedule()
+         * 2. if(waitList.isPresent)
+         * 3.waitList.sort(), waitList.stream().map(Reservation::create).findFirst()
+         * 4. save(Reservation)
+         */
+
+
+        /**
+         * Query + 2
+         * 1. Optional<Waiting> findPriorityWaitingBySchedule()
+         * 2. if(waiting.isPresent)
+         * 3. save(Reservation)
+         * 4. delete(Waiting)
+         * Reservation 조립 위치 get으로 꺼내서 new 할건지 vs Reservation에 Waiting을 넘길건지 vs 별도의 Mapper 객체를 만들건지
+         */

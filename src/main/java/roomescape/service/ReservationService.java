@@ -10,6 +10,7 @@ import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -26,17 +27,20 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
     private final Clock clock;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
+            WaitingRepository waitingRepository,
             Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
         this.clock = clock;
     }
 
@@ -81,7 +85,16 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
         reservation.checkCancellable(name, LocalDateTime.now(clock));
-        reservationRepository.delete(reservation);
+        boolean deleted = reservationRepository.delete(reservation);
+
+        if (!deleted) {
+            return;
+        }
+        waitingRepository.findFirstWaitingByScheduleForUpdate(reservation.getSchedule())
+                .ifPresent(waiting -> {
+                    reservationRepository.save(waiting.toReservation(LocalDateTime.now(clock)));
+                    waitingRepository.delete(waiting);
+                });
     }
 
     private void checkDuplicated(Reservation reservation) {

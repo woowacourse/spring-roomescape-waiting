@@ -1,5 +1,6 @@
 package roomescape.service.fake;
 
+import roomescape.domain.Schedule;
 import roomescape.domain.Waiting;
 import roomescape.repository.WaitingRepository;
 
@@ -43,6 +44,13 @@ public class FakeWaitingRepository implements WaitingRepository {
         return waitingList.stream()
                 .filter(w -> w.getName().equals(name))
                 .toList();
+    }
+
+    @Override
+    public Optional<Waiting> findFirstWaitingByScheduleForUpdate(Schedule schedule) {
+        return waitingList.stream()
+                .filter(r -> r.getSchedule().equals(schedule))
+                .findFirst();
     }
 
     @Override

@@ -67,7 +67,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void delete(Reservation reservation) {
+    public boolean delete(Reservation reservation) {
         throw new UnsupportedOperationException();
     }
 }

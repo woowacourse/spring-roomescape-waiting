@@ -182,9 +182,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void delete(Reservation reservation) {
+    public boolean delete(Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
-        jdbcTemplate.update(sql, reservation.getId());
+        return jdbcTemplate.update(sql, reservation.getId()) > 0;
     }
 
     private RowMapper<Reservation> reservationRowsMapper() {

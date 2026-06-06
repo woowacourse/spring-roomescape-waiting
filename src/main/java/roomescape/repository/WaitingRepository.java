@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import roomescape.domain.Schedule;
 import roomescape.domain.Waiting;
 
 import java.util.List;
@@ -10,6 +11,8 @@ public interface WaitingRepository {
     Optional<Waiting> findById(long id);
 
     List<Waiting> findUserWaitingList(String name, int page, int size);
+
+    Optional<Waiting> findFirstWaitingByScheduleForUpdate(Schedule schedule);
 
     Optional<Waiting> findByScheduleAndName(Waiting waiting);
 
