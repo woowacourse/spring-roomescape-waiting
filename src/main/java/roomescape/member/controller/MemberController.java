@@ -15,13 +15,13 @@ import roomescape.member.dto.SignupRequest;
 import roomescape.member.service.MemberService;
 
 @RestController
-public class LoginController {
+public class MemberController {
 
     private static final String SESSION_KEY = "memberId";
 
     private final MemberService memberService;
 
-    public LoginController(MemberService memberService) {
+    public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
 
