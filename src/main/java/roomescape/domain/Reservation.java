@@ -1,9 +1,15 @@
 package roomescape.domain;
 
+import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.code.ReservationErrorCode;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Reservation {
+    private static final int CANCEL_DEADLINE_HOURS = 24;
+
     private final Long id;
     private final String name;
     private final LocalDate date;
@@ -24,6 +30,16 @@ public class Reservation {
 
     public static Reservation createWithoutId(String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, name, date, time, theme);
+    }
+
+    public void validateCancelable(LocalDateTime now) {
+        Objects.requireNonNull(now, "현재 시간은 필수값 입니다.");
+
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        LocalDateTime cancelDeadLine = reservationDateTime.minusHours(CANCEL_DEADLINE_HOURS);
+        if (now.isAfter(cancelDeadLine)) {
+            throw new RoomEscapeException(ReservationErrorCode.CANNOT_CANCEL);
+        }
     }
 
     public Long getId() {

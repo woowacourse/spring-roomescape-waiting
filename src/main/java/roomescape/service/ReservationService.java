@@ -113,6 +113,20 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public void cancel(Long reservationId, LocalDateTime now) {
+        Reservation reservation = getReservation(reservationId);
+        reservation.validateCancelable(now);
+
+        ReservationSlot slot = new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
+
+        delete(reservationId);
+
+        waitings.first()
+                .ifPresent(this::promoteWaitingToReservation);
+    }
+
     private ReservationTime getTime(long timeId) {
         return reservationTimeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.NOT_FOUND));
@@ -140,5 +154,12 @@ public class ReservationService {
     private Reservation getReservation(Long reservationId) {
         return reservationDao.selectById(reservationId)
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
+    }
+
+    private void promoteWaitingToReservation(ReservationWaiting waiting) {
+        Reservation promotedReservation = Reservation.createWithoutId(waiting.getName(), waiting.getReservationDate(), waiting.getTime(), waiting.getTheme());
+
+        reservationDao.insert(promotedReservation);
+        reservationWaitingDao.delete(waiting.getId());
     }
 }

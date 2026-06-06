@@ -239,6 +239,101 @@ class ReservationServiceTest {
         assertThat(responses.getFirst().order()).isEqualTo(3);
     }
 
+    @Test
+    void 예약_시간까지_24시간_미만이면_취소할_수_없다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = saveReservation(
+                "브라운",
+                LocalDate.of(2026, 6, 10),
+                time,
+                theme
+        );
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 10, 10, 1);
+
+        assertThatThrownBy(() -> reservationService.cancel(reservation.getId(), now))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 예약_시간까지_24시간_이하이면_취소할_수_있다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = saveReservation(
+                "브라운",
+                LocalDate.of(2026, 6, 10),
+                time,
+                theme
+        );
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 9, 10, 0);
+
+        assertThatNoException()
+                .isThrownBy(() -> reservationService.cancel(reservation.getId(), now));
+    }
+
+    @Test
+    void 예약을_취소하면_1순위_대기가_예약으로_자동_전환된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        saveReservationWaiting("맥스", date, time, theme);
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 8, 10, 0);
+
+        reservationService.cancel(reservation.getId(), now);
+
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+
+        assertThat(reservations)
+                .extracting(ReservationResponse::name)
+                .containsExactly("맥스");
+    }
+
+    @Test
+    void 예약을_취소하면_자동_전환된_대기는_대기_목록에서_삭제된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        saveReservationWaiting("맥스", date, time, theme);
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 8, 10, 0);
+
+        reservationService.cancel(reservation.getId(), now);
+
+        List<MyReservationResponse> responses = reservationService.getMyReservations("맥스");
+
+        assertThat(responses)
+                .extracting(MyReservationResponse::status)
+                .containsExactly(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void 예약을_취소하면_남은_대기의_순번이_재계산된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        saveReservationWaiting("맥스", date, time, theme);
+        saveReservationWaiting("로지", date, time, theme);
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 8, 10, 0);
+
+        reservationService.cancel(reservation.getId(), now);
+
+        List<MyReservationResponse> responses = reservationService.getMyReservations("로지");
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(responses.getFirst().order()).isEqualTo(1);
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }

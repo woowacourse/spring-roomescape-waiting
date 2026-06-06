@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ReservationWaitingQueue {
     private static final Comparator<ReservationWaiting> WAITING_ORDER =
@@ -27,5 +28,12 @@ public class ReservationWaitingQueue {
         }
 
         return index + 1;
+    }
+
+    public Optional<ReservationWaiting> first() {
+        if (waitings.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(waitings.getFirst());
     }
 }
