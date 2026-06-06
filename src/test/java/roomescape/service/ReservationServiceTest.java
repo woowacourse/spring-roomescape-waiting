@@ -86,7 +86,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하는 예약을 식별자를 통해 삭제하면 목록에서 사라진다.")
     void 예약_삭제() {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
+        LocalDate futureDate = LocalDate.now().plusDays(2);
         Reservation reservation = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
                 savedTheme.getId());
         reservationService.removeReservation(reservation.getId(), "브라운");
@@ -153,7 +153,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운"))
                 .isInstanceOf(PastTimeException.class)
-                .hasMessage("이미 지난 예약은 삭제할 수 없습니다.");
+                .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
     }
 
     @Test
@@ -216,7 +216,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 취소하면 같은 슬롯의 첫 번째 대기가 예약으로 승급된다.")
     void 예약_취소시_첫번째_대기_승급() {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
+        LocalDate futureDate = LocalDate.now().plusDays(2);
         Reservation reservation = reservationService.saveReservation(
                 "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()
         );
@@ -233,7 +233,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("두번째 대기 순번 예약 취소 시 대기 순번은 1번을 반환한다.")
     void 예약_취소_후_두번째_대기_순번_1번_반() {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
+        LocalDate futureDate = LocalDate.now().plusDays(2);
         Reservation reservation = reservationService.saveReservation(
                 "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()
         );
