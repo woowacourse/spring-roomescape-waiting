@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -54,13 +55,19 @@ public class ReservationService {
         validateNotAlreadyBooked(member.getId(), date, timeId, themeId);
 
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            ReservationWaiting waiting = reservationWaitingRepository.save(
-                    ReservationWaiting.of(member, date, time, theme));
-            return BookingResult.waiting(waiting);
+            return BookingResult.waiting(saveWaiting(member, date, time, theme));
         }
 
-        Reservation saved = reservationRepository.save(Reservation.of(member, date, time, theme));
-        return BookingResult.reserved(saved);
+        try {
+            Reservation saved = reservationRepository.save(Reservation.of(member, date, time, theme));
+            return BookingResult.reserved(saved);
+        } catch (DataIntegrityViolationException e) {
+            return BookingResult.waiting(saveWaiting(member, date, time, theme));
+        }
+    }
+
+    private ReservationWaiting saveWaiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return reservationWaitingRepository.save(ReservationWaiting.of(member, date, time, theme));
     }
 
     private void validateNotAlreadyBooked(Long memberId, LocalDate date, Long timeId, Long themeId) {

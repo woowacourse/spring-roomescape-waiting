@@ -104,6 +104,37 @@ class ReservationConcurrencyTest {
         assertThat(waitingRepository.findByMemberId(waiter.getId())).isEmpty();
     }
 
+    @Test
+    @DisplayName("빈 슬롯에 두 회원이 동시에 예약하면 한 명만 예약되고 다른 한 명은 대기로 전환된다")
+    void 빈_슬롯_동시_예약() throws InterruptedException {
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            await(start);
+            reservationService.createReservation(
+                    reserver, new ReservationRequest(futureDate, time.getId(), theme.getId()));
+        });
+        executor.submit(() -> {
+            await(start);
+            reservationService.createReservation(
+                    newcomer, new ReservationRequest(futureDate, time.getId(), theme.getId()));
+        });
+
+        start.countDown();
+        executor.shutdown();
+        executor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS);
+
+        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, time.getId(), theme.getId()))
+                .isTrue();
+        int reservedCount = reservationRepository.findByMemberId(reserver.getId()).size()
+                + reservationRepository.findByMemberId(newcomer.getId()).size();
+        int waitingCount = waitingRepository.findByMemberId(reserver.getId()).size()
+                + waitingRepository.findByMemberId(newcomer.getId()).size();
+        assertThat(reservedCount).isEqualTo(1);
+        assertThat(waitingCount).isEqualTo(1);
+    }
+
     private void await(CountDownLatch latch) {
         try {
             latch.await();
