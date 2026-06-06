@@ -143,7 +143,18 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(
                         ReservationErrorCode.RESERVATION_NOT_FOUND)
                 );
+        ReservationSlot slot = reservation.getReservationSlot();
         reservation.validateNotPastTime(LocalDateTime.now(clock));
         reservationRepository.delete(id);
+
+        Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlot(slot);
+        promotableWaiting.ifPresent(waiting -> {
+            Reservation promotedReservation = Reservation.create(
+                    waiting.getName(),
+                    waiting.getReservationSlot()
+            );
+            reservationRepository.save(promotedReservation);
+            waitingRepository.delete(waiting.getId());
+        });
     }
 }
