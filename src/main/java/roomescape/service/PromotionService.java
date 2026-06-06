@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.PromotionOutboxDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
-import roomescape.domain.PromotionTask;
+import roomescape.domain.promotion.PromotionTask;
 import roomescape.domain.Slot;
 
 /**

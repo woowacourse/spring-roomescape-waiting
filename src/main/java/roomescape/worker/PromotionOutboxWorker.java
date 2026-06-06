@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import roomescape.dao.PromotionOutboxDao;
-import roomescape.domain.OutboxStatus;
-import roomescape.domain.PromotionTask;
+import roomescape.domain.promotion.OutboxStatus;
+import roomescape.domain.promotion.PromotionTask;
 import roomescape.service.PromotionService;
 
 /**

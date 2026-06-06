@@ -20,7 +20,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
-import roomescape.domain.OutboxStatus;
+import roomescape.domain.promotion.OutboxStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;

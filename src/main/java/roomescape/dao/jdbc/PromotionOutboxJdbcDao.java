@@ -10,8 +10,8 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.PromotionOutboxDao;
-import roomescape.domain.OutboxStatus;
-import roomescape.domain.PromotionTask;
+import roomescape.domain.promotion.OutboxStatus;
+import roomescape.domain.promotion.PromotionTask;
 
 @Repository
 public class PromotionOutboxJdbcDao implements PromotionOutboxDao {

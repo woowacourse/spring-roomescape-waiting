@@ -1,7 +1,8 @@
-package roomescape.domain;
+package roomescape.domain.promotion;
 
 import java.time.LocalDate;
 import roomescape.common.DomainAssert;
+import roomescape.domain.Slot;
 
 /**
  * 아웃박스 행: "이 슬롯의 다음 대기자를 승격시켜라"라는 할 일.
