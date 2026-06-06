@@ -43,6 +43,9 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
             )
     );
 
+    private final RowMapper<WaitingWithTurn> turnRowMapper = (resultSet, rowNum) ->
+            new WaitingWithTurn(rowMapper.mapRow(resultSet, rowNum), resultSet.getLong("turn"));
+
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -132,15 +135,24 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public Long calculateTurn(Long waitingId, LocalDate date, Long timeId, Long themeId) {
+    public List<WaitingWithTurn> findWithTurnByMemberId(Long memberId) {
         String query = """
-                SELECT turn FROM (
+                SELECT rw.id AS waiting_id, rw.date,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url,
+                       sub.turn AS turn
+                FROM (
                     SELECT id, ROW_NUMBER() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at, id) AS turn
                     FROM reservation_waiting
-                    WHERE date = ? AND time_id = ? AND theme_id = ?
                 ) sub
-                WHERE id = ?
+                JOIN reservation_waiting rw ON rw.id = sub.id
+                JOIN member m ON rw.member_id = m.id
+                JOIN reservation_time rt ON rw.time_id = rt.id
+                JOIN theme t ON rw.theme_id = t.id
+                WHERE rw.member_id = ?
+                ORDER BY rw.id
                 """;
-        return jdbcTemplate.queryForObject(query, Long.class, date, timeId, themeId, waitingId);
+        return jdbcTemplate.query(query, turnRowMapper, memberId);
     }
 }

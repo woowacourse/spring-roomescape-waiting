@@ -1,4 +1,4 @@
-package roomescape.reservationwaiting.service;
+package roomescape.reservationwaiting.repository;
 
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 

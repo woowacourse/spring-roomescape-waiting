@@ -11,7 +11,6 @@ import roomescape.auth.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
-import roomescape.reservationwaiting.service.WaitingWithTurn;
 
 @RestController
 @RequestMapping("/waitings")

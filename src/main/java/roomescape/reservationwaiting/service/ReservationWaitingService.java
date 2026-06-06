@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
+import roomescape.reservationwaiting.repository.WaitingWithTurn;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,11 +33,6 @@ public class ReservationWaitingService {
     }
 
     public List<WaitingWithTurn> getWaitingByMemberId(Long memberId) {
-        return reservationWaitingRepository.findByMemberId(memberId).stream()
-                .map(waiting -> new WaitingWithTurn(waiting,
-                        reservationWaitingRepository.calculateTurn(
-                                waiting.getId(), waiting.getDate(), waiting.getTime().getId(),
-                                waiting.getTheme().getId())))
-                .toList();
+        return reservationWaitingRepository.findWithTurnByMemberId(memberId);
     }
 }
