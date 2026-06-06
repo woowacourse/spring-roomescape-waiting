@@ -123,6 +123,16 @@ class ReservationCommandServiceTest {
     }
 
     @Test
+    @DisplayName("과거 예약을 삭제하면 같은 슬롯의 대기를 승격하지 않는다.")
+    void deletePastReservationDoesNotPromote() {
+        reservationCommandService.delete(1L);
+
+        assertThat(reservationDao.findById(1L)).isEmpty();
+        assertThat(waitingDao.findById(1L)).isPresent();
+        assertThat(reservationDao.findAllByName(new Member("user_d"))).isEmpty();
+    }
+
+    @Test
     @DisplayName("승격 중 예약 저장 실패 시 예약 삭제와 대기 삭제가 함께 롤백된다.")
     void cancelRollsBackWhenPromotionFails() {
         doThrow(new DuplicateException("승격 실패"))

@@ -73,7 +73,7 @@ public class ReservationTest {
     void deleteReservationTest() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().delete("/admin/reservations/1")
+                .when().delete("/admin/reservations/3")
                 .then().log().all()
                 .statusCode(204);
 
@@ -83,7 +83,7 @@ public class ReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(3))
-                .body("find { it.id == 1 }", nullValue())
-                .body("find { it.name == 'user_d' && it.date == '2026-04-28' }.status", is("예약"));
+                .body("find { it.id == 3 }", nullValue())
+                .body("find { it.name == 'user_e' && it.date == '2026-06-05' }.status", is("예약"));
     }
 }

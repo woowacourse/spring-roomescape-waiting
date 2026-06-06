@@ -116,6 +116,9 @@ public class ReservationCommandService {
     }
 
     private void promoteNextWaitingIn(Slot slot) {
+        if (slot.isPast(LocalDateTime.now(clock))) {
+            return;
+        }
         waitingDao.findNextInLine(slot)
                 .ifPresent(this::promoteWaiting);
     }
