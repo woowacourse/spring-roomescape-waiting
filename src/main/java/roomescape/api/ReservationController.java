@@ -30,9 +30,9 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> responses = reservationService.getReservations().stream()
-            .map(ReservationResponse::from)
+    public ResponseEntity<List<ReservationWithStatusResponse>> findAll() {
+        List<ReservationWithStatusResponse> responses = reservationService.getReservationsWithStatus().stream()
+            .map(ReservationWithStatusResponse::from)
             .toList();
         return ResponseEntity.ok().body(responses);
     }

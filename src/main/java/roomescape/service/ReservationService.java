@@ -65,6 +65,23 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    public List<ReservationWithStatus> getReservationsWithStatus() {
+        List<ReservationWithStatus> results = new ArrayList<>();
+
+        for (Reservation reservation : reservationRepository.findAll()) {
+            results.add(ReservationWithStatus.reserved(reservation));
+        }
+
+        for (Waitlist waitlist : waitlistRepository.findAll()) {
+            results.add(ReservationWithStatus.waitingWithOrder(waitlist, calculateWaitingOrder(waitlist)));
+        }
+
+        results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
+            .thenComparing(reservation -> reservation.getTime().getStartAt()));
+
+        return results;
+    }
+
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public List<ReservationWithStatus> getMyReservations(String name) {
         List<ReservationWithStatus> results = new ArrayList<>();

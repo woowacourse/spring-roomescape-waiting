@@ -21,7 +21,7 @@
         tbody.innerHTML = '';
 
         if (!reservations || reservations.length === 0) {
-            showEmptyState(tbody, 6, '확정된 예약이 없습니다.');
+            showEmptyState(tbody, 8, '예약과 대기가 없습니다.');
             return;
         }
 
@@ -33,11 +33,23 @@
             row.insertCell().textContent = reservation.theme ? reservation.theme.name : '-';
             row.insertCell().textContent = reservation.date;
             row.insertCell().textContent = reservation.time ? reservation.time.startAt : '-';
+            row.insertCell().textContent = getStatusText(reservation);
+            row.insertCell().textContent = reservation.waitingOrder || '-';
 
             const actions = row.insertCell();
             actions.className = 'actions';
-            actions.appendChild(createButton('삭제', 'btn-danger', () => deleteReservation(reservation)));
+            if (reservation.status !== 'WAITING') {
+                actions.appendChild(createButton('삭제', 'btn-danger', () => deleteReservation(reservation)));
+            }
         });
+    }
+
+    function getStatusText(reservation) {
+        if (reservation.status === 'WAITING') {
+            return '대기';
+        }
+
+        return '예약';
     }
 
     async function deleteReservation(reservation) {

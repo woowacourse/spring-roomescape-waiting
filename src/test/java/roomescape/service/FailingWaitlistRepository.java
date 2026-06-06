@@ -47,6 +47,11 @@ public class FailingWaitlistRepository implements WaitlistRepository {
     }
 
     @Override
+    public List<Waitlist> findAll() {
+        return delegate.findAll();
+    }
+
+    @Override
     public List<Waitlist> findByName(String name) {
         return delegate.findByName(name);
     }

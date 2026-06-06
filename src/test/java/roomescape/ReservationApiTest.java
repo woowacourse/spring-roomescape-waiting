@@ -70,6 +70,30 @@ class ReservationApiTest {
     }
 
     @Test
+    void 전체_예약_조회에서_예약과_대기를_함께_조회한다() {
+        Integer timeId = createTime("10:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+
+        createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
+        createReservation("네오", FUTURE_FIRST_DATE, timeId, themeId);
+        createReservation("포비", FUTURE_FIRST_DATE, timeId, themeId);
+
+        RestAssured.given().log().all()
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(3))
+            .body("[0].name", is("브라운"))
+            .body("[0].status", is("RESERVED"))
+            .body("[1].name", is("네오"))
+            .body("[1].status", is("WAITING"))
+            .body("[1].waitingOrder", is(1))
+            .body("[2].name", is("포비"))
+            .body("[2].status", is("WAITING"))
+            .body("[2].waitingOrder", is(2));
+    }
+
+    @Test
     void 예약_추가_및_삭제() {
         Integer timeId = createTime("18:00");
         Integer themeId = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");

@@ -14,6 +14,8 @@ public interface WaitlistRepository {
 
     Optional<Waitlist> findById(Long id);
 
+    List<Waitlist> findAll();
+
     boolean existsBySameUser(Reservation reservation);
 
     Long save(Reservation reservation, LocalDateTime createdAt);

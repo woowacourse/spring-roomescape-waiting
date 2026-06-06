@@ -66,6 +66,22 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     }
 
     @Override
+    public List<Waitlist> findAll() {
+        String sql = """
+            SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM waitlist as w
+            INNER JOIN reservation_time as t ON w.time_id = t.id
+            INNER JOIN theme as th ON w.theme_id = th.id
+            ORDER BY w.date DESC, t.start_at ASC, w.created_at ASC, w.id ASC;
+            """;
+
+        return jdbcTemplate.query(sql, wailtListRowMapper);
+    }
+
+    @Override
     public boolean existsBySameUser(Reservation reservation) {
         String sql = """
             SELECT COUNT(*)
