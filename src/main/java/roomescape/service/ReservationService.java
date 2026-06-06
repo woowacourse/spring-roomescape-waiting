@@ -3,6 +3,8 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -54,17 +56,39 @@ public class ReservationService {
 
     public List<ReservationAndWaiting> findReservationAndWaitingByName(String name) {
         List<Reservation> reservationsByName = reservationRepository.findByName(name);
-        List<Reservation> reservations = reservationsByName.stream()
-                .filter(Reservation::isReserved)
-                .toList();
-
-        List<WaitingWithNumber> waitings = reservationsByName.stream()
-                .filter(Reservation::isWaiting)
-                .map(this::createWaitingWithNumber)
-                .toList();
+        List<Reservation> reservations = findReservedReservations(reservationsByName);
+        List<WaitingWithNumber> waitings = createWaitingsWithNumber(reservationsByName);
 
         UserReservations userReservations = new UserReservations(name, reservations, waitings);
         return userReservations.getReservationAndWaitings();
+    }
+
+    private List<Reservation> findReservedReservations(List<Reservation> reservations) {
+        return reservations.stream()
+                .filter(Reservation::isReserved)
+                .toList();
+    }
+
+    private List<WaitingWithNumber> createWaitingsWithNumber(List<Reservation> reservationsByName) {
+        List<Reservation> waitingsByName = reservationsByName.stream()
+                .filter(Reservation::isWaiting)
+                .toList();
+
+        Map<Long, List<Reservation>> waitingsBySlotId = findWaitingsBySlotId(waitingsByName);
+
+        return waitingsByName.stream()
+                .map(waiting -> createWaitingWithNumber(waiting, waitingsBySlotId))
+                .toList();
+    }
+
+    private Map<Long, List<Reservation>> findWaitingsBySlotId(List<Reservation> waitingsByName) {
+        List<Long> slotIds = waitingsByName.stream()
+                .map(waiting -> waiting.getSlot().getId())
+                .distinct()
+                .toList();
+
+        return reservationRepository.findWaitingsBySlotIds(slotIds).stream()
+                .collect(Collectors.groupingBy(reservation -> reservation.getSlot().getId()));
     }
 
     @Transactional
@@ -170,9 +194,11 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("해당 예약 슬롯을 찾을 수 없습니다."));
     }
 
-    private WaitingWithNumber createWaitingWithNumber(Reservation waiting) {
-        ReservationLine reservationLine = new ReservationLine(waiting.getSlot(),
-                reservationRepository.findWaitingsBySlotId(waiting.getSlot().getId()));
+    private WaitingWithNumber createWaitingWithNumber(Reservation waiting,
+                                                      Map<Long, List<Reservation>> waitingsBySlotId) {
+
+        List<Reservation> sameSlotWaitings = waitingsBySlotId.getOrDefault(waiting.getSlot().getId(), List.of());
+        ReservationLine reservationLine = new ReservationLine(waiting.getSlot(), sameSlotWaitings);
         return new WaitingWithNumber(waiting, reservationLine.findWaitingNumber(waiting));
     }
 

@@ -9,6 +9,8 @@ import java.util.Optional;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
@@ -21,9 +23,11 @@ import roomescape.domain.TimeSlot;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
 
     @Override
@@ -151,6 +155,38 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY r.created_at ASC, r.id ASC
                 """;
         return jdbcTemplate.query(sql, rowMapper(), slotId, ReservationStatus.WAITING.name());
+    }
+
+    @Override
+    public List<Reservation> findWaitingsBySlotIds(List<Long> slotIds) {
+        String sql = """
+            SELECT
+                r.id AS r_id,
+                r.name,
+                r.created_at,
+                r.status,
+                rs.id AS slot_id,
+                rs.date AS slot_date,
+                ts.id AS time_id,
+                ts.start_at,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.description AS theme_description,
+                th.thumbnail_url AS theme_thumbnail_url
+            FROM reservation r
+            INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+            INNER JOIN time_slot ts ON rs.time_id = ts.id
+            INNER JOIN theme th ON rs.theme_id = th.id
+            WHERE r.slot_id IN (:slotIds)
+              AND r.status = :status
+            ORDER BY r.slot_id ASC, r.created_at ASC, r.id ASC
+            """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("slotIds", slotIds)
+                .addValue("status", ReservationStatus.WAITING.name());
+
+        return namedParameterJdbcTemplate.query(sql, params, rowMapper());
     }
 
     @Override
