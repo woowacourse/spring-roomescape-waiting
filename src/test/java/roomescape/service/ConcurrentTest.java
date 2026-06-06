@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.service.dto.command.ReservationCommand;
@@ -420,6 +421,58 @@ public class ConcurrentTest {
         assertThat(errors)
                 .as("waiting 취소가 race로 실패하면 404(NotFoundException)만 허용")
                 .allMatch(e -> e instanceof NotFoundException);
+    }
+
+    @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
+    void 동시_같은_빈_슬롯에_reserve가_들어오면_한_쪽만_성공하고_나머지는_409() throws Exception {
+        jdbcTemplate.update("DELETE FROM waiting");
+        jdbcTemplate.update("DELETE FROM reservation");
+
+        ReservationCommand commandA = new ReservationCommand("사용자A", date, timeId, themeId);
+        ReservationCommand commandB = new ReservationCommand("사용자B", date, timeId, themeId);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        CountDownLatch finishGate = new CountDownLatch(2);
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.reserve(commandA);
+            } catch (Throwable e) {
+                errors.add(e);
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.reserve(commandB);
+            } catch (Throwable e) {
+                errors.add(e);
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        startGate.countDown();
+        boolean finished = finishGate.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(finished)
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
+                .isTrue();
+
+        assertThat(countReservations())
+                .as("동시 reserve race에서 정확히 1건만 성공 0이면 둘 다 실패, 2면 UNIQUE 제약 실패")
+                .isEqualTo(1);
+
+        assertThat(errors)
+                .as("진 쪽은 409(ConflictException)만 허용된다.")
+                .allMatch(e -> e instanceof ConflictException);
     }
 
     private int countReservations() {
