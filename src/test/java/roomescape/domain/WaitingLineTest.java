@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,19 +18,26 @@ public class WaitingLineTest {
     private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
 
     @Test
-    @DisplayName("빈 대기 목록으로 대기 줄을 생성하면 예외가 발생한다.")
-    void 빈_대기_목록_예외_발생() {
-        assertThatThrownBy(() -> new WaitingLine(List.of()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약 대기가 없습니다.");
+    @DisplayName("빈 대기 목록으로 대기 줄을 생성할 수 있다.")
+    void 빈_대기_목록_생성() {
+        assertThatCode(() -> new WaitingLine(createSlot(), List.of()))
+                .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("null 대기 목록으로 대기 줄을 생성하면 예외가 발생한다.")
     void null_대기_목록_예외_발생() {
-        assertThatThrownBy(() -> new WaitingLine(null))
+        assertThatThrownBy(() -> new WaitingLine(createSlot(), null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약 대기가 없습니다.");
+                .hasMessage("예약 대기 목록은 필수입니다.");
+    }
+
+    @Test
+    @DisplayName("null 예약 슬롯으로 대기 줄을 생성하면 예외가 발생한다.")
+    void null_예약_슬롯_예외_발생() {
+        assertThatThrownBy(() -> new WaitingLine(null, List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 슬롯은 필수입니다.");
     }
 
     @Test
@@ -37,7 +45,7 @@ public class WaitingLineTest {
     void 생성_시각_기준_대기_순번_계산() {
         Reservation first = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
         Reservation second = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
-        WaitingLine waitingLine = new WaitingLine(List.of(second, first));
+        WaitingLine waitingLine = new WaitingLine(createSlot(), List.of(second, first));
 
         assertThat(waitingLine.findWaitingNumber(first)).isEqualTo(1);
         assertThat(waitingLine.findWaitingNumber(second)).isEqualTo(2);
@@ -49,7 +57,7 @@ public class WaitingLineTest {
         LocalDateTime sameCreatedAt = LocalDateTime.of(2026, 6, 3, 10, 0);
         Reservation first = createWaiting(1L, "순번1", sameCreatedAt);
         Reservation second = createWaiting(2L, "순번2", sameCreatedAt);
-        WaitingLine waitingLine = new WaitingLine(List.of(second, first));
+        WaitingLine waitingLine = new WaitingLine(createSlot(), List.of(second, first));
 
         assertThat(waitingLine.findWaitingNumber(first)).isEqualTo(1);
         assertThat(waitingLine.findWaitingNumber(second)).isEqualTo(2);
@@ -67,7 +75,7 @@ public class WaitingLineTest {
                 ReservationStatus.WAITING
         );
 
-        assertThatThrownBy(() -> new WaitingLine(List.of(waiting, otherSlot)))
+        assertThatThrownBy(() -> new WaitingLine(createSlot(), List.of(waiting, otherSlot)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("대기 순번은 같은 예약 슬롯에 대해서만 계산 가능합니다.");
     }
@@ -76,7 +84,7 @@ public class WaitingLineTest {
     @DisplayName("null 예약 대기의 순번을 조회하면 예외가 발생한다.")
     void null_예약_대기_순번_조회_예외_발생() {
         Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        WaitingLine waitingLine = new WaitingLine(List.of(waiting));
+        WaitingLine waitingLine = new WaitingLine(createSlot(), List.of(waiting));
 
         assertThatThrownBy(() -> waitingLine.findWaitingNumber(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -94,7 +102,7 @@ public class WaitingLineTest {
                 LocalDateTime.of(2026, 6, 3, 10, 1),
                 ReservationStatus.WAITING
         );
-        WaitingLine waitingLine = new WaitingLine(List.of(waiting));
+        WaitingLine waitingLine = new WaitingLine(createSlot(), List.of(waiting));
 
         assertThatThrownBy(() -> waitingLine.findWaitingNumber(otherSlot))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -102,7 +110,11 @@ public class WaitingLineTest {
     }
 
     private Reservation createWaiting(Long id, String name, LocalDateTime createdAt) {
-        return new Reservation(id, name, new ReservationSlot(1L, DATE, TIME_SLOT, THEME), createdAt,
+        return new Reservation(id, name, createSlot(), createdAt,
                 ReservationStatus.WAITING);
+    }
+
+    private ReservationSlot createSlot() {
+        return new ReservationSlot(1L, DATE, TIME_SLOT, THEME);
     }
 }
