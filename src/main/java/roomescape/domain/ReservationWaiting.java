@@ -41,6 +41,10 @@ public class ReservationWaiting {
         return name.equals(this.name);
     }
 
+    public boolean isPast(LocalDateTime now) {
+        return reservation.isPast(now);
+    }
+
     public Long getId() {
         return id;
     }
@@ -55,6 +59,10 @@ public class ReservationWaiting {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public Long getReservationId() {
+        return reservation.getId();
     }
 
     @Override

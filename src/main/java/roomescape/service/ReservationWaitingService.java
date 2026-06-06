@@ -29,7 +29,7 @@ public class ReservationWaitingService {
 
     @Transactional
     public WaitingWithOrder addWaiting(ReservationWaiting reservationWaiting) {
-        if (reservationWaitingRepository.existBy(reservationWaiting.getName(), reservationWaiting.getReservation().getId())) {
+        if (reservationWaitingRepository.existBy(reservationWaiting.getName(), reservationWaiting.getReservationId())) {
             throw new ConflictException(ALREADY_BOOKED);
         }
         return reservationWaitingRepository.save(reservationWaiting);
@@ -45,7 +45,7 @@ public class ReservationWaitingService {
         if (!reservationWaiting.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);
         }
-        if (reservationWaiting.getReservation().isPast(LocalDateTime.now())) {
+        if (reservationWaiting.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_WAITING_CANCEL_REJECTED);
         }
 

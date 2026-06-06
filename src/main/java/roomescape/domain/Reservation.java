@@ -42,6 +42,9 @@ public class Reservation {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
+    public boolean isAtTime(ReservationTime time) {
+        return this.time.equals(time);
+    }
 
     public Long getId() {
         return id;
@@ -61,6 +64,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
     }
 
     @Override

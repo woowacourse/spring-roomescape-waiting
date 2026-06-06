@@ -120,7 +120,7 @@ public class ReservationApplicationService {
         }
 
         Reservations others = reservationService
-                .findByDateAndThemeId(request.date(), existing.getTheme().getId())
+                .findByDateAndThemeId(request.date(), existing.getThemeId())
                 .excluding(id);
         if (others.isOccupied(newTime)) {
             throw new ConflictException(ALREADY_EXISTS_ADD_RESERVATION);

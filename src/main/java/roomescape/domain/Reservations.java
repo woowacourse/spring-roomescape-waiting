@@ -15,12 +15,12 @@ public class Reservations {
 
     public boolean isOccupied(ReservationTime time) {
         return reservations.stream()
-                .anyMatch(r -> r.getTime().equals(time));
+                .anyMatch(r -> r.isAtTime(time));
     }
 
     public Reservation findByTime(ReservationTime time) {
         return reservations.stream()
-                .filter(r -> r.getTime().equals(time))
+                .filter(r -> r.isAtTime(time))
                 .findFirst()
                 .orElseThrow(() -> new BusinessRuleViolationException(NOT_RESERVED_SLOT));
     }
