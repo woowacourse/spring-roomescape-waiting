@@ -17,7 +17,7 @@ public interface ReservationRepository {
 
     Long countByReservationSlotId(Long reservationSlotId);
 
-    List<Reservation> findAllByReservationIdOrder(Long reservationId);
+    List<Reservation> findReservationsInWaitingOrder(Long reservationSlotId);
 
     void update(Long id, Reservation updatedReservation);
 

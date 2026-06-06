@@ -60,10 +60,10 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
+    public List<Reservation> findReservationsInWaitingOrder(Long reservationSlotId) {
         return storage.values().stream()
             .filter(this::isActive)
-            .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
+            .filter(userReservation -> reservationSlotId.equals(userReservation.getReservationSlot().getId()))
             .sorted(Comparator.comparing(Reservation::getUpdatedAt)
                 .thenComparing(Reservation::getId))
             .toList();

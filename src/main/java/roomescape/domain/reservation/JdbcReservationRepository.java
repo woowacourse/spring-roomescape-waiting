@@ -145,7 +145,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             where u.name = ?
             order by rd.date desc, rt.start_at desc, r.id;
             """;
-    private static final String FIND_ALL_BY_RESERVATION_ID_ORDER_SQL =
+    private static final String FIND_RESERVATIONS_IN_WAITING_ORDER_SQL =
         """
             select r.id as user_reservation_id,
                    r.status,
@@ -256,8 +256,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
-        return jdbcTemplate.query(FIND_ALL_BY_RESERVATION_ID_ORDER_SQL, userReservationRowMapper(), reservationId);
+    public List<Reservation> findReservationsInWaitingOrder(Long reservationSlotId) {
+        return jdbcTemplate.query(
+            FIND_RESERVATIONS_IN_WAITING_ORDER_SQL,
+            userReservationRowMapper(),
+            reservationSlotId
+        );
     }
 
     @Override

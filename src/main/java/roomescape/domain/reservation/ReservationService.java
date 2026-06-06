@@ -183,7 +183,7 @@ public class ReservationService {
     }
 
     private void promoteFirstWaitingReservation(ReservationSlot reservationSlot) {
-        reservationRepository.findAllByReservationIdOrder(reservationSlot.getId()).stream()
+        reservationRepository.findReservationsInWaitingOrder(reservationSlot.getId()).stream()
             .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
             .findFirst()
             .ifPresent(reservation -> reservationRepository.update(
