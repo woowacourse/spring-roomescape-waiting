@@ -45,10 +45,7 @@ public class ReceptionFacade {
         ReservationTime reservationTime = reservationTimeService.findReservationTime(request.timeId());
         Theme theme = themeService.findTheme(request.themeId());
         Reservation newReservation = new Reservation(request.name(), request.reservationDate(), reservationTime, theme);
-
-        if (newReservation.isPast(LocalDateTime.now(clock))) {
-            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_CREATE);
-        }
+        newReservation.validateCreatable(LocalDateTime.now(clock));
 
         return saveReservationOrWait(request, reservationTime, theme);
     }
@@ -85,9 +82,7 @@ public class ReceptionFacade {
     public void deleteReservation(Long id) {
         reservationService.lockById(id);
         Reservation reservation = reservationService.findReservation(id);
-        if (reservation.isPast(LocalDateTime.now(clock))) {
-            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
-        }
+        reservation.validateDeletable(LocalDateTime.now(clock));
         reservationService.delete(id);
 
         waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
@@ -98,9 +93,7 @@ public class ReceptionFacade {
     @Transactional
     public void deleteWait(Long id) {
         Wait wait = waitService.findWait(id);
-        if (wait.isPast(LocalDateTime.now(clock))) {
-            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
-        }
+        wait.validateDeletable(LocalDateTime.now(clock));
         waitService.delete(id);
     }
 

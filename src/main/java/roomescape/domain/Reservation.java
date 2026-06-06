@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.DomainPreconditions;
+import roomescape.domain.exception.RoomEscapeException;
 
 public class Reservation {
 
@@ -31,14 +32,16 @@ public class Reservation {
         return new Reservation(id, reservation.name, reservation.date, reservation.time, reservation.theme);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        if (date.isBefore(now.toLocalDate())) {
-            return true;
+    public void validateCreatable(LocalDateTime now) {
+        if (isPast(now)) {
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_CREATE);
         }
-        if (date.isAfter(now.toLocalDate())) {
-            return false;
+    }
+
+    public void validateDeletable(LocalDateTime now) {
+        if (isPast(now)) {
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
         }
-        return time.isPast(now.toLocalTime());
     }
 
     public Long getId() {
@@ -63,6 +66,16 @@ public class Reservation {
 
     public boolean isReservedBy(String name) {
         return this.name.equals(name);
+    }
+
+    private boolean isPast(LocalDateTime now) {
+        if (date.isBefore(now.toLocalDate())) {
+            return true;
+        }
+        if (date.isAfter(now.toLocalDate())) {
+            return false;
+        }
+        return time.isPast(now.toLocalTime());
     }
 
     private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
