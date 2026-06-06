@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadMyReservations() {
   Promise.all([
-    fetch('/reservations').then(r => {
+    fetch('/bookings').then(r => {
       if (r.status === 401) {
         showToast('로그인이 필요합니다.');
         setTimeout(() => { window.location.href = '/login'; }, 1000);
@@ -104,7 +104,7 @@ function formatTime(value) {
 
 function cancelReservation(id, btn) {
   if (!confirm('예약을 취소하시겠습니까?')) return;
-  fetch(`/reservations/${id}`, {method: 'DELETE'})
+  fetch(`/bookings/${id}`, {method: 'DELETE'})
     .then(res => {
       if (res.status === 204) {
         showToast('예약이 취소되었습니다.', 'success');
@@ -170,7 +170,7 @@ function submitEdit() {
   const date = datePicker.input.value;
   const timeId = document.getElementById('edit-time').value;
   if (!date || !timeId) { showToast('날짜와 시간을 선택해주세요.'); return; }
-  fetch(`/reservations/${editingId}`, {
+  fetch(`/bookings/${editingId}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({date, timeId: parseInt(timeId)})

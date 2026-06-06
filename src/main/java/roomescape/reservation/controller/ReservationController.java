@@ -24,7 +24,7 @@ import roomescape.reservation.service.ReservationService;
 
 @Tag(name = "예약", description = "예약 생성·조회·수정·삭제 API")
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping("/bookings")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -42,15 +42,15 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<BookingResponse> createReservation(@LoginMember Member member,
-                                                             @Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<BookingResponse> book(@LoginMember Member member,
+                                                @Valid @RequestBody ReservationRequest request) {
         BookingResult result = reservationService.book(member, request);
         BookingResponse response = result.isWaiting()
                 ? BookingResponse.waiting(result.waiting())
                 : BookingResponse.reserved(result.reservation());
         String location = result.isWaiting()
                 ? "/waitings/" + result.waiting().getId()
-                : "/reservations/" + result.reservation().getId();
+                : "/bookings/" + result.reservation().getId();
         return ResponseEntity.created(URI.create(location)).body(response);
     }
 

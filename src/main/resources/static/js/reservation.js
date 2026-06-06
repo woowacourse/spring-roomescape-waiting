@@ -1,4 +1,4 @@
-const RESERVATION_API = '/reservations';
+const RESERVATION_API = '/bookings';
 const THEME_API = '/themes/top/10';
 
 const state = {

@@ -44,7 +44,7 @@ class ReservationWaitingControllerTest {
                 .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", date, "timeId", 1, "themeId", 1))
-                .post("/reservations")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("status", equalTo("RESERVED"));
@@ -60,7 +60,7 @@ class ReservationWaitingControllerTest {
                 .cookie("JSESSIONID", user2Session)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", date, "timeId", 1, "themeId", 1))
-                .post("/reservations")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("status", equalTo("WAITING"))
@@ -94,7 +94,7 @@ class ReservationWaitingControllerTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", "2099-08-05", "timeId", 1, "themeId", 1))
-                .post("/reservations")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }

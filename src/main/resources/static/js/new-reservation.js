@@ -1,5 +1,5 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
+const RESERVATION_API_ENDPOINT = '/bookings';
 const TIME_API_ENDPOINT = '/times';
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -65,7 +65,7 @@ public class MissionStep3Test {
                 .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", "2099-08-05", "timeId", 1, "themeId", 1))
-                .when().post("/reservations")
+                .when().post("/bookings")
                 .then().log().all()
                 .statusCode(201);
 
