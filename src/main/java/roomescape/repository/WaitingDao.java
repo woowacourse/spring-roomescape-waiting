@@ -107,10 +107,6 @@ public class WaitingDao {
                 .findFirst();
     }
 
-    public List<Waiting> findAll() {
-        return jdbcTemplate.query(SELECT_BASE, Map.of(), rowMapper);
-    }
-
     public List<Waiting> findAllSharingSlotWith(Member member) {
         String sql = SELECT_BASE + """
                  WHERE EXISTS (
