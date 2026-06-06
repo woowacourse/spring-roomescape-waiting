@@ -22,5 +22,4 @@ public class AdminReservationController {
     public ResponseEntity<List<ReservationResponseDTO>> readAll() {
         return ResponseEntity.ok(reservationService.readAllReservation());
     }
-
 }

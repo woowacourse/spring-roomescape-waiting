@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 페이지</title>
+  <style>
+    :root {
+      --ink: #202124;
+      --muted: #68717d;
+      --line: #d9dee7;
+      --surface: #ffffff;
+      --bg: #f6f7f9;
+      --accent: #1f6feb;
+      --accent-dark: #164fa8;
+      --danger: #c9362c;
+      --success: #237a4b;
+      --warning: #a45d00;
+      --disabled: #eef1f5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 92px 32px 32px;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 247, 249, 0.92);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand strong {
+      font-size: 18px;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      background: var(--surface);
+    }
+
+    .nav-btn.primary {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--accent-dark);
+    }
+
+    main {
+      width: min(100%, 1200px);
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 28px;
+    }
+
+    h2 {
+      font-size: 20px;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      background: var(--surface);
+      box-shadow: 0 8px 24px rgba(32, 33, 36, 0.04);
+    }
+
+    .panel.full {
+      grid-column: 1 / -1;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-head small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    form {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    button {
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .primary-btn {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .primary-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    .danger-btn {
+      border-color: #e6b7b2;
+      color: var(--danger);
+    }
+
+    /* 테이블 내부 미니 삭제 버튼 스타일 */
+    .table-btn {
+      min-height: 32px;
+      padding: 4px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    .message {
+      min-height: 22px;
+      color: var(--danger);
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    .message.success {
+      color: var(--success);
+    }
+
+    .inline-message {
+      min-height: 20px;
+      margin-top: 10px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .inline-message.success {
+      color: var(--success);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+      background: var(--surface);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle; /* 버튼 배치를 위해 중앙 정렬로 소폭 수정 */
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      background: #fbfcfe;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+
+    .item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .item .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: var(--disabled);
+      color: var(--muted);
+    }
+
+    .action-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 120px;
+    }
+
+    .action-wrap .inline-message {
+      margin-top: 6px;
+      text-align: right;
+      width: 100%;
+    }
+
+    .action-wrap .danger-btn {
+      width: 72px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 84px 18px 18px;
+      }
+
+      .topbar {
+        padding: 14px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <strong>관리자 페이지</strong>
+    <span>예약, 대기열, 테마, 시간 정보를 확인하고 관리합니다</span>
+  </div>
+  <nav class="topbar-actions" aria-label="페이지 이동">
+    <a class="nav-btn" href="/">홈</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>관리자 대시보드</h1>
+    <p>현재 컨트롤러에 연결된 API를 기준으로 예약과 대기 신청 현황, 테마와 시간 목록을 확인할 수 있습니다.</p>
+  </section>
+
+  <div class="grid">
+    <section class="panel full" aria-labelledby="reservation-title">
+      <div class="section-head">
+        <div>
+          <h2 id="reservation-title">예약 목록</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>예약자</th>
+            <th>테마</th>
+            <th>날짜</th>
+            <th>시간</th>
+            <th>관리</th>
+          </tr>
+          </thead>
+          <tbody id="reservation-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel full" aria-labelledby="waiting-title">
+      <div class="section-head">
+        <div>
+          <h2 id="waiting-title">대기 목록</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>이름</th>
+            <th>테마</th>
+            <th>날짜</th>
+            <th>시간</th>
+            <th>순번</th>
+            <th>관리</th>
+          </tr>
+          </thead>
+          <tbody id="waiting-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="theme-title">
+      <div class="section-head">
+        <div>
+          <h2 id="theme-title">테마 관리</h2>
+        </div>
+      </div>
+
+      <form id="theme-form">
+        <div>
+          <label for="theme-name">이름</label>
+          <input id="theme-name" type="text" placeholder="테마 이름">
+        </div>
+        <div>
+          <label for="theme-image-url">이미지 URL</label>
+          <input id="theme-image-url" type="url" placeholder="https://...">
+        </div>
+        <div>
+          <label for="theme-description">설명</label>
+          <input id="theme-description" type="text" placeholder="테마 설명">
+        </div>
+        <div>
+          <label for="theme-running-time">소요 시간(분)</label>
+          <input id="theme-running-time" type="number" min="1" step="1" placeholder="60">
+        </div>
+        <button class="primary-btn" type="submit">테마 추가</button>
+      </form>
+      <div id="theme-form-message" class="inline-message" role="status" aria-live="polite"></div>
+
+      <div id="theme-list" class="list"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="time-title">
+      <div class="section-head">
+        <div>
+          <h2 id="time-title">시간 관리</h2>
+        </div>
+      </div>
+
+      <form id="time-form">
+        <div>
+          <label for="time-start-at">시작 시간</label>
+          <input id="time-start-at" type="time">
+        </div>
+        <button class="primary-btn" type="submit">시간 추가</button>
+      </form>
+      <div id="time-form-message" class="inline-message" role="status" aria-live="polite"></div>
+
+      <div id="time-list" class="list"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const reservationBody = document.getElementById('reservation-body');
+    const waitingBody = document.getElementById('waiting-body');
+    const themeList = document.getElementById('theme-list');
+    const timeList = document.getElementById('time-list');
+    const themeForm = document.getElementById('theme-form');
+    const timeForm = document.getElementById('time-form');
+    const themeFormMessage = document.getElementById('theme-form-message');
+    const timeFormMessage = document.getElementById('time-form-message');
+
+    const themeNameInput = document.getElementById('theme-name');
+    const themeImageInput = document.getElementById('theme-image-url');
+    const themeDescriptionInput = document.getElementById('theme-description');
+    const themeRunningTimeInput = document.getElementById('theme-running-time');
+    const timeStartAtInput = document.getElementById('time-start-at');
+
+    let reservations = [];
+    let waitings = [];
+    let themes = [];
+    let times = [];
+
+    loadAll();
+
+    themeForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearInlineStatus(themeFormMessage);
+
+      const payload = {
+        name: themeNameInput.value.trim(),
+        imageUrl: themeImageInput.value.trim(),
+        description: themeDescriptionInput.value.trim(),
+        runningTime: Number(themeRunningTimeInput.value)
+      };
+
+      if (!payload.name || !payload.imageUrl || !payload.description || !payload.runningTime) {
+        showMessage('테마 정보를 모두 입력해주세요.');
+        return;
+      }
+
+      fetch('/api/admin/themes', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      })
+      .then(handleResponse)
+      .then(() => {
+        themeForm.reset();
+        showInlineStatus(themeFormMessage, '테마를 추가했습니다.', true);
+        loadThemes();
+      })
+      .catch(error => showInlineStatus(themeFormMessage, toErrorMessage(error, '테마를 추가하지 못했습니다.')));
+    });
+
+    timeForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearInlineStatus(timeFormMessage);
+
+      const startAt = timeStartAtInput.value;
+      if (!startAt) {
+        showMessage('시간을 입력해주세요.');
+        return;
+      }
+
+      fetch('/api/admin/times', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({startAt})
+      })
+      .then(handleResponse)
+      .then(() => {
+        timeForm.reset();
+        showInlineStatus(timeFormMessage, '시간을 추가했습니다.', true);
+        loadTimes();
+      })
+      .catch(error => showInlineStatus(timeFormMessage, toErrorMessage(error, '시간을 추가하지 못했습니다.')));
+    });
+
+    function loadAll() {
+      Promise.all([loadReservations(), loadWaitings(), loadThemes(), loadTimes()])
+      .catch(error => console.error(error));
+    }
+
+    function loadReservations() {
+      return fetchJson('/api/admin/reservations')
+      .then(data => {
+        reservations = data || [];
+        renderReservations();
+      });
+    }
+
+    function loadWaitings() {
+      return fetchJson('/api/admin/waitings')
+      .then(data => {
+        waitings = data || [];
+        renderWaitings();
+      });
+    }
+
+    function loadThemes() {
+      return fetchJson('/api/themes')
+      .then(data => {
+        themes = data || [];
+        renderThemes();
+      });
+    }
+
+    function loadTimes() {
+      return fetchJson('/api/times')
+      .then(data => {
+        times = data || [];
+        renderTimes();
+      });
+    }
+
+    function renderReservations() {
+      reservationBody.innerHTML = '';
+      if (reservations.length === 0) {
+        reservationBody.appendChild(emptyRow(6, '예약이 없습니다.'));
+        return;
+      }
+
+      reservations.forEach(reservation => {
+        const tr = document.createElement('tr');
+
+        // 데이터 컬럼 생성
+        tr.innerHTML = `
+          <td>${escapeHtml(reservation.id)}</td>
+          <td>${escapeHtml(reservation.name)}</td>
+          <td>${escapeHtml(reservation.theme?.name ?? '-')}</td>
+          <td>${escapeHtml(reservation.date)}</td>
+          <td>${escapeHtml(reservation.time?.startAt ?? '-')}</td>
+        `;
+
+        // 관리 컬럼(취소 버튼) 동적 생성 및 이벤트 바인딩
+        const actionTd = document.createElement('td');
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'danger-btn table-btn';
+        deleteBtn.textContent = '취소';
+        deleteBtn.addEventListener('click', () => deleteReservation(reservation.id, tr));
+
+        actionTd.appendChild(deleteBtn);
+        tr.appendChild(actionTd);
+        reservationBody.appendChild(tr);
+      });
+    }
+
+    function renderWaitings() {
+      waitingBody.innerHTML = '';
+      if (waitings.length === 0) {
+        waitingBody.appendChild(emptyRow(7, '대기 신청이 없습니다.'));
+        return;
+      }
+
+      waitings.forEach(waiting => {
+        const tr = document.createElement('tr');
+
+        // 데이터 컬럼 생성
+        tr.innerHTML = `
+          <td>${escapeHtml(waiting.id)}</td>
+          <td>${escapeHtml(waiting.name)}</td>
+          <td>${escapeHtml(waiting.theme?.name ?? '-')}</td>
+          <td>${escapeHtml(waiting.date)}</td>
+          <td>${escapeHtml(waiting.time?.startAt ?? '-')}</td>
+          <td>${escapeHtml(waiting.waitingNumber)}</td>
+        `;
+
+        // 관리 컬럼(취소 버튼) 동적 생성 및 이벤트 바인딩
+        const actionTd = document.createElement('td');
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'danger-btn table-btn';
+        deleteBtn.textContent = '취소';
+        deleteBtn.addEventListener('click', () => deleteWaiting(waiting.id, tr));
+
+        actionTd.appendChild(deleteBtn);
+        tr.appendChild(actionTd);
+        waitingBody.appendChild(tr);
+      });
+    }
+
+    function renderThemes() {
+      themeList.innerHTML = '';
+      if (themes.length === 0) {
+        themeList.appendChild(emptyCard('등록된 테마가 없습니다.'));
+        return;
+      }
+
+      themes.forEach(theme => {
+        const item = document.createElement('article');
+        item.className = 'item';
+
+        const content = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = theme.name;
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = `${theme.runningTime}분 · ${theme.id}`;
+        content.appendChild(strong);
+        content.appendChild(meta);
+
+        const actionWrap = document.createElement('div');
+        actionWrap.className = 'action-wrap';
+        const actions = document.createElement('div');
+        actions.className = 'item-actions';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'danger-btn';
+        deleteBtn.textContent = '삭제';
+        const status = document.createElement('div');
+        status.className = 'inline-message';
+        deleteBtn.addEventListener('click', () => deleteTheme(theme.id, status, item));
+        actions.appendChild(deleteBtn);
+        actionWrap.appendChild(actions);
+        actionWrap.appendChild(status);
+
+        item.appendChild(content);
+        item.appendChild(actionWrap);
+        themeList.appendChild(item);
+      });
+    }
+
+    function renderTimes() {
+      timeList.innerHTML = '';
+      if (times.length === 0) {
+        timeList.appendChild(emptyCard('등록된 시간이 없습니다.'));
+        return;
+      }
+
+      times.forEach(time => {
+        const item = document.createElement('article');
+        item.className = 'item';
+
+        const content = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = time.startAt;
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = `ID ${time.id}`;
+        content.appendChild(strong);
+        content.appendChild(meta);
+
+        const actionWrap = document.createElement('div');
+        actionWrap.className = 'action-wrap';
+        const actions = document.createElement('div');
+        actions.className = 'item-actions';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'danger-btn';
+        deleteBtn.textContent = '삭제';
+        const status = document.createElement('div');
+        status.className = 'inline-message';
+        deleteBtn.addEventListener('click', () => deleteTime(time.id, status, item));
+        actions.appendChild(deleteBtn);
+        actionWrap.appendChild(actions);
+        actionWrap.appendChild(status);
+
+        item.appendChild(content);
+        item.appendChild(actionWrap);
+        timeList.appendChild(item);
+      });
+    }
+
+    // 예약 취소(삭제) API 연동 함수
+    function deleteReservation(id, rowEl) {
+      if (!confirm('정말 이 예약을 취소하시겠습니까?')) return;
+
+      fetch(`/api/reservations/${id}`, { method: 'DELETE' })
+      .then(handleResponse)
+      .then(() => {
+        alert('예약이 취소되었습니다.');
+        // 서버에서 승격 처리가 완료된 후 최신 대기/예약 리스트를 통째로 다시 읽어옵니다.
+        loadAll();
+      })
+      .catch(error => {
+        alert(toErrorMessage(error, '예약을 취소하지 못했습니다.'));
+      });
+    }
+
+    // 대기 취소(삭제) API 연동 함수
+    function deleteWaiting(id, rowEl) {
+      if (!confirm('정말 이 대기를 취소하시겠습니까?')) return;
+
+      fetch(`/api/waitings/${id}`, { method: 'DELETE' })
+      .then(handleResponse)
+      .then(() => {
+        alert('대기 신청이 취소되었습니다.');
+        // 대기가 취소된 후의 최신 대기열 상태를 다시 읽어옵니다.
+        loadAll();
+      })
+      .catch(error => {
+        alert(toErrorMessage(error, '대기를 취소하지 못했습니다.'));
+      });
+    }
+
+    function deleteTheme(id, statusEl, itemEl) {
+      clearInlineStatus(statusEl);
+      fetch(`/api/admin/themes/${id}`, {method: 'DELETE'})
+      .then(handleResponse)
+      .then(() => {
+        showInlineStatus(statusEl, '테마를 삭제했습니다.', true);
+        itemEl.remove();
+        if (themeList.children.length === 0) {
+          themeList.appendChild(emptyCard('등록된 테마가 없습니다.'));
+        }
+      })
+      .catch(error => showInlineStatus(statusEl, toErrorMessage(error, '테마를 삭제하지 못했습니다.')));
+    }
+
+    function deleteTime(id, statusEl, itemEl) {
+      clearInlineStatus(statusEl);
+      fetch(`/api/admin/times/${id}`, {method: 'DELETE'})
+      .then(handleResponse)
+      .then(() => {
+        showInlineStatus(statusEl, '시간을 삭제했습니다.', true);
+        itemEl.remove();
+        if (timeList.children.length === 0) {
+          timeList.appendChild(emptyCard('등록된 시간이 없습니다.'));
+        }
+      })
+      .catch(error => showInlineStatus(statusEl, toErrorMessage(error, '시간을 삭제하지 못했습니다.')));
+    }
+
+    function emptyRow(colspan, text) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = colspan;
+      td.textContent = text;
+      td.style.color = '#68717d';
+      tr.appendChild(td);
+      return tr;
+    }
+
+    function emptyCard(text) {
+      const item = document.createElement('div');
+      item.className = 'badge';
+      item.textContent = text;
+      return item;
+    }
+
+    function fetchJson(url) {
+      return fetch(url).then(handleResponse);
+    }
+
+    function handleResponse(res) {
+      return res.text().then(text => {
+        const data = text ? JSON.parse(text) : null;
+        if (res.ok) {
+          return data;
+        }
+        throw data || {message: '요청을 처리할 수 없습니다.'};
+      });
+    }
+
+    function toErrorMessage(error, fallback) {
+      if (error.errors && error.errors.length > 0) {
+        return error.errors.map(detail => detail.reason).join(' ');
+      }
+      return error.message || fallback;
+    }
+
+    function showInlineStatus(target, text, success = false) {
+      if (!target) {
+        return;
+      }
+      target.textContent = text;
+      target.classList.toggle('success', success);
+    }
+
+    function clearInlineStatus(target) {
+      if (!target) {
+        return;
+      }
+      target.textContent = '';
+      target.classList.remove('success');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+    }
+  });
+</script>
+</body>
+</html>
