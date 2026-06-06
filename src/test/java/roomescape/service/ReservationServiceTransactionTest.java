@@ -22,6 +22,7 @@ import roomescape.dto.ReservationUpdateRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -35,6 +36,9 @@ public class ReservationServiceTransactionTest {
 
     @MockitoSpyBean
     private ReservationRepository reservationRepository;
+
+    @MockitoSpyBean
+    private WaitlistRepository waitlistRepository;
 
     @Autowired
     private ReservationTimeRepository timeRepository;
@@ -78,6 +82,41 @@ public class ReservationServiceTransactionTest {
     }
 
     @Test
+    void 대기_승격_후_대기_취소가_실패하면_예약취소_및_대기승격도_롤백된다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+        String name = "브라운";
+        String waitingName = "브리";
+
+        ReservationWithStatus reservation = reservationService.applyReservation(
+                createReservationRequest(name, FUTURE_SECOND_DATE, reservationTime, theme));
+        ReservationWithStatus waitlist = reservationService.applyReservation(
+                createReservationRequest(waitingName, FUTURE_SECOND_DATE, reservationTime, theme));
+
+        AtomicBoolean failPromotion = new AtomicBoolean(false);
+
+        doAnswer(invocation -> {
+            if (failPromotion.get()) {
+                throw new RuntimeException();
+            }
+            return invocation.callRealMethod();
+        }).when(waitlistRepository).deleteById(any(Long.class));
+
+        failPromotion.set(true);
+
+        assertThatThrownBy(() ->
+                reservationService.cancelMyReservationAndPromoteWaitlist(reservation.getId(), name))
+                .isInstanceOf(RuntimeException.class);
+        assertThat(reservationService.getReservation(reservation.getId()).getName())
+                .isEqualTo(name);
+        assertThat(reservationService.getWaitlist(waitlist.getId()).getName())
+                .isEqualTo(waitingName);
+        assertThat(reservationService.getReservations())
+                .extracting(Reservation::getName)
+                .doesNotContain(waitingName);
+    }
+
+    @Test
     void 대기_승격_중_예약_저장에_실패하면_예약_변경도_롤백된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
@@ -97,6 +136,47 @@ public class ReservationServiceTransactionTest {
             }
             return invocation.callRealMethod();
         }).when(reservationRepository).save(any(Reservation.class));
+
+        failPromotion.set(true);
+
+        ReservationTime updateTime = createReservationTime(LocalTime.of(12, 0));
+        LocalDate updateDate = FUTURE_SECOND_DATE.plusDays(1);
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
+                updateDate,
+                updateTime.getId()
+        );
+        assertThatThrownBy(() ->
+                reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name, updateRequest))
+                .isInstanceOf(RuntimeException.class);
+        assertThat(reservationService.getReservation(reservation.getId()).getName())
+                .isEqualTo(name);
+        assertThat(reservationService.getWaitlist(waitlist.getId()).getName())
+                .isEqualTo(waitingName);
+        assertThat(reservationService.getReservations())
+                .extracting(Reservation::getName)
+                .doesNotContain(waitingName);
+    }
+
+    @Test
+    void 대기_승격_후_대기_취소가_실패하면_예약변경_및_대기승격도_롤백된다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+        String name = "브라운";
+        String waitingName = "브리";
+
+        ReservationWithStatus reservation = reservationService.applyReservation(
+                createReservationRequest(name, FUTURE_SECOND_DATE, reservationTime, theme));
+        ReservationWithStatus waitlist = reservationService.applyReservation(
+                createReservationRequest(waitingName, FUTURE_SECOND_DATE, reservationTime, theme));
+
+        AtomicBoolean failPromotion = new AtomicBoolean(false);
+
+        doAnswer(invocation -> {
+            if (failPromotion.get()) {
+                throw new RuntimeException();
+            }
+            return invocation.callRealMethod();
+        }).when(waitlistRepository).deleteById(any(Long.class));
 
         failPromotion.set(true);
 

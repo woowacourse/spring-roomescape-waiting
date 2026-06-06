@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.acceptance;
 
 import static org.hamcrest.Matchers.is;
 
@@ -8,14 +8,10 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationStatus;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class WaitlistApiTest {
+public class WaitlistApiTest extends AcceptanceTest {
 
     public static final String FUTURE_EIGHT_DATE = LocalDate.now().plusDays(8).toString();
 
