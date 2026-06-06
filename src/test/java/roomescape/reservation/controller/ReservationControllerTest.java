@@ -117,8 +117,8 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
-        cancelReservationWithToken(memberToken, reservationId);
+        createReservationWithToken(memberToken, slotId);
+        cancelReservationWithToken(memberToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -141,8 +141,8 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
-        cancelReservationWithToken(memberToken, reservationId);
+        createReservationWithToken(memberToken, slotId);
+        cancelReservationWithToken(memberToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, anotherToken)
@@ -159,54 +159,54 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
+        createReservationWithToken(memberToken, slotId);
 
         Map<String, String> params = new HashMap<>();
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/member/reservations/" + reservationId + "/cancel")
+                .when().patch("/member/slots/" + slotId + "/cancel")
                 .then().log().all()
                 .statusCode(200)
                 .body("status", is("CANCELED"));
     }
 
     @Test
-    @DisplayName("본인의 예약이 아닌데 취소하면 예외가 발생한다.")
-    void cancel_not_owner() {
+    @DisplayName("슬롯에 본인 예약이 없는 사람이 취소하면 예외가 발생한다.")
+    void cancel_no_reservation_in_slot() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
+        createReservationWithToken(memberToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, anotherToken)
                 .contentType(ContentType.JSON)
-                .when().patch("/member/reservations/" + reservationId + "/cancel")
+                .when().patch("/member/slots/" + slotId + "/cancel")
                 .then().log().all()
-                .statusCode(RESERVATION_NOT_OWNER.getHttpStatus().value())
-                .body("message", is(RESERVATION_NOT_OWNER.getMessage()));
+                .statusCode(RESERVATION_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(RESERVATION_NOT_FOUND.getMessage()));
     }
 
     @Test
-    @DisplayName("이미 취소된 예약을 취소하면 예외가 발생한다.")
+    @DisplayName("활성 예약 없는 슬롯을 취소하면 예외가 발생한다.")
     void cancel_already_canceled() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
-        cancelReservationWithToken(memberToken, reservationId);
+        createReservationWithToken(memberToken, slotId);
+        cancelReservationWithToken(memberToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
                 .contentType(ContentType.JSON)
-                .when().patch("/member/reservations/" + reservationId + "/cancel")
+                .when().patch("/member/slots/" + slotId + "/cancel")
                 .then().log().all()
-                .statusCode(RESERVATION_ALREADY_CANCELED.getHttpStatus().value())
-                .body("message", is(RESERVATION_ALREADY_CANCELED.getMessage()));
+                .statusCode(RESERVATION_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(RESERVATION_NOT_FOUND.getMessage()));
     }
 
     @Test
@@ -216,12 +216,12 @@ class ReservationControllerTest extends AcceptanceTest {
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     void cancel_not_past() {
-        Long sqlSavedId = 1L;
+        Long sqlSlotId = 1L;   // past-reservation.sql 에서 생성한 slot_id
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
                 .contentType(ContentType.JSON)
-                .when().patch("/member/reservations/" + sqlSavedId + "/cancel")
+                .when().patch("/member/slots/" + sqlSlotId + "/cancel")
                 .then().log().all()
                 .statusCode(RESERVATION_ALREADY_PAST.getHttpStatus().value())
                 .body("message", is(RESERVATION_ALREADY_PAST.getMessage()));
@@ -238,22 +238,20 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedTimeId = createReservationTime(managerToken, futureTime);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        createSlot(managerToken, changedDateId, changedTimeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
+        Integer newSlotId = createSlot(managerToken, changedDateId, changedTimeId, themeId);
+        createReservationWithToken(memberToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/member/reservations/" + reservationId + "/schedule?name=" + reservationName)
+                .when().patch("/member/slots/" + slotId + "/reservations/reschedule")
                 .then().log().all()
                 .statusCode(200)
-                .body("date", is(futureDate))
-                .body("time", is(futureTime));
+                .body("slotId", is(newSlotId));
     }
 
     @Test
@@ -265,21 +263,20 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        createSlot(managerToken, changedDateId, changedTimeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
+        Integer newSlotId = createSlot(managerToken, changedDateId, changedTimeId, themeId);
+        createReservationWithToken(memberToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, anotherToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/member/reservations/" + reservationId + "/schedule")
+                .when().patch("/member/slots/" + slotId + "/reservations/reschedule")
                 .then().log().all()
-                .statusCode(RESERVATION_NOT_OWNER.getHttpStatus().value())
-                .body("message", is(RESERVATION_NOT_OWNER.getMessage()));
+                .statusCode(RESERVATION_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(RESERVATION_NOT_FOUND.getMessage()));
     }
 
     @Test
@@ -291,22 +288,21 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        createSlot(managerToken, changedDateId, changedTimeId, themeId);
-        Integer reservationId = createReservationWithToken(memberToken, slotId);
-        cancelReservationWithToken(memberToken, reservationId);
+        Integer newSlotId = createSlot(managerToken, changedDateId, changedTimeId, themeId);
+        createReservationWithToken(memberToken, slotId);
+        cancelReservationWithToken(memberToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/member/reservations/" + reservationId + "/schedule")
+                .when().patch("/member/slots/" + slotId + "/reservations/reschedule")
                 .then().log().all()
-                .statusCode(RESERVATION_ALREADY_CANCELED.getHttpStatus().value())
-                .body("message", is(RESERVATION_ALREADY_CANCELED.getMessage()));
+                .statusCode(RESERVATION_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(RESERVATION_NOT_FOUND.getMessage()));
     }
 
     @Test
@@ -319,19 +315,18 @@ class ReservationControllerTest extends AcceptanceTest {
         Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer sqlThemeId = 1;
-        createSlot(managerToken, changedDateId, changedTimeId, sqlThemeId);
+        Integer newSlotId = createSlot(managerToken, changedDateId, changedTimeId, sqlThemeId);
 
-        Long sqlSavedId = 1L;
+        Long sqlSlotId = 1L;
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/member/reservations/" + sqlSavedId + "/schedule")
+                .when().patch("/member/slots/" + sqlSlotId + "/reservations/reschedule")
                 .then().log().all()
                 .statusCode(RESERVATION_ALREADY_PAST.getHttpStatus().value())
                 .body("message", is(RESERVATION_ALREADY_PAST.getMessage()));

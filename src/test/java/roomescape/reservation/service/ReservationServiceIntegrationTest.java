@@ -1,12 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.reservation.domain.ReservationStatus.CANCELED;
-import static roomescape.reservation.domain.ReservationStatus.RESERVED;
-import static roomescape.reservation.exception.ReservationErrorInformation.*;
-import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +11,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
-import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
-import roomescape.reservation.service.dto.ReservationChangeCommand;
-import roomescape.reservation.service.dto.ReservationSaveCommand;
+import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
 import roomescape.support.ServiceSupport;
@@ -28,10 +19,16 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Import({ReservationService.class, ReservationRescheduleService.class})
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
+import static roomescape.reservation.exception.ReservationErrorInformation.*;
+import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
+
+@Import({ReservationService.class})
 class ReservationServiceIntegrationTest extends ServiceSupport {
 
     private final String name = "송송";
@@ -59,22 +56,18 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
     @Autowired
     private ReservationService reservationService;
 
-    @Autowired
-    private ReservationRescheduleService rescheduleService;
-
     @Test
     @DisplayName("나의 예약 목록을 조회하면, 대기 순번을 조회한다.")
     void getMyReservations() {
         // given
         String name1 = "사람1";
         String name2 = "사람2";
-
         saveReservation(name1, slot1);
         saveWaitReservation(name2, slot1);
         saveWaitReservation(name, slot1);
 
         // when
-        List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name);
+        List<ReservationWithSlotInformation> actual = reservationService.readAllByName(name);
 
         // then
         Assertions.assertThat(actual.getFirst().waitingTurn())
@@ -88,7 +81,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         saveReservation(name, slot1);
 
         // when
-        List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name);
+        List<ReservationWithSlotInformation> actual = reservationService.readAllByName(name);
 
         // then
         Assertions.assertThat(actual.getFirst().waitingTurn())
@@ -102,11 +95,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @Test
         @DisplayName("존재하지 않는 슬롯에 예약시, 예외가 발생한다.")
         void reserve_does_not_exist_reservation_time() {
-            // given
-            Long wrongSlotId = Long.MIN_VALUE;
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.reserve(name, wrongSlotId))
+            assertThatThrownBy(() -> reservationService.reserve(name, Long.MIN_VALUE))
                     .isInstanceOf(ReservationSlotException.class)
                     .hasMessage(SLOT_NOT_FOUND.getMessage());
         }
@@ -131,7 +120,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserved_when_cancel_same_name() {
             // given
             Reservation reservation = saveReservation(name, slot1);
-            reservationService.cancelByManager(reservation.getId());
+            reservationService.cancelByManager(slot1.getId(), reservation.getId());
 
             // when
             Reservation actual = reservationService.reserve(name, slot1.getId());
@@ -146,9 +135,8 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserved_when_cancel_another_name() {
             // given
             String anotherName = "다른사람";
-
-            Reservation savedReservation = saveReservation(name, slot1);
-            reservationService.cancelByManager(savedReservation.getId());
+            Reservation saved = saveReservation(name, slot1);
+            reservationService.cancelByManager(slot1.getId(), saved.getId());
 
             // when
             Reservation actual = reservationService.reserve(anotherName, slot1.getId());
@@ -163,7 +151,6 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserve_duplicated() {
             // given
             saveReservation(name, slot1);
-            ReservationSaveCommand command = new ReservationSaveCommand(date1.getId(), time1.getId(), theme.getId());
 
             // when & then
             assertThatThrownBy(() -> reservationService.reserve(name, slot1.getId()))
@@ -174,20 +161,15 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @Test
         @DisplayName("slotId를 기반으로 예약을 생성할 수 있다.")
         void reserve_with_slotId() {
-            // given
-            String name = "송송";
-            Long slot1Id = slot1.getId();
-            Reservation expected = Reservation.reserve(name, slot1, LocalDateTime.now());
-
-            // when
-            Reservation actual = reservationService.reserve(name, slot1Id);
+            // given & when
+            Reservation actual = reservationService.reserve(name, slot1.getId());
 
             // then
-            Assertions.assertThat(actual)
-                    .usingRecursiveComparison()
-                    .ignoringFields("reservedAt")
-                    .ignoringFields("id")
-                    .isEqualTo(expected);
+            Assertions.assertThat(actual.getSlotId())
+                    .isEqualTo(slot1.getId());
+
+            Assertions.assertThat(actual.getStatus())
+                    .isEqualTo(RESERVED);
         }
 
     }
@@ -200,10 +182,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @DisplayName("관리자 전용으로 예약을 취소하면 CANCELED 상태가 된다.")
         void cancelByManager() {
             // given
-            Reservation savedReservation = saveReservation(name, slot1);
+            Reservation saved = saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.cancelByManager(savedReservation.getId());
+            Reservation actual = reservationService.cancelByManager(slot1.getId(), saved.getId());
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -214,10 +196,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @DisplayName("아직 지나지 않은 본인의 예약은 취소할 수 있다.")
         void cancel() {
             // given
-            Reservation savedReservation = saveReservation(name, slot1);
+            saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.cancel(savedReservation.getId(), name);
+            Reservation actual = reservationService.cancel(slot1.getId(), name);
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -228,299 +210,68 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @DisplayName("본인의 예약이 아닌데 취소를하면 예외가 발생한다.")
         void cancel_not_owner() {
             // given
-            Reservation savedReservation = saveReservation(name, slot1);
-
+            saveReservation(name, slot1);
             String anotherName = "다른사람";
-            Long savedId = savedReservation.getId();
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancel(savedId, anotherName))
+            assertThatThrownBy(() -> reservationService.cancel(slot1.getId(), anotherName))
                     .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_NOT_OWNER.getMessage());
-        }
-
-        @Test
-        @DisplayName("이미 취소된 예약을 취소하면 예외가 발생한다.")
-        void cancel_already_canceled() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
-            Long savedId = saved.getId();
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.cancel(savedId, name))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+                    .hasMessage(RESERVATION_NOT_FOUND.getMessage());
         }
 
         @Test
         @DisplayName("이미 지난 예약을 취소하면 예외가 발생한다.")
-        @Sql(
-                scripts = {"classpath:past-reservation.sql"},
-                executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-        )
+        @Sql(scripts = {"classpath:past-reservation.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
         void cancel_not_past() {
-            // given
-            String sqlName = "member";
-            Long savedId = 1L;
-
-            // when & then
-            Assertions.assertThatThrownBy(() -> reservationService.cancel(savedId, sqlName))
+            assertThatThrownBy(() -> reservationService.cancel(1L, "member"))
                     .isInstanceOf(ReservationException.class)
                     .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
         }
 
         @Test
         @DisplayName("예약취소 시, 타겟은 CANCELED 대기 1순위가 RESERVED가 된다.")
-        void cancel_with_reschedule() {
-            // then
+        void cancel_with_promote() {
+            // given
             String name1 = "송송";
             String name2 = "피온";
-
             Reservation reservation1 = saveReservation(name1, slot1);
-            Reservation reservation2 = saveReservation(name2, slot2);
+            Reservation reservation2 = saveWaitReservation(name2, slot1);
 
             // when
-            reservationService.cancel(reservation1.getId(), name1);
-            Reservation canceledReservation = reservationRepository.findById(reservation1.getId()).get();
-            Reservation currentReservedReservation = reservationRepository.findById(reservation2.getId()).get();
+            reservationService.cancel(slot1.getId(), name1);
+            Reservation canceled = reservationRepository.findById(reservation1.getId()).get();
+            Reservation promoted = reservationRepository.findById(reservation2.getId()).get();
 
             // then
-            Assertions.assertThat(canceledReservation.getStatus())
+            Assertions.assertThat(canceled.getStatus())
                     .isEqualTo(CANCELED);
 
-            Assertions.assertThat(currentReservedReservation.getStatus())
+            Assertions.assertThat(promoted.getStatus())
                     .isEqualTo(RESERVED);
         }
 
         @Test
         @DisplayName("관리자가 예약취소 시, 타겟은 CANCELED 대기 1순위가 RESERVED가 된다.")
-        void cancelByManager_with_reschedule() {
-            // then
+        void cancelByManager_with_promote() {
+            // given
             String name1 = "송송";
             String name2 = "피온";
-
             Reservation reservation1 = saveReservation(name1, slot1);
-            Reservation reservation2 = saveReservation(name2, slot2);
+            Reservation reservation2 = saveWaitReservation(name2, slot1);
 
             // when
-            reservationService.cancelByManager(reservation1.getId());
-            Reservation canceledReservation = reservationRepository.findById(reservation1.getId()).get();
-            Reservation currentReservedReservation = reservationRepository.findById(reservation2.getId()).get();
+            reservationService.cancelByManager(slot1.getId(), reservation1.getId());
+            Reservation canceled = reservationRepository.findById(reservation1.getId()).get();
+            Reservation promoted = reservationRepository.findById(reservation2.getId()).get();
 
             // then
-            Assertions.assertThat(canceledReservation.getStatus())
+            Assertions.assertThat(canceled.getStatus())
                     .isEqualTo(CANCELED);
 
-            Assertions.assertThat(currentReservedReservation.getStatus())
+            Assertions.assertThat(promoted.getStatus())
                     .isEqualTo(RESERVED);
         }
 
-    }
-
-    @Nested
-    @DisplayName("예약 변경 비즈니스 로직 통합 테스트")
-    class change_test {
-
-        @Test
-        @DisplayName("예약 가능한 날짜로 변경할 수 있다.")
-        void changeSchedule() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, date2.getId(), time2.getId());
-
-            // when
-            reservationService.changeSchedule(changeCommand);
-
-            // then
-            Reservation actual = reservationRepository.findById(saved.getId()).get();
-
-            Assertions.assertThat(actual.getDate().getId()).isEqualTo(date2.getId());
-            Assertions.assertThat(actual.getDate().getDate()).isEqualTo(date2.getDate());
-            Assertions.assertThat(actual.getTime().getId()).isEqualTo(time2.getId());
-            Assertions.assertThat(actual.getTime().getStartAt()).isEqualTo(time2.getStartAt());
-        }
-
-        @Test
-        @DisplayName("본인의 예약이 아닌데 변경을 시도하면 예외가 발생한다.")
-        void changeSchedule_not_owner() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            String notOwerName = "다른사람";
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), notOwerName, date2.getId(), time2.getId());
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_NOT_OWNER.getMessage());
-        }
-
-        @Test
-        @DisplayName("이미 취소된 예약을 변경하면 예외가 발생한다.")
-        void changeSchedule_already_canceled() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, date2.getId(), time2.getId());
-
-            // when
-            assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
-        }
-
-        @Test
-        @DisplayName("이미 지난 예약을 변경하면 예외가 발생한다.")
-        void changeSchedule_past() {
-            // given
-            ReservationDate pastDate = saveDate(ReservationDateFixture.pastDate());
-            ReservationTime pastTime = saveTime(ReservationTimeFixture.activeTime17());
-            ReservationSlot slot = saveSlot(ReservationSlot.of(pastDate, pastTime, theme));
-            Reservation pastReservation = savePastReservation("과거 예약", slot);
-
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(pastReservation.getId() , "과거 예약", date1.getId(), time1.getId());
-
-            // when
-            assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
-        }
-
-        @Test
-        @DisplayName("지난 날짜로 예약을 변경하면 예외가 발생한다.")
-        void changeSchedule_new_datetime_is_past() {
-            // given
-            ReservationDate pastDate = saveDate(ReservationDateFixture.pastDate());
-            ReservationTime pastTime = saveTime(ReservationTimeFixture.activeTime17());
-            savePastSlot(pastDate.getId(), pastTime.getId(), theme);
-
-            Reservation saved = saveReservation(name, slot1);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, pastDate.getId(), pastTime.getId());
-
-            // when
-            assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
-        }
-
-        @Test
-        @DisplayName("일반유저가 이미 존재하는 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
-        void changeSchedule_duplicated() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            saveReservation(name, slot2);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, date2.getId(), time2.getId());
-
-            // when & then
-            assertThatThrownBy(() ->
-                    reservationService.changeSchedule(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
-        }
-
-        @Test
-        @DisplayName("관리자는 예약자 확인 없이, 예약 날짜/시간을 변경할 수 있다.")
-        void changeScheduleByManager() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), null, date2.getId(), time2.getId());
-
-            // when
-            reservationService.changeScheduleByManager(changeCommand);
-
-            // then
-            Reservation actual = reservationRepository.findById(saved.getId()).get();
-
-            Assertions.assertThat(actual.getDate().getId()).isEqualTo(date2.getId());
-            Assertions.assertThat(actual.getDate().getDate()).isEqualTo(date2.getDate());
-            Assertions.assertThat(actual.getTime().getId()).isEqualTo(time2.getId());
-            Assertions.assertThat(actual.getTime().getStartAt()).isEqualTo(time2.getStartAt());
-        }
-
-        @Test
-        @DisplayName("이미 취소된 예약을 변경하면 예외가 발생한다.")
-        void changeScheduleByManager_already_canceled() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), null, date2.getId(), time2.getId());
-
-            // when
-            assertThatThrownBy(() -> reservationService.changeScheduleByManager(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
-        }
-
-        @Test
-        @DisplayName("관리자가 예약을 과거의 날짜/시간으로 변경하면 예외가 발생한다.")
-        void changeScheduleByManager_pastDateTime() {
-            // given
-            ReservationDate pastDate = saveDate(ReservationDateFixture.pastDate());
-            ReservationTime pastTime = saveTime(ReservationTimeFixture.activeTime17());
-            saveSlot(ReservationSlot.of(pastDate, pastTime, theme));
-            Reservation saved = saveReservation(name, slot1);
-
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), null, pastDate.getId(), pastTime.getId());
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.changeScheduleByManager(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
-        }
-
-        @Test
-        @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
-        void changeScheduleByManager_duplicated() {
-            // given
-            Reservation saved = saveReservation(name, slot1);
-            saveReservation(name, slot2);
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), null, date2.getId(), time2.getId());
-
-            // when & then
-            assertThatThrownBy(() ->
-                    reservationService.changeScheduleByManager(changeCommand))
-                    .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
-        }
-
-    }
-
-    @Test
-    @DisplayName("대기 상태인 예약은 변경할 수 없다.")
-    void waiting_reserve_not_changeable() {
-        // given
-        Reservation saved = saveWaitReservation(name, slot1);
-        ReservationChangeCommand command = new ReservationChangeCommand(
-                saved.getId(), saved.getName(), saved.getDate().getId(), saved.getTime().getId()
-        );
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.changeSchedule(command))
-                .isInstanceOf(ReservationException.class)
-                .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_WAITING.getMessage());
-    }
-
-    @Test
-    @DisplayName("순번을 재정렬하면, 대기 1순위가 예약이 된다.")
-    void reschedule() {
-        Reservation waited = saveWaitReservation(name, slot1);
-
-        // when
-        rescheduleService.rescheduleWaitingOrder(slot1);
-        Reservation actual = reservationRepository.findById(waited.getId()).get();
-
-        // then
-        Assertions.assertThat(actual.isReserved())
-                .isTrue();
-    }
-
-    private void savePastSlot(Long pastDateId, Long pastTimeId, Theme theme) {
-        ReservationTime pastTime = reservationTimeRepository.findById(pastDateId).get();
-        ReservationDate pastDate = reservationDateRepository.findById(pastTimeId).get();
-        saveSlot(ReservationSlot.of(pastDate, pastTime, theme));
     }
 
 }

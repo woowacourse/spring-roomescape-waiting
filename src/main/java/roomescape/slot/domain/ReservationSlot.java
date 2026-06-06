@@ -4,14 +4,17 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.date.domain.ReservationDate;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
-import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -21,19 +24,57 @@ public class ReservationSlot {
     private ReservationDate date;
     private ReservationTime time;
     private Theme theme;
+    private Reservations reservations;
 
     public static ReservationSlot of(ReservationDate date, ReservationTime time, Theme theme) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-        return new ReservationSlot(null, date, time, theme);
+        return new ReservationSlot(null, date, time, theme, new Reservations(new ArrayList<>()));
     }
 
     public static ReservationSlot load(Long id, ReservationDate date, ReservationTime time, Theme theme) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-        return new ReservationSlot(id, date, time, theme);
+        return new ReservationSlot(id, date, time, theme, new Reservations(new ArrayList<>()));
+    }
+
+    public ReservationSlot withReservations(Reservations reservations) {
+        return new ReservationSlot(id, date, time, theme, reservations);
+    }
+
+    public Reservation reserve(String requesterName, LocalDateTime reservedAt) {
+        validateNotPast(reservedAt);
+        return reservations.reserve(requesterName, this.id, reservedAt);
+    }
+
+    public Reservations cancel(String requesterName, LocalDateTime requestAt) {
+        validateNotPast(requestAt);
+        return reservations.cancel(requesterName);
+    }
+
+    public Reservations cancelByManager(Long reservationId, LocalDateTime reservedAt) {
+        validateNotPast(reservedAt);
+        return reservations.cancelByManager(reservationId);
+    }
+
+    public Reservations reschedule(ReservationSlot newSlot, String requesterName, LocalDateTime requestAt) {
+        this.validateNotPast(requestAt);
+        newSlot.validateNotPast(requestAt);
+        ReservationStatus status = newSlot.decideStatus(requesterName);
+        return reservations.reschedule(newSlot.getId(), requesterName, status);
+    }
+
+    public Reservations rescheduleByManager(ReservationSlot newSlot, String requesterName, LocalDateTime requestAt) {
+        this.validateNotPast(requestAt);
+        newSlot.validateNotPast(requestAt);
+        ReservationStatus status = newSlot.decideStatus(requesterName);
+        return reservations.rescheduleByManager(newSlot.getId(), requesterName, status);
+    }
+
+    private ReservationStatus decideStatus(String requesterName) {
+        return reservations.decideStatus(requesterName);
     }
 
     private static void validateDate(ReservationDate date) {

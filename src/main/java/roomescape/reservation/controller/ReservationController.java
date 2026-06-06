@@ -7,8 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.annotation.LoginMember;
 import roomescape.member.domain.Member;
-import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDto;
+import roomescape.reservation.controller.dto.request.ReservationRescheduleDto;
 import roomescape.reservation.controller.dto.response.ReservationDetailDto;
+import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
 
@@ -30,49 +31,40 @@ public class ReservationController {
             @PathVariable Long slotId,
             @LoginMember Member member
     ) {
-        Reservation reservation = reservationService.reserve(member.getName(), slotId);
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
+        Reservation saved = reservationService.reserve(member.getName(), slotId);
+        ReservationDetailDto responseData = ReservationDetailDto.from(saved);
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
     @GetMapping("/my-reservations")
-    public ResponseEntity<List<ReservationDetailDto>> getMyReservations(@LoginMember Member member) {
-        List<ReservationDetailDto> responseData = reservationService.readAllByName(member.getName()).stream()
-                .map(ReservationDetailDto::from)
+    public ResponseEntity<List<ReservationWithSlotDetailDto>> getMyReservationsV2(@LoginMember Member member) {
+        List<ReservationWithSlotDetailDto> responseData = reservationService.readAllByName(member.getName()).stream()
+                .map(ReservationWithSlotDetailDto::from)
                 .toList();
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
-    @GetMapping("/my-reservations/v2")
-    public ResponseEntity<List<ReservationDetailDto>> getMyReservationsV2(@LoginMember Member member) {
-        List<ReservationDetailDto> responseData = reservationService.readAllByNameV2(member.getName()).stream()
-                .map(ReservationDetailDto::from)
-                .toList();
-        return ResponseEntity.ok(responseData);
-    }
-
-    @AuthGuard(roles = {MEMBER, MANAGER})
-    @PatchMapping("/reservations/{id}/cancel")
+    @PatchMapping("/slots/{slotId}/cancel")
     public ResponseEntity<ReservationDetailDto> cancel(
-            @PathVariable Long id,
+            @PathVariable Long slotId,
             @LoginMember Member member
     ) {
-        Reservation reservation = reservationService.cancel(id, member.getName());
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
+        Reservation canceled = reservationService.cancel(slotId, member.getName());
+        ReservationDetailDto responseData = ReservationDetailDto.from(canceled);
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
-    @PatchMapping("/reservations/{id}/schedule")
+    @PatchMapping("/slots/{slotId}/reservations/reschedule")
     public ResponseEntity<ReservationDetailDto> updateSchedule(
-            @PathVariable Long id,
+            @PathVariable Long slotId,
             @LoginMember Member member,
-            @Validated @RequestBody ReservationChangeScheduleDto dto
+            @Validated @RequestBody ReservationRescheduleDto dto
     ) {
-        Reservation reservation = reservationService.changeSchedule(dto.toCommand(id, member.getName()));
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
+        Reservation rescheduled = reservationService.reschedule(slotId, dto.newSlotId(), member.getName());
+        ReservationDetailDto responseData = ReservationDetailDto.from(rescheduled);
         return ResponseEntity.ok(responseData);
     }
 

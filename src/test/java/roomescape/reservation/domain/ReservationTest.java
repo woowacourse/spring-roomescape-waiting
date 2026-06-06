@@ -173,4 +173,69 @@ class ReservationTest {
                 .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
+    @Test
+    @DisplayName("예약을 변경할 때, 예약자가 아니면 예외가 발생한다.")
+    void reschedule_wrongName() {
+        // given
+        Reservation reservation = Reservation.load(1L, name, slotId, RESERVED, LocalDateTime.now());
+        String anotherName = "다른사람";
+        Long newSlotId = 2L;
+
+        // when & then
+        assertThatThrownBy(() -> reservation.reschedule(newSlotId, anotherName, RESERVED))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NOT_OWNER.getMessage());
+    }
+
+    @Test
+    @DisplayName("취소된 예약을 변경할 때, 예외가 발생한다.")
+    void reschedule_already_canceled() {
+        // given
+        Reservation reservation = Reservation.load(1L, name, slotId, CANCELED, LocalDateTime.now());
+        Long newSlotId = 2L;
+
+        // when & then
+        assertThatThrownBy(() -> reservation.reschedule(newSlotId, name, RESERVED))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+    }
+
+    @Test
+    @DisplayName("예약을 변경하면 상태와 슬롯이 바뀐다.")
+    void reschedule() {
+        // given
+        Reservation reservation = Reservation.load(1L, name, slotId, RESERVED, LocalDateTime.now());
+        Long newSlotId = 2L;
+        ReservationStatus newStatus = WAITING;
+
+        // when
+        reservation.reschedule(newSlotId, name, newStatus);
+
+        // then
+        assertThat(reservation.getSlotId())
+                .isEqualTo(newSlotId);
+
+        assertThat(reservation.getStatus())
+                .isEqualTo(newStatus);
+    }
+
+    @Test
+    @DisplayName("관리자가 예약을 변경하면 소유자 확인을 하지 않고 변경한다.")
+    void rescheduleByManager() {
+        // given
+        Reservation reservation = Reservation.load(1L, name, slotId, RESERVED, LocalDateTime.now());
+        Long newSlotId = 2L;
+        ReservationStatus newStatus = WAITING;
+
+        // when
+        reservation.rescheduleByManager(newSlotId, newStatus);
+
+        // then
+        assertThat(reservation.getSlotId())
+                .isEqualTo(newSlotId);
+
+        assertThat(reservation.getStatus())
+                .isEqualTo(newStatus);
+    }
+
 }

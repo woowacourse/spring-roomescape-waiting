@@ -29,7 +29,7 @@ public class ReservationApiFixture {
                 .path("id");
     }
 
-    public static void cancelReservationWithToken(String token, Integer reservationId) {
+    public static void cancelReservationWithToken(String token, Integer slotId) {
         Map<String, String> params = new HashMap<>();
         RequestSpecification request = RestAssured.given().log().all()
                 .contentType(ContentType.JSON);
@@ -39,7 +39,7 @@ public class ReservationApiFixture {
         }
 
         request.body(params)
-                .when().patch("/member/reservations/" + reservationId + "/cancel")
+                .when().patch("/member/slots/" + slotId + "/cancel")
                 .then().log().all()
                 .statusCode(200);
     }

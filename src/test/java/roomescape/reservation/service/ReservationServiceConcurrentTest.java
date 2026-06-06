@@ -13,7 +13,6 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.support.ServiceSupport;
 import roomescape.theme.domain.Theme;
@@ -27,7 +26,7 @@ import static roomescape.ConcurrentUtils.doConcurrent;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({ReservationService.class, ReservationRescheduleService.class})
+@Import({ReservationService.class})
 class ReservationServiceConcurrentTest extends ServiceSupport {
 
     private final String name = "송송";
@@ -35,10 +34,7 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
 
     private ReservationDate date1;
     private ReservationTime time1;
-    private ReservationDate date2;
-    private ReservationTime time2;
     private ReservationSlot slot1;
-    private ReservationSlot slot2;
     private Theme theme;
 
     @Autowired
@@ -48,11 +44,8 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     void setUp() {
         date1 = saveDate(ReservationDateFixture.oneWeekLater());
         time1 = saveTime(ReservationTimeFixture.activeTime15());
-        date2 = saveDate(ReservationDateFixture.twoWeeksLater());
-        time2 = saveTime(ReservationTimeFixture.activeTime16());
         theme = saveTheme(themeName);
         slot1 = saveSlot(ReservationSlot.of(date1, time1, theme));
-        slot2 = saveSlot(ReservationSlot.of(date2, time2, theme));
     }
 
     @Test
@@ -60,23 +53,21 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent() throws InterruptedException {
         // given
-        doConcurrent(5, () -> {
-            reservationService.reserve(UUID.randomUUID().toString(), slot1.getId());
-        });
-
-        // then
-        List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlot(slot1);
+        doConcurrent(5, () -> reservationService.reserve(UUID.randomUUID().toString(), slot1.getId()));
 
         // when
+        List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlotId(slot1.getId());
+
+        // then
         Assertions.assertThat(reservations)
                 .hasSize(5);
 
         Assertions.assertThat(reservations)
-                .filteredOn(reservation -> reservation.getStatus() == RESERVED)
+                .filteredOn(r -> r.getStatus() == RESERVED)
                 .hasSize(1);
 
         Assertions.assertThat(reservations)
-                .filteredOn(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+                .filteredOn(r -> r.getStatus() == ReservationStatus.WAITING)
                 .hasSize(4);
     }
 
@@ -85,22 +76,19 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent_myself() throws InterruptedException {
         // given
-        doConcurrent(5, ()->{
-            reservationService.reserve(name, slot1.getId());
-        });
-
-        // then
-        List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlot(slot1);
+        doConcurrent(5, () -> reservationService.reserve(name, slot1.getId()));
 
         // when
+        List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlotId(slot1.getId());
+
+        // then
         Assertions.assertThat(reservations)
                 .hasSize(1);
 
-        Reservation myReservation = reservations.getFirst();
-
-        Assertions.assertThat(myReservation.getName())
+        Assertions.assertThat(reservations.getFirst().getName())
                 .isEqualTo(name);
-        Assertions.assertThat(myReservation.getStatus())
+
+        Assertions.assertThat(reservations.getFirst().getStatus())
                 .isEqualTo(RESERVED);
     }
 

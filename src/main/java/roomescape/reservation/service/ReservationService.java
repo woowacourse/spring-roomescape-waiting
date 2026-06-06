@@ -1,121 +1,85 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Reservations;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
 import roomescape.slot.repository.ReservationSlotRepository;
-import roomescape.reservation.domain.Reservations;
-import roomescape.reservation.exception.ReservationException;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
-import roomescape.reservation.service.dto.ReservationChangeCommand;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
-import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
-    @RequiredArgsConstructor
+@RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationRescheduleService rescheduleService;
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
 
-    public List<Reservation> readAll() {
+    public List<ReservationWithSlotInformation> readAll() {
         return reservationRepository.findAll();
     }
 
-    public List<ReservationWithWaitingTurn> readAllByName(String name) {
-        return reservationRepository.findMyReservationsWithWaitingTurn(name);
-    }
-
-    public List<ReservationWithSlotInformation> readAllByNameV2(String name) {
+    public List<ReservationWithSlotInformation> readAllByName(String name) {
         return reservationRepository.findByMemberName(name);
     }
 
     @Transactional
     public Reservation reserve(String requesterName, Long slotId) {
-        ReservationSlot slot = getSlotWithLock(slotId);
-        Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
-        Reservation reservation = reservationsOfTimeSlot.reserve(requesterName, slot, LocalDateTime.now());
+        ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
+        Reservation reservation = slot.reserve(requesterName, LocalDateTime.now());
         return reservationRepository.save(reservation);
     }
 
     @Transactional
-    public Reservation cancelByManager(Long id) {
-        Reservation reservation = getReservationWithSlotLocked(id);
-        cancelByManager(reservation);
-
-        if (reservation.isReserved()) {
-            rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
-            return reservation;
-        }
-
-        return reservation;
+    public Reservation cancelByManager(Long slotId, Long reservationId) {
+        ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
+        Reservations changed = slot.cancelByManager(reservationId, LocalDateTime.now());
+        cancelAndPromote(changed);
+        return changed.findById(reservationId);
     }
 
     @Transactional
-    public Reservation cancel(Long id, String requesterName) {
-        Reservation reservation = getReservationWithSlotLocked(id);
-        cancel(reservation, requesterName);
-
-        if (reservation.isReserved()) {
-            rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
-            return reservation;
-        }
-
-        return reservation;
+    public Reservation cancel(Long slotId, String requesterName) {
+        ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
+        Reservations changed = slot.cancel(requesterName, LocalDateTime.now());
+        cancelAndPromote(changed);
+        return changed.findByName(requesterName);
     }
 
     @Transactional
-    public Reservation changeSchedule(ReservationChangeCommand command) {
-        Reservation reservation = getReservationWithSlotLocked(command.id());
-        ReservationSlot newSlot = getSlotWithLock(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
-        validateAlreadyBookedByOthers(newSlot);
+    public Reservation reschedule(Long currentSlotId, Long newSlotId, String requesterName) {
+        ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
+        ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
 
-        reservation.changeSchedule(command.requesterName(), newSlot, LocalDateTime.now());
-        reservationRepository.updateSchedule(reservation);
-        return reservation;
+        Reservations changed = currentSlot.reschedule(newSlot, requesterName, LocalDateTime.now());
+        rescheduleAndPromote(changed);
+        return changed.findByName(requesterName);
     }
 
     @Transactional
-    public Reservation changeScheduleByManager(ReservationChangeCommand command) {
-        Reservation reservation = getReservationWithSlotLocked(command.id());
-        ReservationSlot newSlot = getSlotWithLock(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
-        validateAlreadyBookedByOthers(newSlot);
+    public Reservation rescheduleByManager(Long currentSlotId, Long newSlotId, String requesterName) {
+        ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
+        ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
 
-        reservation.changeScheduleByManager(newSlot, LocalDateTime.now());
-        reservationRepository.updateSchedule(reservation);
-        return reservation;
+        Reservations changed = currentSlot.rescheduleByManager(newSlot, requesterName, LocalDateTime.now());
+        rescheduleAndPromote(changed);
+        return changed.findByName(requesterName);
     }
 
-    private void cancel(Reservation cancelTarget, String requesterName) {
-        cancelTarget.cancel(requesterName, LocalDateTime.now());
-        reservationRepository.updateStatus(cancelTarget);
-    }
 
-    private void cancelByManager(Reservation cancelTarget) {
-        cancelTarget.cancelByManager();
-        reservationRepository.updateStatus(cancelTarget);
-    }
-
-    private Reservation getReservationWithSlotLocked(Long id) {
-        return reservationRepository.findByIdWithSlotLocked(id)
-                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-    }
-
-    private ReservationSlot getSlotWithLock(Long dateId, Long timeId, Long themeId) {
-        return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(dateId, timeId, themeId)
-                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
+    private ReservationSlot getSlotAndReservationsWithLock(Long slotId) {
+        ReservationSlot slot = getSlotWithLock(slotId);
+        List<Reservation> activeReservations = getReservationsOfSlot(slot);
+        return slot.withReservations(new Reservations(activeReservations));
     }
 
     private ReservationSlot getSlotWithLock(Long slotId) {
@@ -123,18 +87,16 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 
-    private void validateAlreadyBookedByOthers(ReservationSlot slot) {
-        if (checkAlreadyBookedByOthers(slot)) {
-            throw new ReservationException(RESERVATION_ALREADY_BOOKED);
-        }
+    private List<Reservation> getReservationsOfSlot(ReservationSlot slot) {
+        return reservationRepository.findReservedAndWaitingBySlotId(slot.getId());
     }
 
-    private boolean checkAlreadyBookedByOthers(ReservationSlot slot) {
-        return reservationRepository.existsReservedBySlot(slot);
+    private void cancelAndPromote(Reservations changed) {
+        changed.values().forEach(reservationRepository::updateStatus);
     }
 
-    private Reservations findTimeSlotReservations(ReservationSlot slot) {
-        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(slot));
+    private void rescheduleAndPromote(Reservations changed) {
+        changed.values().forEach(reservationRepository::updateSchedule);
     }
 
 }

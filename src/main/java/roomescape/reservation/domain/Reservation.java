@@ -61,19 +61,17 @@ public class Reservation {
         this.slotId = newSlotId;
     }
 
-    public void validateNotAlreadyCanceled() {
-        validateNotCanceled();
-    }
-
-    public void validateReschedule(String requesterName) {
+    public void reschedule(Long newSlotId, String requesterName, ReservationStatus status) {
         validateOwner(requesterName);
         validateNotCanceled();
-        validateNotWaiting();
+        this.slotId = newSlotId;
+        this.status = status;
     }
 
-    public void validateRescheduleByManager() {
+    public void rescheduleByManager(Long newSlotId, ReservationStatus status) {
         validateNotCanceled();
-        validateNotWaiting();
+        this.slotId = newSlotId;
+        this.status = status;
     }
 
     private static void validateName(String name) {
