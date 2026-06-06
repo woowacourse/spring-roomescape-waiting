@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
@@ -14,21 +14,21 @@ import roomescape.exception.AlreadyInUseException;
 
 @Service
 public class ReservationTimeService {
-    private final ReservationTimeDao reservationTimeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationTimeService(ReservationTimeDao reservationTimeDao) {
-        this.reservationTimeDao = reservationTimeDao;
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeDao.findAll()
+        return reservationTimeRepository.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public List<TimeSlotResponse> findAvailableTime(Long id, LocalDate date) {
-        return reservationTimeDao.findAvailableTime(id, date)
+        return reservationTimeRepository.findAvailableTime(id, date)
                 .stream()
                 .map(TimeSlotResponse::from)
                 .toList();
@@ -36,22 +36,22 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeResponse save(ReservationTimeRequest request) {
-        if (reservationTimeDao.existsByStartAt(request.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new AlreadyExistsException("이미 존재하는 시간대이므로 추가할 수 없습니다.");
         }
 
         ReservationTime saved = new ReservationTime(request.startAt());
 
-        ReservationTime time = reservationTimeDao.save(saved);
+        ReservationTime time = reservationTimeRepository.save(saved);
 
         return ReservationTimeResponse.from(time);
     }
 
     @Transactional
     public void delete(Long id) {
-        if (reservationTimeDao.existsByTimeId(id)) {
+        if (reservationTimeRepository.existsByTimeId(id)) {
             throw new AlreadyInUseException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
-        reservationTimeDao.delete(id);
+        reservationTimeRepository.delete(id);
     }
 }

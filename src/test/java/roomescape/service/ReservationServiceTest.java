@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -33,18 +33,18 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
 
     private Long themeId;
     private Long timeId;
 
     @BeforeEach
     void setUp() {
-        Theme theme = themeDao.save(new Theme("테스트 테마", "설명", "/test"));
-        ReservationTime time = reservationTimeDao.save(new ReservationTime(LocalTime.of(9, 0)));
+        Theme theme = themeRepository.save(new Theme("테스트 테마", "설명", "/test"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
         themeId = theme.getId();
         timeId = time.getId();
     }
@@ -96,7 +96,7 @@ class ReservationServiceTest {
 
     @Test
     void 예약_변경_시_이미_예약이_존재하면_대기_불가() {
-        ReservationTime anotherTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(21, 0)));
+        ReservationTime anotherTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(21, 0)));
         ReservationRequest firstRequest = new ReservationRequest("그해", LocalDate.now().plusDays(1), timeId, themeId);
         ReservationRequest secondRequest = new ReservationRequest("그해", LocalDate.now().plusDays(1), anotherTime.getId(), themeId);
 

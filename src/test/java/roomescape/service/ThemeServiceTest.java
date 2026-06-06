@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -30,25 +30,25 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Test
     void 인기_테마_상위_3개_조회() {
-        Theme theme1 = themeDao.save(new Theme("인기테마1", "설명", "url"));
-        Theme theme2 = themeDao.save(new Theme("인기테마2", "설명", "url"));
-        Theme theme3 = themeDao.save(new Theme("인기테마3", "설명", "url"));
-        ReservationTime time = reservationTimeDao.save(new ReservationTime(LocalTime.of(9, 0)));
+        Theme theme1 = themeRepository.save(new Theme("인기테마1", "설명", "url"));
+        Theme theme2 = themeRepository.save(new Theme("인기테마2", "설명", "url"));
+        Theme theme3 = themeRepository.save(new Theme("인기테마3", "설명", "url"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
 
-        reservationDao.save(new Reservation("A", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        reservationDao.save(new Reservation("B", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        reservationDao.save(new Reservation("C", LocalDate.now().minusDays(1), time, theme2, ReservationStatus.CONFIRMED));
-        reservationDao.save(new Reservation("D", LocalDate.now().minusDays(1), time, theme3, ReservationStatus.CONFIRMED));
+        reservationRepository.save(new Reservation("A", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
+        reservationRepository.save(new Reservation("B", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
+        reservationRepository.save(new Reservation("C", LocalDate.now().minusDays(1), time, theme2, ReservationStatus.CONFIRMED));
+        reservationRepository.save(new Reservation("D", LocalDate.now().minusDays(1), time, theme3, ReservationStatus.CONFIRMED));
 
         List<ThemeResponse> result = themeService.findTopTheme(3L);
 
@@ -72,17 +72,17 @@ class ThemeServiceTest {
 
     @Test
     void 예약_없는_테마_삭제() {
-        Theme saved = themeDao.save(new Theme("삭제 테마", "설명", "url"));
+        Theme saved = themeRepository.save(new Theme("삭제 테마", "설명", "url"));
         themeService.delete(saved.getId());
         
-        assertThat(themeDao.findThemeById(saved.getId())).isEmpty();
+        assertThat(themeRepository.findThemeById(saved.getId())).isEmpty();
     }
 
     @Test
     void 예약_존재하는_테마_삭제_시_예외() {
-        Theme theme = themeDao.save(new Theme("사용 테마", "설명", "url"));
-        ReservationTime time = reservationTimeDao.save(new ReservationTime(LocalTime.of(9, 0)));
-        reservationDao.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+        Theme theme = themeRepository.save(new Theme("사용 테마", "설명", "url"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
+        reservationRepository.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
 
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
                 .isInstanceOf(AlreadyInUseException.class);

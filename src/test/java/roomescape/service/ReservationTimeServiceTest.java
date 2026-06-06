@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -31,10 +31,10 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Test
     void 전체_예약_시간_순서_확인() {
@@ -83,8 +83,8 @@ class ReservationTimeServiceTest {
     void 예약_존재하는_시간_삭제_시_예외() {
         ReservationTimeResponse timeResponse = reservationTimeService.save(
                 new ReservationTimeRequest(LocalTime.of(21, 0)));
-        Theme theme = themeDao.save(new Theme("테스트테마", "설명", "url"));
-        reservationDao.save(
+        Theme theme = themeRepository.save(new Theme("테스트테마", "설명", "url"));
+        reservationRepository.save(
                 new Reservation("브라운", LocalDate.now(), new ReservationTime(timeResponse.id(), timeResponse.startAt()),
                         theme, ReservationStatus.CONFIRMED));
 
@@ -95,11 +95,11 @@ class ReservationTimeServiceTest {
     @Test
     void 예약된_시간_제외_가용_시간_조회() {
         LocalDate date = LocalDate.now().plusDays(1);
-        Theme theme = themeDao.save(new Theme("가용시간테마", "설명", "url"));
+        Theme theme = themeRepository.save(new Theme("가용시간테마", "설명", "url"));
 
         List<ReservationTimeResponse> allTimes = reservationTimeService.findAll();
         ReservationTimeResponse targetTime = allTimes.get(0);
-        reservationDao.save(
+        reservationRepository.save(
                 new Reservation("브라운", date, new ReservationTime(targetTime.id(), targetTime.startAt()), theme,
                         ReservationStatus.CONFIRMED));
 
@@ -116,7 +116,7 @@ class ReservationTimeServiceTest {
     @Test
     void 예약_없는_날짜의_전체_가용_시간_조회() {
         LocalDate date = LocalDate.now().plusDays(30);
-        Theme theme = themeDao.save(new Theme("빈날짜테마", "설명", "url"));
+        Theme theme = themeRepository.save(new Theme("빈날짜테마", "설명", "url"));
 
         List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(theme.getId(), date);
 
