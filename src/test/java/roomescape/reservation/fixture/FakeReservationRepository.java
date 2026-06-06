@@ -38,7 +38,7 @@ public class FakeReservationRepository implements ReservationRepository {
                     (reservation.getStatus() == ReservationStatus.RESERVED ||
                         reservation.getStatus() == ReservationStatus.WAITING))
             .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
-            .min(Comparator.comparing(Reservation::getRequestedAt)
+            .min(Comparator.comparing(Reservation::getWaitingOrder)
                 .thenComparing(Reservation::getId));
     }
 
@@ -60,7 +60,7 @@ public class FakeReservationRepository implements ReservationRepository {
         Long id = idGenerator.getAndIncrement();
         Reservation saved = Reservation.load(id, reservation.getName(), reservation.getDate(),
             reservation.getTime(),
-            reservation.getTheme(), reservation.getStatus(), reservation.getRequestedAt());
+            reservation.getTheme(), reservation.getStatus(), reservation.getWaitingOrder());
         store.put(id, saved);
         return saved;
     }
@@ -93,6 +93,18 @@ public class FakeReservationRepository implements ReservationRepository {
 
         store.put(reservation.getId(), reservation);
         return true;
+    }
+
+    @Override
+    public Long findNextWaitingOrderBySlot(Long dateId, Long timeId, Long themeId) {
+        return store.values().stream()
+            .filter(reservation -> reservation.getDate().getId().equals(dateId)
+                && reservation.getTime().getId().equals(timeId)
+                && reservation.getTheme().getId().equals(themeId))
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .mapToLong(Reservation::getWaitingOrder)
+            .max()
+            .orElse(0L) + 1;
     }
 
     @Override

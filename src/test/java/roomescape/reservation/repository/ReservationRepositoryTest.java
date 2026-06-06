@@ -7,7 +7,6 @@ import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -133,8 +132,8 @@ class ReservationRepositoryTest {
             List<String> usernames = List.of("user1", "user2", "user3");
             List<Reservation> reservations = List.of(
                 reservation(usernames.get(0), reservationDate1, reservationTime1, theme),
-                waitReservation(usernames.get(1), reservationDate1, reservationTime1, theme),
-                waitReservation(usernames.get(2), reservationDate1, reservationTime1, theme)
+                waitReservation(usernames.get(1), reservationDate1, reservationTime1, theme, 1L),
+                waitReservation(usernames.get(2), reservationDate1, reservationTime1, theme, 2L)
             );
             Reservation expected = reservations.get(1);
             saveAll(reservations);
@@ -181,10 +180,8 @@ class ReservationRepositoryTest {
         void 성공() {
             // given
             List<Reservation> reservations = List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme,
-                    LocalDateTime.now()),
-                Reservation.create(name, reservationDate1, reservationTime2, theme,
-                    LocalDateTime.now())
+                Reservation.reserved(name, reservationDate1, reservationTime1, theme),
+                Reservation.reserved(name, reservationDate1, reservationTime2, theme)
             );
             saveAll(reservations);
 
@@ -242,6 +239,39 @@ class ReservationRepositoryTest {
     }
 
     @Nested
+    @DisplayName("findNextWaitingOrderBySlot 메서드는")
+    class FindNextWaitingOrderBySlotTest {
+
+        @Test
+        @DisplayName("슬롯에 대기 예약이 없으면 1을 반환한다")
+        void 성공1() {
+            // when
+            Long actual = jdbcReservationRepository.findNextWaitingOrderBySlot(
+                reservationDate1.getId(), reservationTime1.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("슬롯에 존재하는 가장 큰 대기 순서보다 1 큰 값을 반환한다")
+        void 성공2() {
+            // given
+            save(waitReservation("대기자1", reservationDate1, reservationTime1, theme, 1L));
+            save(waitReservation("대기자3", reservationDate1, reservationTime1, theme, 3L));
+            save(reservation("확정 예약자", reservationDate1, reservationTime1, theme));
+            save(waitReservation("다른 슬롯 대기자", reservationDate2, reservationTime1, theme, 10L));
+
+            // when
+            Long actual = jdbcReservationRepository.findNextWaitingOrderBySlot(
+                reservationDate1.getId(), reservationTime1.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isEqualTo(4L);
+        }
+    }
+
+    @Nested
     @DisplayName("findMyReservationsWithWaitingTurn 메서드는")
     class FindMyReservationsWithWaitingTurnTest {
 
@@ -250,14 +280,12 @@ class ReservationRepositoryTest {
         @DisplayName("나의 예약 목록에 대기 순번을 포함해 조회한다")
         void 성공() {
             // given
-            LocalDateTime requestedAt = LocalDateTime.of(2026, 1, 1, 10, 0);
             save(reservation("예약자", reservationDate1, reservationTime1, theme));
-            save(Reservation.wait("앞선 대기자", reservationDate1, reservationTime1, theme,
-                requestedAt));
+            save(Reservation.wait("앞선 대기자", reservationDate1, reservationTime1, theme, 1L));
             Reservation waiting = save(Reservation.wait(name, reservationDate1, reservationTime1,
-                theme, requestedAt.plusMinutes(1)));
-            Reservation reserved = save(Reservation.create(name, reservationDate2, reservationTime2,
-                theme, requestedAt.plusMinutes(2)));
+                theme, 2L));
+            Reservation reserved = save(Reservation.reserved(name, reservationDate2, reservationTime2,
+                theme));
 
             // when
             List<ReservationWithWaitingTurn> actual =
@@ -287,7 +315,7 @@ class ReservationRepositoryTest {
             ReservationDate pastDate = jdbcReservationDateRepository.save(
                 ReservationDate.load(1L, LocalDate.now().minusDays(1), true));
             Reservation waiting = save(Reservation.load(1L, name, pastDate, reservationTime1, theme,
-                ReservationStatus.WAITING, LocalDateTime.now()));
+                ReservationStatus.WAITING, 1L));
 
             // when
             List<ReservationWithWaitingTurn> actual =

@@ -96,9 +96,9 @@ class ReservationServiceIntegrationTest {
 
             reservationRepository.save(reservation(name1, date, time, theme));
             reservationRepository.save(
-                waitReservation(name2, date, time, theme));
+                waitReservation(name2, date, time, theme, 1L));
             reservationRepository.save(
-                waitReservation(name3, date, time, theme));
+                waitReservation(name3, date, time, theme, 2L));
 
             // when
             List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name3);
@@ -145,8 +145,8 @@ class ReservationServiceIntegrationTest {
             Reservation reserved = reservationRepository.save(
                 reservation(name1, date, time, theme));
             Reservation firstWaiting = reservationRepository.save(
-                waitReservation(name2, date, time, theme));
-            reservationRepository.save(waitReservation(name3, date, time, theme));
+                waitReservation(name2, date, time, theme, 1L));
+            reservationRepository.save(waitReservation(name3, date, time, theme, 2L));
 
             Long beforeWaitingTurn = reservationService.readAllByName(name3)
                 .getFirst()

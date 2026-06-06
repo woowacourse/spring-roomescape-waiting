@@ -15,6 +15,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
 
+    Long findNextWaitingOrderBySlot(Long dateId, Long timeId, Long themeId);
+
     Reservation save(Reservation reservation);
 
     boolean updateStatus(Reservation reservation);

@@ -2,13 +2,11 @@ package roomescape.reservation.service;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
-import static roomescape.reservation.domain.ReservationStatus.WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -62,18 +60,18 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        LocalDateTime now = LocalDateTime.now();
-
         lockSlot(command.dateId(), command.timeId(), command.themeId());
 
         boolean isReservedSlot = checkReserved(name, command.dateId(), command.timeId(),
             command.themeId());
         if (isReservedSlot) {
+            Long waitingOrder = reservationRepository.findNextWaitingOrderBySlot(command.dateId(),
+                command.timeId(), command.themeId());
             return reservationRepository.save(
-                Reservation.wait(name, reservationDate, reservationTime, theme, now));
+                Reservation.wait(name, reservationDate, reservationTime, theme, waitingOrder));
         }
         return reservationRepository.save(
-            Reservation.create(name, reservationDate, reservationTime, theme, now));
+            Reservation.reserved(name, reservationDate, reservationTime, theme));
     }
 
     @Transactional
@@ -119,10 +117,9 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        reservation.changeSchedule(command.requesterName(), newDate, newTime);
         lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        reservation.changeSchedule(command.requesterName(), newDate, newTime);
         decideStatus(command, reservation);
-        reservation.changeRequestedAt(LocalDateTime.now());
         reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
     }
@@ -134,11 +131,10 @@ public class ReservationService {
         newTime.validateIsInactive();
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
-        reservation.changeScheduleByManager(newDate, newTime);
 
         lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        reservation.changeScheduleByManager(newDate, newTime);
         decideStatus(command, reservation);
-        reservation.changeRequestedAt(LocalDateTime.now());
         reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
     }
@@ -152,10 +148,12 @@ public class ReservationService {
         boolean isReservedSlot = checkReservedExcept(reservation.getId(), reservation.getName(),
             command.dateId(), command.timeId(), reservation.getTheme().getId());
         if (isReservedSlot) {
-            reservation.updateStatus(WAITING);
+            Long waitingOrder = reservationRepository.findNextWaitingOrderBySlot(command.dateId(),
+                command.timeId(), reservation.getTheme().getId());
+            reservation.changeToWaitingWithOrder(waitingOrder);
             return;
         }
-        reservation.updateStatus(RESERVED);
+        reservation.changeToReserved();
     }
 
     private ReservationTime getReservationTime(Long timeId) {

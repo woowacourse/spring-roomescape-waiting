@@ -340,7 +340,7 @@ class ReservationServiceTest {
             ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
             Reservation saved =
                 save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, LocalDateTime.now()));
+                    ReservationStatus.RESERVED, 0L));
             Long savedId = saved.getId();
 
             // when & then
@@ -452,7 +452,7 @@ class ReservationServiceTest {
             ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
             Reservation saved =
                 save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, LocalDateTime.now()));
+                    ReservationStatus.RESERVED, 0L));
             Long savedId = saved.getId();
 
             // when & then
@@ -472,22 +472,17 @@ class ReservationServiceTest {
         void 성공() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeSchedule(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
             Reservation actual = reservationRepository.findById(saved.getId()).get();
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-            assertThat(actual.getRequestedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
         }
 
 
@@ -498,22 +493,17 @@ class ReservationServiceTest {
             String otherName = "다른 이용자";
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             save(reservation(otherName, reservationDate2, reservationTime2, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeSchedule(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
             Reservation actual = reservationRepository.findById(saved.getId()).get();
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(actual.getRequestedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
         }
 
 
@@ -558,7 +548,7 @@ class ReservationServiceTest {
             ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
             Reservation saved =
                 save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, LocalDateTime.now()));
+                    ReservationStatus.RESERVED, 0L));
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -630,22 +620,17 @@ class ReservationServiceTest {
         void 성공1() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeScheduleByManager(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
             Reservation actual = reservationRepository.findById(saved.getId()).get();
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-            assertThat(actual.getRequestedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
         }
 
         @Test

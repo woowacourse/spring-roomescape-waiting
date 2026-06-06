@@ -1,7 +1,6 @@
 package roomescape.reservation.repository.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import roomescape.reservation.domain.ReservationStatus;
 
@@ -14,7 +13,6 @@ public record ReservationWithWaitingTurn(
     String themeName,
     String themeThumbnailUrl,
     ReservationStatus status,
-    LocalDateTime requestedAt,
     Long waitingTurn
 ) {
 

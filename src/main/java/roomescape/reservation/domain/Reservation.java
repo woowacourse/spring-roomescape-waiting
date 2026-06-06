@@ -34,30 +34,41 @@ public class Reservation {
     private ReservationTime time;
     private Theme theme;
     private ReservationStatus status;
-    private LocalDateTime requestedAt;
+    private Long waitingOrder;
 
-    public static Reservation create(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, LocalDateTime requestedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, requestedAt);
+    public static Reservation reserved(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme) {
+        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED);
     }
 
     public static Reservation wait(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, LocalDateTime requestedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, requestedAt);
+        ReservationTime time, Theme theme, Long waitingOrder) {
+        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, waitingOrder);
     }
 
     private static Reservation of(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime requestedAt) {
+        ReservationTime time, Theme theme, ReservationStatus status) {
         validate(name, reservationDate, time, theme);
         validatePast(reservationDate.getDate(), time.getStartAt());
-        return new Reservation(null, name, reservationDate, time, theme, status, requestedAt);
+
+        return new Reservation(null, name, reservationDate, time, theme, status, 0L);
+    }
+
+    private static Reservation of(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme, ReservationStatus status, Long waitingOrder) {
+        validate(name, reservationDate, time, theme);
+        validatePast(reservationDate.getDate(), time.getStartAt());
+        validateWaitingOrder(waitingOrder);
+
+        return new Reservation(null, name, reservationDate, time, theme, status, waitingOrder);
     }
 
     public static Reservation load(Long id, String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime requestedAt) {
+        ReservationTime time, Theme theme, ReservationStatus status, Long waitingOrder) {
         validate(name, reservationDate, time, theme);
         validateId(id);
-        return new Reservation(id, name, reservationDate, time, theme, status, requestedAt);
+
+        return new Reservation(id, name, reservationDate, time, theme, status, waitingOrder);
     }
 
     public void cancel(String requesterName) {
@@ -143,12 +154,24 @@ public class Reservation {
         }
     }
 
+    private static void validateWaitingOrder(Long waitingOrder) {
+        if (waitingOrder != null && waitingOrder < 0) {
+            throw new IllegalStateException("대기 순서는 음수일 수 없습니다");
+        }
+    }
+
     public void updateStatus(ReservationStatus status) {
         this.status = status;
     }
 
-    public void changeRequestedAt(LocalDateTime now) {
-        this.requestedAt = now;
+    public void changeToReserved() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
+    public void changeToWaitingWithOrder(Long waitingOrder) {
+        validateWaitingOrder(waitingOrder);
+        this.status = ReservationStatus.WAITING;
+        this.waitingOrder = waitingOrder;
     }
 
     private void validateOwner(String requesterName) {
