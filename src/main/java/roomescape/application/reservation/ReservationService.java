@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.exception.BusinessException;
+import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
@@ -44,7 +45,7 @@ public class ReservationService {
         User user = findOrCreateByUsername(request.username()); // TODO: 동시성 문제 발생 가능
 
         ReservationSlot slot = slotRepository.findBySchedule(request.timeId(), request.date(), request.themeId())
-                .orElseThrow(() -> new BusinessException()); // TODO: 슬롯 배치 생성 추가
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND)); // TODO: 슬롯 배치 생성 추가
 
         LocalDateTime now = LocalDateTime.now(clock);
         validateReservable(slot, user, now);
@@ -81,7 +82,7 @@ public class ReservationService {
         slot.validateIsNotInPast(now);
 
         if (reservationRepository.existsBySlotIdAndUserId(slot.getId(), user.getId())) { // TODO: 락 추가
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }
 
@@ -109,11 +110,11 @@ public class ReservationService {
 
     private User findByUsernameOrThrow(String username) {
         return userRepository.findByName(username)
-                .orElseThrow(() -> new BusinessException());
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private Reservation findByIdOrThrow(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException());
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 }

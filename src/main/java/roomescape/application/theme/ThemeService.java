@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.exception.BusinessException;
+import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRankResult;
@@ -54,11 +55,11 @@ public class ThemeService {
     @Transactional
     public void deleteTheme(Long id) {
         if (slotRepository.existsByThemeId(id)) {
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.THEME_IN_USE);
         }
         int deletedRow = themeRepository.deleteById(id);
         if (deletedRow == 0) {
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
         }
     }
 }

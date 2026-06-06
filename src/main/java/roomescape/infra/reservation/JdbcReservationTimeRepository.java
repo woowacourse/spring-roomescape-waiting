@@ -18,6 +18,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private static final String COLUMN_START_AT = "start_at";
     private static final String FIND_ALL_SQL = "select id, start_at from reservation_time order by id";
     private static final String DELETE_BY_ID_SQL = "delete from reservation_time where id = :id";
+
     private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (rs, rowNum) -> ReservationTime.of(
             rs.getLong(COLUMN_ID),
             rs.getTime(COLUMN_START_AT).toLocalTime()

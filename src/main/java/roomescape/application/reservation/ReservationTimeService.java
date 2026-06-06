@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.exception.BusinessException;
+import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
@@ -33,12 +34,12 @@ public class ReservationTimeService {
     @Transactional
     public void deleteReservationTime(Long timeId) {
         if (slotRepository.existsByTimeId(timeId)) {
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.RESERVATION_TIME_IN_USE);
         }
 
         int deletedRow = timeRepository.deleteById(timeId);
         if (deletedRow == 0) {
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.RESERVATION_TIME_NOT_FOUND);
         }
     }
 }

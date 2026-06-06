@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.domain.exception.BusinessException;
+import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.theme.Theme;
 
 @Getter
@@ -31,10 +32,10 @@ public class ReservationSlot {
         LocalTime nowTime = now.toLocalTime();
 
         if (date.isBefore(nowDate)) {
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.RESERVATION_SLOT_IN_PAST);
         }
         if (date.isEqual(nowDate) && time.isBefore(nowTime)) {
-            throw new BusinessException();
+            throw new BusinessException(ErrorCode.RESERVATION_SLOT_IN_PAST);
         }
     }
 }

@@ -8,13 +8,9 @@ public interface ReservationSlotRepository {
 
     Optional<ReservationSlot> findBySchedule(Long timeId, LocalDate date, Long themeId);
 
-    Optional<ReservationSlot> findById(Long id);
-
     ReservationSlot save(ReservationSlot reservation);
 
     boolean existsByTimeId(Long id);
 
     boolean existsByThemeId(Long id);
-
-    boolean existsBySchedule(Long timeId, Long dateId, Long themeId);
 }

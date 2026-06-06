@@ -3,7 +3,6 @@ package roomescape.infra.reservation;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import javax.sql.DataSource;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -43,7 +42,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                u.id as user_id,
                u.name as user_name,
                rs.id as reservation_slot_id,
-               rd.date,
+               rs.date,
                rt.id as time_id,
                rt.start_at,
                th.id as theme_id,
@@ -54,10 +53,9 @@ public class JdbcReservationRepository implements ReservationRepository {
         from reservation r
         join users u on r.user_id = u.id
         join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_date rd on rs.date_id = rd.id
         join reservation_time rt on rs.time_id = rt.id
         join theme th on rs.theme_id = th.id
-        order by rd.date desc, rt.start_at desc, r.id;
+        order by rs.date desc, rt.start_at desc, r.id;
         """;
 
     private static final String FIND_BY_ID_SQL = """
@@ -67,7 +65,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                u.id as user_id,
                u.name as user_name,
                rs.id as reservation_slot_id,
-               rd.date,
+               rs.date,
                rt.id as time_id,
                rt.start_at,
                th.id as theme_id,
@@ -78,7 +76,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         from reservation r
         join users u on r.user_id = u.id
         join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_date rd on rs.date_id = rd.id
         join reservation_time rt on rs.time_id = rt.id
         join theme th on rs.theme_id = th.id
         where r.id = :id
@@ -91,7 +88,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                u.id as user_id,
                u.name as user_name,
                rs.id as reservation_slot_id,
-               rd.date,
+               rs.date,
                rt.id as time_id,
                rt.start_at,
                th.id as theme_id,
@@ -102,11 +99,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         from reservation r
         join users u on r.user_id = u.id
         join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_date rd on rs.date_id = rd.id
         join reservation_time rt on rs.time_id = rt.id
         join theme th on rs.theme_id = th.id
         where u.id = :userId
-        order by rd.date desc, rt.start_at desc, r.id;
+        order by rs.date desc, rt.start_at desc, r.id;
         """;
 
     private static final String FIND_ALL_BY_SLOT_ID_ORDER_SQL = """
@@ -116,7 +112,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                u.id as user_id,
                u.name as user_name,
                rs.id as reservation_slot_id,
-               rd.date,
+               rs.date,
                rt.id as time_id,
                rt.start_at,
                th.id as theme_id,
@@ -127,7 +123,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         from reservation r
         join users u on r.user_id = u.id
         join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_date rd on rs.date_id = rd.id
         join reservation_time rt on rs.time_id = rt.id
         join theme th on rs.theme_id = th.id
         where r.reservation_slot_id = :slotId
@@ -188,21 +183,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Reservation save(Reservation userReservation) {
+    public Reservation save(Reservation reservation) {
         Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue("reservation_slot_id", userReservation.getSlot().getId())
-                .addValue("user_id", userReservation.getUser().getId())
-                .addValue("waiting_number", userReservation.getWaitingNumber())
-                .addValue("status", userReservation.getStatus().name())
-                .addValue("reserved_at", Timestamp.valueOf(userReservation.getReservedAt())));
+                .addValue("reservation_slot_id", reservation.getSlot().getId())
+                .addValue("user_id", reservation.getUser().getId())
+                .addValue("waiting_number", reservation.getWaitingNumber())
+                .addValue("status", reservation.getStatus().name())
+                .addValue("reserved_at", Timestamp.valueOf(reservation.getReservedAt())));
 
         return Reservation.of(
                 extractId(key),
-                userReservation.getUser(),
-                userReservation.getSlot(),
-                userReservation.getWaitingNumber(),
-                userReservation.getStatus(),
-                userReservation.getReservedAt()
+                reservation.getUser(),
+                reservation.getSlot(),
+                reservation.getWaitingNumber(),
+                reservation.getStatus(),
+                reservation.getReservedAt()
         );
     }
 

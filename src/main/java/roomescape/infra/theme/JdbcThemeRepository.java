@@ -32,8 +32,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         from theme t
         join reservation_slot rs on rs.theme_id = t.id
         join reservation r on r.reservation_slot_id = rs.id
-        join reservation_date rd on rd.id = rs.date_id
-        where rd.date between :startDay and :today
+        where rs.date between :startDay and :today
         group by t.id, t.name, t.content, t.url
         order by rank, t.id
         limit :rankLimit
