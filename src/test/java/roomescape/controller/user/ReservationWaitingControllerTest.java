@@ -93,7 +93,7 @@ class ReservationWaitingControllerTest {
                         .param("name", "브라운"))
                 .andExpect(status().isNoContent());
 
-        verify(reservationWaitingService, times(1)).delete(eq(1L), eq("브라운"), any(LocalDateTime.class));
+        verify(reservationWaitingService, times(1)).deleteByUser(eq(1L), eq("브라운"), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 

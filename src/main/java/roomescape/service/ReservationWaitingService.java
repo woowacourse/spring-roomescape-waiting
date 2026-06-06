@@ -52,10 +52,15 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void delete(Long id, String name, LocalDateTime now) {
+    public void deleteByUser(Long id, String name, LocalDateTime now) {
         ReservationWaiting waiting = findWaiting(id);
         reservationWaitingValidator.validateModifiable(waiting, name, now);
         deleteWaiting(id);
+    }
+
+    @Transactional
+    public void deleteByAdmin(Long id) {
+        reservationWaitingRepository.delete(id);
     }
 
     private ReservationTime findReservationTime(Long timeId) {

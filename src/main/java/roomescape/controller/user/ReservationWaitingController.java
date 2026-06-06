@@ -52,11 +52,11 @@ public class ReservationWaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
+    public ResponseEntity<Void> deleteWaiting(
             @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
             @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name
     ) {
-        service.delete(id, name, LocalDateTime.now());
+        service.deleteByUser(id, name, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }

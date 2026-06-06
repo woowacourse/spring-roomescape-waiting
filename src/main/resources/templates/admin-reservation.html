@@ -319,6 +319,16 @@
             .catch(showError);
     }
 
+    function deleteWaiting(id) {
+        fetch(`/admin/waitings/${id}`, { method: 'DELETE' })
+            .then(handleResponse)
+            .then(() => {
+                showToast('대기가 삭제되었습니다', 'success');
+                loadReservations();
+            })
+            .catch(showError);
+    }
+
     function selectDatePreset(range, shouldLoad = true) {
         updateActivePreset(range);
         setDateInputsEnabled(range === 'custom');
@@ -365,8 +375,8 @@
     }
 
     function renderActions(reservation) {
-        if (reservation.status !== 'RESERVED') {
-            return '<span class="muted">-</span>';
+        if (reservation.status === 'WAITING') {
+            return `<button class="btn-danger table-action-button" onclick="deleteWaiting(${reservation.id})">삭제</button>`;
         }
         return `<button class="btn-danger table-action-button" onclick="deleteReservation(${reservation.id})">삭제</button>`;
     }

@@ -189,11 +189,43 @@ class ReservationWaitingServiceTest {
                 .thenReturn(1);
 
         // when
-        service.delete(id, name, now);
+        service.deleteByUser(id, name, now);
 
         // then
         verify(reservationWaitingValidator).validateModifiable(waiting, name, now);
         verify(reservationWaitingRepository).delete(id);
+    }
+
+    @Test
+    void 관리자_예약_대기를_삭제한다() {
+        // given
+        Long id = 1L;
+        when(reservationWaitingRepository.delete(id))
+                .thenReturn(1);
+
+        // when
+        service.deleteByAdmin(id);
+
+        // then
+        verify(reservationWaitingRepository).delete(id);
+        verify(reservationWaitingRepository, never()).findById(anyLong());
+        verifyNoInteractions(reservationWaitingValidator);
+    }
+
+    @Test
+    void 관리자_예약_대기_삭제시_존재하지_않는_대기여도_예외가_발생하지_않는다() {
+        // given
+        Long id = 999L;
+        when(reservationWaitingRepository.delete(id))
+                .thenReturn(0);
+
+        // when
+        service.deleteByAdmin(id);
+
+        // then
+        verify(reservationWaitingRepository).delete(id);
+        verify(reservationWaitingRepository, never()).findById(anyLong());
+        verifyNoInteractions(reservationWaitingValidator);
     }
 
     @Test
@@ -208,7 +240,7 @@ class ReservationWaitingServiceTest {
                 .thenReturn(0);
 
         // when & then
-        assertThatThrownBy(() -> service.delete(id, name, now))
+        assertThatThrownBy(() -> service.deleteByUser(id, name, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약 대기입니다.");
@@ -228,7 +260,7 @@ class ReservationWaitingServiceTest {
                 .when(reservationWaitingValidator).validateModifiable(waiting, "구구", now);
 
         // when & then
-        assertThatThrownBy(() -> service.delete(id, "구구", now))
+        assertThatThrownBy(() -> service.deleteByUser(id, "구구", now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_RESOURCE)
                 .hasMessage("본인의 예약 대기만 취소할 수 있습니다.");
@@ -248,7 +280,7 @@ class ReservationWaitingServiceTest {
                 .when(reservationWaitingValidator).validateModifiable(waiting, name, now);
 
         // when & then
-        assertThatThrownBy(() -> service.delete(id, name, now))
+        assertThatThrownBy(() -> service.deleteByUser(id, name, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAST_RESOURCE_LOCKED)
                 .hasMessage("이미 지난 예약 대기는 취소할 수 없습니다.");
@@ -264,7 +296,7 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> service.delete(id, "브라운", now))
+        assertThatThrownBy(() -> service.deleteByUser(id, "브라운", now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약 대기입니다.");
