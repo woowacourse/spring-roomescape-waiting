@@ -285,10 +285,14 @@ public class ConcurrentTest {
                 .isTrue();
 
         int reservationCount = countReservations();
-
+        int waitingCount = countWaitings();
         assertThat(reservationCount)
-                .as("UNIQUE 제약이 같은 슬롯의 reservation 중복을 막아야 함 (0 또는 1)")
-                .isIn(0, 1);
+                .as("기존 reservation이 삭제되고 W1이 새 reservation으로 승격된다.")
+                .isEqualTo(1);
+
+        assertThat(waitingCount)
+                .as("W1은 자동 승격되고 W2는 대기로 남는다.")
+                .isEqualTo(1);
 
         List<Throwable> uniqueViolations = errors.stream()
                 .filter(e -> e instanceof DataIntegrityViolationException)
