@@ -559,6 +559,44 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("확정 예약을 취소하면 슬롯의 활성 예약은 0건이다.")
+    void cancelConfirmedReservation() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId("공포", "무서운 테마", "theme-url")
+        );
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
+        );
+        User user = userRepository.save(User.createWithoutId("boye"));
+        Reservation confirmedReservation = saveConfirmedReservation(reservationSlot, user, now);
+        ReservationService reservationService = createReservationService(now);
+
+        // when
+        reservationService.cancelUserReservation(confirmedReservation.getId());
+
+        // then
+        assertSoftly(softly -> {
+                assertThat(reservationSlotRepository.findBySchedule(
+                    reservationTime.getId(),
+                    reservationDate.getId(),
+                    theme.getId())
+                ).isNotEmpty();
+                assertThat(reservationRepository.countByReservationSlotId(reservationSlot.getId())).isZero();
+                assertThat(reservationRepository.findActiveReservation(confirmedReservation.getId())).isEmpty();
+            }
+        );
+    }
+
+    @Test
     @DisplayName("확정 예약자가 예약을 취소하면 대기 1번 예약자만 확정으로 변경된다.")
     void promoteFirstWaitingReservation() {
         // given
