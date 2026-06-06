@@ -26,19 +26,14 @@ public class AdminThemeController {
             @Valid @RequestBody ThemeCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ThemeResponse.from(themeService.save(request.toCommand())));
+                .body(themeService.save(request.toCommand()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        int deletedCount = themeService.delete(id);
-
-        if (deletedCount == 0) {
-            return ResponseEntity.notFound().build();
-        }
-
+        themeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

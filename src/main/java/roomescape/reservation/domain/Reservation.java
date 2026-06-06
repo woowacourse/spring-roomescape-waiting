@@ -16,6 +16,10 @@ public class Reservation {
     private final Long themeId;
     private final Long timeId;
 
+    public static Reservation of(Long id, String name, LocalDate date, Long themeId, Long timeId) {
+        return new Reservation(id, name, date, themeId, timeId);
+    }
+
     public Reservation withId(Long generatedId) {
         return Reservation.builder()
                 .id(generatedId)

@@ -1,5 +1,6 @@
 package roomescape.theme.repository;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import java.time.LocalDate;
@@ -17,7 +18,6 @@ import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.infra.JdbcReservationTimeRepository;
 import roomescape.support.RepositoryTestHelper;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.PopularTheme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.infra.JdbcThemeRepository;
 
@@ -99,7 +99,7 @@ public class JdbcThemeRepositoryTest {
                 .thumbnailImgUrl("theme img url")
                 .build());
 
-        assertThat(themeRepository.delete(savedTheme.getId())).isEqualTo(1);
+        assertThatCode(() -> themeRepository.delete(savedTheme.getId())).doesNotThrowAnyException();
     }
 
     @DisplayName("db에서 테마를 전체 조회합니다.")
@@ -148,14 +148,11 @@ public class JdbcThemeRepositoryTest {
         testHelper.insertReservation("스타크", yesterday, theme1.getId(), time2.getId());
 
         LocalDate today = LocalDate.now();
-        List<PopularTheme> popularThemes = themeRepository.findTop10PopularThemesBetween(today.minusWeeks(1),
-                today.minusDays(1));
+        List<Theme> popularThemes = themeRepository.findSortedPopularThemes(today.minusWeeks(1), today.minusDays(1), 10);
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(popularThemes.getFirst().id()).isEqualTo(theme1.getId());
-            assertSoftly.assertThat(popularThemes.getFirst().reservedCount()).isEqualTo(2);
-            assertSoftly.assertThat(popularThemes.get(1).id()).isEqualTo(theme2.getId());
-            assertSoftly.assertThat(popularThemes.get(1).reservedCount()).isEqualTo(1);
+            assertSoftly.assertThat(popularThemes.getFirst().getId()).isEqualTo(theme1.getId());
+            assertSoftly.assertThat(popularThemes.get(1).getId()).isEqualTo(theme2.getId());
         });
     }
 }

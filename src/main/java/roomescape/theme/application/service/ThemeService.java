@@ -5,14 +5,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.service.ReservationQueryService;
-import roomescape.theme.application.dto.PopularThemeQueryResult;
+import roomescape.global.ConflictException;
+import roomescape.global.NotFoundException;
 import roomescape.theme.application.dto.ThemeCreateCommand;
-import roomescape.theme.application.dto.ThemeQueryResult;
-import roomescape.theme.application.exception.ThemeErrorCode;
+import roomescape.theme.exception.ThemeErrorMessage;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @RequiredArgsConstructor
 @Transactional
@@ -20,51 +19,41 @@ import roomescape.theme.domain.repository.ThemeRepository;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationQueryService queryService;
 
     @Transactional(readOnly = true)
-    public ThemeQueryResult findById(Long id) {
-        return ThemeQueryResult.from(themeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND)));
+    public ThemeResponse findById(Long id) {
+        return ThemeResponse.from(themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ThemeErrorMessage.THEME_NOT_FOUND, id)));
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeQueryResult> findAll() {
-        List<Theme> themes = themeRepository.findAll();
-
-        return themes.stream().map(ThemeQueryResult::from)
+    public List<ThemeResponse> findAll() {
+        return themeRepository.findAll().stream()
+                .map(ThemeResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<PopularThemeQueryResult> findPopularThemes(LocalDate today) {
-        return themeRepository.findTop10PopularThemesBetween(today.minusWeeks(1), today.minusDays(1))
+    public List<ThemeResponse> findPopularThemes(LocalDate startAt, LocalDate endAt, int limit) {
+        return themeRepository.findSortedPopularThemes(startAt, endAt, limit)
                 .stream()
-                .map(PopularThemeQueryResult::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
-    public ThemeQueryResult save(ThemeCreateCommand request) {
+    public ThemeResponse save(ThemeCreateCommand request) {
         Theme theme = request.toEntity();
         validateDuplicateTheme(theme);
-
-        return ThemeQueryResult.from(themeRepository.save(theme));
+        return ThemeResponse.from(themeRepository.save(theme));
     }
 
-    public int delete(long id) {
-        validateNoReReservationExists(id);
-        return themeRepository.delete(id);
-    }
-
-    private void validateNoReReservationExists(long id) {
-        if (queryService.existsByThemeId(id)) {
-            throw new RoomEscapeException(ThemeErrorCode.THEME_DELETE_NOT_ALLOWED);
-        }
+    public void delete(long id) {
+        themeRepository.delete(id);
     }
 
     private void validateDuplicateTheme(Theme theme) {
         if (themeRepository.existsByNameAndDescription(theme)) {
-            throw new RoomEscapeException(ThemeErrorCode.DUPLICATE_THEME);
+            throw new ConflictException(ThemeErrorMessage.DUPLICATE_THEME);
         }
     }
 }

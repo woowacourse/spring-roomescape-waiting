@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservationtime.domain.repository.AvailableReservationTime;
-import roomescape.reservationtime.domain.repository.AvailableReservationTimeRepository;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
-import roomescape.reservationtime.infra.JdbcAvailableReservationTimeRepository;
 import roomescape.reservationtime.infra.JdbcReservationTimeRepository;
 import roomescape.support.RepositoryTestHelper;
 import roomescape.theme.domain.Theme;
@@ -25,16 +23,15 @@ import roomescape.theme.infra.JdbcThemeRepository;
 class JdbcReservationTimeRepositoryTest {
 
     ReservationTimeRepository timeRepository;
-    AvailableReservationTimeRepository availableReservationTimeRepository;
     ThemeRepository themeRepository;
     RepositoryTestHelper testHelper;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
         timeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
-        availableReservationTimeRepository = new JdbcAvailableReservationTimeRepository(jdbcTemplate);
         themeRepository = new JdbcThemeRepository(jdbcTemplate);
         testHelper = new RepositoryTestHelper(jdbcTemplate);
         testHelper.insertReservationTime(LocalTime.of(9, 0));
@@ -51,8 +48,8 @@ class JdbcReservationTimeRepositoryTest {
                 .thumbnailImgUrl("theme img url")
                 .build());
 
-        List<AvailableReservationTime> times = availableReservationTimeRepository
-                .findByThemeAndDate(savedTheme.getId(), LocalDate.of(2026, 5, 4));
+        List<AvailableReservationTime> times = timeRepository
+                .findAvailableByThemeAndDate(savedTheme.getId(), LocalDate.of(2026, 5, 4));
 
         List<LocalTime> expectedTimes = List.of(
                 LocalTime.parse("09:00"),
