@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -20,6 +21,10 @@ public class ReservationWaiting {
 
     public static ReservationWaiting restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
         return new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
+    }
+
+    public Reservation toReservation() {
+        return Reservation.restore(null, name, slot);
     }
 
     public boolean isPast(Clock clock) {

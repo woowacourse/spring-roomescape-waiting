@@ -11,7 +11,6 @@ import roomescape.common.domain.ReservationSlot;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
@@ -27,18 +26,15 @@ public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingFactory reservationWaitingFactory;
-    private final ReservationFactory reservationFactory;
     private final Clock clock;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
                                      ReservationRepository reservationRepository,
                                      ReservationWaitingFactory reservationWaitingFactory,
-                                     ReservationFactory reservationFactory,
                                      Clock clock) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationWaitingFactory = reservationWaitingFactory;
-        this.reservationFactory = reservationFactory;
         this.clock = clock;
     }
 
@@ -86,8 +82,7 @@ public class ReservationWaitingService {
         reservationWaitingRepository.findReservationWaitingBySlot(slot)
                 .ifPresent(waiting -> {
                     try {
-                        reservationRepository.save(
-                                reservationFactory.create(waiting.getName(), waiting.getSlot()));
+                        reservationRepository.save(waiting.toReservation());
                     } catch (DuplicateKeyException e) {
                         throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
                     }
@@ -106,7 +101,7 @@ public class ReservationWaitingService {
 
         try {
             return ReservationResponse.from(
-                    reservationRepository.save(reservationFactory.create(waiting.getName(), waiting.getSlot())));
+                    reservationRepository.save(waiting.toReservation()));
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
