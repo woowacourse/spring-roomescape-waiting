@@ -11,7 +11,7 @@ import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.UserReservations;
-import roomescape.domain.WaitingLine;
+import roomescape.domain.ReservationLine;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
@@ -76,9 +76,9 @@ public class ReservationService {
     private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId) {
         ReservationSlot reservationSlot = findOrCreateReservationSlot(date, timeId, themeId);
         ReservationSlot lockedSlot = findLockedReservationSlot(reservationSlot);
-        WaitingLine waitingLine = new WaitingLine(lockedSlot, reservationRepository.findBySlotId(lockedSlot.getId()));
+        ReservationLine reservationLine = new ReservationLine(lockedSlot, reservationRepository.findBySlotId(lockedSlot.getId()));
 
-        return waitingLine.add(name, LocalDateTime.now());
+        return reservationLine.add(name, LocalDateTime.now());
     }
 
     private ReservationSlot createReservationSlot(LocalDate date, Long timeId, Long themeId) {
@@ -110,7 +110,7 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(ReservationSlot slot) {
-        WaitingLine waitings = new WaitingLine(slot, reservationRepository.findWaitingsBySlotId(slot.getId()));
+        ReservationLine waitings = new ReservationLine(slot, reservationRepository.findWaitingsBySlotId(slot.getId()));
         waitings.promoteFirstWaiting()
                 .ifPresent(reservationRepository::update);
     }
@@ -171,9 +171,9 @@ public class ReservationService {
     }
 
     private WaitingWithNumber createWaitingWithNumber(Reservation waiting) {
-        WaitingLine waitingLine = new WaitingLine(waiting.getSlot(),
+        ReservationLine reservationLine = new ReservationLine(waiting.getSlot(),
                 reservationRepository.findWaitingsBySlotId(waiting.getSlot().getId()));
-        return new WaitingWithNumber(waiting, waitingLine.findWaitingNumber(waiting));
+        return new WaitingWithNumber(waiting, reservationLine.findWaitingNumber(waiting));
     }
 
     private TimeSlot findTimeSlot(Long id) {
