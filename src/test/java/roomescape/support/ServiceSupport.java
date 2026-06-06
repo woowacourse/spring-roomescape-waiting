@@ -74,7 +74,7 @@ public abstract class ServiceSupport {
     }
 
     protected Reservation savePastReservation(String name, ReservationSlot slot) {
-        return reservationRepository.save(Reservation.load(0L, name, slot, ReservationStatus.RESERVED, LocalDateTime.now()));
+        return reservationRepository.save(Reservation.load(0L, name, slot.getId(), ReservationStatus.RESERVED, LocalDateTime.now()));
     }
 
     protected Reservation saveWaitReservation(String name, ReservationSlot slot) {
