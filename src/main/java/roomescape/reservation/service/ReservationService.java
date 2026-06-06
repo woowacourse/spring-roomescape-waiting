@@ -17,7 +17,6 @@ import roomescape.reservation.service.dto.ReservationSaveCommand;
 
 import java.util.List;
 
-import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
@@ -57,14 +56,14 @@ public class ReservationService {
 
     @Transactional
     public Reservation cancelByManager(Long id) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationWithSlotLocked(id);
         if (reservation.isReserved()) {
-            cancelByManger(reservation);
+            reservation.cancelByManager();
             rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
             return reservation;
         }
 
-        cancelByManger(reservation);
+        reservation.cancelByManager();
         return reservation;
     }
 
@@ -101,11 +100,6 @@ public class ReservationService {
         reservation.changeScheduleByManager(newSlot, LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
-    }
-
-    private void cancelByManger(Reservation cancelTarget) {
-        cancelTarget.updateStatus(CANCELED);
-        reservationRepository.updateStatus(cancelTarget);
     }
 
     private void cancel(Reservation cancelTarget, String requesterName) {

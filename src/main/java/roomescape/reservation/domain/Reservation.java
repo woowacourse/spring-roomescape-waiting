@@ -49,7 +49,10 @@ public class Reservation {
         validateOwner(requesterName);
         validateNotCanceled();
         slot.validateNotPast(cancelRequestAt);
+        this.status = ReservationStatus.CANCELED;
+    }
 
+    public void cancelByManager() {
         this.status = ReservationStatus.CANCELED;
     }
 
