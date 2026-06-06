@@ -1,121 +1,104 @@
 package roomescape.infra.theme;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.exception.InternalServerException;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.theme.ThemeRankResult;
-import roomescape.domain.exception.errors.RoomescapeErrors;
 
 @Repository
-@RequiredArgsConstructor
 public class JdbcThemeRepository implements ThemeRepository {
 
+    private static final String TABLE_NAME = "theme";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "username";
+    private static final String COLUMN_NAME = "name";
     private static final String COLUMN_CONTENT = "content";
     private static final String COLUMN_URL = "url";
 
     private static final String FIND_ALL_SQL = "select id, name, content, url from theme order by id";
-    private static final String FIND_BY_ID_SQL = "select id, name, content, url from theme where id = ?";
-    private static final String INSERT_SQL = "insert into theme(name, content, url) values (?, ?, ?)";
-    private static final String DELETE_BY_ID_SQL = "delete from theme where id = ?";
+    private static final String DELETE_BY_ID_SQL = "delete from theme where id = :id";
     private static final String FIND_ALL_WITH_RANK_SQL = """
         select
             t.id,
             t.name,
+            t.content,
             t.url,
             rank() over (order by count(r.id) desc) as rank
         from theme t
         join reservation_slot rs on rs.theme_id = t.id
         join reservation r on r.reservation_slot_id = rs.id
         join reservation_date rd on rd.id = rs.date_id
-        where rd.date between ? and ?
-        group by t.id, t.name, t.url
+        where rd.date between :startDay and :today
+        group by t.id, t.name, t.content, t.url
         order by rank, t.id
-        limit ?
+        limit :rankLimit
         """;
+    private static final RowMapper<Theme> THEME_ROW_MAPPER = (rs, rowNum) -> Theme.of(
+            rs.getLong(COLUMN_ID),
+            rs.getString(COLUMN_NAME),
+            rs.getString(COLUMN_CONTENT),
+            rs.getString(COLUMN_URL)
+    );
+    private static final RowMapper<ThemeRankResult> THEME_RANK_ROW_MAPPER = (rs, rowNum) -> ThemeRankResult.of(
+            Theme.of(
+                    rs.getLong(COLUMN_ID),
+                    rs.getString(COLUMN_NAME),
+                    rs.getString(COLUMN_CONTENT),
+                    rs.getString(COLUMN_URL)
+            ),
+            rs.getInt("rank")
+    );
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert simpleJdbcInsert;
 
-    @Override
-    public Optional<Theme> findById(Long id) {
-        List<Theme> result = jdbcTemplate.query(FIND_BY_ID_SQL, themeRowMapper(), id);
-        return result.stream().findFirst();
+    public JdbcThemeRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
+                .withTableName(TABLE_NAME)
+                .usingGeneratedKeyColumns(COLUMN_ID);
     }
 
     @Override
     public List<Theme> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, themeRowMapper());
+        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), THEME_ROW_MAPPER);
     }
 
     @Override
     public List<ThemeRankResult> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate today) {
         return jdbcTemplate.query(
                 FIND_ALL_WITH_RANK_SQL,
-                themeRankRowMapper(),
-                startDay,
-                today,
-                rankLimit
+                new MapSqlParameterSource()
+                        .addValue("startDay", startDay)
+                        .addValue("today", today)
+                        .addValue("rankLimit", rankLimit),
+                THEME_RANK_ROW_MAPPER
         );
     }
 
     @Override
     public Theme save(Theme theme) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, theme.getName());
-            ps.setString(2, theme.getDescription());
-            ps.setString(3, theme.getThumbnailUrl());
-            return ps;
-        }, keyHolder);
-        long id = extractId(keyHolder);
-        return Theme.of(
-            id,
-            theme.getName(),
-            theme.getDescription(),
-            theme.getThumbnailUrl()
-        );
+        Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
+                .addValue(COLUMN_NAME, theme.getName())
+                .addValue(COLUMN_CONTENT, theme.getDescription())
+                .addValue(COLUMN_URL, theme.getThumbnailUrl()));
+        return Theme.of(extractId(key), theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
     }
 
     @Override
     public int deleteById(Long id) {
-        return jdbcTemplate.update(DELETE_BY_ID_SQL, id);
+        return jdbcTemplate.update(DELETE_BY_ID_SQL, new MapSqlParameterSource().addValue(COLUMN_ID, id));
     }
 
-    private RowMapper<Theme> themeRowMapper() {
-        return ((rs, rowNum) -> Theme.of(
-            rs.getLong(COLUMN_ID),
-            rs.getString(COLUMN_NAME),
-            rs.getString(COLUMN_CONTENT),
-            rs.getString(COLUMN_URL)
-        ));
-    }
-
-    private RowMapper<ThemeRankResult> themeRankRowMapper() {
-        return ((rs, rowNum) -> ThemeRankResult.of(
-                rs.getLong(COLUMN_ID),
-                rs.getString(COLUMN_NAME),
-                rs.getString(COLUMN_URL),
-                rs.getInt("rank")
-        ));
-    }
-
-    private long extractId(KeyHolder keyHolder) {
-        if (keyHolder.getKey() == null) {
-            throw new InternalServerException(RoomescapeErrors.INVALID_GENERATED_KEY);
+    private long extractId(Number key) {
+        if (key == null) {
+            throw new IllegalStateException("생성 키를 조회할 수 없습니다.");
         }
-        return keyHolder.getKey().longValue();
+        return key.longValue();
     }
 }

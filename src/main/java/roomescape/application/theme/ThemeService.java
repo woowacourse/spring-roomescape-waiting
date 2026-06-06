@@ -6,17 +6,16 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.exception.ConflictException;
+import roomescape.domain.exception.BusinessException;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
-import roomescape.presentation.theme.response.AdminThemeResponse;
-import roomescape.presentation.theme.request.CreateThemeRequest;
-import roomescape.presentation.theme.response.CreateThemeResponse;
-import roomescape.presentation.theme.response.ThemeRankResponse;
 import roomescape.domain.theme.ThemeRankResult;
-import roomescape.presentation.theme.response.ThemeResponse;
-import roomescape.domain.exception.errors.ThemeErrors;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.presentation.theme.request.CreateThemeRequest;
+import roomescape.presentation.theme.response.AdminThemesResponse;
+import roomescape.presentation.theme.response.CreateThemeResponse;
+import roomescape.presentation.theme.response.PopularThemesResponse;
+import roomescape.presentation.theme.response.ThemesResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -26,42 +25,40 @@ public class ThemeService {
     private static final int RANK_DAYS_LIMIT = 7;
 
     private final ThemeRepository themeRepository;
-    private final ReservationSlotRepository reservationSlotRepository;
-
+    private final ReservationSlotRepository slotRepository;
     private final Clock clock;
 
-    public List<AdminThemeResponse> getAllThemeForAdmin() {
-        return themeRepository.findAll().stream()
-            .map(AdminThemeResponse::from)
-            .toList();
+    public ThemesResponse getAllTheme() {
+        return ThemesResponse.from(themeRepository.findAll());
     }
 
-    public List<ThemeResponse> getAllTheme() {
-        return themeRepository.findAll().stream()
-                .map(ThemeResponse::from)
-                .toList();
+    public AdminThemesResponse getAllThemeForAdmin() {
+        return AdminThemesResponse.from(themeRepository.findAll());
     }
 
-    public List<ThemeRankResponse> getThemeRank() {
+    public PopularThemesResponse getThemeRank() {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDay = today.minusDays(RANK_DAYS_LIMIT);
+
         List<ThemeRankResult> popularThemes = themeRepository.findPopularThemes(RANK_LIMIT, startDay, today);
-        return popularThemes.stream()
-                .map(ThemeRankResponse::from)
-                .toList();
+        return PopularThemesResponse.from(popularThemes);
     }
 
     @Transactional
     public CreateThemeResponse createTheme(CreateThemeRequest request) {
-        Theme theme = themeRepository.save(request.toEntity());
-        return CreateThemeResponse.from(theme);
+        Theme theme = Theme.create(request.name(), request.content(), request.thumbnailUrl());
+        Theme savedTheme = themeRepository.save(theme);
+        return CreateThemeResponse.from(savedTheme);
     }
 
     @Transactional
     public void deleteTheme(Long id) {
-        if (reservationSlotRepository.countByThemeId(id) > 0) {
-            throw new ConflictException(ThemeErrors.THEME_IN_USE);
+        if (slotRepository.existsByThemeId(id)) {
+            throw new BusinessException();
         }
-        themeRepository.deleteById(id);
+        int deletedRow = themeRepository.deleteById(id);
+        if (deletedRow == 0) {
+            throw new BusinessException();
+        }
     }
 }

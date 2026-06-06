@@ -3,7 +3,7 @@ package roomescape.domain.theme;
 public record ThemeRankResult(
         Long id,
         String name,
-        String url,
+        String thumbnailUrl,
         Integer rank
 ) {
 

@@ -7,8 +7,6 @@ import roomescape.domain.theme.ThemeRankResult;
 
 public interface ThemeRepository {
 
-    Optional<Theme> findById(Long id);
-
     List<Theme> findAll();
 
     List<ThemeRankResult> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate today);
