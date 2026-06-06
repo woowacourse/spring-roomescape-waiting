@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -78,17 +77,12 @@ public class ReservationService {
     }
 
     private void approveFirstWaitingIfExists(Reservation slot, LocalDateTime now) {
-        Optional<Reservation> candidate;
-        while ((candidate = reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(
-                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())).isPresent()) {
-            Reservation waiting = candidate.get();
-            if (LocalDateTime.of(waiting.getDate(), waiting.getTime().getStartAt()).isBefore(now)) {
-                reservationDao.delete(waiting.getId());
-            } else {
-                reservationDao.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED);
-                break;
-            }
+        if (LocalDateTime.of(slot.getDate(), slot.getTime().getStartAt()).isBefore(now)) {
+            return;
         }
+        reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(
+                        slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())
+                .ifPresent(waiting -> reservationDao.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED));
     }
 
     @Transactional(readOnly = true)

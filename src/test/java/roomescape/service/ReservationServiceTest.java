@@ -124,33 +124,11 @@ class ReservationServiceTest {
 
         given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
         given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(futureDate, 1L, 1L))
-                .willReturn(Optional.of(waiting))
-                .willReturn(Optional.empty());
+                .willReturn(Optional.of(waiting));
 
         reservationService.delete(1L);
 
         then(reservationDao).should().updateStatus(5L, ReservationStatus.CONFIRMED);
-    }
-
-    @Test
-    void delete_자동_승인_대상_날짜가_과거면_삭제_후_다음_순번_승인() {
-        fixClock();
-        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        LocalDate pastDate = fixedNow.toLocalDate().minusDays(1);
-        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        Reservation pastWaiting = new Reservation(2L, "이영희", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme, ReservationStatus.WAITING);
-        Reservation futureWaiting = new Reservation(3L, "김철수", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
-
-        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
-        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(futureDate, 1L, 1L))
-                .willReturn(Optional.of(pastWaiting))
-                .willReturn(Optional.of(futureWaiting))
-                .willReturn(Optional.empty());
-
-        reservationService.delete(1L);
-
-        then(reservationDao).should().delete(2L);
-        then(reservationDao).should().updateStatus(3L, ReservationStatus.CONFIRMED);
     }
 
     @Test
@@ -168,8 +146,7 @@ class ReservationServiceTest {
         given(reservationDao.existsByDateAndTimeIdAndThemeId(newDate, 2L, 1L)).willReturn(false);
         given(reservationDao.update(any())).willReturn(updated);
         given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(oldDate, 1L, 1L))
-                .willReturn(Optional.of(waiting))
-                .willReturn(Optional.empty());
+                .willReturn(Optional.of(waiting));
 
         reservationService.update(1L, newDate, 2L);
 
