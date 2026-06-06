@@ -13,18 +13,18 @@ import roomescape.global.ConflictException;
 import roomescape.global.ForbiddenException;
 import roomescape.global.NotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.event.schema.WaitingSaved;
+import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.presentation.dto.WaitingResponse;
-import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
-import roomescape.theme.exception.ThemeErrorMessage;
+import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.exception.ThemeErrorMessage;
 
 @RequiredArgsConstructor
 @Service

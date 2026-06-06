@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.reservation.domain.repository.dto.WaitingDetail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.domain.repository.dto.WaitingDetail;
 import roomescape.reservation.presentation.controller.WaitingController;
 import roomescape.reservation.presentation.dto.WaitingResponse;
 

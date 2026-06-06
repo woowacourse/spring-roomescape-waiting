@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservation.application.service.WaitingService;
-import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @RequiredArgsConstructor

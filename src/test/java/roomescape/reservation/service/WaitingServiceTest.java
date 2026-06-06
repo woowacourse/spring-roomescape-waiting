@@ -5,8 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import roomescape.reservation.event.schema.WaitingSaved;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,11 +20,12 @@ import roomescape.global.BadRequestException;
 import roomescape.global.ConflictException;
 import roomescape.global.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
+import roomescape.reservation.event.schema.WaitingSaved;
+import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
