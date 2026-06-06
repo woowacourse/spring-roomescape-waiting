@@ -27,6 +27,13 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
+    public Optional<ReservationSlot> findById(Long slotId) {
+        return store.stream()
+                .filter(slot -> slot.equals(slot))
+                .findFirst();
+    }
+
+    @Override
     public Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId) {
         return store.stream()
                 .filter(slot -> slot.getDateId().equals(dateId)

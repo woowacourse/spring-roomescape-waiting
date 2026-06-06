@@ -48,6 +48,14 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation reserve(String requesterName, Long slotId) {
+        ReservationSlot slot = getSlot(slotId);
+        Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
+        Reservation reservation = reservationsOfTimeSlot.reserve(requesterName, slot, LocalDateTime.now());
+        return reservationRepository.save(reservation);
+    }
+
+    @Transactional
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservation(id);
         if (reservation.isReserved()) {
@@ -122,6 +130,11 @@ public class ReservationService {
 
     private ReservationSlot getSlotWithLock(Long dateId, Long timeId, Long themeId) {
         return reservationSlotRepository.findAvailableByDateIdTimeIdThemeIdForUpdate(dateId, timeId, themeId)
+                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
+    }
+
+    private ReservationSlot getSlot(Long slotId) {
+        return reservationSlotRepository.findById(slotId)
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 

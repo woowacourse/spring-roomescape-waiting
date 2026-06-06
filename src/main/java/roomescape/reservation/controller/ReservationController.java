@@ -37,6 +37,17 @@ public class ReservationController {
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
+    @PostMapping("/slots/{slotId}/reservations")
+    public ResponseEntity<ReservationDetailDto> create(
+            @PathVariable Long slotId,
+            @LoginMember Member member
+    ) {
+        Reservation reservation = reservationService.reserve(member.getName(), slotId);
+        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @AuthGuard(roles = {MEMBER, MANAGER})
     @GetMapping("/my-reservations")
     public ResponseEntity<List<ReservationDetailDto>> getMyReservations(@LoginMember Member member) {
         List<ReservationDetailDto> responseData = reservationService.readAllByName(member.getName()).stream()
