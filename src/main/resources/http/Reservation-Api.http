@@ -28,15 +28,8 @@ Content-Type: application/json
 }
 
 ### [Member] 5. 예약 생성
-POST http://localhost:8080/member/reservations
-Content-Type: application/json
-
-{
-  "name": "송송",
-  "dateId": 15,
-  "timeId": 1,
-  "themeId": 1
-}
+POST http://localhost:8080/member/slots/1/reservations
+Accept: application/json
 
 ### [Member] 6. 내 예약 목록 조회
 < {%

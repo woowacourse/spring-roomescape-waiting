@@ -247,7 +247,7 @@ async function selectDate(date) {
 }
 
 async function loadAvailableTimes() {
-    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${selectedTheme.id}`);
+    const response = await authFetch(`/member/slots/times?dateId=${selectedDate.id}&themeId=${selectedTheme.id}`);
 
     if (!response.ok) {
         await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
@@ -287,18 +287,8 @@ async function createReservation() {
         return;
     }
 
-    const requestBody = {
-        dateId: selectedDate.id,
-        timeId: selectedTime.id,
-        themeId: selectedTheme.id
-    };
-
-    const response = await authFetch("/member/reservations", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestBody)
+    const response = await authFetch(`/member/slots/${selectedTime.slotId}/reservations`, {
+        method: "POST"
     });
 
     if (!response.ok) {

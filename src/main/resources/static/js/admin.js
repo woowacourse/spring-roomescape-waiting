@@ -452,7 +452,7 @@ async function loadRescheduleDates() {
 
 async function loadRescheduleTimes() {
     const themeId = reschedulingReservation.themeId;
-    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
+    const response = await authFetch(`/member/slots/times?dateId=${selectedDate.id}&themeId=${themeId}`);
     if (!response || !response.ok) return;
 
     const times = await response.json();

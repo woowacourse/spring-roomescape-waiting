@@ -206,7 +206,7 @@ async function loadRescheduleDates() {
 
 async function loadRescheduleTimes() {
     const themeId = reschedulingReservation.themeId;
-    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
+    const response = await authFetch(`/member/slots/times?dateId=${selectedDate.id}&themeId=${themeId}`);
 
     if (!response.ok) {
         await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
