@@ -37,10 +37,11 @@ public record Reservations(
         }
     }
 
-    public Optional<Reservation> findPromoteWaiting() {
+    public Optional<Reservation> promoteWaiting() {
         return values.stream()
                 .filter(Reservation::isWaiting)
-                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId));
+                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId))
+                .map(Reservation::promote);
     }
 
     public boolean hasReservedByOthers(String name) {

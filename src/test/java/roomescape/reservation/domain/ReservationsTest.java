@@ -126,7 +126,7 @@ class ReservationsTest {
         Reservations reservations = new Reservations(List.of(firstWait, secondWait));
 
         // when
-        Reservation actual = reservations.findPromoteWaiting().get();
+        Reservation actual = reservations.promoteWaiting().get();
 
         // then
         Assertions.assertThat(actual)
@@ -143,7 +143,7 @@ class ReservationsTest {
         Reservations reservations = new Reservations(List.of(laterCreatedWaiting, earlierCreatedWaiting));
 
         // when
-        Reservation actual = reservations.findPromoteWaiting().get();
+        Reservation actual = reservations.promoteWaiting().get();
 
         // then
         Assertions.assertThat(actual)
