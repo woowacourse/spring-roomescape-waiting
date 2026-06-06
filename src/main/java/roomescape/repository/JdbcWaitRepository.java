@@ -50,15 +50,19 @@ public class JdbcWaitRepository implements WaitRepository {
     public Optional<WaitDetailDto> findById(Long id) {
         String sql = """
                 SELECT w.id, w.created_at, w.name, w.reservation_date,
-                t.id as time_id, t.start_at as time_value,
-                th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url,
-                ROW_NUMBER() OVER (
-                    PARTITION BY w.reservation_date, w.time_id, w.theme_id
-                    ORDER BY w.created_at
+                t.id AS time_id, t.start_at AS time_value,
+                th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail_url,
+                (
+                    SELECT COUNT(*) + 1
+                    FROM wait w2
+                    WHERE w2.reservation_date = w.reservation_date
+                      AND w2.time_id = w.time_id
+                      AND w2.theme_id = w.theme_id
+                      AND (w2.created_at < w.created_at OR (w2.created_at = w.created_at AND w2.id < w.id))
                 ) AS wait_order
-                FROM `wait` w
-                INNER JOIN `reservation_time` t ON w.time_id = t.id
-                INNER JOIN `theme` th ON w.theme_id = th.id
+                FROM wait w
+                INNER JOIN reservation_time t ON w.time_id = t.id
+                INNER JOIN theme th ON w.theme_id = th.id
                 WHERE w.id = (?)
                 """;
 
@@ -75,13 +79,13 @@ public class JdbcWaitRepository implements WaitRepository {
                 t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url,
                 ROW_NUMBER() OVER (
                     PARTITION BY w.reservation_date, w.time_id, w.theme_id
-                    ORDER BY w.created_at
+                    ORDER BY w.created_at, w.id
                 ) AS wait_order
                 FROM wait w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
                 WHERE w.reservation_date = ? AND w.time_id = ? AND w.theme_id = ?
-                ORDER BY w.created_at
+                ORDER BY w.created_at, w.id
                 """;
 
         return jdbcTemplate.query(sql, waitDetailDtoRowMapper(),
@@ -96,15 +100,19 @@ public class JdbcWaitRepository implements WaitRepository {
                 SELECT w.id, w.created_at, w.name, w.reservation_date,
                 rt.id AS time_id, rt.start_at AS time_value,
                 t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url,
-                ROW_NUMBER() OVER (
-                    PARTITION BY w.reservation_date, w.time_id, w.theme_id
-                    ORDER BY w.created_at
+                (
+                    SELECT COUNT(*) + 1
+                    FROM wait w2
+                    WHERE w2.reservation_date = w.reservation_date
+                      AND w2.time_id = w.time_id
+                      AND w2.theme_id = w.theme_id
+                      AND (w2.created_at < w.created_at OR (w2.created_at = w.created_at AND w2.id < w.id))
                 ) AS wait_order
                 FROM wait w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
                 WHERE w.name = ?
-                ORDER BY w.created_at
+                ORDER BY w.created_at, w.id
                 """;
 
         return jdbcTemplate.query(sql, waitDetailDtoRowMapper(), name);
@@ -118,12 +126,12 @@ public class JdbcWaitRepository implements WaitRepository {
                 t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url,
                 ROW_NUMBER() OVER (
                     PARTITION BY w.reservation_date, w.time_id, w.theme_id
-                    ORDER BY w.created_at
+                    ORDER BY w.created_at, w.id
                 ) AS wait_order
                 FROM wait w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
-                ORDER BY w.created_at
+                ORDER BY w.created_at, w.id
                 """;
 
         return jdbcTemplate.query(sql, waitDetailDtoRowMapper());
@@ -133,7 +141,7 @@ public class JdbcWaitRepository implements WaitRepository {
     public Long findOrderByWait(Wait wait) {
         String sql = """
                 WITH slot_waiting_list AS (
-                    SELECT `name`, ROW_NUMBER() OVER (ORDER BY created_at ASC) AS `order`
+                    SELECT `name`, ROW_NUMBER() OVER (ORDER BY created_at, id) AS `order`
                     FROM wait
                     WHERE `reservation_date` = ? AND `time_id` = ? AND `theme_id` = ?
                 )
