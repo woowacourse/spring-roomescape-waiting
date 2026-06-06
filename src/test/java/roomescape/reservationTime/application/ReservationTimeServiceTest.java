@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -16,10 +15,13 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ReservationTimeErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
@@ -27,22 +29,17 @@ import roomescape.reservationTime.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 
+@ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
 
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
-    private ReservationTimeService reservationTimeService;
+
+    @Mock
     private ReservationTimeReference reservationReference;
 
-
-    @BeforeEach
-    void setUp() {
-        reservationTimeRepository = mock(ReservationTimeRepository.class);
-        reservationReference = mock(ReservationTimeReference.class);
-        reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository,
-                reservationReference
-        );
-    }
+    @InjectMocks
+    private ReservationTimeService reservationTimeService;
 
     @Test
     @DisplayName("예약 시간을 저장한다")
