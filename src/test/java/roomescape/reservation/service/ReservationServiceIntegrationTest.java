@@ -38,6 +38,7 @@ import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.JdbcReservationSlotRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
+import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
@@ -91,8 +92,16 @@ class ReservationServiceIntegrationTest {
         return reservationDateRepository.save(ReservationDateFixture.activeOneWeekLater());
     }
 
+    private ReservationDate saveSecondDate() {
+        return reservationDateRepository.save(ReservationDateFixture.activeTwoWeekLater());
+    }
+
     private Theme saveTheme(String themeName) {
         return themeRepository.save(ThemeFixture.activeTheme(themeName));
+    }
+
+    private ReservationTime saveSecondTime() {
+        return reservationTimeRepository.save(ReservationTimeFixture.activeTime16());
     }
 
 
@@ -182,6 +191,82 @@ class ReservationServiceIntegrationTest {
                 () -> assertThat(beforeWaitingTurn).isEqualTo(2),
                 () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED),
                 () -> assertThat(actual.getFirst().waitingTurn()).isEqualTo(1)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("changeSchedule 메서드는")
+    class ChangeScheduleTest {
+
+        @Test
+        @DisplayName("확정 예약이 다른 슬롯으로 변경되면 이전 슬롯의 첫 번째 대기가 승격된다")
+        void 성공1() {
+            // given
+            String reservedName = "예약자";
+            String waitingName = "대기자";
+
+            ReservationTime previousTime = saveTime();
+            ReservationTime newTime = saveSecondTime();
+            ReservationDate previousDate = saveDate();
+            ReservationDate newDate = saveSecondDate();
+            Theme theme = saveTheme("theme1");
+
+            Reservation reserved = reservationRepository.save(
+                reservation(reservedName, previousDate, previousTime, theme));
+            Reservation waiting = reservationRepository.save(
+                waitReservation(waitingName, previousDate, previousTime, theme, 1L));
+            ReservationChangeCommand command = new ReservationChangeCommand(
+                reserved.getId(), reservedName, newDate.getId(), newTime.getId());
+
+            // when
+            Reservation changed = reservationService.changeSchedule(command);
+
+            // then
+            Reservation promoted = reservationRepository.findById(waiting.getId()).get();
+            assertAll(
+                () -> assertThat(changed.getDate().getId()).isEqualTo(newDate.getId()),
+                () -> assertThat(changed.getTime().getId()).isEqualTo(newTime.getId()),
+                () -> assertThat(changed.getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("changeScheduleByManager 메서드는")
+    class ChangeScheduleByManagerTest {
+
+        @Test
+        @DisplayName("확정 예약이 다른 슬롯으로 변경되면 이전 슬롯의 첫 번째 대기가 승격된다")
+        void 성공1() {
+            // given
+            String reservedName = "예약자";
+            String waitingName = "대기자";
+
+            ReservationTime previousTime = saveTime();
+            ReservationTime newTime = saveSecondTime();
+            ReservationDate previousDate = saveDate();
+            ReservationDate newDate = saveSecondDate();
+            Theme theme = saveTheme("theme1");
+
+            Reservation reserved = reservationRepository.save(
+                reservation(reservedName, previousDate, previousTime, theme));
+            Reservation waiting = reservationRepository.save(
+                waitReservation(waitingName, previousDate, previousTime, theme, 1L));
+            ReservationChangeCommand command = new ReservationChangeCommand(
+                reserved.getId(), null, newDate.getId(), newTime.getId());
+
+            // when
+            Reservation changed = reservationService.changeScheduleByManager(command);
+
+            // then
+            Reservation promoted = reservationRepository.findById(waiting.getId()).get();
+            assertAll(
+                () -> assertThat(changed.getDate().getId()).isEqualTo(newDate.getId()),
+                () -> assertThat(changed.getTime().getId()).isEqualTo(newTime.getId()),
+                () -> assertThat(changed.getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED)
             );
         }
     }

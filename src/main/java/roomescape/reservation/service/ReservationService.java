@@ -83,7 +83,7 @@ public class ReservationService {
         reservation.cancelByManager();
         reservationRepository.updateStatus(reservation);
         if (reservationStatus == RESERVED) {
-            switchWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
+            promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
         }
         return reservation;
@@ -98,54 +98,73 @@ public class ReservationService {
         reservation.cancel(requesterName);
         reservationRepository.updateStatus(reservation);
         if (reservationStatus == RESERVED) {
-            switchWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
+            promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
         }
         return reservation;
     }
 
-    private void switchWaitingReservation(Long dateId, Long timeId, Long themeId) {
-        lockSlot(dateId, timeId, themeId);
-        reservationRepository.findFirstWaitingByDateTimeAndThemeId(dateId, timeId, themeId)
-            .ifPresent(reservation -> {
-                reservation.updateStatus(RESERVED);
-                reservationRepository.updateStatus(reservation);
-            });
-    }
-
     @Transactional
     public Reservation changeSchedule(ReservationChangeCommand command) {
         Reservation reservation = getReservation(command.id());
+        Long previousDateId = reservation.getDate().getId();
+        Long previousTimeId = reservation.getTime().getId();
+        Long themeId = reservation.getTheme().getId();
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        lockSlot(previousDateId, previousTimeId, themeId);
+        lockSlot(newDate.getId(), newTime.getId(), themeId);
+
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
         decideStatus(command, reservation);
         reservationRepository.updateScheduleAndStatus(reservation);
+        promoteWaitingReservation(previousDateId, previousTimeId, themeId);
         return reservation;
     }
 
     @Transactional
     public Reservation changeScheduleByManager(ReservationChangeCommand command) {
         Reservation reservation = getReservation(command.id());
+        Long previousDateId = reservation.getDate().getId();
+        Long previousTimeId = reservation.getTime().getId();
+        Long themeId = reservation.getTheme().getId();
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        lockSlot(previousDateId, previousTimeId, themeId);
+        lockSlot(newDate.getId(), newTime.getId(), themeId);
+
         reservation.changeScheduleByManager(newDate, newTime);
         decideStatus(command, reservation);
         reservationRepository.updateScheduleAndStatus(reservation);
+        promoteWaitingReservation(previousDateId, previousTimeId, themeId);
         return reservation;
     }
 
     private void lockSlot(Long dateId, Long timeId, Long themeId) {
         reservationSlotRepository.saveIfAbsent(ReservationSlot.create(dateId, timeId, themeId));
         reservationSlotRepository.lockByDateTimeAndThemeId(dateId, timeId, themeId);
+    }
+
+    private void promoteWaitingReservation(Long dateId, Long timeId, Long themeId) {
+        boolean hasReserved = reservationRepository.findAllActiveByDateTimeAndThemeId(dateId,
+                timeId, themeId)
+            .stream()
+            .anyMatch(reservation -> reservation.getStatus() == RESERVED);
+
+        if (hasReserved) {
+            return;
+        }
+        reservationRepository.findFirstWaitingByDateTimeAndThemeId(dateId, timeId, themeId)
+            .ifPresent(reservation -> {
+                reservation.updateStatus(RESERVED);
+                reservationRepository.updateStatus(reservation);
+            });
     }
 
     private void decideStatus(ReservationChangeCommand command, Reservation reservation) {
