@@ -76,7 +76,7 @@ public class ReservationCommandService {
         );
     }
 
-    public void delete(Long reservationId, LocalDateTime now) {
+    public void cancel(Long reservationId, LocalDateTime now) {
         ReservationSlot slot = reservationRepository.findSlotById(reservationId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 

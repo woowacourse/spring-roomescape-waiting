@@ -130,7 +130,7 @@ class WaitingCommandServiceTest {
 
     @DisplayName("예약 대기 삭제를 테스트합니다.")
     @Test
-    void delete_waiting_reservation() {
+    void cancel_waiting_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long waitingId = testHelper.insertWaiting(
@@ -140,20 +140,20 @@ class WaitingCommandServiceTest {
                 timeId
         );
 
-        assertThatNoException().isThrownBy(() -> waitingCommandService.delete(waitingId, NOW));
+        assertThatNoException().isThrownBy(() -> waitingCommandService.cancel(waitingId, NOW));
     }
 
     @DisplayName("삭제할 예약 대기가 없을 시 예외 발생을 테스트합니다.")
     @Test
-    void delete_not_found_waiting_exception() {
-        assertThatThrownBy(() -> waitingCommandService.delete(1L, NOW))
+    void cancel_not_found_waiting_exception() {
+        assertThatThrownBy(() -> waitingCommandService.cancel(1L, NOW))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 대기입니다.");
     }
 
     @DisplayName("삭제할 예약 대기가 현재 시간보다 이전 시간일 경우 예외 발생을 테스트합니다.")
     @Test
-    void delete_past_waiting_exception() {
+    void cancel_past_waiting_exception() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long waitingId = testHelper.insertWaiting(
@@ -163,7 +163,7 @@ class WaitingCommandServiceTest {
                 timeId
         );
 
-        assertThatThrownBy(() -> waitingCommandService.delete(waitingId, NOW))
+        assertThatThrownBy(() -> waitingCommandService.cancel(waitingId, NOW))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지나간 예약은 삭제할 수 없습니다.");
     }

@@ -70,7 +70,7 @@ class ReservationCommandServiceTest {
 
     @DisplayName("예약 삭제를 테스트합니다.")
     @Test
-    void delete_reservation() {
+    void cancel_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
@@ -80,20 +80,20 @@ class ReservationCommandServiceTest {
                 timeId
         );
 
-        assertThatNoException().isThrownBy(() -> reservationCommandService.delete(reservationId, NOW));
+        assertThatNoException().isThrownBy(() -> reservationCommandService.cancel(reservationId, NOW));
     }
 
     @DisplayName("삭제할 예약이 없을 시 예외 발생을 테스트합니다.")
     @Test
-    void delete_not_found_reservation_exception() {
-        assertThatThrownBy(() -> reservationCommandService.delete(1L, NOW))
+    void cancel_not_found_reservation_exception() {
+        assertThatThrownBy(() -> reservationCommandService.cancel(1L, NOW))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
     }
 
     @DisplayName("삭제할 예약이 현재 시간보다 이전 시간일 경우 예외 발생을 테스트합니다.")
     @Test
-    void delete_past_reservation_exception() {
+    void cancel_past_reservation_exception() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
@@ -103,7 +103,7 @@ class ReservationCommandServiceTest {
                 timeId
         );
 
-        assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
+        assertThatThrownBy(() -> reservationCommandService.cancel(reservationId, NOW))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지나간 예약은 삭제할 수 없습니다.");
     }
@@ -233,7 +233,7 @@ class ReservationCommandServiceTest {
 
     @DisplayName("확정 예약 삭제 시 예약 대기의 확정 예약으로의 승격을 테스트합니다.")
     @Test
-    void delete_confirmed_reservation_and_waiting_to_reservation() {
+    void cancel_confirmed_reservation_and_waiting_to_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
@@ -249,7 +249,7 @@ class ReservationCommandServiceTest {
                 timeId
         );
 
-        reservationCommandService.delete(reservationId, NOW);
+        reservationCommandService.cancel(reservationId, NOW);
 
         ReservationSlot slot = ReservationSlot.builder()
                 .date(ReservationFixture.futureReservationDate())
@@ -261,7 +261,7 @@ class ReservationCommandServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(promoteReservation.getMemberName().name()).isEqualTo("스타크");
-            softly.assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
+            softly.assertThatThrownBy(() -> reservationCommandService.cancel(reservationId, NOW))
                     .isInstanceOf(NotFoundException.class);
         });
     }
