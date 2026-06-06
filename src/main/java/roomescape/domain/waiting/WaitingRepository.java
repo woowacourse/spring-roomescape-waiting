@@ -130,4 +130,23 @@ public class WaitingRepository {
         return jdbcTemplate.query(query, waitingRowMapper, id).stream()
             .findFirst();
     }
+
+    public Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
+        String query = """
+            SELECT w.id AS waiting_id, w.name, w.date,
+                   t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
+                   th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                   th.image_url AS theme_image_url
+            FROM waiting w
+            JOIN reservation_time t ON w.time_id = t.id
+            JOIN theme th ON w.theme_id = th.id
+            WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+            ORDER BY w.id
+            LIMIT 1
+            FOR UPDATE
+            """;
+
+        return jdbcTemplate.query(query, waitingRowMapper, date, timeId, themeId).stream()
+            .findFirst();
+    }
 }
