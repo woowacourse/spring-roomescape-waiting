@@ -39,7 +39,12 @@ public class Reservation {
     }
 
     public void validateCancelable(LocalDateTime now) {
-        validateNotPast(now, "이미 지난 예약은 삭제할 수 없습니다.");
+        LocalDateTime cancelLimitTime = LocalDateTime.of(slot.getDate(), slot.getTimeSlot().getStartAt())
+                .minusHours(24);
+
+        if (!now.isBefore(cancelLimitTime)) {
+            throw new PastTimeException("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
+        }
     }
 
     public Reservation promote() {
