@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.FixedClockConfig;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationDao;
@@ -33,7 +35,7 @@ class ReservationCommandServiceTest {
 
     @Autowired
     private ReservationCommandService reservationCommandService;
-    @Autowired
+    @MockitoSpyBean
     private WaitingDao waitingDao;
     @Autowired
     private WaitingQueryService waitingQueryService;
@@ -89,6 +91,7 @@ class ReservationCommandServiceTest {
 
         assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
         assertThat(waitingDao.findById(3L)).isEmpty();
+        verify(waitingDao).findNextInLineForUpdate(any(Slot.class));
     }
 
     @Test
@@ -120,6 +123,7 @@ class ReservationCommandServiceTest {
 
         assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
         assertThat(waitingDao.findById(3L)).isEmpty();
+        verify(waitingDao).findNextInLineForUpdate(any(Slot.class));
     }
 
     @Test
@@ -153,6 +157,7 @@ class ReservationCommandServiceTest {
 
         assertThat(reservationDao.findAllByName(new Member("user_d"))).hasSize(1);
         assertThat(waitingDao.findById(2L)).isEmpty();
+        verify(waitingDao).findNextInLineForUpdate(any(Slot.class));
     }
 
     @Test

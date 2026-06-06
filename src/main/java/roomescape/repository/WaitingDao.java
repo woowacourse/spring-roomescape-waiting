@@ -124,13 +124,14 @@ public class WaitingDao {
         return jdbcTemplate.query(sql, Map.of("name", member.name()), rowMapper);
     }
 
-    public Optional<Waiting> findNextInLine(Slot slot) {
+    public Optional<Waiting> findNextInLineForUpdate(Slot slot) {
         String sql = SELECT_BASE + """
                  WHERE waiting.date = :date
                     AND waiting.time_id = :timeId
                     AND waiting.theme_id = :themeId
                  ORDER BY waiting.created_at, waiting.id
                  LIMIT 1
+                 FOR UPDATE
                 """;
         SqlParameterSource params = slotParams(slot);
         return jdbcTemplate.query(sql, params, rowMapper)

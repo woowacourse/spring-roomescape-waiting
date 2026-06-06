@@ -120,7 +120,7 @@ public class ReservationCommandService {
         if (slot.isPast(LocalDateTime.now(clock))) {
             return;
         }
-        waitingDao.findNextInLine(slot)
+        waitingDao.findNextInLineForUpdate(slot)
                 .ifPresent(this::promoteWaiting);
     }
 
