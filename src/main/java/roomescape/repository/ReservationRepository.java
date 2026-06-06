@@ -90,6 +90,26 @@ public class ReservationRepository {
         return result.stream().findAny();
     }
 
+    public List<Reservation> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                SELECT
+                    r.id as reservation_id,
+                    r.name as username,
+                    r.date,
+                    rt.id as time_id,
+                    rt.start_at as time_value,
+                    t.id as theme_id,
+                    t.name as theme_name,
+                    t.description,
+                    t.thumbnail
+                FROM reservation as r
+                JOIN reservation_time as rt ON r.time_id = rt.id
+                JOIN theme as t ON r.theme_id = t.id
+                WHERE r.date BETWEEN ? AND ?;
+                """;
+        return jdbcTemplate.query(sql, reservationRowMapper, startDate, endDate);
+    }
+
     public List<Reservation> findByName(String name) {
         String sql = """
                 SELECT

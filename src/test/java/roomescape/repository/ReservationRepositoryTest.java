@@ -100,6 +100,28 @@ class ReservationRepositoryTest {
     }
 
     @Test
+    void 날짜_범위에_해당하는_예약_목록을_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름", "테마 설명", "썸네일");
+        reservationRepository.insert(new Reservation(null, "범위밖1", new ReservationSlot(date.minusDays(1), time, theme)));
+        reservationRepository.insert(new Reservation(null, "시작일", new ReservationSlot(date, time, theme)));
+        reservationRepository.insert(new Reservation(null, "종료일", new ReservationSlot(date.plusDays(1), time, theme)));
+        reservationRepository.insert(new Reservation(null, "범위밖2", new ReservationSlot(date.plusDays(2), time, theme)));
+
+        // when
+        List<Reservation> result = reservationRepository.findByDateRange(date, date.plusDays(1));
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(Reservation::getName)
+                        .containsExactlyInAnyOrder("시작일", "종료일"),
+                () -> assertThat(result).extracting(reservation -> reservation.getSlot().getDate())
+                        .containsExactlyInAnyOrder(date, date.plusDays(1)));
+    }
+
+    @Test
     void 예약의_날짜와_시간을_변경한다() {
         // given
         ReservationTime time = findTimeByStartAt("15:00");

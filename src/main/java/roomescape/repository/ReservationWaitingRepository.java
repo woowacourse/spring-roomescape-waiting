@@ -88,6 +88,40 @@ public class ReservationWaitingRepository {
         return jdbcTemplate.query(sql, waitingWithTurnRowMapper, name);
     }
 
+    public List<WaitingWithTurn> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_waiting_id,
+                    r.name AS username,
+                    r.date,
+                    rt.id AS time_id,
+                    rt.start_at AS time_value,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description,
+                    t.thumbnail,
+                    (
+                        SELECT COUNT(*)
+                        FROM reservation_waiting AS earlier
+                        WHERE earlier.date = r.date
+                          AND earlier.time_id = r.time_id
+                          AND earlier.theme_id = r.theme_id
+                          AND (
+                              earlier.created_at < r.created_at
+                              OR (
+                                  earlier.created_at = r.created_at
+                                  AND earlier.id < r.id
+                              )
+                          )
+                    ) + 1 AS turn
+                FROM reservation_waiting AS r
+                JOIN reservation_time AS rt ON r.time_id = rt.id
+                JOIN theme AS t ON r.theme_id = t.id
+                WHERE r.date BETWEEN ? AND ?;
+                """;
+        return jdbcTemplate.query(sql, waitingWithTurnRowMapper, startDate, endDate);
+    }
+
     public ReservationWaiting insert(ReservationWaiting waiting) {
         ReservationSlot slot = waiting.getSlot();
         String sql = "INSERT INTO reservation_waiting(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";

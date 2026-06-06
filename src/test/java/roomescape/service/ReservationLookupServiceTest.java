@@ -2,6 +2,8 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import roomescape.domain.*;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.service.dto.ReservationStatus;
 import roomescape.service.dto.Status;
 
@@ -10,6 +12,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -78,5 +81,57 @@ class ReservationLookupServiceTest {
         // then
         assertThat(result).extracting(ReservationStatus::id)
                 .containsExactly(3L, 2L, 1L);
+    }
+
+    @Test
+    void 기간으로_예약과_예약_대기를_조회할_때_날짜_시간_테마_상태_순번순으로_정렬한다() {
+        // given
+        LocalDate startDate = date.minusDays(1);
+        LocalDate endDate = date.plusDays(1);
+        ReservationTime sameTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        ReservationTime lateTime = new ReservationTime(2L, LocalTime.parse("12:00"));
+        Theme theme1 = new Theme(1L, "테마1", "테마 설명", "썸네일 주소");
+        Theme theme3 = new Theme(3L, "테마3", "테마 설명", "썸네일 주소");
+
+        Reservation previousDateReservation = new Reservation(
+                4L, "아로", new ReservationSlot(date.minusDays(1), lateTime, theme1));
+        Reservation theme1Reservation = new Reservation(1L, "브라운", new ReservationSlot(date, sameTime, theme1));
+        Reservation lateReservation = new Reservation(5L, "포비", new ReservationSlot(date, lateTime, theme1));
+        WaitingWithTurn theme3Waiting = new WaitingWithTurn(
+                new ReservationWaiting(3L, "구구", new ReservationSlot(date, sameTime, theme3)),
+                1L);
+        WaitingWithTurn theme1Waiting = new WaitingWithTurn(
+                new ReservationWaiting(2L, "도라", new ReservationSlot(date, sameTime, theme1)),
+                1L);
+
+        when(reservationService.findByDateRange(startDate, endDate))
+                .thenReturn(List.of(lateReservation, theme1Reservation, previousDateReservation));
+        when(reservationWaitingService.findByDateRange(startDate, endDate))
+                .thenReturn(List.of(theme3Waiting, theme1Waiting));
+
+        // when
+        List<ReservationStatus> result = service.findByDateRange(startDate, endDate);
+
+        // then
+        assertAll(
+                () -> assertThat(result).extracting(ReservationStatus::id)
+                        .containsExactly(4L, 1L, 2L, 3L, 5L),
+                () -> assertThat(result).extracting(ReservationStatus::status)
+                        .containsExactly(Status.RESERVED, Status.RESERVED, Status.WAITING, Status.WAITING, Status.RESERVED),
+                () -> assertThat(result).extracting(status -> status.theme().getName())
+                        .containsExactly("테마1", "테마1", "테마1", "테마3", "테마1"));
+    }
+
+    @Test
+    void 시작일이_종료일보다_늦으면_예외가_발생한다() {
+        // given
+        LocalDate startDate = date.plusDays(1);
+        LocalDate endDate = date;
+
+        // when & then
+        assertThatThrownBy(() -> service.findByDateRange(startDate, endDate))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)
+                .hasMessage("시작일은 종료일보다 늦을 수 없습니다.");
     }
 }

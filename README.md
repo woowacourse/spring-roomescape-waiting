@@ -10,6 +10,7 @@
 | 사용자 본인 예약 대기 조회 | GET `/waitings?name=브라운`                    | —                                | `[{id, name, date, time: {id, startAt}, theme: {id, name}, turn}, ...]` | 200   |
 | 사용자 본인 예약 대기 취소 | DELETE `/waitings/{id}?name=브라운`             | —                                | —                                                            | 204   |
 | 관리자 예약 조회       | GET `/admin/reservations`                      | —                                | `[{id, name, date, time: {id, startAt}, theme: {id, name}}, ...]` | 200   |
+| 관리자 예약 상태 조회    | GET `/admin/reservation-statuses?startDate=2026-06-01&endDate=2026-06-30` | —                                | `[{id, name, date, time: {id, startAt}, theme: {id, name}, status, turn}, ...]` | 200   |
 | 관리자 예약 등록       | POST `/admin/reservations`                     | `{name, date, timeId, themeId}`  | `{id, name, date, time: {id, startAt}, theme: {id, name}}`   | 201   |
 | 관리자 예약 삭제       | DELETE `/admin/reservations/{id}`              | —                                | —                                                            | 204   |
 | 관리자 시간 조회       | GET `/admin/times`                             | —                                | `[{id, startAt}, ...]`                                       | 200   |

@@ -43,6 +43,10 @@ public class ReservationService {
         return reservationRepository.findByName(name);
     }
 
+    public List<Reservation> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        return reservationRepository.findByDateRange(startDate, endDate);
+    }
+
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }

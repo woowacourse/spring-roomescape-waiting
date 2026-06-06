@@ -38,6 +38,10 @@ public class ReservationWaitingService {
         return reservationWaitingRepository.findByNameWithTurn(name);
     }
 
+    public List<WaitingWithTurn> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        return reservationWaitingRepository.findByDateRange(startDate, endDate);
+    }
+
     @Transactional
     public WaitingWithTurn create(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));

@@ -611,10 +611,115 @@ button:disabled {
     color: var(--danger);
 }
 
+.table-action-button {
+    min-height: 0;
+    padding: 0.36rem 0.62rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    line-height: 1;
+}
+
 .btn-secondary {
     background: transparent;
     border-color: var(--border-hover);
     color: var(--text-secondary);
+}
+
+.reservation-filter-panel {
+    display: grid;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+    padding: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.filter-preset-row {
+    display: flex;
+    align-items: center;
+}
+
+.filter-preset-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+}
+
+.filter-preset {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0.44rem 0.72rem;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 400;
+    line-height: 1;
+    min-height: 0;
+    transform: none;
+}
+
+.filter-preset:hover,
+.filter-preset.active {
+    opacity: 1;
+    transform: none;
+}
+
+.filter-preset:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.04);
+}
+
+.filter-preset.active {
+    border-color: rgba(200,169,110,0.5);
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+
+.date-range-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) minmax(180px, 220px) max-content;
+    justify-content: start;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.date-field {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.date-field span {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+.date-field input {
+    padding: 0.62rem 0.78rem;
+    min-height: 38px;
+    font-size: 0.82rem;
+}
+
+.date-field input[readonly] {
+    opacity: 0.58;
+}
+
+.btn-filter-search {
+    width: auto;
+    justify-self: start;
+    min-height: 38px;
+    padding: 0.62rem 0.95rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    line-height: 1;
 }
 
 .btn-text {
@@ -929,6 +1034,9 @@ body.error-page {
     .form-grid.reservation-form,
     .form-grid.time-form,
     .form-grid.lookup-form {
+        grid-template-columns: 1fr;
+    }
+    .date-range-row {
         grid-template-columns: 1fr;
     }
     .table-wrap {

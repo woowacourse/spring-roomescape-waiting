@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JdbcTest
@@ -95,6 +96,32 @@ class ReservationWaitingRepositoryTest {
                         .containsExactly(date, date.plusDays(1)),
                 () -> assertThat(result).extracting(WaitingWithTurn::turn)
                         .containsExactly(2L, 1L));
+    }
+
+    @Test
+    void 날짜_범위에_해당하는_예약_대기_목록을_순번과_함께_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        waitingRepository.insert(new ReservationWaiting(null, "범위밖1", new ReservationSlot(date.minusDays(1), time, theme)));
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", slot));
+        waitingRepository.insert(new ReservationWaiting(null, "구구", slot));
+        waitingRepository.insert(new ReservationWaiting(null, "범위밖2", new ReservationSlot(date.plusDays(1), time, theme)));
+
+        // when
+        List<WaitingWithTurn> result = waitingRepository.findByDateRange(date, date);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result)
+                        .extracting(
+                                waitingWithTurn -> waitingWithTurn.waiting().getName(),
+                                WaitingWithTurn::turn)
+                        .containsExactlyInAnyOrder(
+                                tuple("브라운", 1L),
+                                tuple("구구", 2L)));
     }
 
     @Test
