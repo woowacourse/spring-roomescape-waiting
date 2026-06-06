@@ -23,7 +23,6 @@ import roomescape.time.repository.JdbcReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 @JdbcTest
 @Import({

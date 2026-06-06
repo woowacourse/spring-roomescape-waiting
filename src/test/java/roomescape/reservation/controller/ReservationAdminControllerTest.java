@@ -23,7 +23,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.AcceptanceTest;
-import roomescape.slot.fixture.SlotApiFixture;
 
 class ReservationAdminControllerTest extends AcceptanceTest {
 
@@ -48,8 +47,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
-        createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        createReservationWithToken(managerToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
@@ -65,8 +64,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
@@ -155,9 +154,9 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, futureTime);
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
         createSlot(managerToken, changedDateId, changedTimeId, themeId);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", changedDateId);
@@ -182,9 +181,9 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
         createSlot(managerToken, changedDateId, changedTimeId, themeId);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         cancelReservationWithToken(this.managerToken, reservationId);
 
@@ -210,10 +209,10 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer alreadyReservedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
-        createSlot(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
-        createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
+        Integer alreadyReservedSlotId = createSlot(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
+        createReservationWithToken(managerToken, alreadyReservedSlotId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", alreadyReservedDateId);
@@ -241,9 +240,9 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer pastTimeId = createReservationTime(managerToken, "00:01");
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
         createSlot(managerToken, pastSqlDateId, pastTimeId, themeId);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", pastSqlDateId);

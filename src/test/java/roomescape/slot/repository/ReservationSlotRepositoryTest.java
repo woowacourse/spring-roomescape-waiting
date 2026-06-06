@@ -26,7 +26,7 @@ import java.util.Optional;
         JdbcReservationDateRepository.class,
         JdbcThemeRepository.class
 })
-public class ReservationSlotRepositoryTest {
+class ReservationSlotRepositoryTest {
 
     @Autowired
     private JdbcReservationTimeRepository reservationTimeRepository;

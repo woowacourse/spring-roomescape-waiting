@@ -19,14 +19,6 @@ public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
 
-    @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeDetailDto>> readAvailableTimes(@RequestParam("dateId") Long dateId, @RequestParam("themeId") Long themeId) {
-        List<ReservationTimeDetailDto> responseData = reservationTimeService.readAvailableTimes(dateId, themeId).stream()
-                .map(ReservationTimeDetailDto::from)
-                .toList();
-        return ResponseEntity.ok(responseData);
-    }
-
     @GetMapping("/slots/times")
     public ResponseEntity<List<TimeOfSlotDetailDto>> readAvailableTimesOfSlot(
             @RequestParam("dateId") Long dateId, @RequestParam("themeId") Long themeId

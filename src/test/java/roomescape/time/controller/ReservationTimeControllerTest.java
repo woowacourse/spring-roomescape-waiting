@@ -27,17 +27,19 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt1);
         updateTimeStatus(managerToken, timeId, true);
         Integer themeId = createTheme(managerToken, themeName);
-        createSlot(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
                 .queryParam("themeId", themeId)
-                .when().get("/member/times")
+                .when().get("/member/slots/times")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].id", is(timeId))
-                .body("[0].startAt", is(startAt1));
+                .body("[0].timeId", is(timeId))
+                .body("[0].slotId", is(slotId))
+                .body("[0].startAt", is(startAt1))
+                .body("[0].isActive", is(true));
     }
 
     @Test
@@ -49,7 +51,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
                 .queryParam("themeId", themeId)
-                .when().get("/member/times")
+                .when().get("/member/slots/times")
                 .then().log().all()
                 .statusCode(200);
     }

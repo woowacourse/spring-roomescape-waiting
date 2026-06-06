@@ -8,7 +8,6 @@ import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.annotation.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDto;
-import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.controller.dto.response.ReservationDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
@@ -24,17 +23,6 @@ import static roomescape.member.domain.Role.MEMBER;
 public class ReservationController {
 
     private final ReservationService reservationService;
-
-    @AuthGuard(roles = {MEMBER, MANAGER})
-    @PostMapping("/reservations")
-    public ResponseEntity<ReservationDetailDto> create(
-            @Validated @RequestBody ReservationSaveDto dto,
-            @LoginMember Member member
-    ) {
-        Reservation reservation = reservationService.reserve(member.getName(), dto.toCommand());
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
-        return ResponseEntity.ok(responseData);
-    }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
     @PostMapping("/slots/{slotId}/reservations")

@@ -175,11 +175,6 @@ class ReservationTimeRepositoryTest {
         return jdbcThemeRepository.save(theme);
     }
 
-    private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        ReservationSlot slot = saveSlot(ReservationSlot.of(reservationDate, reservationTime, theme));
-        jdbcReservationRepository.save(reservation("송송", slot));
-    }
-
     private boolean updateStatus(ReservationTime saved) {
         return jdbcReservationTimeRepository.updateStatus(saved);
     }
