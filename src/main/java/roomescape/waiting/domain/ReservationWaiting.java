@@ -23,18 +23,16 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
         this.name = name;
         this.slot = slot;
         this.requestedAt = requestedAt;
+        validateExpiry(requestedAt);
     }
 
     public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme,
                               LocalDateTime requestTime) {
         this(null, name, new ReservationSlot(date, time, theme), requestTime);
-        validateExpiry(requestTime);
     }
 
     public void validateDeletable(String name, LocalDateTime current) {
-        if (name != null) {
-            validateOwner(name);
-        }
+        validateOwner(name);
         validateExpiry(current);
     }
 

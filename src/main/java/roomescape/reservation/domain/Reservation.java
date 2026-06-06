@@ -21,11 +21,11 @@ public class Reservation {
         this.name = name;
         this.slot = slot;
         this.updatedAt = updatedAt;
+        validateExpiry(updatedAt);
     }
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
         this(null, name, new ReservationSlot(date, time, theme), requestTime);
-        validateExpiry(requestTime);
     }
 
     public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
@@ -60,9 +60,7 @@ public class Reservation {
     }
 
     public void validateDeletable(String name, LocalDateTime requestTime) {
-        if (name != null) {
-            validateOwner(name);
-        }
+        validateOwner(name);
         validateExpiry(requestTime);
     }
 
