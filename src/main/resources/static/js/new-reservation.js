@@ -1,42 +1,75 @@
 let isEditing = false;
 const RESERVATION_API_ENDPOINT = '/reservations';
 const TIME_API_ENDPOINT = '/times';
+const ADMIN_THEME_API_ENDPOINT = '/admin/themes';
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-reservation').addEventListener('click', addEditableRow);
   fetchReservations();
-  fetchTimes();
+  Promise.all([fetchTimes(), fetchThemes()]);
 });
 
 function fetchTimes() {
-  requestReadTimes()
+  return requestReadTimes()
       .then(data => {
-        const timeSelectControl = createFormControl(data);
-        appendFormControlToDocument(timeSelectControl);
+        const control = createTimeFormControl(data);
+        appendHiddenControlToDocument(control);
       })
       .catch(error => console.error('Error fetching time:', error));
 }
 
-function createFormControl(timeData) {
+function fetchThemes() {
+  return fetch(ADMIN_THEME_API_ENDPOINT)
+      .then(res => res.json())
+      .then(data => {
+        const control = createThemeFormControl(data);
+        appendHiddenControlToDocument(control);
+      })
+      .catch(error => console.error('Error fetching themes:', error));
+}
+
+function createTimeFormControl(timeData) {
   const select = document.createElement('select');
   select.className = 'form-control';
   select.id = 'time-select';
 
   const defaultOption = document.createElement('option');
-  defaultOption.textContent = "시간 선택";
+  defaultOption.value = '';
+  defaultOption.textContent = '시간 선택';
   select.appendChild(defaultOption);
 
   timeData.forEach(time => {
     const option = document.createElement('option');
     option.value = time.id;
-    option.textContent = time.time;
+    option.textContent = time.startAt;
     select.appendChild(option);
   });
 
   return select;
 }
 
-function appendFormControlToDocument(control) {
+function createThemeFormControl(themeData) {
+  const select = document.createElement('select');
+  select.className = 'form-control';
+  select.id = 'theme-select';
+
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = '테마 선택';
+  select.appendChild(defaultOption);
+
+  themeData.forEach(theme => {
+    const option = document.createElement('option');
+    option.value = theme.id;
+    option.textContent = theme.name;
+    select.appendChild(option);
+  });
+
+  return select;
+}
+
+function appendHiddenControlToDocument(control) {
+  control.style.display = 'none';
   document.body.appendChild(control);
 }
 
@@ -57,13 +90,13 @@ function renderReservations(data) {
 }
 
 function insertReservationRow(row, reservation) {
-  ['id', 'name', 'date'].forEach((field, index) => {
-    row.insertCell(index).textContent = reservation[field];
-  });
+  row.insertCell(0).textContent = reservation.id;
+  row.insertCell(1).textContent = reservation.name;
+  row.insertCell(2).textContent = reservation.date;
+  row.insertCell(3).textContent = reservation.themeName;
+  row.insertCell(4).textContent = reservation.time.startAt;
 
-  row.insertCell(3).textContent = reservation.time.time;
-
-  const actionCell = row.insertCell(4);
+  const actionCell = row.insertCell(5);
   actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
 }
 
@@ -76,8 +109,7 @@ function createActionButton(label, className, eventListener) {
 }
 
 function addEditableRow() {
-
-  if (isEditing) return;  // 이미 편집 중인 경우 추가하지 않음
+  if (isEditing) return;
 
   const tableBody = document.getElementById('reservation-table-body');
   const row = tableBody.insertRow();
@@ -90,9 +122,18 @@ function addEditableRow() {
 function createEditableFieldsFor(row) {
   const nameInput = createInput('text');
   const dateInput = createInput('date');
-  const timeDropdown = document.getElementById('time-select').cloneNode(true);
 
-  const fields = ['', nameInput, dateInput, timeDropdown];
+  const themeDropdown = document.getElementById('theme-select').cloneNode(true);
+  themeDropdown.removeAttribute('id');
+  themeDropdown.className = 'form-control theme-dropdown';
+  themeDropdown.style.display = '';
+
+  const timeDropdown = document.getElementById('time-select').cloneNode(true);
+  timeDropdown.removeAttribute('id');
+  timeDropdown.className = 'form-control time-dropdown';
+  timeDropdown.style.display = '';
+
+  const fields = ['', nameInput, dateInput, themeDropdown, timeDropdown];
 
   fields.forEach((field, index) => {
     const cell = row.insertCell(index);
@@ -105,7 +146,7 @@ function createEditableFieldsFor(row) {
 }
 
 function addSaveAndCancelButtonsToRow(row) {
-  const actionCell = row.insertCell(4);
+  const actionCell = row.insertCell(5);
   actionCell.appendChild(createActionButton('확인', 'btn-primary', saveRow));
   actionCell.appendChild(createActionButton('취소', 'btn-secondary', () => {
     row.remove();
@@ -124,19 +165,21 @@ function saveRow(event) {
   const row = event.target.parentNode.parentNode;
   const nameInput = row.querySelector('input[type="text"]');
   const dateInput = row.querySelector('input[type="date"]');
-  const timeSelect = row.querySelector('select');
+  const themeSelect = row.querySelector('.theme-dropdown');
+  const timeSelect = row.querySelector('.time-dropdown');
 
   const reservation = {
     name: nameInput.value,
     date: dateInput.value,
-    time: timeSelect.value
+    themeId: Number(themeSelect.value),
+    timeId: Number(timeSelect.value)
   };
 
   requestCreate(reservation)
       .then(data => updateRowWithReservationData(row, data))
       .catch(error => console.error('Error:', error));
 
-  isEditing = false;  // isEditing 값을 false로 설정
+  isEditing = false;
 }
 
 function updateRowWithReservationData(row, data) {
@@ -144,21 +187,13 @@ function updateRowWithReservationData(row, data) {
   cells[0].textContent = data.id;
   cells[1].textContent = data.name;
   cells[2].textContent = data.date;
-  cells[3].textContent = data.time.time;
+  cells[3].textContent = data.themeName;
+  cells[4].textContent = data.time.startAt;
 
-  // 버튼 변경: 삭제 버튼으로 변경
-  cells[4].innerHTML = '';
-  cells[4].appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
+  cells[5].innerHTML = '';
+  cells[5].appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
 
   isEditing = false;
-
-  // Remove the editable input fields and just show the saved data
-  for (let i = 1; i <= 3; i++) {
-    const inputElement = cells[i].querySelector('input');
-    if (inputElement) {
-      inputElement.remove();
-    }
-  }
 }
 
 function deleteRow(event) {

@@ -67,7 +67,10 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream()
+        List<Reservation> reservations = (name != null)
+                ? reservationRepository.findByName(name)
+                : reservationRepository.findAll();
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .collect(Collectors.toList());
     }
