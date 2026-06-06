@@ -43,8 +43,35 @@ public class WaitingReservationService {
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
     }
 
+    public void cancelWaitingReservation(Long id) {
+
+        WaitingReservation waitingReservation = waitingReservationRepository
+            .findById(id)
+            .orElseThrow(() -> new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_NOT_FOUND));
+
+        if (reservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(
+            waitingReservation.getName(),
+            waitingReservation.getDate().getId(),
+            waitingReservation.getTime().getId(),
+            waitingReservation.getTheme().getId())) {
+            throw new RoomescapeException(WaitingReservationErrorCode.ALREADY_PROMOTED_TO_RESERVATION);
+        }
+
+        int deletedCount = waitingReservationRepository.deleteById(id);
+        if (deletedCount == 0) {
+            log.warn("이미 삭제된 예약 대기 삭제 요청이 들어왔습니다. reservationId={}", id);
+        }
+    }
+
+    public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
+        return waitingReservationRepository.findAllByNameWithRank(name)
+            .stream()
+            .map(WaitingReservationWithRankResponse::from)
+            .toList();
+    }
+
     private void validateNotPast(ReservationDate reservationDate, ReservationTime reservationTime) {
-        if(reservationDate.isPast(reservationTime)) {
+        if (reservationDate.isPast(reservationTime)) {
             throw new RoomescapeException(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED);
         }
     }
@@ -68,19 +95,5 @@ public class WaitingReservationService {
         if (!reserved) {
             throw new RoomescapeException(WaitingReservationErrorCode.AVAILABLE_SLOT_NOT_WAITABLE);
         }
-    }
-
-    public void cancelWaitingReservation(Long id) {
-        int deletedCount = waitingReservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("이미 삭제된 예약 대기 삭제 요청이 들어왔습니다. reservationId={}", id);
-        }
-    }
-
-    public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
-        return waitingReservationRepository.findAllByNameWithRank(name)
-            .stream()
-            .map(WaitingReservationWithRankResponse::from)
-            .toList();
     }
 }

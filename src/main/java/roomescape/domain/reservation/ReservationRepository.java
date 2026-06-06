@@ -26,4 +26,6 @@ public interface ReservationRepository {
     int updateReservation(Long id, Long dateId, Long timeId);
 
     boolean existsByDateIdAndTimeIdAndThemeId(Long dateId, Long timeId, Long themeId);
+
+    boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, Long dateId, Long timeId, Long themeId);
 }
