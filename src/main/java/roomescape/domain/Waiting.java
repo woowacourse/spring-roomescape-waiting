@@ -56,6 +56,10 @@ public class Waiting {
         return slot.isPast(now);
     }
 
+    public boolean isOnSlot(Slot slot) {
+        return this.slot.equals(slot);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Waiting waiting)) {

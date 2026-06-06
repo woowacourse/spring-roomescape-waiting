@@ -31,7 +31,7 @@ public class PromotionTask {
     }
 
     public static PromotionTask pending(Slot slot) {
-        return new PromotionTask(null, slot.getTheme().getId(), slot.getTime().getId(),
+        return new PromotionTask(null, slot.getThemeId(), slot.getTimeId(),
                 slot.getDate(), slot.getStoreId(), OutboxStatus.PENDING);
     }
 

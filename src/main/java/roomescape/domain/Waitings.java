@@ -67,7 +67,8 @@ public class Waitings {
     }
 
     private void validateCanCreate(Member member) {
-        if (waitings.stream().anyMatch(waiting -> waiting.isSameMember(member))) {
+        if (waitings.stream()
+                .anyMatch(waiting -> waiting.isSameMember(member))) {
             throw new DuplicateEntityException("이미 대기 신청한 슬롯입니다.");
         }
         if (waitings.size() >= MAX_WAITING_COUNT) {
@@ -76,15 +77,14 @@ public class Waitings {
     }
 
     private void validateReservationMatchesSlot(Reservation reservation) {
-        if (!Objects.equals(reservation.getSlot(), slot)) {
+        if (!reservation.isOnSlot(slot)) {
             throw new BusinessRuleViolationException("같은 슬롯의 예약에만 대기를 생성할 수 있습니다.");
         }
     }
 
     private void validateAllBelongToSlot(Slot slot, List<Waiting> waitings) {
         boolean hasDifferentSlot = waitings.stream()
-                .map(Waiting::getSlot)
-                .anyMatch(waitingSlot -> !Objects.equals(waitingSlot, slot));
+                .anyMatch(waiting -> !waiting.isOnSlot(slot));
         if (hasDifferentSlot) {
             throw new BusinessRuleViolationException("같은 슬롯의 대기만 묶을 수 있습니다.");
         }

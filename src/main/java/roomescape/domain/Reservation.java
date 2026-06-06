@@ -86,6 +86,10 @@ public class Reservation {
         return slot.isInStore(store);
     }
 
+    public boolean isOnSlot(Slot slot) {
+        return this.slot.equals(slot);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Reservation that)) {

@@ -50,6 +50,14 @@ public class Slot {
         return store.getId();
     }
 
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Slot slot)) {
