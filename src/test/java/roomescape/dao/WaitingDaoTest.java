@@ -167,4 +167,35 @@ public class WaitingDaoTest {
 
         assertThat(first.getName().value()).isEqualTo("먼저");
     }
+
+    @Test
+    void 같은_슬롯_대기의_created_at이_동일하면_id가_작은_대기를_반환한다() {
+        LocalDate slotDate = LocalDate.parse("2026-05-04");
+        ReservationTime slotTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        LocalDateTime sameCreatedAt = LocalDateTime.of(2026, 5, 1, 9, 0);
+        Theme slotTheme = new Theme(
+                2L,
+                ThemeName.parse("미래 도시"),
+                Description.parse("2050년 서울의 이야기"),
+                ThumbnailUrl.parse("/images/future-city")
+        );
+
+        Waiting savedFirst = waitingDao.save(new Waiting(
+                UserName.parse("먼저저장"),
+                slotDate, slotTime, slotTheme,
+                sameCreatedAt
+        ));
+        Waiting savedSecond = waitingDao.save(new Waiting(
+                UserName.parse("나중저장"),
+                slotDate, slotTime, slotTheme,
+                sameCreatedAt
+        ));
+
+        Waiting first = waitingDao.findFirstBySlot(slotDate, slotTime.getId(), slotTheme.getId())
+                .orElseThrow();
+
+        assertThat(savedFirst.getId()).isLessThan(savedSecond.getId());
+        assertThat(first.getId()).isEqualTo(savedFirst.getId());
+        assertThat(first.getName().value()).isEqualTo("먼저저장");
+    }
 }
