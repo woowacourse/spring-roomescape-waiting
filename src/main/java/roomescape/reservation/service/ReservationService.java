@@ -109,8 +109,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation updateReservation(Long id, ReservationUpdateRequest request) {
+    public Reservation updateReservation(Long id, Member member, ReservationUpdateRequest request) {
         Reservation reservation = getById(id);
+        if (!reservation.isOwnedBy(member.getId())) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
+        }
         if (reservation.isPast()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 예약은 변경할 수 없습니다.");
         }

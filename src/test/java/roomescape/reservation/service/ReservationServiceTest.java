@@ -224,7 +224,7 @@ class ReservationServiceTest {
         LocalDate newDate = futureDate.plusDays(1);
 
         Reservation updated = reservationService.updateReservation(
-                reservationId, new ReservationUpdateRequest(newDate, otherTime.getId()));
+                reservationId, member, new ReservationUpdateRequest(newDate, otherTime.getId()));
 
         assertThat(updated.getDate()).isEqualTo(newDate);
         assertThat(updated.getTime().getId()).isEqualTo(otherTime.getId());
@@ -241,9 +241,22 @@ class ReservationServiceTest {
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
         assertThatThrownBy(() -> reservationService.updateReservation(
-                targetId, new ReservationUpdateRequest(futureDate, otherTime.getId())))
+                targetId, member, new ReservationUpdateRequest(futureDate, otherTime.getId())))
                 .isInstanceOf(DuplicateReservationException.class)
                 .hasMessage("이미 예약된 시간입니다.");
+    }
+
+    @Test
+    @DisplayName("다른 사람의 예약은 변경할 수 없다")
+    void 타인의_예약은_변경할_수_없다() {
+        Member other = memberRepository.save(Member.of("user2", "user2@test.com", "1234"));
+        Long reservationId = reservationService.book(
+                member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
+
+        assertThatThrownBy(() -> reservationService.updateReservation(
+                reservationId, other, new ReservationUpdateRequest(futureDate, otherTime.getId())))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("접근 권한이 없습니다.");
     }
 
     @Test
@@ -253,7 +266,7 @@ class ReservationServiceTest {
                 Reservation.restore(null, member, LocalDate.now().minusDays(1), time, theme));
 
         assertThatThrownBy(() -> reservationService.updateReservation(
-                past.getId(), new ReservationUpdateRequest(futureDate, otherTime.getId())))
+                past.getId(), member, new ReservationUpdateRequest(futureDate, otherTime.getId())))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 예약은 변경할 수 없습니다.");
     }

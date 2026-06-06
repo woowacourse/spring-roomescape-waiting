@@ -56,10 +56,11 @@ public class ReservationController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
+            @LoginMember Member member,
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
-        return ResponseEntity.ok(ReservationResponse.from(reservationService.updateReservation(id, request)));
+        return ResponseEntity.ok(ReservationResponse.from(reservationService.updateReservation(id, member, request)));
     }
 
     @DeleteMapping("/{id}")
