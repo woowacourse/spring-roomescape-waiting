@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.event.schema.PromotionFailed;
 import roomescape.reservation.event.schema.WaitingPromotedToReservation;
 
 @Service
@@ -17,9 +18,18 @@ public class PromotionService {
 
     @Transactional
     public void promoteFromWaiting(LocalDate date, Long themeId, Long timeId) {
-        boolean promoted = reservationRepository.insertFromOldestWaiting(date, themeId, timeId);
-        if (promoted) {
-            eventPublisher.publishEvent(new WaitingPromotedToReservation(date, themeId, timeId));
+        promoteFromWaiting(date, themeId, timeId, 0);
+    }
+
+    @Transactional
+    public void promoteFromWaiting(LocalDate date, Long themeId, Long timeId, int retryCount) {
+        try {
+            boolean promoted = reservationRepository.insertFromOldestWaiting(date, themeId, timeId);
+            if (promoted) {
+                eventPublisher.publishEvent(new WaitingPromotedToReservation(date, themeId, timeId));
+            }
+        } catch (Exception e) {
+            eventPublisher.publishEvent(new PromotionFailed(date, themeId, timeId, retryCount + 1));
         }
     }
 }
