@@ -10,6 +10,8 @@ public interface SessionRepository {
 
     List<Session> findAll();
 
+    Optional<Session> findById(long id);
+
     Session save(Session session);
 
     Optional<Session> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);

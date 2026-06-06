@@ -26,7 +26,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.ProblemDetailsAdvice;
-import roomescape.service.WaitingService;
+import roomescape.service.SessionService;
 
 @WebMvcTest(WaitingController.class)
 @Import(ProblemDetailsAdvice.class)
@@ -39,12 +39,12 @@ class WaitingControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private WaitingService waitingService;
+    private SessionService sessionService;
 
     @Test
     @DisplayName("유효한 요청으로 예약 대기를 신청하고 200 상태 코드를 반환한다.")
     void applyWaiting() throws Exception {
-        given(waitingService.saveWaiting(any())).willReturn(createMockWaiting());
+        given(sessionService.addWaiting(any())).willReturn(createMockWaiting());
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
@@ -55,7 +55,7 @@ class WaitingControllerTest {
     @Test
     @DisplayName("예약 대기를 취소하고 204 상태 코드를 반환한다.")
     void cancelWaiting() throws Exception {
-        doNothing().when(waitingService).removeWaiting(anyLong(), anyString());
+        doNothing().when(sessionService).cancelWaiting(anyLong(), anyString());
         mockMvc.perform(delete("/waitings/1").param("userName", "브라운"))
                 .andExpect(status().isNoContent());
     }

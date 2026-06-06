@@ -95,7 +95,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean isExistsBySlotId(long sessionId) {
+    public boolean isExistsBySessionId(long sessionId) {
         return jdbcTemplate.queryForObject(EXISTS_BY_SESSION_SQL, Boolean.class, sessionId);
     }
 
@@ -111,7 +111,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Waiting findFirstBySlotId(long sessionId) {
+    public Waiting findFirstBySessionId(long sessionId) {
         List<Waiting> waitings = jdbcTemplate.query(FIND_FIRST_BY_SESSION_SQL, rowMapper, sessionId);
         return DataAccessUtils.singleResult(waitings);
     }

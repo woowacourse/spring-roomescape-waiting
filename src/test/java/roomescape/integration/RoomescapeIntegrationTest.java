@@ -90,6 +90,7 @@ class RoomescapeIntegrationTest {
         insertTestData(LocalDate.now().plusDays(1));
 
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES ('코믹', '설명', 'url')");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, 2)", LocalDate.now().plusDays(1));
 
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now().plusDays(1), 1L, 2L);
 

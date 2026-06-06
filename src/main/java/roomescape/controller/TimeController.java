@@ -7,6 +7,7 @@ import roomescape.controller.dto.TimePatchRequest;
 import roomescape.controller.dto.TimeRequest;
 import roomescape.controller.dto.TimeResponse;
 import roomescape.domain.TimeSlot;
+import roomescape.service.SessionService;
 import roomescape.service.TimeSlotService;
 import roomescape.service.dto.AvailableTimeSlot;
 
@@ -18,76 +19,64 @@ import java.util.List;
 @RequestMapping("/times")
 public class TimeController {
 
-    private final TimeSlotService reservationTimeSlotService;
+    private final TimeSlotService timeSlotService;
+    private final SessionService sessionService;
 
-    public TimeController(TimeSlotService reservationTimeSlotService) {
-        this.reservationTimeSlotService = reservationTimeSlotService;
+    public TimeController(TimeSlotService timeSlotService, SessionService sessionService) {
+        this.timeSlotService = timeSlotService;
+        this.sessionService = sessionService;
     }
 
     @GetMapping
     public ResponseEntity<List<TimeResponse>> times() {
-        return ResponseEntity.ok(convertToTimeResponses(reservationTimeSlotService.allTimes()));
+        return ResponseEntity.ok(convertToTimeResponses(timeSlotService.allTimes()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TimeResponse> getTime(@PathVariable long id) {
-        TimeSlot timeSlot = reservationTimeSlotService.findTimeSlotById(id);
-        return ResponseEntity.ok(TimeResponse.from(timeSlot));
+        return ResponseEntity.ok(TimeResponse.from(timeSlotService.findTimeSlotById(id)));
     }
 
     @GetMapping(params = {"themeId", "date"})
     public ResponseEntity<List<TimeResponse>> getAvailableTimes(
-            @RequestParam("themeId")
-            long themeId,
-            @RequestParam("date")
-            LocalDate date
-    ) {
-        List<AvailableTimeSlot> availableSlots = reservationTimeSlotService.findAvailableTimes(themeId, date);
+            @RequestParam("themeId") long themeId,
+            @RequestParam("date") LocalDate date) {
+        List<AvailableTimeSlot> availableSlots = sessionService.findAvailableTimes(themeId, date);
         return ResponseEntity.ok(convertToAvailableResponses(availableSlots));
     }
 
     @PostMapping
     public ResponseEntity<TimeResponse> createTime(@RequestBody @Valid TimeRequest request) {
-        TimeSlot timeSlot = reservationTimeSlotService.saveTime(request);
+        TimeSlot timeSlot = timeSlotService.saveTime(request);
         return ResponseEntity.created(URI.create("/times/" + timeSlot.getId()))
                 .body(TimeResponse.from(timeSlot));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTime(@PathVariable long id) {
-        reservationTimeSlotService.removeTime(id);
+        timeSlotService.removeTime(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TimeResponse> updateTime(
-            @PathVariable
-            long id,
-            @RequestBody @Valid
-            TimeRequest request
-    ) {
-        return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.putTime(id, request)));
+            @PathVariable long id,
+            @RequestBody @Valid TimeRequest request) {
+        return ResponseEntity.ok(TimeResponse.from(timeSlotService.putTime(id, request)));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<TimeResponse> patchTime(
-            @PathVariable
-            long id,
-            @RequestBody
-            TimePatchRequest request
-    ) {
-        return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.patchTime(id, request)));
+            @PathVariable long id,
+            @RequestBody TimePatchRequest request) {
+        return ResponseEntity.ok(TimeResponse.from(timeSlotService.patchTime(id, request)));
     }
 
-    private List<TimeResponse> convertToTimeResponses(List<TimeSlot> reservationTimeSlots) {
-        return reservationTimeSlots.stream()
-                .map(TimeResponse::from)
-                .toList();
+    private List<TimeResponse> convertToTimeResponses(List<TimeSlot> timeSlots) {
+        return timeSlots.stream().map(TimeResponse::from).toList();
     }
 
     private List<TimeResponse> convertToAvailableResponses(List<AvailableTimeSlot> availableSlots) {
-        return availableSlots.stream()
-                .map(TimeResponse::from)
-                .toList();
+        return availableSlots.stream().map(TimeResponse::from).toList();
     }
 }

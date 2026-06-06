@@ -22,6 +22,11 @@ public class FakeSessionRepository implements SessionRepository {
     }
 
     @Override
+    public Optional<Session> findById(long id) {
+        return Optional.ofNullable(storage.get(id));
+    }
+
+    @Override
     public Optional<Session> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return storage.values().stream()
                 .filter(session -> matchCondition(session, date, timeId, themeId))

@@ -22,7 +22,7 @@ public class FakeWaitingRepository implements WaitingRepository {
         long id = sequence++;
         Waiting savedWaiting = new Waiting(id, waiting.getName(), waiting.getSession(), waiting.getWaitingNumber());
         storage.put(id, savedWaiting);
-        return waiting;
+        return savedWaiting;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean isExistsBySlotId(long slotId) {
+    public boolean isExistsBySessionId(long slotId) {
         return storage.values().stream()
                 .anyMatch(entry -> entry.getSession().getId().equals(slotId));
     }
@@ -55,7 +55,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Waiting findFirstBySlotId(long slotId) {
+    public Waiting findFirstBySessionId(long slotId) {
         return storage.values().stream()
                 .filter(entry -> entry.getSession().getId().equals(slotId))
                 .min(Comparator.comparingInt(Waiting::getWaitingNumber))

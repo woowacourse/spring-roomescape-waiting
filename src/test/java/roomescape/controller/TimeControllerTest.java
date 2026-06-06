@@ -29,6 +29,7 @@ import roomescape.controller.dto.TimePatchRequest;
 import roomescape.controller.dto.TimeRequest;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.ProblemDetailsAdvice;
+import roomescape.service.SessionService;
 import roomescape.service.TimeSlotService;
 import roomescape.service.dto.AvailableTimeSlot;
 
@@ -44,6 +45,9 @@ class TimeControllerTest {
 
     @MockitoBean
     private TimeSlotService timeSlotService;
+
+    @MockitoBean
+    private SessionService sessionService;
 
     @Test
     @DisplayName("전체 예약 시간 목록을 조회하고 200 상태 코드를 반환한다.")
@@ -67,7 +71,7 @@ class TimeControllerTest {
     @DisplayName("테마와 날짜로 이용 가능한 시간 목록을 조회하고 200 상태 코드를 반환한다.")
     void getAvailableTimes() throws Exception {
         AvailableTimeSlot availableSlot = new AvailableTimeSlot(createMockTimeSlot(), true);
-        given(timeSlotService.findAvailableTimes(anyLong(), any(LocalDate.class))).willReturn(List.of(availableSlot));
+        given(sessionService.findAvailableTimes(anyLong(), any(LocalDate.class))).willReturn(List.of(availableSlot));
         mockMvc.perform(get("/times").param("themeId", "1").param("date", LocalDate.now().plusDays(1).toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
