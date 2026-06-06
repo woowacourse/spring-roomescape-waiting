@@ -7,37 +7,19 @@ import static roomescape.support.ApiFixtures.예약_대기_생성;
 import static roomescape.support.ApiFixtures.예약_생성;
 import static roomescape.support.ApiFixtures.테마_등록;
 
-import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationEditableStatus;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.theme.dto.response.ThemeResponseDto;
 import roomescape.feature.time.dto.response.TimeResponseDto;
-import roomescape.support.DatabaseCleaner;
+import roomescape.support.IntegrationTestBase;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AdminE2eTest {
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-        databaseCleaner.clean();
-    }
+class AdminE2eTest extends IntegrationTestBase {
 
     @Test
     void 삭제한_테마는_활성_목록에서_제외되고_관리자_목록에는_삭제_상태로_남는다() {
