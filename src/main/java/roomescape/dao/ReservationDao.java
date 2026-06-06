@@ -194,6 +194,30 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId).stream().findFirst();
     }
 
+    public Optional<ReservationWaiting> findWaitingWithNumberById(long id) {
+        String sql = """
+                SELECT sub.reservation_id, sub.name, sub.date, sub.created_at, sub.status,
+                       sub.time_id, sub.time_value,
+                       sub.theme_id, sub.theme_name, sub.theme_description, sub.theme_thumbnail,
+                       sub.waiting_order
+                FROM (
+                    SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
+                           t.id AS time_id, t.start_at AS time_value,
+                           th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY r.date, r.theme_id, r.time_id
+                               ORDER BY r.created_at ASC, r.id ASC
+                           ) AS waiting_order
+                    FROM reservation AS r
+                    INNER JOIN reservation_time AS t ON r.time_id = t.id
+                    INNER JOIN theme AS th ON r.theme_id = th.id
+                    WHERE r.status = 'WAITING'
+                ) AS sub
+                WHERE sub.reservation_id = ?
+                """;
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, id).stream().findFirst();
+    }
+
     public void updateStatus(long id, ReservationStatus status) {
         jdbcTemplate.update("UPDATE reservation SET status = ? WHERE id = ?", status.name(), id);
     }

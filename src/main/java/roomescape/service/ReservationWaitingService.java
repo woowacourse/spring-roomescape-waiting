@@ -30,9 +30,10 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public Reservation saveWaiting(String name, LocalDate date, long timeId, long themeId) {
+    public ReservationWaiting saveWaiting(String name, LocalDate date, long timeId, long themeId) {
         if (!reservationService.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            return reservationService.save(name, date, timeId, themeId);
+            Reservation confirmed = reservationService.save(name, date, timeId, themeId);
+            return new ReservationWaiting(confirmed, 0);
         }
         if (reservationService.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
@@ -44,7 +45,9 @@ public class ReservationWaitingService {
         Theme theme = reservationService.getTheme(themeId);
         Reservation waiting = new Reservation(name, date, LocalDateTime.now(clock), time, theme, ReservationStatus.WAITING);
         try {
-            return reservationDao.save(waiting);
+            Reservation saved = reservationDao.save(waiting);
+            return reservationDao.findWaitingWithNumberById(saved.getId())
+                    .orElseThrow(() -> new ReservationConflictException("대기 신청에 실패했습니다."));
         } catch (DuplicateKeyException e) {
             throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
