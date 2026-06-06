@@ -33,26 +33,13 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
-        ReservationTime reservationTime = getTime(command.timeId());
-        Theme theme = getTheme(command.themeId());
-        ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);
+        ReservationSlot slot = createReservationSlot(command);
+        validateWaitingCreatable(command.name(), slot, now);
 
-        validateReservationExists(slot);
-        slot.validateNotPast(now);
-        validateNotReservedBySameUser(command.name(), slot);
-        validateUniqueReservationWaiting(command.name(), slot);
+        ReservationWaiting savedWaiting = saveReservationWaiting(command.name(), now, slot);
+        int order = calculateWaitingOrder(slot, savedWaiting);
 
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot.getDate(), reservationTime, theme);
-        ReservationWaiting savedReservationWaiting;
-        try {
-            savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
-        } catch (DuplicateKeyException exception) {
-            throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
-        }
-
-        ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
-        int order = waitings.orderOf(savedReservationWaiting);
-        return ReservationWaitingResponse.from(savedReservationWaiting, order);
+        return ReservationWaitingResponse.from(savedWaiting, order);
     }
 
     @Transactional
@@ -91,5 +78,40 @@ public class ReservationWaitingService {
         if (reservationDao.existsByNameAndDateAndTimeIdAndThemeId(name, slot)) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
+    }
+
+    private ReservationSlot createReservationSlot(CreateReservationWaitingCommand command) {
+        ReservationTime reservationTime = getTime(command.timeId());
+        Theme theme = getTheme(command.themeId());
+
+        return new ReservationSlot(command.reservationDate(), reservationTime, theme);
+    }
+
+    private void validateWaitingCreatable(String name, ReservationSlot slot, LocalDateTime now) {
+        validateReservationExists(slot);
+        slot.validateNotPast(now);
+        validateNotReservedBySameUser(name, slot);
+        validateUniqueReservationWaiting(name, slot);
+    }
+
+    private ReservationWaiting saveReservationWaiting(String name, LocalDateTime now, ReservationSlot slot) {
+        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(
+                name,
+                now,
+                slot.getDate(),
+                slot.getTime(),
+                slot.getTheme()
+        );
+
+        try {
+            return reservationWaitingDao.insert(reservationWaiting);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
+        }
+    }
+
+    private int calculateWaitingOrder(ReservationSlot slot, ReservationWaiting savedWaiting){
+        ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
+        return waitings.orderOf(savedWaiting);
     }
 }
