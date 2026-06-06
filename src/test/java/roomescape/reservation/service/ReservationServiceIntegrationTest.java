@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
@@ -195,6 +197,7 @@ class ReservationServiceIntegrationTest {
         @Test
         @Transactional(propagation = Propagation.NOT_SUPPORTED)
         @DisplayName("동시에 같은 슬롯을 예약해도 하나만 예약되고 나머지는 대기된다")
+        @Sql(scripts = "classpath:truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
         void 성공1() throws Exception {
             // given
             List<String> names = List.of("user1", "user2", "user3");
@@ -237,7 +240,6 @@ class ReservationServiceIntegrationTest {
                 );
             } finally {
                 executorService.shutdownNow();
-                deleteCommittedTestData();
             }
         }
     }
@@ -256,13 +258,6 @@ class ReservationServiceIntegrationTest {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
-    }
-
-    private void deleteCommittedTestData() {
-        List<String> tableNamesForDelete = List.of("reservation", "reservation_slot", "theme",
-            "reservation_date", "reservation_time");
-        tableNamesForDelete.forEach(
-            deletedTableName -> jdbcTemplate.update("DELETE FROM " + deletedTableName));
     }
 
 }
