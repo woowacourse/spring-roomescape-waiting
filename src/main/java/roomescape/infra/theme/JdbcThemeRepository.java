@@ -8,8 +8,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.theme.ThemeRankResult;
+import roomescape.domain.theme.ThemeRepository;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {
@@ -23,20 +23,20 @@ public class JdbcThemeRepository implements ThemeRepository {
     private static final String FIND_ALL_SQL = "select id, name, content, url from theme order by id";
     private static final String DELETE_BY_ID_SQL = "delete from theme where id = :id";
     private static final String FIND_ALL_WITH_RANK_SQL = """
-        select
-            t.id,
-            t.name,
-            t.content,
-            t.url,
-            rank() over (order by count(r.id) desc) as rank
-        from theme t
-        join reservation_slot rs on rs.theme_id = t.id
-        join reservation r on r.reservation_slot_id = rs.id
-        where rs.date between :startDay and :today
-        group by t.id, t.name, t.content, t.url
-        order by rank, t.id
-        limit :rankLimit
-        """;
+            select
+                t.id,
+                t.name,
+                t.content,
+                t.url,
+                rank() over (order by count(r.id) desc) as rank
+            from theme t
+            join reservation_slot rs on rs.theme_id = t.id
+            join reservation r on r.reservation_slot_id = rs.id
+            where rs.date between :startDay and :today
+            group by t.id, t.name, t.content, t.url
+            order by rank, t.id
+            limit :rankLimit
+            """;
     private static final RowMapper<Theme> THEME_ROW_MAPPER = (rs, rowNum) -> Theme.of(
             rs.getLong(COLUMN_ID),
             rs.getString(COLUMN_NAME),

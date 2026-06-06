@@ -2,7 +2,6 @@ package roomescape.presentation.theme;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.theme.ThemeService;
-import roomescape.presentation.theme.response.AdminThemesResponse;
-import roomescape.presentation.theme.request.CreateThemeRequest;
-import roomescape.presentation.theme.response.CreateThemeResponse;
 import roomescape.common.auth.AdminRequestValidator;
+import roomescape.presentation.theme.request.CreateThemeRequest;
+import roomescape.presentation.theme.response.AdminThemesResponse;
+import roomescape.presentation.theme.response.CreateThemeResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,8 +34,8 @@ public class AdminThemeController {
 
     @PostMapping("/admin/themes")
     public ResponseEntity<CreateThemeResponse> createTheme(
-        @Valid @RequestBody CreateThemeRequest createThemeRequest,
-        HttpServletRequest httpServletRequest
+            @Valid @RequestBody CreateThemeRequest createThemeRequest,
+            HttpServletRequest httpServletRequest
     ) {
         if (validator.isUnauthorized(httpServletRequest)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

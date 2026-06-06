@@ -25,47 +25,49 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String COLUMN_THEME_NAME = "theme_name";
     private static final String COLUMN_THEME_CONTENT = "theme_content";
     private static final String COLUMN_THEME_URL = "theme_url";
+    private static final String PARAM_TIME_ID = "timeId";
+    private static final String PARAM_THEME_ID = "themeId";
     private static final String FIND_ALL_SQL = """
-        select rs.id,
-               rs.date,
-               rt.id as time_id, rt.start_at,
-               th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-        from reservation_slot rs
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        order by rs.date, rt.start_at, rs.id
-        """;
+            select rs.id,
+                   rs.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            order by rs.date, rt.start_at, rs.id
+            """;
     private static final String COUNT_BY_TIME_ID_SQL = """
-        select count(*)
-        from reservation_slot
-        where time_id = :timeId
-        """;
+            select count(*)
+            from reservation_slot
+            where time_id = :timeId
+            """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation_slot where id = :id";
     private static final String COUNT_BY_THEME_ID_SQL = """
-        select count(*)
-        from reservation_slot
-        where theme_id = :themeId
-        """;
+            select count(*)
+            from reservation_slot
+            where theme_id = :themeId
+            """;
     private static final String FIND_BY_SCHEDULE_SQL = """
-        select rs.id,
-               rs.date,
-               rt.id as time_id, rt.start_at,
-               th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-        from reservation_slot rs
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        where rs.time_id = :timeId and rs.date = :date and rs.theme_id = :themeId
-        """;
+            select rs.id,
+                   rs.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.time_id = :timeId and rs.date = :date and rs.theme_id = :themeId
+            """;
     private static final String FIND_BY_ID_SQL = """
-        select rs.id,
-               rs.date,
-               rt.id as time_id, rt.start_at,
-               th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-        from reservation_slot rs
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        where rs.id = :id
-        """;
+            select rs.id,
+                   rs.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.id = :id
+            """;
     private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> ReservationSlot.of(
             rs.getLong(COLUMN_ID),
             rs.getDate(COLUMN_DATE).toLocalDate(),
@@ -111,7 +113,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     public int countByTimeId(Long timeId) {
         Integer count = jdbcTemplate.queryForObject(
                 COUNT_BY_TIME_ID_SQL,
-                new MapSqlParameterSource().addValue(COLUMN_TIME_ID, timeId),
+                new MapSqlParameterSource().addValue(PARAM_TIME_ID, timeId),
                 Integer.class
         );
         if (count == null) {
@@ -123,7 +125,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     public int countByThemeId(Long themeId) {
         Integer count = jdbcTemplate.queryForObject(
                 COUNT_BY_THEME_ID_SQL,
-                new MapSqlParameterSource().addValue(COLUMN_THEME_ID, themeId),
+                new MapSqlParameterSource().addValue(PARAM_THEME_ID, themeId),
                 Integer.class
         );
         if (count == null) {
@@ -147,9 +149,9 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         List<ReservationSlot> result = jdbcTemplate.query(
                 FIND_BY_SCHEDULE_SQL,
                 new MapSqlParameterSource()
-                        .addValue(COLUMN_TIME_ID, timeId)
+                        .addValue(PARAM_TIME_ID, timeId)
                         .addValue(COLUMN_DATE, date)
-                        .addValue(COLUMN_THEME_ID, themeId),
+                        .addValue(PARAM_THEME_ID, themeId),
                 RESERVATION_SLOT_ROW_MAPPER
         );
         return result.stream().findFirst();

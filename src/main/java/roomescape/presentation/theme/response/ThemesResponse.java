@@ -4,7 +4,7 @@ import java.util.List;
 import roomescape.domain.theme.Theme;
 
 public record ThemesResponse(
-    List<ThemeResponse> themes
+        List<ThemeResponse> themes
 ) {
 
     public static ThemesResponse from(List<Theme> themes) {

@@ -34,118 +34,119 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String COLUMN_WAITING_NUMBER = "waiting_number";
     private static final String COLUMN_STATUS = "status";
     private static final String COLUMN_RESERVED_AT = "reserved_at";
+    private static final String GENERATED_KEY_COLUMN = "id";
 
     private static final String FIND_ALL_SQL = """
-        select r.id as user_reservation_id,
-               r.waiting_number,
-               r.status,
-               u.id as user_id,
-               u.name as user_name,
-               rs.id as reservation_slot_id,
-               rs.date,
-               rt.id as time_id,
-               rt.start_at,
-               th.id as theme_id,
-               th.name as theme_name,
-               th.content as theme_content,
-               th.url as theme_url,
-               r.reserved_at
-        from reservation r
-        join users u on r.user_id = u.id
-        join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        order by rs.date desc, rt.start_at desc, r.id;
-        """;
+            select r.id as user_reservation_id,
+                   r.waiting_number,
+                   r.status,
+                   u.id as user_id,
+                   u.name as user_name,
+                   rs.id as reservation_slot_id,
+                   rs.date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   th.id as theme_id,
+                   th.name as theme_name,
+                   th.content as theme_content,
+                   th.url as theme_url,
+                   r.reserved_at
+            from reservation r
+            join users u on r.user_id = u.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            order by rs.date desc, rt.start_at desc, r.id;
+            """;
 
     private static final String FIND_BY_ID_SQL = """
-        select r.id as user_reservation_id,
-               r.waiting_number,
-               r.status,
-               u.id as user_id,
-               u.name as user_name,
-               rs.id as reservation_slot_id,
-               rs.date,
-               rt.id as time_id,
-               rt.start_at,
-               th.id as theme_id,
-               th.name as theme_name,
-               th.content as theme_content,
-               th.url as theme_url,
-               r.reserved_at
-        from reservation r
-        join users u on r.user_id = u.id
-        join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        where r.id = :id
-        """;
+            select r.id as user_reservation_id,
+                   r.waiting_number,
+                   r.status,
+                   u.id as user_id,
+                   u.name as user_name,
+                   rs.id as reservation_slot_id,
+                   rs.date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   th.id as theme_id,
+                   th.name as theme_name,
+                   th.content as theme_content,
+                   th.url as theme_url,
+                   r.reserved_at
+            from reservation r
+            join users u on r.user_id = u.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where r.id = :id
+            """;
 
     private static final String FIND_ALL_BY_USER_ID_SQL = """
-        select r.id as user_reservation_id,
-               r.waiting_number,
-               r.status,
-               u.id as user_id,
-               u.name as user_name,
-               rs.id as reservation_slot_id,
-               rs.date,
-               rt.id as time_id,
-               rt.start_at,
-               th.id as theme_id,
-               th.name as theme_name,
-               th.content as theme_content,
-               th.url as theme_url,
-               r.reserved_at
-        from reservation r
-        join users u on r.user_id = u.id
-        join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        where u.id = :userId
-        order by rs.date desc, rt.start_at desc, r.id;
-        """;
+            select r.id as user_reservation_id,
+                   r.waiting_number,
+                   r.status,
+                   u.id as user_id,
+                   u.name as user_name,
+                   rs.id as reservation_slot_id,
+                   rs.date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   th.id as theme_id,
+                   th.name as theme_name,
+                   th.content as theme_content,
+                   th.url as theme_url,
+                   r.reserved_at
+            from reservation r
+            join users u on r.user_id = u.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where u.id = :userId
+            order by rs.date desc, rt.start_at desc, r.id;
+            """;
 
     private static final String FIND_ALL_BY_SLOT_ID_ORDER_SQL = """
-        select r.id as user_reservation_id,
-               r.waiting_number,
-               r.status,
-               u.id as user_id,
-               u.name as user_name,
-               rs.id as reservation_slot_id,
-               rs.date,
-               rt.id as time_id,
-               rt.start_at,
-               th.id as theme_id,
-               th.name as theme_name,
-               th.content as theme_content,
-               th.url as theme_url,
-               r.reserved_at
-        from reservation r
-        join users u on r.user_id = u.id
-        join reservation_slot rs on r.reservation_slot_id = rs.id
-        join reservation_time rt on rs.time_id = rt.id
-        join theme th on rs.theme_id = th.id
-        where r.reservation_slot_id = :slotId
-        order by r.reserved_at, r.id
-        """;
+            select r.id as user_reservation_id,
+                   r.waiting_number,
+                   r.status,
+                   u.id as user_id,
+                   u.name as user_name,
+                   rs.id as reservation_slot_id,
+                   rs.date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   th.id as theme_id,
+                   th.name as theme_name,
+                   th.content as theme_content,
+                   th.url as theme_url,
+                   r.reserved_at
+            from reservation r
+            join users u on r.user_id = u.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where r.reservation_slot_id = :slotId
+            order by r.reserved_at, r.id
+            """;
 
     private static final String EXISTS_BY_SLOT_ID_AND_USER_ID_SQL = """
-        select exists(
-            select 1
-            from reservation
-            where reservation_slot_id = :slotId
-              and user_id = :userId
-        )
-        """;
+            select exists(
+                select 1
+                from reservation
+                where reservation_slot_id = :slotId
+                  and user_id = :userId
+            )
+            """;
     private static final String UPDATE_SQL = """
-        update reservation
-        set reservation_slot_id = :slotId,
-            user_id = :userId,
-            waiting_number = :waitingNumber,
-            status = :status,
-            reserved_at = :reservedAt
-        where id = :id
-        """;
+            update reservation
+            set reservation_slot_id = :slotId,
+                user_id = :userId,
+                waiting_number = :waitingNumber,
+                status = :status,
+                reserved_at = :reservedAt
+            where id = :id
+            """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = :id";
     private static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (rs, rowNum) -> Reservation.of(
             rs.getLong(COLUMN_ID),
@@ -179,7 +180,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("reservation")
-                .usingGeneratedKeyColumns(COLUMN_ID);
+                .usingGeneratedKeyColumns(GENERATED_KEY_COLUMN);
     }
 
     @Override
