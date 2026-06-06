@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import roomescape.dao.PromotionOutboxDao;
 import roomescape.domain.OutboxStatus;
 import roomescape.domain.PromotionTask;
-import roomescape.service.WaitingService;
+import roomescape.service.PromotionService;
 
 /**
  * 아웃박스 워커. 이벤트 기반(push)이 아니라 시간 기반(polling)으로,
@@ -20,11 +20,11 @@ public class PromotionOutboxWorker {
     private static final Logger log = LoggerFactory.getLogger(PromotionOutboxWorker.class);
 
     private final PromotionOutboxDao promotionOutboxDao;
-    private final WaitingService waitingService;
+    private final PromotionService promotionService;
 
-    public PromotionOutboxWorker(PromotionOutboxDao promotionOutboxDao, WaitingService waitingService) {
+    public PromotionOutboxWorker(PromotionOutboxDao promotionOutboxDao, PromotionService promotionService) {
         this.promotionOutboxDao = promotionOutboxDao;
-        this.waitingService = waitingService;
+        this.promotionService = promotionService;
     }
 
     @Scheduled(fixedDelayString = "${promotion.poll-interval-ms:5000}")
@@ -36,7 +36,7 @@ public class PromotionOutboxWorker {
 
     private void process(PromotionTask task) {
         try {
-            waitingService.promotePendingSlot(
+            promotionService.promotePendingSlot(
                     task.getThemeId(), task.getTimeId(), task.getDate(), task.getStoreId());
             promotionOutboxDao.markDone(task.getId());
         } catch (RuntimeException e) {

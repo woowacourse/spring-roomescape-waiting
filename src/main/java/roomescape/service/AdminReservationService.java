@@ -10,6 +10,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Time;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
@@ -21,20 +22,20 @@ public class AdminReservationService {
     private final ReservationDao reservationDao;
     private final MemberDao memberDao;
     private final TimeDao timeDao;
-    private final WaitingService waitingService;
+    private final PromotionService promotionService;
     private final ReservationCreator reservationCreator;
 
     public AdminReservationService(
             ReservationDao reservationDao,
             MemberDao memberDao,
             TimeDao timeDao,
-            WaitingService waitingService,
+            PromotionService promotionService,
             ReservationCreator reservationCreator
     ) {
         this.reservationDao = reservationDao;
         this.memberDao = memberDao;
         this.timeDao = timeDao;
-        this.waitingService = waitingService;
+        this.promotionService = promotionService;
         this.reservationCreator = reservationCreator;
     }
 
@@ -67,18 +68,20 @@ public class AdminReservationService {
 
     public Reservation update(Long id, ReservationPatchDto request) {
         Reservation reservation = findById(id);
+        Slot vacatedSlot = reservation.getSlot();
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time, LocalDateTime.now());
-        waitingService.enqueuePromotion(reservation.getSlot());
-        return reservationDao.update(reservation);
+        Reservation updated = reservationDao.update(reservation);
+        promotionService.enqueuePromotion(vacatedSlot);
+        return updated;
     }
 
     public void cancelByAdmin(Long id) {
         Reservation reservation = findById(id);
         reservation.cancelByAdmin(LocalDateTime.now());
         reservationDao.update(reservation);
-        waitingService.enqueuePromotion(reservation.getSlot());
+        promotionService.enqueuePromotion(reservation.getSlot());
     }
 
     public void delete(Long id) {

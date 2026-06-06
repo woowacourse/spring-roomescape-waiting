@@ -45,7 +45,7 @@ import roomescape.dto.request.ReservationRequestDto;
 @JdbcTest
 @Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, WaitingService.class,
         ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class,
-        WaitingJdbcDao.class, PromotionOutboxJdbcDao.class})
+        WaitingJdbcDao.class, PromotionOutboxJdbcDao.class, PromotionService.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
 

@@ -48,7 +48,7 @@ import roomescape.worker.PromotionOutboxWorker;
 @JdbcTest
 @Import({AdminReservationService.class, ReservationCreator.class, WaitingService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
         ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class,
-        PromotionOutboxWorker.class})
+        PromotionOutboxWorker.class, PromotionService.class})
 @ActiveProfiles("test")
 class AdminReservationServiceTest {
 
@@ -202,6 +202,23 @@ class AdminReservationServiceTest {
 
             assertThat(updated.getDate()).isEqualTo(newDate);
             assertThat(updated.getTime()).isEqualTo(savedTime2);
+        }
+
+        @Test
+        @DisplayName("예약을 다른 슬롯으로 수정하면 비워진 원래 슬롯의 대기자가 승격된다")
+        void promotesWaiterOnVacatedSlotAfterUpdate() {
+            Reservation saved = adminReservationService.createByAdmin(requestDto1);
+            Member waiter = saveMember("대기자", "waiter-update@test.com");
+            waitingService.create(
+                    new WaitingRequestDto(requestDto1.date(), savedTime1.getId(), savedTheme1.getId(), storeId),
+                    waiter);
+
+            // 예약을 다른 슬롯으로 옮겨 원래 슬롯을 비운다.
+            adminReservationService.update(saved.getId(),
+                    new ReservationPatchDto(LocalDate.now().plusDays(5), savedTime2.getId()));
+            promotionOutboxWorker.processPendingTasks();
+
+            assertThat(reservationDao.findAllByMemberId(waiter.getId())).hasSize(1);
         }
 
         @Test
