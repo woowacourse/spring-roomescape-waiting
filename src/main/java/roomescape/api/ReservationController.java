@@ -47,7 +47,8 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationWithStatusResponse> reserve(@Valid @RequestBody ReservationRequest request) {
-        ReservationWithStatusResponse response = ReservationWithStatusResponse.from(reservationService.applyReservation(request));
+        ReservationWithStatusResponse response = ReservationWithStatusResponse.from(
+                reservationService.applyReservation(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

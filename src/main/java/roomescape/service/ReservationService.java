@@ -5,7 +5,6 @@ import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -20,6 +19,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
+import roomescape.repository.exception.ReservationSlotAlreadyOccupiedException;
 
 @Service
 @Transactional(readOnly = true)
@@ -70,12 +70,16 @@ public class ReservationService {
         try {
             Reservation saved = getReservation(reservationRepository.save(reservation));
             return ReservationWithStatus.reserved(saved);
-        } catch (DuplicateKeyException e) {
-            Long savedId = waitlistRepository.save(reservation);
-            Waitlist waitlist = getWaitlist(savedId);
-            int waitOrder = waitlistRepository.countBefore(waitlist) + 1;
-            return ReservationWithStatus.waiting(waitlist, waitOrder);
+        } catch (ReservationSlotAlreadyOccupiedException e) {
+            return registerWaitlist(reservation);
         }
+    }
+
+    private ReservationWithStatus registerWaitlist(Reservation reservation) {
+        Long savedId = waitlistRepository.save(reservation);
+        Waitlist waitlist = getWaitlist(savedId);
+        int waitOrder = waitlistRepository.countBefore(waitlist) + 1;
+        return ReservationWithStatus.waiting(waitlist, waitOrder);
     }
 
     private void verifyNoDuplicateReservation(Reservation reservation) {

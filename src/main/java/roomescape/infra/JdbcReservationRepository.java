@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,6 +19,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.exception.ReservationSlotAlreadyOccupiedException;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -213,6 +215,17 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Long save(Reservation reservation) {
+        try {
+            return insert(reservation);
+        } catch (DuplicateKeyException e) {
+            if (isReservationSlotUniqueViolation(e)) {
+                throw new ReservationSlotAlreadyOccupiedException(e);
+            }
+            throw e;
+        }
+    }
+
+    public Long insert(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -226,6 +239,12 @@ public class JdbcReservationRepository implements ReservationRepository {
         }, keyHolder);
 
         return keyHolder.getKey().longValue();
+    }
+
+    private boolean isReservationSlotUniqueViolation(DuplicateKeyException e) {
+        String message = e.getMostSpecificCause().getMessage();
+
+        return message != null && message.contains("UK_RESERVATION_SLOT");
     }
 
     @Override
