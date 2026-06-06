@@ -54,10 +54,10 @@ public class ReservationWaitingRepository {
             return List.of();
         }
 
-        List<String> conditions = new ArrayList<>();
+        List<String> tuples = new ArrayList<>();
         List<Object> params = new ArrayList<>();
         for (ReservationWaiting waiting : waitings) {
-            conditions.add("(date = ? AND time_id = ? AND theme_id = ?)");
+            tuples.add("(?, ?, ?)");
             params.add(waiting.getDate());
             params.add(waiting.getTime().getId());
             params.add(waiting.getTheme().getId());
@@ -66,9 +66,9 @@ public class ReservationWaitingRepository {
         String sql = """
                 SELECT id, date, time_id, theme_id, created_at
                 FROM reservation_waiting
-                WHERE %s
+                WHERE (date, time_id, theme_id) IN (%s)
                 ORDER BY date, time_id, theme_id, created_at, id;
-                """.formatted(String.join(" OR ", conditions));
+                """.formatted(String.join(", ", tuples));
 
         return jdbcTemplate.query(sql, waitingOrderResultRowMapper, params.toArray());
     }
