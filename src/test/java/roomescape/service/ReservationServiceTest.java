@@ -236,7 +236,7 @@ class ReservationServiceTest {
                 theme
         ));
 
-        reservationService.cancelMyReservation(reservation.getId(), canceledReservationName);
+        reservationService.cancelMyReservationAndPromoteWaitlist(reservation.getId(), canceledReservationName);
 
         assertThatRoomEscapeExceptionCode(
                 () -> reservationService.getReservation(reservation.getId()),
@@ -257,7 +257,7 @@ class ReservationServiceTest {
     @Test
     void 사용자_예약을_취소할_때_존재하지_않는_예약이면_예외() {
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.cancelMyReservation(1L, "브라운"),
+                () -> reservationService.cancelMyReservationAndPromoteWaitlist(1L, "브라운"),
                 RESERVATION_NOT_FOUND
         );
     }
@@ -275,7 +275,7 @@ class ReservationServiceTest {
 
         assertThat(dateTime.isBefore(LocalDateTime.now())).isTrue();
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.cancelMyReservation(pastReservation.getId(), name),
+                () -> reservationService.cancelMyReservationAndPromoteWaitlist(pastReservation.getId(), name),
                 PAST_RESERVATION
         );
     }
@@ -314,7 +314,8 @@ class ReservationServiceTest {
                 updateTime.getId()
         );
 
-        reservationService.updateReservation(originalReservation.getId(), originalReservationName, updateRequest);
+        reservationService.updateMyReservationAndPromoteWaitlist(originalReservation.getId(), originalReservationName,
+                updateRequest);
 
         assertThat(reservationService.getReservations())
                 .extracting(
@@ -347,7 +348,7 @@ class ReservationServiceTest {
         );
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.updateReservation(1L, "브라운", updateRequest),
+                () -> reservationService.updateMyReservationAndPromoteWaitlist(1L, "브라운", updateRequest),
                 RESERVATION_NOT_FOUND
         );
     }
@@ -371,7 +372,8 @@ class ReservationServiceTest {
         );
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.updateReservation(reservation.getId(), name, updateRequest),
+                () -> reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name,
+                        updateRequest),
                 RESERVATION_TIME_NOT_FOUND
         );
     }
@@ -405,7 +407,8 @@ class ReservationServiceTest {
         );
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.updateReservation(reservation.getId(), name, updateRequest),
+                () -> reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name,
+                        updateRequest),
                 DUPLICATE_RESERVATION
         );
     }

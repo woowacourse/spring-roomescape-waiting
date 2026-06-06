@@ -66,7 +66,7 @@ public class ReservationServiceTransactionTest {
         failPromotion.set(true);
 
         assertThatThrownBy(() ->
-                reservationService.cancelMyReservation(reservation.getId(), name))
+                reservationService.cancelMyReservationAndPromoteWaitlist(reservation.getId(), name))
                 .isInstanceOf(RuntimeException.class);
         assertThat(reservationService.getReservation(reservation.getId()).getName())
                 .isEqualTo(name);
@@ -107,7 +107,7 @@ public class ReservationServiceTransactionTest {
                 updateTime.getId()
         );
         assertThatThrownBy(() ->
-                reservationService.updateReservation(reservation.getId(), name, updateRequest))
+                reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name, updateRequest))
                 .isInstanceOf(RuntimeException.class);
         assertThat(reservationService.getReservation(reservation.getId()).getName())
                 .isEqualTo(name);

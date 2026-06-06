@@ -60,7 +60,7 @@ public class ReservationController {
 
     @DeleteMapping(value = "/{id}", params = "name")
     public ResponseEntity<Void> cancelMyReservation(@PathVariable Long id, @RequestParam String name) {
-        reservationService.cancelMyReservation(id, name);
+        reservationService.cancelMyReservationAndPromoteWaitlist(id, name);
         return ResponseEntity.noContent().build();
     }
 
@@ -68,7 +68,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id, @RequestParam String name,
                                                       @Valid @RequestBody ReservationUpdateRequest request) {
         ReservationResponse response = ReservationResponse.from(
-                reservationService.updateReservation(id, name, request));
+                reservationService.updateMyReservationAndPromoteWaitlist(id, name, request));
         return ResponseEntity.ok().body(response);
     }
 }

@@ -117,7 +117,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelMyReservation(Long id, String name) {
+    public void cancelMyReservationAndPromoteWaitlist(Long id, String name) {
         Reservation reservation = getReservation(id);
         reservation.verifyCancelableBy(name, LocalDateTime.now());
         reservationRepository.deleteById(id);
@@ -134,7 +134,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation updateReservation(Long id, String name, ReservationUpdateRequest request) {
+    public Reservation updateMyReservationAndPromoteWaitlist(Long id, String name, ReservationUpdateRequest request) {
         Reservation original = getReservation(id);
         Reservation updated = original.changeBy(
                 name,
