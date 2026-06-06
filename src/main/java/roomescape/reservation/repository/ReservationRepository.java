@@ -1,11 +1,9 @@
 package roomescape.reservation.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
+import roomescape.reservation.dto.WaitingRank;
 
 public interface ReservationRepository {
 
@@ -15,17 +13,19 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findByName(String name);
-
-    Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
-    Reservation update(Long id, LocalDate date, ReservationTime time);
-
     void delete(Long id);
 
-    boolean existByTimeId(Long timeId);
+    boolean existsConfirmedBySlotId(Long slotId);
 
-    boolean existByThemeId(Long themeId);
+    Optional<Reservation> findFirstWaitingBySlotId(Long slotId);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Reservation updateStatus(Reservation reservation);
+
+    List<Reservation> findConfirmedByName(String name);
+
+    List<WaitingRank> findWaitingRanksByName(String name);
+
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByThemeId(Long themeId);
 }

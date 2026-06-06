@@ -2,14 +2,14 @@ package roomescape.reservationtime.dto;
 
 import roomescape.reservationtime.domain.ReservationTime;
 
-public record ReservationTimeResponseDTO(
+public record ReservationTimeResponse(
         Long id,
         String startAt
 
 ) {
 
-    public static ReservationTimeResponseDTO from(ReservationTime reservationTime) {
-        return new ReservationTimeResponseDTO(
+    public static ReservationTimeResponse from(ReservationTime reservationTime) {
+        return new ReservationTimeResponse(
                 reservationTime.getId(),
                 reservationTime.getStartAt().toString()
         );

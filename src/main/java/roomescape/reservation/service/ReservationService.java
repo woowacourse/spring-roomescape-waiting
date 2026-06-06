@@ -4,150 +4,125 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationRequestDTO;
-import roomescape.reservation.dto.ReservationResponseDTO;
-import roomescape.reservation.dto.ReservationUpdateRequest;
-import roomescape.reservation.dto.UserBookingResponseDTO;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Slot;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.UserReservationResponse;
+import roomescape.reservation.dto.UserReservationsResponse;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.SlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.dto.ReservedTimeResponseDTO;
+import roomescape.reservationtime.dto.ReservedTimeResponse;
 import roomescape.reservationtime.exception.ReservationTimeErrorCode;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.waiting.dto.WaitingResponseDTO;
-import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
 
     private final Clock clock;
+    private final SlotRepository slotRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final WaitingRepository waitingRepository;
 
-    public ReservationService(Clock clock, ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              WaitingRepository waitingRepository) {
+    public ReservationService(Clock clock, SlotRepository slotRepository,
+                              ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository) {
         this.clock = clock;
+        this.slotRepository = slotRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
-    public ReservationResponseDTO addReservation(ReservationRequestDTO reservationRequestDTO) {
-        ReservationTime time = reservationTimeRepository.findById(reservationRequestDTO.timeId())
-                .orElseThrow(() -> new RoomEscapeException(
-                        ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
-        Theme theme = themeRepository.findById(reservationRequestDTO.themeId())
+    public ReservationResponse reserve(ReservationRequest request) {
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
+        Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
 
-        LocalDate date = reservationRequestDTO.date();
+        Slot slot = slotRepository.findOrCreate(request.date(), time, theme);
+        LocalDateTime now = LocalDateTime.now(clock);
+        if (slot.isPast(now)) {
+            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
+        }
 
-        validateDuplicateReservation(date, time, theme);
-
-        Reservation reservation = Reservation.create(reservationRequestDTO.name(),
-                date, time, theme);
-        reservation.validateNotPastTime(LocalDateTime.now(clock));
-
-        Reservation savedReservation = reservationRepository.save(reservation);
-
-        return ReservationResponseDTO.from(savedReservation);
-    }
-
-    private void validateDuplicateReservation(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
+        slotRepository.lockForUpdate(slot.getId());
+        ReservationStatus status = determineStatus(slot.getId());
+        try {
+            Reservation newReservation = Reservation.create(slot, request.name(), status, now);
+            Reservation savedReservation = reservationRepository.save(newReservation);
+            return ReservationResponse.from(savedReservation);
+        } catch (DuplicateKeyException duplicate) {
             throw new RoomEscapeException(ReservationErrorCode.RESERVATION_DUPLICATE);
         }
     }
 
-    @Transactional(readOnly = true)
-    public ReservationResponseDTO readReservationById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(
-                        () -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
-        return ReservationResponseDTO.from(reservation);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationResponseDTO> findReservationsByName(String name) {
-        return reservationRepository.findByName(name)
-                .stream()
-                .map(ReservationResponseDTO::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public UserBookingResponseDTO findReservationsAndWaitingByName(String name) {
-        List<ReservationResponseDTO> reservatoins = reservationRepository.findByName(name).stream()
-                .map(ReservationResponseDTO::from)
-                .toList();
-        List<WaitingResponseDTO> waitings = waitingRepository.findByName(name).stream()
-                .map(WaitingResponseDTO::from)
-                .toList();
-
-        return UserBookingResponseDTO.of(reservatoins, waitings);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationResponseDTO> readAllReservation() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponseDTO::from)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservedTimeResponseDTO> findReservedTimes(LocalDate targetDate,
-                                                           Long targetThemeId) {
-        return reservationTimeRepository.findReservedTimes(targetDate, targetThemeId)
-                .stream()
-                .map(ReservedTimeResponseDTO::from)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public ReservationResponseDTO updateReservation(Long id, ReservationUpdateRequest request) {
-        Reservation reservation = reservationRepository.findById(id).orElseThrow(
-                () -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND)
-        );
-        LocalDateTime now = LocalDateTime.now(clock);
-        reservation.validateNotPastTime(now);
-
-        ReservationTime time = reservationTimeRepository.findById(request.timeId()).orElseThrow(
-                () -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND)
-        );
-
-        validateUpdateAvailableTime(request.date(), time, now);
-        validateDuplicateReservation(request.date(), time, reservation.getTheme());
-
-        return ReservationResponseDTO.from(reservationRepository.update(id, request.date(), time));
-    }
-
-    private void validateUpdateAvailableTime(LocalDate date, ReservationTime time,
-                                             LocalDateTime now) {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
+    private ReservationStatus determineStatus(Long slotId) {
+        if (reservationRepository.existsConfirmedBySlotId(slotId)) {
+            return ReservationStatus.WAITING;
         }
+        return ReservationStatus.CONFIRMED;
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationResponse readById(Long id) {
+        return ReservationResponse.from(reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> readAll() {
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserReservationsResponse findUserReservations(String name) {
+        List<UserReservationResponse> reservations = reservationRepository.findConfirmedByName(name).stream()
+                .map(UserReservationResponse::confirmed)
+                .toList();
+        List<UserReservationResponse> waitings = reservationRepository.findWaitingRanksByName(name).stream()
+                .map(UserReservationResponse::waiting)
+                .toList();
+        return UserReservationsResponse.of(reservations, waitings);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservedTimeResponse> findReservedTimes(LocalDate targetDate, Long targetThemeId) {
+        return reservationTimeRepository.findReservedTimes(targetDate, targetThemeId).stream()
+                .map(ReservedTimeResponse::from)
+                .toList();
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
+    public void cancel(Long id) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(
-                        ReservationErrorCode.RESERVATION_NOT_FOUND)
-                );
-        reservation.validateNotPastTime(LocalDateTime.now(clock));
-        // TODO: 내 예약이 아니면 예외(관리자 모드 제외)
+                .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+        reservation.validateNotPast(LocalDateTime.now(clock));
+
+        slotRepository.lockForUpdate(reservation.getSlotId());
+        boolean wasConfirmed = reservation.isConfirmed();
         reservationRepository.delete(id);
+
+        if (wasConfirmed) {
+            reservationRepository.findFirstWaitingBySlotId(reservation.getSlotId())
+                    .ifPresent(waiting ->
+                            reservationRepository.updateStatus(waiting.confirm())
+                    );
+        }
     }
 }

@@ -3,6 +3,7 @@ package roomescape.reservationtime.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.config.TestTimeConfig;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Slot;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.SlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.dto.ReservationTimeRequestDTO;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.exception.ReservationTimeErrorCode;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -33,11 +37,13 @@ class ReservationTimeServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private SlotRepository slotRepository;
 
     @Test
     void 중복된_예약시간을_추가하면_예외가_발생한다() {
         // given
-        ReservationTimeRequestDTO request = new ReservationTimeRequestDTO(
+        ReservationTimeRequest request = new ReservationTimeRequest(
                 LocalTime.parse("10:00")
         );
 
@@ -59,8 +65,9 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(
                 Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png")
         );
+        Slot slot = slotRepository.findOrCreate(LocalDate.parse("2026-08-05"), time, theme);
         reservationRepository.save(
-                Reservation.create("브라운", LocalDate.parse("2026-08-05"), time, theme)
+                Reservation.create(slot, "브라운", ReservationStatus.CONFIRMED, LocalDateTime.now())
         );
 
         // when & then

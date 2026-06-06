@@ -1,14 +1,13 @@
 package roomescape.reservationtime.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.dto.ReservationTimeRequestDTO;
-import roomescape.reservationtime.dto.ReservationTimeResponseDTO;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
+import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.exception.ReservationTimeErrorCode;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
@@ -25,14 +24,14 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTimeResponseDTO addReservationTime(
-            ReservationTimeRequestDTO reservationTimeRequest) {
+    public ReservationTimeResponse addReservationTime(
+            ReservationTimeRequest reservationTimeRequest) {
         ReservationTime reservationTime = ReservationTime.create(reservationTimeRequest.startAt());
 
         validateDuplicateReservationTime(reservationTime);
         ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
 
-        return ReservationTimeResponseDTO.from(savedTime);
+        return ReservationTimeResponse.from(savedTime);
     }
 
     private void validateDuplicateReservationTime(ReservationTime reservationTime) {
@@ -42,9 +41,9 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTimeResponseDTO> findAllReservationTime() {
-        return reservationTimeRepository.findAll().stream().map(ReservationTimeResponseDTO::from)
-                .collect(Collectors.toList());
+    public List<ReservationTimeResponse> findAllReservationTime() {
+        return reservationTimeRepository.findAll().stream().map(ReservationTimeResponse::from)
+                .toList();
     }
 
     @Transactional
@@ -61,7 +60,7 @@ public class ReservationTimeService {
     }
 
     private void validateRemovableReservationTime(Long id) {
-        if (reservationRepository.existByTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_EXIST_ON_TIME);
         }
     }

@@ -2,7 +2,7 @@ package roomescape.theme.dto;
 
 import roomescape.theme.domain.Theme;
 
-public record ThemeResponseDTO(
+public record ThemeResponse(
         Long id,
         String name,
         String description,
@@ -10,8 +10,8 @@ public record ThemeResponseDTO(
         Long runningTime
 ) {
 
-    public static ThemeResponseDTO from(Theme theme) {
-        return new ThemeResponseDTO(
+    public static ThemeResponse from(Theme theme) {
+        return new ThemeResponse(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),

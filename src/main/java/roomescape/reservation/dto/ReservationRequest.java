@@ -1,4 +1,4 @@
-package roomescape.waiting.dto;
+package roomescape.reservation.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
-public record WaitingRequestDTO(
+public record ReservationRequest(
         @NotBlank(message = "이름은 비어 있을 수 없습니다.")
         String name,
 

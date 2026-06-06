@@ -3,13 +3,11 @@ package roomescape.reservationtime.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -17,6 +15,9 @@ import roomescape.reservationtime.domain.ReservedTime;
 
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
+
+    private static final RowMapper<ReservationTime> TIME_ROW_MAPPER = timeRowMapper();
+    private static final RowMapper<ReservedTime> RESERVED_TIME_ROW_MAPPER = reservedTimeRowMapper();
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -28,11 +29,28 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 .usingGeneratedKeyColumns("id");
     }
 
+    private static RowMapper<ReservationTime> timeRowMapper() {
+        return (resultSet, rowNum) -> ReservationTime.of(
+                resultSet.getLong("id"),
+                resultSet.getTime("start_at").toLocalTime()
+        );
+    }
+
+    private static RowMapper<ReservedTime> reservedTimeRowMapper() {
+        return (resultSet, rowNum) -> new ReservedTime(
+                ReservationTime.of(
+                        resultSet.getLong("reservation_time_id"),
+                        resultSet.getTime("start_at").toLocalTime()
+                ),
+                resultSet.getObject("reservation_id", Long.class) != null
+        );
+    }
+
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
-        long generatedKey = simpleJdbcInsert.executeAndReturnKey(
-                new BeanPropertySqlParameterSource(reservationTime)
-        ).longValue();
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("start_at", reservationTime.getStartAt());
+        long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
         return ReservationTime.of(
                 generatedKey,
@@ -49,18 +67,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                     WHERE id = :id
                 """;
 
-        Map<String, Object> params = Map.of("id", id);
-
         List<ReservationTime> results = jdbcTemplate.query(
                 sql,
-                params,
-                (resultSet, rowNum) -> ReservationTime.of(
-                        resultSet.getLong("id"),
-                        LocalTime.parse(resultSet.getString("start_at"))
-                )
+                new MapSqlParameterSource("id", id),
+                TIME_ROW_MAPPER
         );
-        return results.stream()
-                .findFirst();
+        return results.stream().findFirst();
     }
 
     @Override
@@ -71,13 +83,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                     FROM reservation_time
                 """;
 
-        return jdbcTemplate.query(
-                sql,
-                (resultSet, rowNum) -> ReservationTime.of(
-                        resultSet.getLong("id"),
-                        LocalTime.parse(resultSet.getString("start_at"))
-                )
-        );
+        return jdbcTemplate.query(sql, TIME_ROW_MAPPER);
     }
 
     @Override
@@ -87,27 +93,20 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                            rt.start_at AS start_at,
                            r.id AS reservation_id
                     FROM reservation_time AS rt
+                    LEFT JOIN slot AS s
+                      ON s.time_id = rt.id
+                      AND s.date = :date
+                      AND s.theme_id = :theme_id
                     LEFT JOIN reservation AS r
-                      ON rt.id = r.time_id
-                      AND r.date = :date
-                      AND r.theme_id = :theme_id
+                      ON r.slot_id = s.id
+                      AND r.status = 'CONFIRMED'
                 """;
 
-        SqlParameterSource params = new MapSqlParameterSource()
+        MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("theme_id", themeId);
 
-        return jdbcTemplate.query(
-                sql,
-                params,
-                (resultSet, rowNum) -> new ReservedTime(
-                        ReservationTime.of(
-                                resultSet.getLong("reservation_time_id"),
-                                LocalTime.parse(resultSet.getString("start_at"))
-                        ),
-                        resultSet.getObject("reservation_id", Long.class) != null
-                )
-        );
+        return jdbcTemplate.query(sql, params, RESERVED_TIME_ROW_MAPPER);
     }
 
     @Override
@@ -116,8 +115,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                     DELETE FROM reservation_time
                     WHERE id = :id
                 """;
-        Map<String, Object> params = Map.of("id", id);
-        jdbcTemplate.update(sql, params);
+        jdbcTemplate.update(sql, new MapSqlParameterSource("id", id));
     }
 
     @Override
@@ -129,9 +127,8 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                       WHERE start_at = :start_at
                     )
                 """;
-        Map<String, Object> params = Map.of("start_at", startAt);
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, params, Boolean.class)
+                jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("start_at", startAt), Boolean.class)
         );
     }
 }

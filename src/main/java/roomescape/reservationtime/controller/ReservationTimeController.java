@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservationtime.dto.ReservationTimeResponseDTO;
+import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.service.ReservationTimeService;
 
 @RestController
@@ -19,7 +19,7 @@ public class ReservationTimeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeResponseDTO>> readReservationTime() {
+    public ResponseEntity<List<ReservationTimeResponse>> readReservationTime() {
         return ResponseEntity.ok(reservationTimeService.findAllReservationTime());
     }
 

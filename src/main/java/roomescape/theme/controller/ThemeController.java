@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.theme.dto.ThemeResponseDTO;
+import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -23,19 +23,19 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponseDTO>> readThemes() {
+    public ResponseEntity<List<ThemeResponse>> readThemes() {
         return ResponseEntity.ok(themeService.findAllThemes());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ThemeResponseDTO> findById(
+    public ResponseEntity<ThemeResponse> findById(
             @PathVariable @Positive(message = "테마 아이디는 1 이상이어야 합니다.") Long id) {
         return ResponseEntity.ok(themeService.findById(id));
     }
 
     @GetMapping("/popular-themes")
-    public ResponseEntity<List<ThemeResponseDTO>> getPopularThemes() {
-        List<ThemeResponseDTO> popularThemes = themeService.getPopularThemes(1L, 10L);
+    public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
+        List<ThemeResponse> popularThemes = themeService.getPopularThemes(1L, 10L);
         return ResponseEntity.ok(popularThemes);
     }
 }

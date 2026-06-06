@@ -1,40 +1,38 @@
 package roomescape.reservation.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 public class Reservation {
 
     private static final long NAME_MAX_LENGTH = 20L;
+
     private final Long id;
+    private final Slot slot;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationStatus status;
+    private final LocalDateTime createdAt;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, Slot slot, String name, ReservationStatus status, LocalDateTime createdAt) {
+        validateSlot(slot);
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+        validateStatus(status);
+        validateCreatedAt(createdAt);
         this.id = id;
+        this.slot = slot;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.status = status;
+        this.createdAt = createdAt;
     }
 
-    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, name, date, time, theme);
+    public static Reservation create(Slot slot, String name, ReservationStatus status, LocalDateTime createdAt) {
+        return new Reservation(null, slot, name, status, createdAt);
     }
 
-    public static Reservation of(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public static Reservation of(Long id, Slot slot, String name, ReservationStatus status, LocalDateTime createdAt) {
         validateId(id);
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(id, slot, name, status, createdAt);
     }
 
     private static void validateId(Long id) {
@@ -46,36 +44,49 @@ public class Reservation {
         }
     }
 
+    private static void validateSlot(Slot slot) {
+        if (slot == null) {
+            throw new IllegalStateException("슬롯은 필수값입니다.");
+        }
+    }
+
     private static void validateName(String name) {
         if (name == null || name.isBlank() || name.length() > NAME_MAX_LENGTH) {
             throw new RoomEscapeException(ReservationErrorCode.INVALID_NAME);
         }
     }
 
-    private static void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_DATE);
+    private static void validateStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalStateException("예약 상태는 필수값입니다.");
         }
     }
 
-    private static void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_TIME);
+    private static void validateCreatedAt(LocalDateTime createdAt) {
+        if (createdAt == null) {
+            throw new IllegalStateException("생성 시각은 필수값입니다.");
         }
     }
 
-    private static void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_THEME);
+    public Reservation confirm() {
+        if (!status.isWaiting()) {
+            throw new IllegalStateException("대기 상태에서만 확정으로 전환할 수 있습니다. (현재: " + status + ")");
         }
+        return new Reservation(id, slot, name, ReservationStatus.CONFIRMED, createdAt);
     }
 
-    public void validateNotPastTime(LocalDateTime now) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-
-        if (reservationDateTime.isBefore(now)) {
+    public void validateNotPast(LocalDateTime now) {
+        if (slot.isPast(now)) {
             throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
         }
+    }
+
+    public boolean isConfirmed() {
+        return status.isConfirmed();
+    }
+
+    public boolean isWaiting() {
+        return status.isWaiting();
     }
 
     public boolean isSameName(String otherName) {
@@ -86,38 +97,23 @@ public class Reservation {
         return id;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
+    public Long getSlotId() {
+        return slot.getId();
+    }
+
     public String getName() {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public ReservationStatus getStatus() {
+        return status;
     }
 
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    @Override
-    public String toString() {
-        return "Reservation{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
-                '}';
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

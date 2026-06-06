@@ -3,14 +3,13 @@ package roomescape.theme.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.ThemeRequestDTO;
-import roomescape.theme.dto.ThemeResponseDTO;
+import roomescape.theme.dto.ThemeRequest;
+import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -30,11 +29,11 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponseDTO addTheme(ThemeRequestDTO request) {
+    public ThemeResponse addTheme(ThemeRequest request) {
         Theme theme = Theme.create(request.name(), request.description(), request.imageUrl());
         validateDuplicateTheme(theme);
         Theme savedTheme = themeRepository.save(theme);
-        return ThemeResponseDTO.from(savedTheme);
+        return ThemeResponse.from(savedTheme);
     }
 
     private void validateDuplicateTheme(Theme theme) {
@@ -44,23 +43,23 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public ThemeResponseDTO findById(Long id) {
+    public ThemeResponse findById(Long id) {
         Theme result = themeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
-        return ThemeResponseDTO.from(result);
+        return ThemeResponse.from(result);
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponseDTO> findAllThemes() {
-        return themeRepository.findAll().stream().map(ThemeResponseDTO::from)
-                .collect(Collectors.toList());
+    public List<ThemeResponse> findAllThemes() {
+        return themeRepository.findAll().stream().map(ThemeResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponseDTO> getPopularThemes(Long weeks, Long limit) {
+    public List<ThemeResponse> getPopularThemes(Long weeks, Long limit) {
         LocalDate now = LocalDate.now(clock);
         return themeRepository.findPopularThemes(now.minusWeeks(weeks),
-                now, limit).stream().map(ThemeResponseDTO::from).toList();
+                now, limit).stream().map(ThemeResponse::from).toList();
     }
 
     @Transactional
@@ -77,7 +76,7 @@ public class ThemeService {
     }
 
     private void validateRemovableTheme(Long id) {
-        if (reservationRepository.existByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new RoomEscapeException(ThemeErrorCode.RESERVATION_EXIST_ON_THEME);
         }
     }

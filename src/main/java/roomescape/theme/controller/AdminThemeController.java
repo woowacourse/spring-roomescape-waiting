@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.theme.dto.ThemeRequestDTO;
-import roomescape.theme.dto.ThemeResponseDTO;
+import roomescape.theme.dto.ThemeRequest;
+import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -28,8 +28,8 @@ public class AdminThemeController {
 
     @PostMapping("/themes")
     public ResponseEntity<Void> add(
-            @Valid @RequestBody ThemeRequestDTO request) {
-        ThemeResponseDTO saved = themeService.addTheme(request);
+            @Valid @RequestBody ThemeRequest request) {
+        ThemeResponse saved = themeService.addTheme(request);
         return ResponseEntity.created(URI.create("/themes/" + saved.id())).build();
     }
 
