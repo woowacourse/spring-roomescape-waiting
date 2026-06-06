@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationE2ETest {
+class ReservationAcceptanceTest {
 
     @LocalServerPort
     int port;
