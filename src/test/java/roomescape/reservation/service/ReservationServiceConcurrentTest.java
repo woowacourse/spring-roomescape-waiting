@@ -60,10 +60,8 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent() throws InterruptedException {
         // given
-        ReservationSaveCommand command = new ReservationSaveCommand(date1.getId(), time1.getId(), theme.getId());
-
         doConcurrent(5, () -> {
-            reservationService.reserve(UUID.randomUUID().toString(), command);
+            reservationService.reserve(UUID.randomUUID().toString(), slot1.getId());
         });
 
         // then
@@ -87,10 +85,8 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent_myself() throws InterruptedException {
         // given
-        ReservationSaveCommand command = new ReservationSaveCommand(date1.getId(), time1.getId(), theme.getId());
-
         doConcurrent(5, ()->{
-            reservationService.reserve(name, command);
+            reservationService.reserve(name, slot1.getId());
         });
 
         // then

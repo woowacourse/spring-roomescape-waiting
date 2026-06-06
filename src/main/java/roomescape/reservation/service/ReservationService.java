@@ -39,14 +39,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation reserve(String name, ReservationSaveCommand command) {
-        ReservationSlot slot = getSlotWithLock(command.dateId(), command.timeId(), command.themeId());
-        Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
-        Reservation reservation = reservationsOfTimeSlot.reserve(name, slot, LocalDateTime.now());
-        return reservationRepository.save(reservation);
-    }
-
-    @Transactional
     public Reservation reserve(String requesterName, Long slotId) {
         ReservationSlot slot = getSlot(slotId);
         Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
@@ -57,26 +49,26 @@ public class ReservationService {
     @Transactional
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservationWithSlotLocked(id);
+        cancelByManager(reservation);
+
         if (reservation.isReserved()) {
-            reservation.cancelByManager();
             rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
             return reservation;
         }
 
-        reservation.cancelByManager();
         return reservation;
     }
 
     @Transactional
     public Reservation cancel(Long id, String requesterName) {
         Reservation reservation = getReservationWithSlotLocked(id);
+        cancel(reservation, requesterName);
+
         if (reservation.isReserved()) {
-            cancel(reservation, requesterName);
             rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
             return reservation;
         }
 
-        cancel(reservation, requesterName);
         return reservation;
     }
 
@@ -104,6 +96,11 @@ public class ReservationService {
 
     private void cancel(Reservation cancelTarget, String requesterName) {
         cancelTarget.cancel(requesterName, LocalDateTime.now());
+        reservationRepository.updateStatus(cancelTarget);
+    }
+
+    private void cancelByManager(Reservation cancelTarget) {
+        cancelTarget.cancelByManager();
         reservationRepository.updateStatus(cancelTarget);
     }
 

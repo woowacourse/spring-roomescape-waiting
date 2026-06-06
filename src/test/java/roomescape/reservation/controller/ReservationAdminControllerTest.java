@@ -20,7 +20,6 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.AcceptanceTest;
 
@@ -79,69 +78,6 @@ class ReservationAdminControllerTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
-    }
-
-    @Test
-    @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
-    void reserve_reservation_without_date_id() {
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer themeId = createTheme(managerToken, themeName);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", null);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
-    @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
-    void reserve_reservation_without_time_id() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer themeId = createTheme(managerToken, themeName);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", dateId);
-        params.put("timeId", null);
-        params.put("themeId", themeId);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
-    @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
-    void reserve_reservation_without_theme_id() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(managerToken, startAt);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", dateId);
-        params.put("timeId", timeId);
-        params.put("themeId", null);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
     }
 
     @Test

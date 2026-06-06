@@ -1,6 +1,5 @@
 package roomescape.reservation.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -9,7 +8,6 @@ import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.annotation.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDto;
-import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.controller.dto.response.ReservationDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
@@ -35,12 +33,12 @@ public class ReservationAdminController {
     }
 
     @AuthGuard(roles = MANAGER)
-    @PostMapping("/reservations")
+    @PostMapping("/slots/{slotId}/reservations")
     public ResponseEntity<ReservationDetailDto> createReservation(
-            @Valid @RequestBody ReservationSaveDto dto,
+            @PathVariable Long slotId,
             @LoginMember Member manager
     ) {
-        Reservation reservation = reservationService.reserve(manager.getName(), dto.toCommand());
+        Reservation reservation = reservationService.reserve(manager.getName(), slotId);
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }

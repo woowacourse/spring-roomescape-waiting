@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
-import static roomescape.reservation.fixture.ReservationFixture.toCommand;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
 import org.assertj.core.api.Assertions;
@@ -19,7 +18,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
-import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
@@ -102,27 +100,13 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
     class reserved_test {
 
         @Test
-        @DisplayName("예약시, 슬롯에 등록되지 않은 예약 시간이면 예외를 발생한다.")
+        @DisplayName("존재하지 않는 슬롯에 예약시, 예외가 발생한다.")
         void reserve_does_not_exist_reservation_time() {
             // given
-            Long wrongTimeId = Long.MIN_VALUE;
-            ReservationSaveCommand command = ReservationFixture.toCommand(date1, wrongTimeId, theme);
+            Long wrongSlotId = Long.MIN_VALUE;
 
             // when & then
-            assertThatThrownBy(() -> reservationService.reserve(name, command))
-                    .isInstanceOf(ReservationSlotException.class)
-                    .hasMessage(SLOT_NOT_FOUND.getMessage());
-        }
-
-        @Test
-        @DisplayName("예약시, 슬롯에 등록되지 않은 테마이면 예외를 발생한다.")
-        void reserve_does_not_exist_theme() {
-            // given
-            Long wrongThemeId = Long.MIN_VALUE;
-            ReservationSaveCommand command = toCommand(date1, time1, wrongThemeId);
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.reserve(name, command))
+            assertThatThrownBy(() -> reservationService.reserve(name, wrongSlotId))
                     .isInstanceOf(ReservationSlotException.class)
                     .hasMessage(SLOT_NOT_FOUND.getMessage());
         }
@@ -132,11 +116,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserved_duplicated() {
             // given
             String anotherName = "다른사람";
-            ReservationSaveCommand duplicated = ReservationFixture.toCommand(date1, time1, theme);
             saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.reserve(anotherName, duplicated);
+            Reservation actual = reservationService.reserve(anotherName, slot1.getId());
 
             // then
             assertThat(actual.getStatus())
@@ -148,11 +131,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserved_when_cancel_same_name() {
             // given
             Reservation reservation = saveReservation(name, slot1);
-            ReservationSaveCommand saveCommand = ReservationFixture.toCommand(date1, time1, theme);
             reservationService.cancelByManager(reservation.getId());
 
             // when
-            Reservation actual = reservationService.reserve(name, saveCommand);
+            Reservation actual = reservationService.reserve(name, slot1.getId());
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -166,11 +148,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             String anotherName = "다른사람";
 
             Reservation savedReservation = saveReservation(name, slot1);
-            ReservationSaveCommand saveCommand = ReservationFixture.toCommand(date1, time1, theme);
             reservationService.cancelByManager(savedReservation.getId());
 
             // when
-            Reservation actual = reservationService.reserve(anotherName, saveCommand);
+            Reservation actual = reservationService.reserve(anotherName, slot1.getId());
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -185,7 +166,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             ReservationSaveCommand command = new ReservationSaveCommand(date1.getId(), time1.getId(), theme.getId());
 
             // when & then
-            assertThatThrownBy(() -> reservationService.reserve(name, command))
+            assertThatThrownBy(() -> reservationService.reserve(name, slot1.getId()))
                     .isInstanceOf(ReservationException.class)
                     .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_BOOKED.getMessage());
         }
