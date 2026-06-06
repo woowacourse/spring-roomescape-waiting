@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -30,9 +31,11 @@ class ReservationE2ETest {
     void setUp() {
         RestAssured.port = port;
 
+        jdbcTemplate.update("DELETE FROM waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
@@ -128,6 +131,40 @@ class ReservationE2ETest {
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.size()", is(0));
+    }
+
+    @Test
+    @DisplayName("DELETE /reservations/{id}?name=... - 예약 취소 시 첫 번째 대기자가 예약으로 확정된다")
+    void deleteReservation_promotesFirstWaiting() {
+        String futureDate = LocalDate.now().plusDays(7).toString();
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "브라운", futureDate, 1L, 1L);
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "레서", futureDate, 1L, 1L);
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "밍구", futureDate, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("레서"))
+                .body("reservations[0].date", is(futureDate))
+                .body("reservations[0].time.id", is(1))
+                .body("reservations[0].theme.id", is(1));
+
+        Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM waiting", Integer.class);
+        String remainingWaitingName = jdbcTemplate.queryForObject("SELECT name FROM waiting", String.class);
+
+        assertThat(waitingCount).isEqualTo(1);
+        assertThat(remainingWaitingName).isEqualTo("밍구");
     }
 
     @Test

@@ -48,7 +48,9 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findById(long id) {
-        throw new UnsupportedOperationException();
+        return reservations.stream()
+                .filter(r -> r.getId().equals(id))
+                .findFirst();
     }
 
     @Override
@@ -63,11 +65,16 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public void update(Reservation reservation) {
-        throw new UnsupportedOperationException();
+        for (int i = 0; i < reservations.size(); i++) {
+            if (reservations.get(i).getId().equals(reservation.getId())) {
+                reservations.set(i, reservation);
+                return;
+            }
+        }
     }
 
     @Override
     public boolean delete(Reservation reservation) {
-        throw new UnsupportedOperationException();
+        return reservations.removeIf(r -> r.getId().equals(reservation.getId()));
     }
 }
