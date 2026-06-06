@@ -1,27 +1,25 @@
 package roomescape.reservationwaiting.service;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
-import roomescape.theme.domain.Theme;
 
 @Service
 public class ReservationWaitingService {
@@ -49,8 +47,7 @@ public class ReservationWaitingService {
         Reservation reservation = reservationRepository.findById(request.reservationId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId())) {
+        if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getSlot())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         }
         if (reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(request.name(), reservation.getDate(),
@@ -86,13 +83,12 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void promoteWaiting(LocalDate date, Long timeId, Long themeId) {
-        reservationWaitingRepository.findReservationWaitingBySlot(date, timeId, themeId)
+    public void promoteWaiting(ReservationSlot slot) {
+        reservationWaitingRepository.findReservationWaitingBySlot(slot)
                 .ifPresent(waiting -> {
                     try {
                         reservationRepository.save(
-                                reservationFactory.create(waiting.getName(), waiting.getDate(), waiting.getTime(),
-                                        waiting.getTheme()));
+                                reservationFactory.create(waiting.getName(), slot));
                     } catch (DuplicateKeyException e) {
                         throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
                     }
@@ -103,19 +99,15 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationResponse approveWaiting(Long waitingId) {
         ReservationWaiting reservationWaiting = getById(waitingId);
-        LocalDate date = reservationWaiting.getDate();
-        ReservationTime time = reservationWaiting.getTime();
-        Theme theme = reservationWaiting.getTheme();
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())) {
+        ReservationSlot slot = reservationWaiting.getSlot();
+        if (reservationRepository.existsBySlot(slot)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
         reservationWaitingRepository.deleteById(reservationWaiting.getId());
 
         try {
-            return ReservationResponse.from(reservationRepository.save(
-                    reservationFactory.create(reservationWaiting.getName(), reservationWaiting.getDate(),
-                            reservationWaiting.getTime(),
-                            reservationWaiting.getTheme())));
+            return ReservationResponse.from(
+                    reservationRepository.save(reservationFactory.create(reservationWaiting.getName(), slot)));
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }

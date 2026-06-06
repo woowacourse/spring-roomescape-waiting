@@ -126,7 +126,7 @@ public class ReservationWaitingRepositoryTest {
     void 예약_대기_조회() {
         reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", futureReservation1));
         Optional<ReservationWaiting> waiting = reservationWaitingRepository.findReservationWaitingBySlot(
-                LocalDate.of(2099, 12, 1), 1L, 1L);
+                futureReservation1.getSlot());
         assertThat(waiting).isPresent();
         assertThat(waiting.get().getName()).isEqualTo("현미밥1");
     }

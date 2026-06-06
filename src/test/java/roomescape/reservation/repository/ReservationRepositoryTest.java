@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
@@ -58,9 +59,10 @@ class ReservationRepositoryTest {
     @DisplayName("예약 저장 성공")
     void 예약_저장_성공() {
         Reservation saved = reservationRepository.save(
-                reservationFactory.create("현미밥", LocalDate.now().plusDays(1),
+                reservationFactory.create("현미밥", new ReservationSlot(
+                        LocalDate.now().plusDays(1),
                         timeRepository.findById(1L).get(),
-                        themeRepository.findById(1L).get()));
+                        themeRepository.findById(1L).get())));
         assertThat(saved.getId()).isNotNull();
     }
 

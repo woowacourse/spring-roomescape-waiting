@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -23,17 +24,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> Reservation.restore(
             resultSet.getLong("reservation_id"),
             resultSet.getString("name"),
-            resultSet.getDate("date").toLocalDate(),
-            ReservationTime.restore(
-                    resultSet.getLong("time_id"),
-                    resultSet.getTime("time_start_at").toLocalTime(),
-                    resultSet.getTime("time_finish_at").toLocalTime()
-            ),
-            Theme.restore(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("theme_description"),
-                    resultSet.getString("theme_image_url")
+            new ReservationSlot(
+                    resultSet.getDate("date").toLocalDate(),
+                    ReservationTime.restore(
+                            resultSet.getLong("time_id"),
+                            resultSet.getTime("time_start_at").toLocalTime(),
+                            resultSet.getTime("time_finish_at").toLocalTime()
+                    ),
+                    Theme.restore(
+                            resultSet.getLong("theme_id"),
+                            resultSet.getString("theme_name"),
+                            resultSet.getString("theme_description"),
+                            resultSet.getString("theme_image_url")
+                    )
             )
     );
 
@@ -56,8 +59,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return Reservation.restore(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme());
+        return Reservation.restore(id, reservation.getName(),
+                new ReservationSlot(reservation.getDate(), reservation.getTime(),
+                        reservation.getTheme()));
     }
 
     @Override
@@ -96,9 +100,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
+    public boolean existsBySlot(ReservationSlot slot) {
+        String sql = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slot.date(), slot.time().getId(),
+                slot.theme().getId());
         return count != null && count > 0;
     }
 
@@ -110,9 +115,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdExcludingId(LocalDate date, Long timeId, Long themeId, Long id) {
+    public boolean existsBySlotExcludingId(ReservationSlot slot, Long id) {
         String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ? and id != ?";
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId, id);
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, slot.date(), slot.time().getId(),
+                slot.theme().getId(), id);
         return count != null && count > 0;
     }
 

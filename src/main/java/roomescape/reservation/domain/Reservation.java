@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -13,36 +14,28 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
     @Builder(access = lombok.AccessLevel.PRIVATE)
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, String name, ReservationSlot slot) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
-    public static Reservation restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public static Reservation restore(Long id, String name, ReservationSlot slot) {
         return Reservation.builder()
                 .id(id)
                 .name(name)
-                .date(date)
-                .time(time)
-                .theme(theme)
+                .slot(slot)
                 .build();
     }
 
     public Reservation reschedule(LocalDate date, ReservationTime time, Clock clock) {
         Reservation changed = Reservation.builder()
-                .id(id)
+                .id(this.id)
                 .name(this.name)
-                .date(date)
-                .time(time)
-                .theme(this.theme)
+                .slot(new ReservationSlot(date, time, getTheme()))
                 .build();
         if (changed.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_TIME_RESERVATION);
@@ -51,11 +44,11 @@ public class Reservation {
     }
 
     public boolean isPast(Clock clock) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock));
+        return LocalDateTime.of(getDate(), getTime().getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
     public boolean isCancelable(Clock clock) {
-        return LocalDateTime.now(clock).isBefore(LocalDateTime.of(date, time.getStartAt()).minusHours(12));
+        return LocalDateTime.now(clock).isBefore(LocalDateTime.of(getDate(), getTime().getStartAt()).minusHours(12));
     }
 
     public Long getId() {
@@ -67,14 +60,18 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return this.slot.date();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return this.slot.time();
     }
 
     public Theme getTheme() {
-        return theme;
+        return this.slot.theme();
+    }
+
+    public ReservationSlot getSlot() {
+        return this.slot;
     }
 }

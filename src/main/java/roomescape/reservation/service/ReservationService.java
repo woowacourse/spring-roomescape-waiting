@@ -8,6 +8,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.domain.ReservationSlot;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
@@ -52,14 +53,13 @@ public class ReservationService {
     public ReservationResponse createReservation(ReservationRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
+        ReservationSlot slot = new ReservationSlot(request.date(), time, theme);
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
-                request.themeId())) {
+        if (reservationRepository.existsBySlot(slot)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
         try {
-            Reservation saved = reservationRepository.save(
-                    reservationFactory.create(request.name(), request.date(), time, theme));
+            Reservation saved = reservationRepository.save(reservationFactory.create(request.name(), slot));
             return ReservationResponse.from(saved);
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
@@ -81,8 +81,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
 
         try {
-            reservationWaitingService.promoteWaiting(reservation.getDate(), reservation.getTime().getId(),
-                    reservation.getTheme().getId());
+            reservationWaitingService.promoteWaiting(reservation.getSlot());
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.RESERVATION_CANCEL_FAILED);
         }
@@ -94,21 +93,19 @@ public class ReservationService {
         if (!reservation.isCancelable(clock)) {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
         }
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(request.date(), request.timeId(),
-                reservation.getTheme().getId(), id)) {
+        ReservationSlot slot = reservation.getSlot();
+        ReservationTime time = reservationTimeService.getById(request.timeId());
+        ReservationSlot newSlot = new ReservationSlot(request.date(), time, slot.theme());
+
+        if (reservationRepository.existsBySlotExcludingId(newSlot, id)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
 
-        LocalDate oldDate = reservation.getDate();
-        Long oldTimeId = reservation.getTime().getId();
-        Long oldThemeId = reservation.getTheme().getId();
-
-        Reservation validReservation = reservation.reschedule(request.date(),
-                reservationTimeService.getById(request.timeId()), clock);
+        Reservation validReservation = reservation.reschedule(request.date(), time, clock);
         reservationRepository.update(id, validReservation.getDate(), validReservation.getTime().getId());
 
         try {
-            reservationWaitingService.promoteWaiting(oldDate, oldTimeId, oldThemeId);
+            reservationWaitingService.promoteWaiting(slot);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.RESERVATION_CANCEL_FAILED);
         }
