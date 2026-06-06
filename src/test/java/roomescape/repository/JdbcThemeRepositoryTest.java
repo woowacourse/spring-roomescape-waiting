@@ -100,7 +100,7 @@ class JdbcThemeRepositoryTest {
 
     private void insertReservation(long themeId) {
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES ('10:00:00')");
-        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, ?)", LocalDate.now(), themeId);
-        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('test', 1)");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, ?)", LocalDate.now(), themeId);
+        jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('test', 1)");
     }
 }

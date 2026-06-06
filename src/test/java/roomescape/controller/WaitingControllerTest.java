@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.WaitingRequest;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
@@ -63,7 +63,7 @@ class WaitingControllerTest {
     private Waiting createMockWaiting() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "https://url");
-        Slot slot = new Slot(1L, LocalDate.now().plusDays(1), timeSlot, theme);
-        return new Waiting(1L, "브라운", slot, 1);
+        Session session = new Session(1L, LocalDate.now().plusDays(1), timeSlot, theme);
+        return new Waiting(1L, "브라운", session, 1);
     }
 }

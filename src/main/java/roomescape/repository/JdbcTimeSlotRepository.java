@@ -28,13 +28,13 @@ public class JdbcTimeSlotRepository implements TimeSlotRepository {
     private static final String DELETE_SQL = "DELETE FROM time_slot WHERE id = ?";
     private static final String UPDATE_SQL = "UPDATE time_slot SET start_at = ? WHERE id = ?";
     private static final String FIND_AVAILABLE_SQL = """
-            SELECT 
-                t.id AS t_id, 
-                t.start_at, 
+            SELECT
+                t.id AS t_id,
+                t.start_at,
                 r.id IS NULL AS is_available
             FROM time_slot t
-            LEFT JOIN slot s ON t.id = s.time_id AND s.theme_id = ? AND s.date = ?
-            LEFT JOIN reservation r ON s.id = r.slot_id
+            LEFT JOIN session s ON t.id = s.time_id AND s.theme_id = ? AND s.date = ?
+            LEFT JOIN reservation r ON s.id = r.session_id
             """;
 
     private final JdbcTemplate jdbcTemplate;

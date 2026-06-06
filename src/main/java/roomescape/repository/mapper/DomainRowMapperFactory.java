@@ -1,7 +1,7 @@
 package roomescape.repository.mapper;
 
 import org.springframework.stereotype.Component;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 
@@ -21,7 +21,7 @@ public class DomainRowMapperFactory {
         return new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail_url"));
     }
 
-    public Slot mapSlot(ResultSet rs) throws SQLException {
-        return new Slot(rs.getLong("slot_id"), rs.getObject("date", LocalDate.class), mapTimeSlot(rs), mapTheme(rs));
+    public Session mapSession(ResultSet rs) throws SQLException {
+        return new Session(rs.getLong("session_id"), rs.getObject("date", LocalDate.class), mapTimeSlot(rs), mapTheme(rs));
     }
 }

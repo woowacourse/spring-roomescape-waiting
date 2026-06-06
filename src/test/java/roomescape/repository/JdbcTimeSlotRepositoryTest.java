@@ -9,7 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.TimeSlotNotFoundException;
@@ -33,7 +33,7 @@ class JdbcTimeSlotRepositoryTest {
     private JdbcTimeSlotRepository timeRepository;
     private JdbcThemeRepository themeRepository;
     private JdbcReservationRepository reservationRepository;
-    private JdbcSlotRepository jdbcSlotRepository;
+    private JdbcSessionRepository jdbcSessionRepository;
 
     @BeforeEach
     void setUp() {
@@ -41,7 +41,7 @@ class JdbcTimeSlotRepositoryTest {
         timeRepository = new JdbcTimeSlotRepository(jdbcTemplate, factory);
         themeRepository = new JdbcThemeRepository(jdbcTemplate, factory);
         reservationRepository = new JdbcReservationRepository(jdbcTemplate, factory);
-        jdbcSlotRepository = new JdbcSlotRepository(jdbcTemplate, factory);
+        jdbcSessionRepository = new JdbcSessionRepository(jdbcTemplate, factory);
     }
 
     @Test
@@ -95,7 +95,7 @@ class JdbcTimeSlotRepositoryTest {
     void deleteTimeSlot_WithReservation() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(Theme.transientOf("공포", "설명", "url"));
-        Slot savedSlot = jdbcSlotRepository.save(Slot.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
+        Session savedSlot = jdbcSessionRepository.save(Session.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
         reservationRepository.save(Reservation.transientOf("브라운", savedSlot));
         assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId())).isInstanceOf(DataIntegrityViolationException.class);
     }

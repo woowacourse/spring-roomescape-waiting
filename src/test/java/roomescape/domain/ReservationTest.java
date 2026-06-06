@@ -15,16 +15,16 @@ class ReservationTest {
     @Test
     @DisplayName("정상적인 값을 입력하면 예약 객체가 생성된다.")
     void createValidReservation() {
-        Slot slot = createMockSlot();
-        Reservation reservation = new Reservation(1L, "브라운", slot);
+        Session session = createMockSlot();
+        Reservation reservation = new Reservation(1L, "브라운", session);
         assertThat(reservation.getName()).isEqualTo("브라운");
     }
 
     @Test
     @DisplayName("예약자 이름이 null이거나 비어있으면 예외가 발생한다.")
     void createInvalidNameThrowsException() {
-        Slot slot = createMockSlot();
-        assertThatThrownBy(() -> new Reservation(1L, " ", slot))
+        Session session = createMockSlot();
+        assertThatThrownBy(() -> new Reservation(1L, " ", session))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -38,8 +38,8 @@ class ReservationTest {
     @Test
     @DisplayName("transientOf를 통해 비영속 상태의 예약 객체를 생성할 수 있다.")
     void transientOfCreatesTransientReservation() {
-        Slot slot = createMockSlot();
-        Reservation reservation = Reservation.transientOf("브라운", slot);
+        Session session = createMockSlot();
+        Reservation reservation = Reservation.transientOf("브라운", session);
         assertThat(reservation.getId()).isNull();
     }
 
@@ -51,9 +51,9 @@ class ReservationTest {
                 .isInstanceOf(InvalidOwnershipException.class);
     }
 
-    private Slot createMockSlot() {
+    private Session createMockSlot() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포", "설명", "url");
-        return new Slot(1L, LocalDate.now().plusDays(1), timeSlot, theme);
+        return new Session(1L, LocalDate.now().plusDays(1), timeSlot, theme);
     }
 }

@@ -21,9 +21,9 @@ public record Booking(
         return new Booking(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getSlot().getDate(),
-                reservation.getSlot().getTimeSlot(),
-                reservation.getSlot().getTheme(),
+                reservation.getSession().getDate(),
+                reservation.getSession().getTimeSlot(),
+                reservation.getSession().getTheme(),
                 true,
                 null
         );
@@ -33,9 +33,9 @@ public record Booking(
         return new Booking(
                 waiting.getId(),
                 waiting.getName(),
-                waiting.getSlot().getDate(),
-                waiting.getSlot().getTimeSlot(),
-                waiting.getSlot().getTheme(),
+                waiting.getSession().getDate(),
+                waiting.getSession().getTimeSlot(),
+                waiting.getSession().getTheme(),
                 false,
                 waiting.getWaitingNumber()
         );

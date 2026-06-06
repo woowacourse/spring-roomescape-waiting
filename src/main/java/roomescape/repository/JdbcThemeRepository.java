@@ -29,14 +29,14 @@ public class JdbcThemeRepository implements ThemeRepository {
     private static final String DELETE_SQL = "DELETE FROM theme WHERE id = ?";
     private static final String UPDATE_SQL = "UPDATE theme SET name = ?, description = ?, thumbnail_url = ? WHERE id = ?";
     private static final String FIND_POPULAR_SQL = """
-            SELECT 
-                t.id AS theme_id, 
-                t.name AS theme_name, 
-                t.description AS theme_description, 
-                t.thumbnail_url AS theme_thumbnail_url, 
+            SELECT
+                t.id AS theme_id,
+                t.name AS theme_name,
+                t.description AS theme_description,
+                t.thumbnail_url AS theme_thumbnail_url,
                 COUNT(r.id) AS reservation_count
-            FROM slot s
-            INNER JOIN reservation r ON s.id = r.slot_id
+            FROM session s
+            INNER JOIN reservation r ON s.id = r.session_id
             INNER JOIN theme t ON s.theme_id = t.id
             WHERE s.date BETWEEN ? AND ?
             GROUP BY t.id

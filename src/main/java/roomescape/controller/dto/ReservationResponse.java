@@ -10,9 +10,9 @@ public record ReservationResponse(long id, String name, LocalDate date, TimeResp
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getSlot().getDate(),
-                TimeResponse.from(reservation.getSlot().getTimeSlot()),
-                ThemeResponse.from(reservation.getSlot().getTheme())
+                reservation.getSession().getDate(),
+                TimeResponse.from(reservation.getSession().getTimeSlot()),
+                ThemeResponse.from(reservation.getSession().getTheme())
         );
     }
 }

@@ -2,7 +2,7 @@ SET REFERENTIAL_INTEGRITY FALSE;
 
 TRUNCATE TABLE waiting RESTART IDENTITY;
 TRUNCATE TABLE reservation RESTART IDENTITY;
-TRUNCATE TABLE slot RESTART IDENTITY;
+TRUNCATE TABLE session RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
 TRUNCATE TABLE time_slot RESTART IDENTITY;
 
@@ -35,8 +35,8 @@ VALUES ('09:00:00'), ('10:00:00'), ('11:00:00'), ('12:00:00'), ('13:00:00'),
        ('14:00:00'), ('15:00:00'), ('16:00:00'), ('17:00:00'), ('18:00:00'),
        ('19:00:00'), ('20:00:00'), ('21:00:00'), ('22:00:00');
 
--- 1. 모든 예약 건에 대한 슬롯(Slot) 1:1 선제 생성
-INSERT INTO slot (date, time_id, theme_id)
+-- 1. 모든 예약 건에 대한 세션(Session) 1:1 선제 생성
+INSERT INTO session (date, time_id, theme_id)
 VALUES
     ('2026-05-07', 1, 1), ('2026-05-07', 4, 1), ('2026-05-07', 8, 1), ('2026-05-08', 2, 1), ('2026-05-08', 6, 1),
     ('2026-05-08', 10, 1), ('2026-05-09', 1, 1), ('2026-05-09', 3, 1), ('2026-05-09', 5, 1), ('2026-05-10', 7, 1),
@@ -95,9 +95,9 @@ VALUES
     ('2026-05-04', 6, 6), ('2026-05-05', 1, 1), ('2026-05-05', 3, 1), ('2026-05-05', 6, 1), ('2026-05-05', 9, 2),
     ('2026-05-05', 12, 3), ('2026-05-05', 14, 3), ('2026-05-05', 2, 4), ('2026-05-05', 5, 4);
 
--- 2. 생성된 슬롯 ID에 매핑하여 예약 데이터 삽입
--- (위 slot 테이블 삽입 순서와 완벽히 1:1로 매칭되므로 AUTO_INCREMENT 된 id 값 1부터 순서대로 삽입)
-INSERT INTO reservation (name, slot_id)
+-- 2. 생성된 세션 ID에 매핑하여 예약 데이터 삽입
+-- (위 session 테이블 삽입 순서와 완벽히 1:1로 매칭되므로 AUTO_INCREMENT 된 id 값 1부터 순서대로 삽입)
+INSERT INTO reservation (name, session_id)
 VALUES
     ('김철수', 1), ('이영희', 2), ('박민지', 3), ('정현우', 4), ('김철수', 5),
     ('이영희', 6), ('유재석', 7), ('송지효', 8), ('박민지', 9), ('하동훈', 10),

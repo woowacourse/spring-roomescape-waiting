@@ -29,7 +29,7 @@ public class ProblemDetailsAdvice {
         exceptionHttpStatusMap.put(DuplicateWaitingException.class, HttpStatus.CONFLICT);
         exceptionHttpStatusMap.put(InvalidOwnershipException.class, HttpStatus.FORBIDDEN);
         exceptionHttpStatusMap.put(InvalidWaitingPrerequisiteException.class, HttpStatus.BAD_REQUEST);
-        exceptionHttpStatusMap.put(PastSlotControlException.class, HttpStatus.BAD_REQUEST);
+        exceptionHttpStatusMap.put(PastSessionControlException.class, HttpStatus.BAD_REQUEST);
         exceptionHttpStatusMap.put(PastTimeException.class, HttpStatus.BAD_REQUEST);
         exceptionHttpStatusMap.put(ReservationNotFoundException.class, HttpStatus.NOT_FOUND);
         exceptionHttpStatusMap.put(ResourceInUseException.class, HttpStatus.CONFLICT);

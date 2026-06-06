@@ -15,24 +15,24 @@ class WaitingTest {
     @Test
     @DisplayName("정상적인 값을 입력하면 대기 객체가 생성된다.")
     void createValidWaiting() {
-        Slot slot = createMockSlot();
-        Waiting waiting = new Waiting(1L, "브라운", slot, 1);
+        Session session = createMockSlot();
+        Waiting waiting = new Waiting(1L, "브라운", session, 1);
         assertThat(waiting.getName()).isEqualTo("브라운");
     }
 
     @Test
     @DisplayName("대기자 이름이 null이거나 비어있으면 예외가 발생한다.")
     void createInvalidNameThrowsException() {
-        Slot slot = createMockSlot();
-        assertThatThrownBy(() -> new Waiting(1L, "", slot, 1))
+        Session session = createMockSlot();
+        assertThatThrownBy(() -> new Waiting(1L, "", session, 1))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("transientOf를 통해 비영속 상태의 대기 객체를 생성할 수 있다.")
     void transientOfCreatesTransientWaiting() {
-        Slot slot = createMockSlot();
-        Waiting waiting = Waiting.transientOf("브라운", slot);
+        Session session = createMockSlot();
+        Waiting waiting = Waiting.transientOf("브라운", session);
         assertThat(waiting.getId()).isNull();
     }
 
@@ -44,9 +44,9 @@ class WaitingTest {
                 .isInstanceOf(InvalidOwnershipException.class);
     }
 
-    private Slot createMockSlot() {
+    private Session createMockSlot() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포", "설명", "url");
-        return new Slot(1L, LocalDate.now(), timeSlot, theme);
+        return new Session(1L, LocalDate.now(), timeSlot, theme);
     }
 }

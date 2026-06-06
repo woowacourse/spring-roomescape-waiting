@@ -9,7 +9,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.repository.mapper.DomainRowMapperFactory;
@@ -31,7 +31,7 @@ class JdbcReservationRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     private JdbcReservationRepository jdbcReservationRepository;
-    private JdbcSlotRepository jdbcSlotRepository;
+    private JdbcSessionRepository jdbcSessionRepository;
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
 
@@ -39,7 +39,7 @@ class JdbcReservationRepositoryTest {
     void setUp() {
         DomainRowMapperFactory factory = new DomainRowMapperFactory();
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate, factory);
-        jdbcSlotRepository = new JdbcSlotRepository(jdbcTemplate, factory);
+        jdbcSessionRepository = new JdbcSessionRepository(jdbcTemplate, factory);
         insertDependencyData(factory);
     }
 
@@ -50,8 +50,8 @@ class JdbcReservationRepositoryTest {
         savedTheme = themeRepo.save(new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com"));
     }
 
-    private Slot createSavedSlot() {
-        return jdbcSlotRepository.save(Slot.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
+    private Session createSavedSlot() {
+        return jdbcSessionRepository.save(Session.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
     }
 
     @Test
@@ -90,10 +90,10 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("특정 날짜, 시간, 테마에 해당하는 예약이 이미 존재하면 해당 예약을 반환한다.")
     void findByDateAndTimeIdAndThemeId() {
-        Slot slot = createSavedSlot();
-        System.out.println(slot.getDate());
-        System.out.println(slot.getTheme());
-        jdbcReservationRepository.save(Reservation.transientOf("브라운", slot));
+        Session session = createSavedSlot();
+        System.out.println(session.getDate());
+        System.out.println(session.getTheme());
+        jdbcReservationRepository.save(Reservation.transientOf("브라운", session));
         Optional<Reservation> existingReservation = jdbcReservationRepository.findByDateAndTimeIdAndThemeId(
                 LocalDate.now(), savedTimeSlot.getId(), savedTheme.getId()
         );
@@ -104,9 +104,9 @@ class JdbcReservationRepositoryTest {
     @DisplayName("존재하는 예약을 변경 불가능한 날짜, 시간, 테마으로 수정 시도 시 예외가 발생한다.")
     void updateByDuplicatedDateAndTimeIdAndThemeId() {
         jdbcReservationRepository.save(Reservation.transientOf("브라운", createSavedSlot()));
-        Slot otherSlot = jdbcSlotRepository.save(Slot.transientOf(LocalDate.now().plusDays(7), savedTimeSlot, savedTheme));
+        Session otherSlot = jdbcSessionRepository.save(Session.transientOf(LocalDate.now().plusDays(7), savedTimeSlot, savedTheme));
         Reservation newReservation = jdbcReservationRepository.save(Reservation.transientOf("네오", otherSlot));
-        Slot firstSlot = jdbcSlotRepository.findByDateAndTimeIdAndThemeId(LocalDate.now(), savedTimeSlot.getId(), savedTheme.getId()).get();
+        Session firstSlot = jdbcSessionRepository.findByDateAndTimeIdAndThemeId(LocalDate.now(), savedTimeSlot.getId(), savedTheme.getId()).get();
         Reservation updateReservation = new Reservation(newReservation.getId(), "네오", firstSlot);
         assertThatThrownBy(() -> jdbcReservationRepository.update(updateReservation)).isInstanceOf(DuplicateKeyException.class);
     }

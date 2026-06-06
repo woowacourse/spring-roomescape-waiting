@@ -109,14 +109,14 @@ class RoomescapeIntegrationTest {
 
         LocalDate today = LocalDate.now();
 
-        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 1)", today.minusDays(8));
-        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('유저1', 2)");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, 1)", today.minusDays(8));
+        jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('유저1', 2)");
 
-        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 2)", today.minusDays(3));
-        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('유저2', 3)");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, 2)", today.minusDays(3));
+        jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('유저2', 3)");
 
-        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 2)", today.minusDays(2));
-        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('유저3', 4)");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, 2)", today.minusDays(2));
+        jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('유저3', 4)");
 
         RestAssured.given().log().all()
                 .queryParam("topCount", 10)
@@ -132,7 +132,7 @@ class RoomescapeIntegrationTest {
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES ('10:00:00')");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES ('공포', '설명', 'url')");
 
-        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, 1, 1)", date);
-        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES ('브라운', 1)");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, 1)", date);
+        jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('브라운', 1)");
     }
 }

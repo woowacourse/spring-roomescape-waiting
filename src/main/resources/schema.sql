@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS theme CASCADE;
 DROP TABLE IF EXISTS time_slot CASCADE;
-DROP TABLE IF EXISTS slot CASCADE;
+DROP TABLE IF EXISTS session CASCADE;
 DROP TABLE IF EXISTS reservation CASCADE;
 DROP TABLE IF EXISTS waiting CASCADE;
 
@@ -21,7 +21,7 @@ CREATE TABLE time_slot
     CONSTRAINT uk_time_slot_start_at UNIQUE (start_at)
 );
 
-CREATE TABLE slot
+CREATE TABLE session
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     date     DATE   NOT NULL,
@@ -30,17 +30,17 @@ CREATE TABLE slot
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES time_slot (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT uk_slot_date_time_theme UNIQUE (date, time_id, theme_id)
+    CONSTRAINT uk_session_date_time_theme UNIQUE (date, time_id, theme_id)
 );
 
 CREATE TABLE reservation
 (
-    id      BIGINT       NOT NULL AUTO_INCREMENT,
-    name    VARCHAR(255) NOT NULL,
-    slot_id BIGINT       NOT NULL,
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    name       VARCHAR(255) NOT NULL,
+    session_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (slot_id) REFERENCES slot (id),
-    CONSTRAINT uk_reservation_slot UNIQUE (slot_id)
+    FOREIGN KEY (session_id) REFERENCES session (id),
+    CONSTRAINT uk_reservation_session UNIQUE (session_id)
 );
 
 CREATE TABLE waiting
@@ -48,8 +48,8 @@ CREATE TABLE waiting
     id         BIGINT       NOT NULL AUTO_INCREMENT,
     name       VARCHAR(250) NOT NULL,
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    slot_id    BIGINT       NOT NULL,
+    session_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (slot_id) REFERENCES slot (id),
-    CONSTRAINT uk_waiting_name_slot UNIQUE (name, slot_id)
+    FOREIGN KEY (session_id) REFERENCES session (id),
+    CONSTRAINT uk_waiting_name_session UNIQUE (name, session_id)
 );

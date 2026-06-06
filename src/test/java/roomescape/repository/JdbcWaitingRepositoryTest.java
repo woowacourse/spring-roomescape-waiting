@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
@@ -26,7 +26,7 @@ class JdbcWaitingRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     private JdbcWaitingRepository jdbcWaitingRepository;
-    private JdbcSlotRepository jdbcSlotRepository;
+    private JdbcSessionRepository jdbcSessionRepository;
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
 
@@ -34,7 +34,7 @@ class JdbcWaitingRepositoryTest {
     void setUp() {
         DomainRowMapperFactory factory = new DomainRowMapperFactory();
         jdbcWaitingRepository = new JdbcWaitingRepository(jdbcTemplate, factory);
-        jdbcSlotRepository = new JdbcSlotRepository(jdbcTemplate, factory);
+        jdbcSessionRepository = new JdbcSessionRepository(jdbcTemplate, factory);
         saveDependencyData(factory);
     }
 
@@ -45,8 +45,8 @@ class JdbcWaitingRepositoryTest {
         savedTheme = themeRepo.save(new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com"));
     }
 
-    private Slot createSavedSlot() {
-        return jdbcSlotRepository.save(Slot.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
+    private Session createSavedSlot() {
+        return jdbcSessionRepository.save(Session.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
     }
 
     @Test
@@ -59,9 +59,9 @@ class JdbcWaitingRepositoryTest {
     @Test
     @DisplayName("저장된 예약 대기 존재를 확인하면, 참을 반환한다.")
     void existsWaiting() {
-        Slot slot = createSavedSlot();
-        jdbcWaitingRepository.save(new Waiting(null, "브라운", slot, null));
-        assertThat(jdbcWaitingRepository.isExists(new Waiting(null, "브라운", slot, null))).isEqualTo(true);
+        Session session = createSavedSlot();
+        jdbcWaitingRepository.save(new Waiting(null, "브라운", session, null));
+        assertThat(jdbcWaitingRepository.isExists(new Waiting(null, "브라운", session, null))).isEqualTo(true);
     }
 
     @Test
@@ -82,9 +82,9 @@ class JdbcWaitingRepositoryTest {
     @Test
     @DisplayName("예약 대기 순번을 계산한다.")
     void calculateWaitingNumber() {
-        Slot slot = createSavedSlot();
-        Waiting waiting1 = new Waiting(null, "브라운", slot, null);
-        Waiting waiting2 = new Waiting(null, "워니", slot, null);
+        Session session = createSavedSlot();
+        Waiting waiting1 = new Waiting(null, "브라운", session, null);
+        Waiting waiting2 = new Waiting(null, "워니", session, null);
         jdbcWaitingRepository.save(waiting1);
         jdbcWaitingRepository.save(waiting2);
         assertThat(jdbcWaitingRepository.calculateWaitingNumber(waiting2)).isEqualTo(2);

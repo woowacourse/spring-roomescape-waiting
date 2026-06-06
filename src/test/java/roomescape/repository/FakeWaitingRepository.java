@@ -12,7 +12,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public int calculateWaitingNumber(Waiting waiting) {
         return (int) storage.values().stream()
-                .filter(entry -> entry.getSlot().getId().equals(waiting.getSlot().getId()))
+                .filter(entry -> entry.getSession().getId().equals(waiting.getSession().getId()))
                 .filter(entry -> entry.getId() <= waiting.getId())
                 .count();
     }
@@ -20,7 +20,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         long id = sequence++;
-        Waiting savedWaiting = new Waiting(id, waiting.getName(), waiting.getSlot(), waiting.getWaitingNumber());
+        Waiting savedWaiting = new Waiting(id, waiting.getName(), waiting.getSession(), waiting.getWaitingNumber());
         storage.put(id, savedWaiting);
         return waiting;
     }
@@ -39,7 +39,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public boolean isExistsBySlotId(long slotId) {
         return storage.values().stream()
-                .anyMatch(entry -> entry.getSlot().getId().equals(slotId));
+                .anyMatch(entry -> entry.getSession().getId().equals(slotId));
     }
 
     @Override
@@ -57,13 +57,13 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public Waiting findFirstBySlotId(long slotId) {
         return storage.values().stream()
-                .filter(entry -> entry.getSlot().getId().equals(slotId))
+                .filter(entry -> entry.getSession().getId().equals(slotId))
                 .min(Comparator.comparingInt(Waiting::getWaitingNumber))
                 .orElse(null);
     }
 
     private boolean isSameWaiting(Waiting first, Waiting second) {
-        return first.getSlot().getId().equals(second.getSlot().getId())
+        return first.getSession().getId().equals(second.getSession().getId())
                 && first.getName().equals(second.getName());
     }
 }

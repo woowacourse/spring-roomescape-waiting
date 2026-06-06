@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingException;
@@ -20,23 +20,23 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
-    private final SlotService slotService;
+    private final SessionService sessionService;
 
     public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
-                          SlotService slotService) {
+                          SessionService sessionService) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
-        this.slotService = slotService;
+        this.sessionService = sessionService;
     }
 
     @Transactional
     public Waiting saveWaiting(WaitingRequest request) {
-        Slot slot = slotService.findSlotOrNull(request.date(), request.timeId(), request.themeId());
-        validPrerequisite(slot);
-        Reservation reservation = findReservationOrThrow(slot);
+        Session session = sessionService.findSessionOrNull(request.date(), request.timeId(), request.themeId());
+        validPrerequisite(session);
+        Reservation reservation = findReservationOrThrow(session);
         validNotReservedBySelf(reservation, request.name());
 
-        Waiting waiting = Waiting.transientOf(request.name(), slot);
+        Waiting waiting = Waiting.transientOf(request.name(), session);
         validDuplicated(waiting);
         waiting.validateNotPast(LocalDateTime.now());
 
@@ -50,24 +50,24 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
-    private void validPrerequisite(Slot slot) {
-        if (slot == null) {
+    private void validPrerequisite(Session session) {
+        if (session == null) {
             throw new InvalidWaitingPrerequisiteException();
         }
     }
 
-    private Reservation findReservationOrThrow(Slot slot) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(slot.getDate(), slot.getTimeSlot().getId(),
-                        slot.getTheme().getId())
+    private Reservation findReservationOrThrow(Session session) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(session.getDate(), session.getTimeSlot().getId(),
+                        session.getTheme().getId())
                 .orElseThrow(InvalidWaitingPrerequisiteException::new);
     }
 
     private void validNotReservedBySelf(Reservation reservation, String userName) {
         if (reservation.getName().equals(userName)) {
             throw new DuplicateReservationException(
-                    reservation.getSlot().getDate().toString(),
-                    reservation.getSlot().getTimeSlot().getId(),
-                    reservation.getSlot().getTheme().getId()
+                    reservation.getSession().getDate().toString(),
+                    reservation.getSession().getTimeSlot().getId(),
+                    reservation.getSession().getTheme().getId()
             );
         }
     }

@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.InvalidOwnershipException;
@@ -198,7 +198,7 @@ class ReservationControllerTest {
     private Reservation createMockReservation() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Slot slot = new Slot(1L, LocalDate.now(), timeSlot, theme);
-        return new Reservation(1L, "브라운", slot);
+        Session session = new Session(1L, LocalDate.now(), timeSlot, theme);
+        return new Reservation(1L, "브라운", session);
     }
 }

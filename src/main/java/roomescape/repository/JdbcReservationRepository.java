@@ -17,20 +17,20 @@ import java.util.Optional;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private static final String BASE_SQL = """
-            SELECT 
-                r.id AS r_id, 
-                r.name, 
-                s.id AS slot_id, 
-                s.date, 
-                t.id AS t_id, 
-                t.start_at, 
-                th.id AS theme_id, 
-                th.name AS theme_name, 
-                th.description AS theme_description, 
-                th.thumbnail_url AS theme_thumbnail_url 
-            FROM reservation r 
-            INNER JOIN slot s ON r.slot_id = s.id 
-            INNER JOIN time_slot t ON s.time_id = t.id 
+            SELECT
+                r.id AS r_id,
+                r.name,
+                s.id AS session_id,
+                s.date,
+                t.id AS t_id,
+                t.start_at,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.description AS theme_description,
+                th.thumbnail_url AS theme_thumbnail_url
+            FROM reservation r
+            INNER JOIN session s ON r.session_id = s.id
+            INNER JOIN time_slot t ON s.time_id = t.id
             INNER JOIN theme th ON s.theme_id = th.id
             """;
     private static final String FIND_ALL_SQL = BASE_SQL;
@@ -38,7 +38,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String FIND_BY_NAME_SQL = BASE_SQL + " WHERE r.name = ?";
     private static final String FIND_BY_CONDITIONS_SQL = BASE_SQL + " WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ?";
     private static final String DELETE_SQL = "DELETE FROM reservation WHERE id = ?";
-    private static final String UPDATE_SQL = "UPDATE reservation SET name = ?, slot_id = ? WHERE id = ?";
+    private static final String UPDATE_SQL = "UPDATE reservation SET name = ?, session_id = ? WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
@@ -52,7 +52,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.rowMapper = (rs, rowNum) -> new Reservation(
                 rs.getLong("r_id"),
                 rs.getString("name"),
-                mapperFactory.mapSlot(rs)
+                mapperFactory.mapSession(rs)
         );
     }
 
@@ -80,10 +80,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         Map<String, Object> params = Map.of(
                 "name", reservation.getName(),
-                "slot_id", reservation.getSlot().getId()
+                "session_id", reservation.getSession().getId()
         );
         long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getSlot());
+        return new Reservation(id, reservation.getName(), reservation.getSession());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation update(Reservation reservation) {
-        int columns = jdbcTemplate.update(UPDATE_SQL, reservation.getName(), reservation.getSlot().getId(), reservation.getId());
+        int columns = jdbcTemplate.update(UPDATE_SQL, reservation.getName(), reservation.getSession().getId(), reservation.getId());
         checkUpdateResult(columns, reservation.getId());
         return reservation;
     }

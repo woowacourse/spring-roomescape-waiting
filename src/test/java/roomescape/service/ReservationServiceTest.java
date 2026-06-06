@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Test;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
+import roomescape.domain.Session;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidOwnershipException;
-import roomescape.exception.PastSlotControlException;
+import roomescape.exception.PastSessionControlException;
 import roomescape.exception.PastTimeException;
 import roomescape.service.dto.Booking;
 import roomescape.repository.FakeReservationRepository;
-import roomescape.repository.FakeSlotRepository;
+import roomescape.repository.FakeSessionRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
 import roomescape.repository.FakeWaitingRepository;
@@ -35,8 +35,8 @@ class ReservationServiceTest {
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
     private FakeWaitingRepository fakeWaitingRepository;
-    private FakeSlotRepository fakeSlotRepository;
-    private SlotService slotService;
+    private FakeSessionRepository fakeSessionRepository;
+    private SessionService sessionService;
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
     private ReservationRequest basicReservationRequest;
@@ -47,9 +47,9 @@ class ReservationServiceTest {
         timeSlotRepository = new FakeTimeSlotRepository();
         themeRepository = new FakeThemeRepository();
         fakeWaitingRepository = new FakeWaitingRepository();
-        fakeSlotRepository = new FakeSlotRepository();
-        slotService = new SlotService(fakeSlotRepository, timeSlotRepository, themeRepository);
-        reservationService = new ReservationService(reservationRepository, fakeWaitingRepository, slotService);
+        fakeSessionRepository = new FakeSessionRepository();
+        sessionService = new SessionService(fakeSessionRepository, timeSlotRepository, themeRepository);
+        reservationService = new ReservationService(reservationRepository, fakeWaitingRepository, sessionService);
 
         savedTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(Theme.transientOf("이름", "설명", "test.com"));
@@ -60,7 +60,7 @@ class ReservationServiceTest {
     @DisplayName("원시값을 받아 연관된 객체를 조회하여 조립한 뒤 예약을 생성한다.")
     void saveReservation() {
         Reservation reservation = reservationService.saveReservation(basicReservationRequest);
-        assertThat(reservation.getSlot().getTimeSlot().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(reservation.getSession().getTimeSlot().getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
     @Test
@@ -124,7 +124,7 @@ class ReservationServiceTest {
     void removeReservation_Past() {
         Reservation pastReservation = savePastReservation(LocalDate.now().minusDays(1));
         assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운"))
-                .isInstanceOf(PastSlotControlException.class);
+                .isInstanceOf(PastSessionControlException.class);
     }
 
     @Test
@@ -134,7 +134,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.putReservation(
                 pastReservation.getId(), "브라운", new ReservationRequest(
                         "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId())
-        )).isInstanceOf(PastSlotControlException.class);
+        )).isInstanceOf(PastSessionControlException.class);
     }
 
     @Test
@@ -143,7 +143,7 @@ class ReservationServiceTest {
         Reservation pastReservation = savePastReservation(LocalDate.now().minusDays(1));
         assertThatThrownBy(() -> reservationService.patchReservation(
                 pastReservation.getId(), "브라운", new ReservationPatchRequest("브라운", null, null, null)))
-                .isInstanceOf(PastSlotControlException.class);
+                .isInstanceOf(PastSessionControlException.class);
     }
 
     @Test
@@ -171,26 +171,26 @@ class ReservationServiceTest {
     void removeReservation_SlotRemove() {
         Reservation reservation = reservationService.saveReservation(basicReservationRequest);
         reservationService.removeReservation(reservation.getId(), reservation.getName());
-        assertThat(fakeSlotRepository.findAll()).isEmpty();
+        assertThat(fakeSessionRepository.findAll()).isEmpty();
     }
 
     @Test
     @DisplayName("예약 삭제 시 대기자가 있다면 최우선 대기자가 예약으로 승급된다.")
     void removeReservation_PromoteWaiting() {
         Reservation reservation = reservationService.saveReservation(basicReservationRequest);
-        fakeWaitingRepository.save(Waiting.transientOf("네오", reservation.getSlot()));
+        fakeWaitingRepository.save(Waiting.transientOf("네오", reservation.getSession()));
         reservationService.removeReservation(reservation.getId(), "브라운");
         List<Reservation> reservations = reservationService.allReservations();
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getName()).isEqualTo("네오");
-        assertThat(fakeWaitingRepository.isExistsBySlotId(reservation.getSlot().getId())).isFalse();
+        assertThat(fakeWaitingRepository.isExistsBySlotId(reservation.getSession().getId())).isFalse();
     }
 
     @Test
     @DisplayName("예약 변경으로 슬롯이 달라지면 기존 슬롯의 최우선 대기자가 예약으로 승급된다.")
     void putReservation_PromoteWaiting() {
         Reservation reservation = reservationService.saveReservation(basicReservationRequest);
-        fakeWaitingRepository.save(Waiting.transientOf("네오", reservation.getSlot()));
+        fakeWaitingRepository.save(Waiting.transientOf("네오", reservation.getSession()));
         TimeSlot newTime = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(15, 0)));
         ReservationRequest putRequest = new ReservationRequest("브라운", futureDate, newTime.getId(), savedTheme.getId());
         reservationService.putReservation(reservation.getId(), "브라운", putRequest);
@@ -209,7 +209,7 @@ class ReservationServiceTest {
     }
 
     private Reservation savePastReservation(LocalDate pastDate) {
-        Slot slot = slotService.resolveNewSlot(pastDate, savedTimeSlot.getId(), savedTheme.getId());
-        return reservationRepository.save(Reservation.transientOf("브라운", slot));
+        Session session = sessionService.resolveNewSession(pastDate, savedTimeSlot.getId(), savedTheme.getId());
+        return reservationRepository.save(Reservation.transientOf("브라운", session));
     }
 }
