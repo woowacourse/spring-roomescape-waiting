@@ -14,6 +14,7 @@ import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.TimeWithStatusResponse;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.ConflictException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
@@ -140,12 +141,12 @@ public class ReservationApplicationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        reservationService.findReservation(id).ifPresent(reservation -> {
-            if (reservation.isPast(LocalDateTime.now())) {
-                throw new BusinessRuleViolationException(PAST_RESERVATION_DELETE_REJECTED);
-            }
-            promoteOrDelete(reservation);
-        });
+        Reservation reservation = reservationService.findReservation(id)
+                .orElseThrow(() -> NotFoundException.reservation(id));
+        if (reservation.isPast(LocalDateTime.now())) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_DELETE_REJECTED);
+        }
+        promoteOrDelete(reservation);
     }
 
     private void promoteOrDelete(Reservation reservation) {

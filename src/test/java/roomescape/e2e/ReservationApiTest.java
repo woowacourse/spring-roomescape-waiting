@@ -438,6 +438,14 @@ class ReservationApiTest {
     }
 
     @Test
+    void 존재하지_않는_예약을_관리자가_삭제하면_404() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/9999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @Test
     void 지난_예약을_취소하면_422() {
         Integer timeId = createTime("11:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
