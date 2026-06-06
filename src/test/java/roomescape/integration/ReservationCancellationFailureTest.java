@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 예약 취소 시 '승계(주인 교체) + 대기 삭제'를 한 트랜잭션으로 묶었을 때의 실패 처리를 검증한다.
  *
  * <p>(1) 대기 삭제가 실패하면 앞선 주인 교체까지 함께 롤백되는지(원자성),
- * (2) 락 대기·동시성 충돌 같은 일시적 DB 실패가 503(재시도 안내)로 응답되는지를 본다.
+ * (2) 락 대기·동시성 충돌 같은 일시적 DB 실패가 409(재시도 안내)로 응답되는지를 본다.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -100,13 +100,13 @@ class ReservationCancellationFailureTest {
     }
 
     @Test
-    void 일시적_DB_오류로_취소가_실패하면_503과_재시도_안내를_반환한다() throws Exception {
+    void 동시성_충돌로_취소가_실패하면_409와_재시도_안내를_반환한다() throws Exception {
         given(reservationWaitingService.findEarliestByReservationId(reservationId))
                 .willThrow(new CannotAcquireLockException("lock timeout"));
 
         mockMvc.perform(delete("/reservations/me/{id}", reservationId).param("name", "티뉴"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.type").value(ProblemType.SERVICE_UNAVAILABLE.uri().toString()));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").value(ProblemType.CONCURRENCY_CONFLICT.uri().toString()));
     }
 
     private Reservation anyReservation() {

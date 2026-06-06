@@ -141,7 +141,7 @@ RFC 9457 Problem Details 형식. `Content-Type: application/problem+json`.
 | 405 | `method-not-supported`     | 지원하지 않는 HTTP 메서드                                     |
 | 406 | `not-acceptable`           | 응답 가능한 미디어 타입 없음                                     |
 | 409 | `conflict`                 | 동일 날짜·시간·테마 중복 예약                                    |
+| 409 | `concurrency-conflict`     | 락 대기·데드락 등 동시성 충돌. 잠시 후 재시도 안내                      |
 | 415 | `media-type-not-supported` | 지원하지 않는 요청 미디어 타입                                    |
 | 422 | `business-rule-violation`  | 지난 시각 예약/변경, 지난 예약 취소·삭제, 지난 대기 취소, 예약이 존재하는 시간·테마 삭제 |
 | 500 | `internal-error`           | 처리되지 않은 예외                                           |
-| 503 | `service-unavailable`      | 일시적 처리 실패(락 대기·동시성 충돌 등). 잠시 후 재시도 안내            |

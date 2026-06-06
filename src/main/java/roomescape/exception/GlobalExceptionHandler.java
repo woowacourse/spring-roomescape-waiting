@@ -63,9 +63,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(TransientDataAccessException.class)
     public ProblemDetail handleTransient(TransientDataAccessException ex, WebRequest request) {
-        HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
+        HttpStatus status = HttpStatus.CONFLICT;
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, DETAIL_TRANSIENT);
-        applyType(problem, ProblemType.SERVICE_UNAVAILABLE, request);
+        applyType(problem, ProblemType.CONCURRENCY_CONFLICT, request);
         logException(ex, status, request);
         return problem;
     }

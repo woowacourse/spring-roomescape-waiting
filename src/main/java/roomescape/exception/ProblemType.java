@@ -7,6 +7,7 @@ public enum ProblemType {
     NOT_FOUND("not-found", "리소스를 찾을 수 없음"),
     UNAUTHORIZED("unauthorized", "본인 확인 실패"),
     CONFLICT("conflict", "요청이 현재 상태와 충돌함"),
+    CONCURRENCY_CONFLICT("concurrency-conflict", "동시 요청이 충돌함"),
     BUSINESS_RULE_VIOLATION("business-rule-violation", "비즈니스 정책 위반"),
     VALIDATION_ERROR("validation-error", "요청 본문 검증 실패"),
     BAD_REQUEST("bad-request", "잘못된 요청"),
@@ -14,7 +15,6 @@ public enum ProblemType {
     MEDIA_TYPE_NOT_SUPPORTED("media-type-not-supported", "지원하지 않는 미디어 타입"),
     NOT_ACCEPTABLE("not-acceptable", "응답 가능한 미디어 타입 없음"),
     NO_RESOURCE("no-resource", "리소스를 찾을 수 없음"),
-    SERVICE_UNAVAILABLE("service-unavailable", "일시적으로 요청을 처리할 수 없음"),
     INTERNAL_ERROR("internal-error", "서버 내부 오류");
 
     private static final String TYPE_BASE = "https://roomescape.example/problems/";
