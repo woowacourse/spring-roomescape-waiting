@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,9 +57,13 @@ public class ReservationWaitingService {
                 reservation.getTime().getId(), reservation.getTheme().getId())) {
             throw new BusinessException(ErrorCode.WAITING_ON_OWN_RESERVATION);
         }
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
-                reservationWaitingFactory.create(request.name(), reservation));
-        return ReservationWaitingResponse.from(reservationWaiting);
+        try {
+            ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
+                    reservationWaitingFactory.create(request.name(), reservation));
+            return ReservationWaitingResponse.from(reservationWaiting);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
+        }
     }
 
     @Transactional
@@ -84,9 +89,13 @@ public class ReservationWaitingService {
     public void promoteWaiting(LocalDate date, Long timeId, Long themeId) {
         reservationWaitingRepository.findReservationWaitingBySlot(date, timeId, themeId)
                 .ifPresent(waiting -> {
-                    reservationRepository.save(
-                            reservationFactory.create(waiting.getName(), waiting.getDate(), waiting.getTime(),
-                                    waiting.getTheme()));
+                    try {
+                        reservationRepository.save(
+                                reservationFactory.create(waiting.getName(), waiting.getDate(), waiting.getTime(),
+                                        waiting.getTheme()));
+                    } catch (DuplicateKeyException e) {
+                        throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
+                    }
                     reservationWaitingRepository.deleteById(waiting.getId());
                 });
     }
@@ -101,10 +110,15 @@ public class ReservationWaitingService {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
         reservationWaitingRepository.deleteById(reservationWaiting.getId());
-        return ReservationResponse.from(reservationRepository.save(
-                reservationFactory.create(reservationWaiting.getName(), reservationWaiting.getDate(),
-                        reservationWaiting.getTime(),
-                        reservationWaiting.getTheme())));
+
+        try {
+            return ReservationResponse.from(reservationRepository.save(
+                    reservationFactory.create(reservationWaiting.getName(), reservationWaiting.getDate(),
+                            reservationWaiting.getTime(),
+                            reservationWaiting.getTheme())));
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
+        }
     }
 
     @NonNull

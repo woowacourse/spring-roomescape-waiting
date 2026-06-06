@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,10 +57,13 @@ public class ReservationService {
                 request.themeId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
-
-        Reservation saved = reservationRepository.save(
-                reservationFactory.create(request.name(), request.date(), time, theme));
-        return ReservationResponse.from(saved);
+        try {
+            Reservation saved = reservationRepository.save(
+                    reservationFactory.create(request.name(), request.date(), time, theme));
+            return ReservationResponse.from(saved);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
+        }
     }
 
     public List<ReservationResponse> getReservationsByName(String name) {
