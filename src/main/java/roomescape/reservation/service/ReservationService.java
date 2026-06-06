@@ -82,7 +82,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation changeSchedule(ReservationChangeCommand command) {
-        Reservation reservation = getReservation(command.id());
+        Reservation reservation = getReservationWithSlotLocked(command.id());
         ReservationSlot newSlot = getSlot(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
         validateAlreadyBookedByOthers(newSlot);
 
@@ -93,7 +93,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation changeScheduleByManager(ReservationChangeCommand command) {
-        Reservation reservation = getReservation(command.id());
+        Reservation reservation = getReservationWithSlotLocked(command.id());
         ReservationSlot newSlot = getSlot(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
         validateAlreadyBookedByOthers(newSlot);
 
@@ -105,11 +105,6 @@ public class ReservationService {
     private void cancel(Reservation cancelTarget, String requesterName) {
         cancelTarget.cancel(requesterName, LocalDateTime.now());
         reservationRepository.updateStatus(cancelTarget);
-    }
-
-    private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
     private Reservation getReservationWithSlotLocked(Long id) {
