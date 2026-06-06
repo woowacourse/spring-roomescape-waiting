@@ -13,6 +13,7 @@ import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.TemporaryConflictException;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -125,7 +126,11 @@ public class ReservationCommandService {
 
     private void promoteWaiting(Waiting waiting) {
         waitingDao.deleteById(waiting.id());
-        reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
+        try {
+            reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
+        } catch (DataIntegrityViolationException e) {
+            throw new TemporaryConflictException("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
     }
 
     private Reservation findReservation(long reservationId) {
