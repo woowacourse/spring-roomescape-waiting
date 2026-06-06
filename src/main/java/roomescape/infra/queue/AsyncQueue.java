@@ -1,44 +1,55 @@
 package roomescape.infra.queue;
 
 import java.time.LocalDate;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class AsyncQueue<T, R> {
 
-    private final BlockingQueue<AsyncMessage<T>> queue = new LinkedBlockingQueue<>();
+    private final ConcurrentMap<String, ExecutorService> slotExecutors = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, JobResult<R>> results = new ConcurrentHashMap<>();
 
     public String enqueue(T request) {
+        String slotId = toSlotId(request);
         String jobId = toJobId(request);
+
         results.put(jobId, JobResult.pending());
-        queue.add(new AsyncMessage<>(jobId, request));
+
+        slotExecutors
+                .computeIfAbsent(slotId, k -> Executors.newSingleThreadExecutor(Thread.ofVirtual().factory()))
+                .submit(() -> results.put(jobId, process(request)));
+
         return jobId;
     }
 
+    protected abstract String toSlotId(T request);
+
     protected abstract String toJobId(T request);
 
-    public AsyncMessage<T> take() throws InterruptedException {
-        return queue.take();
-    }
-
-    public void storeResult(String jobId, JobResult<R> result) {
-        results.put(jobId, result);
-    }
+    protected abstract JobResult<R> process(T request);
 
     public JobResult<R> getResult(String jobId) {
         return results.get(jobId);
     }
 
-    protected void evictResultsBefore(LocalDate date) {
-        results.keySet().removeIf(key -> {
-            try {
-                return LocalDate.parse(key.split(":")[0]).isBefore(date);
-            } catch (Exception e) {
-                return false;
+    protected void evictBefore(LocalDate date) {
+        results.keySet().removeIf(key -> isBeforeDate(key, date));
+        slotExecutors.entrySet().removeIf(entry -> {
+            if (isBeforeDate(entry.getKey(), date)) {
+                entry.getValue().shutdown();
+                return true;
             }
+            return false;
         });
+    }
+
+    private boolean isBeforeDate(String key, LocalDate date) {
+        try {
+            return LocalDate.parse(key.split(":")[0]).isBefore(date);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
