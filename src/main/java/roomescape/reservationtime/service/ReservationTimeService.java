@@ -47,7 +47,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (timeRepository.existsReservationByTimeId(id)) {
+        if (timeRepository.hasReservation(id)) {
             throw new BusinessException(ErrorCode.TIME_HAS_RESERVATION);
         }
         timeRepository.deleteById(id);

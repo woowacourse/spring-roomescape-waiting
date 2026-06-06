@@ -35,7 +35,7 @@ public class AdminThemeService {
 
     @Transactional
     public void deleteTheme(Long id) {
-        if (themeRepository.existsReservationByThemeId(id)) {
+        if (themeRepository.hasReservation(id)) {
             throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
         }
         themeRepository.deleteById(id);

@@ -16,13 +16,13 @@ public interface ReservationRepository {
 
     void update(Long id, ReservationSlot slot);
 
-    boolean existsBySlot(ReservationSlot slot);
+    boolean isBooked(ReservationSlot slot);
 
-    boolean existsByNameAndSlot(String name, ReservationSlot slot);
+    boolean isReservedBy(ReservationSlot slot, String name);
 
-    boolean existsBySlotExcludingId(ReservationSlot slot, Long id);
+    boolean isBookedByOther(ReservationSlot slot, Long id);
 
     void deleteById(Long id);
 
-    ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId);
+    ReservationIdResponse findIdBySlot(LocalDate date, Long themeId, Long timeId);
 }

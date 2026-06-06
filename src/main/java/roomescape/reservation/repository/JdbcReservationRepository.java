@@ -100,7 +100,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsBySlot(ReservationSlot slot) {
+    public boolean isBooked(ReservationSlot slot) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slot.date(), slot.time().getId(),
                 slot.theme().getId());
@@ -108,7 +108,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+    public boolean isReservedBy(ReservationSlot slot, String name) {
         String query = "select count(*) from reservation where name = ? and date = ? and time_id = ? and theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, name, slot.date(), slot.time().getId(),
                 slot.theme().getId());
@@ -116,7 +116,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsBySlotExcludingId(ReservationSlot slot, Long id) {
+    public boolean isBookedByOther(ReservationSlot slot, Long id) {
         String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ? and id != ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, slot.date(), slot.time().getId(),
                 slot.theme().getId(), id);
@@ -130,7 +130,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
+    public ReservationIdResponse findIdBySlot(LocalDate date, Long themeId, Long timeId) {
         String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
         return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
     }

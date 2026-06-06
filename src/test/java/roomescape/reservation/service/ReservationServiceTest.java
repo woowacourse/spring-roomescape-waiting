@@ -160,7 +160,7 @@ class ReservationServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(futureReservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
-        when(reservationRepository.existsBySlotExcludingId(any(), any())).thenReturn(false);
+        when(reservationRepository.isBookedByOther(any(), any())).thenReturn(false);
         when(reservationTimeService.getById(2L)).thenReturn(time2);
 
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -176,7 +176,7 @@ class ReservationServiceTest {
     void 오늘_날짜_지난_시각_예약_불가() {
         when(reservationTimeService.getById(1L)).thenReturn(time1);
         when(themeService.getById(1L)).thenReturn(theme);
-        when(reservationRepository.existsBySlot(any())).thenReturn(false);
+        when(reservationRepository.isBooked(any())).thenReturn(false);
         when(reservationFactory.create(any(), any())).thenThrow(
                 new BusinessException(ErrorCode.PAST_TIME_CREATE));
 
@@ -195,7 +195,7 @@ class ReservationServiceTest {
         when(reservationRepository.findById(2L)).thenReturn(Optional.of(reservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
-        when(reservationRepository.existsBySlotExcludingId(any(), any())).thenReturn(true);
+        when(reservationRepository.isBookedByOther(any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> reservationService.updateReservation(2L,
                 new ReservationUpdateRequest(LocalDate.of(2099, 12, 1), 1L)))

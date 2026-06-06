@@ -43,10 +43,10 @@ public class ReservationWaitingService {
         Reservation reservation = reservationRepository.findById(request.reservationId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getSlot())) {
+        if (reservationWaitingRepository.isWaitingBy(reservation.getSlot(), request.name())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         }
-        if (reservationRepository.existsByNameAndSlot(request.name(), reservation.getSlot())) {
+        if (reservationRepository.isReservedBy(reservation.getSlot(), request.name())) {
             throw new BusinessException(ErrorCode.WAITING_ON_OWN_RESERVATION);
         }
         try {
@@ -79,7 +79,7 @@ public class ReservationWaitingService {
 
     @Transactional
     public void promoteWaiting(ReservationSlot slot) {
-        reservationWaitingRepository.findReservationWaitingBySlot(slot)
+        reservationWaitingRepository.findOldestBySlot(slot)
                 .ifPresent(waiting -> {
                     try {
                         reservationRepository.save(waiting.toReservation());
@@ -94,7 +94,7 @@ public class ReservationWaitingService {
     public ReservationResponse approveWaiting(Long waitingId) {
         ReservationWaiting waiting = getById(waitingId);
         ReservationSlot slot = waiting.getSlot();
-        if (reservationRepository.existsBySlot(slot)) {
+        if (reservationRepository.isBooked(slot)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
         reservationWaitingRepository.deleteById(waiting.getId());
@@ -109,7 +109,7 @@ public class ReservationWaitingService {
 
     @NonNull
     private ReservationWaiting getById(Long id) {
-        return reservationWaitingRepository.findReservationWaitingById(id)
+        return reservationWaitingRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_NOT_FOUND));
     }
 }

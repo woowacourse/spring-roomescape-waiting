@@ -125,7 +125,7 @@ public class ReservationWaitingRepositoryTest {
     @DisplayName("date, themeId, timdId로 대기 객체를 받아온다.")
     void 예약_대기_조회() {
         reservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", futureReservation1));
-        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findReservationWaitingBySlot(
+        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findOldestBySlot(
                 futureReservation1.getSlot());
         assertThat(waiting).isPresent();
         assertThat(waiting.get().getName()).isEqualTo("현미밥1");

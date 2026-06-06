@@ -15,9 +15,9 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findByName(String name);
 
-    Optional<ReservationWaiting> findReservationWaitingBySlot(ReservationSlot slot);
+    Optional<ReservationWaiting> findOldestBySlot(ReservationSlot slot);
 
-    boolean existsByNameAndSlot(String name, ReservationSlot slot);
+    boolean isWaitingBy(ReservationSlot slot, String name);
 
-    Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId);
+    Optional<ReservationWaiting> findById(Long id);
 }

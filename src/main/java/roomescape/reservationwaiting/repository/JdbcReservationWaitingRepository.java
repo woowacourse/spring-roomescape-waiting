@@ -101,14 +101,14 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId) {
+    public Optional<ReservationWaiting> findById(Long reservationWaitingId) {
         String query = "SELECT * FROM (" + BASE_QUERY
                 + ") sub WHERE sub.reservation_waiting_id = ? ORDER BY sub.created_at";
         return jdbcTemplate.query(query, rowMapper, reservationWaitingId).stream().findFirst();
     }
 
     @Override
-    public Optional<ReservationWaiting> findReservationWaitingBySlot(ReservationSlot slot) {
+    public Optional<ReservationWaiting> findOldestBySlot(ReservationSlot slot) {
 
         String query = "SELECT * FROM (" + BASE_QUERY
                 + ") sub WHERE sub.reservation_date = ? AND sub.time_id = ? AND sub.theme_id = ? ORDER BY sub.created_at";
@@ -116,7 +116,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+    public boolean isWaitingBy(ReservationSlot slot, String name) {
         String query = "select count(*) from reservation_waiting where name = ? and date = ? and time_id = ? and theme_id = ?";
         return jdbcTemplate.queryForObject(query, Integer.class, name, slot.date(), slot.time().getId(), slot.theme().getId()) >= 1;
     }

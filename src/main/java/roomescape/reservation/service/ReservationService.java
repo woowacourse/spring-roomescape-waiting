@@ -55,7 +55,7 @@ public class ReservationService {
         Theme theme = themeService.getById(request.themeId());
         ReservationSlot slot = new ReservationSlot(request.date(), time, theme);
 
-        if (reservationRepository.existsBySlot(slot)) {
+        if (reservationRepository.isBooked(slot)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
         try {
@@ -93,7 +93,7 @@ public class ReservationService {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         ReservationSlot newSlot = new ReservationSlot(request.date(), time, slot.theme());
 
-        if (reservationRepository.existsBySlotExcludingId(newSlot, id)) {
+        if (reservationRepository.isBookedByOther(newSlot, id)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
 
@@ -111,6 +111,6 @@ public class ReservationService {
     }
 
     public ReservationIdResponse getReservationId(LocalDate date, Long themeId, Long timeId) {
-        return reservationRepository.findReservationId(date, themeId, timeId);
+        return reservationRepository.findIdBySlot(date, themeId, timeId);
     }
 }

@@ -59,7 +59,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
     void 예약_대기_생성_실패() {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(futureReservation));
-        when(reservationWaitingRepository.existsByNameAndSlot("현미밥", futureReservation.getSlot())).thenReturn(true);
+        when(reservationWaitingRepository.isWaitingBy(futureReservation.getSlot(), "현미밥")).thenReturn(true);
 
         assertThatThrownBy(() -> reservationWaitingService.createWaiting(new ReservationWaitingRequest("현미밥", 1L)))
                 .isInstanceOf(BusinessException.class)
@@ -71,7 +71,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("지난 예약 대기는 삭제할 수 없다.")
     void 예약_대기_삭제_실패() {
         ReservationWaiting waiting = ReservationWaiting.restore(1L, "현미밥", LocalDate.now().minusDays(1), time, theme);
-        when(reservationWaitingRepository.findReservationWaitingById(1L)).thenReturn(Optional.of(waiting));
+        when(reservationWaitingRepository.findById(1L)).thenReturn(Optional.of(waiting));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
 
@@ -85,7 +85,7 @@ class ReservationWaitingServiceTest {
     @Test
     @DisplayName("존재하지 않는 대기 ID로 삭제 시 예외 발생")
     void 없는_대기_삭제_실패() {
-        when(reservationWaitingRepository.findReservationWaitingById(Long.MAX_VALUE)).thenReturn(Optional.empty());
+        when(reservationWaitingRepository.findById(Long.MAX_VALUE)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(Long.MAX_VALUE))
                 .isInstanceOf(BusinessException.class)

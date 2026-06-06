@@ -55,7 +55,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean existsReservationByThemeId(Long themeId) {
+    public boolean hasReservation(Long themeId) {
         String query = "select count(*) from reservation where theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, themeId);
         return count != null && count > 0;
