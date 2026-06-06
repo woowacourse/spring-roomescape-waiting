@@ -4,7 +4,7 @@
 
 ## ✅ 리팩토링 할 것 목록
 
-- [ ] **1. POST /reservations/waiting 응답 타입을 `ReservationResponse` → `ReservationWaitingResponse`로 변경 (waitingNumber 포함)**
+- [x] **1. POST /reservations/waiting 응답 타입을 `ReservationResponse` → `ReservationWaitingResponse`로 변경 (waitingNumber 포함)**
 - [x] **2. `ReservationDao` 반복되는 SELECT + JOIN 절을 `BASE_QUERY` 상수로 추출**
 - [ ] **3. `ReservationService.delete` 존재하지 않는 예약 시 `ifPresent` → `orElseThrow`로 변경 (update와 일관성 통일)**
 - [ ] **4. `ReservationService.update`에 `validateCancellable` 추가 (과거 예약 수정 방지 + `approveFirstWaitingIfExists` 최적화 전제 보장)**

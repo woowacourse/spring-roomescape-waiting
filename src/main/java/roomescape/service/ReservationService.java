@@ -55,8 +55,9 @@ public class ReservationService {
     public Reservation update(long id, LocalDate date, long timeId) {
         Reservation reservation = reservationDao.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
-        ReservationTime time = validateReservationTime(timeId);
         LocalDateTime now = LocalDateTime.now(clock);
+        reservation.validateCancellable(now);
+        ReservationTime time = validateReservationTime(timeId);
         Reservation updated = reservation.withUpdated(date, time, now);
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
@@ -68,12 +69,12 @@ public class ReservationService {
 
     @Transactional
     public void delete(long id) {
-        reservationDao.findByIdForUpdate(id).ifPresent(reservation -> {
-            LocalDateTime now = LocalDateTime.now(clock);
-            reservation.validateCancellable(now);
-            reservationDao.delete(id);
-            approveFirstWaitingIfExists(reservation, now);
-        });
+        Reservation reservation = reservationDao.findByIdForUpdate(id)
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        LocalDateTime now = LocalDateTime.now(clock);
+        reservation.validateCancellable(now);
+        reservationDao.delete(id);
+        approveFirstWaitingIfExists(reservation, now);
     }
 
     private void approveFirstWaitingIfExists(Reservation slot, LocalDateTime now) {

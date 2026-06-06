@@ -22,6 +22,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.domain.Reservation;
@@ -108,10 +109,10 @@ class ReservationServiceTest {
     }
 
     @Test
-    void delete_존재하지_않는_예약이면_조용히_반환() {
-        assertThatCode(() -> reservationService.delete(999L))
-                .doesNotThrowAnyException();
-        then(reservationDao).should().findByIdForUpdate(999L);
+    void delete_존재하지_않는_예약이면_예외() {
+        assertThatThrownBy(() -> reservationService.delete(999L))
+                .isInstanceOf(ReservationNotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다.");
     }
 
     @Test
