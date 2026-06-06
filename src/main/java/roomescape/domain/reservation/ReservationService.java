@@ -67,17 +67,10 @@ public class ReservationService {
         validateModifiable(reservation.getDate(), reservation.getTime());
 
         reservationRepository.deleteById(id);
-        Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
-            reservation.getDate().getId(), reservation.getTime().getId(), reservation.getTheme().getId());
-        if (waitingReservationOpt.isPresent()) {
-            WaitingReservation waitingReservation = waitingReservationOpt.get();
-            reservationRepository.save(
-                Reservation.createWithoutId(waitingReservation.getName(), waitingReservation.getDate(),
-                    waitingReservation.getTime(), waitingReservation.getTheme()));
-            waitingReservationRepository.deleteById(waitingReservation.getId());
-        }
+        promoteWaitingReservation(reservation);
     }
 
+    @Transactional
     public ReservationResponse updateReservation(Long id, @Valid ReservationUpdateRequest request) {
         Reservation reservation = findById(id);
         validateModifiable(reservation.getDate(), reservation.getTime());
@@ -92,6 +85,7 @@ public class ReservationService {
         if (updatedCount == 0) {
             log.warn(" 수정할 예약 건이 없습니다. reservationId={}", id);
         }
+        promoteWaitingReservation(reservation);
         return ReservationResponse.from(findById(id));
     }
 
@@ -121,5 +115,17 @@ public class ReservationService {
     private void validateModifiable(ReservationDate reservationDate, ReservationTime reservationTime) {
         validateNotPast(reservationDate, reservationTime);
         validateNotToday(reservationDate);
+    }
+
+    private void promoteWaitingReservation(Reservation reservation) {
+        Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
+            reservation.getDate().getId(), reservation.getTime().getId(), reservation.getTheme().getId());
+        if (waitingReservationOpt.isPresent()) {
+            WaitingReservation waitingReservation = waitingReservationOpt.get();
+            reservationRepository.save(
+                Reservation.createWithoutId(waitingReservation.getName(), waitingReservation.getDate(),
+                    waitingReservation.getTime(), waitingReservation.getTheme()));
+            waitingReservationRepository.deleteById(waitingReservation.getId());
+        }
     }
 }
