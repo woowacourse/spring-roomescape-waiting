@@ -99,7 +99,7 @@ class ReservationApiTest {
     }
 
     @Test
-    void 대기자가_있는_예약_삭제_시_409를_반환한다() {
+    void 대기자가_있는_예약을_삭제하면_1순위_대기가_예약으로_전환된다() {
         createTheme();
         createReservationTime("15:40");
         LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -109,9 +109,14 @@ class ReservationApiTest {
         RestAssured.given().log().all()
                 .when().delete("/reservations/1")
                 .then().log().all()
-                .statusCode(409)
-                .body("code", is("RESERVATION_HAS_WAITINGS"))
-                .body("status", is(409));
+                .statusCode(204);
+
+        String reservationOwner = jdbcTemplate.queryForObject(
+                "SELECT name FROM reservation WHERE id = 1", String.class);
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1", Integer.class);
+        assertThat(reservationOwner).isEqualTo("코니");
+        assertThat(waitingCount).isNotNull().isZero();
     }
 
     @Test
