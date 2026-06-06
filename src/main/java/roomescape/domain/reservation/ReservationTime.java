@@ -1,18 +1,16 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationTime {
 
     private final Long id;
     private final LocalTime startAt;
-
-    private ReservationTime(Long id, LocalTime startAt) {
-        this.id = id;
-        this.startAt = startAt;
-    }
 
     public static ReservationTime create(LocalTime startAt) {
         return new ReservationTime(null, startAt);

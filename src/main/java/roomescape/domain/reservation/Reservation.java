@@ -1,10 +1,13 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.domain.user.User;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Reservation {
 
     private final Long id;
@@ -13,22 +16,6 @@ public class Reservation {
     private final Integer waitingNumber;
     private final ReservationStatus status;
     private final LocalDateTime reservedAt;
-
-    private Reservation(
-            Long id,
-            User user,
-            ReservationSlot slot,
-            Integer waitingNumber,
-            ReservationStatus status,
-            LocalDateTime reservedAt
-    ) {
-        this.id = id;
-        this.user = user;
-        this.slot = slot;
-        this.waitingNumber = waitingNumber;
-        this.status = status;
-        this.reservedAt = reservedAt;
-    }
 
     public static Reservation create(
             User user,
@@ -65,10 +52,6 @@ public class Reservation {
 
     public void validateCancellable(LocalDateTime now) {
         slot.validateIsNotInPast(now);
-    }
-
-    public Reservation update(int waitingNumber, ReservationStatus status) {
-        return new Reservation(id, user, slot, waitingNumber, status, reservedAt);
     }
 
     public Reservation updateConfirmed() {

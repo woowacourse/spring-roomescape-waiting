@@ -1,17 +1,15 @@
 package roomescape.domain.user;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
 
     private final Long id;
     private final String name;
-
-    private User(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public static User create(String name) {
         return new User(null, name);

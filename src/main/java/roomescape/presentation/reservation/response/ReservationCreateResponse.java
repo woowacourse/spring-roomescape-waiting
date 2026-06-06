@@ -8,12 +8,9 @@ import roomescape.domain.theme.Theme;
 
 public record ReservationCreateResponse(
         Long id,
-
         LocalDate date,
-
         @JsonFormat(pattern = "HH:mm")
         LocalTime startAt,
-
         ThemePayload theme
 ) {
 
@@ -26,14 +23,14 @@ public record ReservationCreateResponse(
         );
     }
 
-    public record ThemePayload(
+    private record ThemePayload(
             Long id,
             String name,
             String content,
             String url
     ) {
 
-        public static ThemePayload from(Theme theme) {
+        private static ThemePayload from(Theme theme) {
             return new ThemePayload(
                     theme.getId(),
                     theme.getName(),

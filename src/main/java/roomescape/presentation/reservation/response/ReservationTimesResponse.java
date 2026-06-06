@@ -10,11 +10,11 @@ public record ReservationTimesResponse(
 ) {
 
     public static ReservationTimesResponse from(List<ReservationTime> times) {
-        List<ReservationTimePayload> timePayloads = times.stream()
+        List<ReservationTimePayload> payloads = times.stream()
                 .map(ReservationTimePayload::from)
                 .toList();
 
-        return new ReservationTimesResponse(timePayloads);
+        return new ReservationTimesResponse(payloads);
     }
 
     private record ReservationTimePayload(

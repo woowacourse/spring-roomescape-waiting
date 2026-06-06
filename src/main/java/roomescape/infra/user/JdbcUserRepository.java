@@ -1,72 +1,64 @@
 package roomescape.infra.user;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import javax.sql.DataSource;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 
 @Repository
-@RequiredArgsConstructor
 public class JdbcUserRepository implements UserRepository {
 
+    private static final String TABLE_NAME = "users";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "username";
-
-    private static final String INSERT_SQL = "insert into users(name) values (?)";
+    private static final String COLUMN_NAME = "name";
     private static final String FIND_ALL_SQL = "select id, name from users order by id";
-    private static final String FIND_BY_ID_SQL = "select id, name from users where id = ?";
-    private static final String FIND_BY_NAME_SQL = "select id, name from users where name = ?";
+    private static final String FIND_BY_NAME_SQL = "select id, name from users where name = :name";
+    private static final RowMapper<User> USER_ROW_MAPPER = (rs, rowNum) -> User.of(
+            rs.getLong(COLUMN_ID),
+            rs.getString(COLUMN_NAME)
+    );
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert insertUser;
+
+    public JdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate, DataSource dataSource) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.insertUser = new SimpleJdbcInsert(dataSource)
+                .withTableName(TABLE_NAME)
+                .usingGeneratedKeyColumns(COLUMN_ID);
+    }
 
     @Override
     public User save(User user) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, user.getName());
-            return ps;
-        }, keyHolder);
-        long id = extractId(keyHolder);
-        return User.createWithId(id, user);
+        Number key = insertUser.executeAndReturnKey(new MapSqlParameterSource()
+                .addValue(COLUMN_NAME, user.getName()));
+        return User.of(extractId(key), user.getName());
     }
 
-    @Override
     public List<User> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, userRowMapper());
-    }
-
-    @Override
-    public Optional<User> findById(Long id) {
-        List<User> result = jdbcTemplate.query(FIND_BY_ID_SQL, userRowMapper(), id);
-        return result.stream().findFirst();
+        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), USER_ROW_MAPPER);
     }
 
     @Override
     public Optional<User> findByName(String name) {
-        List<User> result = jdbcTemplate.query(FIND_BY_NAME_SQL, userRowMapper(), name);
+        List<User> result = jdbcTemplate.query(
+                FIND_BY_NAME_SQL,
+                new MapSqlParameterSource().addValue(COLUMN_NAME, name),
+                USER_ROW_MAPPER
+        );
         return result.stream().findFirst();
     }
 
-    private RowMapper<User> userRowMapper() {
-        return (rs, rowNum) -> User.of(
-            rs.getLong(COLUMN_ID),
-            rs.getString(COLUMN_NAME)
-        );
-    }
-
-    private long extractId(KeyHolder keyHolder) {
-        if (keyHolder.getKey() == null) {
+    private long extractId(Number key) {
+        if (key == null) {
             throw new IllegalStateException("생성 키를 조회할 수 없습니다.");
         }
-        return keyHolder.getKey().longValue();
+        return key.longValue();
     }
 }

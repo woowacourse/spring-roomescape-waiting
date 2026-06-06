@@ -14,11 +14,11 @@ public record ReservationsResponse(
 ) {
 
     public static ReservationsResponse of(List<Reservation> reservations) {
-        List<ReservationPayload> reservationPayloads = reservations.stream()
+        List<ReservationPayload> payloads = reservations.stream()
                 .map(ReservationPayload::from)
                 .toList();
 
-        return new ReservationsResponse(reservationPayloads);
+        return new ReservationsResponse(payloads);
     }
 
     private record ReservationPayload(

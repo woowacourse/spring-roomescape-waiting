@@ -34,7 +34,7 @@ public class ReservationService {
     }
 
     public UserReservationsResponse getUserReservations(String username) {
-        User user = userRepository.findByNameOrThrow(username);
+        User user = findByUsernameOrThrow(username);
         List<Reservation> userReservations = reservationRepository.findAllReservationsByUserId(user.getId());
         return UserReservationsResponse.of(username, userReservations);
     }
@@ -43,11 +43,8 @@ public class ReservationService {
     public ReservationCreateResponse createReservation(ReservationCreateRequest request) {
         User user = findOrCreateByUsername(request.username()); // TODO: 동시성 문제 발생 가능
 
-        ReservationSlot slot = slotRepository.findByScheduleOrThrow( // TODO: 슬롯 배치 생성 추가
-                request.timeId(),
-                request.date(),
-                request.themeId()
-        );
+        ReservationSlot slot = slotRepository.findBySchedule(request.timeId(), request.date(), request.themeId())
+                .orElseThrow(() -> new BusinessException()); // TODO: 슬롯 배치 생성 추가
 
         LocalDateTime now = LocalDateTime.now(clock);
         validateReservable(slot, user, now);
@@ -61,16 +58,17 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationByAdmin(Long id) {
-        Reservation reservation = reservationRepository.findByIdOrThrow(id);
+        Reservation reservation = findByIdOrThrow(id);
         reservationRepository.deleteById(id);
         recalculateReservationsForSlot(reservation.getSlot());
     }
 
     @Transactional
     public void cancelReservationByUser(Long id, String username) { // TODO: 이름 확인하기 추가
-        Reservation reservation = reservationRepository.findByIdOrThrow(id);
+        Reservation reservation = findByIdOrThrow(id);
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationRepository.deleteById(id);
+
         recalculateReservationsForSlot(reservation.getSlot());
     }
 
@@ -107,5 +105,15 @@ public class ReservationService {
         }
 
         return updatedReservations;
+    }
+
+    private User findByUsernameOrThrow(String username) {
+        return userRepository.findByName(username)
+                .orElseThrow(() -> new BusinessException());
+    }
+
+    private Reservation findByIdOrThrow(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new BusinessException());
     }
 }

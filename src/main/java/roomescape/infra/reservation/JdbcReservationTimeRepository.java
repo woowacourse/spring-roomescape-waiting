@@ -1,85 +1,59 @@
 package roomescape.infra.reservation;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Time;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.exception.InternalServerException;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.exception.errors.RoomescapeErrors;
 
 @Repository
-@RequiredArgsConstructor
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
+    private static final String TABLE_NAME = "reservation_time";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_START_AT = "start_at";
-
-    private static final String INSERT_SQL = "insert into reservation_time(start_at) values (?)";
     private static final String FIND_ALL_SQL = "select id, start_at from reservation_time order by id";
-    private static final String FIND_BY_ID_SQL = "select id, start_at from reservation_time where id = ?";
-    private static final String FIND_BY_TIME_SQL = "select id, start_at from reservation_time where start_at = ?";
-    private static final String DELETE_BY_ID_SQL = "delete from reservation_time where id = ?";
+    private static final String DELETE_BY_ID_SQL = "delete from reservation_time where id = :id";
+    private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (rs, rowNum) -> ReservationTime.of(
+            rs.getLong(COLUMN_ID),
+            rs.getTime(COLUMN_START_AT).toLocalTime()
+    );
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert simpleJdbcInsert;
+
+    public JdbcReservationTimeRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
+                .withTableName(TABLE_NAME)
+                .usingGeneratedKeyColumns(COLUMN_ID);
+    }
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-            ps.setTime(1, Time.valueOf(reservationTime.getStartAt()));
-            return ps;
-        }, keyHolder);
-        long id = extractId(keyHolder);
-        return ReservationTime.create(
-            id,
-            reservationTime.getStartAt()
-        );
+        Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
+                .addValue(COLUMN_START_AT, Time.valueOf(reservationTime.getStartAt())));
+        return ReservationTime.of(extractId(key), reservationTime.getStartAt());
     }
 
     @Override
     public List<ReservationTime> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, reservationTimeRowMapper());
-    }
-
-    @Override
-    public Optional<ReservationTime> findById(Long id) {
-        List<ReservationTime> result = jdbcTemplate.query(FIND_BY_ID_SQL, reservationTimeRowMapper(), id);
-        return result.stream().findFirst();
+        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), RESERVATION_TIME_ROW_MAPPER);
     }
 
     @Override
     public int deleteById(Long id) {
-        return jdbcTemplate.update(DELETE_BY_ID_SQL, id);
+        return jdbcTemplate.update(DELETE_BY_ID_SQL, new MapSqlParameterSource().addValue(COLUMN_ID, id));
     }
 
-    @Override
-    public Optional<ReservationTime> findByStartAt(LocalTime startAt) {
-        List<ReservationTime> result = jdbcTemplate.query(FIND_BY_TIME_SQL, reservationTimeRowMapper(), startAt);
-        return result.stream().findFirst();
-    }
-
-    private RowMapper<ReservationTime> reservationTimeRowMapper() {
-        return (rs, rowNum) -> ReservationTime.create(
-            rs.getLong(COLUMN_ID),
-            rs.getTime(COLUMN_START_AT).toLocalTime()
-        );
-    }
-
-    private long extractId(KeyHolder keyHolder) {
-        if (keyHolder.getKey() == null) {
-            throw new InternalServerException(RoomescapeErrors.INVALID_GENERATED_KEY);
+    private long extractId(Number key) {
+        if (key == null) {
+            throw new IllegalStateException("생성 키를 조회할 수 없습니다.");
         }
-        return keyHolder.getKey().longValue();
+        return key.longValue();
     }
 }
