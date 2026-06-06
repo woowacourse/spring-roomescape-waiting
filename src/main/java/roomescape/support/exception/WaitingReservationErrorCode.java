@@ -19,7 +19,8 @@ public enum WaitingReservationErrorCode implements ErrorCode {
         "해당 예약 대기는 이미 예약으로 전환되었습니다.", "예약 목록을 확인하십시오."),
     WAITING_RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND,
         "지정한 식별자에 해당하는 예약 대기 엔티티를 찾을 수 없습니다.", "요청한 예약 대기 ID의 유효성 및 DB 존재 여부를 확인하십시오."),
-    ;
+    ALREADY_RESERVED(HttpStatus.CONFLICT,
+        "이미 예약 완료된 것은 예약 대기가 불가능합니다.", "선택한 옵션으로 예약된 것이 있는지 확인하세요.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -36,6 +36,7 @@ public class WaitingReservationService {
         Theme theme = themeService.findById(request.themeId());
         validateNotPast(date, time);
         validateSlotIsReserved(request);
+        validateAlreadyReserved(request);
         validateDuplicationOfWaitingReservation(request);
 
         WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now());
@@ -73,6 +74,16 @@ public class WaitingReservationService {
     private void validateNotPast(ReservationDate reservationDate, ReservationTime reservationTime) {
         if (reservationDate.isPast(reservationTime)) {
             throw new RoomescapeException(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED);
+        }
+    }
+
+    private void validateAlreadyReserved(WaitingReservationCreationRequest request) {
+        if(reservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(
+            request.name(),
+            request.dateId(),
+            request.timeId(),
+            request.themeId())) {
+            throw new RoomescapeException(WaitingReservationErrorCode.ALREADY_RESERVED);
         }
     }
 
