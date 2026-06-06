@@ -67,10 +67,7 @@ public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCas
     @Transactional
     public void deleteByIdForUser(long waitingId, long memberId) {
         Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
-                .orElse(null);
-        if (waiting == null) {
-            return;
-        }
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.WAITING_NOT_FOUND, waitingId));
 
         waiting.validateOwnedBy(memberId);
 

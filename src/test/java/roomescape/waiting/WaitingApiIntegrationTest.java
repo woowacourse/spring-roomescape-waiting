@@ -155,6 +155,22 @@ public class WaitingApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
+    @DisplayName("없는 대기를 취소하면 404를 응답한다.")
+    void canceling_missing_waiting_returns_not_found() {
+        String accessToken = loginWaitingUserToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .pathParam("id", 999)
+                .when().delete("/api/user/waitings/{id}")
+                .then().log().all()
+                .statusCode(404)
+                .body("success", is(false))
+                .body("error.code", is("WAITING_404"));
+    }
+
+    @Test
     @DisplayName("양수가 아닌 대기 id로 취소를 요청하면 400을 응답한다.")
     void non_positive_waiting_id_cancel_request_returns_bad_request() {
         String accessToken = loginWaitingUserToken();

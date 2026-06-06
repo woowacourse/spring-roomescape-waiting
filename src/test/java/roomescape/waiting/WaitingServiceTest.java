@@ -207,12 +207,14 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
-    void canceling_missing_waiting_is_treated_as_success() {
+    @DisplayName("없는 예약 대기를 취소할 경우 예외가 발생한다.")
+    void canceling_missing_waiting_throws_exception() {
         when(waitingRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> waitingService.deleteByIdForUser(999L, 1L))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> waitingService.deleteByIdForUser(999L, 1L))
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_FOUND)
+                );
 
         verify(waitingRepository, never()).deleteById(999L);
     }
