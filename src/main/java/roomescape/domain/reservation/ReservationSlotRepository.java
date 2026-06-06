@@ -7,6 +7,8 @@ public interface ReservationSlotRepository {
 
     Optional<ReservationSlot> findBySchedule(Long timeId, LocalDate date, Long themeId);
 
+    Optional<ReservationSlot> findByScheduleForUpdate(Long timeId, LocalDate date, Long themeId);
+
     ReservationSlot save(ReservationSlot reservation);
 
     boolean existsByTimeId(Long id);

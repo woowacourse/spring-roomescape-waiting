@@ -47,10 +47,12 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelReservation(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @RequestParam
+            @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
+            String name
     ) {
-        String username = "";
-        reservationService.cancelReservationByUser(id, username);
+        reservationService.cancelReservationByUser(id, name);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

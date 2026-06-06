@@ -58,6 +58,17 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             join theme th on rs.theme_id = th.id
             where rs.time_id = :timeId and rs.date = :date and rs.theme_id = :themeId
             """;
+    private static final String FIND_BY_SCHEDULE_FOR_UPDATE_SQL = """
+            select rs.id,
+                   rs.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.time_id = :timeId and rs.date = :date and rs.theme_id = :themeId
+            for update
+            """;
     private static final String FIND_BY_ID_SQL = """
             select rs.id,
                    rs.date,
@@ -146,15 +157,12 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     @Override
     public Optional<ReservationSlot> findBySchedule(Long timeId, LocalDate date, Long themeId) {
-        List<ReservationSlot> result = jdbcTemplate.query(
-                FIND_BY_SCHEDULE_SQL,
-                new MapSqlParameterSource()
-                        .addValue(PARAM_TIME_ID, timeId)
-                        .addValue(COLUMN_DATE, date)
-                        .addValue(PARAM_THEME_ID, themeId),
-                RESERVATION_SLOT_ROW_MAPPER
-        );
-        return result.stream().findFirst();
+        return findBySchedule(FIND_BY_SCHEDULE_SQL, timeId, date, themeId);
+    }
+
+    @Override
+    public Optional<ReservationSlot> findByScheduleForUpdate(Long timeId, LocalDate date, Long themeId) {
+        return findBySchedule(FIND_BY_SCHEDULE_FOR_UPDATE_SQL, timeId, date, themeId);
     }
 
     public Optional<ReservationSlot> findById(Long id) {
@@ -171,5 +179,17 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             throw new IllegalStateException("생성 키를 조회할 수 없습니다.");
         }
         return key.longValue();
+    }
+
+    private Optional<ReservationSlot> findBySchedule(String sql, Long timeId, LocalDate date, Long themeId) {
+        List<ReservationSlot> result = jdbcTemplate.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue(PARAM_TIME_ID, timeId)
+                        .addValue(COLUMN_DATE, date)
+                        .addValue(PARAM_THEME_ID, themeId),
+                RESERVATION_SLOT_ROW_MAPPER
+        );
+        return result.stream().findFirst();
     }
 }

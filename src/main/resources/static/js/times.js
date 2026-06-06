@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const response = await fetch(`/reservations/${id}`, {
+        const response = await fetch(`/reservations/${id}?name=${encodeURIComponent(state.userReservationName)}`, {
             method: "DELETE",
             headers: { Accept: "application/json" }
         });

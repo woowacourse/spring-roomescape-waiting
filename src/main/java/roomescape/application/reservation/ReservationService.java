@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
@@ -42,9 +43,9 @@ public class ReservationService {
 
     @Transactional
     public ReservationCreateResponse createReservation(ReservationCreateRequest request) {
-        User user = findOrCreateByUsername(request.username()); // TODO: 동시성 문제 발생 가능
+        User user = findOrCreateByUsername(request.username());
 
-        ReservationSlot slot = slotRepository.findBySchedule(request.timeId(), request.date(), request.themeId())
+        ReservationSlot slot = slotRepository.findByScheduleForUpdate(request.timeId(), request.date(), request.themeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND)); // TODO: 슬롯 배치 생성 추가
 
         LocalDateTime now = LocalDateTime.now(clock);
@@ -65,8 +66,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservationByUser(Long id, String username) { // TODO: 이름 확인하기 추가
+    public void cancelReservationByUser(Long id, String name) {
         Reservation reservation = findByIdOrThrow(id);
+        validateOwner(reservation, name);
+        lockReservationSlot(reservation);
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationRepository.deleteById(id);
 
@@ -75,13 +78,21 @@ public class ReservationService {
 
     private User findOrCreateByUsername(String username) {
         return userRepository.findByName(username)
-                .orElseGet(() -> userRepository.save(User.create(username)));
+                .orElseGet(() -> createUser(username));
+    }
+
+    private User createUser(String username) {
+        try {
+            return userRepository.save(User.create(username));
+        } catch (DuplicateKeyException exception) {
+            return findByUsernameOrThrow(username);
+        }
     }
 
     private void validateReservable(ReservationSlot slot, User user, LocalDateTime now) {
         slot.validateIsNotInPast(now);
 
-        if (reservationRepository.existsBySlotIdAndUserId(slot.getId(), user.getId())) { // TODO: 락 추가
+        if (reservationRepository.existsBySlotIdAndUserId(slot.getId(), user.getId())) {
             throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }
@@ -116,5 +127,19 @@ public class ReservationService {
     private Reservation findByIdOrThrow(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    private void validateOwner(Reservation reservation, String name) {
+        if (!reservation.getUser().getName().equals(name)) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_OWNER);
+        }
+    }
+
+    private void lockReservationSlot(Reservation reservation) {
+        slotRepository.findByScheduleForUpdate(
+                reservation.getSlot().getTime().getId(),
+                reservation.getSlot().getDate(),
+                reservation.getSlot().getTheme().getId()
+        ).orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND));
     }
 }
