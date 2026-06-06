@@ -67,7 +67,7 @@ public class ReservationRepository {
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    public Optional<Reservation> findByIdForUpdate(Long id) {
+    public Optional<Reservation> findById(Long id) {
         String sql = """
                 SELECT
                     r.id as reservation_id,
@@ -84,11 +84,15 @@ public class ReservationRepository {
                   ON r.time_id = rt.id
                 INNER JOIN theme as t
                   ON r.theme_id = t.id
-                WHERE r.id = ?
-                FOR UPDATE;
+                WHERE r.id = ?;
                 """;
         List<Reservation> result = jdbcTemplate.query(sql, reservationRowMapper, id);
         return result.stream().findAny();
+    }
+
+    public Optional<Reservation> findByIdForUpdate(Long id) {
+        return lockById(id)
+                .flatMap(this::findById);
     }
 
     public List<Reservation> findByDateRange(LocalDate startDate, LocalDate endDate) {
@@ -223,5 +227,10 @@ public class ReservationRepository {
         String sql = "SELECT count(*) FROM reservation WHERE time_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
         return count != null && count > 0;
+    }
+
+    private Optional<Long> lockById(Long id) {
+        String sql = "SELECT id FROM reservation WHERE id = ? FOR UPDATE;";
+        return jdbcTemplate.queryForList(sql, Long.class, id).stream().findFirst();
     }
 }
