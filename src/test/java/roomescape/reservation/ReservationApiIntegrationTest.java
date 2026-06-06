@@ -195,6 +195,69 @@ class ReservationApiIntegrationTest {
                 .statusCode(204);
     }
 
+    @DisplayName("예약 취소 시 첫 번째 대기자가 예약자로 전환됩니다.")
+    @Test
+    void cancel_reservation_promotes_first_waiting() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2028, 5, 6);
+        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        Long firstWaitingId = testHelper.insertWaiting("카야", date, themeId, timeId);
+        Long secondWaitingId = testHelper.insertWaiting("타스", date, themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "스타크")
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        String reservationOwner = jdbcTemplate.queryForObject(
+                "SELECT name FROM reservation WHERE id = ?",
+                String.class,
+                reservationId
+        );
+        Integer firstWaitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE id = ?",
+                Integer.class,
+                firstWaitingId
+        );
+        Integer secondWaitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE id = ?",
+                Integer.class,
+                secondWaitingId
+        );
+
+        assertThat(reservationOwner).isEqualTo("카야");
+        assertThat(firstWaitingCount).isZero();
+        assertThat(secondWaitingCount).isEqualTo(1);
+    }
+
+    @DisplayName("첫 번째 대기자가 예약으로 전환되면 다음 대기자의 순번이 1번이 됩니다.")
+    @Test
+    void promotion_reorders_remaining_waitings() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2028, 5, 6);
+        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        testHelper.insertWaiting("카야", date, themeId, timeId);
+        testHelper.insertWaiting("타스", date, themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "스타크")
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", equalTo("타스"))
+                .body("[0].order", equalTo(1));
+    }
+
     @DisplayName("동일한 예약 요청이 동시에 들어오면 1건만 성공하고 나머지는 409를 반환한다.")
     @Test
     void save_reservation_concurrently() throws Exception {
