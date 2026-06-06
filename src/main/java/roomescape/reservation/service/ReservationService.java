@@ -44,23 +44,23 @@ public class ReservationService {
     }
 
     @Transactional
-    public BookingResult createReservation(Member member, ReservationRequest request) {
+    public BookingResult book(Member member, ReservationRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
         LocalDate date = request.date();
-        Long timeId = request.timeId();
-        Long themeId = request.themeId();
 
-        reservationRepository.lockSlot(date, timeId, themeId);
-        validateNotAlreadyBooked(member.getId(), date, timeId, themeId);
+        reservationRepository.lockSlot(date, time.getId(), theme.getId());
+        validateNotAlreadyBooked(member.getId(), date, time.getId(), theme.getId());
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())) {
             return BookingResult.waiting(saveWaiting(member, date, time, theme));
         }
+        return reserveOrWaitOnConflict(member, date, time, theme);
+    }
 
+    private BookingResult reserveOrWaitOnConflict(Member member, LocalDate date, ReservationTime time, Theme theme) {
         try {
-            Reservation saved = reservationRepository.save(Reservation.of(member, date, time, theme));
-            return BookingResult.reserved(saved);
+            return BookingResult.reserved(reservationRepository.save(Reservation.of(member, date, time, theme)));
         } catch (DataIntegrityViolationException e) {
             return BookingResult.waiting(saveWaiting(member, date, time, theme));
         }

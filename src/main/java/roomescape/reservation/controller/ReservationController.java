@@ -44,7 +44,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<BookingResponse> createReservation(@LoginMember Member member,
                                                              @Valid @RequestBody ReservationRequest request) {
-        BookingResult result = reservationService.createReservation(member, request);
+        BookingResult result = reservationService.book(member, request);
         BookingResponse response = result.isWaiting()
                 ? BookingResponse.waiting(result.waiting())
                 : BookingResponse.reserved(result.reservation());

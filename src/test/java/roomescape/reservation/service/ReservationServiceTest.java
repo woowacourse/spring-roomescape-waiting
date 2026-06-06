@@ -68,7 +68,7 @@ class ReservationServiceTest {
     void 예약_생성_시_응답과_DB에_저장된다() {
         ReservationRequest request = new ReservationRequest(futureDate, time.getId(), theme.getId());
 
-        BookingResult result = reservationService.createReservation(member, request);
+        BookingResult result = reservationService.book(member, request);
 
         Reservation reservation = result.reservation();
         assertThat(result.isWaiting()).isFalse();
@@ -85,9 +85,9 @@ class ReservationServiceTest {
     @DisplayName("본인이 이미 예약한 슬롯에 다시 신청하면 예외가 발생한다")
     void 본인이_예약한_슬롯에_다시_신청하면_예외가_발생한다() {
         ReservationRequest request = new ReservationRequest(futureDate, time.getId(), theme.getId());
-        reservationService.createReservation(member, request);
+        reservationService.book(member, request);
 
-        assertThatThrownBy(() -> reservationService.createReservation(member, request))
+        assertThatThrownBy(() -> reservationService.book(member, request))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 예약한 슬롯입니다.");
     }
@@ -95,10 +95,10 @@ class ReservationServiceTest {
     @Test
     @DisplayName("이미 예약된 슬롯에 다른 사람이 신청하면 대기로 생성된다")
     void 예약된_슬롯에_다른_사람이_신청하면_대기로_생성된다() {
-        reservationService.createReservation(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
+        reservationService.book(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
         Member other = memberRepository.save(Member.of("other", "other@test.com", "1234"));
 
-        BookingResult result = reservationService.createReservation(
+        BookingResult result = reservationService.book(
                 other, new ReservationRequest(futureDate, time.getId(), theme.getId()));
 
         assertThat(result.isWaiting()).isTrue();
@@ -108,12 +108,12 @@ class ReservationServiceTest {
     @Test
     @DisplayName("본인이 이미 대기 중인 슬롯에 다시 신청하면 예외가 발생한다")
     void 본인이_대기중인_슬롯에_다시_신청하면_예외가_발생한다() {
-        reservationService.createReservation(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
+        reservationService.book(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
         Member other = memberRepository.save(Member.of("other", "other@test.com", "1234"));
         ReservationRequest request = new ReservationRequest(futureDate, time.getId(), theme.getId());
-        reservationService.createReservation(other, request);
+        reservationService.book(other, request);
 
-        assertThatThrownBy(() -> reservationService.createReservation(other, request))
+        assertThatThrownBy(() -> reservationService.book(other, request))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 대기 중인 슬롯입니다.");
     }
@@ -123,7 +123,7 @@ class ReservationServiceTest {
     void 과거_시간으로는_예약을_생성할_수_없다() {
         ReservationRequest request = new ReservationRequest(LocalDate.now().minusDays(1), time.getId(), theme.getId());
 
-        assertThatThrownBy(() -> reservationService.createReservation(member, request))
+        assertThatThrownBy(() -> reservationService.book(member, request))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 시간에는 예약할 수 없습니다.");
     }
@@ -131,8 +131,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("회원 ID로 본인의 예약 목록을 조회한다")
     void 회원ID로_본인_예약_목록을_조회한다() {
-        reservationService.createReservation(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
-        reservationService.createReservation(member, new ReservationRequest(futureDate, otherTime.getId(), theme.getId()));
+        reservationService.book(member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
+        reservationService.book(member, new ReservationRequest(futureDate, otherTime.getId(), theme.getId()));
 
         List<Reservation> reservations = reservationService.getReservationsByMember(member);
 
@@ -142,7 +142,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 삭제하면 DB에서 제거된다")
     void 예약_삭제_시_DB에서_제거된다() {
-        Long reservationId = reservationService.createReservation(
+        Long reservationId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
         reservationService.deleteReservation(reservationId, member);
@@ -155,7 +155,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 취소하면 같은 슬롯의 1순위 대기가 예약으로 승격된다")
     void 예약_취소_시_1순위_대기가_승격된다() {
-        Long reservationId = reservationService.createReservation(
+        Long reservationId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
         Member waiter = memberRepository.save(Member.of("waiter", "waiter@test.com", "1234"));
         ReservationWaiting waiting = waitingRepository.save(
@@ -173,7 +173,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("대기가 없는 슬롯의 예약을 취소하면 승격 없이 삭제만 된다")
     void 대기_없는_예약_취소_시_삭제만_된다() {
-        Long reservationId = reservationService.createReservation(
+        Long reservationId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
         reservationService.deleteReservation(reservationId, member);
@@ -196,7 +196,7 @@ class ReservationServiceTest {
     @DisplayName("다른 사람의 예약은 삭제할 수 없다")
     void 타인의_예약은_삭제할_수_없다() {
         Member other = memberRepository.save(Member.of("user2", "user2@test.com", "1234"));
-        Long reservationId = reservationService.createReservation(
+        Long reservationId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
         assertThatThrownBy(() -> reservationService.deleteReservation(reservationId, other))
@@ -207,7 +207,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약을 조회하면 예외가 발생한다")
     void 존재하지_않는_예약_조회_시_예외가_발생한다() {
-        Long reservationId = reservationService.createReservation(
+        Long reservationId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
         reservationService.deleteReservation(reservationId, member);
 
@@ -219,7 +219,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약 날짜·시간을 변경하면 응답과 DB에 반영된다")
     void 예약_변경_시_응답과_DB에_반영된다() {
-        Long reservationId = reservationService.createReservation(
+        Long reservationId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
         LocalDate newDate = futureDate.plusDays(1);
 
@@ -236,8 +236,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("변경하려는 슬롯이 이미 예약되어 있으면 예외가 발생한다")
     void 변경_대상_슬롯이_이미_예약되면_예외가_발생한다() {
-        reservationService.createReservation(member, new ReservationRequest(futureDate, otherTime.getId(), theme.getId()));
-        Long targetId = reservationService.createReservation(
+        reservationService.book(member, new ReservationRequest(futureDate, otherTime.getId(), theme.getId()));
+        Long targetId = reservationService.book(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
 
         assertThatThrownBy(() -> reservationService.updateReservation(

@@ -89,7 +89,7 @@ class ReservationConcurrencyTest {
         });
         executor.submit(() -> {
             await(start);
-            reservationService.createReservation(
+            reservationService.book(
                     newcomer, new ReservationRequest(futureDate, time.getId(), theme.getId()));
         });
 
@@ -112,12 +112,12 @@ class ReservationConcurrencyTest {
 
         executor.submit(() -> {
             await(start);
-            reservationService.createReservation(
+            reservationService.book(
                     reserver, new ReservationRequest(futureDate, time.getId(), theme.getId()));
         });
         executor.submit(() -> {
             await(start);
-            reservationService.createReservation(
+            reservationService.book(
                     newcomer, new ReservationRequest(futureDate, time.getId(), theme.getId()));
         });
 
