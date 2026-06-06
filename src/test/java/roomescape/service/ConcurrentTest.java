@@ -20,7 +20,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.command.WaitingCommand;
 
@@ -125,12 +126,9 @@ public class ConcurrentTest {
                 .as("최종 reservation은 0건(대기취소 우선) 또는 1건(승격) 둘 중 하나, 모순 상태 없음")
                 .isIn(0, 1);
 
-        List<Throwable> conflicts = errors.stream()
-                .filter(e -> e instanceof ConflictException)
-                .toList();
-        assertThat(conflicts)
-                .as("UNIQUE 충돌은 자동 X-lock + 명시 락 조합으로 막아야 함")
-                .isEmpty();
+        assertThat(errors)
+                .as("waiting 취소가 race로 실패하면 404(NotFoundException)만 허용")
+                .allMatch(e -> e instanceof NotFoundException);
     }
 
     @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
@@ -167,7 +165,7 @@ public class ConcurrentTest {
         executor.shutdown();
 
         assertThat(finished)
-                .as("두 작업이 5초 안에 끝나야 함")
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
                 .isTrue();
 
         int reservationCount = countReservations();
@@ -179,12 +177,10 @@ public class ConcurrentTest {
         assertThat(reservationCount)
                 .as("승격된 reservation 1건이 남아야 함")
                 .isEqualTo(1);
-        List<Throwable> conflicts = errors.stream()
-                .filter(e -> e instanceof ConflictException)
-                .toList();
-        assertThat(conflicts)
-                .as("UNIQUE 충돌은 자동 X-lock + 명시 락 조합으로 막아야 함")
-                .isEmpty();
+
+        assertThat(errors)
+                .as("delete race로 진 쪽은 404(NotFoundException)만 허용")
+                .allMatch(e -> e instanceof NotFoundException);
     }
 
     @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
@@ -195,12 +191,14 @@ public class ConcurrentTest {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CountDownLatch startGate = new CountDownLatch(1);
         CountDownLatch finishGate = new CountDownLatch(2);
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
 
         executor.submit(() -> {
             try {
                 startGate.await();
                 waitingService.save(new WaitingCommand(applicantName, date, timeId, themeId));
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                errors.add(e);
             } finally {
                 finishGate.countDown();
             }
@@ -210,7 +208,8 @@ public class ConcurrentTest {
             try {
                 startGate.await();
                 reservationService.cancelReservation(reservationId, CANCELLER_NAME);
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                errors.add(e);
             } finally {
                 finishGate.countDown();
             }
@@ -221,7 +220,7 @@ public class ConcurrentTest {
         executor.shutdown();
 
         assertThat(finished)
-                .as("두 작업이 5초 안에 끝나야 함")
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
                 .isTrue();
 
         int reservationCount = countReservations();
@@ -231,6 +230,10 @@ public class ConcurrentTest {
         assertThat(dangling)
                 .as("dangling waiting (예약 없는 슬롯에 대기만 떠 있는 상태) 발생 금지")
                 .isFalse();
+
+        assertThat(errors)
+                .as("waiting 신청이 race로 실패하면 422(UnprocessableEntityException)만 허용")
+                .allMatch(e -> e instanceof UnprocessableEntityException);
     }
 
     @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
@@ -278,7 +281,7 @@ public class ConcurrentTest {
         executor.shutdown();
 
         assertThat(finished)
-                .as("두 작업이 5초 안에 끝나야 함")
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
                 .isTrue();
 
         int reservationCount = countReservations();
@@ -311,12 +314,14 @@ public class ConcurrentTest {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CountDownLatch startGate = new CountDownLatch(1);
         CountDownLatch finishGate = new CountDownLatch(2);
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
 
         executor.submit(() -> {
             try {
                 startGate.await();
                 reservationService.changeReservationSlot(reservationId, changeCommand);
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                errors.add(e);
             } finally {
                 finishGate.countDown();
             }
@@ -326,7 +331,8 @@ public class ConcurrentTest {
             try {
                 startGate.await();
                 waitingService.save(waitCommand);
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                errors.add(e);
             } finally {
                 finishGate.countDown();
             }
@@ -337,7 +343,7 @@ public class ConcurrentTest {
         executor.shutdown();
 
         assertThat(finished)
-                .as("두 작업이 5초 안에 끝나야 함")
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
                 .isTrue();
 
         int newSlotReservation = jdbcTemplate.queryForObject(
@@ -353,6 +359,10 @@ public class ConcurrentTest {
         assertThat(dangling)
                 .as("새 슬롯에 dangling waiting (예약 없는데 대기만 있음) 발생 금지")
                 .isFalse();
+
+        assertThat(errors)
+                .as("waiting 신청이 race로 실패하면 422(UnprocessableEntityException)만 허용")
+                .allMatch(e -> e instanceof UnprocessableEntityException);
     }
 
     @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
@@ -365,12 +375,14 @@ public class ConcurrentTest {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CountDownLatch startGate = new CountDownLatch(1);
         CountDownLatch finishGate = new CountDownLatch(2);
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
 
         executor.submit(() -> {
             try {
                 startGate.await();
                 reservationService.changeReservationSlot(reservationId, changeCommand);
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
+                errors.add(t);
             } finally {
                 finishGate.countDown();
             }
@@ -380,7 +392,8 @@ public class ConcurrentTest {
             try {
                 startGate.await();
                 waitingService.delete(waitingId, WAITER_NAME);
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
+                errors.add(t);
             } finally {
                 finishGate.countDown();
             }
@@ -391,7 +404,7 @@ public class ConcurrentTest {
         executor.shutdown();
 
         assertThat(finished)
-                .as("두 작업이 5초 안에 끝나야 함")
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
                 .isTrue();
 
         int oldSlotWaiting = countWaitings();
@@ -399,6 +412,10 @@ public class ConcurrentTest {
         assertThat(oldSlotWaiting)
                 .as("old 슬롯의 waiting은 promote되거나 사용자 취소로 사라져야 함 (0건)")
                 .isZero();
+
+        assertThat(errors)
+                .as("waiting 취소가 race로 실패하면 404(NotFoundException)만 허용")
+                .allMatch(e -> e instanceof NotFoundException);
     }
 
     private int countReservations() {
