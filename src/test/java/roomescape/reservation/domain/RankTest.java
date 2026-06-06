@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.global.exception.RoomEscapeException;
 
 class RankTest {
@@ -54,14 +56,27 @@ class RankTest {
     }
 
     @DisplayName("양수가 아닌 순번으로 대기 순번을 미룰 시 예외를 테스트합니다.")
-    @Test
-    void postpone_rank_with_non_positive_steps_exception() {
+    @ValueSource(ints = {0, -1, -5})
+    @ParameterizedTest
+    void postpone_rank_with_non_positive_steps_exception(int steps) {
         Rank rank = Rank.builder()
                 .value(1)
                 .build();
 
-        assertThatThrownBy(() -> rank.postpone(0, 4))
+        assertThatThrownBy(() -> rank.postpone(steps, 4))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("미룰 순번은 양수여야 합니다.");
+    }
+
+    @DisplayName("가장 마지막 대기 순번이 대기를 미룰 시 예외를 테스트합니다.")
+    @Test
+    void postpone_last_rank_exception() {
+        Rank rank = Rank.builder()
+                .value(4)
+                .build();
+
+        assertThatThrownBy(() -> rank.postpone(1, 4))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("마지막 대기 순번은 대기를 미룰 수 없습니다.");
     }
 }
