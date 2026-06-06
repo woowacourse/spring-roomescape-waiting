@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginRequest;
-import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.SignupRequest;
 import roomescape.member.repository.MemberRepository;
 
@@ -21,10 +20,12 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse signup(SignupRequest request) {
-        Member member = Member.restore(null, request.name(), request.email(), request.password());
-        Member saved = memberRepository.save(member);
-        return MemberResponse.from(saved);
+    public Member signup(SignupRequest request) {
+        if (memberRepository.existsByEmail(request.email())) {
+            throw new BusinessException(HttpStatus.CONFLICT, "이미 가입된 이메일입니다.");
+        }
+        Member member = Member.of(request.name(), request.email(), request.password());
+        return memberRepository.save(member);
     }
 
     public Member login(LoginRequest request) {

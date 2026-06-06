@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadMyReservations() {
   Promise.all([
-    fetch('/reservations').then(r => {
+    fetch('/bookings').then(r => {
       if (r.status === 401) {
         showToast('로그인이 필요합니다.');
         setTimeout(() => { window.location.href = '/login'; }, 1000);
@@ -77,7 +77,7 @@ function renderAll(reservations, waitings) {
           <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
             onclick="openEditModal(${data.id}, '${data.date}', ${data.themeId})">변경</button>
           <button class="btn btn-danger"
-            onclick="cancelReservation(${data.id}, this)">취소</button>
+            onclick="cancelReservation(${data.id})">취소</button>
         </td>
       `;
     } else {
@@ -88,7 +88,7 @@ function renderAll(reservations, waitings) {
         <td><span class="status-badge status-badge--waiting">대기 ${data.turn}순번</span></td>
         <td style="text-align:right;">
           <button class="btn btn-danger"
-            onclick="cancelWaiting(${data.id}, this)">취소</button>
+            onclick="cancelWaiting(${data.id})">취소</button>
         </td>
       `;
     }
@@ -104,11 +104,11 @@ function formatTime(value) {
 
 function cancelReservation(id, btn) {
   if (!confirm('예약을 취소하시겠습니까?')) return;
-  fetch(`/reservations/${id}`, {method: 'DELETE'})
+  fetch(`/bookings/${id}`, {method: 'DELETE'})
     .then(res => {
       if (res.status === 204) {
-        btn.closest('tr').remove();
         showToast('예약이 취소되었습니다.', 'success');
+        loadMyReservations();
         return;
       }
       return res.json().then(b => { throw new Error(b.message || '취소에 실패했습니다.'); });
@@ -121,8 +121,8 @@ function cancelWaiting(id, btn) {
   fetch(`/waitings/${id}`, {method: 'DELETE'})
     .then(res => {
       if (res.status === 204) {
-        btn.closest('tr').remove();
         showToast('대기가 취소되었습니다.', 'success');
+        loadMyReservations();
         return;
       }
       return res.json().then(b => { throw new Error(b.message || '취소에 실패했습니다.'); });
@@ -170,7 +170,7 @@ function submitEdit() {
   const date = datePicker.input.value;
   const timeId = document.getElementById('edit-time').value;
   if (!date || !timeId) { showToast('날짜와 시간을 선택해주세요.'); return; }
-  fetch(`/reservations/${editingId}`, {
+  fetch(`/bookings/${editingId}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({date, timeId: parseInt(timeId)})

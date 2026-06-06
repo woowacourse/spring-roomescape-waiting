@@ -1,5 +1,4 @@
-const RESERVATION_API = '/reservations';
-const WAITING_API = '/waitings';
+const RESERVATION_API = '/bookings';
 const THEME_API = '/themes/top/10';
 
 const state = {
@@ -194,15 +193,10 @@ function confirmBooking() {
     showToast('날짜·테마·시간을 모두 선택해주세요.');
     return;
   }
-
-  if (state.mode === 'waiting') {
-    submitWaiting();
-  } else {
-    submitReservation();
-  }
+  submitBooking();
 }
 
-function submitReservation() {
+function submitBooking() {
   fetch(RESERVATION_API, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -210,28 +204,13 @@ function submitReservation() {
   })
     .then(res => {
       if (res.status === 201) return res.json();
-      return res.json().then(body => { throw new Error(body.message || '예약에 실패했습니다.'); });
+      return res.json().then(body => { throw new Error(body.message || '신청에 실패했습니다.'); });
     })
-    .then(() => {
-      showToast('예약이 완료되었습니다.', 'success');
-      clearBookingBar();
-      refreshTimes();
-    })
-    .catch(err => showToast(err.message));
-}
-
-function submitWaiting() {
-  fetch(WAITING_API, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({date: state.date, timeId: state.timeId, themeId: state.themeId})
-  })
-    .then(res => {
-      if (res.status === 201) return res.json();
-      return res.json().then(b => { throw new Error(b.message || '대기 신청에 실패했습니다.'); });
-    })
-    .then(() => {
-      showToast('대기 신청이 완료되었습니다.', 'success');
+    .then(booking => {
+      const fallback = booking.status === 'WAITING'
+        ? '대기 신청이 완료되었습니다.'
+        : '예약이 완료되었습니다.';
+      showToast(booking.message || fallback, 'success');
       clearBookingBar();
       refreshTimes();
     })

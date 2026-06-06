@@ -13,9 +13,11 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findByMemberId(Long memberId);
 
+    List<WaitingWithTurn> findWithTurnByMemberId(Long memberId);
+
     Optional<ReservationWaiting> findById(Long id);
 
     boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 
-    Long calculateTurn(Long waitingId, LocalDate date, Long timeId, Long themeId);
+    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -27,7 +26,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getLong("member_id"),
                     resultSet.getString("member_name"),
                     resultSet.getString("member_email"),
-                    resultSet.getString("member_password")
+                    resultSet.getString("member_password"),
+                    roomescape.member.domain.Role.valueOf(resultSet.getString("member_role"))
             ),
             resultSet.getDate("date").toLocalDate(),
             ReservationTime.restore(
@@ -68,7 +68,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findById(Long id) {
         String query = """
                 SELECT r.id AS reservation_id, r.date,
-                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation r
@@ -84,7 +84,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findByMemberId(Long memberId) {
         String query = """
                 SELECT r.id AS reservation_id, r.date,
-                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation r
@@ -118,14 +118,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void lockSlot(LocalDate date, Long timeId, Long themeId) {
+        String query = "SELECT id FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? FOR UPDATE";
+        jdbcTemplate.query(query, idMapper, date, timeId, themeId);
+    }
+
+    @Override
     public void deleteById(Long id) {
         String query = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 
-    @Override
-    public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
-        String query = "SELECT id FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?";
-        return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
-    }
 }

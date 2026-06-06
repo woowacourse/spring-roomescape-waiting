@@ -52,7 +52,7 @@ class ThemeServiceTest {
         themeA = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
         themeB = themeRepository.save(Theme.restore(null, "테마B", "설명B", "https://b.com"));
         themeC = themeRepository.save(Theme.restore(null, "테마C", "설명C", "https://c.com"));
-        member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
+        member = memberRepository.save(Member.of("user1", "user1@test.com", "1234"));
         time = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
     }
 

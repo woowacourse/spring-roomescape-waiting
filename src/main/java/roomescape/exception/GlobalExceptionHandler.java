@@ -1,7 +1,5 @@
 package roomescape.exception;
 
-import java.util.Comparator;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -21,6 +19,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.exception.business.BusinessException;
+
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -94,6 +95,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException e) {
+        log.warn("비즈니스 규칙 위반 [{}]: {}", e.getStatus(), e.getMessage(), e);
         return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getStatus().name(), e.getMessage()));
     }
 

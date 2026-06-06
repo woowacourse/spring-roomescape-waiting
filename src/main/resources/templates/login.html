@@ -60,7 +60,6 @@
         return res.json().then(b => { throw new Error(b.message || '로그인에 실패했습니다.'); });
       })
       .then(() => {
-        document.cookie = 'auth=1; path=/';
         window.location.href = '/';
       })
       .catch(err => showToast(err.message));

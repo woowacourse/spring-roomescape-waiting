@@ -35,9 +35,20 @@ class ReservationWaitingControllerTest {
                 .extract().cookie("JSESSIONID");
     }
 
-    @DisplayName("대기 생성 성공")
+    @DisplayName("이미 예약된 슬롯에 신청하면 대기로 생성된다")
     @Test
     void 대기_생성_성공() {
+        String date = LocalDate.now().plusDays(20).toString();
+
+        given()
+                .cookie("JSESSIONID", sessionId)
+                .contentType(ContentType.JSON)
+                .body(Map.of("date", date, "timeId", 1, "themeId", 1))
+                .post("/bookings")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .body("status", equalTo("RESERVED"));
+
         String user2Session = given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "user2@test.com", "password", "1234"))
@@ -45,15 +56,14 @@ class ReservationWaitingControllerTest {
                 .then()
                 .extract().cookie("JSESSIONID");
 
-        String date = LocalDate.now().plusDays(11).toString();
-
         given()
                 .cookie("JSESSIONID", user2Session)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", date, "timeId", 1, "themeId", 1))
-                .post("/waitings")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
+                .body("status", equalTo("WAITING"))
                 .body("memberName", equalTo("user2"));
     }
 
@@ -78,13 +88,13 @@ class ReservationWaitingControllerTest {
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
-    @DisplayName("로그인 없이 대기 생성 시 401")
+    @DisplayName("로그인 없이 예약/대기 생성 시 401")
     @Test
-    void 비인증_대기_생성_실패() {
+    void 비인증_생성_실패() {
         given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", "2099-08-05", "timeId", 1, "themeId", 1))
-                .post("/waitings")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }

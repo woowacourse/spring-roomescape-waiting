@@ -52,7 +52,7 @@ class Roomescapee2eTest {
                 .cookie("JSESSIONID", user3Session)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", futureDate, "timeId", 2, "themeId", 1))
-                .when().post("/waitings")
+                .when().post("/bookings")
                 .then().log().all()
                 .statusCode(201);
 
@@ -78,7 +78,7 @@ class Roomescapee2eTest {
                 .cookie("JSESSIONID", user3Session)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", futureDate, "timeId", 2, "themeId", 1))
-                .when().post("/waitings")
+                .when().post("/bookings")
                 .then().log().all()
                 .statusCode(201);
 

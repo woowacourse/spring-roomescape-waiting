@@ -42,7 +42,7 @@ class ReservationControllerTest {
                 .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", "2099-08-05", "timeId", 1, "themeId", 2))
-                .post("/reservations")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("memberName", equalTo("user1"));
@@ -53,7 +53,7 @@ class ReservationControllerTest {
     void 내_예약_조회_성공() {
         given()
                 .cookie("JSESSIONID", sessionId)
-                .get("/reservations")
+                .get("/bookings")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", greaterThanOrEqualTo(1));
@@ -64,7 +64,7 @@ class ReservationControllerTest {
     void 예약_삭제_성공() {
         given()
                 .cookie("JSESSIONID", sessionId)
-                .delete("/reservations/11")
+                .delete("/bookings/11")
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
@@ -75,7 +75,7 @@ class ReservationControllerTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("date", "2099-08-05", "timeId", 1, "themeId", 1))
-                .post("/reservations")
+                .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
