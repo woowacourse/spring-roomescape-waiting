@@ -80,11 +80,7 @@ public class ReservationService {
         }
         reservationRepository.deleteById(id);
 
-        try {
-            reservationWaitingService.promoteWaiting(reservation.getSlot());
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.RESERVATION_CANCEL_FAILED);
-        }
+        reservationWaitingService.promoteWaiting(reservation.getSlot());
     }
 
     @Transactional
@@ -104,11 +100,7 @@ public class ReservationService {
         Reservation validReservation = reservation.reschedule(request.date(), time, clock);
         reservationRepository.update(id, validReservation.getSlot());
 
-        try {
-            reservationWaitingService.promoteWaiting(slot);
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.RESERVATION_CANCEL_FAILED);
-        }
+        reservationWaitingService.promoteWaiting(slot);
         return ReservationResponse.from(getById(id));
     }
 

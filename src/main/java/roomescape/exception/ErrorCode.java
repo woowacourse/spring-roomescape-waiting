@@ -23,9 +23,7 @@ public enum ErrorCode {
     DUPLICATE_WAITING(HttpStatus.CONFLICT, "같은 슬롯에 중복 대기할 수 없습니다."),
     TIME_HAS_RESERVATION(HttpStatus.CONFLICT, "예약이 존재하는 시간은 삭제할 수 없습니다."),
     THEME_HAS_RESERVATION(HttpStatus.CONFLICT, "예약이 존재하는 테마는 삭제할 수 없습니다."),
-    WAITING_ON_OWN_RESERVATION(HttpStatus.CONFLICT, "자기 예약에는 대기할 수 없습니다."),
-
-    RESERVATION_CANCEL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "예약 취소 처리 중 오류가 발생했습니다. 관리자에게 문의해주세요.");
+    WAITING_ON_OWN_RESERVATION(HttpStatus.CONFLICT, "자기 예약에는 대기할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
