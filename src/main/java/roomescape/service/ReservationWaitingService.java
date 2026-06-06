@@ -35,10 +35,11 @@ public class ReservationWaitingService {
     public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
-        ReservationSlot slot = new ReservationSlot(command.reservationDate(),reservationTime,theme);
+        ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);
 
         validateReservationExists(slot);
         slot.validateNotPast(now);
+        validateNotReservedBySameUser(command.name(), slot);
         validateUniqueReservationWaiting(command.name(), slot);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot.getDate(), reservationTime, theme);
@@ -83,6 +84,12 @@ public class ReservationWaitingService {
         boolean exists = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(name, slot);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
+        }
+    }
+
+    private void validateNotReservedBySameUser(String name, ReservationSlot slot) {
+        if (reservationDao.existsByNameAndDateAndTimeIdAndThemeId(name, slot)) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 }

@@ -11,10 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 
 @Repository
 public class ReservationDao {
@@ -114,6 +111,16 @@ public class ReservationDao {
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?""";
         return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), reservationId);
+    }
+
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, ReservationSlot slot) {
+        String sql = """
+                SELECT COUNT(*) > 0 
+                FROM reservation 
+                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
     }
 
     public Reservation update(Long reservationId, LocalDate date, long timeId) {

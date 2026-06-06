@@ -155,6 +155,20 @@ class ReservationWaitingServiceTest {
         assertThat(second.order()).isEqualTo(2);
     }
 
+    @Test
+    void 이미_같은_슬롯에_예약한_사용자는_예약_대기를_신청할_수_없다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        reservationDao.insert(Reservation.createWithoutId("맥스", date, time, theme));
+
+        CreateReservationWaitingCommand command = new CreateReservationWaitingCommand("맥스", date, time.getId(), theme.getId());
+
+        assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(command, LocalDateTime.now()))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
@@ -162,5 +176,4 @@ class ReservationWaitingServiceTest {
     private Theme saveTheme(String name, String description, String thumbnail) {
         return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
     }
-
 }
