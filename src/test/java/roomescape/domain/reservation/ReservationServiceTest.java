@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
@@ -558,6 +559,52 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("확정 예약자가 예약을 취소하면 대기 1번 예약자만 확정으로 변경된다.")
+    void promoteFirstWaitingReservation() {
+        // given
+        Clock confirmedClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        Clock firstWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 1));
+        Clock secondWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 2));
+        Clock cancelClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 3));
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId("공포", "무섭다", "theme-url")
+        );
+        ReservationSlot reservationSlot = reservationSlotRepository.save(ReservationSlot.createWithoutId(
+            reservationDate, reservationTime, theme
+        ));
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User firstWaitingUser = userRepository.save(User.createWithoutId("수민"));
+        User secondWaitingUser = userRepository.save(User.createWithoutId("말랑"));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, confirmedUser, ReservationStatus.CONFIRMED, confirmedClock
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, firstWaitingUser, ReservationStatus.WAITING, firstWaitingClock
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, secondWaitingUser, ReservationStatus.WAITING, secondWaitingClock
+        ));
+
+        // when
+        ReservationService reservationService = createReservationService(cancelClock);
+        reservationService.cancelUserReservation(confirmedUser.getId());
+
+        // then
+        ReservationWithWaitingNumber updatedReservation = reservationRepository.findReservations("수민").getFirst();
+        ReservationWithWaitingNumber waitingReservation = reservationRepository.findReservations("말랑").getFirst();
+        assertSoftly(softly -> {
+            assertThat(updatedReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+            assertThat(waitingReservation.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+        });
+    }
+
+    @Test
     @DisplayName("예약 날짜와 시간을 수정한다.")
     void updateReservationDateAndTime() {
         // given
@@ -641,11 +688,14 @@ class ReservationServiceTest {
         reservationService.updateReservation(confirmedReservation.getId(), request);
 
         // then
-        Reservation updatedConfirmedReservation = reservationRepository.findActiveReservation(confirmedReservation.getId())
+        Reservation updatedConfirmedReservation = reservationRepository.findActiveReservation(
+                confirmedReservation.getId())
             .orElseThrow();
-        Reservation updatedFirstWaitingReservation = reservationRepository.findActiveReservation(firstWaitingReservation.getId())
+        Reservation updatedFirstWaitingReservation = reservationRepository.findActiveReservation(
+                firstWaitingReservation.getId())
             .orElseThrow();
-        Reservation updatedSecondWaitingReservation = reservationRepository.findActiveReservation(secondWaitingReservation.getId())
+        Reservation updatedSecondWaitingReservation = reservationRepository.findActiveReservation(
+                secondWaitingReservation.getId())
             .orElseThrow();
         assertSoftly(softly -> {
             assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
