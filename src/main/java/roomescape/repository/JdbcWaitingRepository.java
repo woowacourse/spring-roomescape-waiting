@@ -42,8 +42,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     resultSet.getString("reservation_theme_image_url")
             );
 
-            ReservationSlot slot = ReservationSlot.of(resultSet.getDate("date").toLocalDate(), time,
-                    theme);
+            ReservationSlot slot = ReservationSlot.of(
+                    resultSet.getDate("date").toLocalDate(),
+                    time,
+                    theme
+            );
 
             return Waiting.of(
                     resultSet.getLong("id"),
@@ -176,6 +179,59 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 .addValue("theme_id", theme.getId());
 
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, Long.class));
+    }
+
+    @Override
+    public Optional<Waiting> findPromotableWaitingBySlot(ReservationSlot slot) {
+        String sql = """
+                SELECT w.id AS id,
+                            w.name,
+                            w.date,
+                            w.waiting_number,
+                            t.id AS reservation_time_id,
+                            t.start_at AS time_value,
+                            th.id AS reservation_theme_id,
+                           th.name AS reservation_theme_name,
+                           th.description AS reservation_theme_description,
+                           th.image_url AS reservation_theme_image_url
+                FROM waiting AS w
+                INNER JOIN reservation_time AS t 
+                ON w.time_id = t.id
+                INNER JOIN theme AS th
+                 ON w.theme_id = th.id
+                WHERE w.date = :date
+                    AND t.id = :time_id
+                    AND th.id = :theme_id
+                LIMIT 1;
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", slot.getDate())
+                .addValue("time_id", slot.getTime().getId())
+                .addValue("theme_id", slot.getTheme().getId());
+
+        List<Waiting> result = jdbcTemplate.query(sql, params, getWaitingRowMapper());
+        return result.stream().findFirst();
+    }
+
+    @Override
+    public Long countWaitingOrder(Waiting waiting) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM waiting
+                WHERE date = :date
+                      AND time_id = :time_id
+                      AND theme_id = :theme_id 
+                      AND waiting_number <= :waiting_number
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", waiting.getReservationSlot().getDate())
+                .addValue("time_id", waiting.getReservationSlot().getTime().getId())
+                .addValue("theme_id", waiting.getReservationSlot().getTheme().getId())
+                .addValue("waiting_number", waiting.getWaitingNumber());
+
+        return jdbcTemplate.queryForObject(sql, params, Long.class);
     }
 
     @Override

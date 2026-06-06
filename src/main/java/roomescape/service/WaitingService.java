@@ -77,8 +77,26 @@ public class WaitingService {
         return maxWaitingNumber + 1L;
     }
 
+    @Transactional(readOnly = true)
+    public List<WaitingResponseDTO> readAllWaiting() {
+        return waitingRepository.findAll().stream()
+                .map(waiting -> calculateWaitingNumber(waiting))
+                .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
+    }
+
+    private Waiting calculateWaitingNumber(Waiting waiting) {
+        return Waiting.of(
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getReservationSlot(),
+                waitingRepository.countWaitingOrder(waiting)
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<WaitingResponseDTO> findWaitingsByName(String name) {
         return waitingRepository.findByName(name).stream()
+                .map(waiting -> calculateWaitingNumber(waiting))
                 .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
     }
 
@@ -88,17 +106,5 @@ public class WaitingService {
                 .orElseThrow(() -> new RoomEscapeException(WaitingErrorCode.WAITING_NOT_FOUND));
         existWaiting.validateNotPastTime(LocalDateTime.now());
         waitingRepository.delete(id);
-    }
-
-    @Transactional(readOnly = true)
-    public List<WaitingResponseDTO> readAllWaiting() {
-        return waitingRepository.findAll().stream().map(WaitingResponseDTO::from).toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<WaitingResponseDTO> findPromotableWaitings() {
-        return waitingRepository.findAll().stream()
-                .filter(waiting -> waiting.getWaitingNumber() == 1L).map(WaitingResponseDTO::from)
-                .toList();
     }
 }

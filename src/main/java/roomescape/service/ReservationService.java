@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
@@ -22,6 +24,7 @@ import roomescape.exception.ThemeErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -30,13 +33,16 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(Clock clock, ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+            WaitingRepository waitingRepository) {
         this.clock = clock;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -117,7 +123,18 @@ public class ReservationService {
         slotForUpdate.validateNotPastTime(now);
         validateDuplicateReservation(slotForUpdate);
 
-        return ReservationResponseDTO.from(reservationRepository.update(id, slotForUpdate));
+        Reservation updatedReservation = reservationRepository.update(id, slotForUpdate);
+
+        Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlot(reservation.getReservationSlot());
+        promotableWaiting.ifPresent(waiting -> {
+            Reservation promotedReservation = Reservation.create(
+                    waiting.getName(),
+                    waiting.getReservationSlot()
+            );
+            reservationRepository.save(promotedReservation);
+            waitingRepository.delete(waiting.getId());
+        });
+        return ReservationResponseDTO.from(updatedReservation);
     }
 
     @Transactional

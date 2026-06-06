@@ -23,6 +23,9 @@ public interface WaitingRepository {
     Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
             Theme theme);
 
-    boolean existsByNameAndSlot(String name, ReservationSlot slot);
+    Optional<Waiting> findPromotableWaitingBySlot(ReservationSlot slot);
 
+    Long countWaitingOrder(Waiting waiting);
+
+    boolean existsByNameAndSlot(String name, ReservationSlot slot);
 }
