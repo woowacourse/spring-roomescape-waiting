@@ -1,4 +1,4 @@
-package roomescape.reservation.application.exception;
+package roomescape.global;
 
 public class BadRequestException extends RuntimeException {
 
@@ -6,7 +6,7 @@ public class BadRequestException extends RuntimeException {
         super(errorMessage.getMessage());
     }
 
-    public BadRequestException(String message) {
-        super(message);
+    public BadRequestException(ErrorMessage errorMessage, Object... args) {
+        super(String.format(errorMessage.getMessage(), args));
     }
 }

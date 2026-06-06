@@ -1,4 +1,4 @@
-package roomescape.reservation.application.exception;
+package roomescape.global;
 
 public class NotFoundException extends RuntimeException {
 
@@ -6,7 +6,7 @@ public class NotFoundException extends RuntimeException {
         super(errorMessage.getMessage());
     }
 
-    public NotFoundException(String message) {
-        super(message);
+    public NotFoundException(ErrorMessage errorMessage, Object... args) {
+        super(String.format(errorMessage.getMessage(), args));
     }
 }

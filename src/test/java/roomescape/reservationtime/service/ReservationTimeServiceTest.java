@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.ConflictException;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservationtime.application.service.ReservationTimeService;
 import roomescape.reservationtime.domain.repository.AvailableReservationTime;
@@ -67,7 +67,7 @@ class ReservationTimeServiceTest {
         when(timeRepository.existsByStartAt(LocalTime.of(9, 0))).thenReturn(true);
 
         assertThatThrownBy(() -> timeService.save(new ReservationTimeCreateCommand(LocalTime.of(9, 0))))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage("시간 09:00이(가) 이미 존재합니다.");
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 존재하는 예약 시간입니다.");
     }
 }

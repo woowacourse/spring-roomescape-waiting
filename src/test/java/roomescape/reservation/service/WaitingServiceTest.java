@@ -18,11 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.BadRequestException;
+import roomescape.global.ConflictException;
+import roomescape.global.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.exception.BadRequestException;
-import roomescape.reservation.application.exception.ConflictException;
-import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -141,7 +141,7 @@ class WaitingServiceTest {
         when(waitingRepository.findById(id)).thenReturn(Optional.of(waiting));
 
         assertThatThrownBy(() -> waitingService.delete(id, "카야"))
-                .isExactlyInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.FORBIDDEN_RESERVATION_ACCESS.message());
+                .isExactlyInstanceOf(ForbiddenException.class)
+                .hasMessage(ReservationErrorMessage.FORBIDDEN_WAITING_ACCESS.getMessage());
     }
 }

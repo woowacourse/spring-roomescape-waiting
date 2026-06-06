@@ -13,8 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.global.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.infra.JdbcReservationRepository;
@@ -88,8 +87,8 @@ class JdbcReservationRepositoryTest {
                 .themeId(1L)
                 .timeId(1L)
                 .build()))
-                .isExactlyInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.message());
+                .isExactlyInstanceOf(NotFoundException.class)
+                .hasMessage("해당하는 ID(999)의 예약이 존재하지 않습니다.");
     }
 
 }

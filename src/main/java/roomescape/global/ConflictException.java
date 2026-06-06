@@ -1,4 +1,4 @@
-package roomescape.reservation.application.exception;
+package roomescape.global;
 
 public class ConflictException extends RuntimeException {
 

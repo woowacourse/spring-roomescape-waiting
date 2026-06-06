@@ -8,18 +8,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.BadRequestException;
+import roomescape.global.ConflictException;
+import roomescape.global.ForbiddenException;
+import roomescape.global.NotFoundException;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
-import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservation.event.schema.ReservationCancelRequested;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservationtime.application.exception.ReservationTimeErrorCode;
+import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
-import roomescape.theme.application.exception.ThemeErrorCode;
+import roomescape.theme.exception.ThemeErrorMessage;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -79,42 +82,42 @@ public class ReservationService {
 
     private Theme findThemeById(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ThemeErrorMessage.THEME_NOT_FOUND, id));
     }
 
     private ReservationTime findTimeById(Long id) {
         return timeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.TIME_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(ReservationTimeErrorMessage.TIME_NOT_FOUND, id));
     }
 
     private ReservationDetail getReservationDetail(Long id) {
         return reservationRepository.findDetailById(id)
-                .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ReservationErrorMessage.RESERVATION_NOT_FOUND, id));
     }
 
     private void validateDuplicateReservation(ReservationUpdateCommand request, Reservation reservation) {
         Boolean exists = reservationRepository.existsByDateAndThemeAndTimeExcludingId(
                 request.date(), reservation.getThemeId(), request.timeId(), reservation.getId());
         if (exists) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
+            throw new ConflictException(ReservationErrorMessage.DUPLICATE_RESERVATION);
         }
     }
 
     private void validateOwner(String name, Reservation reservation) {
         if (!reservation.isOwner(name)) {
-            throw new RoomEscapeException(ReservationErrorCode.FORBIDDEN_RESERVATION_ACCESS);
+            throw new ForbiddenException(ReservationErrorMessage.FORBIDDEN_RESERVATION_ACCESS);
         }
     }
 
     private void validateReservationDateTime(LocalDate date, LocalTime startAt, LocalDateTime currentDateTime) {
         if (LocalDateTime.of(date, startAt).isBefore(currentDateTime)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_TIME);
+            throw new BadRequestException(ReservationErrorMessage.CANNOT_SELECT_PAST_RESERVATION_TIME);
         }
     }
 
     private void validateReservationNotPast(ReservationDetail reservationDetail, LocalDateTime currentDateTime) {
         if (LocalDateTime.of(reservationDetail.date(), reservationDetail.startAt()).isBefore(currentDateTime)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_MODIFICATION);
+            throw new BadRequestException(ReservationErrorMessage.CANNOT_MODIFY_PAST_RESERVATION);
         }
     }
 

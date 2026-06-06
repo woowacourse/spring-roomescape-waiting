@@ -17,7 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.BadRequestException;
+import roomescape.global.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.domain.Reservation;
@@ -107,7 +108,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.update(
                 new ReservationUpdateCommand(1L, "카야", LocalDate.of(2026, 5, 7), 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0)))
-                .isInstanceOf(RoomEscapeException.class)
+                .isInstanceOf(ForbiddenException.class)
                 .hasMessage("본인의 예약만 변경하거나 취소할 수 있습니다.");
     }
 
@@ -119,7 +120,7 @@ class ReservationServiceTest {
         when(reservationRepository.findDetailById(1L)).thenReturn(Optional.of(detail));
 
         assertThatThrownBy(() -> reservationService.delete(1L, "스타크", LocalDateTime.of(2026, 5, 6, 11, 0)))
-                .isInstanceOf(RoomEscapeException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("지난 예약은 변경하거나 취소할 수 없습니다.");
     }
 }

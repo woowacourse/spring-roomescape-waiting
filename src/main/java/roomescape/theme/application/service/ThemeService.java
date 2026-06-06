@@ -5,9 +5,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.ConflictException;
+import roomescape.global.NotFoundException;
 import roomescape.theme.application.dto.ThemeCreateCommand;
-import roomescape.theme.application.exception.ThemeErrorCode;
+import roomescape.theme.exception.ThemeErrorMessage;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.presentation.dto.ThemeResponse;
@@ -22,7 +23,7 @@ public class ThemeService {
     @Transactional(readOnly = true)
     public ThemeResponse findById(Long id) {
         return ThemeResponse.from(themeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND)));
+                .orElseThrow(() -> new NotFoundException(ThemeErrorMessage.THEME_NOT_FOUND, id)));
     }
 
     @Transactional(readOnly = true)
@@ -52,7 +53,7 @@ public class ThemeService {
 
     private void validateDuplicateTheme(Theme theme) {
         if (themeRepository.existsByNameAndDescription(theme)) {
-            throw new RoomEscapeException(ThemeErrorCode.DUPLICATE_THEME);
+            throw new ConflictException(ThemeErrorMessage.DUPLICATE_THEME);
         }
     }
 }

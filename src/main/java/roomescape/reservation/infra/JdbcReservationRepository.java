@@ -9,8 +9,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.global.ConflictException;
+import roomescape.global.NotFoundException;
+import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
@@ -115,7 +116,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
             return reservation.withId(id);
         } catch (DuplicateKeyException e) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
+            throw new ConflictException(ReservationErrorMessage.DUPLICATE_RESERVATION);
         }
     }
 
@@ -129,7 +130,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
 
         if (updatedRowCount == 0) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
+            throw new NotFoundException(ReservationErrorMessage.RESERVATION_NOT_FOUND, reservation.getId());
         }
 
         return reservation;

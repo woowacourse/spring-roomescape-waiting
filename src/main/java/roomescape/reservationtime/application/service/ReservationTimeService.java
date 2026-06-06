@@ -2,14 +2,14 @@ package roomescape.reservationtime.application.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.ConflictException;
+import roomescape.global.NotFoundException;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
-import roomescape.reservationtime.application.exception.ReservationTimeErrorCode;
+import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.AvailableReservationTimeResponse;
@@ -25,7 +25,7 @@ public class ReservationTimeService {
     @Transactional(readOnly = true)
     public ReservationTimeResponse findById(Long timeId) {
         return ReservationTimeResponse.from(timeRepository.findById(timeId)
-                .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.TIME_NOT_FOUND)));
+                .orElseThrow(() -> new NotFoundException(ReservationTimeErrorMessage.TIME_NOT_FOUND, timeId)));
     }
 
     @Transactional(readOnly = true)
@@ -53,10 +53,7 @@ public class ReservationTimeService {
 
     private void validateDuplicateTime(LocalTime startAt) {
         if (timeRepository.existsByStartAt(startAt)) {
-            throw new RoomEscapeException(
-                    ReservationTimeErrorCode.DUPLICATE_TIME,
-                    startAt.format(DateTimeFormatter.ofPattern("HH:mm"))
-            );
+            throw new ConflictException(ReservationTimeErrorMessage.DUPLICATE_TIME);
         }
     }
 }

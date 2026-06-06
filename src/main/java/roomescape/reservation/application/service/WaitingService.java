@@ -8,21 +8,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.RoomEscapeException;
+import roomescape.global.BadRequestException;
+import roomescape.global.ConflictException;
+import roomescape.global.ForbiddenException;
+import roomescape.global.NotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.exception.BadRequestException;
-import roomescape.reservation.application.exception.ConflictException;
-import roomescape.reservation.application.exception.ErrorMessage;
-import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.reservation.exception.ReservationErrorMessage;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.event.schema.WaitingSaved;
 import roomescape.reservation.presentation.dto.WaitingResponse;
-import roomescape.reservationtime.application.exception.ReservationTimeErrorCode;
+import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
-import roomescape.theme.application.exception.ThemeErrorCode;
+import roomescape.theme.exception.ThemeErrorMessage;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -58,7 +58,7 @@ public class WaitingService {
                 pending.getDate(),
                 pending.getThemeId(),
                 pending.getTimeId())) {
-            throw new ConflictException(ErrorMessage.ALREADY_RESERVED_CANNOT_WAIT);
+            throw new ConflictException(ReservationErrorMessage.ALREADY_RESERVED_CANNOT_WAIT);
         }
 
         if (waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(
@@ -66,7 +66,7 @@ public class WaitingService {
                 pending.getDate(),
                 pending.getThemeId(),
                 pending.getTimeId())) {
-            throw new ConflictException(ErrorMessage.DUPLICATE_WAITING);
+            throw new ConflictException(ReservationErrorMessage.DUPLICATE_WAITING);
         }
 
         Waiting saved = waitingRepository.save(pending);
@@ -85,10 +85,10 @@ public class WaitingService {
     @Transactional
     public int delete(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ReservationErrorMessage.WAITING_NOT_FOUND, id));
 
         if (!waiting.isOwner(name)) {
-            throw new RoomEscapeException(ReservationErrorCode.FORBIDDEN_RESERVATION_ACCESS);
+            throw new ForbiddenException(ReservationErrorMessage.FORBIDDEN_WAITING_ACCESS);
         }
 
         return waitingRepository.delete(id);
@@ -96,26 +96,19 @@ public class WaitingService {
 
     private Theme findThemeById(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(ThemeErrorMessage.THEME_NOT_FOUND, id));
     }
 
     private ReservationTime findTimeById(Long id) {
         return timeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.TIME_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(ReservationTimeErrorMessage.TIME_NOT_FOUND, id));
     }
 
     private void validateReservationDateTime(LocalDate date, LocalTime startAt, LocalDateTime currentDateTime) {
         LocalDateTime triedDateTime = LocalDateTime.of(date, startAt);
 
         if (triedDateTime.isBefore(currentDateTime)) {
-            throw new BadRequestException(ErrorMessage.CANNOT_SELECT_PAST_DATETIME);
-        }
-    }
-
-    private void validateDuplicateWaiting(ReservationCreateCommand request) {
-        if (waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(
-                request.name(), request.date(), request.themeId(), request.timeId())) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_WAITING);
+            throw new BadRequestException(ReservationErrorMessage.CANNOT_SELECT_PAST_DATETIME);
         }
     }
 }
