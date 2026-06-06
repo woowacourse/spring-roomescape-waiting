@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class ReservationLookupService {
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
