@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Reservations;
 import roomescape.domain.theme.dto.ThemeResponse;
 
 @Service
@@ -26,7 +25,7 @@ public class ThemeService {
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now();
 
-        List<Long> top10Ids = Reservations.from(
+        List<Long> top10Ids = ThemeRanking.from(
                 reservationRepository.findThemeIdsByDateRange(startDate, endDate)
         ).topThemeIds(10);
 

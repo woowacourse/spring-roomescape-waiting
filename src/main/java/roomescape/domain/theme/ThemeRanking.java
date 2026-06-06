@@ -1,19 +1,19 @@
-package roomescape.domain.reservation;
+package roomescape.domain.theme;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Reservations {
+public class ThemeRanking {
 
     private final List<Long> themeIds;
 
-    private Reservations(List<Long> themeIds) {
+    private ThemeRanking(List<Long> themeIds) {
         this.themeIds = themeIds;
     }
 
-    public static Reservations from(List<Long> themeIds) {
-        return new Reservations(themeIds);
+    public static ThemeRanking from(List<Long> themeIds) {
+        return new ThemeRanking(themeIds);
     }
 
     public List<Long> topThemeIds(int limit) {
