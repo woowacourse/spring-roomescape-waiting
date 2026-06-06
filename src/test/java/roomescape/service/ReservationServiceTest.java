@@ -334,6 +334,24 @@ class ReservationServiceTest {
         assertThat(responses.getFirst().order()).isEqualTo(1);
     }
 
+    @Test
+    void 대기가_없는_예약을_취소하면_예약만_삭제된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = saveReservation(
+                "브라운",
+                LocalDate.of(2026, 6, 10),
+                time,
+                theme
+        );
+
+        LocalDateTime now = LocalDateTime.of(2026, 6, 8, 10, 0);
+
+        reservationService.cancel(reservation.getId(), now);
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+        assertThat(reservations).isEmpty();
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
