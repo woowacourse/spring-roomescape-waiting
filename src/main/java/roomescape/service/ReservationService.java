@@ -72,7 +72,9 @@ public class ReservationService {
     public void deleteByAdmin(Long id) {
         Reservation reservation = findReservation(id);
         reservationRepository.delete(id);
-        promoteFirstWaiting(reservation);
+        if (!reservation.isPast()) {
+            promoteFirstWaiting(reservation);
+        }
     }
 
     @Transactional

@@ -254,6 +254,23 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 관리자가_과거_예약을_삭제하면_대기를_승격하지_않는다() {
+        // given
+        Long id = 1L;
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createReservation(id, "브라운", LocalDate.now().minusDays(1), time);
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+
+        // when
+        service.deleteByAdmin(id);
+
+        // then
+        verify(reservationRepository, times(1)).delete(id);
+        verify(reservationWaitingRepository, never()).delete(any(Long.class));
+    }
+
+    @Test
     void 사용자_본인_예약을_변경한다() {
         // given
         Long id = 1L;
