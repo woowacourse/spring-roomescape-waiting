@@ -350,4 +350,20 @@ class ReservationCommandServiceTest {
         assertThat(survivedReservation).isNotNull();
         assertThat(survivedReservation.getMemberName().name()).isEqualTo("피노");
     }
+
+    @DisplayName("예약을 취소할 때, 해당 슬롯에 대기자가 아무도 없어도 정상적으로 취소되어야 한다.")
+    @Test
+    void cancel_reservation_when_no_waiting_exists_successfully() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+
+        Long reservationId = testHelper.insertReservation("피노", ReservationFixture.futureReservationDate(), themeId,
+                timeId);
+
+        assertThatNoException().isThrownBy(() -> reservationCommandService.cancel(reservationId, NOW));
+
+        assertThatThrownBy(() -> reservationCommandService.cancel(reservationId, NOW))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("존재하지 않는 예약");
+    }
 }
