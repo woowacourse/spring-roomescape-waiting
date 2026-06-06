@@ -105,8 +105,7 @@ public class ReservationServiceImpl implements ReservationService {
     public void cancel(Long id) {
         Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        promoteNextWaiting(reservation);
-        reservationRepository.deleteById(id);
+        cancelWithPromotion(reservation);
     }
 
     @Override
@@ -116,8 +115,12 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.validateOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
+        cancelWithPromotion(reservation);
+    }
+
+    private void cancelWithPromotion(Reservation reservation) {
         promoteNextWaiting(reservation);
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservation.getId());
     }
 
     @Override
