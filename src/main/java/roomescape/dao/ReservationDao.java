@@ -20,6 +20,15 @@ public class ReservationDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcReservationInsert;
 
+    private static final String BASE_SELECT = """
+            SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
+                   t.id AS time_id, t.start_at AS time_value,
+                   th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+            FROM reservation AS r
+            INNER JOIN reservation_time AS t ON r.time_id = t.id
+            INNER JOIN theme AS th ON r.theme_id = th.id
+            """;
+
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
             rs.getLong("reservation_id"),
             rs.getString("name"),
@@ -53,13 +62,7 @@ public class ReservationDao {
     }
 
     public List<Reservation> findAll(int page, int size) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
+        String sql = BASE_SELECT + """
                 WHERE r.status = 'CONFIRMED'
                 ORDER BY r.date DESC, r.id DESC
                 LIMIT ? OFFSET ?
@@ -74,15 +77,7 @@ public class ReservationDao {
     }
 
     public Optional<Reservation> findById(long id) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.id = ?
-                """;
+        String sql = BASE_SELECT + "WHERE r.id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
     }
 
@@ -132,42 +127,17 @@ public class ReservationDao {
     }
 
     public List<Reservation> findByName(String username) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.name = ? AND r.status = 'CONFIRMED'
-                """;
+        String sql = BASE_SELECT + "WHERE r.name = ? AND r.status = 'CONFIRMED'";
         return jdbcTemplate.query(sql, reservationRowMapper, username);
     }
 
     public Optional<Reservation> findByIdForUpdate(long id) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.id = ?
-                FOR UPDATE
-                """;
+        String sql = BASE_SELECT + "WHERE r.id = ? FOR UPDATE";
         return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
     }
 
     public Optional<Reservation> findWaitingById(long id) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.id = ? AND r.status = 'WAITING'
-                """;
+        String sql = BASE_SELECT + "WHERE r.id = ? AND r.status = 'WAITING'";
         return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
     }
 
@@ -202,27 +172,12 @@ public class ReservationDao {
     }
 
     public Optional<Reservation> findWaitingByIdForUpdate(long id) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.id = ? AND r.status = 'WAITING'
-                FOR UPDATE
-                """;
+        String sql = BASE_SELECT + "WHERE r.id = ? AND r.status = 'WAITING' FOR UPDATE";
         return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
     }
 
     public Optional<Reservation> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
+        String sql = BASE_SELECT + """
                 WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ? AND r.status = 'WAITING'
                 ORDER BY r.created_at ASC, r.id ASC
                 LIMIT 1
@@ -231,17 +186,10 @@ public class ReservationDao {
     }
 
     public Optional<Reservation> findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, long timeId, long themeId) {
-        String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
-                       t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
+        String sql = BASE_SELECT + """
                 WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ? AND r.status = 'WAITING'
                 ORDER BY r.created_at ASC, r.id ASC
-                LIMIT 1
-                FOR UPDATE
+                LIMIT 1 FOR UPDATE
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId).stream().findFirst();
     }
