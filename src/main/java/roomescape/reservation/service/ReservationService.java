@@ -10,7 +10,7 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationEntry;
 import roomescape.reservation.domain.ReservationHistory;
-import roomescape.reservation.domain.ReservationSequence;
+import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.repository.ReservationHistoryRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -42,7 +42,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationEntry> findAll() {
-        return ReservationSequence.entriesOf(reservationRepository.findAll());
+        return new Reservations(reservationRepository.findAll()).entries();
     }
 
     @Transactional
@@ -74,7 +74,9 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationEntry> findByName(String name) {
-        return ReservationSequence.entriesOf(reservationRepository.findAllForName(name))
+        Reservations reservations = new Reservations(reservationRepository.findAllForName(name));
+
+        return reservations.entries()
                 .stream()
                 .filter(entry -> entry.reservation().isReservedBy(name))
                 .toList();

@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationEntry;
-import roomescape.reservation.domain.ReservationSequence;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -143,7 +143,7 @@ class ReservationConcurrencyTest {
 
     private void assertQueueIsConsistent(LocalDate date, Theme theme, int reservationCount) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, theme.getId());
-        List<ReservationEntry> entries = ReservationSequence.entriesOf(reservations);
+        List<ReservationEntry> entries = new Reservations(reservations).entries();
 
         assertThat(reservations).hasSize(reservationCount);
         assertThat(entries)

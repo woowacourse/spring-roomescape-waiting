@@ -12,7 +12,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-class ReservationSequenceTest {
+class ReservationsTest {
 
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
     private final Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -25,11 +25,11 @@ class ReservationSequenceTest {
         Reservation firstWaitingReservation = reservation(2L, "레아");
         Reservation secondWaitingReservation = reservation(3L, "포비");
 
-        List<ReservationEntry> entries = ReservationSequence.entriesOf(List.of(
+        List<ReservationEntry> entries = new Reservations(List.of(
                 reservedReservation,
                 firstWaitingReservation,
                 secondWaitingReservation
-        ));
+        )).entries();
 
         assertThat(entries)
                 .extracting(
@@ -46,7 +46,7 @@ class ReservationSequenceTest {
 
     @Test
     @DisplayName("서로 다른 슬롯의 예약은 슬롯별로 독립적인 예약 순서를 가진다.")
-    void entriesOf_success_calculatesStatusAndWaitingRankPerSlot() {
+    void entries_success_calculatesStatusAndWaitingRankPerSlot() {
         Reservation reservation = reservation(1L, "브라운");
         Reservation otherSlotReservation = reservation(
                 2L,
@@ -55,11 +55,11 @@ class ReservationSequenceTest {
         );
         Reservation waitingReservation = reservation(3L, "포비");
 
-        List<ReservationEntry> entries = ReservationSequence.entriesOf(List.of(
+        List<ReservationEntry> entries = new Reservations(List.of(
                 reservation,
                 otherSlotReservation,
                 waitingReservation
-        ));
+        )).entries();
 
         assertThat(entries)
                 .extracting(

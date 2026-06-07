@@ -15,10 +15,6 @@ public record Slot(LocalDate date,
         validate(date, time, theme);
     }
 
-    boolean contains(Reservation reservation) {
-        return Objects.equals(this, reservation.getSlot());
-    }
-
     boolean hasSameDateTime(LocalDate date, ReservationTime time) {
         return Objects.equals(this.date, date)
                 && Objects.equals(this.time, time);
