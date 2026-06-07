@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidReservationStateException;
 import roomescape.exception.UnauthorizedReservationException;
@@ -72,6 +74,7 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Reservation deleteMyReservation(Long id, String name) {
         Reservation reservation = reservationDao.findById(id);
         validateReservationAuthority(name, reservation);
@@ -81,6 +84,7 @@ public class ReservationService {
         return reservation;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void promoteFirstWaiting(Reservation reservation) {
         reservationDao.findFirstWaitingByDateTimeTheme(
             reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
@@ -101,6 +105,7 @@ public class ReservationService {
         reservationDao.delete(reservationId);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Reservation updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
@@ -122,6 +127,19 @@ public class ReservationService {
                         r.waitRank()
                 ))
                 .toList();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void restoreReservation(Long id) {
+        Reservation reservation = reservationDao.findById(id);
+        reservation.promote(ReservationStatus.RESERVED);
+        reservationDao.updateStatus(id, ReservationStatus.RESERVED);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void revertReservationUpdate(Long reservationId, LocalDate originalDate,
+        Long originalTimeId, String name) {
+        reservationDao.updateReservation(originalDate, originalTimeId, name, reservationId);
     }
 
     private static void validateIsNotReserved(Reservation reservation, ReservationStatus reserved,

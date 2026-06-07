@@ -2,8 +2,6 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ResourceInUseException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationRequest;
@@ -58,21 +56,34 @@ public class ReservationFacade {
         return reservationService.findById(id);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
         Reservation reservation = reservationService.deleteMyReservation(reservationId, name);
-        reservationService.promoteFirstWaiting(reservation);
+        try {
+            reservationService.promoteFirstWaiting(reservation);
+        } catch (Exception e) {
+            reservationService.restoreReservation(reservation.getId());
+            throw e;
+        }
     }
 
     public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {
         reservationService.deleteWaitingByNameAndReservationId(name, reservationId);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
         Reservation reservation = reservationService.updateMyReservation(updateMyReservation, name,
             reservationId);
-        reservationService.promoteFirstWaiting(reservation);
+        try {
+            reservationService.promoteFirstWaiting(reservation);
+        } catch (Exception e) {
+            reservationService.revertReservationUpdate(
+                reservationId,
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                name
+            );
+            throw e;
+        }
     }
 
     public List<MyReservationResponse> findReservationsByName(String name) {
