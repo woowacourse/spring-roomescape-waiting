@@ -125,15 +125,8 @@ public class ReservationService {
 
         Reservation updatedReservation = reservationRepository.update(id, slotForUpdate);
 
-        Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlot(reservation.getReservationSlot());
-        promotableWaiting.ifPresent(waiting -> {
-            Reservation promotedReservation = Reservation.create(
-                    waiting.getName(),
-                    waiting.getReservationSlot()
-            );
-            reservationRepository.save(promotedReservation);
-            waitingRepository.delete(waiting.getId());
-        });
+        promoteWaitingToReservationBySlot(reservation.getReservationSlot());
+
         return ReservationResponseDTO.from(updatedReservation);
     }
 
@@ -147,6 +140,10 @@ public class ReservationService {
         reservation.validateNotPastTime(LocalDateTime.now(clock));
         reservationRepository.delete(id);
 
+        promoteWaitingToReservationBySlot(slot);
+    }
+
+    private void promoteWaitingToReservationBySlot(ReservationSlot slot) {
         Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlot(slot);
         promotableWaiting.ifPresent(waiting -> {
             Reservation promotedReservation = Reservation.create(
