@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
-import roomescape.dto.PopularThemeProjection;
+import roomescape.dto.projection.PopularThemeProjection;
 
 import java.time.LocalDate;
 import java.util.List;

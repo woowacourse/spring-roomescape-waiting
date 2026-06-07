@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.dto.projection;
 
 public record MemberSummaryProjection(
         Long id,

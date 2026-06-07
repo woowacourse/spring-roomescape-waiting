@@ -1,8 +1,9 @@
-package roomescape.dto;
+package roomescape.dto.result;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
+import roomescape.dto.projection.WaitingResponseProjection;
 
 import java.time.LocalDateTime;
 

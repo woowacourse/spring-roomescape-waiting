@@ -1,6 +1,6 @@
 package roomescape.dto.response;
 
-import roomescape.dto.PopularThemeResult;
+import roomescape.dto.result.PopularThemeResult;
 
 import java.util.List;
 

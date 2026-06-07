@@ -1,4 +1,6 @@
-package roomescape.dto;
+package roomescape.dto.result;
+
+import roomescape.dto.projection.PopularThemeProjection;
 
 public record PopularThemeResult(
         Long id,

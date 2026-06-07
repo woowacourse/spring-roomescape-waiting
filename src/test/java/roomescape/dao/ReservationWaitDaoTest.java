@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationWait;
-import roomescape.dto.WaitingResponseProjection;
+import roomescape.dto.projection.WaitingResponseProjection;
 
 import java.util.List;
 import java.util.Optional;

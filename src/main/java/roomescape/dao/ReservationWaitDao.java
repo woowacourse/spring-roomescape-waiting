@@ -11,7 +11,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
-import roomescape.dto.WaitingResponseProjection;
+import roomescape.dto.projection.WaitingResponseProjection;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;

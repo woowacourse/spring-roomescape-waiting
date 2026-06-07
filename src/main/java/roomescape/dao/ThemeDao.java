@@ -6,7 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
-import roomescape.dto.PopularThemeProjection;
+import roomescape.dto.projection.PopularThemeProjection;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;

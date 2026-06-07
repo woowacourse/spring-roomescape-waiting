@@ -9,9 +9,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
-import roomescape.dto.MemberSummaryProjection;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.StoreReservationResult;
+import roomescape.dto.projection.MemberSummaryProjection;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.StoreReservationResult;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;

@@ -8,8 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.StoreReservationResult;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.StoreReservationResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

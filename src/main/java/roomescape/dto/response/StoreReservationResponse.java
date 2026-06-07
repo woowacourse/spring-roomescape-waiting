@@ -1,8 +1,8 @@
 package roomescape.dto.response;
 
 import roomescape.domain.Reservation;
-import roomescape.dto.MemberSummaryProjection;
-import roomescape.dto.StoreReservationResult;
+import roomescape.dto.projection.MemberSummaryProjection;
+import roomescape.dto.result.StoreReservationResult;
 
 import java.util.List;
 

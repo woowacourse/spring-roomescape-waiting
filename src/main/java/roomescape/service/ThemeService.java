@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
-import roomescape.dto.PopularThemeResult;
+import roomescape.dto.result.PopularThemeResult;
 import roomescape.exception.theme.ThemeInUseException;
 import roomescape.exception.theme.ThemeNotFoundException;
 

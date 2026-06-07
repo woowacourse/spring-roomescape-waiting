@@ -1,13 +1,17 @@
-package roomescape.dto;
+package roomescape.dto.projection;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 
-public record StoreReservationResult(
+import java.time.LocalDateTime;
+
+public record WaitingResponseProjection(
+        Long order,
         Reservation reservation,
         Theme theme,
         Store store,
-        MemberSummaryProjection member
+        Long memberId,
+        LocalDateTime createdAt
 ) {
 }
