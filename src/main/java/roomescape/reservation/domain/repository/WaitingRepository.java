@@ -12,8 +12,6 @@ public interface WaitingRepository {
 
     boolean existsByNameAndDateAndThemeIdAndTimeId(String name, LocalDate date, Long themeId, Long timeId);
 
-    Optional<Waiting> findOldestByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
-
     List<WaitingDetail> findByName(String name);
 
     Waiting save(Waiting waiting);

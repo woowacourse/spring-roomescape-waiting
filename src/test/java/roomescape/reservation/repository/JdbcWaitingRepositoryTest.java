@@ -81,9 +81,9 @@ public class JdbcWaitingRepositoryTest {
         });
     }
 
-    @DisplayName("같은 날짜, 테마, 시간의 가장 오래된 대기 조회를 테스트합니다.")
+    @DisplayName("같은 슬롯의 대기가 여러 개일 때 가장 오래된 대기만 삭제됩니다.")
     @Test
-    void find_oldest_by_date_and_theme_id_and_time_id() {
+    void delete_oldest_by_slot() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
         LocalDate date = LocalDate.of(2026, 5, 4);
@@ -94,16 +94,17 @@ public class JdbcWaitingRepositoryTest {
                 .themeId(themeId)
                 .timeId(timeId)
                 .build());
-        waitingRepository.save(Waiting.builder()
+        Waiting secondWaiting = waitingRepository.save(Waiting.builder()
                 .name("second")
                 .date(date)
                 .themeId(themeId)
                 .timeId(timeId)
                 .build());
 
-        Waiting oldestWaiting = waitingRepository.findOldestByDateAndThemeIdAndTimeId(date, themeId, timeId).get();
+        waitingRepository.deleteOldestBySlot(date, themeId, timeId);
 
-        assertThat(oldestWaiting.getId()).isEqualTo(firstWaiting.getId());
+        assertThat(waitingRepository.findById(firstWaiting.getId())).isEmpty();
+        assertThat(waitingRepository.findById(secondWaiting.getId())).isPresent();
     }
 
     @DisplayName("대기 삭제를 테스트합니다.")
