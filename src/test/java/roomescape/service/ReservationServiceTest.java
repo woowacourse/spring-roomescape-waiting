@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
@@ -140,7 +141,7 @@ class ReservationServiceTest {
 
         assertThat(result).isEqualTo(updated);
         then(reservationDao).should().update(any(Reservation.class));
-        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
         then(reservationDao).should().deleteWaiting(10L);
     }
 
@@ -162,13 +163,13 @@ class ReservationServiceTest {
         given(reservationDao.update(any(Reservation.class))).willReturn(updated);
         given(reservationDao.findFirstWaitingBySlot(originalDate, 1L, 1L))
                 .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
-        given(reservationDao.save(waiting)).willThrow(new DataConflictException(new RuntimeException()));
+        given(reservationDao.save(any(Reservation.class))).willThrow(new DataConflictException(new RuntimeException()));
 
         assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
                 .isInstanceOf(ReservationConflictException.class);
 
         then(reservationDao).should().update(any(Reservation.class));
-        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
         then(reservationDao).should(never()).deleteWaiting(10L);
     }
 
@@ -284,7 +285,7 @@ class ReservationServiceTest {
         reservationService.delete(1L, "브라운");
 
         then(reservationDao).should().delete(1L);
-        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
         then(reservationDao).should().deleteWaiting(10L);
     }
 
@@ -301,7 +302,7 @@ class ReservationServiceTest {
         reservationService.delete(1L);
 
         then(reservationDao).should().delete(1L);
-        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
         then(reservationDao).should().deleteWaiting(10L);
     }
 
@@ -314,13 +315,13 @@ class ReservationServiceTest {
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
                 .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
-        given(reservationDao.save(waiting)).willThrow(new DataConflictException(new RuntimeException()));
+        given(reservationDao.save(any(Reservation.class))).willThrow(new DataConflictException(new RuntimeException()));
 
         assertThatThrownBy(() -> reservationService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class);
 
         then(reservationDao).should().delete(1L);
-        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
         then(reservationDao).should(never()).deleteWaiting(10L);
     }
 
@@ -462,5 +463,14 @@ class ReservationServiceTest {
                 .containsExactly(ReservationType.WAITING, ReservationType.RESERVED);
         assertThat(myReservations.getFirst().waitingNumber()).isEqualTo(1);
         assertThat(myReservations.getLast().waitingNumber()).isNull();
+    }
+
+    private Reservation promotedReservationOf(Reservation waiting) {
+        return argThat(reservation -> reservation.getId() == null
+                && reservation.getName().equals(waiting.getName())
+                && reservation.getDate().equals(waiting.getDate())
+                && reservation.getCreatedAt().equals(fixedNow)
+                && reservation.getTime().equals(waiting.getTime())
+                && reservation.getTheme().equals(waiting.getTheme()));
     }
 }
