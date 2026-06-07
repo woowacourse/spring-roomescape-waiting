@@ -42,7 +42,7 @@ public class ReservationWithStatus {
         );
     }
 
-    public static ReservationWithStatus waitingWithOrder(Waitlist waitlist, int waitingOrder) {
+    public static ReservationWithStatus waiting(Waitlist waitlist, int waitingOrder) {
         return new ReservationWithStatus(
             waitlist.getId(),
             waitlist.getName(),
@@ -53,19 +53,6 @@ public class ReservationWithStatus {
             waitingOrder
         );
     }
-
-    public static ReservationWithStatus waiting(Waitlist waitlist) {
-        return new ReservationWithStatus(
-            waitlist.getId(),
-            waitlist.getName(),
-            waitlist.getDate(),
-            waitlist.getTime(),
-            waitlist.getTheme(),
-            ReservationStatus.WAITING,
-            null
-        );
-    }
-
 
     public Long getId() {
         return id;
