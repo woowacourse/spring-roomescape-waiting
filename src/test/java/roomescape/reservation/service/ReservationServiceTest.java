@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -149,6 +150,23 @@ class ReservationServiceTest {
       // when // then
       assertThatThrownBy(() -> reservationService.deleteMyReservation(RESERVATION_ID, NAME))
           .isInstanceOf(InvalidReservationStateException.class);
+    }
+
+    @Test
+    void 대기가_없는_확정_예약_삭제_시_기존_예약만_CANCELED된다() {
+      // given
+      Reservation reservation = Reservation.of(RESERVATION_ID, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
+      when(reservationDao.findById(RESERVATION_ID)).thenReturn(reservation);
+      when(reservationDao.findFirstWaitingByDateTimeTheme(DEFAULT_DATE, DEFAULT_TIME.getId(), DEFAULT_THEME.getId()))
+          .thenReturn(Optional.empty());
+
+      // when
+      Reservation deleted = reservationService.deleteMyReservation(RESERVATION_ID, NAME);
+      reservationService.promoteFirstWaiting(deleted);
+
+      // then
+      verify(reservationDao).delete(RESERVATION_ID);
+      verify(reservationDao, never()).updateStatus(any(), any());
     }
   }
 }
