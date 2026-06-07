@@ -1,5 +1,6 @@
 package roomescape.unit.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.ReservationFixture.member;
@@ -44,6 +45,16 @@ class ReservationTest {
 
         assertThatCode(() -> Reservation.createWith(RESERVER, targetSlot, NOW))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 대기_승격은_지난_시각이어도_예약으로_전환한다() {
+        Slot targetSlot = slot(RESERVATION_DATE, TWO_PM, ANY_THEME);
+
+        Reservation promoted = Reservation.promoteFrom(RESERVER, targetSlot);
+
+        assertThat(promoted.getReserver()).isEqualTo(RESERVER);
+        assertThat(promoted.getSlot()).isEqualTo(targetSlot);
     }
 
     @Test

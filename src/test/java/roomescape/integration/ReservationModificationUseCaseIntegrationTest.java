@@ -22,7 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationUpdateRequest;
-import roomescape.application.ReservationCancellationUseCase;
+import roomescape.application.ReservationModificationUseCase;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.command.ReservationWaitingCommandService;
 import roomescape.application.query.ReservationQueryService;
@@ -39,7 +39,7 @@ import roomescape.repository.ReservationWaitingQueryJdbcRepository;
 
 @JdbcTest
 @Import({
-        ReservationCancellationUseCase.class,
+        ReservationModificationUseCase.class,
         ReservationCommandService.class,
         ReservationWaitingCommandService.class,
         ReservationQueryService.class,
@@ -51,7 +51,7 @@ import roomescape.repository.ReservationWaitingQueryJdbcRepository;
         ReservationWaitingQueryJdbcRepository.class,
         FixedClockConfig.class
 })
-class ReservationCancellationUseCaseIntegrationTest {
+class ReservationModificationUseCaseIntegrationTest {
 
     private static final LocalTime RESERVATION_START_AT = LocalTime.of(10, 0);
     private static final LocalDateTime FIRST_WAITING_CREATED_AT = LocalDateTime.of(2026, 8, 1, 10, 0);
@@ -61,7 +61,7 @@ class ReservationCancellationUseCaseIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ReservationCancellationUseCase reservationCancellationUseCase;
+    private ReservationModificationUseCase reservationModificationUseCase;
 
     @Autowired
     private Clock clock;
@@ -99,7 +99,7 @@ class ReservationCancellationUseCaseIntegrationTest {
         Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
 
-        reservationCancellationUseCase.deleteReservation(reservationId);
+        reservationModificationUseCase.deleteReservation(reservationId);
 
         assertThat(countReservationsById(reservationId)).isZero();
         assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
@@ -121,7 +121,7 @@ class ReservationCancellationUseCaseIntegrationTest {
                 .when(reservationWaitingCommandService)
                 .delete(any(ReservationWaiting.class));
 
-        assertThatThrownBy(() -> reservationCancellationUseCase.deleteReservation(reservationId))
+        assertThatThrownBy(() -> reservationModificationUseCase.deleteReservation(reservationId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(errorMessage);
 
@@ -137,7 +137,7 @@ class ReservationCancellationUseCaseIntegrationTest {
         Long reservationId = insertReservation("티뉴", future);
         insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
 
-        assertThatThrownBy(() -> reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱"))
+        assertThatThrownBy(() -> reservationModificationUseCase.deleteMyReservation(reservationId, "민욱"))
                 .isInstanceOf(ForbiddenException.class);
 
         assertThat(findReservationName(reservationId)).isEqualTo("티뉴");
@@ -149,7 +149,7 @@ class ReservationCancellationUseCaseIntegrationTest {
         Long reservationId = insertReservation("민욱", past);
         insertWaiting("브라운", past, FIRST_WAITING_CREATED_AT);
 
-        assertThatThrownBy(() -> reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱"))
+        assertThatThrownBy(() -> reservationModificationUseCase.deleteMyReservation(reservationId, "민욱"))
                 .isInstanceOf(BusinessRuleViolationException.class);
 
         assertThat(findReservationName(reservationId)).isEqualTo("민욱");
@@ -160,7 +160,7 @@ class ReservationCancellationUseCaseIntegrationTest {
     void 대기가_없고_미래_예약이면_예약을_삭제한다() {
         Long reservationId = insertReservation("민욱", future);
 
-        reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱");
+        reservationModificationUseCase.deleteMyReservation(reservationId, "민욱");
 
         assertThat(countReservationsById(reservationId)).isZero();
     }
@@ -171,7 +171,7 @@ class ReservationCancellationUseCaseIntegrationTest {
         Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
 
-        reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱");
+        reservationModificationUseCase.deleteMyReservation(reservationId, "민욱");
 
         assertThat(countReservationsById(reservationId)).isZero();
         assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
@@ -185,7 +185,7 @@ class ReservationCancellationUseCaseIntegrationTest {
         Long reservationId = insertReservation("민욱", future);
         ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
 
-        reservationCancellationUseCase.updateMyReservation(reservationId, "민욱", request);
+        reservationModificationUseCase.updateMyReservation(reservationId, "민욱", request);
 
         assertThat(findReservationNamesBySlot(future)).isEmpty();
         assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");
@@ -198,7 +198,7 @@ class ReservationCancellationUseCaseIntegrationTest {
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
         ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
 
-        reservationCancellationUseCase.updateMyReservation(reservationId, "민욱", request);
+        reservationModificationUseCase.updateMyReservation(reservationId, "민욱", request);
 
         assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
         assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");

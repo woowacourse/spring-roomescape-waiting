@@ -17,7 +17,7 @@ import roomescape.api.dto.ReservationResponse;
 import roomescape.api.dto.ReservationResponses;
 import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.ReservationApplicationService;
-import roomescape.application.ReservationCancellationUseCase;
+import roomescape.application.ReservationModificationUseCase;
 import roomescape.domain.Reservation;
 
 @RestController
@@ -25,14 +25,14 @@ import roomescape.domain.Reservation;
 public class ReservationController {
 
     private final ReservationApplicationService reservationApplicationService;
-    private final ReservationCancellationUseCase reservationCancellationUseCase;
+    private final ReservationModificationUseCase reservationModificationUseCase;
 
     public ReservationController(
             ReservationApplicationService reservationApplicationService,
-            ReservationCancellationUseCase reservationCancellationUseCase
+            ReservationModificationUseCase reservationModificationUseCase
     ) {
         this.reservationApplicationService = reservationApplicationService;
-        this.reservationCancellationUseCase = reservationCancellationUseCase;
+        this.reservationModificationUseCase = reservationModificationUseCase;
     }
 
     @PostMapping
@@ -52,7 +52,7 @@ public class ReservationController {
             @RequestParam String name,
             @RequestBody @Valid ReservationUpdateRequest request
     ) {
-        Reservation updated = reservationCancellationUseCase.updateMyReservation(id, name, request);
+        Reservation updated = reservationModificationUseCase.updateMyReservation(id, name, request);
 
         return ResponseEntity.ok()
                 .body(ReservationResponse.from(updated));
@@ -79,7 +79,7 @@ public class ReservationController {
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        reservationCancellationUseCase.deleteReservation(id);
+        reservationModificationUseCase.deleteReservation(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -89,7 +89,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationCancellationUseCase.deleteMyReservation(id, name);
+        reservationModificationUseCase.deleteMyReservation(id, name);
 
         return ResponseEntity.noContent().build();
     }

@@ -1,6 +1,5 @@
 package roomescape.application;
 
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationUpdateRequest;
@@ -12,11 +11,10 @@ import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Slot;
 
 @Service
-public class ReservationCancellationUseCase {
+public class ReservationModificationUseCase {
 
     private final ReservationCommandService reservationCommandService;
     private final ReservationWaitingCommandService reservationWaitingCommandService;
@@ -25,7 +23,7 @@ public class ReservationCancellationUseCase {
     private final ReservationWaitingQueryService reservationWaitingQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
 
-    public ReservationCancellationUseCase(
+    public ReservationModificationUseCase(
             ReservationCommandService reservationCommandService,
             ReservationWaitingCommandService reservationWaitingCommandService,
             ReservationQueryService reservationQueryService,
@@ -82,15 +80,11 @@ public class ReservationCancellationUseCase {
     }
 
     private void promoteFirstWaitingToReservation(Slot slot) {
-        Optional<ReservationWaiting> firstWaiting = reservationWaitingQueryService.findFirstBySlot(slot);
-        if (firstWaiting.isPresent()) {
-            ReservationWaiting waiting = firstWaiting.get();
-            reservationCommandService.save(
-                    waiting.getWaiter(),
-                    slot
-            );
-            reservationWaitingCommandService.delete(waiting);
-        }
+        reservationWaitingQueryService.findFirstBySlot(slot)
+                .ifPresent(waiting -> {
+                    reservationCommandService.promote(waiting);
+                    reservationWaitingCommandService.delete(waiting);
+                });
     }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Slot;
 import roomescape.repository.ReservationRepository;
 
@@ -32,6 +33,15 @@ public class ReservationCommandService {
         );
 
         return reservationRepository.save(reservation);
+    }
+
+    public void promote(ReservationWaiting waiting) {
+        Reservation reservation = Reservation.promoteFrom(
+                waiting.getWaiter(),
+                waiting.getSlot()
+        );
+
+        reservationRepository.save(reservation);
     }
 
     public Reservation updateMine(Reservation existing, Member requester, Slot targetSlot) {
