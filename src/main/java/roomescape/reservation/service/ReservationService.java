@@ -64,14 +64,11 @@ public class ReservationService {
         }
         ReservationTime time = findTime(timeId);
 
-        Reservation updatedReservation = Reservation.create(
-                reservation.getName(),
-                date,
-                time,
-                reservation.getSlot().theme(),
-                LocalDateTime.now()
-        ).withId(reservation.getId());
+        if (reservation.hasSameDateTime(date, time)) {
+            return reservation;
+        }
 
+        Reservation updatedReservation = reservation.updateDateTime(date, time, LocalDateTime.now());
         return updateReservationDateTime(updatedReservation);
     }
 

@@ -23,6 +23,11 @@ public record Slot(LocalDate date,
         return Objects.equals(this, reservation.getSlot());
     }
 
+    public boolean hasSameDateTime(LocalDate date, ReservationTime time) {
+        return Objects.equals(this.date, date)
+                && Objects.equals(this.time, time);
+    }
+
     public boolean isPast(LocalDateTime now) {
         return LocalDateTime.of(date, time.getStartAt())
                 .isBefore(now);

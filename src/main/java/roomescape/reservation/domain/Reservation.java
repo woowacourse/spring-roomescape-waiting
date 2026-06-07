@@ -49,6 +49,13 @@ public class Reservation {
         this.slot = slot;
     }
 
+    public Reservation updateDateTime(LocalDate date, ReservationTime time, LocalDateTime now) {
+        Slot updatedSlot = createSlot(date, time, slot.theme());
+        validatePastDateTime(now, updatedSlot);
+
+        return new Reservation(id, name, updatedSlot);
+    }
+
     public Reservation withId(Long id) {
         validateId(id);
 
@@ -120,6 +127,10 @@ public class Reservation {
 
     public boolean isPast(LocalDateTime now) {
         return slot.isPast(now);
+    }
+
+    public boolean hasSameDateTime(LocalDate date, ReservationTime time) {
+        return slot.hasSameDateTime(date, time);
     }
 
     public boolean isReservedBy(String name) {

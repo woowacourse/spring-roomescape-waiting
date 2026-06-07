@@ -327,6 +327,38 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("같은 날짜와 시간으로 예약을 변경하면 예약 순서가 유지된다.")
+    public void updateDateTime_success_whenSameDateTime() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+
+        Reservation reservedReservation = createReservation(NAME, FUTURE_DATE, time, theme);
+        Reservation waitingReservation = createReservation(OTHER_NAME, FUTURE_DATE, time, theme);
+
+        // when
+        Reservation updatedReservation = reservationService.updateDateTime(
+                reservedReservation.getId(),
+                NAME,
+                FUTURE_DATE,
+                time.getId()
+        );
+
+        // then
+        assertThat(updatedReservation.getId()).isEqualTo(reservedReservation.getId());
+        assertThat(reservationService.findAll())
+                .extracting(
+                        entry -> entry.reservation().getId(),
+                        ReservationEntry::status,
+                        ReservationEntry::waitingRank
+                )
+                .containsExactly(
+                        tuple(reservedReservation.getId(), ReservationStatus.RESERVED, 0L),
+                        tuple(waitingReservation.getId(), ReservationStatus.WAITING, 1L)
+                );
+    }
+
+    @Test
     @DisplayName("같은 사용자가 이미 신청한 날짜, 시간, 테마로 예약을 변경하면 예외가 발생한다.")
     public void updateDateTime_fail_whenDuplicatedReservation() {
         // given
