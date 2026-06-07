@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), errorCode.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(errorResponse);
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
                 .orElse(errorCode.getMessage());
 
 
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), message);
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), message);
 
         return ResponseEntity
                 .badRequest()
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> fieldError.getDefaultMessage())
                 .orElse(ErrorCode.COMMON_BAD_REQUEST.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), message);
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), message);
 
         return ResponseEntity
                 .badRequest()
@@ -67,16 +67,12 @@ public class GlobalExceptionHandler {
     ) {
         ErrorCode errorCode = ErrorCode.COMMON_BAD_REQUEST;
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                errorCode.getCode(),
-                errorCode.getMessage()
-        );
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), errorCode.getMessage());
 
         return ResponseEntity
                 .badRequest()
                 .body(errorResponse);
     }
-
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
@@ -84,10 +80,7 @@ public class GlobalExceptionHandler {
     ) {
         ErrorCode errorCode = ErrorCode.COMMON_BAD_REQUEST;
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                errorCode.getCode(),
-                errorCode.getMessage()
-        );
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), errorCode.getMessage());
 
         return ResponseEntity
                 .badRequest()
@@ -99,10 +92,9 @@ public class GlobalExceptionHandler {
             Exception e
     ) {
         ErrorCode errorCode = ErrorCode.COMMON_SERVER_ERROR;
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), errorCode.getMessage());
         return ResponseEntity
                 .internalServerError()
                 .body(errorResponse);
     }
-
 }
