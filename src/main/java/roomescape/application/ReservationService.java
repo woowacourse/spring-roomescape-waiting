@@ -55,6 +55,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
         ReservationTime time = findTimeOrThrow(command.getTimeId());
         Theme theme = findThemeOrThrow(command.getThemeId());
@@ -73,6 +74,7 @@ public class ReservationService {
         return ReservationResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }
@@ -123,6 +125,7 @@ public class ReservationService {
         });
     }
 
+    @Transactional
     public ReservationResult updateByOwner(ReservationUpdateCommand command) {
         Reservation reservation = findByIdAndName(command.getId(), command.getName());
         reservationPolicy.validateUpdatable(reservation.scheduledAt());

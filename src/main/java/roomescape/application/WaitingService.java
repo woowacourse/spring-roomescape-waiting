@@ -33,6 +33,7 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public WaitingResult create(WaitingCreateCommand command) {
         ReservationTime time = findTimeOrThrow(command.getTimeId());
         Theme theme = findThemeOrThrow(command.getThemeId());
@@ -101,4 +102,3 @@ public class WaitingService {
 
 
 }
-
