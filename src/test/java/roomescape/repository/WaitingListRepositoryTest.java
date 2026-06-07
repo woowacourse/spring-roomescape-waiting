@@ -17,7 +17,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Import(WaitingListRepository.class)
@@ -39,6 +43,25 @@ class WaitingListRepositoryTest {
 
         theme = Theme.createWithId(1L, "테스트 테마", "테스트용 설명입니다", "https://thumbnail.com");
         reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    }
+
+    @Nested
+    class save {
+
+        @Test
+        void 동일한_조건으로_중복_저장하면_ALREADY_ON_WAITING_LIST_예외발생() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            WaitingList first = WaitingList.create("오리", date, theme, reservationTime);
+            waitingListRepository.save(first);
+
+            WaitingList duplicate = WaitingList.create("오리", date, theme, reservationTime);
+
+            // when & then
+            assertThatThrownBy(() -> waitingListRepository.save(duplicate))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
     }
 
     @Nested
@@ -82,7 +105,7 @@ class WaitingListRepositoryTest {
     }
 
     @Nested
-    class existsByNameAndThemeAndDateAndTime {
+    class existsByNameAndDateAndTimeIdAndThemeId {
 
         @Test
         void 동일한_조건으로_대기중이면_true를_반환() {
@@ -92,7 +115,7 @@ class WaitingListRepositoryTest {
             waitingListRepository.save(waitingList);
 
             // when
-            boolean result = waitingListRepository.existsByNameAndThemeAndDateAndTime("오리", 1L, date, 1L);
+            boolean result = waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId("오리", date, 1L, 1L);
 
             // then
             assertThat(result).isTrue();
@@ -101,7 +124,7 @@ class WaitingListRepositoryTest {
         @Test
         void 대기중이_아니면_false를_반환() {
             // when
-            boolean result = waitingListRepository.existsByNameAndThemeAndDateAndTime("오리", 1L, LocalDate.now().plusDays(1), 1L);
+            boolean result = waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId("오리", LocalDate.now().plusDays(1), 1L, 1L);
 
             // then
             assertThat(result).isFalse();
@@ -109,7 +132,7 @@ class WaitingListRepositoryTest {
     }
 
     @Nested
-    class findWaitingOrderByIdAndThemeAndDateAndTime {
+    class findWaitingOrderByDateAndTimeIdAndThemeId {
 
         @Test
         void 대기가_없으면_0을_반환() {
@@ -119,7 +142,7 @@ class WaitingListRepositoryTest {
             waitingListRepository.deleteById(saved.getId());
 
             // when
-            int order = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(saved);
+            int order = waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(saved);
 
             // then
             assertThat(order).isZero();
@@ -132,7 +155,7 @@ class WaitingListRepositoryTest {
             WaitingList saved = waitingListRepository.save(WaitingList.create("오리", date, theme, reservationTime));
 
             // when
-            int order = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(saved);
+            int order = waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(saved);
 
             // then
             assertThat(order).isEqualTo(1);
@@ -146,7 +169,7 @@ class WaitingListRepositoryTest {
             WaitingList second = waitingListRepository.save(WaitingList.create("오리", date, theme, reservationTime));
 
             // when
-            int order = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(second);
+            int order = waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(second);
 
             // then
             assertThat(order).isEqualTo(2);

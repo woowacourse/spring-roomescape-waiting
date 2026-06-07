@@ -22,7 +22,7 @@ public record ReservationResult (
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getDate(),
+                reservation.getReservationDate().getDate(),
                 ReservationTimeResult.from(reservationTime),
                 ThemeResult.from(theme),
                 ReservationStatus.RESERVATION

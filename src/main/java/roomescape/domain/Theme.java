@@ -29,7 +29,7 @@ public class Theme {
         }
     }
 
-    private void validateDescription(String description) {
+    private void validateDescription(final String description) {
         if (description == null || description.isBlank()) {
             throw new BusinessException(ErrorCode.DESCRIPTION_NULL_OR_BLANK);
         }
@@ -39,7 +39,7 @@ public class Theme {
         }
     }
 
-    private void validateThumbnailUrl(String thumbnailUrl) {
+    private void validateThumbnailUrl(final String thumbnailUrl) {
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
             throw new BusinessException(ErrorCode.THUMBNAIL_URL_NULL_OR_BLANK);
         }

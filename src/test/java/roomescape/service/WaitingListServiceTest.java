@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
@@ -65,9 +64,19 @@ class WaitingListServiceTest {
 
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.save(any(WaitingList.class))).willReturn(WaitingList.create(NAME, date, theme, reservationTime).withId(1));
-            given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
+            given(waitingListRepository.save(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(date) &&
+                    w.getReservationTime().getId().equals(TIME_ID) &&
+                    w.getTheme().getId().equals(THEME_ID)
+            ))).willReturn(WaitingList.create(NAME, date, theme, reservationTime).withId(1));
+            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(date)
+            ))).willReturn(1);
 
             // when
             WaitingListResult result = waitingListService.create(createCommand(date));
@@ -89,9 +98,19 @@ class WaitingListServiceTest {
 
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, today, TIME_ID, THEME_ID)).willReturn(false);
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(today, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.save(any(WaitingList.class))).willReturn(WaitingList.create(NAME, today, theme, reservationTime).withId(1));
-            given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, today, TIME_ID, THEME_ID)).willReturn(false);
+            given(waitingListRepository.save(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(today) &&
+                    w.getReservationTime().getId().equals(TIME_ID) &&
+                    w.getTheme().getId().equals(THEME_ID)
+            ))).willReturn(WaitingList.create(NAME, today, theme, reservationTime).withId(1));
+            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(today)
+            ))).willReturn(1);
 
             // when
             WaitingListResult result = waitingListService.create(createCommand(today));
@@ -148,8 +167,7 @@ class WaitingListServiceTest {
         @Test
         void 오늘_과거_시간이면_예외발생() {
             // given
-            LocalTime past = LocalTime.now().minusHours(1);
-            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, past, past.plusHours(1));
+            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(0, 0), LocalTime.of(0, 30));
 
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
@@ -176,6 +194,24 @@ class WaitingListServiceTest {
         }
 
         @Test
+        void 본인이_이미_예약한_슬롯이면_예외발생() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            LocalTime startAt = LocalTime.of(10, 0);
+            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, startAt, startAt.plusHours(1));
+
+            given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+            given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> waitingListService.create(createCommand(date)))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_RESERVED_BY_SELF);
+            verify(waitingListRepository, never()).save(any(WaitingList.class));
+        }
+
+        @Test
         void 이미_대기중이면_예외발생() {
             // given
             LocalDate date = LocalDate.now().plusDays(1);
@@ -185,7 +221,7 @@ class WaitingListServiceTest {
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.existsByNameAndThemeAndDateAndTime(NAME, THEME_ID, date, TIME_ID)).willReturn(true);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(true);
 
             // when & then
             assertThatThrownBy(() -> waitingListService.create(createCommand(date)))
@@ -210,24 +246,6 @@ class WaitingListServiceTest {
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
-        @Test
-        void 동시_요청_유니크_제약조건_예외발생() {
-            // given
-            LocalDate date = LocalDate.now().plusDays(1);
-            LocalTime startAt = LocalTime.of(10, 0);
-            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, startAt, startAt.plusHours(1));
-
-            given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
-            given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.existsByNameAndThemeAndDateAndTime(NAME, THEME_ID, date, TIME_ID)).willReturn(false);
-            given(waitingListRepository.save(any(WaitingList.class))).willThrow(new DataIntegrityViolationException("unique constraint"));
-
-            // when & then
-            assertThatThrownBy(() -> waitingListService.create(createCommand(date)))
-                    .isInstanceOf(BusinessException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
-        }
     }
 
     @Nested
@@ -298,7 +316,7 @@ class WaitingListServiceTest {
         void 과거_시간이면_예외발생() {
             // given
             Long waitingListId = 1L;
-            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.now().minusHours(1), LocalTime.now());
+            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(0, 0), LocalTime.of(0, 30));
             WaitingList waitingList = WaitingList.createWithId(waitingListId, NAME, LocalDate.now(), theme, reservationTime, LocalDateTime.now().minusDays(1));
 
             given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));

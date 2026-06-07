@@ -2,19 +2,22 @@ package roomescape.repository;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.KeyGenerationException;
 import roomescape.dto.ReservationTimesWithStatus;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 
-import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,7 +25,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    public Reservation save(final Reservation newReservation) {
+        final String sql = """
+                INSERT INTO reservation (name, date, time_id, theme_id)
+                VALUES (:name, :date, :timeId, :themeId)
+                """;
+
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("name", newReservation.getName())
+                .addValue("date", Date.valueOf(newReservation.getReservationDate().getDate()))
+                .addValue("timeId", newReservation.getTime().getId())
+                .addValue("themeId", newReservation.getTheme().getId());
+
+        try {
+            jdbcTemplate.update(sql, param, keyHolder);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
+        }
+
+        final long newReservationId = keyHolder.getKey().longValue();
+        return newReservation.withId(newReservationId);
+    }
 
     public List<Reservation> findAll() {
         final String sql = """
@@ -39,17 +66,17 @@ public class ReservationRepository {
                     h.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
-                JOIN theme h ON r.theme_id = h.id 
+                JOIN theme h ON r.theme_id = h.id
                 ORDER BY r.id
                 """;
 
-        return jdbcTemplate.query(sql, ReservationRepository::mapToDomain)
+        return jdbcTemplate.query(sql, new MapSqlParameterSource(), reservationRowMapper())
                 .stream()
                 .toList();
     }
 
     public List<Reservation> findByName(final String name) {
-        String sql = """
+        final String sql = """
                 SELECT
                     r.id AS reservation_id,
                     r.name AS reservation_name,
@@ -63,18 +90,21 @@ public class ReservationRepository {
                     h.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
-                JOIN theme h ON r.theme_id = h.id 
-                WHERE r.name = ?
+                JOIN theme h ON r.theme_id = h.id
+                WHERE r.name = :name
                 ORDER BY r.id
                 """;
 
-        return jdbcTemplate.query(sql, ReservationRepository::mapToDomain, name)
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("name", name);
+
+        return jdbcTemplate.query(sql, param, reservationRowMapper())
                 .stream()
                 .toList();
     }
 
     public Optional<Reservation> findById(final Long reservationId) {
-        String sql = """
+        final String sql = """
                 SELECT
                     r.id AS reservation_id,
                     r.name AS reservation_name,
@@ -88,57 +118,18 @@ public class ReservationRepository {
                     h.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
-                JOIN theme h ON r.theme_id = h.id 
-                WHERE r.id = ?
+                JOIN theme h ON r.theme_id = h.id
+                WHERE r.id = :id
                 """;
 
         try {
-            Reservation reservation = jdbcTemplate.queryForObject(
-                    sql,
-                    ReservationRepository::mapToDomain,
-                    reservationId
-            );
-
+            final MapSqlParameterSource param = new MapSqlParameterSource()
+                    .addValue("id", reservationId);
+            final Reservation reservation = jdbcTemplate.queryForObject(sql, param, reservationRowMapper());
             return Optional.of(reservation);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
-    }
-
-    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
-        final String sql = """
-                SELECT COUNT(id)
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?
-                """;
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
-
-        return count != null && count > 0;
-    }
-
-    public boolean existsByTimeId(final Long timeId) {
-        final String sql = """
-                SELECT COUNT(id)
-                FROM reservation
-                WHERE time_id = ?
-                """;
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
-
-        return count != null && count > 0;
-    }
-
-    public boolean existsByThemeId(final Long themeId) {
-        final String sql = """
-                SELECT COUNT(id)
-                FROM reservation
-                WHERE theme_id = ?
-                """;
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
-
-        return count != null && count > 0;
     }
 
     public List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(final LocalDate date, final Long themeId) {
@@ -153,119 +144,139 @@ public class ReservationRepository {
                 FROM reservation_time rt
                 LEFT JOIN reservation r
                     ON r.time_id = rt.id
-                   AND r.date = ?
-                   AND r.theme_id = ?
+                   AND r.date = :date
+                   AND r.theme_id = :themeId
                 ORDER BY rt.start_at;
                 """;
 
-        return jdbcTemplate.query(
-                        sql,
-                        ReservationRepository::mapToTimesWithStatus,
-                        date,
-                        themeId
-                ).stream()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("themeId", themeId);
+
+        return jdbcTemplate.query(sql, param, timesWithStatusRowMapper())
+                .stream()
                 .toList();
     }
 
-    public Reservation save(final Reservation newReservation) {
-        final long newReservationId = insertReservation(newReservation);
-
-        return newReservation.withId(newReservationId);
-    }
-
-    private long insertReservation(final Reservation reservation) {
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(final String name, final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                SELECT COUNT(id)
+                FROM reservation
+                WHERE name = :name AND date = :date AND time_id = :timeId AND theme_id = :themeId
                 """;
 
-        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("name", name)
+                .addValue("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId);
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    sql,
-                    Statement.RETURN_GENERATED_KEYS
-            );
-
-            preparedStatement.setString(1, reservation.getName());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
-            preparedStatement.setLong(3, reservation.getTime().getId());
-            preparedStatement.setLong(4, reservation.getTheme().getId());
-
-            return preparedStatement;
-        }, keyHolder);
-
-        return generatedIdFrom(keyHolder);
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        return count != null && count > 0;
     }
 
-    private static long generatedIdFrom(final KeyHolder keyHolder) {
-        final Number generatedKey = keyHolder.getKey();
+    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
+        final String sql = """
+                SELECT COUNT(id)
+                FROM reservation
+                WHERE date = :date AND time_id = :timeId AND theme_id = :themeId
+                """;
 
-        if (generatedKey == null) {
-            throw new KeyGenerationException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId);
 
-        return generatedKey.longValue();
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        return count != null && count > 0;
     }
 
-    public void updateDateAndTime(final Reservation reservation) {
+    public boolean existsByTimeId(final Long timeId) {
+        final String sql = """
+                SELECT COUNT(id)
+                FROM reservation
+                WHERE time_id = :timeId
+                """;
+
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("timeId", timeId);
+
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        return count != null && count > 0;
+    }
+
+    public boolean existsByThemeId(final Long themeId) {
+        final String sql = """
+                SELECT COUNT(id)
+                FROM reservation
+                WHERE theme_id = :themeId
+                """;
+
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("themeId", themeId);
+
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        return count != null && count > 0;
+    }
+
+    public void update(final Reservation reservation) {
         final String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?
-                WHERE id = ?
+                SET date = :date, time_id = :timeId, theme_id = :themeId
+                WHERE id = :id
                 """;
 
-        jdbcTemplate.update(
-                sql,
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getId()
-        );
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("date", reservation.getReservationDate().getDate())
+                .addValue("timeId", reservation.getTime().getId())
+                .addValue("themeId", reservation.getTheme().getId())
+                .addValue("id", reservation.getId());
+
+        jdbcTemplate.update(sql, param);
     }
 
-    public boolean deleteById(final Long reservationId) {
+    public void deleteById(final Long reservationId) {
         final String sql = """
                 DELETE FROM reservation
-                WHERE id = ?
+                WHERE id = :id
                 """;
 
-        return jdbcTemplate.update(sql, reservationId) > 0;
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("id", reservationId);
+
+        jdbcTemplate.update(sql, param);
     }
 
-    /**
-     * ResultSet - Domain 매핑 메서드
-     */
-    private static Reservation mapToDomain(final ResultSet resultSet, final int rowNum) throws SQLException {
-        final ReservationTime reservationTime = ReservationTime.createWithId(
-                resultSet.getLong("time_id"),
-                resultSet.getTime("time_start_at").toLocalTime(),
-                resultSet.getTime("time_end_at").toLocalTime()
-        );
+    private RowMapper<Reservation> reservationRowMapper() {
+        return (rs, rowNum) -> {
+            final ReservationTime reservationTime = ReservationTime.createWithId(
+                    rs.getLong("time_id"),
+                    rs.getTime("time_start_at").toLocalTime(),
+                    rs.getTime("time_end_at").toLocalTime()
+            );
 
-        final Theme theme = Theme.createWithId(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
-        );
+            final Theme theme = Theme.createWithId(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail_url")
+            );
 
-        return Reservation.createWithId(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("reservation_name"),
-                resultSet.getDate("reservation_date").toLocalDate(),
-                reservationTime,
-                theme
-        );
+            return Reservation.createWithId(
+                    rs.getLong("reservation_id"),
+                    rs.getString("reservation_name"),
+                    rs.getDate("reservation_date").toLocalDate(),
+                    reservationTime,
+                    theme
+            );
+        };
     }
 
-    /**
-     * ResultSet - DTO 매핑 메서드
-     */
-    private static ReservationTimesWithStatus mapToTimesWithStatus(final ResultSet resultSet, final int rowNum) throws SQLException {
-        return new ReservationTimesWithStatus(
-                resultSet.getLong("id"),
-                resultSet.getTime("start_at").toLocalTime(),
-                resultSet.getBoolean("reserved")
+    private RowMapper<ReservationTimesWithStatus> timesWithStatusRowMapper() {
+        return (rs, rowNum) -> new ReservationTimesWithStatus(
+                rs.getLong("id"),
+                rs.getTime("start_at").toLocalTime(),
+                rs.getBoolean("reserved")
         );
     }
 }

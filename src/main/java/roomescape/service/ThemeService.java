@@ -22,29 +22,16 @@ public class ThemeService {
 
     private static final int DATA_RANGE = 7;
 
-    public ThemeResult create(final ThemeCreateCommand request) {
+    public ThemeResult create(final ThemeCreateCommand command) {
         final Theme themeWithoutId = Theme.create(
-                request.name(),
-                request.description(),
-                request.thumbnailUrl()
+                command.name(),
+                command.description(),
+                command.thumbnailUrl()
         );
 
-        Theme theme = themeRepository.save(themeWithoutId);
+        final Theme theme = themeRepository.save(themeWithoutId);
 
         return ThemeResult.from(theme);
-    }
-
-    public void delete(final Long themeId) {
-        final boolean hasAnyOngoingReservation = reservationRepository.existsByThemeId(themeId);
-        if (hasAnyOngoingReservation) {
-            throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
-        }
-
-        boolean deleted = themeRepository.deleteById(themeId);
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
-        }
     }
 
     public List<ThemeResult> getPopularThemes() {
@@ -62,5 +49,18 @@ public class ThemeService {
                 .stream()
                 .map(ThemeResult::from)
                 .toList();
+    }
+
+    public void delete(final Long themeId) {
+        final boolean hasAnyOngoingReservation = reservationRepository.existsByThemeId(themeId);
+        if (hasAnyOngoingReservation) {
+            throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
+        }
+
+        final boolean deleted = themeRepository.deleteById(themeId);
+
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
+        }
     }
 }

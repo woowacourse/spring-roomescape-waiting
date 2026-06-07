@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -10,7 +9,6 @@ import roomescape.domain.WaitingList;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
-import roomescape.dto.WaitingListRow;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -20,7 +18,6 @@ import roomescape.repository.WaitingListRepository;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class WaitingListService {
@@ -30,71 +27,67 @@ public class WaitingListService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<WaitingListResult> getWaitingListByName(String name) {
+    @Transactional
+    public WaitingListResult create(final WaitingListCreateCommand command) {
+        final Theme findTheme = findThemeOrThrow(command.themeId());
+        final ReservationTime findReservationTime = findReservationTimeOrThrow(command.timeId());
+
+        final WaitingList waitingList = WaitingList.create(command.name(), command.date(), findTheme, findReservationTime);
+
+        validateWaitingList(waitingList);
+
+        final WaitingList savedWaitingList = waitingListRepository.save(waitingList);
+        final int waitingOrder = waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(savedWaitingList);
+        return WaitingListResult.from(savedWaitingList, waitingOrder);
+    }
+
+    public List<WaitingListResult> getWaitingListByName(final String name) {
         return waitingListRepository.findByName(name).stream()
                 .map(row -> WaitingListResult.from(row.waitingList(), row.waitingOrder()))
                 .toList();
     }
 
     @Transactional
-    public WaitingListResult create(final WaitingListCreateCommand createCommand) {
-        Theme findTheme = findThemeOrThrow(createCommand.themeId());
-        ReservationTime findReservationTime = findReservationTimeOrThrow(createCommand.timeId());
-
-        WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
-
-        validateWaitingList(waitingList, findReservationTime, findTheme);
-
-        try {
-            WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-            int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
-            return WaitingListResult.from(savedWaitingList, waitingOrder);
-        } catch (DataAccessException e) {
-            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
-        }
-    }
-
-    @Transactional
-    public void delete(final WaitingListDeleteCommand deleteCommand) {
-        WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
+    public void delete(final WaitingListDeleteCommand command) {
+        final WaitingList findWaitingList = waitingListRepository.findById(command.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
-        
-        if (!findWaitingList.getName().equals(deleteCommand.name())) {
-            throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
-        }
 
-        findWaitingList.validateNotPast();
-        
-        waitingListRepository.deleteById(deleteCommand.waitingListId());
+        findWaitingList.validateForDeletion(command.name());
+
+        waitingListRepository.deleteById(command.waitingListId());
     }
 
-    private ReservationTime findReservationTimeOrThrow(Long timeId) {
+    private ReservationTime findReservationTimeOrThrow(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
     }
 
-    private Theme findThemeOrThrow(Long themeId) {
+    private Theme findThemeOrThrow(final Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
     }
 
-    private void validateWaitingList(WaitingList waitingList, ReservationTime findReservationTime, Theme findTheme) {
+    private void validateWaitingList(final WaitingList waitingList) {
         waitingList.validateNotPast();
-
-        validateReservationExists(waitingList, findReservationTime, findTheme);
-        validateNotDuplicated(waitingList, findTheme, findReservationTime);
+        validateReservationExists(waitingList);
+        validateNotDuplicated(waitingList);
     }
 
-    private void validateReservationExists(WaitingList waitingList, ReservationTime findReservationTime, Theme findTheme) {
+    private void validateReservationExists(final WaitingList waitingList) {
+        if (reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                waitingList.getName(), waitingList.getReservationDate().getDate(), waitingList.getReservationTime().getId(), waitingList.getTheme().getId())) {
+            throw new BusinessException(ErrorCode.ALREADY_RESERVED_BY_SELF);
+        }
+
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId())) {
+                waitingList.getReservationDate().getDate(), waitingList.getReservationTime().getId(), waitingList.getTheme().getId())) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
     }
 
-    private void validateNotDuplicated(WaitingList waitingList, Theme findTheme, ReservationTime findReservationTime) {
-        if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
-                waitingList.getName(), findTheme.getId(), waitingList.getReservationDate().getDate(), findReservationTime.getId())) {
+    private void validateNotDuplicated(final WaitingList waitingList) {
+        if (waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                waitingList.getName(), waitingList.getReservationDate().getDate(), waitingList.getReservationTime().getId(), waitingList.getTheme().getId())) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
     }
