@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.command.ReservationCreateCommand;
@@ -113,16 +114,21 @@ public class ReservationService {
                 canceled.getTheme().getId()
         ));
 
-        waitings.firstWaiting().ifPresent(first -> {
-            Reservation promoted = Reservation.promote(first);
-            reservationRepository.save(promoted);
+        Optional<Waiting> firstWaiting = waitings.firstWaiting();
+        if (firstWaiting.isEmpty()) {
+            return;
+        }
 
-            waitingRepository.deleteById(first.getId());
+        Waiting first = firstWaiting.get();
+        reservationRepository.save(Reservation.promote(first));
+        waitingRepository.deleteById(first.getId());
+        reorderRemaining(waitings, first.getOrderIndex());
+    }
 
-            for (Waiting w : waitings.reorderAfterRemoval(first.getOrderIndex())) {
-                waitingRepository.updateOrderIndex(w.getId(), w.getOrderIndex());
-            }
-        });
+    private void reorderRemaining(Waitings waitings, int removedOrder) {
+        for (Waiting w : waitings.reorderAfterRemoval(removedOrder)) {
+            waitingRepository.updateOrderIndex(w.getId(), w.getOrderIndex());
+        }
     }
 
     @Transactional
