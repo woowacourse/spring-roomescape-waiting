@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.repository.reservation.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -29,9 +29,9 @@ public class FakeReservationRepository implements ReservationRepository {
     public Optional<Reservation> findBySlot(final ReservationSlot slot) {
         return reservations.values()
                 .stream()
-                .filter(reservation -> Objects.equals(reservation.getDate(), slot.date()))
-                .filter(reservation -> Objects.equals(reservation.getTheme(), slot.theme()))
-                .filter(reservation -> Objects.equals(reservation.getTime(), slot.time()))
+                .filter(reservation -> Objects.equals(reservation.getDate(), slot.getDate()))
+                .filter(reservation -> Objects.equals(reservation.getTheme(), slot.getTheme()))
+                .filter(reservation -> Objects.equals(reservation.getTime(), slot.getTime()))
                 .findFirst();
     }
 

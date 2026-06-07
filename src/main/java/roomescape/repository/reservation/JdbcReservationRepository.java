@@ -5,15 +5,17 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.repository.PersistenceConflictException;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -31,12 +33,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getTime("start_at").toLocalTime()
         );
 
+        ReservationSlot slot = ReservationSlot.of(
+                resultSet.getLong("slot_id"),
+                resultSet.getDate("date").toLocalDate(),
+                theme,
+                reservationTime
+        );
+
         return Reservation.of(
                 resultSet.getLong("id"),
                 resultSet.getString("reservation_name"),
-                resultSet.getDate("date").toLocalDate(),
-                theme,
-                reservationTime,
+                slot,
                 resultSet.getTimestamp("created_at").toLocalDateTime()
         );
     };
@@ -52,7 +59,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 SELECT r.id,
                        r.name AS reservation_name,
-                       r.date,
+                       r.slot_id,
+                       s.date,
                        r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
@@ -61,8 +69,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                        t.description,
                        t.thumbnail_url
                 FROM reservation AS r
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
+                INNER JOIN reservation_slot AS s ON r.slot_id = s.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper);
@@ -73,7 +82,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 SELECT r.id,
                        r.name AS reservation_name,
-                       r.date,
+                       r.slot_id,
+                       s.date,
                        r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
@@ -82,8 +92,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                        t.description,
                        t.thumbnail_url
                 FROM reservation AS r
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
+                INNER JOIN reservation_slot AS s ON r.slot_id = s.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
                 WHERE r.id = ?
                 """;
 
@@ -97,7 +108,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 SELECT r.id,
                        r.name AS reservation_name,
-                       r.date,
+                       r.slot_id,
+                       s.date,
                        r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
@@ -106,17 +118,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                        t.description,
                        t.thumbnail_url
                 FROM reservation AS r
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
-                WHERE r.date = ? AND r.theme_id = ? AND r.time_id = ?
+                INNER JOIN reservation_slot AS s ON r.slot_id = s.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
+                WHERE s.date = ? AND s.theme_id = ? AND s.time_id = ?
                 """;
 
         return jdbcTemplate.query(
                         sql,
                         reservationRowMapper,
-                        Date.valueOf(slot.date()),
-                        slot.theme().getId(),
-                        slot.time().getId()
+                        Date.valueOf(slot.getDate()),
+                        slot.getTheme().getId(),
+                        slot.getTime().getId()
                 )
                 .stream()
                 .findFirst();
@@ -125,7 +138,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void delete(final Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
-        jdbcTemplate.update(sql, reservation.getId());
+        try {
+            jdbcTemplate.update(sql, reservation.getId());
+        } catch (DataIntegrityViolationException exception) {
+            throw new PersistenceConflictException(exception);
+        }
     }
 
     @Override
@@ -138,18 +155,20 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private Reservation insert(final Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, theme_id, time_id, created_at) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, slot_id, created_at) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-            preparedStatement.setString(1, reservation.getName());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
-            preparedStatement.setLong(3, reservation.getTheme().getId());
-            preparedStatement.setLong(4, reservation.getTime().getId());
-            preparedStatement.setTimestamp(5, Timestamp.valueOf(reservation.getCreatedAt()));
-            return preparedStatement;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
+                preparedStatement.setString(1, reservation.getName());
+                preparedStatement.setLong(2, reservation.getSlot().getId());
+                preparedStatement.setTimestamp(3, Timestamp.valueOf(reservation.getCreatedAt()));
+                return preparedStatement;
+            }, keyHolder);
+        } catch (DataIntegrityViolationException exception) {
+            throw new PersistenceConflictException(exception);
+        }
 
         Number key = keyHolder.getKey();
         if (key == null) {
@@ -162,16 +181,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     private Reservation update(final Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?
+                SET slot_id = ?
                 WHERE id = ?
                 """;
 
-        jdbcTemplate.update(
-                sql,
-                Date.valueOf(reservation.getDate()),
-                reservation.getTime().getId(),
-                reservation.getId()
-        );
+        try {
+            jdbcTemplate.update(
+                    sql,
+                    reservation.getSlot().getId(),
+                    reservation.getId()
+            );
+        } catch (DataIntegrityViolationException exception) {
+            throw new PersistenceConflictException(exception);
+        }
 
         return reservation;
     }

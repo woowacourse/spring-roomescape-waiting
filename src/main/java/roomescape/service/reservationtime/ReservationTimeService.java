@@ -12,6 +12,7 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.PersistenceConflictException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.theme.ThemeService;
@@ -45,7 +46,11 @@ public class ReservationTimeService {
             throw new ConflictException(ErrorCode.RESERVATION_TIME_DUPLICATED, "같은 시간을 추가할 수 없습니다.");
         }
 
-        return reservationTimeRepository.save(reservationTime);
+        try {
+            return reservationTimeRepository.save(reservationTime);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(ErrorCode.RESERVATION_TIME_DUPLICATED, "같은 시간을 추가할 수 없습니다.");
+        }
     }
 
     public List<ReservationTime> findAvailableTimes(final LocalDate date, final long themeId) {
@@ -71,7 +76,12 @@ public class ReservationTimeService {
                 .anyMatch(reservation -> reservation.getTime().getId().equals(timeId))) {
             throw new ConflictException(ErrorCode.RESERVATION_TIME_IN_USE, "이미 예약된 시간은 삭제할 수 없습니다.");
         }
-        int affectedRowCount = reservationTimeRepository.deleteById(timeId);
+        int affectedRowCount;
+        try {
+            affectedRowCount = reservationTimeRepository.deleteById(timeId);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(ErrorCode.RESERVATION_TIME_IN_USE, "이미 예약된 시간은 삭제할 수 없습니다.");
+        }
 
         if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "삭제된 시간 데이터가 없습니다.");

@@ -5,13 +5,14 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.PersistenceConflictException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -38,7 +39,7 @@ public class ReservationWaitingService {
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
         ReservationName waitingName = ReservationName.from(name);
-        ReservationSlot slot = new ReservationSlot(
+        ReservationSlot slot = ReservationSlot.createNew(
                 date,
                 themeService.getById(themeId),
                 reservationTimeService.getById(timeId)
@@ -54,7 +55,14 @@ public class ReservationWaitingService {
         LocalDateTime requestedAt = LocalDateTime.now();
 
         ReservationWaiting nonIdReservationWaiting = createNewWaiting(reservation, waitingName, requestedAt);
-        return reservationWaitingRepository.save(nonIdReservationWaiting);
+        try {
+            return reservationWaitingRepository.save(nonIdReservationWaiting);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    "이미 같은 예약에 대기 중입니다."
+            );
+        }
     }
 
     private void validateWaitableName(final Reservation reservation, final ReservationName waitingName) {

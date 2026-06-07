@@ -13,10 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
-import roomescape.exception.ConflictException;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.repository.reservation.JdbcReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
+import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.theme.JdbcThemeRepository;
 
@@ -25,6 +26,7 @@ class JdbcThemeRepositoryTest {
 
     private JdbcThemeRepository jdbcThemeRepository;
     private JdbcReservationRepository jdbcReservationRepository;
+    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
 
     @Autowired
@@ -35,6 +37,7 @@ class JdbcThemeRepositoryTest {
         clearTables();
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
         jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
     }
 
@@ -73,7 +76,7 @@ class JdbcThemeRepositoryTest {
         jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
 
         // when & then
-        assertThrows(ConflictException.class, () ->
+        assertThrows(PersistenceConflictException.class, () ->
                 jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "새 설명", "https://example.com/new-theme.png"))
         );
     }
@@ -152,9 +155,11 @@ class JdbcThemeRepositoryTest {
 
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }
@@ -171,6 +176,7 @@ class JdbcThemeRepositoryTest {
             final Theme theme,
             final ReservationTime reservationTime
     ) {
-        return Reservation.createNew(name, date, theme, reservationTime, date.minusDays(1).atStartOfDay());
+        ReservationSlot slot = jdbcReservationSlotRepository.save(ReservationSlot.createNew(date, theme, reservationTime));
+        return Reservation.createNew(name, slot, date.minusDays(1).atStartOfDay());
     }
 }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
@@ -71,7 +70,7 @@ class JdbcReservationTimeRepositoryTest {
         jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
         //then
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(PersistenceConflictException.class, () -> {
             jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
         });
     }
@@ -107,10 +106,12 @@ class JdbcReservationTimeRepositoryTest {
 
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }
 }

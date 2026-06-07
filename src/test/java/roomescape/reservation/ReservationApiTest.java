@@ -48,6 +48,7 @@ class ReservationApiTest {
         createTheme();
         createReservationTime("15:40");
         LocalDate futureDate = LocalDate.now().plusDays(1);
+        insertReservationSlot(futureDate, 1L, 1L);
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -105,7 +106,7 @@ class ReservationApiTest {
         jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail_url) VALUES (?, ?, ?, ?)",
                 1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)", 1L, "15:40:00");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)", "브라운", "2023-08-05", 1L, 1L);
+        insertReservation("브라운", LocalDate.parse("2023-08-05"), 1L, 1L);
 
         List<Map<String, Object>> reservations = RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -124,6 +125,7 @@ class ReservationApiTest {
         createTheme();
         createReservationTime("10:00");
         LocalDate futureDate = LocalDate.now().plusDays(1);
+        insertReservationSlot(futureDate, 1L, 1L);
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -175,6 +177,7 @@ class ReservationApiTest {
         createTheme();
         createReservationTime("10:00");
         LocalDate futureDate = LocalDate.now().plusDays(1);
+        insertReservationSlot(futureDate, 1L, 1L);
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -277,6 +280,8 @@ class ReservationApiTest {
 
     @Test
     void 예약_가능_시간_조회_시_날짜_형식이_잘못되면_400을_반환한다() {
+        createTheme();
+
         RestAssured.given().log().all()
                 .queryParam("date", "2026/05/20")
                 .when().get("/themes/1/times/available")
@@ -349,6 +354,8 @@ class ReservationApiTest {
     }
 
     private void createReservation(final String name, final String date, final Long themeId, final Long timeId) {
+        insertReservationSlot(LocalDate.parse(date), themeId, timeId);
+
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", name);
         reservation.put("date", date);
@@ -364,9 +371,26 @@ class ReservationApiTest {
     }
 
     private void insertReservation(final String name, final LocalDate date, final Long themeId, final Long timeId) {
+        Long slotId = insertReservationSlot(date, themeId, timeId);
+
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, slot_id) VALUES (?, ?)",
                 name,
+                slotId
+        );
+    }
+
+    private Long insertReservationSlot(final LocalDate date, final Long themeId, final Long timeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_slot (date, theme_id, time_id) VALUES (?, ?, ?)",
+                java.sql.Date.valueOf(date),
+                themeId,
+                timeId
+        );
+
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE date = ? AND theme_id = ? AND time_id = ?",
+                Long.class,
                 java.sql.Date.valueOf(date),
                 themeId,
                 timeId
@@ -375,9 +399,11 @@ class ReservationApiTest {
 
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }

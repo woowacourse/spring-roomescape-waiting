@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
@@ -19,6 +20,7 @@ import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 import roomescape.support.FakeReservationRepository;
+import roomescape.support.FakeReservationSlotRepository;
 import roomescape.support.FakeReservationTimeRepository;
 import roomescape.support.FakeReservationWaitingRepository;
 import roomescape.support.FakeThemeRepository;
@@ -32,6 +34,7 @@ class ReservationServiceTest {
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.saveTime("10:00");
         LocalDate date = LocalDate.parse("2026-08-06");
+        fixture.saveSlot(date, theme, time);
 
         Reservation saved = fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
 
@@ -46,6 +49,7 @@ class ReservationServiceTest {
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.saveTime("10:00");
         LocalDate date = LocalDate.parse("2026-08-06");
+        fixture.saveSlot(date, theme, time);
         fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
 
         assertThrows(
@@ -61,6 +65,7 @@ class ReservationServiceTest {
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.saveTime("10:00");
         LocalDate pastDate = LocalDate.now().minusDays(1);
+        fixture.saveSlot(pastDate, theme, time);
 
         assertThrows(
                 InvalidInputException.class,
@@ -76,6 +81,7 @@ class ReservationServiceTest {
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         ReservationTime time = fixture.reservationTimeRepository.save(ReservationTime.createNew(pastTime));
+        fixture.saveSlot(LocalDate.now(), theme, time);
 
         assertThrows(
                 InvalidInputException.class,
@@ -146,6 +152,7 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
         ReservationTime secondTime = fixture.saveTime("11:00");
+        fixture.saveSlot(LocalDate.parse("2026-08-07"), reservation.getTheme(), secondTime);
 
         Reservation updated = fixture.reservationService.updateByIdAndName(
                 reservation.getId(),
@@ -165,6 +172,7 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
         ReservationTime secondTime = fixture.saveTime("11:00");
+        fixture.saveSlot(LocalDate.parse("2026-08-06"), reservation.getTheme(), secondTime);
         fixture.reservationService.save("아루", LocalDate.parse("2026-08-06"), reservation.getTheme().getId(), secondTime.getId());
 
         assertThrows(
@@ -199,6 +207,7 @@ class ReservationServiceTest {
     private static class Fixture {
         private final FakeThemeRepository themeRepository = new FakeThemeRepository();
         private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
+        private final FakeReservationSlotRepository reservationSlotRepository = new FakeReservationSlotRepository();
         private final FakeReservationWaitingRepository reservationWaitingRepository = new FakeReservationWaitingRepository();
         private final FakeReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
         private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
@@ -209,6 +218,7 @@ class ReservationServiceTest {
         );
         private final ReservationService reservationService = new ReservationService(
                 reservationRepository,
+                reservationSlotRepository,
                 reservationWaitingRepository,
                 reservationTimeService,
                 themeService
@@ -230,8 +240,13 @@ class ReservationServiceTest {
                     .findFirst()
                     .orElseGet(this::saveTheme);
             ReservationTime time = saveTime(startAt);
+            saveSlot(LocalDate.parse(date), theme, time);
 
             return reservationService.save(name, LocalDate.parse(date), theme.getId(), time.getId());
+        }
+
+        private ReservationSlot saveSlot(final LocalDate date, final Theme theme, final ReservationTime time) {
+            return reservationSlotRepository.save(ReservationSlot.createNew(date, theme, time));
         }
 
         private Reservation savePastReservation() {

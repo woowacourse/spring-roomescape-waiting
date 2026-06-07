@@ -11,15 +11,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.reservation.JdbcReservationRepository;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
+import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
 import roomescape.repository.reservationwaiting.JdbcReservationWaitingRepository;
 import roomescape.repository.theme.JdbcThemeRepository;
 
@@ -28,6 +29,7 @@ class JdbcReservationWaitingRepositoryTest {
 
     private JdbcReservationWaitingRepository jdbcReservationWaitingRepository;
     private JdbcReservationRepository jdbcReservationRepository;
+    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
     private JdbcThemeRepository jdbcThemeRepository;
 
@@ -39,6 +41,7 @@ class JdbcReservationWaitingRepositoryTest {
         clearTables();
         jdbcReservationWaitingRepository = new JdbcReservationWaitingRepository(jdbcTemplate);
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
         jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
     }
@@ -56,8 +59,8 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(waiting);
 
         assertThat(saved.getId()).isEqualTo(1L);
-        Long reservationId = jdbcTemplate.queryForObject(
-                "SELECT reservation_id FROM reservation_waiting WHERE id = ?",
+        Long slotId = jdbcTemplate.queryForObject(
+                "SELECT slot_id FROM reservation_waiting WHERE id = ?",
                 Long.class,
                 saved.getId()
         );
@@ -67,7 +70,7 @@ class JdbcReservationWaitingRepositoryTest {
                 saved.getId()
         );
 
-        assertThat(reservationId).isEqualTo(reservation.getId());
+        assertThat(slotId).isEqualTo(reservation.getSlot().getId());
         assertThat(name).isEqualTo("아루");
     }
 
@@ -82,7 +85,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        assertThrows(DataIntegrityViolationException.class, () -> jdbcReservationWaitingRepository.save(
+        assertThrows(PersistenceConflictException.class, () -> jdbcReservationWaitingRepository.save(
                 ReservationWaiting.createNew(reservation, "아루", LocalDateTime.parse("2026-08-05T12:01:00"))
         ));
     }
@@ -151,18 +154,21 @@ class JdbcReservationWaitingRepositoryTest {
                 ReservationTime.createNew(LocalTime.parse("10:00"))
         );
 
-        return jdbcReservationRepository.save(
-                Reservation.createNew("쿠다", LocalDate.parse("2026-08-06"), theme, reservationTime)
+        ReservationSlot slot = jdbcReservationSlotRepository.save(
+                ReservationSlot.createNew(LocalDate.parse("2026-08-06"), theme, reservationTime)
         );
+        return jdbcReservationRepository.save(Reservation.createNew("쿠다", slot, LocalDateTime.now()));
     }
 
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }

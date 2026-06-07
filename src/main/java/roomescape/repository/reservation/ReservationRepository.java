@@ -3,7 +3,7 @@ package roomescape.repository.reservation;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 
 public interface ReservationRepository {
 

@@ -58,10 +58,12 @@ class MyHistoryApiTest {
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }
@@ -92,25 +94,30 @@ class MyHistoryApiTest {
             final long timeId
     ) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (id, name, date, theme_id, time_id) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO reservation_slot (id, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
                 id,
-                name,
                 date,
                 themeId,
                 timeId
+        );
+        jdbcTemplate.update(
+                "INSERT INTO reservation (id, name, slot_id) VALUES (?, ?, ?)",
+                id,
+                name,
+                id
         );
     }
 
     private void createReservationWaiting(
             final long id,
-            final long reservationId,
+            final long slotId,
             final String name,
             final String requestedAt
     ) {
         jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (id, reservation_id, name, requested_at) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation_waiting (id, slot_id, name, requested_at) VALUES (?, ?, ?, ?)",
                 id,
-                reservationId,
+                slotId,
                 name,
                 requestedAt
         );

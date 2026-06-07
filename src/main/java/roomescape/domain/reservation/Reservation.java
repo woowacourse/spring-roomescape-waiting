@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -30,7 +31,7 @@ public class Reservation {
     }
 
     public static Reservation createNew(final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return createNew(name, new ReservationSlot(date, theme, time), LocalDateTime.now());
+        return createNew(name, ReservationSlot.createNew(date, theme, time), LocalDateTime.now());
     }
 
     public static Reservation createNew(
@@ -40,7 +41,7 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime standardDateTime
     ) {
-        return createNew(name, new ReservationSlot(date, theme, time), standardDateTime);
+        return createNew(name, ReservationSlot.createNew(date, theme, time), standardDateTime);
     }
 
     public static Reservation createNew(
@@ -53,7 +54,7 @@ public class Reservation {
     }
 
     public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return of(id, name, new ReservationSlot(date, theme, time), LocalDateTime.now());
+        return of(id, name, ReservationSlot.createNew(date, theme, time), LocalDateTime.now());
     }
 
     public static Reservation of(
@@ -64,7 +65,7 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime createdAt
     ) {
-        return of(id, name, new ReservationSlot(date, theme, time), createdAt);
+        return of(id, name, ReservationSlot.createNew(date, theme, time), createdAt);
     }
 
     public static Reservation of(
@@ -83,7 +84,7 @@ public class Reservation {
     }
 
     public Reservation withDateAndTime(final LocalDate date, final ReservationTime time) {
-        return new Reservation(this.id, this.name, new ReservationSlot(date, this.slot.theme(), time), this.createdAt);
+        return new Reservation(this.id, this.name, ReservationSlot.createNew(date, this.slot.getTheme(), time), this.createdAt);
     }
 
     public Reservation withDateAndTime(
@@ -91,9 +92,17 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime standardDateTime
     ) {
-        ReservationSlot changedSlot = new ReservationSlot(date, this.slot.theme(), time);
+        ReservationSlot changedSlot = ReservationSlot.createNew(date, this.slot.getTheme(), time);
         validateReservable(changedSlot, standardDateTime);
         return new Reservation(this.id, this.name, changedSlot, this.createdAt);
+    }
+
+    public Reservation withSlot(
+            final ReservationSlot slot,
+            final LocalDateTime standardDateTime
+    ) {
+        validateReservable(slot, standardDateTime);
+        return new Reservation(this.id, this.name, slot, this.createdAt);
     }
 
     public boolean hasName(final String name) {
@@ -172,15 +181,15 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return this.slot.date();
+        return this.slot.getDate();
     }
 
     public Theme getTheme() {
-        return this.slot.theme();
+        return this.slot.getTheme();
     }
 
     public ReservationTime getTime() {
-        return this.slot.time();
+        return this.slot.getTime();
     }
 
     public ReservationSlot getSlot() {
