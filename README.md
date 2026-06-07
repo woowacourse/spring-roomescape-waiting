@@ -87,7 +87,7 @@ Password: 비워두기
 - [x] 같은 사용자가 같은 슬롯에 **중복 대기할 수 없다**.
 - [x] 이미 지난 예약은 대기를 신청할 수 없다.
 - [x] 사용자는 본인의**대기를 취소**할 수 있다.
-- [x] 예약대기가 있는 예약 삭제를 한 경우 최근 예약대기자 정보로 예약된다. 
+- [x] 예약대기가 있는 예약 삭제를 한 경우 최근 예약대기자 정보로 예약된다.
 - [ ] [선택] 한 예약은 최대 20개의 예약 대기만 받을 수 있다.
 
 ### **2단계 - 내 예약 목록 조회 (상태 구분)**
@@ -108,7 +108,7 @@ Password: 비워두기
 - [x] 취소된 슬롯에 **대기가 하나도 없으면** 전환 없이 예약만 삭제된다.
 - [x] 본인이 신청한 **대기를 취소**하면 그 슬롯의 남은 대기 순번도 동일하게 재정렬된다.
 - [x] **매니저가 예약을 삭제**하면 자동 전환 없이 슬롯이 비워지며, 딸린 대기는 FK `ON DELETE CASCADE`로 함께 삭제된다.
-  - 사용자 취소(대기 1번 승격)와 의도적으로 다른 경로다. 매니저 삭제는 슬롯 자체를 닫는 행정 처리이므로 대기를 승격시키지 않고 정리한다.
+    - 사용자 취소(대기 1번 승격)와 의도적으로 다른 경로다. 매니저 삭제는 슬롯 자체를 닫는 행정 처리이므로 대기를 승격시키지 않고 정리한다.
 
 ### 함께 진행할 작업
 
@@ -118,9 +118,32 @@ Password: 비워두기
 ### 통합 적용 규칙
 
 - [ ] 이번 토론에서 정한 **트랜잭션 경계 규칙**을 코드에 적용한다.
-  - [ ] 트랜잭션 경계 결정마다 "왜 함께 묶었는가 / 분리했는가"를 **PR 본문에 한두 줄로** 남긴다.
+    - [ ] 트랜잭션 경계 결정마다 "왜 함께 묶었는가 / 분리했는가"를 **PR 본문에 한두 줄로** 남긴다.
 
 ## 미션 중 기록
+
+### 트랜잭션 경계 규칙
+
+#### If-Then
+- (If-Then) 만약 한 변경이 실패했을 때 다른 변경이 사용자에게 잘못된 상태를 보이게 한다면
+  - → 두 변경을 하나의 작업 단위로 묶는다.
+  - (이유: 사용자가 보는 것은 "원자적"이어야 한다)
+- (If-Then) 만약 한 변경이 사용자가 즉시 볼 필요 없는 후행 작업이라면
+  - → 묶지 않고 별도로 처리한다.
+  - (예: 통계·인기 테마 갱신 등)
+- (If-Then) 만약 한 흐름의 check-then-act가 동시 요청에서 깨질 수 있다면 
+- → 읽기~쓰기를 한 트랜잭션으로 두고 락으로 직렬화해 경계를 지킨다.
+- (이유: 트랜잭션 경계만으로는 READ COMMITTED의 read→write 틈을 못 막는다)
+
+#### 우선순위
+- (우선순위) 경계를 결정할 때 순서:
+  1) 사용자가 잘못된 중간 상태를 보게 되는가?
+  2) 데이터 정합성이 깨지는가?
+  3) 1·2 모두 아니면 묶지 않는다 (성능·복잡도 비용)
+
+#### 금지사항
+- (금지) 이번 사이클에서 "어쨌든 다 묶고 보자"식으로 트랜잭션을 키우지 않는다.
+  - 이유: 묶을수록 깨질 때의 영향이 커지고 동시성도 떨어진다.
 
 <details>
 <summary>사이클 1</summary>
@@ -137,33 +160,33 @@ Password: 비워두기
 
 CREATE TABLE member
 (
-  id       INT AUTO_INCREMENT PRIMARY KEY,
-  name     VARCHAR(255) NOT NULL,
-  -- ...
-  store_id INT          NOT NULL
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL,
+    -- ...
+    store_id INT          NOT NULL
 )
 ```
 
 ```sql
 CREATE TABLE member
 (
-  id       INT AUTO_INCREMENT PRIMARY KEY,
-  name     VARCHAR(255) NOT NULL,
-  store_id INT          NOT NULL
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL,
+    store_id INT          NOT NULL
 );
 
 CREATE TABLE store_manager
 (
-  id        INT AUTO_INCREMENT PRIMARY KEY,
-  member_id INT NOT NULL,
-  store_id  INT NOT NULL,
-  PRIMARY KEY (member_id)
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    member_id INT NOT NULL,
+    store_id  INT NOT NULL,
+    PRIMARY KEY (member_id)
 );
 
 CREATE TABLE store
 (
-  id   INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255)
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255)
 );
 ```
 
@@ -178,7 +201,8 @@ CREATE TABLE store
 **방식 A: `wait_order` 컬럼을 두고 INSERT 시점에 직접 채워 넣기**
 
 ```sql
-CREATE TABLE reservation_wait (
+CREATE TABLE reservation_wait
+(
     id             BIGINT AUTO_INCREMENT PRIMARY KEY,
     reservation_id BIGINT NOT NULL,
     member_id      BIGINT NOT NULL,
@@ -193,7 +217,8 @@ CREATE TABLE reservation_wait (
 **방식 B: `created_at` 정렬로 조회 시점에 계산 (`ROW_NUMBER()`)**
 
 ```sql
-SELECT id, member_id,
+SELECT id,
+       member_id,
        ROW_NUMBER() OVER (PARTITION BY reservation_id ORDER BY created_at) AS wait_order
 FROM reservation_wait
 WHERE reservation_id = ?
@@ -201,13 +226,13 @@ WHERE reservation_id = ?
 
 저장 시에는 순번을 신경 쓰지 않고, 조회할 때만 정렬 기반으로 도출.
 
-|              | 방식 A (저장)              | 방식 B (계산)             |
-|--------------|------------------------|-----------------------|
-| 조회 비용        | 낮음                     | 중간 (윈도 함수)            |
-| 쓰기 복잡도       | 높음 (MAX+1, 동시성 위험)     | 낮음 (INSERT만)          |
-| 취소 처리        | 뒤 row 모두 UPDATE        | 자기 row만 DELETE        |
-| 동시성 안전성      | 어려움 (락 / unique + 재시도) | 자연스럽게 안전              |
-| 데이터 일관성      | 컬럼 값과 정렬이 어긋날 위험       | `created_at` 단일 진실원   |
+|         | 방식 A (저장)              | 방식 B (계산)           |
+|---------|------------------------|---------------------|
+| 조회 비용   | 낮음                     | 중간 (윈도 함수)          |
+| 쓰기 복잡도  | 높음 (MAX+1, 동시성 위험)     | 낮음 (INSERT만)        |
+| 취소 처리   | 뒤 row 모두 UPDATE        | 자기 row만 DELETE      |
+| 동시성 안전성 | 어려움 (락 / unique + 재시도) | 자연스럽게 안전            |
+| 데이터 일관성 | 컬럼 값과 정렬이 어긋날 위험       | `created_at` 단일 진실원 |
 
 상의 끝에 **방식 B**를 채택했다. 순번은 화면에 노출되는 **파생 값**이지 핵심 데이터가 아니라는 점,
 쓰기 경로의 동시성 리스크와 취소 시 부수 UPDATE를 피할 수 있다는 점,
