@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.controller.dto.request.ThemeCreateRequest;
+import roomescape.controller.dto.response.ThemeListResponse;
 import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
@@ -50,12 +51,11 @@ public class ThemeFacadeTest {
         Theme themeLuke = new Theme(1L, "루크의 모험", "모험 이야기", "url");
         Theme themeFizz = new Theme(2L, "피즈의 모험", "모험 이야기", "url");
         List<Theme> themes = List.of(themeLuke, themeFizz);
-        List<ThemeResponse> responses = List.of(ThemeResponse.from(themeLuke),
-                ThemeResponse.from(themeFizz));
+        ThemeListResponse response = ThemeListResponse.from(themes);
 
         when(themeService.findAll()).thenReturn(themes);
 
-        assertThat(themeFacade.findAll()).isEqualTo(responses);
+        assertThat(themeFacade.findAll()).isEqualTo(response);
     }
 
     @Test
@@ -66,12 +66,11 @@ public class ThemeFacadeTest {
         LocalDate endDate = LocalDate.of(2026, 5, 1);
 
         List<Theme> themeRanking = List.of(themeLuke, themeFizz);
-        List<ThemeResponse> responseRanking = List.of(ThemeResponse.from(themeLuke),
-                ThemeResponse.from(themeFizz));
+        ThemeListResponse response = ThemeListResponse.from(themeRanking);
 
         when(themeService.findRanking(startDate, endDate)).thenReturn(themeRanking);
 
-        assertThat(themeFacade.findRanking(startDate, endDate)).isEqualTo(responseRanking);
+        assertThat(themeFacade.findRanking(startDate, endDate)).isEqualTo(response);
     }
 
     @Test

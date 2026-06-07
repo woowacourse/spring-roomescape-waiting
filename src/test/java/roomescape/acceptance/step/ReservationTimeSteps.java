@@ -27,7 +27,7 @@ public class ReservationTimeSteps {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(expectedSize));
+                .body("items.size()", is(expectedSize));
     }
 
     public static void deleteReservationTime(Long id) {
@@ -44,6 +44,6 @@ public class ReservationTimeSteps {
                 .when().get("/times/available")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].availability", is(availability.name()));
+                .body("items[0].availability", is(availability.name()));
     }
 }

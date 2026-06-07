@@ -28,7 +28,7 @@ public class ThemeSteps {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(expectedSize));
+                .body("items.size()", is(expectedSize));
     }
 
     public static void deleteTheme(Long id) {
@@ -45,6 +45,6 @@ public class ThemeSteps {
                 .when().get("/themes/ranking")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].id", is(expectedRanking));
+                .body("items[0].id", is(expectedRanking));
     }
 }

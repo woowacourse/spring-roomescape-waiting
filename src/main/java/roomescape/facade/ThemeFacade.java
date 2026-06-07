@@ -1,10 +1,10 @@
 package roomescape.facade;
 
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ThemeCreateRequest;
+import roomescape.controller.dto.response.ThemeListResponse;
 import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
@@ -30,16 +30,12 @@ public class ThemeFacade {
         return ThemeResponse.from(themeService.save(themeWithoutId));
     }
 
-    public List<ThemeResponse> findAll() {
-        return themeService.findAll().stream()
-                .map(ThemeResponse::from)
-                .toList();
+    public ThemeListResponse findAll() {
+        return ThemeListResponse.from(themeService.findAll());
     }
 
-    public List<ThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
-        return themeService.findRanking(startDate, endDate).stream()
-                .map(ThemeResponse::from)
-                .toList();
+    public ThemeListResponse findRanking(LocalDate startDate, LocalDate endDate) {
+        return ThemeListResponse.from(themeService.findRanking(startDate, endDate));
     }
 
     @Transactional

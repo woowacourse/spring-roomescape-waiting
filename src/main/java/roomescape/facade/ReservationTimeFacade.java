@@ -8,7 +8,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
+import roomescape.controller.dto.response.ReservationTimeAvailabilityListResponse;
 import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
+import roomescape.controller.dto.response.ReservationTimeListResponse;
 import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.domain.ReservationAvailability;
 import roomescape.domain.ReservationTime;
@@ -40,14 +42,12 @@ public class ReservationTimeFacade {
         return ReservationTimeResponse.from(reservationTime);
     }
 
-    public List<ReservationTimeResponse> findAll() {
-        return reservationTimeService.findAll().stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
+    public ReservationTimeListResponse findAll() {
+        return ReservationTimeListResponse.from(reservationTimeService.findAll());
     }
 
-    public List<ReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(LocalDate date,
-                                                                                    Long themeId) {
+    public ReservationTimeAvailabilityListResponse findAvailabilityByDateAndTheme(LocalDate date,
+                                                                                  Long themeId) {
         themeService.validateExistTheme(themeId);
 
         List<ReservationTimeAvailabilityResponse> responses = new ArrayList<>();
@@ -58,7 +58,7 @@ public class ReservationTimeFacade {
             responses.add(ReservationTimeAvailabilityResponse.from(reservationTime,
                     getAvailability(reservedTimes, reservationTime, date, themeId)));
         }
-        return responses;
+        return ReservationTimeAvailabilityListResponse.from(responses);
     }
 
     @Transactional

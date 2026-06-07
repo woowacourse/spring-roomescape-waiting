@@ -13,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
+import roomescape.controller.dto.response.ReservationTimeAvailabilityListResponse;
 import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
+import roomescape.controller.dto.response.ReservationTimeListResponse;
 import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.domain.ReservationAvailability;
 import roomescape.domain.ReservationStatus;
@@ -74,14 +76,11 @@ public class ReservationTimeFacadeTest {
                 new ReservationTime(2L, LocalTime.of(11, 0))
         );
 
-        List<ReservationTimeResponse> responses = List.of(
-                ReservationTimeResponse.from(reservationTimes.get(0)),
-                ReservationTimeResponse.from(reservationTimes.get(1))
-        );
+        ReservationTimeListResponse response = ReservationTimeListResponse.from(reservationTimes);
 
         when(reservationTimeService.findAll()).thenReturn(reservationTimes);
 
-        assertThat(reservationTimeFacade.findAll()).isEqualTo(responses);
+        assertThat(reservationTimeFacade.findAll()).isEqualTo(response);
     }
 
     @Test
@@ -102,12 +101,15 @@ public class ReservationTimeFacadeTest {
                         ReservationStatus.WAITING, 3L, LocalDateTime.now())
         );
 
-        List<ReservationTimeAvailabilityResponse> responses = List.of(
+        List<ReservationTimeAvailabilityResponse> availabilityResponses = List.of(
                 ReservationTimeAvailabilityResponse.from(firstTime,
                         ReservationAvailability.RESERVATION_AVAILABLE),
                 ReservationTimeAvailabilityResponse.from(secondTime, ReservationAvailability.WAITING_AVAILABLE),
                 ReservationTimeAvailabilityResponse.from(thirdTime, ReservationAvailability.NOTHING_AVAILABLE)
         );
+
+        ReservationTimeAvailabilityListResponse response = ReservationTimeAvailabilityListResponse.from(
+                availabilityResponses);
 
         when(reservationTimeService.findReservedTimesByDateAndTheme(reservationDate, theme.getId())).thenReturn(
                 reservedTimes);
@@ -115,7 +117,7 @@ public class ReservationTimeFacadeTest {
         when(waitService.findBySlot(reservationDate, thirdTime.getId(), theme.getId())).thenReturn(thirdTimeWaits);
 
         assertThat(reservationTimeFacade.findAvailabilityByDateAndTheme(reservationDate, theme.getId())).isEqualTo(
-                responses);
+                response);
 
         verify(themeService, times(1)).validateExistTheme(theme.getId());
     }

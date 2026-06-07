@@ -1,13 +1,12 @@
 package roomescape.controller;
 
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.controller.dto.response.ThemeListResponse;
 import roomescape.facade.ThemeFacade;
 
 @RestController
@@ -21,17 +20,17 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> findAll() {
-        List<ThemeResponse> response = themeFacade.findAll();
+    public ResponseEntity<ThemeListResponse> findAll() {
+        ThemeListResponse response = themeFacade.findAll();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<ThemeResponse>> findRanking(
+    public ResponseEntity<ThemeListResponse> findRanking(
             @RequestParam("startDate") LocalDate startDate,
             @RequestParam("endDate") LocalDate endDate
     ) {
-        List<ThemeResponse> response = themeFacade.findRanking(startDate, endDate);
+        ThemeListResponse response = themeFacade.findRanking(startDate, endDate);
         return ResponseEntity.ok(response);
     }
 }
