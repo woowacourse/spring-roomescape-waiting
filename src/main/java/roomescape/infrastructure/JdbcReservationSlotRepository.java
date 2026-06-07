@@ -182,4 +182,22 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
         return result.stream().findFirst();
     }
+
+    @Override
+    public List<ReservationSlotInfo> findAll() {
+        String sql = """
+                SELECT r.id, 
+                       r.date,
+                       t.id AS time_id, 
+                       t.start_at AS time_value,
+                       th.id AS theme_id, 
+                       th.name AS theme_name, 
+                       th.description AS theme_description, 
+                       th.thumbnail_url AS theme_thumbnail
+                FROM reservation_slot AS r
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                """;
+        return jdbcTemplate.query(sql, slotRowMapper);
+    }
 }
