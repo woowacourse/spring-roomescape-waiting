@@ -29,8 +29,8 @@ public class Slot {
         return new Slot(id, date, time, theme);
     }
 
-    public boolean isSame(Reservation target) {
-        return id == target.getSlot().getId();
+    public boolean isSame(Slot target) {
+        return id == target.id;
     }
 
     public boolean isBefore(LocalDateTime now) {

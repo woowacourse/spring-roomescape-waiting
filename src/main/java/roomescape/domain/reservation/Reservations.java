@@ -13,14 +13,14 @@ public class Reservations {
     }
 
     public Reservation reserve(ReservationName reservationName, Slot foundSlot, LocalDateTime now) {
-        validateHasName(reservationName, foundSlot);
+        validateNoDuplicate(reservationName, foundSlot);
 
-        Status status = getStatus();
+        Status status = decideStatusFor(foundSlot);
 
         return Reservation.create(reservationName, foundSlot, status, now);
     }
 
-    private void validateHasName(ReservationName reservationName, Slot slot) {
+    private void validateNoDuplicate(ReservationName reservationName, Slot slot) {
         if (reservations.stream()
                 .filter(reservation -> reservation.getSlot().equals(slot))
                 .anyMatch(reservation -> reservation.getName().equals(reservationName))) {
@@ -28,11 +28,40 @@ public class Reservations {
         }
     }
 
-    private Status getStatus() {
+    private Status decideStatusFor(Slot slot) {
         if (reservations.stream()
+                .filter(reservation -> reservation.isSameSlot(slot))
                 .anyMatch(reservation -> reservation.getStatus().equals(Status.APPROVED))) {
             return Status.WAITING;
         }
         return Status.APPROVED;
+    }
+
+    public List<RankedReservation> rankedReservationsOf(String name) {
+        List<Reservation> listByName = findByName(name);
+
+        return listByName.stream()
+                .map(this::toRankedReservation)
+                .toList();
+    }
+
+    private List<Reservation> findByName(String name) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getName().equals(new ReservationName(name)))
+                .toList();
+    }
+
+    public List<RankedReservation> allRankedReservationsOf() {
+        return reservations.stream()
+                .map(this::toRankedReservation)
+                .toList();
+    }
+
+    private RankedReservation toRankedReservation(Reservation target) {
+        List<Reservation> sameSlots = reservations.stream()
+                .filter(reservation -> reservation.isSameSlot(target.getSlot()))
+                .toList();
+
+        return RankedReservation.decideRankFrom(target, sameSlots);
     }
 }

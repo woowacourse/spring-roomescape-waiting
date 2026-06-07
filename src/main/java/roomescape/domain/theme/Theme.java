@@ -42,19 +42,4 @@ public class Theme {
     public ThumbnailUrl getThumbnailUrl() {
         return thumbnailUrl;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Theme theme = (Theme) o;
-        return id == theme.id && Objects.equals(name, theme.name) && Objects.equals(description,
-                theme.description) && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, description, thumbnailUrl);
-    }
 }

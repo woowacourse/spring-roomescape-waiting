@@ -29,11 +29,11 @@ public class Reservation {
     public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
         Reservation reservation = new Reservation(0L, reservationName, slot, status, now);
-        reservation.ensureNotPast(now);
+        reservation.isPastFrom(now);
         return reservation;
     }
 
-    public void ensureNotPast(LocalDateTime now) {
+    public void isPastFrom(LocalDateTime now) {
         if (slot.isBefore(now)) {
             throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
         }
@@ -47,8 +47,12 @@ public class Reservation {
         return id < target.getId();
     }
 
-    public boolean isSameSlot(Reservation target) {
+    public boolean isSameSlot(Slot target) {
         return slot.isSame(target);
+    }
+
+    public boolean isApproved() {
+        return status.isApproved();
     }
 
     public Reservation withId(long id) {
@@ -85,19 +89,5 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return id == that.id && Objects.equals(name, that.name) && Objects.equals(slot, that.slot);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, slot);
     }
 }

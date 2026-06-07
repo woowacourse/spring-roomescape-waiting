@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.RankedReservation;
-import roomescape.domain.reservation.RankedReservations;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.Reservations;
@@ -48,30 +47,30 @@ public class ReservationService {
     }
 
     public List<RankedReservation> findList(String name) {
-        RankedReservations rankedReservations = new RankedReservations(reservationRepository.findAll());
+        Reservations rankedReservations = new Reservations(reservationRepository.findAll());
 
         if (name == null) {
-            return rankedReservations.resultsOf();
+            return rankedReservations.allRankedReservationsOf();
         }
-        return rankedReservations.resultsOf(name);
+        return rankedReservations.rankedReservationsOf(name);
     }
 
     @Transactional
     public RankedReservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation originReservation = findReservationById(id);
-        originReservation.ensureNotPast(now);
+        originReservation.isPastFrom(now);
 
         Slot updateSlot = slotService.findOrCreate(request.getDate(), request.getTimeId(), request.getThemeId());
         slotService.lockSlot(updateSlot);
-
-        validateIsDuplicateReservation(updateSlot, request.getName());
 
         Reservations reservations = new Reservations(reservationRepository.findAllBySlot(updateSlot));
         Reservation reserved = reservations.reserve(new ReservationName(request.getName()), updateSlot, now);
 
         Reservation updated = reservationRepository.update(id, reserved);
 
-        findFirstWaitingAndUpdateStatus(originReservation);
+        if (originReservation.isApproved()) {
+            findFirstWaitingAndUpdateStatus(originReservation);
+        }
 
         return getRankedReservation(updated);
     }
@@ -84,19 +83,12 @@ public class ReservationService {
     @Transactional
     public void cancel(long reservationId, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
-        reservation.ensureNotPast(now);
+        reservation.isPastFrom(now);
 
-        Status cancelledStatus = reservation.getStatus();
         reservationRepository.deleteById(reservationId);
 
-        if (cancelledStatus == Status.APPROVED) {
+        if (reservation.isApproved()) {
             findFirstWaitingAndUpdateStatus(reservation);
-        }
-    }
-
-    private void validateIsDuplicateReservation(Slot slot, String name) {
-        if (reservationRepository.existsBySlotAndName(slot, name)) {
-            throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
