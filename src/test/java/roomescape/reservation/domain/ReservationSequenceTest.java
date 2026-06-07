@@ -10,7 +10,6 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 class ReservationSequenceTest {
@@ -26,12 +25,11 @@ class ReservationSequenceTest {
         Reservation firstWaitingReservation = reservation(2L, "레아");
         Reservation secondWaitingReservation = reservation(3L, "포비");
 
-        ReservationSequence sequence = new ReservationSequence(
-                slot,
-                List.of(reservedReservation, firstWaitingReservation, secondWaitingReservation)
-        );
-
-        List<ReservationEntry> entries = sequence.entries();
+        List<ReservationEntry> entries = ReservationSequence.entriesOf(List.of(
+                reservedReservation,
+                firstWaitingReservation,
+                secondWaitingReservation
+        ));
 
         assertThat(entries)
                 .extracting(
@@ -47,20 +45,40 @@ class ReservationSequenceTest {
     }
 
     @Test
-    @DisplayName("서로 다른 슬롯의 예약은 하나의 예약 순서로 묶을 수 없다.")
-    void create_fail_whenReservationsHaveDifferentSlot() {
+    @DisplayName("서로 다른 슬롯의 예약은 슬롯별로 독립적인 예약 순서를 가진다.")
+    void entriesOf_success_calculatesStatusAndWaitingRankPerSlot() {
         Reservation reservation = reservation(1L, "브라운");
-        Reservation otherSlotReservation = new Reservation(
+        Reservation otherSlotReservation = reservation(
                 2L,
                 "레아",
                 new Slot(LocalDate.of(2026, 5, 16), time, theme)
         );
+        Reservation waitingReservation = reservation(3L, "포비");
 
-        assertThatThrownBy(() -> new ReservationSequence(slot, List.of(reservation, otherSlotReservation)))
-                .isInstanceOf(IllegalArgumentException.class);
+        List<ReservationEntry> entries = ReservationSequence.entriesOf(List.of(
+                reservation,
+                otherSlotReservation,
+                waitingReservation
+        ));
+
+        assertThat(entries)
+                .extracting(
+                        entry -> entry.reservation().getId(),
+                        ReservationEntry::status,
+                        ReservationEntry::waitingRank
+                )
+                .containsExactly(
+                        tuple(1L, ReservationStatus.RESERVED, 0L),
+                        tuple(3L, ReservationStatus.WAITING, 1L),
+                        tuple(2L, ReservationStatus.RESERVED, 0L)
+                );
     }
 
     private Reservation reservation(Long id, String name) {
-        return new Reservation(id, name, slot);
+        return Reservation.reconstruct(id, name, slot);
+    }
+
+    private Reservation reservation(Long id, String name, Slot slot) {
+        return Reservation.reconstruct(id, name, slot);
     }
 }

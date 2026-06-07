@@ -15,15 +15,11 @@ public record Slot(LocalDate date,
         validate(date, time, theme);
     }
 
-    public static Slot from(Reservation reservation) {
-        return reservation.getSlot();
-    }
-
-    public boolean contains(Reservation reservation) {
+    boolean contains(Reservation reservation) {
         return Objects.equals(this, reservation.getSlot());
     }
 
-    public boolean hasSameDateTime(LocalDate date, ReservationTime time) {
+    boolean hasSameDateTime(LocalDate date, ReservationTime time) {
         return Objects.equals(this.date, date)
                 && Objects.equals(this.time, time);
     }

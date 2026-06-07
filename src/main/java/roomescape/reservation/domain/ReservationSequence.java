@@ -13,7 +13,7 @@ public class ReservationSequence {
     private final Slot slot;
     private final List<Reservation> reservations;
 
-    public ReservationSequence(Slot slot, List<Reservation> reservations) {
+    private ReservationSequence(Slot slot, List<Reservation> reservations) {
         validate(slot, reservations);
 
         this.slot = slot;
@@ -35,7 +35,7 @@ public class ReservationSequence {
                 .toList();
     }
 
-    public List<ReservationEntry> entries() {
+    private List<ReservationEntry> entries() {
         if (reservations.isEmpty()) {
             return List.of();
         }
