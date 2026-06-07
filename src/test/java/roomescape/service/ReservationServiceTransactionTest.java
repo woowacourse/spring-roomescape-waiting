@@ -145,11 +145,17 @@ public class ReservationServiceTransactionTest {
                 updateDate,
                 updateTime.getId()
         );
+
         assertThatThrownBy(() ->
                 reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name, updateRequest))
                 .isInstanceOf(RuntimeException.class);
-        assertThat(reservationService.getReservation(reservation.getId()).getName())
-                .isEqualTo(name);
+        assertThat(reservationService.getReservation(reservation.getId()))
+                .extracting(
+                        Reservation::getDate,
+                        r -> r.getTime().getId(),
+                        r -> r.getTime().getStartAt()
+                ).containsExactly(FUTURE_SECOND_DATE, reservationTime.getId(), reservationTime.getStartAt())
+                .doesNotContain(updateDate, updateTime.getId(), updateTime.getStartAt());
         assertThat(reservationService.getWaitlist(waitlist.getId()).getName())
                 .isEqualTo(waitingName);
         assertThat(reservationService.getReservations())
@@ -189,8 +195,13 @@ public class ReservationServiceTransactionTest {
         assertThatThrownBy(() ->
                 reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name, updateRequest))
                 .isInstanceOf(RuntimeException.class);
-        assertThat(reservationService.getReservation(reservation.getId()).getName())
-                .isEqualTo(name);
+        assertThat(reservationService.getReservation(reservation.getId()))
+                .extracting(
+                        Reservation::getDate,
+                        r -> r.getTime().getId(),
+                        r -> r.getTime().getStartAt()
+                ).containsExactly(FUTURE_SECOND_DATE, reservationTime.getId(), reservationTime.getStartAt())
+                .doesNotContain(updateDate, updateTime.getId(), updateTime.getStartAt());
         assertThat(reservationService.getWaitlist(waitlist.getId()).getName())
                 .isEqualTo(waitingName);
         assertThat(reservationService.getReservations())
