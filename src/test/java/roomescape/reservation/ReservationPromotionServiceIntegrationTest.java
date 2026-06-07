@@ -42,8 +42,10 @@ class ReservationPromotionServiceIntegrationTest {
         doThrow(new RuntimeException("예약 삭제 실패"))
                 .when(reservationRepository)
                 .deleteById(reservationId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow();
 
-        assertThatThrownBy(() -> reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId))
+        assertThatThrownBy(() -> reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("예약 삭제 실패");
 
@@ -62,8 +64,10 @@ class ReservationPromotionServiceIntegrationTest {
         doThrow(new RuntimeException("승격 예약 저장 실패"))
                 .when(reservationRepository)
                 .save(any(Reservation.class));
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow();
 
-        assertThatThrownBy(() -> reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId))
+        assertThatThrownBy(() -> reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("승격 예약 저장 실패");
 
@@ -83,18 +87,19 @@ class ReservationPromotionServiceIntegrationTest {
         doThrow(new RuntimeException("예약 스케줄 변경 실패"))
                 .when(reservationRepository)
                 .updateScheduleById(reservationId, newScheduleId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow();
 
         assertThatThrownBy(() -> reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
-                reservationId,
-                oldScheduleId,
+                reservation,
                 newScheduleId
         ))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("예약 스케줄 변경 실패");
 
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation foundReservation = reservationRepository.findById(reservationId)
                 .orElseThrow();
-        assertThat(reservation.getScheduleId()).isEqualTo(oldScheduleId);
+        assertThat(foundReservation.getScheduleId()).isEqualTo(oldScheduleId);
         assertThat(waitingRepository.findById(firstWaiting.getId())).isPresent();
         assertThat(reservationRepository.existsByMemberIdAndScheduleId(firstWaiting.getMemberId(), oldScheduleId))
                 .isFalse();
@@ -110,18 +115,19 @@ class ReservationPromotionServiceIntegrationTest {
         doThrow(new RuntimeException("승격 예약 저장 실패"))
                 .when(reservationRepository)
                 .save(any(Reservation.class));
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow();
 
         assertThatThrownBy(() -> reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
-                reservationId,
-                oldScheduleId,
+                reservation,
                 newScheduleId
         ))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("승격 예약 저장 실패");
 
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation foundReservation = reservationRepository.findById(reservationId)
                 .orElseThrow();
-        assertThat(reservation.getScheduleId()).isEqualTo(oldScheduleId);
+        assertThat(foundReservation.getScheduleId()).isEqualTo(oldScheduleId);
         assertThat(waitingRepository.findById(firstWaiting.getId())).isPresent();
         assertThat(reservationRepository.existsByMemberIdAndScheduleId(firstWaiting.getMemberId(), oldScheduleId))
                 .isFalse();

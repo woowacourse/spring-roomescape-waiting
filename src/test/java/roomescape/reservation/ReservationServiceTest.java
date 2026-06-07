@@ -96,7 +96,7 @@ class ReservationServiceTest {
 
         assertThatCode(() -> reservationService.cancelByIdForUser(reservationId, 1L))
                 .doesNotThrowAnyException();
-        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Test
@@ -126,7 +126,7 @@ class ReservationServiceTest {
 
         reservationService.cancelByIdForUser(reservationId, 1L);
 
-        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
 
@@ -143,7 +143,7 @@ class ReservationServiceTest {
 
         assertThatCode(() -> reservationService.cancelByIdForManager(reservationId))
                 .doesNotThrowAnyException();
-        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Test
@@ -167,7 +167,7 @@ class ReservationServiceTest {
         assertThat(response.id()).isEqualTo(reservationId);
         assertThat(response.memberId()).isEqualTo(1L);
         assertThat(response.scheduleId()).isEqualTo(99L);
-        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservationId, 3L, 99L);
+        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservation, 99L);
     }
 
     @Test
@@ -191,7 +191,7 @@ class ReservationServiceTest {
         assertThat(response.id()).isEqualTo(reservationId);
         assertThat(response.memberId()).isEqualTo(1L);
         assertThat(response.scheduleId()).isEqualTo(99L);
-        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservationId, 3L, 99L);
+        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservation, 99L);
     }
 
     @Test
@@ -206,7 +206,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 999L))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).findDetailById(reservationId);
-        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(anyLong(), anyLong(), anyLong());
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
 
     @Test
@@ -230,7 +230,7 @@ class ReservationServiceTest {
         verify(scheduleService).validateNotPastDate(oldReservation.date());
         verify(scheduleService).validateNotPastTime(oldReservation.date(), oldReservation.startAt());
         verify(scheduleService, never()).findScheduleIdByDateAndTimeIdAndThemeId(any(LocalDate.class), anyLong(), anyLong());
-        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(anyLong(), anyLong(), anyLong());
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
 
     @Test
@@ -255,7 +255,7 @@ class ReservationServiceTest {
         reservationService.updateForUser(request, reservationId, 1L);
 
         verify(reservationPromotionService)
-                .changeReservationScheduleAndPromoteFirstWaiting(reservationId, oldScheduleId, newScheduleId);
+                .changeReservationScheduleAndPromoteFirstWaiting(reservation, newScheduleId);
     }
 
     @Test
@@ -279,7 +279,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
                 .isInstanceOf(EscapeRoomException.class);
 
-        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(anyLong(), anyLong(), anyLong());
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
 
     @Test

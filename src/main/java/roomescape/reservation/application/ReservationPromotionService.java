@@ -19,20 +19,20 @@ public class ReservationPromotionService {
     private final WaitingRepository waitingRepository;
 
     @Transactional
-    public void cancelReservationAndPromoteFirstWaiting(long reservationId, long scheduleId) {
+    public void cancelReservationAndPromoteFirstWaiting(Reservation reservation) {
+        long scheduleId = reservation.getScheduleId();
+
         Waiting firstWaiting = popFirstWaiting(scheduleId);
-        reservationRepository.deleteById(reservationId);
+        reservationRepository.deleteById(reservation.getId());
         promoteWaitingIfPresent(firstWaiting, scheduleId);
     }
 
     @Transactional
-    public void changeReservationScheduleAndPromoteFirstWaiting(
-            long reservationId,
-            long oldScheduleId,
-            long newScheduleId
-    ) {
+    public void changeReservationScheduleAndPromoteFirstWaiting(Reservation reservation, long newScheduleId) {
+        long oldScheduleId = reservation.getScheduleId();
+
         Waiting firstWaiting = popFirstWaiting(oldScheduleId);
-        updateReservationSchedule(reservationId, newScheduleId);
+        updateReservationSchedule(reservation.getId(), newScheduleId);
         promoteWaitingIfPresent(firstWaiting, oldScheduleId);
     }
 

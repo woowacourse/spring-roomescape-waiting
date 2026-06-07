@@ -36,10 +36,11 @@ class ReservationPromotionServiceTest {
     void cancelReservationAndPromoteFirstWaiting_테스트_1() {
         long reservationId = 1L;
         long scheduleId = 10L;
+        Reservation reservation = new Reservation(reservationId, 1L, scheduleId);
         when(waitingRepository.findFirstByScheduleIdForPromotion(scheduleId))
                 .thenReturn(Optional.empty());
 
-        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId);
+        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation);
 
         verify(reservationRepository).deleteById(reservationId);
         verify(waitingRepository, never()).deleteById(anyLong());
@@ -51,11 +52,12 @@ class ReservationPromotionServiceTest {
     void cancelReservationAndPromoteFirstWaiting_테스트_2() {
         long reservationId = 1L;
         long scheduleId = 10L;
+        Reservation reservation = new Reservation(reservationId, 1L, scheduleId);
         Waiting firstWaiting = new Waiting(100L, 3L, scheduleId);
         when(waitingRepository.findFirstByScheduleIdForPromotion(scheduleId))
                 .thenReturn(Optional.of(firstWaiting));
 
-        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, scheduleId);
+        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation);
 
         verify(waitingRepository).deleteById(firstWaiting.getId());
         verify(reservationRepository).deleteById(reservationId);
@@ -71,6 +73,7 @@ class ReservationPromotionServiceTest {
         long reservationId = 1L;
         long oldScheduleId = 10L;
         long newScheduleId = 20L;
+        Reservation reservation = new Reservation(reservationId, 1L, oldScheduleId);
         Waiting firstWaiting = new Waiting(100L, 3L, oldScheduleId);
         when(waitingRepository.findFirstByScheduleIdForPromotion(oldScheduleId))
                 .thenReturn(Optional.of(firstWaiting));
@@ -78,8 +81,7 @@ class ReservationPromotionServiceTest {
                 .thenReturn(1);
 
         reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
-                reservationId,
-                oldScheduleId,
+                reservation,
                 newScheduleId
         );
 
@@ -97,14 +99,14 @@ class ReservationPromotionServiceTest {
         long reservationId = 1L;
         long oldScheduleId = 10L;
         long newScheduleId = 20L;
+        Reservation reservation = new Reservation(reservationId, 1L, oldScheduleId);
         when(waitingRepository.findFirstByScheduleIdForPromotion(oldScheduleId))
                 .thenReturn(Optional.empty());
         when(reservationRepository.updateScheduleById(reservationId, newScheduleId))
                 .thenReturn(1);
 
         reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
-                reservationId,
-                oldScheduleId,
+                reservation,
                 newScheduleId
         );
 

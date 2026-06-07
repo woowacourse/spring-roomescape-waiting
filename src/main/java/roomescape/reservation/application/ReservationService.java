@@ -59,7 +59,7 @@ public class ReservationService {
         ReservationDetailProjection reservationDetail = getReservationDetailOrThrow(reservationId);
         validateNotPast(reservationDetail);
 
-        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
+        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Transactional
@@ -73,7 +73,7 @@ public class ReservationService {
         ReservationDetailProjection reservationDetail = getReservationDetailOrThrow(reservationId);
         validateNotPast(reservationDetail);
 
-        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
+        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Transactional
@@ -155,15 +155,9 @@ public class ReservationService {
         validateUpdatable(oldReservationDetail, body);
 
         long reservationId = reservation.getId();
-        long oldScheduleId = reservation.getScheduleId();
         long newScheduleId = resolveNewScheduleId(body, oldReservationDetail, reservationId);
-        validateNotSameSchedule(oldScheduleId, newScheduleId);
-
-        reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
-                reservationId,
-                oldScheduleId,
-                newScheduleId
-        );
+        validateNotSameSchedule(reservation, newScheduleId);
+        reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(reservation, newScheduleId);
 
         return new ReservationSaveResponse(reservationId, reservation.getMemberId(), newScheduleId);
     }
@@ -212,8 +206,8 @@ public class ReservationService {
         }
     }
 
-    private void validateNotSameSchedule(long oldScheduleId, long newScheduleId) {
-        if (oldScheduleId == newScheduleId) {
+    private void validateNotSameSchedule(Reservation reservation, long newScheduleId) {
+        if (reservation.isSameScheduleId(newScheduleId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_SAME_SCHEDULE);
         }
     }

@@ -166,10 +166,7 @@ class WaitingServiceTest {
         WaitingResponse response = waitingService.save(request, MEMBER_ID);
 
         assertThat(response.id()).isEqualTo(11L);
-        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(
-                reservationIdToCancel,
-                reservation.getScheduleId()
-        );
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Test
@@ -200,7 +197,7 @@ class WaitingServiceTest {
 
         verify(waitingRepository, never()).save(any(Waiting.class));
         verify(reservationRepository, never()).deleteById(anyLong());
-        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(anyLong(), anyLong());
+        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(any(Reservation.class));
     }
 
     @Test
@@ -237,7 +234,7 @@ class WaitingServiceTest {
 
         verify(reservationRepository, never()).findById(anyLong());
         verify(reservationRepository, never()).deleteById(anyLong());
-        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(anyLong(), anyLong());
+        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(any(Reservation.class));
         verify(waitingRepository).save(any(Waiting.class));
     }
 

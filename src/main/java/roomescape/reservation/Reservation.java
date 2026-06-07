@@ -17,4 +17,8 @@ public class Reservation {
     public boolean isSameMemberId(long otherMemberId) {
         return this.memberId.equals(otherMemberId);
     }
+
+    public boolean isSameScheduleId(long newScheduleId) {
+        return this.scheduleId.equals(newScheduleId);
+    }
 }

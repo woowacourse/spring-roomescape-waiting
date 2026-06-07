@@ -93,6 +93,6 @@ public class WaitingService {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
         }
 
-        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservationId, reservation.getScheduleId());
+        reservationPromotionService.cancelReservationAndPromoteFirstWaiting(reservation);
     }
 }
