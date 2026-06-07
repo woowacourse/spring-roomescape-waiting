@@ -85,6 +85,26 @@ public class ReservationService {
         }
     }
 
+    private Reservation findReservationByIdForUpdate(Long reservationId) {
+        reservationDao.lockById(reservationId);
+        Reservation reservation = findReservation(reservationId);
+        return reservation;
+    }
+
+    private Reservation findReservation(Long id) {
+        try {
+            return reservationDao.findReservationById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ReservationNotFoundException();
+        }
+    }
+
+    private static void validateIfSelfReserved(Long memberId, Reservation reservation) {
+        if (reservation.getMemberId().equals(memberId)) {
+            throw new SelfReservationWaitNotAllowedException();
+        }
+    }
+
     @Transactional
     public ReservationResult updateReservation(Long id, LocalDate date, Long memberId, Long timeId) {
         ReservationTime reservationTime = findReservationTime(timeId);
@@ -98,6 +118,20 @@ public class ReservationService {
             throw new ReservationAlreadyExistsException();
         }
         return reservationDao.findReservationResultById(id);
+    }
+
+    private void validateReservationOwner(Long memberId, Reservation reservation) {
+        if (!reservation.isReservedBy(memberId)) {
+            throw new ReservationOwnerMismatchException();
+        }
+    }
+
+    private ReservationTime findReservationTime(Long id) {
+        try {
+            return reservationTimeDao.findReservationTimeById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ReservationTimeNotFoundException();
+        }
     }
 
     @Transactional
@@ -126,17 +160,16 @@ public class ReservationService {
         deleteOrPromoteWaiting(reservationId);
     }
 
-    private Reservation findReservationByIdForUpdate(Long reservationId) {
-        reservationDao.lockById(reservationId);
-        Reservation reservation = findReservation(reservationId);
-        return reservation;
-    }
-
     private void deleteOrPromoteWaiting(Long reservationId) {
         reservationWaitDao.findEarliestMemberId(reservationId)
                 .ifPresentOrElse(
                         m -> changeToRecentWaitingMember(reservationId, m),
                         () -> reservationDao.delete(reservationId));
+    }
+
+    private void changeToRecentWaitingMember(Long reservationId, Long memberId) {
+        reservationDao.updateMemberId(reservationId, memberId);
+        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
     }
 
     @Transactional
@@ -149,38 +182,5 @@ public class ReservationService {
     @Transactional
     public void deleteReservationWait(Long reservationId, Long memberId) {
         reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
-    }
-
-    private void changeToRecentWaitingMember(Long reservationId, Long memberId) {
-        reservationDao.updateMemberId(reservationId, memberId);
-        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
-    }
-
-    private void validateReservationOwner(Long memberId, Reservation reservation) {
-        if (!reservation.isReservedBy(memberId)) {
-            throw new ReservationOwnerMismatchException();
-        }
-    }
-
-    private Reservation findReservation(Long id) {
-        try {
-            return reservationDao.findReservationById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ReservationNotFoundException();
-        }
-    }
-
-    private ReservationTime findReservationTime(Long id) {
-        try {
-            return reservationTimeDao.findReservationTimeById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ReservationTimeNotFoundException();
-        }
-    }
-
-    private static void validateIfSelfReserved(Long memberId, Reservation reservation) {
-        if (reservation.getMemberId().equals(memberId)) {
-            throw new SelfReservationWaitNotAllowedException();
-        }
     }
 }

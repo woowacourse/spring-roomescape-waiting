@@ -71,66 +71,6 @@ public class ReservationTimeControllerTest {
                 .body("findAll { it.available == true }.size()", is(2));
     }
 
-    @Test
-    @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-    void 예약생성시_같은_날짜와_시간이어도_테마가_다르면_201을_반환한다() {
-        String cookie = authenticate();
-        createDefaultTimes(cookie);
-        createDefaultThemes(cookie);
-
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(reservationParams())
-                .when().post("/api/v1/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(reservationParams(Map.of("themeId", 2L)))
-                .when().post("/api/v1/reservations")
-                .then().log().all()
-                .statusCode(201);
-    }
-
-    @Test
-    void 예약가능시간_조회시_date가_누락되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?themeId=1")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_003"));
-    }
-
-    @Test
-    void 예약가능시간_조회시_themeId가_누락되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=2026-05-15")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_003"));
-    }
-
-    @Test
-    void 예약가능시간_조회시_date_형식이_잘못되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=2026/05/15&themeId=1")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_005"));
-    }
-
-    @Test
-    void 예약가능시간_조회시_themeId_형식이_잘못되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=2026-05-15&themeId=abc")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_005"));
-    }
-
     private String authenticate() {
         return RestAssured
                 .given()
@@ -172,6 +112,17 @@ public class ReservationTimeControllerTest {
                 .then().statusCode(201);
     }
 
+    private String authenticateAsManager() {
+        return RestAssured
+                .given()
+                .param("email", MANAGER_EMAIL)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
     private void createDefaultThemes(String unusedCookie) {
         String managerCookie = authenticateAsManager();
         Map<String, Object> themeParams = new HashMap<>();
@@ -198,17 +149,6 @@ public class ReservationTimeControllerTest {
                 .then().statusCode(201);
     }
 
-    private String authenticateAsManager() {
-        return RestAssured
-                .given()
-                .param("email", MANAGER_EMAIL)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
-    }
-
     private Map<String, Object> reservationParams() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", AVAILABLE_TIME_TEST_DATE);
@@ -218,9 +158,69 @@ public class ReservationTimeControllerTest {
         return params;
     }
 
+    @Test
+    @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+    void 예약생성시_같은_날짜와_시간이어도_테마가_다르면_201을_반환한다() {
+        String cookie = authenticate();
+        createDefaultTimes(cookie);
+        createDefaultThemes(cookie);
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .body(reservationParams())
+                .when().post("/api/v1/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .body(reservationParams(Map.of("themeId", 2L)))
+                .when().post("/api/v1/reservations")
+                .then().log().all()
+                .statusCode(201);
+    }
+
     private Map<String, Object> reservationParams(Map<String, Object> overrides) {
         Map<String, Object> params = reservationParams();
         params.putAll(overrides);
         return params;
+    }
+
+    @Test
+    void 예약가능시간_조회시_date가_누락되면_400을_반환한다() {
+        RestAssured.given().log().all()
+                .when().get("/api/v1/reservation-times/availability?themeId=1")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("COMMON400_003"));
+    }
+
+    @Test
+    void 예약가능시간_조회시_themeId가_누락되면_400을_반환한다() {
+        RestAssured.given().log().all()
+                .when().get("/api/v1/reservation-times/availability?date=2026-05-15")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("COMMON400_003"));
+    }
+
+    @Test
+    void 예약가능시간_조회시_date_형식이_잘못되면_400을_반환한다() {
+        RestAssured.given().log().all()
+                .when().get("/api/v1/reservation-times/availability?date=2026/05/15&themeId=1")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("COMMON400_005"));
+    }
+
+    @Test
+    void 예약가능시간_조회시_themeId_형식이_잘못되면_400을_반환한다() {
+        RestAssured.given().log().all()
+                .when().get("/api/v1/reservation-times/availability?date=2026-05-15&themeId=abc")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("COMMON400_005"));
     }
 }

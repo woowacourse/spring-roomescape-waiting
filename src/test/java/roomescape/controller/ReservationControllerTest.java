@@ -26,26 +26,127 @@ import static org.hamcrest.Matchers.*;
 @SqlMergeMode(MergeMode.MERGE)
 public class ReservationControllerTest {
 
+    public static final String INSERT_INTO_RESERVATION_WAIT_RESERVATION_ID_MEMBER_ID = """
+            INSERT INTO reservation_wait (reservation_id, member_id, created_at) VALUES (%d, %d, %s)
+            """;
     private static final String INSERT_DEFAULT_STORE_SQL = """
             INSERT INTO store (id, name)
             VALUES (1, '강남점');
             """;
-
     private static final String INSERT_DEFAULT_MEMBER_SQL = """
             INSERT INTO member (id, email, password, name, role, store_id)
             VALUES (1, 'brown@email.com', 'password', '브라운', 'USER', NULL),
                    (2, 'manager-gangnam@email.com', 'password', '강남매니저', 'MANAGER', 1);
             """;
-
     private static final String EMAIL = "brown@email.com";
     private static final String PASSWORD = "password";
     private static final String MANAGER_EMAIL = "manager-gangnam@email.com";
-    public static final String INSERT_INTO_RESERVATION_WAIT_RESERVATION_ID_MEMBER_ID = """
-            INSERT INTO reservation_wait (reservation_id, member_id, created_at) VALUES (%d, %d, %s)
-            """;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private String authenticate() {
+        return RestAssured
+                .given()
+                .param("email", EMAIL)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
+    private String authenticateAsToken() {
+        return RestAssured
+                .given()
+                .contentType(ContentType.JSON)
+                .body(new LoginRequest(EMAIL, PASSWORD))
+                .when().post("/api/v1/auth/login/token")
+                .then()
+                .extract().as(TokenResponse.class)
+                .token();
+    }
+
+    private void createDefaultTimes(String unusedCookie) {
+        String managerCookie = authenticateAsManager();
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", "10:00");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .header("Cookie", managerCookie)
+                .body(time)
+                .when().post("/api/v1/admin/reservation-times")
+                .then().statusCode(201);
+
+        Map<String, String> time2 = new HashMap<>();
+        time2.put("startAt", "11:00");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .header("Cookie", managerCookie)
+                .body(time2)
+                .when().post("/api/v1/admin/reservation-times")
+                .then().statusCode(201);
+
+        Map<String, String> time3 = new HashMap<>();
+        time3.put("startAt", "12:00");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .header("Cookie", managerCookie)
+                .body(time3)
+                .when().post("/api/v1/admin/reservation-times")
+                .then().statusCode(201);
+    }
+
+    private String authenticateAsManager() {
+        return RestAssured
+                .given()
+                .param("email", MANAGER_EMAIL)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
+    private void createDefaultThemes(String unusedCookie) {
+        String managerCookie = authenticateAsManager();
+        Map<String, Object> themeParams = new HashMap<>();
+        themeParams.put("name", "이든의 공포 하우스");
+        themeParams.put("description", "이든이 귀신으로 나옴");
+        themeParams.put("imgUrl", "https://images.example.com/themes/horror-house.jpg");
+        RestAssured.given().log().all()
+                .header("Cookie", managerCookie)
+                .contentType(ContentType.JSON)
+                .body(themeParams)
+                .when().post("/api/v1/admin/themes")
+                .then().statusCode(201);
+
+        Map<String, Object> themeParams2 = new HashMap<>();
+        themeParams2.put("name", "정콩이의 방탈출");
+        themeParams2.put("description", "니는 못나간다");
+        themeParams2.put("imgUrl", "https://images.example.com/themes/jungkong-room.jpg");
+
+        RestAssured.given().log().all()
+                .header("Cookie", managerCookie)
+                .contentType(ContentType.JSON)
+                .body(themeParams2)
+                .when().post("/api/v1/admin/themes")
+                .then().statusCode(201);
+    }
+
+    private Map<String, Object> reservationParams(Map<String, Object> overrides) {
+        Map<String, Object> params = reservationParams();
+        params.putAll(overrides);
+        return params;
+    }
+
+    private Map<String, Object> reservationParams() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", LocalDate.now().plusDays(1).toString());
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+        params.put("storeId", 1L);
+        return params;
+    }
 
     @Nested
     class 예약_생성 {
@@ -621,109 +722,5 @@ public class ReservationControllerTest {
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_002"));
         }
-    }
-
-    private String authenticate() {
-        return RestAssured
-                .given()
-                .param("email", EMAIL)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
-    }
-
-    private String authenticateAsToken() {
-        return RestAssured
-                .given()
-                .contentType(ContentType.JSON)
-                .body(new LoginRequest(EMAIL, PASSWORD))
-                .when().post("/api/v1/auth/login/token")
-                .then()
-                .extract().as(TokenResponse.class)
-                .token();
-    }
-
-    private void createDefaultTimes(String unusedCookie) {
-        String managerCookie = authenticateAsManager();
-        Map<String, String> time = new HashMap<>();
-        time.put("startAt", "10:00");
-
-        RestAssured.given().contentType(ContentType.JSON)
-                .header("Cookie", managerCookie)
-                .body(time)
-                .when().post("/api/v1/admin/reservation-times")
-                .then().statusCode(201);
-
-        Map<String, String> time2 = new HashMap<>();
-        time2.put("startAt", "11:00");
-
-        RestAssured.given().contentType(ContentType.JSON)
-                .header("Cookie", managerCookie)
-                .body(time2)
-                .when().post("/api/v1/admin/reservation-times")
-                .then().statusCode(201);
-
-        Map<String, String> time3 = new HashMap<>();
-        time3.put("startAt", "12:00");
-
-        RestAssured.given().contentType(ContentType.JSON)
-                .header("Cookie", managerCookie)
-                .body(time3)
-                .when().post("/api/v1/admin/reservation-times")
-                .then().statusCode(201);
-    }
-
-    private void createDefaultThemes(String unusedCookie) {
-        String managerCookie = authenticateAsManager();
-        Map<String, Object> themeParams = new HashMap<>();
-        themeParams.put("name", "이든의 공포 하우스");
-        themeParams.put("description", "이든이 귀신으로 나옴");
-        themeParams.put("imgUrl", "https://images.example.com/themes/horror-house.jpg");
-        RestAssured.given().log().all()
-                .header("Cookie", managerCookie)
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/v1/admin/themes")
-                .then().statusCode(201);
-
-        Map<String, Object> themeParams2 = new HashMap<>();
-        themeParams2.put("name", "정콩이의 방탈출");
-        themeParams2.put("description", "니는 못나간다");
-        themeParams2.put("imgUrl", "https://images.example.com/themes/jungkong-room.jpg");
-
-        RestAssured.given().log().all()
-                .header("Cookie", managerCookie)
-                .contentType(ContentType.JSON)
-                .body(themeParams2)
-                .when().post("/api/v1/admin/themes")
-                .then().statusCode(201);
-    }
-
-    private String authenticateAsManager() {
-        return RestAssured
-                .given()
-                .param("email", MANAGER_EMAIL)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
-    }
-
-    private Map<String, Object> reservationParams() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
-        params.put("storeId", 1L);
-        return params;
-    }
-
-    private Map<String, Object> reservationParams(Map<String, Object> overrides) {
-        Map<String, Object> params = reservationParams();
-        params.putAll(overrides);
-        return params;
     }
 }

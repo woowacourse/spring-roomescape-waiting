@@ -62,6 +62,24 @@ public class AdminStoreReservationControllerTest {
     private static final String REGULAR_USER_EMAIL = "user@email.com";
     private static final String PASSWORD = "password";
 
+    private Map<String, Object> updateParams(String date, long timeId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", date);
+        params.put("timeId", timeId);
+        return params;
+    }
+
+    private String loginAndGetCookie(String email) {
+        return RestAssured
+                .given()
+                .param("email", email)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
     @Nested
     class 매장_예약_목록_조회 {
 
@@ -343,23 +361,5 @@ public class AdminStoreReservationControllerTest {
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_002"));
         }
-    }
-
-    private Map<String, Object> updateParams(String date, long timeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", date);
-        params.put("timeId", timeId);
-        return params;
-    }
-
-    private String loginAndGetCookie(String email) {
-        return RestAssured
-                .given()
-                .param("email", email)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
     }
 }

@@ -23,22 +23,6 @@ public class Theme {
         this.imgUrl = imgUrl;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getImgUrl() {
-        return imgUrl;
-    }
-
     private void validateName(String name) {
         Validator.notBlank(name, "이름은 비어 있을 수 없습니다.");
     }
@@ -59,5 +43,21 @@ public class Theme {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("올바른 URL 형식이 아닙니다.");
         }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
     }
 }

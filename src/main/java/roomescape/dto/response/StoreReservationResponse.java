@@ -15,6 +15,12 @@ public record StoreReservationResponse(
         StoreResponse store,
         MemberSummaryProjection member
 ) {
+    public static List<StoreReservationResponse> fromAll(List<StoreReservationResult> storeReservationResults) {
+        return storeReservationResults.stream()
+                .map(StoreReservationResponse::from)
+                .toList();
+    }
+
     public static StoreReservationResponse from(StoreReservationResult storeReservationResult) {
         Reservation reservation = storeReservationResult.reservation();
         return new StoreReservationResponse(
@@ -26,11 +32,5 @@ public record StoreReservationResponse(
                 StoreResponse.from(storeReservationResult.store()),
                 storeReservationResult.member()
         );
-    }
-
-    public static List<StoreReservationResponse> fromAll(List<StoreReservationResult> storeReservationResults) {
-        return storeReservationResults.stream()
-                .map(StoreReservationResponse::from)
-                .toList();
     }
 }

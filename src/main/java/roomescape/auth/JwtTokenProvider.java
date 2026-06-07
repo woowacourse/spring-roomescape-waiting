@@ -47,11 +47,6 @@ public class JwtTokenProvider {
         parseClaims(token);
     }
 
-    public Long getMemberId(String token) {
-        Claims claims = parseClaims(token);
-        return Long.parseLong(claims.getSubject());
-    }
-
     private Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder()
@@ -64,5 +59,10 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException | JsonSyntaxException e) {
             throw new InvalidTokenException();
         }
+    }
+
+    public Long getMemberId(String token) {
+        Claims claims = parseClaims(token);
+        return Long.parseLong(claims.getSubject());
     }
 }
