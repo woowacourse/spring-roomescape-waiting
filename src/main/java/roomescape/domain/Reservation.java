@@ -35,6 +35,10 @@ public class Reservation {
         return new Reservation(id, name, date, this.createdAt, newTime, theme);
     }
 
+    public Reservation withCreatedAt(LocalDateTime createdAt) {
+        return new Reservation(name, date, createdAt, time, theme);
+    }
+
     public void validateCancellable(LocalDateTime now) {
         if (isPast(now)) {
             throw new PastReservationException("이미 지난 예약은 취소할 수 없습니다.");

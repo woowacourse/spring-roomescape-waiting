@@ -168,8 +168,9 @@ public class ReservationService {
     }
 
     private void convertWaitingToReservation(ReservationWaiting waiting) {
+        Reservation reservation = waiting.promoteToReservation(LocalDateTime.now(clock));
         try {
-            reservationDao.save(waiting.reservation());
+            reservationDao.save(reservation);
         } catch (DataConflictException e) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
