@@ -59,6 +59,36 @@ class JdbcReservationRepositoryTest {
         assertThat(saved.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
+    @DisplayName("예약을 락과 함께 id로 조회할 수 있다")
+    @Test
+    void findByIdForUpdate() {
+        // given
+        Reservation saved = saveReservation("락홍길동", "도심 탈출", LocalDate.of(2030, 3, 1), LocalTime.of(13, 0));
+
+        // when & then
+        assertThat(reservationRepository.findByIdForUpdate(saved.getId()))
+                .hasValueSatisfying(found -> {
+                    assertThat(found.getId()).isEqualTo(saved.getId());
+                    assertThat(found.getUser().getName()).isEqualTo("락홍길동");
+                });
+    }
+
+    @DisplayName("예약을 락과 함께 id와 사용자 이름으로 조회할 수 있다")
+    @Test
+    void findByIdAndUsernameForUpdate() {
+        // given
+        Reservation saved = saveReservation("락김철수", "미로 탈출", LocalDate.of(2030, 3, 2), LocalTime.of(15, 0));
+
+        // when & then
+        assertThat(reservationRepository.findByIdAndUsernameForUpdate(
+                saved.getId(),
+                saved.getUser().getName()
+        )).hasValueSatisfying(found -> {
+            assertThat(found.getId()).isEqualTo(saved.getId());
+            assertThat(found.getUser().getName()).isEqualTo("락김철수");
+        });
+    }
+
     @DisplayName("같은 사용자와 슬롯으로 다시 저장하면 중복 예외가 발생한다")
     @Test
     void saveWhenDuplicate() {
