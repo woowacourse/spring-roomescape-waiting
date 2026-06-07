@@ -17,19 +17,27 @@ public enum ErrorCode {
     ALREADY_EXISTS_TIME("TIME_409_1", "이미 존재하는 시간은 저장할 수 없습니다.", HttpStatus.CONFLICT),
     UNALLOWED_DELETE_RESERVED_TIME("TIME_409_2", "예약중인 시간은 삭제할 수 없습니다.", HttpStatus.CONFLICT),
 
+    NOT_EXIST_RESERVATION("Reservation_404", "존재하지 않는 예약입니다.", HttpStatus.NOT_FOUND),
     PAST_DATE_RESERVATION("RESERVATION_400_1", "지난 날짜/시간으로 예약할 수 없습니다.", HttpStatus.BAD_REQUEST),
     RESERVATION_NAME_BLANK("RESERVATION_400_2", "예약자 이름은 비거나 공백일 수 없습니다.", HttpStatus.BAD_REQUEST),
     RESERVATION_NAME_TOO_LONG("RESERVATION_400_3", "예약자 이름은 255자를 초과할 수 없습니다.", HttpStatus.BAD_REQUEST),
     RESERVATION_DATE_NULL("RESERVATION_400_4", "예약 날짜는 null일 수 없습니다.", HttpStatus.BAD_REQUEST),
     RESERVATION_TIME_NULL("RESERVATION_400_5", "예약 시간은 null일 수 없습니다.", HttpStatus.BAD_REQUEST),
     RESERVATION_THEME_NULL("RESERVATION_400_6", "예약 테마는 null일 수 없습니다.", HttpStatus.BAD_REQUEST),
+    UNALLOWED_UPDATE_PAST_RESERVATION("RESERVATION_400_7", "이미 지난 예약은 수정할 수 없습니다. ", HttpStatus.BAD_REQUEST),
     UNALLOWED_DELETE_PAST_RESERVATION("RESERVATION_400_7", "이미 지난 예약은 취소할 수 없습니다. ", HttpStatus.BAD_REQUEST),
     RESERVATION_WAITING_NULL("RESERVATION_400_8", "예약 대기는 null일 수 없습니다.", HttpStatus.BAD_REQUEST),
     UNALLOWED_CHANGE_RESERVATION_THEME("RESERVATION_400_9", "예약의 테마는 변경할 수 없습니다. 에약 취소 후 다시 예약해주세요.", HttpStatus.BAD_REQUEST),
     RESERVATION_SLOT_NULL("RESERVATION_400_10", "예약 슬롯은 null일 수 없습니다.", HttpStatus.BAD_REQUEST),
     RESERVATION_STATUS_NULL("RESERVATION_400_11", "예약 상태는 null 일 수 없습니다.", HttpStatus.BAD_REQUEST),
+    RESERVATION_STATUS_UNAVAILABLE("RESERVATION_400_12","예약 확정 상태가 아닙니다.",HttpStatus.BAD_REQUEST),
+    RESERVATION_DATE_UNAVAILABLE("RESERVATION_400_13","예약 변경 가능 시간이 아닙니다.",HttpStatus.BAD_REQUEST),
     DUPLICATE_RESERVATION("RESERVATION_409_1", "해당 시간은 이미 예약이 마감되었습니다. 다른 시간을 선택해주세요. ", HttpStatus.CONFLICT),
-    ALREADY_EXISTS_RESERVATION("RESERVATION_409_2", "이미 예약중인 시간입니다.", HttpStatus.CONFLICT);
+    ALREADY_EXISTS_RESERVATION("RESERVATION_409_2", "이미 예약중인 시간입니다.", HttpStatus.CONFLICT),
+
+    ALREADY_PAST_RESERVATION_SLOT("RESERVATION_SLOT_400","이미 시간이 지난 예약 슬롯입니다.", HttpStatus.BAD_REQUEST),
+    NOT_EXIST_RESERVATION_SLOT("RESERVATION_SLOT_400","조건에 맞는 예약 슬롯이 없습니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_RESERVATION_SLOT("RESERVATION_SLOT_400","이미 존재하는 예약 슬롯입니다.", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final String message;
