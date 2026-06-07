@@ -147,9 +147,13 @@ public class ReservationDao {
     }
 
     public Reservation update(Reservation reservation) {
-        jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
-                reservation.getDate(), reservation.getTime().getId(), reservation.getId());
-        return findById(reservation.getId()).orElseThrow();
+        try {
+            jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getId());
+            return findById(reservation.getId()).orElseThrow();
+        } catch (DuplicateKeyException e) {
+            throw new DataConflictException(e);
+        }
     }
 
     public void delete(long id) {
