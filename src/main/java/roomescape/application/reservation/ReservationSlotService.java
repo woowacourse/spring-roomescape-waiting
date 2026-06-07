@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationSlotRepository;
-import roomescape.presentation.reservation.response.ReservationSlotResponse;
+import roomescape.application.reservation.response.ReservationSlotResponse;
 
 @Service
 @RequiredArgsConstructor

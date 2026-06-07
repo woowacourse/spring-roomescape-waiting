@@ -18,13 +18,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import roomescape.application.reservation.request.TimeCreateRequest;
+import roomescape.application.reservation.response.ReservationTimesResponse;
+import roomescape.application.reservation.response.TimeCreateResponse;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.presentation.reservation.request.TimeCreateRequest;
-import roomescape.presentation.reservation.response.ReservationTimesResponse;
-import roomescape.presentation.reservation.response.TimeCreateResponse;
 
 @DisplayName("예약 시간 서비스")
 @ExtendWith(MockitoExtension.class)

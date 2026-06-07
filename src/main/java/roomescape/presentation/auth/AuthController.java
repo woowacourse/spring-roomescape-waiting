@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.auth.AuthService;
 import roomescape.common.auth.SessionKeys;
 import roomescape.domain.user.User;
-import roomescape.presentation.auth.request.LoginRequest;
-import roomescape.presentation.auth.request.SignupRequest;
-import roomescape.presentation.auth.response.LoginResponse;
+import roomescape.application.auth.request.LoginRequest;
+import roomescape.application.auth.request.SignupRequest;
+import roomescape.application.auth.response.LoginResponse;
 
 @RestController
 @RequiredArgsConstructor

@@ -22,16 +22,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import roomescape.application.theme.request.CreateThemeRequest;
+import roomescape.application.theme.response.AdminThemesResponse;
+import roomescape.application.theme.response.CreateThemeResponse;
+import roomescape.application.theme.response.PopularThemesResponse;
+import roomescape.application.theme.response.ThemesResponse;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRankResult;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.presentation.theme.request.CreateThemeRequest;
-import roomescape.presentation.theme.response.AdminThemesResponse;
-import roomescape.presentation.theme.response.CreateThemeResponse;
-import roomescape.presentation.theme.response.PopularThemesResponse;
-import roomescape.presentation.theme.response.ThemesResponse;
 
 @DisplayName("테마 서비스")
 @ExtendWith(MockitoExtension.class)

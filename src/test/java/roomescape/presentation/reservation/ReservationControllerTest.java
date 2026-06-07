@@ -29,6 +29,9 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.request.ReservationCreateRequest;
+import roomescape.application.reservation.response.ReservationCreateResponse;
+import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.common.auth.LoginUserArgumentResolver;
 import roomescape.common.auth.SessionKeys;
 import roomescape.common.config.AuthWebConfig;
@@ -41,9 +44,6 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRole;
 import roomescape.presentation.error.GlobalExceptionHandler;
-import roomescape.presentation.reservation.request.ReservationCreateRequest;
-import roomescape.presentation.reservation.response.ReservationCreateResponse;
-import roomescape.presentation.reservation.response.UserReservationsResponse;
 
 @DisplayName("예약 컨트롤러")
 @WebMvcTest(controllers = ReservationController.class)

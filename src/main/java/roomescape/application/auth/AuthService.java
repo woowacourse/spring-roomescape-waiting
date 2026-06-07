@@ -9,8 +9,8 @@ import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
-import roomescape.presentation.auth.request.LoginRequest;
-import roomescape.presentation.auth.request.SignupRequest;
+import roomescape.application.auth.request.LoginRequest;
+import roomescape.application.auth.request.SignupRequest;
 
 @Service
 @RequiredArgsConstructor

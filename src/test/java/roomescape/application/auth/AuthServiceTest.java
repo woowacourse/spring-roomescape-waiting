@@ -13,14 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.exception.DuplicateResourceException;
+import roomescape.application.auth.request.LoginRequest;
+import roomescape.application.auth.request.SignupRequest;
 import roomescape.common.security.Pbkdf2PasswordEncoder;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
-import roomescape.presentation.auth.request.LoginRequest;
-import roomescape.presentation.auth.request.SignupRequest;
 
 @DisplayName("인증 서비스")
 @ExtendWith(MockitoExtension.class)

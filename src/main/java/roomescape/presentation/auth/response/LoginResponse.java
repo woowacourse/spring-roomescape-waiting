@@ -1,4 +1,4 @@
-package roomescape.presentation.auth.response;
+package roomescape.application.auth.response;
 
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRole;

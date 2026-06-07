@@ -23,6 +23,8 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.theme.ThemeService;
+import roomescape.application.theme.response.AdminThemesResponse;
+import roomescape.application.theme.response.CreateThemeResponse;
 import roomescape.common.auth.AdminAccessInterceptor;
 import roomescape.common.auth.LoginUserArgumentResolver;
 import roomescape.common.auth.SessionKeys;
@@ -31,8 +33,6 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRole;
 import roomescape.presentation.error.GlobalExceptionHandler;
-import roomescape.presentation.theme.response.AdminThemesResponse;
-import roomescape.presentation.theme.response.CreateThemeResponse;
 
 @DisplayName("관리자 테마 컨트롤러")
 @WebMvcTest(controllers = AdminThemeController.class)

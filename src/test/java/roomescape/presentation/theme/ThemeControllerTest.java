@@ -18,11 +18,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.theme.ThemeService;
+import roomescape.application.theme.response.PopularThemesResponse;
+import roomescape.application.theme.response.ThemesResponse;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRankResult;
 import roomescape.presentation.error.GlobalExceptionHandler;
-import roomescape.presentation.theme.response.PopularThemesResponse;
-import roomescape.presentation.theme.response.ThemesResponse;
 
 @DisplayName("테마 컨트롤러")
 @WebMvcTest(controllers = ThemeController.class)

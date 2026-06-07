@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.theme.ThemeService;
-import roomescape.presentation.theme.response.PopularThemesResponse;
-import roomescape.presentation.theme.response.ThemesResponse;
+import roomescape.application.theme.response.PopularThemesResponse;
+import roomescape.application.theme.response.ThemesResponse;
 
 @RestController
 @RequiredArgsConstructor

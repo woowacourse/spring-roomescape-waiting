@@ -28,6 +28,13 @@ import org.mockito.Mock;
 import org.mockito.InOrder;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.exception.DuplicateResourceException;
+import roomescape.application.reservation.request.AdminReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationUpdateRequest;
+import roomescape.application.reservation.response.ReservationCreateResponse;
+import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.response.ReservationsResponse;
+import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
@@ -39,13 +46,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
-import roomescape.presentation.reservation.request.AdminReservationCreateRequest;
-import roomescape.presentation.reservation.request.ReservationCreateRequest;
-import roomescape.presentation.reservation.request.ReservationUpdateRequest;
-import roomescape.presentation.reservation.response.ReservationCreateResponse;
-import roomescape.presentation.reservation.response.ReservationUpdateResponse;
-import roomescape.presentation.reservation.response.ReservationsResponse;
-import roomescape.presentation.reservation.response.UserReservationsResponse;
 
 @DisplayName("예약 서비스")
 @ExtendWith(MockitoExtension.class)

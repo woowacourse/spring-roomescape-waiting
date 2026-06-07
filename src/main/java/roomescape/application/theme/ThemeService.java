@@ -12,11 +12,11 @@ import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRankResult;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.presentation.theme.request.CreateThemeRequest;
-import roomescape.presentation.theme.response.AdminThemesResponse;
-import roomescape.presentation.theme.response.CreateThemeResponse;
-import roomescape.presentation.theme.response.PopularThemesResponse;
-import roomescape.presentation.theme.response.ThemesResponse;
+import roomescape.application.theme.request.CreateThemeRequest;
+import roomescape.application.theme.response.AdminThemesResponse;
+import roomescape.application.theme.response.CreateThemeResponse;
+import roomescape.application.theme.response.PopularThemesResponse;
+import roomescape.application.theme.response.ThemesResponse;
 
 @Service
 @RequiredArgsConstructor

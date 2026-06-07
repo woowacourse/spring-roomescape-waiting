@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
 import roomescape.common.auth.LoginUser;
 import roomescape.domain.user.User;
-import roomescape.presentation.reservation.request.ReservationCreateRequest;
-import roomescape.presentation.reservation.request.ReservationUpdateRequest;
-import roomescape.presentation.reservation.response.ReservationCreateResponse;
-import roomescape.presentation.reservation.response.ReservationUpdateResponse;
-import roomescape.presentation.reservation.response.UserReservationsResponse;
+import roomescape.application.reservation.request.ReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationUpdateRequest;
+import roomescape.application.reservation.response.ReservationCreateResponse;
+import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.response.UserReservationsResponse;
 
 @RestController
 @RequiredArgsConstructor

@@ -16,13 +16,13 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
-import roomescape.presentation.reservation.request.AdminReservationCreateRequest;
-import roomescape.presentation.reservation.request.ReservationCreateRequest;
-import roomescape.presentation.reservation.request.ReservationUpdateRequest;
-import roomescape.presentation.reservation.response.ReservationCreateResponse;
-import roomescape.presentation.reservation.response.ReservationUpdateResponse;
-import roomescape.presentation.reservation.response.ReservationsResponse;
-import roomescape.presentation.reservation.response.UserReservationsResponse;
+import roomescape.application.reservation.request.AdminReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationUpdateRequest;
+import roomescape.application.reservation.response.ReservationCreateResponse;
+import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.response.ReservationsResponse;
+import roomescape.application.reservation.response.UserReservationsResponse;
 
 @Service
 @RequiredArgsConstructor

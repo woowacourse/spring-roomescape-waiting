@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.theme.ThemeService;
-import roomescape.presentation.theme.request.CreateThemeRequest;
-import roomescape.presentation.theme.response.AdminThemesResponse;
-import roomescape.presentation.theme.response.CreateThemeResponse;
+import roomescape.application.theme.request.CreateThemeRequest;
+import roomescape.application.theme.response.AdminThemesResponse;
+import roomescape.application.theme.response.CreateThemeResponse;
 
 @RestController
 @RequiredArgsConstructor
