@@ -253,15 +253,33 @@ class JdbcReservationRepositoryTest {
                     name,
                     date,
                     time_id,
+                    start_at,
                     theme_id,
+                    theme_name,
+                    theme_description,
+                    theme_thumbnail,
                     request_order,
                     created_at,
                     canceled_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                SELECT ?,
+                       ?,
+                       ?,
+                       rt.id,
+                       rt.start_at,
+                       t.id,
+                       t.name,
+                       t.description,
+                       t.thumbnail,
+                       ?,
+                       CURRENT_TIMESTAMP,
+                       CURRENT_TIMESTAMP
+                FROM reservation_time rt
+                JOIN theme t ON t.id = ?
+                WHERE rt.id = ?
                 """;
 
-        jdbcTemplate.update(sql, reservationId, name, Date.valueOf(date), timeId, themeId, requestOrder);
+        jdbcTemplate.update(sql, reservationId, name, Date.valueOf(date), requestOrder, themeId, timeId);
     }
 
     private void deleteReservation(Long id) {

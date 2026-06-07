@@ -106,9 +106,8 @@ public class ReservationService {
             throw new InvalidRequestException("이미 지난 예약은 취소할 수 없습니다.");
         }
 
-        if (reservationHistoryRepository.saveFromReservation(reservation.getId())) {
-            reservationRepository.deleteById(reservation.getId());
-        }
+        saveHistory(reservation.getId());
+        reservationRepository.deleteById(reservation.getId());
     }
 
     @Transactional
@@ -120,6 +119,14 @@ public class ReservationService {
     private Reservation findReservation(Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("변경할 예약이 존재하지 않습니다. 예약 목록을 확인해주세요."));
+    }
+
+    private void saveHistory(Long reservationId) {
+        try {
+            reservationHistoryRepository.save(reservationId);
+        } catch (DuplicateKeyException exception) {
+            return;
+        }
     }
 
     private ReservationTime findTime(Long timeId) {

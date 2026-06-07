@@ -57,20 +57,18 @@ public class JdbcReservationHistoryRepository implements ReservationHistoryRepos
                        h.name,
                        h.date,
                        h.time_id,
-                       rt.start_at,
+                       h.start_at,
                        h.theme_id,
-                       t.name AS theme_name,
-                       t.description AS theme_description,
-                       t.thumbnail AS theme_thumbnail,
+                       h.theme_name,
+                       h.theme_description,
+                       h.theme_thumbnail,
                        h.request_order,
                        h.created_at,
                        h.canceled_at
                 FROM reservation_history h
-                JOIN reservation_time rt ON h.time_id = rt.id
-                JOIN theme t ON h.theme_id = t.id
                 WHERE h.name = ?
                 ORDER BY h.date ASC,
-                         rt.start_at ASC,
+                         h.start_at ASC,
                          h.request_order ASC,
                          h.reservation_id ASC
                 """;
@@ -79,33 +77,51 @@ public class JdbcReservationHistoryRepository implements ReservationHistoryRepos
     }
 
     @Override
-    public boolean saveFromReservation(Long reservationId) {
+    public void save(Long reservationId) {
+        int rowCount = insertHistory(reservationId);
+        validateSavedRowCount(rowCount, reservationId);
+    }
+
+    private int insertHistory(Long reservationId) {
         String sql = """
                 INSERT INTO reservation_history (
                     reservation_id,
                     name,
                     date,
                     time_id,
+                    start_at,
                     theme_id,
+                    theme_name,
+                    theme_description,
+                    theme_thumbnail,
                     request_order,
                     created_at,
                     canceled_at
                 )
-                SELECT id,
-                       name,
-                       date,
-                       time_id,
-                       theme_id,
-                       request_order,
-                       created_at,
+                SELECT r.id,
+                       r.name,
+                       r.date,
+                       r.time_id,
+                       rt.start_at,
+                       r.theme_id,
+                       t.name,
+                       t.description,
+                       t.thumbnail,
+                       r.request_order,
+                       r.created_at,
                        CURRENT_TIMESTAMP
-                FROM reservation
-                WHERE id = ?
+                FROM reservation r
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                WHERE r.id = ?
                 """;
 
-        int rowCount = jdbcTemplate.update(sql, reservationId);
+        return jdbcTemplate.update(sql, reservationId);
+    }
+
+    private void validateSavedRowCount(int rowCount, Long reservationId) {
         if (rowCount == 0) {
-            return false;
+            return;
         }
         if (rowCount != 1) {
             log.error(
@@ -115,7 +131,5 @@ public class JdbcReservationHistoryRepository implements ReservationHistoryRepos
             );
             throw new InfrastructureException("예약 취소 이력 저장에 실패했습니다.");
         }
-
-        return true;
     }
 }

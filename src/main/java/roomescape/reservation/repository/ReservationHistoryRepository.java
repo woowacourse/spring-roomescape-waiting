@@ -8,5 +8,5 @@ public interface ReservationHistoryRepository {
 
     List<ReservationHistory> findByName(String name);
 
-    boolean saveFromReservation(Long reservationId);
+    void save(Long reservationId);
 }

@@ -38,17 +38,22 @@ CREATE TABLE reservation
 
 CREATE TABLE reservation_history
 (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT       NOT NULL,
-    name           VARCHAR(255) NOT NULL,
-    date           DATE         NOT NULL,
-    time_id        BIGINT       NOT NULL,
-    theme_id       BIGINT       NOT NULL,
-    request_order  BIGINT       NOT NULL,
-    created_at     TIMESTAMP    NOT NULL,
-    canceled_at    TIMESTAMP    NOT NULL,
+    id                BIGINT        NOT NULL AUTO_INCREMENT,
+    reservation_id    BIGINT        NOT NULL,
+    name              VARCHAR(255)  NOT NULL,
+    date              DATE          NOT NULL,
+    time_id           BIGINT        NOT NULL,
+    start_at          TIME          NOT NULL,
+    theme_id          BIGINT        NOT NULL,
+    theme_name        VARCHAR(255)  NOT NULL,
+    theme_description VARCHAR(255)  NOT NULL,
+    theme_thumbnail   VARCHAR(2048) NOT NULL,
+    request_order     BIGINT        NOT NULL,
+    created_at        TIMESTAMP     NOT NULL,
+    canceled_at       TIMESTAMP     NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (reservation_id)
 );
 
 CREATE INDEX idx_reservation_slot_request_order
