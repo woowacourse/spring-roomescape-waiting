@@ -40,7 +40,7 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
         return new Waitlist(
             rs.getLong("waitlist_id"),
             rs.getString("name"),
-            new Slot(
+            Slot.saved(
                 rs.getLong("slot_id"),
                 rs.getDate("date").toLocalDate(),
                 time,

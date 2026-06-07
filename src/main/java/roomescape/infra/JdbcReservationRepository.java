@@ -40,7 +40,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return new Reservation(
             rs.getLong("reservation_id"),
             rs.getString("name"),
-            new Slot(
+            Slot.saved(
                 rs.getLong("slot_id"),
                 rs.getDate("date").toLocalDate(),
                 time,

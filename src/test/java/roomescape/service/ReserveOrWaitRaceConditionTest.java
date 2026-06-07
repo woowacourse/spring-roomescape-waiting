@@ -242,7 +242,7 @@ public class ReserveOrWaitRaceConditionTest {
     }
 
     private Reservation createReservation(String name, ReservationTime reservationTime, Theme theme) {
-        Slot slot = slotRepository.getOrCreate(new Slot(FUTURE_FIRST_DATE, reservationTime, theme));
+        Slot slot = slotRepository.getOrCreate(Slot.of(FUTURE_FIRST_DATE, reservationTime, theme));
         return new Reservation(
             name,
             slot

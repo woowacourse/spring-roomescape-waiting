@@ -220,7 +220,7 @@ class JdbcReservationRepositoryTest {
     }
 
     private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        Slot slot = slotRepository.getOrCreate(new Slot(date, time, theme));
+        Slot slot = slotRepository.getOrCreate(Slot.of(date, time, theme));
         return new Reservation(name, slot);
     }
 }

@@ -33,7 +33,7 @@ public class JdbcSlotRepository implements SlotRepository {
             WHERE date = ? AND time_id = ? AND theme_id = ?
             """, Long.class, slot.getDate(), slot.getTimeId(), slot.getThemeId());
 
-        return new Slot(id, slot.getDate(), slot.getTime(), slot.getTheme());
+        return Slot.saved(id, slot.getDate(), slot.getTime(), slot.getTheme());
     }
 
     @Override

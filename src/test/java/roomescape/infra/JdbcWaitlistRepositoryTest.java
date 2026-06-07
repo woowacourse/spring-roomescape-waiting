@@ -50,7 +50,7 @@ class JdbcWaitlistRepositoryTest {
     void 같은_슬롯의_대기_목록을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
-        Slot slot = slotRepository.getOrCreate(new Slot(FUTURE_SECOND_DATE, reservationTime, theme));
+        Slot slot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE, reservationTime, theme));
 
         Long brieId = waitlistRepository.save(new Reservation("브리", slot), CREATED_AT);
         Long pobiId = waitlistRepository.save(new Reservation("포비", slot), CREATED_AT);

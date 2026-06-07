@@ -19,29 +19,8 @@ public class Reservation {
         this.slot = slot;
     }
 
-    // TODO: Slot 전환이 완료되면 제거한다.
-    public Reservation(
-        Long id,
-        String name,
-        LocalDate date,
-        ReservationTime time,
-        Theme theme
-    ) {
-        this(id, name, new Slot(date, time, theme));
-    }
-
     public Reservation(String name, Slot slot) {
         this(null, name, slot);
-    }
-
-    // TODO: Slot 전환이 완료되면 제거한다.
-    public Reservation(
-        String name,
-        LocalDate date,
-        ReservationTime time,
-        Theme theme
-    ) {
-        this(null, name, date, time, theme);
     }
 
     public void verifyReservable(LocalDateTime now) {
@@ -67,7 +46,7 @@ public class Reservation {
             throw new RoomEscapeException(PAST_RESERVATION, "이미 지난 예약은 변경할 수 없습니다.");
         }
 
-        Slot newSlot = new Slot(newDate, newTime, slot.getTheme());
+        Slot newSlot = Slot.of(newDate, newTime, slot.getTheme());
 
         if (newSlot.isPast(now)) {
             throw new RoomEscapeException(PAST_RESERVATION, "과거 시점으로 변경할 수 없습니다.");

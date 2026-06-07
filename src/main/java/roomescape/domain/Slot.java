@@ -10,15 +10,19 @@ public class Slot {
     private final ReservationTime time;
     private final Theme theme;
 
-    public Slot(Long id, LocalDate date, ReservationTime time, Theme theme) {
+    private Slot(Long id, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public Slot(LocalDate date, ReservationTime time, Theme theme) {
-        this(null, date, time, theme);
+    public static Slot of(LocalDate date, ReservationTime time, Theme theme) {
+        return new Slot(null, date, time, theme);
+    }
+
+    public static Slot saved(Long id, LocalDate date, ReservationTime time, Theme theme) {
+        return new Slot(id, date, time, theme);
     }
 
     public boolean isPast(LocalDateTime now) {

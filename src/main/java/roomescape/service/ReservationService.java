@@ -143,9 +143,7 @@ public class ReservationService {
     private Reservation createReservation(ReservationRequest request, ReservationTime reservationTime, Theme theme) {
         return new Reservation(
             request.name(),
-            request.date(),
-            reservationTime,
-            theme
+            Slot.of(request.date(), reservationTime, theme)
         );
     }
 

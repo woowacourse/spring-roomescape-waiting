@@ -20,31 +20,8 @@ public class Waitlist {
         this.slot = slot;
     }
 
-    // TODO: Slot 전환이 완료되면 제거한다.
-    public Waitlist(
-        Long id,
-        String name,
-        LocalDate date,
-        LocalDateTime createdAt,
-        ReservationTime time,
-        Theme theme
-    ) {
-        this(id, name, new Slot(date, time, theme), createdAt);
-    }
-
     public Waitlist(String name, Slot slot, LocalDateTime createdAt) {
         this(null, name, slot, createdAt);
-    }
-
-    // TODO: Slot 전환이 완료되면 제거한다.
-    public Waitlist(
-        String name,
-        LocalDate date,
-        LocalDateTime createdAt,
-        ReservationTime time,
-        Theme theme
-    ) {
-        this(null, name, date, createdAt, time, theme);
     }
 
     public void verifyCancelableBy(String name) {

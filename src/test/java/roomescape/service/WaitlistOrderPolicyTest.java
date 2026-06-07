@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 
@@ -52,10 +53,12 @@ class WaitlistOrderPolicyTest {
         return new Waitlist(
             id,
             name,
-            LocalDate.now().plusDays(1),
-            createdAt,
-            new ReservationTime(1L, LocalTime.of(10, 0)),
-            new Theme(1L, "방탈출 제목", "방탈출 설명", "thumbnail.png")
+            Slot.of(
+                LocalDate.now().plusDays(1),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "방탈출 제목", "방탈출 설명", "thumbnail.png")
+            ),
+            createdAt
         );
     }
 }
