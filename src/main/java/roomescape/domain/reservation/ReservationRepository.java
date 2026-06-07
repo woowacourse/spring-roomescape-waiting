@@ -11,11 +11,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllReservationsByUserId(Long userId);
 
-    Optional<Reservation> findById(Long id);
-
     Optional<Reservation> findByIdForUpdate(Long id);
-
-    Optional<Reservation> findByIdAndUsername(Long id, String username);
 
     Optional<Reservation> findByIdAndUsernameForUpdate(Long id, String username);
 

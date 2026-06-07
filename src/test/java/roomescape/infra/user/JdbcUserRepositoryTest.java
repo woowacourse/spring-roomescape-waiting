@@ -1,7 +1,7 @@
 package roomescape.infra.user;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,17 +41,6 @@ class JdbcUserRepositoryTest {
                 .hasValueSatisfying(user -> {
                     assertThat(user.getName()).isEqualTo("테스트김철수");
                 });
-    }
-
-    @DisplayName("이름 존재 여부를 확인할 수 있다")
-    @Test
-    void existsByName() {
-        // given
-        userRepository.save(User.create("테스트이름"));
-
-        // when & then
-        assertThat(userRepository.existsByName("테스트이름")).isTrue();
-        assertThat(userRepository.existsByName("없는이름")).isFalse();
     }
 
     @DisplayName("같은 이름의 사용자를 두 번 저장하면 중복 예외가 발생한다")

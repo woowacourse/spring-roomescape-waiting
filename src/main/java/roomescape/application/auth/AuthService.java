@@ -2,6 +2,8 @@ package roomescape.application.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.application.auth.request.LoginRequest;
+import roomescape.application.auth.request.SignupRequest;
 import roomescape.application.exception.DuplicateResourceException;
 import roomescape.common.security.PasswordEncoder;
 import roomescape.domain.exception.BusinessException;
@@ -9,8 +11,6 @@ import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
-import roomescape.application.auth.request.LoginRequest;
-import roomescape.application.auth.request.SignupRequest;
 
 @Service
 @RequiredArgsConstructor

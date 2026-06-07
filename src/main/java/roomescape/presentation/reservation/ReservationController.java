@@ -7,20 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
-import roomescape.common.auth.LoginUser;
-import roomescape.domain.user.User;
 import roomescape.application.reservation.request.ReservationCreateRequest;
 import roomescape.application.reservation.request.ReservationUpdateRequest;
 import roomescape.application.reservation.response.ReservationCreateResponse;
 import roomescape.application.reservation.response.ReservationUpdateResponse;
 import roomescape.application.reservation.response.UserReservationsResponse;
+import roomescape.common.auth.LoginUser;
+import roomescape.domain.user.User;
 
 @RestController
 @RequiredArgsConstructor

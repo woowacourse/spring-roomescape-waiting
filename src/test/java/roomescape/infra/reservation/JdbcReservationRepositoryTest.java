@@ -1,7 +1,7 @@
 package roomescape.infra.reservation;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -112,21 +112,6 @@ class JdbcReservationRepositoryTest {
         ))).isInstanceOf(DuplicateResourceException.class);
     }
 
-    @DisplayName("예약을 id로 조회할 수 있다")
-    @Test
-    void findById() {
-        // given
-        Reservation saved = saveReservation("테스트김철수", "미로 탈출", LocalDate.of(2030, 3, 2), LocalTime.of(15, 0));
-
-        // when & then
-        assertThat(reservationRepository.findById(saved.getId()))
-                .hasValueSatisfying(found -> {
-                    assertThat(found.getUser().getName()).isEqualTo("테스트김철수");
-                    assertThat(found.getSlot().getDate()).isEqualTo(LocalDate.of(2030, 3, 2));
-                    assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
-                });
-    }
-
     @DisplayName("예약을 삭제할 수 있다")
     @Test
     void deleteById() {
@@ -137,7 +122,7 @@ class JdbcReservationRepositoryTest {
         assertThat(reservationRepository.deleteById(saved.getId())).isEqualTo(1);
 
         // then
-        assertThat(reservationRepository.findById(saved.getId())).isEmpty();
+        assertThat(reservationRepository.findByIdForUpdate(saved.getId())).isEmpty();
     }
 
     @DisplayName("슬롯과 사용자로 예약 존재 여부를 확인할 수 있다")
@@ -185,17 +170,17 @@ class JdbcReservationRepositoryTest {
         ));
 
         // then
-        assertThat(reservationRepository.findById(first.getId()))
+        assertThat(reservationRepository.findByIdForUpdate(first.getId()))
                 .hasValueSatisfying(found -> {
                     assertThat(found.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
                     assertThat(found.getWaitingNumber()).isEqualTo(0);
                 });
-        assertThat(reservationRepository.findById(second.getId()))
+        assertThat(reservationRepository.findByIdForUpdate(second.getId()))
                 .hasValueSatisfying(found -> {
                     assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
                     assertThat(found.getWaitingNumber()).isEqualTo(1);
                 });
-        assertThat(reservationRepository.findById(third.getId()))
+        assertThat(reservationRepository.findByIdForUpdate(third.getId()))
                 .hasValueSatisfying(found -> {
                     assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
                     assertThat(found.getWaitingNumber()).isEqualTo(2);

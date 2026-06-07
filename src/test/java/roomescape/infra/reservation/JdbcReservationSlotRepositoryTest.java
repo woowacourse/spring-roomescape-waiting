@@ -1,7 +1,7 @@
 package roomescape.infra.reservation;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -64,23 +64,6 @@ class JdbcReservationSlotRepositoryTest {
         // when & then
         assertThatThrownBy(() -> slotRepository.save(slot))
                 .isInstanceOf(DuplicateResourceException.class);
-    }
-
-    @DisplayName("시간과 테마로 예약 슬롯 존재 여부를 확인할 수 있다")
-    @Test
-    void existsByTimeIdAndThemeId() {
-        // given
-        ReservationSlot saved = saveSlot(
-                "판타지",
-                "마법과 모험이 있는 테마",
-                "/themes/fantasy-adventure",
-                LocalDate.of(2030, 2, 3),
-                LocalTime.of(15, 0)
-        );
-
-        // then
-        assertThat(slotRepository.existsByTimeId(saved.getTime().getId())).isTrue();
-        assertThat(slotRepository.existsByThemeId(saved.getTheme().getId())).isTrue();
     }
 
     private ReservationSlot saveSlot(

@@ -2,7 +2,6 @@ package roomescape.presentation.reservation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -139,7 +138,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.theme.content").value("도심 탈출 설명"))
                 .andExpect(jsonPath("$.theme.url").value("/themes/40"));
 
-        verify(reservationService, times(1)).createReservationByUser(any(ReservationCreateRequest.class), eq(loginUser));
+        verify(reservationService, times(1)).createReservationByUser(any(ReservationCreateRequest.class),
+                eq(loginUser));
     }
 
     @Test
@@ -164,7 +164,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("slotId"))
                 .andExpect(jsonPath("$.fieldErrors[0].message").value("슬롯은 필수 선택 사항 입니다. 슬롯을 선택해주세요."));
 
-        verify(reservationService, never()).createReservationByUser(any(ReservationCreateRequest.class), any(User.class));
+        verify(reservationService, never()).createReservationByUser(any(ReservationCreateRequest.class),
+                any(User.class));
     }
 
     @Test

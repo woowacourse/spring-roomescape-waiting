@@ -28,32 +28,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String COLUMN_THEME_NAME = "theme_name";
     private static final String COLUMN_THEME_CONTENT = "theme_content";
     private static final String COLUMN_THEME_URL = "theme_url";
-    private static final String PARAM_TIME_ID = "timeId";
     private static final String PARAM_THEME_ID = "themeId";
-    private static final String COUNT_BY_TIME_ID_SQL = """
-            select count(*)
-            from reservation_slot
-            where time_id = :timeId
-            """;
-    private static final String COUNT_BY_THEME_ID_SQL = """
-            select count(*)
-            from reservation_slot
-            where theme_id = :themeId
-            """;
-    private static final String FIND_BY_ID_SQL = """
-            select rs.id,
-                   rs.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url
-            from reservation_slot rs
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where rs.id = :id
-            """;
     private static final String FIND_BY_ID_FOR_UPDATE_SQL = """
             select rs.id,
                    rs.date,
@@ -107,16 +82,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<ReservationSlot> findById(Long id) {
-        List<ReservationSlot> result = jdbcTemplate.query(
-                FIND_BY_ID_SQL,
-                new MapSqlParameterSource().addValue(COLUMN_ID, id),
-                RESERVATION_SLOT_ROW_MAPPER
-        );
-        return result.stream().findFirst();
-    }
-
-    @Override
     public Optional<ReservationSlot> findByIdForUpdate(Long id) {
         List<ReservationSlot> result = jdbcTemplate.query(
                 FIND_BY_ID_FOR_UPDATE_SQL,
@@ -158,44 +123,10 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return ReservationSlot.of(extractId(key), reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
-    @Override
-    public boolean existsByTimeId(Long id) {
-        return countByTimeId(id) > 0;
-    }
-
-    @Override
-    public boolean existsByThemeId(Long id) {
-        return countByThemeId(id) > 0;
-    }
-
     private long extractId(Number key) {
         if (key == null) {
             throw new IllegalStateException("생성 키를 조회할 수 없습니다.");
         }
         return key.longValue();
-    }
-
-    private int countByTimeId(Long timeId) {
-        Integer count = jdbcTemplate.queryForObject(
-                COUNT_BY_TIME_ID_SQL,
-                new MapSqlParameterSource().addValue(PARAM_TIME_ID, timeId),
-                Integer.class
-        );
-        if (count == null) {
-            return 0;
-        }
-        return count;
-    }
-
-    private int countByThemeId(Long themeId) {
-        Integer count = jdbcTemplate.queryForObject(
-                COUNT_BY_THEME_ID_SQL,
-                new MapSqlParameterSource().addValue(PARAM_THEME_ID, themeId),
-                Integer.class
-        );
-        if (count == null) {
-            return 0;
-        }
-        return count;
     }
 }

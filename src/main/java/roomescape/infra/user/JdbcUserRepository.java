@@ -23,13 +23,6 @@ public class JdbcUserRepository implements UserRepository {
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_ROLE = "role";
     private static final String FIND_BY_NAME_SQL = "select id, name, password, role from users where name = :name";
-    private static final String EXISTS_BY_NAME_SQL = """
-            select exists(
-                select 1
-                from users
-                where name = :name
-            )
-            """;
     private static final RowMapper<User> USER_ROW_MAPPER = (rs, rowNum) -> User.of(
             rs.getLong(COLUMN_ID),
             rs.getString(COLUMN_NAME),
@@ -70,16 +63,6 @@ public class JdbcUserRepository implements UserRepository {
         }
 
         return User.of(extractId(key), user.getName(), user.getPassword(), user.getRole());
-    }
-
-    @Override
-    public boolean existsByName(String name) {
-        Boolean exists = jdbcTemplate.queryForObject(
-                EXISTS_BY_NAME_SQL,
-                new MapSqlParameterSource().addValue(COLUMN_NAME, name),
-                Boolean.class
-        );
-        return Boolean.TRUE.equals(exists);
     }
 
     private long extractId(Number key) {

@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.exception.DuplicateResourceException;
 import roomescape.application.auth.request.LoginRequest;
 import roomescape.application.auth.request.SignupRequest;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.common.security.Pbkdf2PasswordEncoder;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
@@ -26,10 +26,9 @@ import roomescape.domain.user.UserRole;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
+    private final Pbkdf2PasswordEncoder passwordEncoder = new Pbkdf2PasswordEncoder();
     @Mock
     private UserRepository userRepository;
-
-    private final Pbkdf2PasswordEncoder passwordEncoder = new Pbkdf2PasswordEncoder();
 
     @Test
     @DisplayName("비밀번호가 일치하면 로그인할 수 있다")

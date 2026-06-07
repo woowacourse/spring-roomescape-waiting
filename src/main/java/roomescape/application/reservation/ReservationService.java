@@ -8,6 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.exception.DuplicateResourceException;
+import roomescape.application.reservation.request.AdminReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationCreateRequest;
+import roomescape.application.reservation.request.ReservationUpdateRequest;
+import roomescape.application.reservation.response.ReservationCreateResponse;
+import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.response.ReservationsResponse;
+import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
@@ -16,13 +23,6 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
-import roomescape.application.reservation.request.AdminReservationCreateRequest;
-import roomescape.application.reservation.request.ReservationCreateRequest;
-import roomescape.application.reservation.request.ReservationUpdateRequest;
-import roomescape.application.reservation.response.ReservationCreateResponse;
-import roomescape.application.reservation.response.ReservationUpdateResponse;
-import roomescape.application.reservation.response.ReservationsResponse;
-import roomescape.application.reservation.response.UserReservationsResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +78,8 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now(clock);
 
         Reservation reservation = findReservationByIdAndUsernameForUpdateOrThrow(id, loginUser.getName());
-        ReservationSlots reservationSlots = findReservationSlotsForUpdate(reservation.getSlot().getId(), request.slotId());
+        ReservationSlots reservationSlots = findReservationSlotsForUpdate(reservation.getSlot().getId(),
+                request.slotId());
 
         ReservationSlot currentSlot = reservationSlots.currentSlot();
         ReservationSlot targetSlot = reservationSlots.targetSlot();
@@ -99,7 +100,8 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now(clock);
 
         Reservation reservation = findReservationByIdForUpdateOrThrow(id);
-        ReservationSlots reservationSlots = findReservationSlotsForUpdate(reservation.getSlot().getId(), request.slotId());
+        ReservationSlots reservationSlots = findReservationSlotsForUpdate(reservation.getSlot().getId(),
+                request.slotId());
 
         ReservationSlot currentSlot = reservationSlots.currentSlot();
         ReservationSlot targetSlot = reservationSlots.targetSlot();

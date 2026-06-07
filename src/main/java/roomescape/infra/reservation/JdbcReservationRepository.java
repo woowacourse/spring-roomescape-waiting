@@ -61,28 +61,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             order by rs.date desc, rt.start_at desc, r.id;
             """;
 
-    private static final String FIND_BY_ID_SQL = """
-            select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   rs.id as reservation_slot_id,
-                   rs.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   r.reserved_at
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where r.id = :id
-            """;
     private static final String FIND_BY_ID_FOR_UPDATE_SQL = """
             select r.id as user_reservation_id,
                    r.waiting_number,
@@ -105,29 +83,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             join theme th on rs.theme_id = th.id
             where r.id = :id
             for update
-            """;
-    private static final String FIND_BY_ID_AND_USERNAME_SQL = """
-            select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   rs.id as reservation_slot_id,
-                   rs.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   r.reserved_at
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where r.id = :id
-              and u.name = :username
             """;
     private static final String FIND_BY_ID_AND_USERNAME_FOR_UPDATE_SQL = """
             select r.id as user_reservation_id,
@@ -280,32 +235,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
-        List<Reservation> result = jdbcTemplate.query(
-                FIND_BY_ID_SQL,
-                new MapSqlParameterSource().addValue("id", id),
-                RESERVATION_ROW_MAPPER
-        );
-        return result.stream().findFirst();
-    }
-
-    @Override
     public Optional<Reservation> findByIdForUpdate(Long id) {
         List<Reservation> result = jdbcTemplate.query(
                 FIND_BY_ID_FOR_UPDATE_SQL,
                 new MapSqlParameterSource().addValue("id", id),
-                RESERVATION_ROW_MAPPER
-        );
-        return result.stream().findFirst();
-    }
-
-    @Override
-    public Optional<Reservation> findByIdAndUsername(Long id, String username) {
-        List<Reservation> result = jdbcTemplate.query(
-                FIND_BY_ID_AND_USERNAME_SQL,
-                new MapSqlParameterSource()
-                        .addValue("id", id)
-                        .addValue("username", username),
                 RESERVATION_ROW_MAPPER
         );
         return result.stream().findFirst();
