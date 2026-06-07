@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
@@ -22,6 +23,7 @@ import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
 import roomescape.service.dto.result.WaitingDetailResult;
+import roomescape.service.event.ReservationChangeEvent;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,6 +34,7 @@ public class ReservationService {
     private final WaitingDao waitingDao;
     private final ReservationRejectLogger reservationRejectLogger;
     private final SlotManager slotManager;
+    private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
     public ReservationService(
@@ -41,6 +44,7 @@ public class ReservationService {
             WaitingDao waitingDao,
             ReservationRejectLogger reservationRejectLogger,
             SlotManager slotManager,
+            ApplicationEventPublisher eventPublisher,
             Clock clock
     ) {
         this.reservationDao = reservationDao;
@@ -49,6 +53,7 @@ public class ReservationService {
         this.waitingDao = waitingDao;
         this.reservationRejectLogger = reservationRejectLogger;
         this.slotManager = slotManager;
+        this.eventPublisher = eventPublisher;
         this.clock = clock;
     }
 
@@ -114,7 +119,7 @@ public class ReservationService {
             return ReservationResult.from(origin);
         }
 
-        if (!slotManager.tryChange(originEventSlot, modifiedEventSlot)) {
+        if (!slotManager.tryAcquire(modifiedEventSlot)) {
             throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
 
@@ -128,9 +133,11 @@ public class ReservationService {
         boolean isSuccessful = reservationDao.update(modified);
 
         if (!isSuccessful) {
-            slotManager.tryChange(modifiedEventSlot, originEventSlot);
+            slotManager.release(modifiedEventSlot);
             throw new NotFoundException("예약 변경 중 문제가 발생했습니다. (이미 취소된 예약일 수 있습니다.)");
         }
+
+        eventPublisher.publishEvent(new ReservationChangeEvent(originEventSlot));
 
         return ReservationResult.from(modified);
     }
@@ -140,10 +147,11 @@ public class ReservationService {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 
-        slotManager.release(origin.getEventSlot());
         Reservation canceled = origin.cancel();
 
         reservationDao.update(canceled);
+
+        eventPublisher.publishEvent(new ReservationChangeEvent(origin.getEventSlot()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -151,9 +159,10 @@ public class ReservationService {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 
-        slotManager.release(origin.getEventSlot());
         Reservation canceled = origin.cancel(UserName.parse(userName), LocalDateTime.now(clock));
 
         reservationDao.update(canceled);
+
+        eventPublisher.publishEvent(new ReservationChangeEvent(origin.getEventSlot()));
     }
 }
