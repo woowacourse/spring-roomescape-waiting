@@ -354,7 +354,7 @@ class JdbcWaitingRepositoryTest {
                 Waiting.create("네오", slot, 2L));
 
         // when
-        Optional<Waiting> result = waitingRepository.findPromotableWaitingBySlot(slot);
+        Optional<Waiting> result = waitingRepository.findPromotableWaitingBySlotWithLock(slot);
 
         // then
         assertThat(result).isPresent().get().isEqualTo(waiting1);

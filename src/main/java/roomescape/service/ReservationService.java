@@ -148,7 +148,7 @@ public class ReservationService {
     }
 
     private void promoteWaitingToReservationBySlot(ReservationSlot slot) {
-        Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlot(slot);
+        Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlotWithLock(slot);
         promotableWaiting.ifPresent(waiting -> {
             Reservation promotedReservation = Reservation.create(
                     waiting.getName(),

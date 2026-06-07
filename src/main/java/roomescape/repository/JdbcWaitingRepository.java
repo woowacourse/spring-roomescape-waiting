@@ -241,7 +241,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findPromotableWaitingBySlot(ReservationSlot slot) {
+    public Optional<Waiting> findPromotableWaitingBySlotWithLock(ReservationSlot slot) {
         String sql = """
                 SELECT w.id AS id,
                            w.name,
@@ -262,7 +262,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     AND t.id = :time_id
                     AND th.id = :theme_id
                 ORDER BY w.waiting_number ASC
-                LIMIT 1;
+                LIMIT 1
+                FOR UPDATE;
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
