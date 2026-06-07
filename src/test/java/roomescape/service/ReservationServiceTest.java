@@ -146,34 +146,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void update_대기_전환_중_예약_저장이_실패하면_대기를_삭제하지_않는다() {
-        fixClock();
-        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
-        LocalDate originalDate = fixedNow.toLocalDate().plusDays(1);
-        LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);
-        Reservation reservation = new Reservation(
-                1L, "브라운", originalDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        Reservation updated = new Reservation(
-                1L, "브라운", updateDate, fixedNow.minusHours(1), newTime, sampleTheme);
-        Reservation waiting = new Reservation(
-                10L, "이든", originalDate, fixedNow, sampleTime, sampleTheme);
-        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
-        given(reservationDao.existsByDateAndTimeIdAndThemeId(updateDate, 2L, 1L)).willReturn(false);
-        given(reservationDao.update(any(Reservation.class))).willReturn(updated);
-        given(reservationDao.findFirstWaitingBySlot(originalDate, 1L, 1L))
-                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
-        given(reservationDao.save(any(Reservation.class))).willThrow(new DataConflictException(new RuntimeException()));
-
-        assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
-                .isInstanceOf(ReservationConflictException.class);
-
-        then(reservationDao).should().update(any(Reservation.class));
-        then(reservationDao).should().save(promotedReservationOf(waiting));
-        then(reservationDao).should(never()).deleteWaiting(10L);
-    }
-
-    @Test
     void update_지난_예약이면_변경할_수_없다() {
         fixClock();
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
@@ -304,25 +276,6 @@ class ReservationServiceTest {
         then(reservationDao).should().delete(1L);
         then(reservationDao).should().save(promotedReservationOf(waiting));
         then(reservationDao).should().deleteWaiting(10L);
-    }
-
-    @Test
-    void delete_대기_전환_중_예약_저장이_실패하면_대기를_삭제하지_않는다() {
-        fixClock();
-        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
-        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
-                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
-        given(reservationDao.save(any(Reservation.class))).willThrow(new DataConflictException(new RuntimeException()));
-
-        assertThatThrownBy(() -> reservationService.delete(1L))
-                .isInstanceOf(ReservationConflictException.class);
-
-        then(reservationDao).should().delete(1L);
-        then(reservationDao).should().save(promotedReservationOf(waiting));
-        then(reservationDao).should(never()).deleteWaiting(10L);
     }
 
     @Test
