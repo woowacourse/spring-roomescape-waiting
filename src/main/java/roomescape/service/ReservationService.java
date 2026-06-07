@@ -161,10 +161,10 @@ public class ReservationService {
     }
 
     private void cancelAndPromoteNextWaitlist(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+
         List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(reservation.getSlot().getId());
         Optional<Waitlist> firstWaitlist = waitlistOrderPolicy.selectPromotionTarget(sameSlotWaitlists);
-
-        reservationRepository.deleteById(reservation.getId());
 
         if (firstWaitlist.isEmpty()) {
             return;
