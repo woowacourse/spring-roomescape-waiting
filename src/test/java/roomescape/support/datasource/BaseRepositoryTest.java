@@ -11,6 +11,5 @@ import roomescape.RoomescapeApplication;
         BaseRepositoryTest.class,
 }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@ComponentScan(basePackages = "roomescape.support.datasource")
 public class BaseRepositoryTest {
 }

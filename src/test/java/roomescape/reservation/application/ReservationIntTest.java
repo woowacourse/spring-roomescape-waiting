@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
@@ -24,7 +23,6 @@ import roomescape.support.datasource.ReservationDataSource;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@ComponentScan(basePackages = "roomescape.support.datasource")
 class ReservationIntTest {
 
     @Autowired
