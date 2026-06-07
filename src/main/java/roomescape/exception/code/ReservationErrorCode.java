@@ -9,6 +9,7 @@ public enum ReservationErrorCode implements ErrorCode {
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
     PAST_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "지난 날짜는 선택할 수 없습니다."),
     RESERVATION_CANCEL_DEADLINE_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "예약 변경 및 취소 가능한 시간이 지났습니다."),
+    RESERVATION_NOT_CHANGED(HttpStatus.BAD_REQUEST, "예약 정보가 변경되지 않았습니다."),
     ;
 
     private final HttpStatus httpStatus;

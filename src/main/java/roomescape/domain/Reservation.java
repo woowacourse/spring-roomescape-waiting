@@ -40,6 +40,10 @@ public class Reservation {
         return new Reservation(id, this.slot, this.name);
     }
 
+    public Reservation updateReservation(Slot slot) {
+        return new Reservation(this.id, slot, this.name);
+    }
+
     public boolean isNotModifiableAt(LocalDateTime now) {
         LocalDateTime reservationDateTime = LocalDateTime.of(
                 slot.getDate(),

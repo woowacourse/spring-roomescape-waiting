@@ -1,6 +1,5 @@
 package roomescape.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -110,17 +109,19 @@ public class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     void 예약을_수정한다() {
-        long timeId = apiFixtureGenerator.createTime("10:00");
-        long themeId = apiFixtureGenerator.createTheme("방탈출1", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
-        LocalDate reservationDate = LocalDate.of(2099, 5, 31);
+        long originalTimeId = apiFixtureGenerator.createTime("10:00");
+        long changedTimeId = apiFixtureGenerator.createTime("11:00");
 
-        long reservationId = apiFixtureGenerator.createReservation("브라운", reservationDate, timeId, themeId);
+        LocalDate originalDate = LocalDate.of(2099, 5, 31);
+        LocalDate changedDate = LocalDate.of(2099, 6, 1);
+
+        long themeId = apiFixtureGenerator.createTheme("방탈출1", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
+
+        long reservationId = apiFixtureGenerator.createReservation("브라운", originalDate, originalTimeId, themeId);
 
         Map<String, Object> updateParams = new HashMap<>();
-        updateParams.put("name", "조이");
-        updateParams.put("date", reservationDate.toString());
-        updateParams.put("timeId", timeId);
-        updateParams.put("themeId", themeId);
+        updateParams.put("date", changedDate.toString());
+        updateParams.put("timeId", changedTimeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -128,7 +129,8 @@ public class ReservationControllerTest extends AcceptanceTest {
                 .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(200)
-                .body("name", is("조이"));
+                .body("name", is("브라운"))
+                .body("date", is(changedDate.toString()));
     }
 
     @Test

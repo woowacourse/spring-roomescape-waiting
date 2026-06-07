@@ -143,6 +143,17 @@ public class ReservationDao {
         }
     }
 
+    public boolean existsBySlotIdForUpdate(long slotId) {
+        String sql = """
+                SELECT id
+                FROM reservation
+                WHERE slot_id = ?
+                FOR UPDATE        
+                """;
+        List<Integer> result = jdbcTemplate.queryForList(sql, Integer.class, slotId);
+        return !result.isEmpty();
+    }
+
     public boolean existsByReservationTime(long reservationTimeId) {
         String sql = """
                 SELECT EXISTS (
@@ -208,18 +219,6 @@ public class ReservationDao {
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId, name));
-    }
-
-    public boolean existsBySlot(long slotId) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation r
-                    INNER JOIN slot s ON r.slot_id=s.id
-                    WHERE s.id=?
-                )
-                """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId));
     }
 
     public void update(Reservation reservation) {

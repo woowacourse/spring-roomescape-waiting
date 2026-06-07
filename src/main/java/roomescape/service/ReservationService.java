@@ -3,19 +3,18 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.UpdateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.code.ReservationErrorCode;
 import roomescape.exception.code.ReservationTimeErrorCode;
@@ -28,47 +27,31 @@ import roomescape.exception.domain.ThemeException;
 @Transactional(readOnly = true)
 public class ReservationService {
 
+    private final SlotService slotService;
+
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
-    private final SlotDao slotDao;
+    private final WaitingDao waitingDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao) {
+    public ReservationService(SlotService slotService, ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, WaitingDao waitingDao) {
+        this.slotService = slotService;
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
-        this.slotDao = slotDao;
+        this.waitingDao = waitingDao;
     }
 
     @Transactional
     public ReservationResponse create(ReservationRequest request, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
-        Slot slot = createSlot(request.date(), reservationTime, theme);
+        Slot slot = slotService.findOrCreate(request.date(), reservationTime, theme);
 
         Reservation reservation = request.toReservation(slot, currentDateTime);
         validateUniqueReservation(theme.getId(), reservation.getDate(), reservationTime.getId());
-        try {
-            Reservation savedReservation = reservationDao.save(reservation);
-            return ReservationResponse.from(savedReservation);
-        } catch (DuplicateKeyException e) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
-        }
-    }
-
-    private Slot createSlot(LocalDate date, ReservationTime reservationTime, Theme theme) {
-        Optional<Slot> dateAndTimeAndTheme = slotDao.findByDateAndTimeAndTheme(date, reservationTime.getId(), theme.getId());
-        return dateAndTimeAndTheme.orElseGet(() -> {
-            try {
-                return slotDao.save(new Slot(date, reservationTime, theme));
-            } catch (DuplicateKeyException e) {
-                return slotDao.findByDateAndTimeAndTheme(
-                        date,
-                        reservationTime.getId(),
-                        theme.getId()
-                ).get();
-            }
-        });
+        Reservation savedReservation = reservationDao.save(reservation);
+        return ReservationResponse.from(savedReservation);
     }
 
     private void validateUniqueReservation(long themeId, LocalDate date, long timeId) {
@@ -103,22 +86,27 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse update(long reservationId, ReservationRequest request, LocalDateTime currentDateTime) {
-        try {
-            Reservation reservation = getReservation(reservationId);
-            validateModifiable(reservation, currentDateTime);
+    public ReservationResponse update(long reservationId, UpdateReservationRequest request, LocalDateTime currentDateTime) {
+        Reservation reservation = getReservation(reservationId);
+        Slot previousSlot = reservation.getSlot();
+        validateModifiable(reservation, currentDateTime);
 
-            ReservationTime reservationTime = getTime(request.timeId());
-            Theme theme = getTheme(request.themeId());
-            validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
-            validateUniqueReservationForUpdate(reservationId, theme, request.date(), reservationTime);
+        ReservationTime reservationTime = getTime(request.timeId());
+        validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
+        validateUniqueReservationForUpdate(reservation, request.date(), reservationTime);
 
-            Slot slot = createSlot(request.date(), reservationTime, theme);
-            Reservation updatedReservation = new Reservation(reservationId, slot, request.name());
-            reservationDao.update(updatedReservation);
-            return ReservationResponse.from(updatedReservation);
-        } catch (DuplicateKeyException e) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        Slot newSlot = slotService.findOrCreate(request.date(), reservationTime, reservation.getTheme());
+        validateSlotChanged(previousSlot, newSlot);
+        Reservation updatedReservation = reservation.updateReservation(newSlot);
+        reservationDao.update(updatedReservation);
+
+        promoteFirstWaiting(previousSlot);
+        return ReservationResponse.from(updatedReservation);
+    }
+
+    private void validateModifiable(Reservation reservation, LocalDateTime currentDateTime) {
+        if (reservation.isNotModifiableAt(currentDateTime)) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_CANCEL_DEADLINE_PASSED);
         }
     }
 
@@ -129,20 +117,27 @@ public class ReservationService {
         }
     }
 
-    private void validateModifiable(Reservation reservation, LocalDateTime currentDateTime) {
-        if (reservation.isNotModifiableAt(currentDateTime)) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_CANCEL_DEADLINE_PASSED);
-        }
-    }
-
-    private void validateUniqueReservationForUpdate(long reservationId, Theme theme,
+    private void validateUniqueReservationForUpdate(Reservation reservation,
                                                     LocalDate date, ReservationTime reservationTime) {
         boolean exists = reservationDao.existsByThemeAndDateAndTimeAndIdNot(
-                theme.getId(), date,
-                reservationTime.getId(), reservationId);
+                reservation.getTheme().getId(), date,
+                reservationTime.getId(), reservation.getId());
         if (exists) {
             throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
         }
+    }
+
+    private void validateSlotChanged(Slot previousSlot, Slot newSlot) {
+        if (previousSlot.equals(newSlot)) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_NOT_CHANGED);
+        }
+    }
+
+    private void promoteFirstWaiting(Slot previousSlot) {
+        waitingDao.findFirstBySlot(previousSlot.getId()).ifPresent(waiting -> {
+            reservationDao.save(new Reservation(previousSlot, waiting.getName()));
+            waitingDao.delete(waiting.getId());
+        });
     }
 
     @Transactional
@@ -150,6 +145,8 @@ public class ReservationService {
         Reservation reservation = getReservation(reservationId);
         validateModifiable(reservation, currentDateTime);
         reservationDao.delete(reservationId);
+
+        promoteFirstWaiting(reservation.getSlot());
     }
 
     private Reservation getReservation(long reservationId) {

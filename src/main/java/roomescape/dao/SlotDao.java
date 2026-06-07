@@ -1,5 +1,10 @@
 package roomescape.dao;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,11 +13,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Repository
 public class SlotDao {
@@ -57,6 +57,19 @@ public class SlotDao {
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
 
         return slot.createWithId(generatedId.longValue());
+    }
+
+    public Slot findOrCreate(Slot slot) {
+        return findByDateAndTimeAndTheme(slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())
+                .orElseGet(() -> {
+                    try {
+                        return save(slot);
+                    } catch (DuplicateKeyException e) {
+                        return findByDateAndTimeAndTheme(
+                                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId()
+                        ).get();
+                    }
+                });
     }
 
     public Optional<Slot> findByDateAndTimeAndTheme(LocalDate date, long timeId, long themeId) {

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -109,6 +110,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private String getPath(WebRequest request) {
         return request.getDescription(false).replace("uri=", "");
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateKeyException(DuplicateKeyException duplicateKeyException) {
+        CommonErrorCode errorCode = CommonErrorCode.DUPLICATE_RESOURCE;
+        log.warn("중복 키 예외 발생: errorCode={}",
+                errorCode.getCode(), duplicateKeyException);
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(new ErrorResponse(errorCode));
     }
 
     @ExceptionHandler(RoomescapeException.class)

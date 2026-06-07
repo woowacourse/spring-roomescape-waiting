@@ -1,5 +1,10 @@
 package roomescape.dao;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -7,12 +12,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.RankedWaiting;
 import roomescape.domain.Waiting;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Repository
 public class WaitingDao {
@@ -74,6 +73,24 @@ public class WaitingDao {
         }
     }
 
+    public Optional<Waiting> findFirstBySlot(long slotId) {
+        String sql = """
+                SELECT id, 
+                       created_at,
+                       slot_id,
+                       name
+                FROM waiting
+                    WHERE slot_id = ?
+                ORDER BY created_at ASC, id ASC
+                LIMIT 1;
+                """;
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, slotId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     public List<RankedWaiting> findAllWithRankByName(String name) {
         String sql = """
                 SELECT
@@ -88,14 +105,20 @@ public class WaitingDao {
                         SELECT COUNT(*)
                         FROM waiting w2
                         WHERE w2.slot_id = w.slot_id
-                          AND w2.created_at < w.created_at
+                          AND (
+                              w2.created_at < w.created_at
+                              OR (
+                                w2.created_at = w.created_at
+                                AND w2.id < w.id
+                            )
+                        )
                     ) + 1 AS rank
                 FROM waiting w
                 JOIN slot s ON w.slot_id = s.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN theme t ON s.theme_id = t.id
                 WHERE w.name = ?
-                ORDER BY w.created_at;
+                ORDER BY w.created_at ASC, w.id ASC;
                 """;
         return jdbcTemplate.query(sql, RANK_MAPPER, name);
     }

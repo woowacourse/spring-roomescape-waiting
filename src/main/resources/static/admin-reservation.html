@@ -92,16 +92,16 @@
                     <form id="edit-form" class="row g-3">
                         <input type="hidden" id="edit-id">
                         <div class="col-md-6">
-                            <label class="form-label font-weight-bold">예약자 이름</label>
-                            <input type="text" id="edit-name" class="form-control" required>
+                            <label class="form-label font-weight-bold">예약자 이름 <span class="badge bg-secondary">변경 불가</span></label>
+                            <input type="text" id="edit-name" class="form-control bg-light" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">테마 <span class="badge bg-secondary">변경 불가</span></label>
+                            <input type="text" id="edit-theme-name" class="form-control bg-light" disabled>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label font-weight-bold">날짜</label>
                             <input type="date" id="edit-date" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label font-weight-bold">테마</label>
-                            <select id="edit-theme" class="form-select" required></select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label font-weight-bold">시간</label>
@@ -121,6 +121,7 @@
     <script>
         const editModal = new bootstrap.Modal(document.getElementById('editModal'));
         let currentReservations = [];
+        let editingThemeId = null;
 
         function checkPassword() {
             const password = document.getElementById('admin-password').value;
@@ -190,53 +191,48 @@
             const today = new Date();
             const offset = today.getTimezoneOffset() * 60000;
             const localToday = new Date(today - offset).toISOString().slice(0, 10);
-            
+
             if (res.date < localToday) {
                 alert('🚫 수정 불가: 지난 날짜의 예약은 수정할 수 없습니다.');
                 return;
             }
 
+            editingThemeId = res.theme.id;
+
             document.getElementById('edit-id').value = res.id;
             document.getElementById('edit-name').value = res.name;
+            document.getElementById('edit-theme-name').value = res.theme.name;
             document.getElementById('edit-date').value = res.date;
 
-            // 수정 모달용 테마 및 시간 로드
-            fetchThemes('edit-theme')
-                .then(() => {
-                    document.getElementById('edit-theme').value = res.theme.id;
-                    return fetchAvailableTimes('edit-time', 'edit-date', 'edit-theme', res.time.id);
-                })
+            // 수정 모달용 시간 로드 (themeSelectId=null → editingThemeId 사용)
+            fetchAvailableTimes('edit-time', 'edit-date', null, res.time.id)
                 .then(() => {
                     editModal.show();
                 })
                 .catch(error => {
-                    // fetchAvailableTimes 등에서 발생한 에러 처리 (이미 alert 띄웠을 것이므로 추가 조치 없이 중단만)
                     console.warn('모달 열기 중단:', error);
                 });
 
-            // 모달 내 변경 이벤트 바인딩
-            document.getElementById('edit-date').onchange = () => fetchAvailableTimes('edit-time', 'edit-date', 'edit-theme').catch(() => {});
-            document.getElementById('edit-theme').onchange = () => fetchAvailableTimes('edit-time', 'edit-date', 'edit-theme').catch(() => {});
+            // 날짜 변경 시 시간 목록 재조회 (themeSelectId=null → editingThemeId 사용)
+            document.getElementById('edit-date').onchange = () => fetchAvailableTimes('edit-time', 'edit-date', null).catch(() => {});
         }
 
         function updateReservation() {
             const id = parseInt(document.getElementById('edit-id').value);
             const date = document.getElementById('edit-date').value;
-            
+
             // 최종 수정 전 날짜 한 번 더 검증 (백엔드 update 누락 대응)
             const today = new Date();
             const offset = today.getTimezoneOffset() * 60000;
             const localToday = new Date(today - offset).toISOString().slice(0, 10);
-            
+
             if (date < localToday) {
                 alert('🚫 수정 불가: 지난 날짜로는 예약을 수정할 수 없습니다.');
                 return;
             }
 
             const payload = {
-                name: document.getElementById('edit-name').value,
                 date: date,
-                themeId: parseInt(document.getElementById('edit-theme').value),
                 timeId: parseInt(document.getElementById('edit-time').value)
             };
 
@@ -290,9 +286,10 @@
                 .catch(handleError);
         }
 
-        function fetchAvailableTimes(timeSelectId, dateInputId, themeSelectId, selectedTimeId = null) {
+        // themeSelectId가 null이면 editingThemeId 모듈 변수를 사용 (편집 모달 전용)
+        function fetchAvailableTimes(timeSelectId, dateInputId, themeSelectId = null, selectedTimeId = null) {
             const date = document.getElementById(dateInputId).value;
-            const themeId = document.getElementById(themeSelectId).value;
+            const themeId = themeSelectId ? document.getElementById(themeSelectId).value : editingThemeId;
             const timeSelect = document.getElementById(timeSelectId);
 
             if (date && themeId) {
