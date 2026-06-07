@@ -211,8 +211,13 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
 
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "브라운");
+
         RestAssured.given().log().all()
-                .when().delete("/reservations/1?name=브라운")
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
@@ -222,8 +227,13 @@ class ReservationControllerTest {
 
     @Test
     void 존재하지_않는_예약을_취소하면_실패한다() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "브라운");
+
         RestAssured.given().log().all()
-                .when().delete("/reservations/999?name=브라운")
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().delete("/reservations/999")
                 .then().log().all()
                 .statusCode(404);
     }

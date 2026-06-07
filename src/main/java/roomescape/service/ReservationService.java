@@ -7,6 +7,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableDateResult;
 import roomescape.dto.ReservationCreateCommand;
+import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.ReservationTimeStatusResult;
@@ -85,14 +86,14 @@ public class ReservationService {
         }
     }
 
-    public void deleteWithValidation(final Long reservationId, final String name) {
-        final Reservation reservation = getReservation(reservationId);
-        validateReservationOwner(reservation, name);
+    public void deleteWithValidation(final ReservationDeleteCommand deleteCommand) {
+        final Reservation reservation = getReservation(deleteCommand.reservationId());
+        validateReservationOwner(reservation, deleteCommand.name());
         final LocalDate date = reservation.getDate();
         validateFutureOrPresentDate(date);
         final ReservationTime reservationTime = reservation.getTime();
         validateFutureOrPresentTime(date, reservationTime);
-        delete(reservationId);
+        delete(reservation.getId());
     }
 
     public List<ReservationResult> getReservations() {

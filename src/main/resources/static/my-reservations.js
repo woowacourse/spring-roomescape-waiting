@@ -171,7 +171,7 @@ async function loadMyData() {
 async function deleteReservation(id) {
   if (!confirm('정말 이 예약을 취소하시겠습니까? 취소된 예약은 복구할 수 없습니다.')) return;
   try {
-    await api.del(`/reservations/${id}?name=${encodeURIComponent(state.currentName)}`);
+    await api.del(`/reservations/${id}`, { name: state.currentName });
     showToast('예약이 성공적으로 취소되었습니다.', 'success');
     loadMyData();
   } catch (e) {

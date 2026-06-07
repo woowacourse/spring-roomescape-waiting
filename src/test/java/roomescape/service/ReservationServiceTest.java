@@ -10,6 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationCreateCommand;
+import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.ReservationStatus;
@@ -148,9 +149,10 @@ class ReservationServiceTest {
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationRepository.deleteById(1L)).willReturn(true);
+        ReservationDeleteCommand correctDeleteCommand = new ReservationDeleteCommand(1L, "오리");
 
         // when
-        reservationService.deleteWithValidation(1L, "오리");
+        reservationService.deleteWithValidation(correctDeleteCommand);
 
         // then
         verify(reservationRepository).deleteById(1L);
@@ -161,9 +163,10 @@ class ReservationServiceTest {
         // given
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        ReservationDeleteCommand wrongDeleteCommand = new ReservationDeleteCommand(1L, "거위");
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteWithValidation(1L, "거위"))
+        assertThatThrownBy(() -> reservationService.deleteWithValidation(wrongDeleteCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
     }
