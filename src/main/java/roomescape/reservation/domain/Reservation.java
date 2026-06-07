@@ -44,10 +44,6 @@ public class Reservation {
             LocalDate date,
             ReservationTime time,
             Theme theme) {
-        validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
 
         this.id = id;
         this.status = status;
