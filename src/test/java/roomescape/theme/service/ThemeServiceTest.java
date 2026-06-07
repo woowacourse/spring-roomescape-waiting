@@ -14,6 +14,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -108,7 +109,7 @@ class ThemeServiceTest {
                 "https://example.com/theme.png"
         );
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        reservationRepository.save(new Reservation("브라운", LocalDate.now().plusDays(1), time, theme));
+        saveReservation("브라운", LocalDate.now().plusDays(1), time, theme);
 
         // when, then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
@@ -127,10 +128,10 @@ class ThemeServiceTest {
         ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
 
         LocalDate now = LocalDate.of(2026, 10, 15);
-        reservationRepository.save(new Reservation("브라운", LocalDate.of(2026, 10, 8), time, popularTheme));
-        reservationRepository.save(new Reservation("레아", LocalDate.of(2026, 10, 8), time2, popularTheme));
-        reservationRepository.save(new Reservation("제이슨", LocalDate.of(2026, 10, 9), time, lessPopularTheme));
-        reservationRepository.save(new Reservation("포비", now, time, outOfRangeTheme));
+        saveReservation("브라운", LocalDate.of(2026, 10, 8), time, popularTheme);
+        saveReservation("레아", LocalDate.of(2026, 10, 8), time2, popularTheme);
+        saveReservation("제이슨", LocalDate.of(2026, 10, 9), time, lessPopularTheme);
+        saveReservation("포비", now, time, outOfRangeTheme);
 
         // when
         List<Theme> popularThemes = themeService.findPopularThemes(7, now, 10);
@@ -139,6 +140,16 @@ class ThemeServiceTest {
         assertThat(popularThemes)
                 .extracting(Theme::getId)
                 .containsExactly(popularTheme.getId(), lessPopularTheme.getId());
+    }
+
+    private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return reservationRepository.save(Reservation.create(
+                name,
+                date,
+                time,
+                theme,
+                LocalDateTime.of(date, time.getStartAt()).minusMinutes(1)
+        ));
     }
 
 }

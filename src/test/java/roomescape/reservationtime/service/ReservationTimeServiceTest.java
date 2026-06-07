@@ -16,6 +16,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -79,7 +80,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
-        reservationRepository.save(new Reservation("브라운", LocalDate.of(2026, 5, 14), reservationTime, theme));
+        saveReservation("브라운", LocalDate.of(2026, 5, 14), reservationTime, theme);
 
         // when, then
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTime.getId()))
@@ -109,9 +110,9 @@ class ReservationTimeServiceTest {
 
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
 
-        reservationRepository.save(new Reservation("브라운", targetDate, time, targetTheme));
-        reservationRepository.save(new Reservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme));
-        reservationRepository.save(new Reservation("브라운", targetDate, time, nonTargetTheme));
+        saveReservation("브라운", targetDate, time, targetTheme);
+        saveReservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme);
+        saveReservation("브라운", targetDate, time, nonTargetTheme);
 
         // when
         List<ReservationTimeAvailability> availableTimes = reservationTimeService.findAvailableTimes(targetDate, targetTheme.getId());
@@ -133,5 +134,15 @@ class ReservationTimeServiceTest {
         // when, then
         assertThatThrownBy(() -> reservationTimeService.findAvailableTimes(date, notFoundThemeId))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return reservationRepository.save(Reservation.create(
+                name,
+                date,
+                time,
+                theme,
+                LocalDateTime.of(date, time.getStartAt()).minusMinutes(1)
+        ));
     }
 }

@@ -28,14 +28,6 @@ public class Reservation {
         return new Reservation(null, null, null, name, date, time, theme);
     }
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, null, null, name, date, time, theme);
-    }
-
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, null, null, name, date, time, theme);
-    }
-
     public Reservation(
             Long id,
             ReservationStatus status,

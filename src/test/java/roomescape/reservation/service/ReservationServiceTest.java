@@ -18,6 +18,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -357,7 +358,14 @@ class ReservationServiceTest {
     }
 
     private Reservation savePastReservation() {
-        return reservationRepository.save(new Reservation(NAME, PAST_DATE, saveReservationTime(14), saveTheme()));
+        ReservationTime time = saveReservationTime(14);
+        return reservationRepository.save(Reservation.create(
+                NAME,
+                PAST_DATE,
+                time,
+                saveTheme(),
+                LocalDateTime.of(PAST_DATE, time.getStartAt()).minusMinutes(1)
+        ));
     }
 
     private ReservationTime saveReservationTime(int hour) {
