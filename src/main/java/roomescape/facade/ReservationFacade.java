@@ -17,8 +17,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.AlreadyReservedException;
+import roomescape.exception.custom.CannotCreatePastReservationException;
+import roomescape.exception.custom.CannotModifyPastReservationException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -50,7 +51,7 @@ public class ReservationFacade {
         Theme theme = themeService.findTheme(request.themeId());
 
         if (isPast(request.date(), reservationTime)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE);
+            throw new CannotCreatePastReservationException();
         }
 
         return saveReservationOrWait(request, reservationTime, theme);
@@ -98,7 +99,7 @@ public class ReservationFacade {
 
     private void validateDelete(LocalDate reservationDate, ReservationTime reservationTime) {
         if (isPast(reservationDate, reservationTime)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE);
+            throw new CannotModifyPastReservationException();
         }
     }
 
@@ -123,8 +124,8 @@ public class ReservationFacade {
         if (reservation.isEmpty()) {
             return saveReservation(request, reservationTime, theme);
         }
-        if (reservation.get().getName().equals(request.name())) {
-            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION);
+        if (reservation.get().isSameUser(request.name())) {
+            throw new AlreadyReservedException();
         }
 
         return saveWait(request, reservationTime, theme);

@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,8 +17,9 @@ import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
+import roomescape.exception.custom.CannotDeleteThemeInUseException;
+import roomescape.exception.custom.ReservationNotExistsException;
 import roomescape.repository.ReservationRepository;
 
 public class ReservationServiceTest {
@@ -94,7 +94,7 @@ public class ReservationServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.findReservation(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(ReservationNotExistsException.class);
     }
 
     @Test
@@ -124,19 +124,17 @@ public class ReservationServiceTest {
 
     @Test
     void validateReferencedThemeExceptionTest() {
-        doThrow(new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME))
-                .when(reservationRepository).existsByThemeId(1L);
+        when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationService.validateReferencedTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(CannotDeleteThemeInUseException.class);
     }
 
     @Test
     void validateReferencedTimeExceptionTest() {
-        doThrow(new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME))
-                .when(reservationRepository).existsByTimeId(1L);
+        when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationService.validateReferencedTime(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(CannotDeleteReservationTimeInUseException.class);
     }
 }

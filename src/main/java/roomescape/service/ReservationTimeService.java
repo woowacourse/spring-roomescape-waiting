@@ -7,8 +7,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.CannotReadPastReservationTimeAvailability;
+import roomescape.exception.custom.ReservationTimeAlreadyExistsException;
+import roomescape.exception.custom.ReservationTimeNotExistsException;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
@@ -36,7 +37,7 @@ public class ReservationTimeService {
 
     private void validateDuplicatedReservationTime(LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION_TIME);
+            throw new ReservationTimeAlreadyExistsException();
         }
     }
 
@@ -48,7 +49,7 @@ public class ReservationTimeService {
 
     private void validateNotPastDate(LocalDate date) {
         if (date.isBefore(LocalDate.now(clock))) {
-            throw new CustomInvalidRequestException(ErrorCode.PAST_RESERVATION_TIME_READ);
+            throw new CannotReadPastReservationTimeAvailability();
         }
     }
 
@@ -59,6 +60,6 @@ public class ReservationTimeService {
 
     public ReservationTime findReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
+                .orElseThrow(ReservationTimeNotExistsException::new);
     }
 }

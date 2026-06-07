@@ -6,8 +6,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
+import roomescape.exception.custom.CannotDeleteThemeInUseException;
+import roomescape.exception.custom.ReservationNotExistsException;
 import roomescape.repository.ReservationRepository;
 
 @Service
@@ -35,7 +36,7 @@ public class ReservationService {
 
     public Reservation findReservation(Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION));
+                .orElseThrow(ReservationNotExistsException::new);
     }
 
     @Transactional
@@ -49,13 +50,13 @@ public class ReservationService {
 
     public void validateReferencedTheme(Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
+            throw new CannotDeleteThemeInUseException();
         }
     }
 
     public void validateReferencedTime(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
+            throw new CannotDeleteReservationTimeInUseException();
         }
     }
 }

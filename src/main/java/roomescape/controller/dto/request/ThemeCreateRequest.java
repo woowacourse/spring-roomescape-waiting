@@ -1,8 +1,7 @@
 package roomescape.controller.dto.request;
 
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.InvalidRequestArgumentException;
 
 public record ThemeCreateRequest(
         String name,
@@ -20,13 +19,13 @@ public record ThemeCreateRequest(
 
     private void validate(String name, String description, String thumbnailUrl) {
         if (name == null || name.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_NAME_NULL);
+            throw new InvalidRequestArgumentException("테마 이름은 비어 있을 수 없습니다.");
         }
         if (description == null || description.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_DESCRIPTION_NULL);
+            throw new InvalidRequestArgumentException("테마 설명은 비어 있을 수 없습니다.");
         }
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_THUMBNAIL_NULL);
+            throw new InvalidRequestArgumentException("테마 썸네일은 비어 있을 수 없습니다.");
         }
     }
 }

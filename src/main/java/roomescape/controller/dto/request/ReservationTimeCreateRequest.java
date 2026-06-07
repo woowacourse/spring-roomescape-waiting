@@ -2,8 +2,7 @@ package roomescape.controller.dto.request;
 
 import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.InvalidRequestArgumentException;
 
 public record ReservationTimeCreateRequest(
         LocalTime startAt
@@ -19,7 +18,7 @@ public record ReservationTimeCreateRequest(
 
     private void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_TIME_NULL);
+            throw new InvalidRequestArgumentException("예약 시간은 비어 있을 수 없습니다.");
         }
     }
 }

@@ -28,8 +28,9 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.AlreadyReservedException;
+import roomescape.exception.custom.CannotCreatePastReservationException;
+import roomescape.exception.custom.CannotModifyPastReservationException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -112,8 +113,7 @@ public class ReservationFacadeTest {
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
 
         assertThatThrownBy(() -> reservationFacade.save(request))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE.getMessage());
+                .isInstanceOf(CannotCreatePastReservationException.class);
     }
 
     @Test
@@ -128,8 +128,7 @@ public class ReservationFacadeTest {
                 Optional.of(beforeReservation));
 
         assertThatThrownBy(() -> reservationFacade.save(request))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(ErrorCode.DUPLICATED_RESERVATION.getMessage());
+                .isInstanceOf(AlreadyReservedException.class);
     }
 
     @Test
@@ -218,8 +217,7 @@ public class ReservationFacadeTest {
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
 
         assertThatThrownBy(() -> reservationFacade.deleteReservation(reservation.getId()))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE.getMessage());
+                .isInstanceOf(CannotModifyPastReservationException.class);
     }
 
     @Test

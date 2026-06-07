@@ -17,7 +17,9 @@ import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
+import roomescape.exception.custom.AlreadyWaitingException;
+import roomescape.exception.custom.WaitIsFullException;
+import roomescape.exception.custom.WaitNotExistsException;
 import roomescape.repository.WaitRepository;
 import roomescape.repository.dto.WaitDetailDto;
 import roomescape.service.dto.WaitInfo;
@@ -70,7 +72,7 @@ public class WaitServiceTest {
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
         assertThatThrownBy(() -> waitService.save(waitWithoutId))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(AlreadyWaitingException.class);
     }
 
     @Test
@@ -91,7 +93,7 @@ public class WaitServiceTest {
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
         assertThatThrownBy(() -> waitService.save(waitWithoutId))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(WaitIsFullException.class);
     }
 
     @Test
@@ -171,6 +173,6 @@ public class WaitServiceTest {
         when(waitRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> waitService.findWait(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(WaitNotExistsException.class);
     }
 }

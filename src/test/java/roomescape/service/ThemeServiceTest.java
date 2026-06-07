@@ -5,10 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static roomescape.exception.ErrorCode.FUTURE_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.INVALID_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.LONG_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.NOT_FOUND_THEME;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -21,7 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
+import roomescape.exception.custom.RankingPeriodEndDateBeforeStartDateException;
+import roomescape.exception.custom.RankingPeriodExceedsLimitException;
+import roomescape.exception.custom.RankingPeriodPastDateOnlyException;
+import roomescape.exception.custom.ThemeNotExistsException;
 import roomescape.repository.ThemeRepository;
 
 public class ThemeServiceTest {
@@ -90,8 +89,7 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 5, 4);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(FUTURE_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RankingPeriodPastDateOnlyException.class);
     }
 
     @Test
@@ -100,8 +98,7 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 4, 3);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(INVALID_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RankingPeriodEndDateBeforeStartDateException.class);
     }
 
     @Test
@@ -110,8 +107,7 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2025, 4, 30);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(LONG_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RankingPeriodExceedsLimitException.class);
     }
 
     @Test
@@ -130,7 +126,7 @@ public class ThemeServiceTest {
         when(themeRepository.findById(theme.getId())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> themeService.findTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(ThemeNotExistsException.class);
     }
 
     @Test
@@ -147,7 +143,6 @@ public class ThemeServiceTest {
         when(themeRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> themeService.validateExistTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(NOT_FOUND_THEME.getMessage());
+                .isInstanceOf(ThemeNotExistsException.class);
     }
 }

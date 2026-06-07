@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
+import roomescape.exception.custom.CannotReadPastReservationTimeAvailability;
+import roomescape.exception.custom.ReservationTimeAlreadyExistsException;
+import roomescape.exception.custom.ReservationTimeNotExistsException;
 import roomescape.repository.ReservationTimeRepository;
 
 public class ReservationTimeServiceTest {
@@ -51,7 +53,7 @@ public class ReservationTimeServiceTest {
         when(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.save(reservationTimeWithoutId))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(ReservationTimeAlreadyExistsException.class);
     }
 
     @Test
@@ -87,7 +89,7 @@ public class ReservationTimeServiceTest {
         LocalDate date = LocalDate.of(2026, 5, 1);
 
         assertThatThrownBy(() -> reservationTimeService.findReservedTimesByDateAndTheme(date, 1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(CannotReadPastReservationTimeAvailability.class);
     }
 
     @Test
@@ -98,7 +100,7 @@ public class ReservationTimeServiceTest {
     }
 
     @Test
-    void findReservationTest() {
+    void findReservationTimeTest() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
 
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
@@ -107,10 +109,10 @@ public class ReservationTimeServiceTest {
     }
 
     @Test
-    void findReservationExceptionTest() {
+    void findReservationTimeExceptionTest() {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationTimeService.findReservationTime(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(ReservationTimeNotExistsException.class);
     }
 }

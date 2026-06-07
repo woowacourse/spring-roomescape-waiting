@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.AlreadyWaitingException;
+import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
+import roomescape.exception.custom.CannotDeleteThemeInUseException;
+import roomescape.exception.custom.WaitIsFullException;
+import roomescape.exception.custom.WaitNotExistsException;
 import roomescape.repository.WaitRepository;
 import roomescape.repository.dto.WaitDetailDto;
 import roomescape.service.dto.WaitInfo;
@@ -32,12 +35,12 @@ public class WaitService {
 
         for (WaitDetailDto waitDetailDto : waits) {
             if (waitWithoutId.isSameUser(waitDetailDto.name())) {
-                throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_WAIT);
+                throw new AlreadyWaitingException();
             }
         }
 
         if (waits.size() >= MAX_WAITING_COUNT) {
-            throw new CustomInvalidRequestException(ErrorCode.WAIT_IS_FULL);
+            throw new WaitIsFullException();
         }
 
         Wait newWait = waitRepository.save(waitWithoutId);
@@ -70,7 +73,7 @@ public class WaitService {
 
     public WaitInfo findWait(Long waitId) {
         WaitDetailDto waitDetailDto = waitRepository.findById(waitId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_WAIT));
+                .orElseThrow(WaitNotExistsException::new);
         return WaitInfo.from(waitDetailDto);
     }
 
@@ -80,13 +83,13 @@ public class WaitService {
 
     public void validateReferencedTime(Long timeId) {
         if (waitRepository.existsByTimeId(timeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
+            throw new CannotDeleteReservationTimeInUseException();
         }
     }
 
     public void validateReferencedTheme(Long themeId) {
         if (waitRepository.existsByThemeId(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
+            throw new CannotDeleteThemeInUseException();
         }
     }
 }
