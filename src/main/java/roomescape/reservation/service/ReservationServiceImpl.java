@@ -51,6 +51,9 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
+        slotService.ensure(request.themeId(), request.timeId());
+        slotService.lock(request.themeId(), request.timeId());
+
         LocalDateTime now = LocalDateTime.now();
         ReservationTime time = timeService.findById(request.timeId());
         time.validateExpired(now);
@@ -61,9 +64,6 @@ public class ReservationServiceImpl implements ReservationService {
         if (holidayService.isHoliday(time.getDate())) {
             throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
         }
-
-        slotService.ensure(request.themeId(), request.timeId());
-        slotService.lock(request.themeId(), request.timeId());
 
         if (reservationRepository.isDuplicatedWithName(request.name(), request.themeId(), time)) {
             throw new DuplicateReservationException();
