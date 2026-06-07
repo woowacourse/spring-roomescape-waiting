@@ -183,7 +183,7 @@ public class ReservationService {
 
     private Reservation getReservationOrThrow(long reservationId) {
         return reservationRepository.findByIdForPromotion(reservationId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
     }
 
     private ReservationDetailProjection getOldReservationDetailOrThrow(long reservationId) {
