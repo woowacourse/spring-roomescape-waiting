@@ -1,11 +1,14 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableDateResult;
+import roomescape.dto.ReservationCanceledEvent;
 import roomescape.dto.ReservationCreateCommand;
 import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
@@ -28,6 +31,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
 
@@ -78,14 +82,12 @@ public class ReservationService {
         return ReservationResult.from(modifiedReservation);
     }
 
+    @Transactional
     public void delete(final Long reservationId) {
-        final boolean deleted = reservationRepository.deleteById(reservationId);
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
+        deleteAndCallEventListener(reservationId);
     }
 
+    @Transactional
     public void deleteWithValidation(final ReservationDeleteCommand deleteCommand) {
         final Reservation reservation = getReservation(deleteCommand.reservationId());
         validateReservationOwner(reservation, deleteCommand.name());
@@ -93,7 +95,7 @@ public class ReservationService {
         validateFutureOrPresentDate(date);
         final ReservationTime reservationTime = reservation.getTime();
         validateFutureOrPresentTime(date, reservationTime);
-        delete(reservation.getId());
+        deleteAndCallEventListener(reservation);
     }
 
     public List<ReservationResult> getReservations() {
@@ -126,6 +128,38 @@ public class ReservationService {
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();
+    }
+
+    private void deleteAndCallEventListener(final Long reservationId) {
+        final Reservation reservation = getReservation(reservationId);
+
+        final boolean deleted = reservationRepository.deleteById(reservationId);
+
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
+
+        eventPublisher.publishEvent(new ReservationCanceledEvent(
+                        reservation.getDate(),
+                        reservation.getTime().getId(),
+                        reservation.getTheme().getId()
+                )
+        );
+    }
+
+    private void deleteAndCallEventListener(final Reservation reservation) {
+        final boolean deleted = reservationRepository.deleteById(reservation.getId());
+
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
+
+        eventPublisher.publishEvent(new ReservationCanceledEvent(
+                        reservation.getDate(),
+                        reservation.getTime().getId(),
+                        reservation.getTheme().getId()
+                )
+        );
     }
 
     private Reservation getReservation(final Long reservationId) {

@@ -2,9 +2,15 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
+import roomescape.dto.ReservationCanceledEvent;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
@@ -16,6 +22,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -68,6 +75,28 @@ public class WaitingListService {
         if (!deleted) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handleReservationCanceled(ReservationCanceledEvent event) {
+        Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
+                event.date(), event.timeId(), event.themeId());
+
+        if (nextWaiting.isEmpty()) {
+            return;
+        }
+
+        WaitingList waiting = nextWaiting.get();
+        Reservation newReservation = Reservation.create(
+                waiting.getName(),
+                waiting.getReservationDate().date(),
+                waiting.getReservationTime(),
+                waiting.getTheme()
+        );
+
+        reservationRepository.save(newReservation);
+        waitingListRepository.deleteById(waiting.getId());
     }
 
     public List<WaitingListResult> getWaitingListByName(final String name) {

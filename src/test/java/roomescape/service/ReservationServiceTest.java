@@ -6,9 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.dto.ReservationCanceledEvent;
 import roomescape.dto.ReservationCreateCommand;
 import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
@@ -44,6 +46,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -141,6 +146,21 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.modify(request))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+    }
+
+    @Test
+    void 예약_삭제시_이벤트가_발생한다() {
+        // given
+        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.deleteById(1L)).willReturn(true);
+
+        // when
+        reservationService.delete(1L);
+
+        // then
+        verify(reservationRepository).deleteById(1L);
+        verify(eventPublisher).publishEvent(any(ReservationCanceledEvent.class));
     }
 
     @Test

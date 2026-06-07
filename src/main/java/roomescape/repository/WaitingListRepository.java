@@ -120,6 +120,41 @@ public class WaitingListRepository {
         return 0;
     }
 
+    public Optional<WaitingList> findFirstBySlot(final LocalDate date, final Long timeId, final Long themeId) {
+        final String sql = """
+                SELECT
+                    w.id AS waiting_list_id,
+                    w.name AS waiting_list_name,
+                    w.date AS waiting_list_date,
+                    w.theme_id AS theme_id,
+                    w.created_at,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    t.end_at AS time_end_at,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM waiting_list w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme h ON w.theme_id = h.id 
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.created_at ASC 
+                LIMIT 1
+                """;
+        try {
+            final WaitingList waitingList = jdbcTemplate.queryForObject(
+                    sql,
+                    this::mapToDomain,
+                    date,
+                    timeId,
+                    themeId
+            );
+            return Optional.of(waitingList);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     public boolean existsByNameAndDateAndTimeAndTheme(final String name, final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(*)
