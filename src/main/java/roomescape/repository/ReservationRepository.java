@@ -13,12 +13,8 @@ public interface ReservationRepository {
     Reservation save(Reservation reservation);
 
     Reservation update(Reservation reservation);
-
-    Reservation updateReserver(Reservation reservation);
-
+    
     boolean existsByTimeId(Long timeId);
-
-    boolean existsBySlot(Slot slot);
 
     Optional<Reservation> findById(Long id);
 

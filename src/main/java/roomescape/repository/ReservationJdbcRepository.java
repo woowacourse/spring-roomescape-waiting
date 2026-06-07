@@ -68,35 +68,27 @@ public class ReservationJdbcRepository implements ReservationRepository {
         );
     };
 
+    @Override
     public List<Reservation> findAll(int offset, int limit) {
         String sql = SELECT_BASE + " ORDER BY r.date DESC, time_value ASC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, reservationRowMapper, limit, offset);
     }
 
+    @Override
     public long count() {
         String sql = "SELECT COUNT(*) FROM reservation";
         Long count = jdbcTemplate.queryForObject(sql, Long.class);
         return count != null ? count : 0L;
     }
 
+    @Override
     public boolean existsByTimeId(Long timeId) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE time_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
         return count != null && count > 0;
     }
 
-    public boolean existsBySlot(Slot slot) {
-        String sql = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                slot.date(),
-                slot.time().getId(),
-                slot.theme().getId()
-        );
-        return count != null && count > 0;
-    }
-
+    @Override
     public Reservation save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -122,6 +114,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
         );
     }
 
+    @Override
     public Reservation update(Reservation reservation) {
         String sql = "UPDATE reservation SET date = ?, time_id = ?, theme_id = ? WHERE id = ?";
         try {
@@ -137,28 +130,21 @@ public class ReservationJdbcRepository implements ReservationRepository {
         }
         return reservation;
     }
-
-    public Reservation updateReserver(Reservation reservation) {
-        String sql = "UPDATE reservation SET name = ? WHERE id = ?";
-        jdbcTemplate.update(
-                sql,
-                reservation.getReserver().name(),
-                reservation.getId()
-        );
-        return reservation;
-    }
-
+    
+    @Override
     public void deleteById(Long id) {
         String sql = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
 
+    @Override
     public Optional<Reservation> findById(Long id) {
         String sql = SELECT_BASE + " WHERE r.id = ?";
         List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, id);
         return results.stream().findFirst();
     }
 
+    @Override
     public Optional<Reservation> findBySlot(Slot slot) {
         String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?";
         List<Reservation> results = jdbcTemplate.query(
@@ -171,11 +157,13 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return results.stream().findFirst();
     }
 
+    @Override
     public List<Long> findReservedTimeIdsByDateAndTheme(LocalDate date, Theme theme) {
         String sql = "SELECT time_id FROM reservation WHERE date = ? AND theme_id = ?";
         return jdbcTemplate.queryForList(sql, Long.class, date, theme.getId());
     }
 
+    @Override
     public List<Reservation> findByMember(Member member) {
         String sql = SELECT_BASE + " WHERE r.name = ? ORDER BY r.date DESC, time_value ASC";
         return jdbcTemplate.query(sql, reservationRowMapper, member.name());

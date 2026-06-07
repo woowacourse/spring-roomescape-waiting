@@ -32,11 +32,13 @@ public class ThemeJdbcRepository implements ThemeRepository {
                     rs.getString("thumbnail_image_url")
             );
 
+    @Override
     public List<Theme> findAll() {
         String sql = "SELECT id, name, description, thumbnail_image_url FROM theme ORDER BY id DESC";
         return jdbcTemplate.query(sql, themeRowMapper);
     }
 
+    @Override
     public Theme save(Theme theme) {
         String sql = "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -58,6 +60,7 @@ public class ThemeJdbcRepository implements ThemeRepository {
         );
     }
 
+    @Override
     public void deleteById(Long id) {
         String sql = "DELETE FROM theme WHERE id = ?";
         try {
@@ -67,12 +70,14 @@ public class ThemeJdbcRepository implements ThemeRepository {
         }
     }
 
+    @Override
     public Optional<Theme> findById(Long id) {
         String sql = "SELECT * FROM theme WHERE id = ?";
         List<Theme> results = jdbcTemplate.query(sql, themeRowMapper, id);
         return results.stream().findFirst();
     }
 
+    @Override
     public List<Theme> findPopularThemes(LocalDate start, LocalDate end, Integer limit) {
         String sql = """
                 SELECT

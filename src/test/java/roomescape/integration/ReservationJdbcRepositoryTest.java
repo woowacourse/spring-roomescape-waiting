@@ -106,22 +106,6 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void updateReserver는_예약자의_이름만_변경한다() {
-        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
-        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
-        Reservation saved = repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
-        Reservation changed = reservation(saved.getId(), "민욱", saved.getSlot());
-
-        repository.updateReserver(changed);
-
-        Optional<Reservation> found = repository.findById(saved.getId());
-        assertThat(found).isPresent();
-        assertThat(found.get().getName()).isEqualTo("민욱");
-        assertThat(found.get().getSlot()).isEqualTo(saved.getSlot());
-        assertThat(repository.count()).isEqualTo(1L);
-    }
-
-    @Test
     void findReservedTimeIdsByDateAndTheme는_같은_날짜와_테마의_예약_시간_id만_반환한다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
@@ -145,17 +129,6 @@ class ReservationJdbcRepositoryTest {
         Optional<Reservation> result = repository.findBySlot(targetSlot);
 
         assertThat(result).contains(saved);
-    }
-
-    @Test
-    void existsByDateAndTimeIdAndThemeId는_해당_슬롯에_예약이_있으면_true를_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
-        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
-        LocalDate date = RESERVATION_DATE;
-        Slot targetSlot = slot(date, time, theme);
-        repository.save(reservation("브라운", date, time, theme));
-
-        assertThat(repository.existsBySlot(targetSlot)).isTrue();
     }
 
     @Test

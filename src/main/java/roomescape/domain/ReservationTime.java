@@ -13,7 +13,7 @@ public class ReservationTime {
             LocalTime startAt
     ) {
         this.id = id;
-        this.startAt = startAt;
+        this.startAt = Objects.requireNonNull(startAt);
     }
 
     public ReservationTime(
