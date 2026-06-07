@@ -52,8 +52,7 @@ public class WaitingListService {
         final WaitingList findWaitingList = waitingListRepository.findById(command.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
 
-        findWaitingList.validateOwner(command.name());
-        findWaitingList.validateNotPast();
+        findWaitingList.validateForDeletion(command.name());
 
         waitingListRepository.deleteById(command.waitingListId());
     }

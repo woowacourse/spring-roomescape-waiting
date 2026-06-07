@@ -101,6 +101,39 @@ class WaitingListTest {
     }
 
     @Nested
+    class validateForDeletion {
+
+        @Test
+        void 이름_일치하고_미래_날짜면_통과() {
+            String name = "검프";
+            WaitingList waitingList = WaitingList.create(name, LocalDate.now().plusDays(1), theme, futureTime);
+            waitingList.validateForDeletion(name);
+        }
+
+        @Test
+        void 이름_불일치시_예외발생() {
+            String ownerName = "검프";
+            WaitingList waitingList = WaitingList.create(ownerName, LocalDate.now().plusDays(1), theme, futureTime);
+
+            assertThatThrownBy(() -> waitingList.validateForDeletion("거위"))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+        }
+
+        @Test
+        void 과거_날짜면_예외발생() {
+            String name = "검프";
+            WaitingList waitingList = WaitingList.createWithId(
+                    1L, name, LocalDate.now().minusDays(1), theme, futureTime, LocalDateTime.now()
+            );
+
+            assertThatThrownBy(() -> waitingList.validateForDeletion(name))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
+        }
+    }
+
+    @Nested
     class validateOwner {
 
         @Test

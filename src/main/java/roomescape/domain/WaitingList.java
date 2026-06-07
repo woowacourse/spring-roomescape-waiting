@@ -41,6 +41,11 @@ public class WaitingList {
         return new WaitingList(waitingListId, name, reservationDate, theme, reservationTime, createdAt);
     }
 
+    public void validateForDeletion(final String name) {
+        validateOwner(name);
+        validateNotPast();
+    }
+
     public void validateNotPast() {
         if (reservationDate.isPast()) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
