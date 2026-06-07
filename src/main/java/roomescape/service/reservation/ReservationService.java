@@ -177,7 +177,7 @@ public class ReservationService {
     }
 
     private void validateNoWaiting(final Reservation reservation) {
-        if (!reservationWaitingRepository.findLineByReservation(reservation).isEmpty()) {
+        if (!reservationWaitingRepository.findLineBySlot(reservation.getSlot()).isEmpty()) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_HAS_WAITING,
                     "예약 대기가 존재하는 예약은 바로 삭제할 수 없습니다."

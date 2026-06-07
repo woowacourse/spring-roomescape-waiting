@@ -117,7 +117,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public ReservationWaitingLine findLineByReservation(final Reservation reservation) {
+    public ReservationWaitingLine findLineBySlot(final ReservationSlot slot) {
         String sql = """
                 SELECT rw.id,
                        rw.name AS waiting_name,
@@ -144,7 +144,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         return ReservationWaitingLine.fromWaitings(jdbcTemplate.query(
                 sql,
                 reservationWaitingRowMapper,
-                reservation.getSlot().getId()
+                slot.getId()
         ));
     }
 

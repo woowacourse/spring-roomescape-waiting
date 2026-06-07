@@ -3,7 +3,8 @@ package roomescape.support;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import roomescape.domain.reservation.Reservation;
+import java.util.Objects;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
@@ -30,10 +31,10 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public ReservationWaitingLine findLineByReservation(final Reservation reservation) {
+    public ReservationWaitingLine findLineBySlot(final ReservationSlot slot) {
         return ReservationWaitingLine.fromWaitings(waitings.values()
                 .stream()
-                .filter(waiting -> waiting.getReservation().equals(reservation))
+                .filter(waiting -> Objects.equals(waiting.getReservation().getSlot().getId(), slot.getId()))
                 .toList());
     }
 

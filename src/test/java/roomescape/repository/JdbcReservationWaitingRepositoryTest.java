@@ -131,8 +131,8 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약의 대기 줄을 조회한다")
-    void findLineByReservation() {
+    @DisplayName("슬롯의 대기 줄을 조회한다")
+    void findLineBySlot() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
@@ -140,7 +140,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        ReservationWaitingLine waitingLine = jdbcReservationWaitingRepository.findLineByReservation(reservation);
+        ReservationWaitingLine waitingLine = jdbcReservationWaitingRepository.findLineBySlot(reservation.getSlot());
 
         assertThat(waitingLine.isEmpty()).isFalse();
         assertThat(waitingLine.sequenceOf(saved.getId())).isOne();
