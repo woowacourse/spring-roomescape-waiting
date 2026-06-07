@@ -1,27 +1,87 @@
 package roomescape.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import roomescape.domain.vo.Slot;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
 public class ReservationSlot {
-    private final Long id;
-    private final Slot slot;
-    private List<Reservation> reservations;
+    private final ReservationSlotInfo slot;
+    private final List<Reservation> reservations;
 
-    public ReservationSlot(Long id, Slot slot, List<Reservation> reservations) {
-        this.id = id;
+    public ReservationSlot(ReservationSlotInfo slot, List<Reservation> reservations) {
         this.slot = slot;
-        this.reservations = reservations;
+        this.reservations = new ArrayList<>(reservations);
     }
 
-    private void validateTime(LocalDateTime now) {
-        if (now.isAfter(LocalDateTime.of(slot.date(), slot.startAt().getStartAt()))) {
-            throw new CustomException(ErrorCode.ALREADY_PAST_RESERVATION_SLOT);
+    public int calculateOrder(Reservation reservation) {
+        if (reservation.isReserved()) {
+            return 0;
         }
+
+        return (int) reservations.stream()
+                .filter(Reservation::isWaiting)
+                .filter(it -> it.isUpdatedAtBefore(reservation))
+                .count() + 1;
+    }
+
+    public Reservation reserve(String name, LocalDateTime now) {
+        validateUniqueReservation(name);
+        validateNotPastReservation(now, ErrorCode.PAST_DATE_RESERVATION);
+
+        Reservation newReservation = new Reservation(null, name, slot.slotId(), calculateStatus(), now);
+        reservations.add(newReservation);
+        return newReservation;
+    }
+
+    public Reservation findReservation(Long reservationId) {
+        return reservations.stream()
+                .filter(r -> r.getId().equals(reservationId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
+    }
+
+    public Optional<Reservation> getReservedReservation() {
+        return reservations.stream()
+                .filter(r -> r.getStatus() == Status.RESERVED)
+                .findFirst();
+    }
+
+    public Reservation moveIn(Reservation reservation, String name, LocalDateTime now) {
+        validateReservationOwner(reservation, name);
+        validateUniqueReservation(name);
+        validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
+
+        reservation.update(now, slot.slotId(), calculateStatus());
+        reservations.add(reservation);
+
+        return reservation;
+    }
+
+    public Reservation moveOut(Long reservationId, String name, LocalDateTime now) {
+        Reservation reservation = findReservation(reservationId);
+        validateReservationOwner(reservation, name);
+        validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
+
+        promoteReservation(reservation);
+        reservations.remove(reservation);
+
+        return reservation;
+    }
+
+    public Reservation deleteReservation(Long reservationId, String name, LocalDateTime now) {
+        Reservation reservation = findReservation(reservationId);
+        validateReservationOwner(reservation, name);
+        validateNotPastReservation(now, ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
+
+        promoteReservation(reservation);
+        reservation.cancel(now);
+        reservations.remove(reservation);
+        return reservation;
     }
 
     private void validateUniqueReservation(String name) {
@@ -41,75 +101,35 @@ public class ReservationSlot {
     }
 
     private void promoteReservation(Reservation reservation) {
-        if (!reservation.isReserved()) {
-            return;
-        }
-
-        reservations.stream()
-                .filter(Reservation::isWaiting)
-                .min((r1, r2) -> r1.getUpdateAt().compareTo(r2.getUpdateAt()))
-                .ifPresent(Reservation::promote);
-    }
-
-    public int calculateOrder(Reservation reservation) {
         if (reservation.isReserved()) {
-            return 0;
+            reservations.stream()
+                    .filter(Reservation::isWaiting)
+                    .min((r1, r2) -> r1.getUpdateAt().compareTo(r2.getUpdateAt()))
+                    .ifPresent(Reservation::promote);
         }
-
-        return (int) reservations.stream()
-                .filter(Reservation::isWaiting)
-                .filter(it -> it.isUpdatedAtBefore(reservation))
-                .count() + 1;
     }
 
-    public Reservation reserve(String name, LocalDateTime now) {
-        validateTime(now);
-        validateUniqueReservation(name);
-        Reservation newReservation = new Reservation(null, name, this.id, calculateStatus(), now);
-        reservations.add(newReservation);
-        return newReservation;
+    private void validateNotPastReservation(LocalDateTime now, ErrorCode code) {
+        LocalDateTime reservationTime = LocalDateTime.of(slot.date(), slot.time().getStartAt());
+        if (reservationTime.isBefore(now)) {
+            throw new CustomException(code);
+        }
     }
 
-    public Reservation findReservation(Long reservationId) {
-        return reservations.stream()
-                .filter(r -> r.getId().equals(reservationId))
-                .findFirst()
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
+    private void validateNotPastSlot(ReservationSlotInfo slotInfo, LocalDateTime now) {
+        LocalDateTime slotTime = LocalDateTime.of(slotInfo.date(), slotInfo.time().getStartAt());
+        if (slotTime.isBefore(now)) {
+            throw new CustomException(ErrorCode.ALREADY_PAST_RESERVATION_SLOT);
+        }
     }
 
-    public Reservation getReservedReservation() {
-        return reservations.stream()
-                .filter(r -> r.getStatus().equals(Status.RESERVED))
-                .findFirst()
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
+    private void validateReservationOwner(Reservation reservation, String name) {
+        if (!reservation.getName().equals(name)) {
+            throw new CustomException(ErrorCode.COMMON_UNAUTHORIZED);
+        }
     }
 
-    public Reservation updateReservation(Reservation reservation, LocalDateTime now) {
-        reservation.update(now, this.id, calculateStatus());
-
-        validateTime(now);
-
-        reservations.add(reservation);
-        return reservation;
-    }
-
-    public Reservation deleteReservation(Long reservationId, LocalDateTime now) {
-        validateTime(now);
-        Reservation reservation = findReservation(reservationId);
-        promoteReservation(reservation);
-
-        reservation.cancel(now);
-        reservations.remove(reservation);
-        return reservation;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Slot getSlot() {
+    public ReservationSlotInfo getSlot() {
         return slot;
     }
 }

@@ -1,8 +1,6 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 
 import roomescape.exception.CustomException;
@@ -36,42 +34,44 @@ public class Reservation {
         return updateAt.isBefore(other.updateAt);
     }
 
-    private void validateName(String name) {
-        if (name.length() > 255) {
-            throw new CustomException(ErrorCode.RESERVATION_NAME_TOO_LONG);
-        }
-    }
-
-    private void validateDateAvailable(LocalDateTime now) {
-        if (now.isBefore(this.updateAt)) {
-            throw new CustomException(ErrorCode.RESERVATION_DATE_UNAVAILABLE);
-        }
-    }
-
-    private void validateReservedStatus(){
-        if (this.status != Status.RESERVED) {
+    public void promote() {
+        if (!isWaiting()){
             throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
         }
-    }
-
-    public void promote() {
-        validateReservedStatus();
         this.status = Status.RESERVED;
     }
 
     public void update(LocalDateTime now, long reservationSlotId, Status status){
-        validateDateAvailable(now);
-        validateReservedStatus();
+        validateUpdateAt(now);
+        validateNotCanceledStatus();
         this.reservationSlotId = reservationSlotId;
         this.status = status;
         this.updateAt = now;
     }
 
     public void cancel(LocalDateTime now) {
-        validateDateAvailable(now);
-        validateReservedStatus();
+        validateUpdateAt(now);
+        validateNotCanceledStatus();
         this.status = Status.CANCELED;
         this.updateAt = now;
+    }
+
+    private void validateName(String name) {
+        if (name.length() > 255) {
+            throw new CustomException(ErrorCode.RESERVATION_NAME_TOO_LONG);
+        }
+    }
+
+    private void validateUpdateAt(LocalDateTime now) {
+        if (now.isBefore(this.updateAt)) {
+            throw new CustomException(ErrorCode.RESERVATION_DATE_UNAVAILABLE);
+        }
+    }
+
+    private void validateNotCanceledStatus(){
+        if (this.status == Status.CANCELED) {
+            throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
+        }
     }
 
     public Long getId() {

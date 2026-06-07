@@ -11,7 +11,6 @@ public interface ReservationSlotRepository {
     Reservation saveReservation(Reservation reservation);
     ReservationSlot findById(Long id);
     ReservationSlot findByReservationId(Long reservationId);
-    boolean existsByNameAndReservationSlot(Long reservationSlotId, String name);
     Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
     void updateReservation(Reservation reservation);
 }
