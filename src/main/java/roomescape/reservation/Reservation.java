@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
+import roomescape.waiting.ReservationWaiting;
 
 public class Reservation {
     private Long id;
@@ -50,6 +51,25 @@ public class Reservation {
     public void validateSameName(String name, ErrorCode errorCode) {
         if (!this.name.equals(name)) {
             throw new RoomescapeException(errorCode);
+        }
+    }
+
+    public void validateDateTime(LocalDate date, ReservationTime time, ErrorCode errorCode) {
+        if (time.isBeforeDateTime(date, time)) {
+            throw new RoomescapeException(errorCode);
+        }
+    }
+
+    public Reservation approve(ReservationWaiting waiting) {
+        validateSameSchedule(waiting);
+        return new Reservation(id, waiting.getName(), themeId, date, time);
+    }
+
+    private void validateSameSchedule(ReservationWaiting waiting) {
+        if (!themeId.equals(waiting.getThemeId())
+                || !date.equals(waiting.getDate())
+                || !time.getId().equals(waiting.getTime().getId())) {
+            throw new RoomescapeException(ErrorCode.INVALID_RESERVATION_WAITING);
         }
     }
 }

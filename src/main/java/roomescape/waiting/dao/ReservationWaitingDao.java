@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.Reservation;
 import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
 
@@ -58,6 +59,29 @@ public class ReservationWaitingDao {
         return results.stream().findFirst();
     }
 
+    public Optional<ReservationWaiting> selectByIdForUpdate(Long id) {
+        String sql = """
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date,
+                       t.id as time_id, t.start_at as start_at, w.created_at,
+                       (select count(*) + 1
+                        from reservation_waiting ahead
+                        where ahead.theme_id = w.theme_id
+                          and ahead.date = w.date
+                          and ahead.time_id = w.time_id
+                          and (
+                              ahead.created_at < w.created_at
+                              or (ahead.created_at = w.created_at and ahead.id < w.id)
+                          )) as waiting_number
+                from reservation_waiting w
+                join reservation_time t
+                on w.time_id = t.id
+                where w.id = ?
+                for update
+                """;
+
+        return jdbcTemplate.query(sql, rowMapper, id).stream().findFirst();
+    }
+
     public List<ReservationWaiting> selectByName(String name) {
         String sql = """
                 select w.id as reservation_waiting_id, w.name, w.theme_id, w.date,
@@ -79,6 +103,24 @@ public class ReservationWaitingDao {
                 """;
 
         return jdbcTemplate.query(sql, rowMapper, name);
+    }
+
+    public Optional<ReservationWaiting> selectFirstWaitingForUpdate(Reservation reservation) {
+        String sql = """
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date,
+                       t.id as time_id, t.start_at as start_at, w.created_at,
+                       1 as waiting_number
+                from reservation_waiting w
+                join reservation_time t
+                on w.time_id = t.id
+                where w.theme_id = ? and w.date = ? and w.time_id = ?
+                order by w.created_at asc, w.id asc
+                limit 1
+                for update
+                """;
+
+        return jdbcTemplate.query(sql, rowMapper, reservation.getThemeId(), reservation.getDate(), reservation.getTime().getId())
+                .stream().findFirst();
     }
 
     public boolean existsByNameAndDateAndThemeIdAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {

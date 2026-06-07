@@ -22,14 +22,14 @@ public record MyReservationResponse(
 ) {
     public static MyReservationResponse from(MyReservation myReservation) {
         return new MyReservationResponse(
-                myReservation.resourceType() + ":" + myReservation.id(),
-                myReservation.id(),
-                myReservation.name(),
-                myReservation.themeName(),
-                myReservation.date(),
-                myReservation.startAt(),
-                myReservation.status(),
-                myReservation.waitingNumber()
+                myReservation.getResourceType() + ":" + myReservation.getId(),
+                myReservation.getId(),
+                myReservation.getName(),
+                myReservation.getThemeName(),
+                myReservation.getDate(),
+                myReservation.getStartAt(),
+                myReservation.getStatus(),
+                myReservation.getWaitingNumber()
         );
     }
 }

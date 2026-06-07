@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.reservation.Reservation;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
@@ -41,7 +42,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
         validateDateTime(date, reservationTime);
 
-        validateNotExistsReservation(themeId, date, timeId);
+        validateExistsReservationForUpdate(themeId, date, timeId);
         validateDuplicatedReservation(name, themeId, date, timeId);
         validateDuplicatedWaiting(name, themeId, date, timeId);
 
@@ -52,7 +53,7 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        ReservationWaiting originReservationWaiting = reservationWaitingDao.selectById(id)
+        ReservationWaiting originReservationWaiting = reservationWaitingDao.selectByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
 
         originReservationWaiting.validateSameName(name);
@@ -60,8 +61,8 @@ public class ReservationWaitingService {
         reservationWaitingDao.deleteById(id);
     }
 
-    private void validateNotExistsReservation(Long themeId, LocalDate date, Long timeId) {
-        if (reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId)) {
+    private void validateExistsReservationForUpdate(Long themeId, LocalDate date, Long timeId) {
+        if (reservationDao.selectByThemeIdAndDateAndTimeIdForUpdate(themeId, date, timeId).isEmpty()) {
             throw new RoomescapeException(ErrorCode.RESERVATION_NOT_EXISTS);
         }
     }

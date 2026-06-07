@@ -11,12 +11,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +32,9 @@ import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
+import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.dao.ReservationWaitingDao;
+import roomescape.waiting.service.ReservationWaitingService;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
@@ -43,70 +48,91 @@ public class ReservationServiceTest {
     @Mock
     private TimeDao timeDao;
 
+    @Mock
+    private ReservationWaitingDao reservationWaitingDao;
+
     @InjectMocks
     private ReservationService reservationService;
 
+    @InjectMocks
+    private ReservationWaitingService reservationWaitingService;
+
     @Test
-    void 이름으로_예약과_예약_대기를_한_번에_조회한다() {
+    void 이름으로_예약과_예약_대기를_한_번에_조회_성공() {
         String name = "초록";
         LocalDate date = LocalDate.now().plusDays(1);
-        List<MyReservation> expected = List.of(
-                new MyReservation(1L, name, "예약 테마", date, LocalTime.of(10, 0),
-                        "reservation", "예약 확정", null),
-                new MyReservation(2L, name, "대기 테마", date, LocalTime.of(11, 0),
-                        "waiting", "대기중", 1L)
-        );
+        Reservation reservation = new Reservation(1L, name, 1L, date, new ReservationTime(1L, LocalTime.of(10, 0)));
+        ReservationWaiting waiting = new ReservationWaiting(2L, name, 2L, date,
+                new ReservationTime(2L, LocalTime.of(11, 0)), LocalDateTime.now(), 1L);
 
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(expected);
+        when(reservationDao.selectByName(name)).thenReturn(List.of(reservation));
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of(waiting));
+        when(themeDao.selectById(1L)).thenReturn(Optional.of(new Theme(1L, "예약 테마", "설명", "image")));
+        when(themeDao.selectById(2L)).thenReturn(Optional.of(new Theme(2L, "대기 테마", "설명", "image")));
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
-        assertThat(actual).isEqualTo(expected);
-        verify(reservationDao).selectAllCombinedByName(name);
-        verifyNoInteractions(themeDao, timeDao);
+        assertThat(actual).hasSize(2);
+        assertThat(actual.getFirst())
+                .extracting(MyReservation::getId, MyReservation::getName, MyReservation::getThemeName,
+                        MyReservation::getStartAt, MyReservation::getResourceType, MyReservation::getStatus,
+                        MyReservation::getWaitingNumber)
+                .containsExactly(1L, name, "예약 테마", LocalTime.of(10, 0), "reservation", "예약 확정", null);
+        assertThat(actual.get(1))
+                .extracting(MyReservation::getId, MyReservation::getName, MyReservation::getThemeName,
+                        MyReservation::getStartAt, MyReservation::getResourceType, MyReservation::getStatus,
+                        MyReservation::getWaitingNumber)
+                .containsExactly(2L, name, "대기 테마", LocalTime.of(11, 0), "waiting", "대기중", 1L);
+        verify(reservationDao).selectByName(name);
+        verify(reservationWaitingDao).selectByName(name);
+        verifyNoInteractions(timeDao);
     }
 
     @Test
     void 이름으로_예약만_조회_성공() {
         String name = "초록";
-        List<MyReservation> expected = List.of(
-                new MyReservation(1L, name, "테마", LocalDate.now(), LocalTime.of(10, 0),
-                        "reservation", "예약 확정", null),
-                new MyReservation(2L, name, "테마", LocalDate.now(), LocalTime.of(11, 0),
-                        "reservation", "예약 확정", null)
+        LocalDate date = LocalDate.now();
+        List<Reservation> reservations = List.of(
+                new Reservation(1L, name, 1L, date, new ReservationTime(1L, LocalTime.of(10, 0))),
+                new Reservation(2L, name, 1L, date, new ReservationTime(2L, LocalTime.of(11, 0)))
         );
 
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(expected);
+        when(reservationDao.selectByName(name)).thenReturn(reservations);
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of());
+        when(themeDao.selectById(1L)).thenReturn(Optional.of(new Theme(1L, "테마", "설명", "image")));
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(2)
                 .allSatisfy(myReservation -> {
-                    assertThat(myReservation.resourceType()).isEqualTo("reservation");
-                    assertThat(myReservation.waitingNumber()).isNull();
+                    assertThat(myReservation.getResourceType()).isEqualTo("reservation");
+                    assertThat(myReservation.getWaitingNumber()).isNull();
                 });
     }
 
     @Test
     void 이름으로_예약_대기만_조회_성공() {
         String name = "초록";
-        MyReservation waiting = new MyReservation(1L, name, "은하수", LocalDate.now().plusDays(1),
-                LocalTime.of(10, 0), "waiting", "대기중", 1L);
+        ReservationWaiting waiting = new ReservationWaiting(1L, name, 1L, LocalDate.now().plusDays(1),
+                new ReservationTime(1L, LocalTime.of(10, 0)), LocalDateTime.now(), 1L);
 
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(List.of(waiting));
+        when(reservationDao.selectByName(name)).thenReturn(List.of());
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of(waiting));
+        when(themeDao.selectById(1L)).thenReturn(Optional.of(new Theme(1L, "은하수", "설명", "image")));
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(1);
-        assertThat(actual.getFirst().name()).isEqualTo(name);
-        assertThat(actual.getFirst().themeName()).isEqualTo("은하수");
-        assertThat(actual.getFirst().waitingNumber()).isEqualTo(1L);
+        assertThat(actual.getFirst().getName()).isEqualTo(name);
+        assertThat(actual.getFirst().getThemeName()).isEqualTo("은하수");
+        assertThat(actual.getFirst().getWaitingNumber()).isEqualTo(1L);
     }
 
     @Test
     void 이름으로_조회한_예약과_예약_대기가_없으면_빈_목록을_반환한다() {
         String name = "에버";
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(List.of());
+        when(reservationDao.selectByName(name)).thenReturn(List.of());
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of());
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
@@ -116,15 +142,16 @@ public class ReservationServiceTest {
     @Test
     void 지난_날짜및시간_예약_하는_경우_예외발생() {
         ReservationTime mockTime = new ReservationTime(17L, LocalTime.now().minusMinutes(10));
+        when(themeDao.selectById(anyLong())).thenReturn(Optional.of(new Theme("name", "description", "image")));
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(mockTime));
 
         assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().minusDays(1), 1L))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
+                .hasMessage(ErrorCode.CANNOT_RESERVE_PAST_DATETIME.getMessage());
 
         assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now(), mockTime.getId()))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
+                .hasMessage(ErrorCode.CANNOT_RESERVE_PAST_DATETIME.getMessage());
     }
 
     @Test
@@ -251,12 +278,15 @@ public class ReservationServiceTest {
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
 
-        given(reservationDao.selectById(reservationId))
+        given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(originReservation));
+        given(reservationWaitingDao.selectFirstWaitingForUpdate(originReservation))
+                .willReturn(Optional.empty());
 
         reservationService.deleteByIdIfNameMatches(reservationId, name);
 
         verify(reservationDao, times(1)).deleteById(reservationId);
+        verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(any(Reservation.class));
     }
 
     @Test
@@ -277,7 +307,7 @@ public class ReservationServiceTest {
                 2L
         );
 
-        given(reservationDao.selectById(reservationId))
+        given(reservationDao.selectByIdForUpdate(reservationId))
                 .willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservationId, request.name()))
@@ -318,10 +348,126 @@ public class ReservationServiceTest {
                 LocalDate.now().minusDays(1),
                 new ReservationTime(2L, LocalTime.of(11, 0))
         );
-        given(reservationDao.selectById(pastReserved)).willReturn(Optional.of(reservation));
+        given(reservationDao.selectByIdForUpdate(pastReserved)).willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(pastReserved, request.name()))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ErrorCode.CANNOT_DELETE_PAST_RESERVATION.getMessage());
+    }
+
+    @Test
+    void 예약_삭제_시_자동_예약_전환_성공() {
+        Long id = 1L;
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+        Long waitingNumber = 1L;
+
+        Reservation reservation = new Reservation(
+                id,
+                "워넬",
+                themeId,
+                date,
+                reservationTime
+        );
+
+        ReservationWaiting waiting = new ReservationWaiting(
+                id,
+                "로치",
+                themeId,
+                date,
+                reservationTime,
+                LocalDateTime.now(),
+                waitingNumber
+        );
+
+        when(reservationDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.selectFirstWaitingForUpdate(reservation)).thenReturn(Optional.of(waiting));
+        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(any(Reservation.class)))
+                .thenReturn(Optional.of(new Reservation(id, waiting.getName(), themeId, date, reservationTime)));
+
+        reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName());
+
+        ArgumentCaptor<Reservation> approvedReservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationDao, times(1)).updateNameByThemeIdAndDateAndTimeId(approvedReservationCaptor.capture());
+        Reservation approvedReservation = approvedReservationCaptor.getValue();
+
+        assertThat(approvedReservation.getId()).isEqualTo(id);
+        assertThat(approvedReservation.getName()).isEqualTo(waiting.getName());
+        assertThat(approvedReservation.getThemeId()).isEqualTo(themeId);
+        assertThat(approvedReservation.getDate()).isEqualTo(date);
+        assertThat(approvedReservation.getTime().getId()).isEqualTo(timeId);
+        verify(reservationDao, times(0)).deleteById(id);
+        verify(reservationWaitingDao, times(1)).deleteById(waiting.getId());
+    }
+
+    @Test
+    void 자동_예약_전환_대상이_없으면_예약_삭제_성공() {
+        Long id = 1L;
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+
+        Reservation reservation = new Reservation(
+                id,
+                "워넬",
+                themeId,
+                date,
+                reservationTime
+        );
+
+        when(reservationDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.selectFirstWaitingForUpdate(reservation)).thenReturn(Optional.empty());
+
+        reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName());
+
+        verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(any(Reservation.class));
+        verify(reservationDao, times(1)).deleteById(id);
+        verify(reservationWaitingDao, times(0)).deleteById(anyLong());
+    }
+
+    @Test
+    void 자동_예약_전환_중_예약_갱신_실패_예외발생() {
+        Long id = 1L;
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+        Long waitingNumber = 1L;
+
+        Reservation reservation = new Reservation(
+                id,
+                "워넬",
+                themeId,
+                date,
+                reservationTime
+        );
+
+        ReservationWaiting waiting = new ReservationWaiting(
+                id,
+                "로치",
+                themeId,
+                date,
+                reservationTime,
+                LocalDateTime.now(),
+                waitingNumber
+        );
+
+        when(reservationDao.selectByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingDao.selectFirstWaitingForUpdate(reservation)).thenReturn(Optional.of(waiting));
+        when(reservationDao.updateNameByThemeIdAndDateAndTimeId(any(Reservation.class)))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationService.deleteByIdIfNameMatches(reservation.getId(), reservation.getName()))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
+
+        ArgumentCaptor<Reservation> approvedReservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationDao, times(1)).updateNameByThemeIdAndDateAndTimeId(approvedReservationCaptor.capture());
+        assertThat(approvedReservationCaptor.getValue().getName()).isEqualTo(waiting.getName());
+        verify(reservationDao, times(0)).deleteById(id);
+        verify(reservationWaitingDao, times(0)).deleteById(waiting.getId());
     }
 }
