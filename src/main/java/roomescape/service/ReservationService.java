@@ -49,10 +49,6 @@ public class ReservationService {
 
         validateAvailable(date, timeId, themeId);
 
-        if (waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new BusinessException(ErrorCode.QUEUED_WAITING_LIST);
-        }
-
         final Reservation newReservation = Reservation.create(data.name(), date, reservationTime, theme);
 
         final Reservation savedReservation = reservationRepository.save(newReservation);
@@ -91,7 +87,9 @@ public class ReservationService {
 
     @Transactional
     public void delete(final Long reservationId) {
-        deleteAndCallEventListener(reservationId);
+        final Reservation reservation = getReservation(reservationId);
+        deleteReservation(reservationId);
+        callEventListenerForWaitingListApproval(reservation);
     }
 
     @Transactional
@@ -102,7 +100,16 @@ public class ReservationService {
         validateFutureOrPresentDate(date);
         final ReservationTime reservationTime = reservation.getTime();
         validateFutureOrPresentTime(date, reservationTime);
-        deleteAndCallEventListener(reservation);
+
+        deleteReservation(reservation.getId());
+        callEventListenerForWaitingListApproval(reservation);
+    }
+
+    private void deleteReservation(final Long reservationId) {
+        final boolean deleted = reservationRepository.deleteById(reservationId);
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
     }
 
     public List<ReservationResult> getReservations() {
@@ -137,30 +144,7 @@ public class ReservationService {
                 .toList();
     }
 
-    private void deleteAndCallEventListener(final Long reservationId) {
-        final Reservation reservation = getReservation(reservationId);
-
-        final boolean deleted = reservationRepository.deleteById(reservationId);
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
-
-        eventPublisher.publishEvent(new ReservationCanceledEvent(
-                        reservation.getDate(),
-                        reservation.getTime().getId(),
-                        reservation.getTheme().getId()
-                )
-        );
-    }
-
-    private void deleteAndCallEventListener(final Reservation reservation) {
-        final boolean deleted = reservationRepository.deleteById(reservation.getId());
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
-
+    private void callEventListenerForWaitingListApproval(final Reservation reservation) {
         eventPublisher.publishEvent(new ReservationCanceledEvent(
                         reservation.getDate(),
                         reservation.getTime().getId(),
@@ -200,14 +184,14 @@ public class ReservationService {
     }
 
     private void validateAvailable(final LocalDate date, final Long timeId, final Long themeId) {
-        final boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                date,
-                timeId,
-                themeId
-        );
-
+        final boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (isAlreadyReserved) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
+        }
+
+        final boolean hasWaitingList = waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        if (hasWaitingList) {
+            throw new BusinessException(ErrorCode.QUEUED_WAITING_LIST);
         }
     }
 

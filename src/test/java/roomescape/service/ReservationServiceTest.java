@@ -145,6 +145,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, theme.getId())).willReturn(false);
+        given(waitingListRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, theme.getId())).willReturn(false);
 
         // when
         ReservationResult response = reservationService.modify(request);
@@ -167,6 +168,45 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.modify(request))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+    }
+
+    @Test
+    void 변경을_시도하는_건에_이미_예약이_존재할시_예외발생() {
+        // given
+        LocalDate newDate = futureDate.plusDays(1);
+        Long newTimeId = 2L;
+        ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", newDate, newTimeId);
+        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
+        ReservationTime newTime = ReservationTime.createWithId(newTimeId, LocalTime.of(13, 0), LocalTime.of(14, 0));
+        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, newTimeId, theme.getId())).willReturn(true);
+
+        // when & them
+        assertThatThrownBy(() -> reservationService.modify(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
+    }
+
+    @Test
+    void 변경을_시도하는_건에_이미_예약대기가_존재할시_예외발생() {
+        // given
+        LocalDate newDate = futureDate.plusDays(1);
+        Long newTimeId = 2L;
+        ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", newDate, newTimeId);
+        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
+        ReservationTime newTime = ReservationTime.createWithId(newTimeId, LocalTime.of(13, 0), LocalTime.of(14, 0));
+        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, newTimeId, theme.getId())).willReturn(false);
+        given(waitingListRepository.existsByDateAndTimeIdAndThemeId(newDate, newTimeId, theme.getId())).willReturn(true);
+
+        // when & them
+        assertThatThrownBy(() -> reservationService.modify(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.QUEUED_WAITING_LIST);
     }
 
     @Test
