@@ -122,12 +122,6 @@ public class ReservationService {
                 .toList();
     }
 
-    private static void validateReservedIsCanceled(Reservation reservation) {
-        if (!reservation.isCanceled()) {
-            throw new IllegalStateException("확정 예약이 삭제되지 않으면 대기는 승격될 수 없습니다.");
-        }
-    }
-
     private static void validateIsNotReserved(Reservation reservation, ReservationStatus reserved,
         String message) {
         if (reservation.getStatus() != reserved) {
