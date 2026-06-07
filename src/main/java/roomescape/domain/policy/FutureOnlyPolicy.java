@@ -36,7 +36,7 @@ public class FutureOnlyPolicy implements ReservationPolicy {
     }
 
     private void rejectIfNotFuture(ReservationDateTime when, String message) {
-        if (!when.startsAfter(LocalDateTime.now(clock))) {
+        if (when.startsAtOrBefore(LocalDateTime.now(clock))) {
             throw new BusinessRuleViolationException(message);
         }
     }

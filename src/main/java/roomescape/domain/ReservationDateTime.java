@@ -25,10 +25,7 @@ public class ReservationDateTime {
         return new ReservationDateTime(date, time);
     }
 
-    /**
-     * 이 시점이 주어진 기준 시각보다 엄격히 이후인가. 같은 순간은 "이후"가 아니다(false). "동일 시각을 허용/거부할지"의 결정은 이 비교 위에서 정책이 내린다.
-     */
-    public boolean startsAfter(LocalDateTime moment) {
-        return date.atTime(time).isAfter(moment);
+    public boolean startsAtOrBefore(LocalDateTime moment) {
+        return !date.atTime(time).isAfter(moment);
     }
 }

@@ -120,9 +120,9 @@ class ReservationTest {
 
             // 시점이 2050-12-31 10:00임을 행위로 확인 - getter로 들여다보지 않는다
             assertThat(reservation.dateTime()
-                    .startsAfter(LocalDate.of(2050, 12, 31).atTime(9, 59))).isTrue();
+                    .startsAtOrBefore(LocalDate.of(2050, 12, 31).atTime(9, 59))).isFalse();
             assertThat(reservation.dateTime()
-                    .startsAfter(LocalDate.of(2050, 12, 31).atTime(10, 1))).isFalse();
+                    .startsAtOrBefore(LocalDate.of(2050, 12, 31).atTime(10, 1))).isTrue();
         }
     }
 
