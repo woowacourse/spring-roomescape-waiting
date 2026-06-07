@@ -137,8 +137,11 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(
                         ReservationErrorCode.RESERVATION_NOT_FOUND)
                 );
+
         ReservationSlot slot = reservation.getReservationSlot();
         reservation.validateNotPastTime(LocalDateTime.now(clock));
+        reservationRepository.findBySlotWithLock(slot);
+
         reservationRepository.delete(id);
 
         promoteWaitingToReservationBySlot(slot);
