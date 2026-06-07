@@ -121,6 +121,12 @@ public class Reservation {
         return Objects.equals(this.name, name);
     }
 
+    public boolean isSameSlot(LocalDate date, ReservationTime time, Theme theme) {
+        return Objects.equals(this.date, date)
+                && Objects.equals(this.time.getId(), time.getId())
+                && Objects.equals(this.theme.getId(), theme.getId());
+    }
+
     public boolean isCanceled() {
         return this.status == ReservationStatus.CANCELED;
     }
@@ -137,4 +143,3 @@ public class Reservation {
         return Objects.hashCode(id);
     }
 }
-

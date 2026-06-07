@@ -69,6 +69,10 @@ public class ReservationService {
         }
 
         ReservationTime time = findTime(timeId);
+        if (reservation.isSameSlot(date, time, reservation.getTheme())) {
+            return reservation;
+        }
+
         if (reservationRepository.existsConflictExcluding(
                 name,
                 date,
