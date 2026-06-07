@@ -2,7 +2,7 @@ package roomescape.reservation.infra;
 
 import java.time.LocalTime;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -73,7 +73,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 , id).stream().findFirst();
     }
 
-
     @Override
     public Reservation save(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
@@ -86,7 +85,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
             return reservation.withId(id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
         }
     }
@@ -99,7 +98,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     slot.date(),
                     slot.timeId(),
                     id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
         }
     }

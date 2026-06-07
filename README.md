@@ -79,6 +79,13 @@
 - [x] 내 예약 목록 조회
     - 예약과 대기 상태로 구분해서 함께 조회
     - 대기 조회 시에는 본인의 대기 순번도 함께 조회
+- [x] 대기 순번 조회
+    - 같은 슬롯의 전체 대기 수를 함께 조회
+- [x] 대기 순번 미루기
+    - 본인보다 뒤에 있는 순번까지만 미루기 가능
+    - 남아있는 대기 수보다 큰 요청값이 들어오면 자동으로 맨 뒤의 대기로 보정
+    - 이미 지나간 대기는 미루기 불가
+    - 맨 마지막 대기 순번은 대기 미루기 불가
 
 </details>
 
@@ -211,6 +218,102 @@
 → 성공 시 `204 No Content`  
 → 존재하지 않는 예약 삭제 시 `404 Not Found`  
 → 이미 지나간 예약 삭제 시 `422 Unprocessable Entity`
+
+---
+
+#### 대기 (`/waitings`)
+
+**예약자 이름으로 대기 조회** `GET /waitings?username={name}` → `200 OK`
+
+응답
+
+```json
+[
+  {
+    "id": 1,
+    "name": "홍길동",
+    "date": "2024-05-01",
+    "theme": {
+      "id": 1,
+      "name": "테마 이름",
+      "description": "테마 설명",
+      "thumbnailImgUrl": "https://example.com/thumbnail.jpg"
+    },
+    "time": {
+      "id": 1,
+      "startAt": "10:00"
+    },
+    "status": "WAITING",
+    "rank": 1,
+    "totalRankCount": 3
+  }
+]
+```
+
+**대기 생성** `POST /waitings`
+→ 성공 시 `201 Created`
+→ 빈 이름, 잘못된 날짜 형식, 올바르지 않은 ID 형식이 들어올 시 `400 Bad Request`
+→ 존재하지 않는 테마 또는 시간으로 대기 신청 시 `404 Not Found`
+→ 이미 해당 테마의 날짜와 시간에 대기를 신청했을 시 `409 Conflict`
+→ 이미 예약한 날짜와 시간에 대기 신청 시 `409 Conflict`
+→ 예약이 존재하지 않는 날짜, 테마, 시간에 대기 신청 시 `422 Unprocessable Entity`
+→ 현재 시각보다 이전 날짜/시간으로 대기 신청 시 `422 Unprocessable Entity`
+
+요청
+
+```json
+{
+  "name": "홍길동",
+  "date": "2024-05-01",
+  "themeId": 1,
+  "timeId": 1
+}
+```
+
+응답
+
+```json
+{
+  "id": 1,
+  "name": "홍길동",
+  "date": "2024-05-01",
+  "theme": {
+    "id": 1,
+    "name": "테마 이름",
+    "description": "테마 설명",
+    "thumbnailImgUrl": "https://example.com/thumbnail.jpg"
+  },
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  },
+  "status": "WAITING",
+  "rank": 1,
+  "totalRankCount": 3
+}
+```
+
+**대기 삭제** `DELETE /waitings/{id}`
+→ 성공 시 `204 No Content`
+→ 존재하지 않는 대기 삭제 시 `404 Not Found`
+→ 이미 지나간 대기 삭제 시 `422 Unprocessable Entity`
+
+**대기 미루기** `POST /waitings/{id}/postpone?steps={steps}`
+→ 성공 시 `200 OK`
+→ 미룰 칸 수가 양수가 아닐 시 `400 Bad Request`
+→ 존재하지 않는 대기 미루기 시 `404 Not Found`
+→ 이미 지나간 대기 미루기 시 `422 Unprocessable Entity`
+
+> `steps`는 현재 대기 순번을 기준으로 뒤로 미룰 칸 수이며, 남은 대기 수보다 큰 값이 들어오면 마지막 순번으로 미뤄진다.
+
+응답
+
+```json
+{
+  "id": 1,
+  "rank": 3
+}
+```
 
 ---
 

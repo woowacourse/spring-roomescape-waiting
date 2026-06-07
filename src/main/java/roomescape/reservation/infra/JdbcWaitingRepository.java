@@ -2,13 +2,14 @@ package roomescape.reservation.infra;
 
 import java.time.LocalTime;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.UniqueConstraintViolationException;
+import roomescape.reservation.domain.Rank;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.Waiting;
@@ -28,44 +29,37 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<ReservationSlot> findSlotById(Long id) {
+    public Optional<Waiting> findById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT w.date, w.theme_id, w.time_id, rt.start_at
-                            FROM waiting w
-                            JOIN reservation_time rt ON w.time_id = rt.id
-                            WHERE w.id = ?
+                        SELECT w.id, w.name, w.date, w.theme_id, w.time_id, rt.start_at, w.rank
+                        FROM waiting w
+                        JOIN reservation_time rt ON w.time_id = rt.id
+                        WHERE w.id = ?
                         """,
-                (rs, rowNum) -> ReservationSlot.builder()
-                        .date(rs.getDate("date").toLocalDate())
-                        .themeId(rs.getLong("theme_id"))
-                        .timeId(rs.getLong("time_id"))
-                        .startAt(rs.getObject("start_at", LocalTime.class))
-                        .build()
-                , id).stream().findFirst();
+                (rs, rowNum) -> {
+                    ReservationSlot slot = ReservationSlot.builder()
+                            .date(rs.getDate("date").toLocalDate())
+                            .themeId(rs.getLong("theme_id"))
+                            .timeId(rs.getLong("time_id"))
+                            .startAt(rs.getObject("start_at", LocalTime.class))
+                            .build();
+
+                    return toWaiting(rs.getLong("id"), rs.getString("name"), rs.getInt("rank"), slot);
+                }, id).stream().findFirst();
     }
 
     @Override
     public Optional<Waiting> findFirstBySlot(ReservationSlot slot) {
         return jdbcTemplate.query("""
-                                SELECT w.id, w.name
-                                    FROM waiting w
-                                    WHERE w.date = ?
-                                AND w.theme_id = ?
-                                AND w.time_id = ?
-                                ORDER BY w.id ASC
+                                SELECT w.id, w.name, w.rank
+                                FROM waiting w
+                                WHERE w.date = ?
+                                  AND w.theme_id = ?
+                                  AND w.time_id = ?
+                                ORDER BY w.rank ASC
                                 LIMIT 1
                                 """,
-                        (rs, rowNum) -> {
-                            User user = User.builder()
-                                    .name(rs.getString("name"))
-                                    .build();
-
-                            return Waiting.builder()
-                                    .id(rs.getLong("id"))
-                                    .user(user)
-                                    .slot(slot)
-                                    .build();
-                        },
+                        (rs, rowNum) -> toWaiting(rs.getLong("id"), rs.getString("name"), rs.getInt("rank"), slot),
                         slot.date(),
                         slot.themeId(),
                         slot.timeId())
@@ -75,40 +69,126 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         ReservationSlot slot = waiting.getSlot();
+        Rank rank = getNextRank(slot);
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", waiting.getUserName())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
-                .addValue("time_id", slot.timeId());
+                .addValue("time_id", slot.timeId())
+                .addValue("rank", rank.value());
 
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-            return waiting.withId(id);
-        } catch (DataIntegrityViolationException e) {
+            return waiting.withId(id).withRank(rank);
+        } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
         }
     }
 
-    @Override
-    public Long getRank(Waiting waiting) {
-        ReservationSlot slot = waiting.getSlot();
-        return jdbcTemplate.queryForObject("""
-                            SELECT COUNT(*)
-                            FROM waiting
-                            WHERE id <= ?
-                              AND date = ? 
-                              AND theme_id = ?
-                              AND time_id = ?
+    private Rank getNextRank(ReservationSlot slot) {
+        Integer rank = jdbcTemplate.queryForObject("""
+                        SELECT COALESCE(MAX(rank), 0) + 1
+                        FROM waiting
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
                         """,
-                Long.class,
-                waiting.getId(),
+                Integer.class,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
+
+        return Rank.builder()
+                .value(rank)
+                .build();
+    }
+
+    @Override
+    public Integer delete(Long id) {
+        return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    }
+
+    @Override
+    public void rebalanceRank(ReservationSlot slot, Rank rank) {
+        jdbcTemplate.update("""
+                        UPDATE waiting
+                        SET rank = rank - 1
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                          AND rank > ?
+                        """,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId(),
+                rank.value());
+    }
+
+    @Override
+    public int countBySlot(ReservationSlot slot) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT COUNT(*)
+                        FROM waiting
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                        """,
+                Integer.class,
                 slot.date(),
                 slot.themeId(),
                 slot.timeId());
     }
 
     @Override
-    public Integer delete(Long id) {
-        return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    public Integer postpone(Waiting waiting, Waiting postponedWaiting) {
+        decreaseRanksBetween(waiting, postponedWaiting);
+        return updateRank(waiting.getId(), postponedWaiting.getRank());
+    }
+
+    private void decreaseRanksBetween(Waiting waiting, Waiting postponedWaiting) {
+        ReservationSlot slot = waiting.getSlot();
+        Rank currentRank = waiting.getRank();
+        Rank targetRank = postponedWaiting.getRank();
+        int rankAfterCurrent = currentRank.value() + 1;
+
+        jdbcTemplate.update("""
+                        UPDATE waiting
+                        SET rank = rank - 1
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                          AND rank BETWEEN ? AND ?
+                        """,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId(),
+                rankAfterCurrent,
+                targetRank.value());
+    }
+
+    private Integer updateRank(Long id, Rank rank) {
+        return jdbcTemplate.update("""
+                        UPDATE waiting
+                        SET rank = ?
+                        WHERE id = ?
+                        """,
+                rank.value(),
+                id);
+    }
+
+    private Waiting toWaiting(Long id, String name, int rankValue, ReservationSlot slot) {
+        User user = User.builder()
+                .name(name)
+                .build();
+        Rank rank = Rank.builder()
+                .value(rankValue)
+                .build();
+
+        return Waiting.builder()
+                .id(id)
+                .user(user)
+                .slot(slot)
+                .rank(rank)
+                .build();
     }
 }

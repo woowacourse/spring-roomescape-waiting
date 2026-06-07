@@ -26,14 +26,14 @@ public class JdbcWaitingDao implements WaitingDetailDao {
                                t.thumbnail_img_url,
                                w.time_id,
                                rt.start_at,
+                               w.rank,
                                (
                                    SELECT COUNT(*)
-                                   FROM waiting same_slot
-                                   WHERE same_slot.id <= w.id
-                                     AND same_slot.date = w.date
-                                     AND same_slot.theme_id = w.theme_id
-                                     AND same_slot.time_id = w.time_id
-                               ) AS rank
+                                   FROM waiting total
+                                   WHERE total.date = w.date
+                                     AND total.theme_id = w.theme_id
+                                     AND total.time_id = w.time_id
+                               ) AS total_rank_count
                         FROM waiting w
                         JOIN theme t ON w.theme_id = t.id
                         JOIN reservation_time rt ON w.time_id = rt.id
@@ -50,7 +50,8 @@ public class JdbcWaitingDao implements WaitingDetailDao {
                                 rs.getString("thumbnail_img_url"),
                                 rs.getLong("time_id"),
                                 rs.getTime("start_at").toLocalTime(),
-                                rs.getLong("rank")),
+                                rs.getInt("rank"),
+                                rs.getInt("total_rank_count")),
                 username
         );
     }

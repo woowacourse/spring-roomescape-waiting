@@ -2,6 +2,8 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -9,7 +11,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
@@ -23,18 +25,21 @@ import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
 @ServiceTest
-@Transactional
 class ReservationCommandServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 1, 1, 0, 0);
 
     @Autowired
     private ReservationCommandService reservationCommandService;
+
+    @MockitoSpyBean
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private TestDataHelper testHelper;
@@ -275,6 +280,12 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
+        testHelper.insertWaiting(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
         User stark = ReservationFixture.userNameStark();
 
         reservationCommandService.delete(reservationId, NOW);
@@ -286,9 +297,11 @@ class ReservationCommandServiceTest {
                 .startAt(LocalTime.of(10, 0))
                 .build();
         Reservation promoteReservation = testHelper.findReservationBySlot(slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(promoteReservation.getUser()).isEqualTo(stark);
+            softly.assertThat(neoRank).isEqualTo(1);
             softly.assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
                     .isInstanceOf(NotFoundException.class);
         });
@@ -339,6 +352,48 @@ class ReservationCommandServiceTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(changeReservation.getUser()).isEqualTo(pino);
             softly.assertThat(promoteReservation.getUser()).isEqualTo(stark);
+        });
+    }
+
+    @DisplayName("대기 승격 실패 시 확정 예약 삭제도 함께 롤백된다.")
+    @Test
+    void reservation_rollback_if_waiting_promote_failed() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피케이",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        doThrow(new RuntimeException("대기 승격 실패"))
+                .when(waitingRepository)
+                .delete(any());
+
+        assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("대기 승격 실패");
+
+        Reservation reservation = testHelper.findReservationBySlot(slot);
+        Integer waitingRank = testHelper.findWaitingRank("피케이", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservation.getId()).isEqualTo(reservationId);
+            softly.assertThat(reservation.getUser()).isEqualTo(ReservationFixture.userNameStark());
+            softly.assertThat(waitingRank).isEqualTo(1);
         });
     }
 }

@@ -9,6 +9,7 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.application.dto.WaitingCreateCommand;
+import roomescape.reservation.application.dto.WaitingPostponeResult;
 import roomescape.reservation.application.dto.WaitingResult;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
@@ -45,12 +46,13 @@ public class WaitingCommandService {
 
         try {
             Waiting savedWaiting = waitingRepository.save(waiting);
-            Long rank = waitingRepository.getRank(savedWaiting);
+            int totalRankCount = waitingRepository.countBySlot(slot);
+
             return WaitingResult.from(
                     savedWaiting,
                     ThemeResult.from(theme),
                     ReservationTimeResult.from(time),
-                    rank
+                    totalRankCount
             );
         } catch (UniqueConstraintViolationException e) {
             throw new ConflictException("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");
@@ -58,14 +60,29 @@ public class WaitingCommandService {
     }
 
     public void delete(Long id, LocalDateTime now) {
-        ReservationSlot slot = waitingRepository.findSlotById(id)
+        Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
 
-        slot.validateDeletable(now);
+        waiting.getSlot().validateDeletable(now);
 
         if (waitingRepository.delete(id) == 0) {
             throw new NotFoundException("존재하지 않는 대기입니다.");
         }
+        waitingRepository.rebalanceRank(waiting.getSlot(), waiting.getRank());
+    }
+
+    public WaitingPostponeResult postpone(Long id, int steps, LocalDateTime now) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
+
+        int totalRankCount = waitingRepository.countBySlot(waiting.getSlot());
+        Waiting postponedWaiting = waiting.postpone(steps, totalRankCount, now);
+
+        if (waitingRepository.postpone(waiting, postponedWaiting) == 0) {
+            throw new NotFoundException("존재하지 않는 대기입니다.");
+        }
+
+        return WaitingPostponeResult.from(postponedWaiting);
     }
 
     private void validateNoReservationConflict(String username, ReservationSlot slot) {

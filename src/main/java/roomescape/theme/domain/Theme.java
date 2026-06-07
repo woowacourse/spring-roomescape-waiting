@@ -3,12 +3,14 @@ package roomescape.theme.domain;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.With;
 import roomescape.global.exception.RoomEscapeException;
 
 @Getter
 @EqualsAndHashCode(of = {"name", "description"})
 public class Theme {
 
+    @With
     private final Long id;
     private final String name;
     private final String description;
@@ -20,15 +22,6 @@ public class Theme {
         this.name = requireName(name);
         this.description = requireDescription(description);
         this.thumbnailImgUrl = requireThumbnailImgUrl(thumbnailImgUrl);
-    }
-
-    public Theme withId(Long generatedId) {
-        return Theme.builder()
-                .id(generatedId)
-                .name(this.name)
-                .description(this.description)
-                .thumbnailImgUrl(this.thumbnailImgUrl)
-                .build();
     }
 
     private static String requireName(String name) {

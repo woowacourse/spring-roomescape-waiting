@@ -66,8 +66,39 @@ public class TestDataHelper {
                 "name", name,
                 "date", date,
                 "theme_id", themeId,
-                "time_id", timeId
+                "time_id", timeId,
+                "rank", nextWaitingRank(date, themeId, timeId)
         )).longValue();
+    }
+
+    private Integer nextWaitingRank(LocalDate date, Long themeId, Long timeId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT COALESCE(MAX(rank), 0) + 1
+                        FROM waiting
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                        """,
+                Integer.class,
+                date,
+                themeId,
+                timeId);
+    }
+
+    public Integer findWaitingRank(String name, ReservationSlot slot) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT rank
+                        FROM waiting
+                        WHERE name = ?
+                          AND date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                        """,
+                Integer.class,
+                name,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
     }
 
     public Reservation findReservationBySlot(ReservationSlot slot) {

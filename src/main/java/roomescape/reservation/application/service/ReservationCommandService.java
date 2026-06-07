@@ -103,6 +103,7 @@ public class ReservationCommandService {
         Optional<Waiting> firstWaitingBySlot = waitingRepository.findFirstBySlot(slot);
         firstWaitingBySlot.ifPresent(waiting -> {
             waitingRepository.delete(waiting.getId());
+            waitingRepository.rebalanceRank(waiting.getSlot(), waiting.getRank());
 
             saveReservation(Reservation.create(waiting.getUser(), waiting.getSlot(), now));
         });

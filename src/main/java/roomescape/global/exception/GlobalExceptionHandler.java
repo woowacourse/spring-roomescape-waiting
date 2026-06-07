@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+@Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
 public class GlobalExceptionHandler {
 
@@ -41,6 +43,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ErrorResponse handleConflict(ConflictException e) {
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler
+    public ErrorResponse handleUnexpected(Exception e) {
+        log.error("처리 못한 예외 발생", e);
+        return new ErrorResponse("서버 내부 오류가 발생했습니다.");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

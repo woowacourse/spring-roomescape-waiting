@@ -12,5 +12,6 @@ public record WaitingDetail(Long waitingId,
                             String thumbnailImgUrl,
                             Long timeId,
                             LocalTime startAt,
-                            Long rank) {
+                            int rank,
+                            int totalRankCount) {
 }

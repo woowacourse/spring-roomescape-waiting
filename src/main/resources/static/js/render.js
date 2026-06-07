@@ -394,7 +394,15 @@ function renderMyReservationItem(reservation) {
 
 function renderMyWaitingItem(waiting) {
     const past = isPastReservation(waiting);
-    const rankText = waiting.rank ? `${waiting.rank}번째 대기` : "대기 중";
+    const rank = Number(waiting.rank);
+    const totalRankCount = Number(waiting.totalRankCount);
+    const hasRank = Number.isInteger(rank) && rank > 0;
+    const hasTotalRankCount = Number.isInteger(totalRankCount) && totalRankCount > 0;
+    const maxPostponeSteps = hasRank && hasTotalRankCount ? Math.max(totalRankCount - rank, 0) : 0;
+    const canPostpone = !past && maxPostponeSteps > 0 && !state.submitting;
+    const rankText = hasRank
+        ? `${rank}번째 대기${hasTotalRankCount ? ` / 총 ${totalRankCount}명` : ""}`
+        : "대기 중";
 
     return `
     <article class="my-reservation-item is-waiting">
@@ -408,6 +416,13 @@ function renderMyWaitingItem(waiting) {
         <small>${escapeHtml(waiting.date)} ${escapeHtml(waiting.time.startAt)} · ${escapeHtml(waiting.name)} · ${escapeHtml(waiting.status)}</small>
       </span>
       <span class="reservation-card-actions">
+        <form class="waiting-postpone-form" data-waiting-postpone-form data-waiting-id="${waiting.id}">
+          <label for="waiting-postpone-${waiting.id}">미룰 칸</label>
+          <input id="waiting-postpone-${waiting.id}" name="steps" type="number" min="1" max="${maxPostponeSteps}" value="${canPostpone ? 1 : ""}" inputmode="numeric" ${canPostpone ? "" : "disabled"}>
+          <button class="secondary-button" type="submit" ${canPostpone ? "" : "disabled"}>
+            ${state.submitting ? "처리 중" : (maxPostponeSteps > 0 ? "미루기" : "미루기 불가")}
+          </button>
+        </form>
         <button class="danger-button" type="button" data-action="delete-waiting" data-waiting-id="${waiting.id}" ${past ? "disabled" : ""}>
           ${past ? "취소 불가" : "대기 취소"}
         </button>
