@@ -61,7 +61,7 @@ class ReservationTest {
     void 본인_예약이_아니면_취소할_수_없다() {
         Reservation reservation = reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThatThrownBy(() -> reservation.cancelBy(member("티뉴"), BEFORE_RESERVATION))
+        assertThatThrownBy(() -> reservation.validateCancellableBy(member("티뉴"), BEFORE_RESERVATION))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -69,7 +69,7 @@ class ReservationTest {
     void 지난_예약은_취소할_수_없다() {
         Reservation reservation = reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThatThrownBy(() -> reservation.cancelBy(RESERVER, NOW))
+        assertThatThrownBy(() -> reservation.validateCancellableBy(RESERVER, NOW))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("취소할 수 없습니다");
     }
@@ -78,7 +78,7 @@ class ReservationTest {
     void 본인의_미래_예약은_취소할_수_있다() {
         Reservation reservation = reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThatCode(() -> reservation.cancelBy(RESERVER, BEFORE_RESERVATION))
+        assertThatCode(() -> reservation.validateCancellableBy(RESERVER, BEFORE_RESERVATION))
                 .doesNotThrowAnyException();
     }
 }

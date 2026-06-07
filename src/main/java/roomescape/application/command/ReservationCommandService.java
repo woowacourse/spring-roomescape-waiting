@@ -59,7 +59,7 @@ public class ReservationCommandService {
     }
 
     public void deleteMine(Reservation reservation, Member requester) {
-        reservation.cancelBy(
+        reservation.validateCancellableBy(
                 requester,
                 now()
         );

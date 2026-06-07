@@ -80,7 +80,7 @@ public class Reservation {
         );
     }
 
-    public void cancelBy(Member member, LocalDateTime now) {
+    public void validateCancellableBy(Member member, LocalDateTime now) {
         validateOwner(member);
         validatePast(now, PAST_RESERVATION_CANCEL_REJECTED);
     }
