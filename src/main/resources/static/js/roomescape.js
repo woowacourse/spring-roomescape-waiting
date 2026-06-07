@@ -499,7 +499,7 @@ function renderAdminThemes() {
                 <strong>${escapeHtml(theme.name)}</strong>
                 <span>${escapeHtml(theme.description)}</span>
             </div>
-            <button class="button danger small" type="button" data-action="delete-theme" data-id="${theme.id}">삭제</button>
+            <button class="button danger small" type="button" data-action="deactivate-theme" data-id="${theme.id}">비활성화</button>
         </div>
     `).join("");
 }
@@ -517,7 +517,7 @@ function renderAdminTimes() {
                 <strong>${displayTime(time.startAt)}</strong>
                 <span>ID ${time.id}</span>
             </div>
-            <button class="button danger small" type="button" data-action="delete-time" data-id="${time.id}">삭제</button>
+            <button class="button danger small" type="button" data-action="deactivate-time" data-id="${time.id}">비활성화</button>
         </div>
     `).join("");
 }
@@ -593,8 +593,8 @@ function handleAdminActions(event) {
     const id = Number(target.dataset.id);
     const actions = {
         "delete-admin-reservation": () => deleteAdminReservation(id),
-        "delete-theme": () => deleteTheme(id),
-        "delete-time": () => deleteTime(id)
+        "deactivate-theme": () => deactivateTheme(id),
+        "deactivate-time": () => deactivateTime(id)
     };
 
     if (actions[target.dataset.action]) {
@@ -612,20 +612,26 @@ async function deleteAdminReservation(id) {
     }
 }
 
-async function deleteTheme(id) {
+async function deactivateTheme(id) {
     try {
-        await api(`/admin/themes/${id}`, { method: "DELETE" });
-        showToast("테마를 삭제했습니다.");
+        await api(`/admin/themes/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "INACTIVE" })
+        });
+        showToast("테마를 비활성화했습니다.");
         await loadAdminData();
     } catch (error) {
         showToast(error.message, "error");
     }
 }
 
-async function deleteTime(id) {
+async function deactivateTime(id) {
     try {
-        await api(`/admin/times/${id}`, { method: "DELETE" });
-        showToast("시간을 삭제했습니다.");
+        await api(`/admin/times/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "INACTIVE" })
+        });
+        showToast("시간을 비활성화했습니다.");
         await loadAdminData();
     } catch (error) {
         showToast(error.message, "error");

@@ -19,10 +19,6 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
-    boolean existsByTimeId(Long timeId);
-
-    boolean existsByThemeId(Long themeId);
-
     boolean existsConflict(String name, LocalDate date, Long timeId, Long themeId);
 
     boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id);

@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -30,6 +32,9 @@ class ThemeServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private ReservationService reservationService;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -73,8 +78,8 @@ class ThemeServiceTest {
     }
 
     @Test
-    @DisplayName("테마를 삭제한다.")
-    public void delete_success() {
+    @DisplayName("테마를 비활성화한다.")
+    public void deactivate_success() {
         // given
         Theme theme = themeService.create(
                 "레벨2 탈출",
@@ -83,25 +88,25 @@ class ThemeServiceTest {
         );
 
         // when
-        themeService.delete(theme.getId());
+        themeService.deactivate(theme.getId());
 
         // then
         assertThat(themeService.list()).isEmpty();
     }
 
     @Test
-    @DisplayName("존재하지 않는 테마 삭제를 요청해도 성공한다.")
-    public void delete_success_whenThemeNotFound() {
+    @DisplayName("존재하지 않는 테마 비활성화를 요청해도 성공한다.")
+    public void deactivate_success_whenThemeNotFound() {
         // when
-        themeService.delete(37L);
+        themeService.deactivate(37L);
 
         // then
         assertThat(themeService.list()).isEmpty();
     }
 
     @Test
-    @DisplayName("예약이 존재하는 테마를 삭제하면 예외가 발생한다.")
-    public void delete_fail_whenReservationExists() {
+    @DisplayName("예약이 존재하는 테마도 비활성화한다.")
+    public void deactivate_success_whenReservationExists() {
         // given
         Theme theme = themeService.create(
                 "레벨2 탈출",
@@ -111,9 +116,34 @@ class ThemeServiceTest {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         saveReservation("브라운", LocalDate.now().plusDays(1), time, theme);
 
+        // when
+        themeService.deactivate(theme.getId());
+
+        // then
+        assertThat(themeService.list()).isEmpty();
+        assertThat(themeRepository.findById(theme.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("비활성화된 테마로 예약을 생성하면 예외가 발생한다.")
+    public void createReservation_fail_whenThemeInactive() {
+        // given
+        Theme theme = themeService.create(
+                "레벨2 탈출",
+                "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://example.com/theme.png"
+        );
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        themeService.deactivate(theme.getId());
+
         // when, then
-        assertThatThrownBy(() -> themeService.delete(theme.getId()))
-                .isInstanceOf(ConflictException.class);
+        assertThatThrownBy(() -> reservationService.create(
+                "브라운",
+                LocalDate.now().plusDays(1),
+                time.getId(),
+                theme.getId()
+        ))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test

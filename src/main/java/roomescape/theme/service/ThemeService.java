@@ -3,7 +3,6 @@ package roomescape.theme.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -13,11 +12,9 @@ import java.util.List;
 @Service
 public class ThemeService {
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -44,11 +41,12 @@ public class ThemeService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
-            throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다. 먼저 해당 예약들을 삭제해주세요.");
-        }
+    public void activate(Long id) {
+        themeRepository.updateActive(id, true);
+    }
 
-        themeRepository.deleteById(id);
+    @Transactional
+    public void deactivate(Long id) {
+        themeRepository.updateActive(id, false);
     }
 }
