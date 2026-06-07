@@ -116,13 +116,6 @@ public record Reservations(
         return target;
     }
 
-    public Reservation findById(Long reservationId) {
-        return values.stream()
-                .filter(r -> r.getId() != null && r.getId().equals(reservationId))
-                .findFirst()
-                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-    }
-
     private Reservation register(String requesterName, Long slotId, LocalDateTime reservedAt, ReservationStatus status) {
         Reservation reserved = Reservation.reserve(requesterName, slotId, status, reservedAt);
         values.add(reserved);

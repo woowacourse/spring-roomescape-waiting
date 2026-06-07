@@ -112,8 +112,8 @@ class ReservationsTest {
 
         // when
         Reservations changed = reservations.cancel(name);
-        Reservation canceled = changed.findById(1L);
-        Reservation promoted = changed.findById(2L);
+        Reservation canceled = changed.findByName(reserved.getName());
+        Reservation promoted = changed.findByName(waiting.getName());
 
         // then
         Assertions.assertThat(changed.values()).hasSize(2);
@@ -154,8 +154,8 @@ class ReservationsTest {
 
         // when
         Reservations changed = reservations.cancelByManager(reserved.getName());
-        Reservation canceled = changed.findById(1L);
-        Reservation promoted = changed.findById(2L);
+        Reservation canceled = changed.findByName(reserved.getName());
+        Reservation promoted = changed.findByName(waiting.getName());
 
         // then
         Assertions.assertThat(changed.values()).hasSize(2);
@@ -242,8 +242,8 @@ class ReservationsTest {
 
         // when
         Reservations changed = reservations.reschedule(newSlotId, name, RESERVED);
-        Reservation rescheduled = changed.findByName(name);
-        Reservation promoted = changed.findById(2L);
+        Reservation rescheduled = changed.findByName(reserved.getName());
+        Reservation promoted = changed.findByName(waiting.getName());
 
         // then
         Assertions.assertThat(changed.values()).hasSize(2);
