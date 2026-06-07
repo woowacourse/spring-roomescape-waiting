@@ -6,6 +6,7 @@ import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_DATE_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ID_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NAME_IS_NULL;
@@ -38,8 +39,6 @@ class ReservationTest {
     private final LocalTime startAt = LocalTime.of(15, 40);
     private final ReservationTime reservationTime = ReservationTime.create(startAt);
     private final Theme theme = Theme.load(1L, "테마", "설명", "썸네일", true);
-    private final Reservation reservation = Reservation.load(1L, name, reservationDate,
-        reservationTime, theme, RESERVED, LocalDateTime.now());
 
 
     @Nested
@@ -56,14 +55,12 @@ class ReservationTest {
 
             // when & then
             assertThatThrownBy(
-                () -> Reservation.create(nullName, reservationDate, reservationTime, theme,
-                    LocalDateTime.now()))
+                () -> Reservation.reserved(nullName, reservationDate, reservationTime, theme))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
 
             assertThatThrownBy(
-                () -> Reservation.create(emptyName, reservationDate, reservationTime, theme,
-                    LocalDateTime.now()))
+                () -> Reservation.reserved(emptyName, reservationDate, reservationTime, theme))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
         }
@@ -82,8 +79,7 @@ class ReservationTest {
 
             // when & then
             assertThatThrownBy(
-                () -> Reservation.create(name, reservationDate, nullTime, theme,
-                    LocalDateTime.now()))
+                () -> Reservation.reserved(name, reservationDate, nullTime, theme))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_TIME_IS_NULL.getMessage());
         }
@@ -102,8 +98,7 @@ class ReservationTest {
 
             // when & then
             assertThatThrownBy(
-                () -> Reservation.create(name, nullDate, reservationTime, theme,
-                    LocalDateTime.now()))
+                () -> Reservation.reserved(name, nullDate, reservationTime, theme))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_DATE_IS_NULL.getMessage());
         }
@@ -124,7 +119,7 @@ class ReservationTest {
             assertThatThrownBy(
                 () -> Reservation.load(nullId, name, reservationDate, reservationTime, theme,
                     RESERVED,
-                    LocalDateTime.now()))
+                    0L))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ID_IS_NULL.getMessage());
         }
@@ -186,7 +181,7 @@ class ReservationTest {
         void 실패3() {
             // given
             Reservation reserved = Reservation.load(2L, name, pastDate, reservationTime, theme,
-                RESERVED, LocalDateTime.now());
+                RESERVED, 0L);
 
             // when & then
             assertThatThrownBy(() -> reserved.cancel(name))
@@ -261,7 +256,7 @@ class ReservationTest {
         void 실패3() {
             // given
             Reservation reserved = Reservation.load(2L, name, pastDate, reservationTime, theme,
-                RESERVED, LocalDateTime.now());
+                RESERVED, 0L);
             ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
 
             // when & then
@@ -277,12 +272,28 @@ class ReservationTest {
             // given
             Reservation reserved = Reservation.load(2L, name, reservationDate, reservationTime,
                 theme,
-                RESERVED, LocalDateTime.now());
+                RESERVED, 0L);
 
             // when & then
             assertThatThrownBy(() -> reserved.changeSchedule(name, pastDate, reservationTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("대기 상태이면 예외가 발생한다")
+        void 실패5() {
+            // given
+            Reservation waiting = ReservationFixture.waitReservation(name, reservationDate,
+                reservationTime, theme);
+            ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
+            ReservationTime changedTime = ReservationTimeFixture.activeTime15();
+
+            // when & then
+            assertThatThrownBy(() -> waiting.changeSchedule(name, changedDate, changedTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
     }
 
@@ -344,6 +355,22 @@ class ReservationTest {
                     () -> reserved.changeScheduleByManager(changedDate, reservationTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("대기 상태이면 예외가 발생한다")
+        void 실패3() {
+            // given
+            Reservation waiting = ReservationFixture.waitReservation(name, reservationDate,
+                reservationTime, theme);
+            ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
+            ReservationTime changedTime = ReservationTimeFixture.activeTime15();
+
+            // when & then
+            assertThatThrownBy(() -> waiting.changeScheduleByManager(changedDate, changedTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
     }
 }

@@ -2,11 +2,13 @@ package roomescape.reservation.domain;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_DATE_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ID_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NAME_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_PAST_DATETIME_NOT_ALLOWED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_TIME_IS_NULL;
@@ -32,30 +34,41 @@ public class Reservation {
     private ReservationTime time;
     private Theme theme;
     private ReservationStatus status;
-    private LocalDateTime reservedAt;
+    private Long waitingOrder;
 
-    public static Reservation create(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, LocalDateTime reservedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, reservedAt);
+    public static Reservation reserved(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme) {
+        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED);
     }
 
     public static Reservation wait(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, LocalDateTime reservedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, reservedAt);
+        ReservationTime time, Theme theme, Long waitingOrder) {
+        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, waitingOrder);
     }
 
     private static Reservation of(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+        ReservationTime time, Theme theme, ReservationStatus status) {
         validate(name, reservationDate, time, theme);
         validatePast(reservationDate.getDate(), time.getStartAt());
-        return new Reservation(null, name, reservationDate, time, theme, status, reservedAt);
+
+        return new Reservation(null, name, reservationDate, time, theme, status, 0L);
+    }
+
+    private static Reservation of(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme, ReservationStatus status, Long waitingOrder) {
+        validate(name, reservationDate, time, theme);
+        validatePast(reservationDate.getDate(), time.getStartAt());
+        validateWaitingOrder(waitingOrder);
+
+        return new Reservation(null, name, reservationDate, time, theme, status, waitingOrder);
     }
 
     public static Reservation load(Long id, String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+        ReservationTime time, Theme theme, ReservationStatus status, Long waitingOrder) {
         validate(name, reservationDate, time, theme);
         validateId(id);
-        return new Reservation(id, name, reservationDate, time, theme, status, reservedAt);
+
+        return new Reservation(id, name, reservationDate, time, theme, status, waitingOrder);
     }
 
     public void cancel(String requesterName) {
@@ -77,6 +90,8 @@ public class Reservation {
         ReservationTime newTime) {
         validateOwner(requesterName);
         validateNotCanceled();
+        validateNotWaiting();
+        validateReserved();
         validateNotPast(date.getDate(), time.getStartAt());
         validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
 
@@ -86,6 +101,8 @@ public class Reservation {
 
     public void changeScheduleByManager(ReservationDate newDate, ReservationTime newTime) {
         validateNotCanceled();
+        validateNotWaiting();
+        validateReserved();
         validateNotPast(date.getDate(), time.getStartAt());
         validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
 
@@ -137,12 +154,25 @@ public class Reservation {
         }
     }
 
+    private static void validateWaitingOrder(Long waitingOrder) {
+        if (waitingOrder != null && waitingOrder < 0) {
+            throw new IllegalStateException("대기 순서는 음수일 수 없습니다");
+        }
+    }
+
     public void updateStatus(ReservationStatus status) {
         this.status = status;
     }
 
-    public void changeReservedAt(LocalDateTime now) {
-        this.reservedAt = now;
+    public void changeToReserved() {
+        this.status = ReservationStatus.RESERVED;
+        this.waitingOrder = 0L;
+    }
+
+    public void changeToWaitingWithOrder(Long waitingOrder) {
+        validateWaitingOrder(waitingOrder);
+        this.status = ReservationStatus.WAITING;
+        this.waitingOrder = waitingOrder;
     }
 
     private void validateOwner(String requesterName) {
@@ -155,9 +185,21 @@ public class Reservation {
         return this.name.equals(requesterName);
     }
 
+    private void validateReserved() {
+        if (status != ReservationStatus.RESERVED) {
+            throw new ReservationException(RESERVATION_NOT_RESERVED);
+        }
+    }
+
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
+        }
+    }
+
+    private void validateNotWaiting() {
+        if (status == ReservationStatus.WAITING) {
+            throw new ReservationException(RESERVATION_ALREADY_WAITING);
         }
     }
 

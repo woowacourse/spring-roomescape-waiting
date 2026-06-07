@@ -1,7 +1,10 @@
 package roomescape.theme.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.theme.fixture.PopularThemeResultFixture.popularThemeResult;
+import static roomescape.theme.fixture.ThemeFixture.theme;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,8 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
+import roomescape.theme.repository.projection.PopularThemeResult;
 
 @JdbcTest
 class ThemeRepositoryTest {
@@ -50,9 +55,9 @@ class ThemeRepositoryTest {
         void 성공() {
             // given
             List<Theme> themes = List.of(
-                ThemeFixture.theme("테마1"),
-                ThemeFixture.theme("테마2"),
-                ThemeFixture.theme("테마3")
+                theme("테마1"),
+                theme("테마2"),
+                theme("테마3")
             );
             saveAll(themes);
 
@@ -74,7 +79,7 @@ class ThemeRepositoryTest {
         @DisplayName("요청한 Id를 가진 테마를 조회한다")
         void 성공() {
             // given
-            Theme savedTheme = jdbcThemeRepository.save(ThemeFixture.theme());
+            Theme savedTheme = jdbcThemeRepository.save(theme());
 
             // when
             Theme actual = jdbcThemeRepository.findById(savedTheme.getId()).get();
@@ -139,7 +144,7 @@ class ThemeRepositoryTest {
             List<Theme> themes = List.of();
 
             // when
-            jdbcThemeRepository.save(ThemeFixture.theme());
+            jdbcThemeRepository.save(theme());
 
             // then
             assertThat(jdbcThemeRepository.findAll())
@@ -156,7 +161,7 @@ class ThemeRepositoryTest {
         @DisplayName("테마 상태를 변경한다 - isActive: true")
         void 성공1() {
             // given
-            Theme savedTheme = jdbcThemeRepository.save(ThemeFixture.theme());
+            Theme savedTheme = jdbcThemeRepository.save(theme());
             savedTheme.updateStatus(true);
 
             // when
@@ -181,6 +186,98 @@ class ThemeRepositoryTest {
             // then
             assertThat(jdbcThemeRepository.findById(savedTheme.getId()).get().isActive())
                 .isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("findPopularThemes 메서드는")
+    @Sql(
+        scripts = {"classpath:truncate.sql", "classpath:test-popular-theme.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    class FindPopularThemesTest {
+
+        static final int POPULAR_STATISTICS_DURATION = 7;
+        static final int PREVIOUS_DAYS = 1;
+
+        LocalDate today = LocalDate.now();
+        LocalDate endDate = today.minusDays(PREVIOUS_DAYS);
+        LocalDate startDate = today.minusDays(PREVIOUS_DAYS + POPULAR_STATISTICS_DURATION);
+        int limit = 10;
+
+
+        @Test
+        @DisplayName("입력된 기간 사이에 등록된 예약의 상위 n개의 테마를 조회한다")
+        void 성공1() {
+            // given
+            List<PopularThemeResult> expected = List.of(
+                popularThemeResult(1L, "인기 테마 1", 4),
+                popularThemeResult(2L, "인기 테마 2", 2),
+                popularThemeResult(3L, "인기 테마 3", 1)
+            );
+
+            // when
+            List<PopularThemeResult> actual = jdbcThemeRepository.findPopularThemes(startDate,
+                endDate, limit);
+
+            // then
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("description", "thumbnailUrl")
+                .isEqualTo(expected);
+        }
+
+
+        @Test
+        @DisplayName("비활성화된 테마는 조회 결과에서 제외된다")
+        void 성공2() {
+            // given
+            int expected = 3;
+
+            // when
+            List<PopularThemeResult> actual = jdbcThemeRepository.findPopularThemes(startDate,
+                endDate, limit);
+
+            // then
+            assertThat(actual)
+                .hasSize(expected);
+        }
+
+
+        @Test
+        @DisplayName("요청 개수만큼 조회한다")
+        void 성공3() {
+            // given
+            int limit = 2;
+            List<PopularThemeResult> expected = List.of(
+                popularThemeResult(1L, "인기 테마 1", 4),
+                popularThemeResult(2L, "인기 테마 2", 2)
+            );
+
+            // when
+            List<PopularThemeResult> actual = jdbcThemeRepository.findPopularThemes(startDate, endDate, limit);
+
+            // then
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("description", "thumbnailUrl")
+                .isEqualTo(expected);
+        }
+
+
+        @Test
+        @DisplayName("예약 완료 상태의 예약만 인기 테마 집계에 포함한다")
+        void 성공4() {
+            // given
+            List<Long> expected = List.of(4L, 2L, 1L);
+
+            // when
+            List<PopularThemeResult> actual = jdbcThemeRepository.findPopularThemes(startDate, endDate, limit);
+
+            // then
+            assertThat(actual)
+                .extracting(PopularThemeResult::reservationCount)
+                .containsExactly(expected.toArray(new Long[0]));
         }
     }
 }

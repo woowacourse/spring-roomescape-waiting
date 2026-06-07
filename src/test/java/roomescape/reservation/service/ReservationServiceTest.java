@@ -5,16 +5,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.toCommand;
+import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -245,15 +247,57 @@ class ReservationServiceTest {
             // given
             String nameInWaiting = "대기중인 사용자";
             save(reservation(name, reservationDate1, reservationTime1, theme1));
-            Reservation reservationInWaiting = save(
-                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting =
+                save(waitReservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
 
             // when
-            Reservation actual = reservationService.cancel(reservationInWaiting.getId(), nameInWaiting);
+            Reservation actual = reservationService.cancel(reservationInWaiting.getId(),
+                nameInWaiting);
 
             // then
             Assertions.assertThat(actual.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
+        }
+
+
+        @Test
+        @DisplayName("WAITING 예약을 취소하면 승격이 일어나지 않는다")
+        void 성공3() {
+            // given
+            String name2 = "사용자2";
+            String name3 = "사용자3";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+            save(waitReservation(name3, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancel(reservationInWaiting.getId(), name2);
+
+            // then
+            assertThat(reservationRepository.findAll())
+                .filteredOn(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                .hasSize(1);
+        }
+
+
+        @Test
+        @DisplayName("RESERVED 예약을 취소하면 첫 번째 WAITING 예약만 RESERVED로 승격된다")
+        void 성공4() {
+            // given
+            String name2 = "사용자2";
+            Reservation reservationToCancel = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancel(reservationToCancel.getId(), name);
+
+            // then
+            assertThat(reservationInWaiting)
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
         }
 
 
@@ -278,7 +322,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             Long savedId = saved.getId();
 
             // when & then
@@ -295,7 +339,7 @@ class ReservationServiceTest {
             ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
             Reservation saved =
                 save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, LocalDateTime.now()));
+                    ReservationStatus.RESERVED, 0L));
             Long savedId = saved.getId();
 
             // when & then
@@ -331,8 +375,8 @@ class ReservationServiceTest {
             // given
             String nameInWaiting = "대기중인 사용자";
             save(reservation(name, reservationDate1, reservationTime1, theme1));
-            Reservation reservationInWaiting = save(
-                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting =
+                save(waitReservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
 
             // when
             Reservation actual = reservationService.cancelByManager(reservationInWaiting.getId());
@@ -344,12 +388,53 @@ class ReservationServiceTest {
 
 
         @Test
+        @DisplayName("WAITING 상태인 예약이 취소되어도 같은 슬롯에서 승격이 이루어지지 않는다")
+        void 성공3() {
+            // given
+            String name2 = "사용자2";
+            String name3 = "사용자3";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+            save(waitReservation(name3, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancelByManager(reservationInWaiting.getId());
+
+            // then
+            assertThat(reservationRepository.findAll())
+                .filteredOn(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                .hasSize(1);
+        }
+
+
+        @Test
+        @DisplayName("RESERVED 예약을 취소하면 첫 번째 WAITING 예약만 RESERVED로 승격된다")
+        void 성공4() {
+            // given
+            String name2 = "사용자2";
+            Reservation reservationToCancel = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancelByManager(reservationToCancel.getId());
+
+            // then
+            assertThat(reservationInWaiting)
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
+        }
+
+
+        @Test
         @DisplayName("이미 취소된 예약이면 예외가 발생한다")
         void 실패1() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             Long savedId = saved.getId();
 
             // when & then
@@ -366,7 +451,7 @@ class ReservationServiceTest {
             ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
             Reservation saved =
                 save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, LocalDateTime.now()));
+                    ReservationStatus.RESERVED, 0L));
             Long savedId = saved.getId();
 
             // when & then
@@ -386,22 +471,17 @@ class ReservationServiceTest {
         void 성공() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeSchedule(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
             Reservation actual = reservationRepository.findById(saved.getId()).get();
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-            assertThat(actual.getReservedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
         }
 
 
@@ -412,22 +492,17 @@ class ReservationServiceTest {
             String otherName = "다른 이용자";
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             save(reservation(otherName, reservationDate2, reservationTime2, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeSchedule(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
             Reservation actual = reservationRepository.findById(saved.getId()).get();
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(actual.getReservedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
         }
 
 
@@ -454,7 +529,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -472,7 +547,7 @@ class ReservationServiceTest {
             ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
             Reservation saved =
                 save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, LocalDateTime.now()));
+                    ReservationStatus.RESERVED, 0L));
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -517,6 +592,21 @@ class ReservationServiceTest {
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
         }
+
+
+        @Test
+        @DisplayName("대기 상태인 예약이면 예외가 발생한다")
+        void 실패6() {
+            // given
+            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
+        }
     }
 
     @Nested
@@ -529,22 +619,17 @@ class ReservationServiceTest {
         void 성공1() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeScheduleByManager(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
             Reservation actual = reservationRepository.findById(saved.getId()).get();
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-            assertThat(actual.getReservedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
         }
 
         @Test
@@ -554,22 +639,18 @@ class ReservationServiceTest {
             String otherName = "다른 이용자";
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             save(reservation(otherName, reservationDate2, reservationTime2, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeScheduleByManager(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
+            Optional<Reservation> actual = reservationRepository.findById(saved.getId());
 
             // then
-            Reservation actual = reservationRepository.findById(saved.getId()).get();
-            assertThat(actual.getDate()).isEqualTo(reservationDate2);
-            assertThat(actual.getTime()).isEqualTo(reservationTime2);
-            assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(actual.getReservedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
+            assertThat(actual).isPresent()
+                .get()
+                .extracting("status")
+                .isEqualTo(ReservationStatus.WAITING);
         }
 
 
@@ -579,7 +660,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatus(saved);
+            reservationRepository.updateStatusAndWaitingOrder(saved);
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
@@ -623,6 +704,21 @@ class ReservationServiceTest {
                 reservationService.changeScheduleByManager(changeCommand))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("대기 상태인 예약이면 예외가 발생한다")
+        void 실패4() {
+            // given
+            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.changeScheduleByManager(changeCommand))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
     }
 }

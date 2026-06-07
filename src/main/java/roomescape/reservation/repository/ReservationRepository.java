@@ -11,11 +11,15 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findFirstWaitingByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
+
     List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
+
+    Long findNextWaitingOrderBySlot(Long dateId, Long timeId, Long themeId);
 
     Reservation save(Reservation reservation);
 
-    boolean updateStatus(Reservation reservation);
+    boolean updateStatusAndWaitingOrder(Reservation reservation);
 
     boolean updateScheduleAndStatus(Reservation reservation);
 

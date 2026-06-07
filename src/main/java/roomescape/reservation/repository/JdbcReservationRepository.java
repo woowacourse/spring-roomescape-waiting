@@ -1,7 +1,6 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +44,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             resultSet.getBoolean("is_active")
         ),
         ReservationStatus.valueOf(resultSet.getString("status")),
-        resultSet.getTimestamp("reserved_at").toLocalDateTime()
+        resultSet.getLong("waiting_order")
     );
 
     public JdbcReservationRepository(NamedParameterJdbcTemplate jdbcTemplate) {
@@ -62,7 +61,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 r.id AS reservation_id,
                 r.name,
                 r.status,
-                r.reserved_at,
+                r.waiting_order,
                 d.id as date_id,
                 d.date,
                 d.is_active as date_is_active,
@@ -90,7 +89,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 r.id AS reservation_id,
                 r.name,
                 r.status,
-                r.reserved_at,
+                r.waiting_order,
                 d.id as date_id,
                 d.date,
                 d.is_active as date_is_active,
@@ -118,13 +117,62 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+    public Optional<Reservation> findFirstWaitingByDateTimeAndThemeId(Long dateId, Long timeId,
+        Long themeId) {
         String sql = """
             SELECT
                 r.id AS reservation_id,
                 r.name,
                 r.status,
-                r.reserved_at,
+                r.waiting_order,
+                d.id as date_id,
+                d.date,
+                d.is_active as date_is_active,
+                t.id as time_id,
+                t.start_at,
+                t.is_active as time_is_active,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.description,
+                th.thumbnail_url,
+                th.is_active
+            FROM reservation r
+            INNER JOIN reservation_date d ON r.date_id = d.id
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
+            WHERE r.status = 'WAITING'
+            AND date_id = :dateId
+            AND time_id = :timeId
+            AND theme_id = :themeId
+            AND (
+                d.date > CURRENT_DATE 
+                OR (d.date = CURRENT_DATE AND t.start_at > CURRENT_TIME)
+            )
+            ORDER BY r.waiting_order ASC
+            LIMIT 1
+            """;
+        SqlParameterSource params = new MapSqlParameterSource()
+            .addValue("dateId", dateId)
+            .addValue("timeId", timeId)
+            .addValue("themeId", themeId);
+        try {
+            Reservation reservation = jdbcTemplate.queryForObject(sql, params,
+                reservationRowMapper);
+            return Optional.ofNullable(reservation);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId,
+        Long themeId) {
+        String sql = """
+            SELECT
+                r.id AS reservation_id,
+                r.name,
+                r.status,
+                r.waiting_order,
                 d.id AS date_id,
                 d.date,
                 d.is_active as date_is_active,
@@ -147,12 +195,33 @@ public class JdbcReservationRepository implements ReservationRepository {
             ORDER BY d.date DESC , t.start_at ASC
             """;
 
-        MapSqlParameterSource params = new MapSqlParameterSource()
+        SqlParameterSource params = new MapSqlParameterSource()
             .addValue("dateId", dateId)
             .addValue("timeId", timeId)
             .addValue("themeId", themeId);
 
         return jdbcTemplate.query(sql, params, reservationRowMapper);
+    }
+
+    @Override
+    public Long findNextWaitingOrderBySlot(Long dateId, Long timeId, Long themeId) {
+        String sql = """
+            SELECT coalesce(max(r.waiting_order), 0) + 1
+            FROM reservation r
+            INNER JOIN reservation_date d ON r.date_id = d.id
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
+            WHERE r.date_id = :dateId
+            AND r.time_id = :timeId
+            AND r.theme_id = :themeId
+            AND r.status in ('WAITING')
+            """;
+        SqlParameterSource params = new MapSqlParameterSource()
+            .addValue("dateId", dateId)
+            .addValue("timeId", timeId)
+            .addValue("themeId", themeId);
+
+        return jdbcTemplate.queryForObject(sql, params, Long.class);
     }
 
     @Override
@@ -163,8 +232,9 @@ public class JdbcReservationRepository implements ReservationRepository {
             .addValue("time_id", reservation.getTime().getId())
             .addValue("theme_id", reservation.getTheme().getId())
             .addValue("status", reservation.getStatus().name())
-            .addValue("reserved_at", reservation.getReservedAt());
+            .addValue("waiting_order", reservation.getWaitingOrder());
         Long savedId = simpleJdbcInsert.executeAndReturnKey(params).longValue();
+
         return Reservation.load(
             savedId,
             reservation.getName(),
@@ -172,15 +242,22 @@ public class JdbcReservationRepository implements ReservationRepository {
             reservation.getTime(),
             reservation.getTheme(),
             reservation.getStatus(),
-            reservation.getReservedAt()
+            reservation.getWaitingOrder()
         );
     }
 
-    public boolean updateStatus(Reservation reservation) {
-        String sql = "UPDATE RESERVATION SET status = :status WHERE id = :id ";
+    @Override
+    public boolean updateStatusAndWaitingOrder(Reservation reservation) {
+        String sql = """
+            UPDATE reservation
+            SET status = :status,
+                waiting_order = :waitingOrder
+            WHERE id = :id
+            """;
         SqlParameterSource params = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
-            .addValue("status", reservation.getStatus().name());
+            .addValue("status", reservation.getStatus().name())
+            .addValue("waitingOrder", reservation.getWaitingOrder());
         int updatedCount = jdbcTemplate.update(sql, params);
         return updatedCount > 0;
     }
@@ -192,14 +269,14 @@ public class JdbcReservationRepository implements ReservationRepository {
             SET date_id = :dateId,
                 time_id = :timeId,
                 status = :status,
-                reserved_at = :reservedAt
+                waiting_order = :waitingOrder
             WHERE id = :id
             """;
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("dateId", reservation.getDate().getId())
             .addValue("timeId", reservation.getTime().getId())
             .addValue("status", reservation.getStatus().name())
-            .addValue("reservedAt", reservation.getReservedAt())
+            .addValue("waitingOrder", reservation.getWaitingOrder())
             .addValue("id", reservation.getId());
 
         int updatedCount = jdbcTemplate.update(sql, params);
@@ -217,26 +294,29 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.name AS theme_name,
                 th.thumbnail_url AS theme_thumbnail_url,
                 r.status,
-                r.reserved_at,
                 CASE 
-                    WHEN r.status = 'WAITING' THEN (
-                        SELECT COUNT(*) + 1 
-                        FROM reservation wait
-                        WHERE wait.date_id = r.date_id
-                          AND wait.time_id = r.time_id
-                          AND wait.theme_id = r.theme_id
-                          AND wait.status = 'WAITING'
-                          AND (wait.reserved_at < r.reserved_at 
-                               OR (wait.reserved_at = r.reserved_at AND wait.id < r.id))
+                    WHEN r.status = 'WAITING'
+                        AND(
+                            d.date > CURRENT_DATE
+                            OR (d.date = CURRENT_DATE AND t.start_at > CURRENT_TIME)
+                        )
+                    THEN (
+                    SELECT COUNT(*) + 1 
+                    FROM reservation wait
+                    WHERE wait.date_id = r.date_id
+                        AND wait.time_id = r.time_id
+                        AND wait.theme_id = r.theme_id
+                        AND wait.status = 'WAITING'
+                        AND wait.waiting_order < r.waiting_order
                     )
-                    ELSE NULL 
+                    ELSE NULL
                 END AS waiting_turn
             FROM reservation r
             INNER JOIN reservation_date d ON r.date_id = d.id
             INNER JOIN reservation_time t ON r.time_id = t.id
             INNER JOIN theme th ON r.theme_id = th.id
             WHERE r.name = :memberName
-            ORDER BY r.reserved_at DESC
+            ORDER BY r.id DESC
             """;
 
         MapSqlParameterSource params = new MapSqlParameterSource("memberName", memberName);
@@ -244,10 +324,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(sql, params, reservationWithWaitingTurnRowMapper);
     }
 
-    private final RowMapper<ReservationWithWaitingTurn> reservationWithWaitingTurnRowMapper = (rs, rowNum) -> {
-        Long waitingTurn = rs.getObject("waiting_turn", Long.class);
-
-        return new ReservationWithWaitingTurn(
+    private final RowMapper<ReservationWithWaitingTurn> reservationWithWaitingTurnRowMapper =
+        (rs, rowNum) -> new ReservationWithWaitingTurn(
             rs.getLong("id"),
             rs.getString("name"),
             rs.getObject("date", LocalDate.class),
@@ -256,9 +334,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             rs.getString("theme_name"),
             rs.getString("theme_thumbnail_url"),
             ReservationStatus.valueOf(rs.getString("status")),
-            rs.getObject("reserved_at", LocalDateTime.class),
-            waitingTurn
+            rs.getObject("waiting_turn", Long.class)
         );
-    };
 
 }

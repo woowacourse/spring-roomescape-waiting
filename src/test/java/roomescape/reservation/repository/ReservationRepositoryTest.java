@@ -1,11 +1,12 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.reservation.fixture.ReservationFixture.canceledReservation;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
+import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -78,7 +80,7 @@ class ReservationRepositoryTest {
 
     private void updateStatus(Reservation beforeReservation) {
         beforeReservation.updateStatus(ReservationStatus.CANCELED);
-        jdbcReservationRepository.updateStatus(beforeReservation);
+        jdbcReservationRepository.updateStatusAndWaitingOrder(beforeReservation);
     }
 
 
@@ -120,6 +122,55 @@ class ReservationRepositoryTest {
     }
 
     @Nested
+    @DisplayName("findFirstWaitingByDateTimeAndThemeId 메서드는")
+    class FindFirstWaitingByDateTimeAndThemeId {
+
+        @Test
+        @DisplayName("가장 이른 대기 요청 1개를 조회한다")
+        void 성공1() {
+            // given
+            List<String> usernames = List.of("user1", "user2", "user3");
+            List<Reservation> reservations = List.of(
+                reservation(usernames.get(0), reservationDate1, reservationTime1, theme),
+                waitReservation(usernames.get(1), reservationDate1, reservationTime1, theme, 1L),
+                waitReservation(usernames.get(2), reservationDate1, reservationTime1, theme, 2L)
+            );
+            Reservation expected = reservations.get(1);
+            saveAll(reservations);
+
+            // when
+            Optional<Reservation> actual = jdbcReservationRepository.findFirstWaitingByDateTimeAndThemeId(
+                reservationDate1.getId(), reservationTime1.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isPresent()
+                .get()
+                .usingRecursiveComparison()
+                .ignoringFields("id")
+                .isEqualTo(expected);
+
+        }
+
+        @Test
+        @DisplayName("슬롯에 대기 요청이 없으면 Optional.empty를 반환한다")
+        void 성공2() {
+            // given
+            List<String> usernames = List.of("user1", "user2", "user3");
+            List<Reservation> reservations = List.of(
+                reservation(usernames.get(0), reservationDate1, reservationTime1, theme)
+            );
+            saveAll(reservations);
+
+            // when
+            Optional<Reservation> actual = jdbcReservationRepository.findFirstWaitingByDateTimeAndThemeId(
+                reservationDate1.getId(), reservationTime1.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("findAll 메서드는")
     class FindAllTest {
 
@@ -129,10 +180,8 @@ class ReservationRepositoryTest {
         void 성공() {
             // given
             List<Reservation> reservations = List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme,
-                    LocalDateTime.now()),
-                Reservation.create(name, reservationDate1, reservationTime2, theme,
-                    LocalDateTime.now())
+                Reservation.reserved(name, reservationDate1, reservationTime1, theme),
+                Reservation.reserved(name, reservationDate1, reservationTime2, theme)
             );
             saveAll(reservations);
 
@@ -186,6 +235,98 @@ class ReservationRepositoryTest {
             // then
             assertThat(afterReservation.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
+        }
+    }
+
+    @Nested
+    @DisplayName("findNextWaitingOrderBySlot 메서드는")
+    class FindNextWaitingOrderBySlotTest {
+
+        @Test
+        @DisplayName("슬롯에 대기 예약이 없으면 1을 반환한다")
+        void 성공1() {
+            // when
+            Long actual = jdbcReservationRepository.findNextWaitingOrderBySlot(
+                reservationDate1.getId(), reservationTime1.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("슬롯에 존재하는 가장 큰 대기 순서보다 1 큰 값을 반환한다")
+        void 성공2() {
+            // given
+            save(waitReservation("대기자1", reservationDate1, reservationTime1, theme, 1L));
+            save(waitReservation("대기자3", reservationDate1, reservationTime1, theme, 3L));
+            save(reservation("확정 예약자", reservationDate1, reservationTime1, theme));
+            save(waitReservation("다른 슬롯 대기자", reservationDate2, reservationTime1, theme, 10L));
+
+            // when
+            Long actual = jdbcReservationRepository.findNextWaitingOrderBySlot(
+                reservationDate1.getId(), reservationTime1.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isEqualTo(4L);
+        }
+    }
+
+    @Nested
+    @DisplayName("findMyReservationsWithWaitingTurn 메서드는")
+    class FindMyReservationsWithWaitingTurnTest {
+
+
+        @Test
+        @DisplayName("나의 예약 목록에 대기 순번을 포함해 조회한다")
+        void 성공() {
+            // given
+            save(reservation("예약자", reservationDate1, reservationTime1, theme));
+            save(Reservation.wait("앞선 대기자", reservationDate1, reservationTime1, theme, 1L));
+            Reservation waiting = save(Reservation.wait(name, reservationDate1, reservationTime1,
+                theme, 2L));
+            Reservation reserved = save(Reservation.reserved(name, reservationDate2, reservationTime2,
+                theme));
+
+            // when
+            List<ReservationWithWaitingTurn> actual =
+                jdbcReservationRepository.findMyReservationsWithWaitingTurn(name);
+
+            // then
+            assertAll(
+                () -> assertThat(actual)
+                    .hasSize(2),
+                () -> assertThat(actual)
+                    .filteredOn(reservation -> reservation.id().equals(waiting.getId()))
+                    .singleElement()
+                    .extracting("status", "waitingTurn")
+                    .containsExactly(ReservationStatus.WAITING, 2L),
+                () -> assertThat(actual)
+                    .filteredOn(reservation -> reservation.id().equals(reserved.getId()))
+                    .singleElement()
+                    .extracting("status", "waitingTurn")
+                    .containsExactly(ReservationStatus.RESERVED, null)
+            );
+        }
+
+        @Test
+        @DisplayName("지난 대기 예약은 대기 순번을 가지지 않는다")
+        void 성공2() {
+            // given
+            ReservationDate pastDate = jdbcReservationDateRepository.save(
+                ReservationDate.load(1L, LocalDate.now().minusDays(1), true));
+            Reservation waiting = save(Reservation.load(1L, name, pastDate, reservationTime1, theme,
+                ReservationStatus.WAITING, 1L));
+
+            // when
+            List<ReservationWithWaitingTurn> actual =
+                jdbcReservationRepository.findMyReservationsWithWaitingTurn(name);
+
+            // then
+            assertThat(actual)
+                .filteredOn(reservation -> reservation.id().equals(waiting.getId()))
+                .singleElement()
+                .extracting("status", "waitingTurn")
+                .containsExactly(ReservationStatus.WAITING, null);
         }
     }
 }

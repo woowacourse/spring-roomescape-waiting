@@ -21,6 +21,7 @@ const ERROR_MESSAGES = {
   "RES_010": "이미 지난 예약은 변경하거나 취소할 수 없습니다.",
   "RES_011": "과거 날짜나 시간으로는 예약할 수 없습니다.",
   "RES_012": "과거 날짜나 시간으로 일정을 변경할 수 없습니다.",
+  "RES_013": "대기 중인 예약은 일정을 변경할 수 없습니다.",
 };
 
 async function handleResponseError(response, defaultMessage) {
@@ -94,6 +95,7 @@ function renderReservations(reservations) {
 
     const isCanceled = reservation.status === "CANCELED";
     const isWaiting = reservation.status === "WAITING";
+    const canReschedule = !isCanceled && !isWaiting;
     const waitingTurnText = isWaiting && reservation.waitingTurn
         ? `<p>대기 순번: ${reservation.waitingTurn}번째</p>`
         : "";
@@ -118,7 +120,7 @@ function renderReservations(reservations) {
                     <button
                         class="reschedule-button"
                         type="button"
-                        ${isCanceled ? "style='display: none;'" : ""}
+                        ${canReschedule ? "" : "style='display: none;'"}
                     >
                         예약 변경
                     </button>
@@ -138,12 +140,14 @@ function renderReservations(reservations) {
 
     if (!isCanceled) {
       cancelButton.addEventListener("click", async () => {
-        await cancelReservation(reservation.id);
+        await cancelReservation(reservation);
       });
 
-      rescheduleButton.addEventListener("click", () => {
-        openRescheduleModal(reservation);
-      });
+      if (canReschedule) {
+        rescheduleButton.addEventListener("click", () => {
+          openRescheduleModal(reservation);
+        });
+      }
     }
 
     reservationResultList.appendChild(article);
@@ -151,6 +155,11 @@ function renderReservations(reservations) {
 }
 
 function openRescheduleModal(reservation) {
+  if (reservation.status === "WAITING") {
+    alert("대기 중인 예약은 일정을 변경할 수 없습니다.");
+    return;
+  }
+
   reschedulingReservation = reservation;
   selectedDate = null;
   selectedTime = null;
@@ -274,14 +283,17 @@ async function submitReschedule() {
   await loadMyReservations();
 }
 
-async function cancelReservation(reservationId) {
-  const confirmed = confirm("예약을 취소하시겠습니까?");
+async function cancelReservation(reservation) {
+  const confirmMessage = reservation.status === "WAITING"
+      ? "예약 대기를 취소하시겠습니까?"
+      : "예약을 취소하시겠습니까?";
+  const confirmed = confirm(confirmMessage);
   if (!confirmed) {
     return;
   }
 
   const response = await authFetch(
-      `/member/reservations/${reservationId}/cancel`, {
+      `/member/reservations/${reservation.id}/cancel`, {
         method: "PATCH"
       });
 

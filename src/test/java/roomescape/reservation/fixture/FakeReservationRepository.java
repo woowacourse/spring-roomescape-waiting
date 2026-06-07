@@ -1,6 +1,7 @@
 package roomescape.reservation.fixture;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,21 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findFirstWaitingByDateTimeAndThemeId(Long dateId, Long timeId,
+        Long themeId) {
+        return store.values().stream()
+            .filter(reservation ->
+                reservation.getDate().getId().equals(dateId) &&
+                    reservation.getTime().getId().equals(timeId) &&
+                    reservation.getTheme().getId().equals(themeId) &&
+                    (reservation.getStatus() == ReservationStatus.RESERVED ||
+                        reservation.getStatus() == ReservationStatus.WAITING))
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .min(Comparator.comparing(Reservation::getWaitingOrder)
+                .thenComparing(Reservation::getId));
+    }
+
+    @Override
     public List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
         return store.values().stream()
             .filter(reservation ->
@@ -44,7 +60,7 @@ public class FakeReservationRepository implements ReservationRepository {
         Long id = idGenerator.getAndIncrement();
         Reservation saved = Reservation.load(id, reservation.getName(), reservation.getDate(),
             reservation.getTime(),
-            reservation.getTheme(), reservation.getStatus(), reservation.getReservedAt());
+            reservation.getTheme(), reservation.getStatus(), reservation.getWaitingOrder());
         store.put(id, saved);
         return saved;
     }
@@ -58,13 +74,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateStatus(Reservation reservation) {
+    public boolean updateStatusAndWaitingOrder(Reservation reservation) {
         Optional<Reservation> findReservation = findById(reservation.getId());
         if (findReservation.isEmpty()) {
             return false;
         }
 
-        findReservation.get().updateStatus(reservation.getStatus());
+        store.put(reservation.getId(), reservation);
         return true;
     }
 
@@ -77,6 +93,18 @@ public class FakeReservationRepository implements ReservationRepository {
 
         store.put(reservation.getId(), reservation);
         return true;
+    }
+
+    @Override
+    public Long findNextWaitingOrderBySlot(Long dateId, Long timeId, Long themeId) {
+        return store.values().stream()
+            .filter(reservation -> reservation.getDate().getId().equals(dateId)
+                && reservation.getTime().getId().equals(timeId)
+                && reservation.getTheme().getId().equals(themeId))
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .mapToLong(Reservation::getWaitingOrder)
+            .max()
+            .orElse(0L) + 1;
     }
 
     @Override

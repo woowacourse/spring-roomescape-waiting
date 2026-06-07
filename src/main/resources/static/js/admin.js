@@ -21,6 +21,7 @@ const ERROR_MESSAGES = {
   "RES_010": "이미 지난 예약은 변경하거나 취소할 수 없습니다.",
   "RES_011": "과거 날짜나 시간으로는 예약할 수 없습니다.",
   "RES_012": "과거 날짜나 시간으로 일정을 변경할 수 없습니다.",
+  "RES_013": "대기 중인 예약은 일정을 변경할 수 없습니다.",
 };
 
 async function handleResponseError(response, defaultMessage) {
@@ -392,6 +393,8 @@ async function loadReservations() {
 
   reservations.forEach(reservation => {
     const isCanceled = reservation.status === "CANCELED";
+    const isWaiting = reservation.status === "WAITING";
+    const canReschedule = !isCanceled && !isWaiting;
 
     tbody.insertAdjacentHTML("beforeend", `
             <tr>
@@ -403,7 +406,7 @@ async function loadReservations() {
                 <td>${reservation.status}</td>
                 <td class="align-right">
                     <button class="reschedule-button" type="button" 
-                            ${isCanceled ? "style='display: none;'" : ""}
+                            ${canReschedule ? "" : "style='display: none;'"}
                             onclick="openRescheduleModal(${reservation.id})">
                         변경
                     </button>
@@ -422,6 +425,10 @@ function openRescheduleModal(reservationId) {
   reschedulingReservation = reservations.find(r => r.id === reservationId);
   if (!reschedulingReservation) {
     alert("예약 정보를 찾을 수 없습니다.");
+    return;
+  }
+  if (reschedulingReservation.status === "WAITING") {
+    alert("대기 중인 예약은 일정을 변경할 수 없습니다.");
     return;
   }
 
@@ -536,7 +543,11 @@ async function submitReschedule() {
 }
 
 async function cancelReservation(id) {
-  if (!confirm("해당 예약을 취소하시겠습니까?")) {
+  const reservation = reservations.find(reservation => reservation.id === id);
+  const confirmMessage = reservation?.status === "WAITING"
+      ? "예약 대기를 취소하시겠습니까?"
+      : "해당 예약을 취소하시겠습니까?";
+  if (!confirm(confirmMessage)) {
     return;
   }
 

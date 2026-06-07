@@ -1,7 +1,5 @@
 package roomescape.reservation.fixture;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.domain.Reservation;
@@ -18,8 +16,17 @@ public class ReservationFixture {
         ReservationTime time,
         Theme theme
     ) {
-        return Reservation.create(name, date, time, theme,
-            LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return Reservation.reserved(name, date, time, theme);
+    }
+
+    public static Reservation waitReservation(
+        String name,
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme,
+        Long waitingOrder
+    ) {
+        return Reservation.wait(name, date, time, theme, waitingOrder);
     }
 
     public static Reservation waitReservation(
@@ -28,8 +35,7 @@ public class ReservationFixture {
         ReservationTime time,
         Theme theme
     ) {
-        return Reservation.wait(name, date, time, theme,
-            LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return waitReservation(name, date, time, theme, 1L);
     }
 
     public static Reservation canceledReservation(
@@ -38,7 +44,7 @@ public class ReservationFixture {
         ReservationTime time,
         Theme theme
     ) {
-        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.reserved(name, date, time, theme);
         reservation.updateStatus(ReservationStatus.CANCELED);
         return reservation;
     }
