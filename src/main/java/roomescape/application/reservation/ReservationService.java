@@ -10,9 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.exception.DuplicateResourceException;
 import roomescape.application.reservation.request.AdminReservationCreateRequest;
 import roomescape.application.reservation.request.ReservationCreateRequest;
-import roomescape.application.reservation.request.ReservationUpdateRequest;
-import roomescape.application.reservation.response.ReservationCreateResponse;
-import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.request.AdminReservationUpdateRequest;
+import roomescape.application.reservation.request.UserReservationUpdateRequest;
+import roomescape.application.reservation.response.AdminReservationCreateResponse;
+import roomescape.application.reservation.response.AdminReservationUpdateResponse;
+import roomescape.application.reservation.response.UserReservationCreateResponse;
+import roomescape.application.reservation.response.UserReservationUpdateResponse;
 import roomescape.application.reservation.response.ReservationsResponse;
 import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.domain.exception.BusinessException;
@@ -44,7 +47,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCreateResponse createReservationByUser(ReservationCreateRequest request, User loginUser) {
+    public UserReservationCreateResponse createReservationByUser(ReservationCreateRequest request, User loginUser) {
         ReservationSlot slot = findSlotByIdForUpdateOrThrow(request.slotId());
         LocalDateTime now = LocalDateTime.now(clock);
         validateReservable(slot, loginUser, now);
@@ -52,11 +55,11 @@ public class ReservationService {
         Reservation savedReservation = saveReservation(loginUser, slot, now);
 
         recalculateReservationsForSlot(slot);
-        return ReservationCreateResponse.from(savedReservation);
+        return UserReservationCreateResponse.from(savedReservation);
     }
 
     @Transactional
-    public ReservationCreateResponse createReservationByAdmin(AdminReservationCreateRequest request) {
+    public AdminReservationCreateResponse createReservationByAdmin(AdminReservationCreateRequest request) {
         User user = findByUsernameOrThrow(request.username());
         ReservationSlot slot = findSlotByIdForUpdateOrThrow(request.slotId());
         validateReservationNotDuplicated(slot, user);
@@ -66,13 +69,13 @@ public class ReservationService {
         Reservation savedReservation = saveReservation(user, slot, now);
 
         recalculateReservationsForSlot(slot);
-        return ReservationCreateResponse.from(savedReservation);
+        return AdminReservationCreateResponse.from(savedReservation);
     }
 
     @Transactional
-    public ReservationUpdateResponse updateReservationByUser(
+    public UserReservationUpdateResponse updateReservationByUser(
             Long id,
-            ReservationUpdateRequest request,
+            UserReservationUpdateRequest request,
             User loginUser
     ) {
         LocalDateTime now = LocalDateTime.now(clock);
@@ -92,11 +95,11 @@ public class ReservationService {
         recalculateReservationsForSlot(currentSlot);
         recalculateReservationsForSlot(targetSlot);
 
-        return ReservationUpdateResponse.from(updatedReservation);
+        return UserReservationUpdateResponse.from(updatedReservation);
     }
 
     @Transactional
-    public ReservationUpdateResponse updateReservationByAdmin(Long id, ReservationUpdateRequest request) {
+    public AdminReservationUpdateResponse updateReservationByAdmin(Long id, AdminReservationUpdateRequest request) {
         LocalDateTime now = LocalDateTime.now(clock);
 
         Reservation reservation = findReservationByIdForUpdateOrThrow(id);
@@ -113,7 +116,7 @@ public class ReservationService {
         recalculateReservationsForSlot(currentSlot);
         recalculateReservationsForSlot(targetSlot);
 
-        return ReservationUpdateResponse.from(updatedReservation);
+        return AdminReservationUpdateResponse.from(updatedReservation);
     }
 
     @Transactional

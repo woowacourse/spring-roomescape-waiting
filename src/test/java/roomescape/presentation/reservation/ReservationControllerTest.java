@@ -29,7 +29,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.reservation.ReservationService;
 import roomescape.application.reservation.request.ReservationCreateRequest;
-import roomescape.application.reservation.response.ReservationCreateResponse;
+import roomescape.application.reservation.response.UserReservationCreateResponse;
 import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.common.auth.LoginUserArgumentResolver;
 import roomescape.common.auth.SessionKeys;
@@ -115,7 +115,7 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
         given(reservationService.createReservationByUser(any(ReservationCreateRequest.class), eq(loginUser)))
-                .willReturn(ReservationCreateResponse.from(reservation));
+                .willReturn(UserReservationCreateResponse.from(reservation));
 
         // when & then
         mockMvc.perform(post("/reservations")

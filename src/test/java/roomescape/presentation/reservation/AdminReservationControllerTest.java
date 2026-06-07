@@ -27,8 +27,8 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.reservation.ReservationService;
-import roomescape.application.reservation.request.ReservationUpdateRequest;
-import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.request.AdminReservationUpdateRequest;
+import roomescape.application.reservation.response.AdminReservationUpdateResponse;
 import roomescape.application.reservation.response.ReservationsResponse;
 import roomescape.common.auth.AdminAccessInterceptor;
 import roomescape.common.auth.LoginUserArgumentResolver;
@@ -141,8 +141,8 @@ class AdminReservationControllerTest {
         );
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(SessionKeys.LOGIN_USER, User.of(1L, "admin", "", UserRole.ADMIN));
-        given(reservationService.updateReservationByAdmin(eq(1L), any(ReservationUpdateRequest.class)))
-                .willReturn(ReservationUpdateResponse.from(reservation));
+        given(reservationService.updateReservationByAdmin(eq(1L), any(AdminReservationUpdateRequest.class)))
+                .willReturn(AdminReservationUpdateResponse.from(reservation));
 
         // when & then
         mockMvc.perform(patch("/admin/reservations/{id}", 1L)
@@ -161,6 +161,6 @@ class AdminReservationControllerTest {
                 .andExpect(jsonPath("$.startAt").value("13:00"))
                 .andExpect(jsonPath("$.theme.name").value("도심 탈출"));
 
-        verify(reservationService, times(1)).updateReservationByAdmin(eq(1L), any(ReservationUpdateRequest.class));
+        verify(reservationService, times(1)).updateReservationByAdmin(eq(1L), any(AdminReservationUpdateRequest.class));
     }
 }

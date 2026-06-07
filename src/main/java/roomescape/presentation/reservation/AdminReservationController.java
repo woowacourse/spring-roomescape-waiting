@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
 import roomescape.application.reservation.request.AdminReservationCreateRequest;
-import roomescape.application.reservation.request.ReservationUpdateRequest;
-import roomescape.application.reservation.response.ReservationCreateResponse;
-import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.request.AdminReservationUpdateRequest;
+import roomescape.application.reservation.response.AdminReservationCreateResponse;
+import roomescape.application.reservation.response.AdminReservationUpdateResponse;
 import roomescape.application.reservation.response.ReservationsResponse;
 
 @RestController
@@ -32,20 +32,20 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationCreateResponse> createReservation(
+    public ResponseEntity<AdminReservationCreateResponse> createReservation(
             @Valid @RequestBody AdminReservationCreateRequest request
     ) {
-        ReservationCreateResponse response = reservationService.createReservationByAdmin(request);
+        AdminReservationCreateResponse response = reservationService.createReservationByAdmin(request);
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ReservationUpdateResponse> updateReservation(
+    public ResponseEntity<AdminReservationUpdateResponse> updateReservation(
             @PathVariable Long id,
-            @Valid @RequestBody ReservationUpdateRequest request
+            @Valid @RequestBody AdminReservationUpdateRequest request
     ) {
-        ReservationUpdateResponse response = reservationService.updateReservationByAdmin(id, request);
+        AdminReservationUpdateResponse response = reservationService.updateReservationByAdmin(id, request);
         return ResponseEntity.ok(response);
     }
 

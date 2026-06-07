@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.theme.Theme;
 
-public record ReservationUpdateResponse(
+public record AdminReservationCreateResponse(
         Long id,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")
@@ -14,8 +14,8 @@ public record ReservationUpdateResponse(
         ThemePayload theme
 ) {
 
-    public static ReservationUpdateResponse from(Reservation reservation) {
-        return new ReservationUpdateResponse(
+    public static AdminReservationCreateResponse from(Reservation reservation) {
+        return new AdminReservationCreateResponse(
                 reservation.getId(),
                 reservation.getSlot().getDate(),
                 reservation.getSlot().getTime().getStartAt(),

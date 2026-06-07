@@ -29,11 +29,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.exception.DuplicateResourceException;
 import roomescape.application.reservation.request.AdminReservationCreateRequest;
+import roomescape.application.reservation.request.AdminReservationUpdateRequest;
 import roomescape.application.reservation.request.ReservationCreateRequest;
-import roomescape.application.reservation.request.ReservationUpdateRequest;
-import roomescape.application.reservation.response.ReservationCreateResponse;
-import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.request.UserReservationUpdateRequest;
+import roomescape.application.reservation.response.AdminReservationCreateResponse;
+import roomescape.application.reservation.response.AdminReservationUpdateResponse;
 import roomescape.application.reservation.response.ReservationsResponse;
+import roomescape.application.reservation.response.UserReservationCreateResponse;
+import roomescape.application.reservation.response.UserReservationUpdateResponse;
 import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
@@ -177,7 +180,7 @@ class ReservationServiceTest {
                 List.of(savedReservation, waitingReservation));
 
         // when
-        ReservationCreateResponse response = reservationService.createReservationByUser(request, user);
+        UserReservationCreateResponse response = reservationService.createReservationByUser(request, user);
 
         // then
         assertThat(response.id()).isEqualTo(100L);
@@ -235,7 +238,7 @@ class ReservationServiceTest {
                 List.of(savedReservation, waitingReservation));
 
         // when
-        ReservationCreateResponse response = reservationService.createReservationByAdmin(request);
+        AdminReservationCreateResponse response = reservationService.createReservationByAdmin(request);
 
         // then
         assertThat(response.id()).isEqualTo(100L);
@@ -278,7 +281,7 @@ class ReservationServiceTest {
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of(savedReservation));
 
         // when
-        ReservationCreateResponse response = reservationService.createReservationByAdmin(request);
+        AdminReservationCreateResponse response = reservationService.createReservationByAdmin(request);
 
         // then
         assertThat(response.id()).isEqualTo(100L);
@@ -406,9 +409,9 @@ class ReservationServiceTest {
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
 
         // when
-        ReservationUpdateResponse updatedResponse = reservationService.updateReservationByUser(
+        UserReservationUpdateResponse updatedResponse = reservationService.updateReservationByUser(
                 1L,
-                new ReservationUpdateRequest(20L),
+                new UserReservationUpdateRequest(20L),
                 user
         );
 
@@ -454,7 +457,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservationByUser(
                 1L,
-                new ReservationUpdateRequest(20L),
+                new UserReservationUpdateRequest(20L),
                 user
         ))
                 .isInstanceOf(BusinessException.class)
@@ -500,9 +503,9 @@ class ReservationServiceTest {
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(30L)).willReturn(List.of());
 
         // when
-        ReservationUpdateResponse updatedResponse = reservationService.updateReservationByAdmin(
+        AdminReservationUpdateResponse updatedResponse = reservationService.updateReservationByAdmin(
                 1L,
-                new ReservationUpdateRequest(30L)
+                new AdminReservationUpdateRequest(30L)
         );
 
         // then
@@ -547,7 +550,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservationByAdmin(
                 1L,
-                new ReservationUpdateRequest(20L)
+                new AdminReservationUpdateRequest(20L)
         ))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
@@ -592,9 +595,9 @@ class ReservationServiceTest {
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
 
         // when
-        ReservationUpdateResponse updatedResponse = reservationService.updateReservationByAdmin(
+        AdminReservationUpdateResponse updatedResponse = reservationService.updateReservationByAdmin(
                 1L,
-                new ReservationUpdateRequest(20L)
+                new AdminReservationUpdateRequest(20L)
         );
 
         // then

@@ -1,11 +1,10 @@
 package roomescape.application.reservation;
 
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.reservation.response.ReservationSlotResponse;
+import roomescape.application.reservation.response.ReservationSlotsResponse;
 import roomescape.domain.reservation.ReservationSlotRepository;
 
 @Service
@@ -15,9 +14,7 @@ public class ReservationSlotService {
 
     private final ReservationSlotRepository slotRepository;
 
-    public List<ReservationSlotResponse> getReservationSlots(Long themeId, LocalDate date) {
-        return slotRepository.findWaitingCountsByThemeIdAndDate(themeId, date).stream()
-                .map(ReservationSlotResponse::from)
-                .toList();
+    public ReservationSlotsResponse getReservationSlots(Long themeId, LocalDate date) {
+        return ReservationSlotsResponse.from(slotRepository.findWaitingCountsByThemeIdAndDate(themeId, date));
     }
 }

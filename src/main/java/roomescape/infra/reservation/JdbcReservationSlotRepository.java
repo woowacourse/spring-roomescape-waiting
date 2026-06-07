@@ -21,6 +21,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     private static final String TABLE_NAME = "reservation_slot";
     private static final String COLUMN_ID = "id";
+    private static final String COLUMN_SLOT_ID = "slot_id";
     private static final String COLUMN_DATE = "date";
     private static final String COLUMN_TIME_ID = "time_id";
     private static final String COLUMN_START_AT = "start_at";
@@ -45,7 +46,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             for update
             """;
     private static final String FIND_WAITING_COUNTS_BY_THEME_ID_AND_DATE_SQL = """
-            select rt.id as time_id,
+            select rs.id as slot_id,
+                   rt.id as time_id,
                    rt.start_at,
                    count(case when r.status = 'WAITING' then 1 end) as waiting_count
             from reservation_slot rs
@@ -102,6 +104,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                         .addValue(PARAM_THEME_ID, themeId)
                         .addValue(COLUMN_DATE, date),
                 (rs, rowNum) -> ReservationCountResult.of(
+                        rs.getLong(COLUMN_SLOT_ID),
                         rs.getLong(COLUMN_TIME_ID),
                         rs.getTime(COLUMN_START_AT).toLocalTime(),
                         rs.getLong("waiting_count")

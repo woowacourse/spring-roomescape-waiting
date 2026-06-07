@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
 import roomescape.application.reservation.request.ReservationCreateRequest;
-import roomescape.application.reservation.request.ReservationUpdateRequest;
-import roomescape.application.reservation.response.ReservationCreateResponse;
-import roomescape.application.reservation.response.ReservationUpdateResponse;
+import roomescape.application.reservation.request.UserReservationUpdateRequest;
+import roomescape.application.reservation.response.UserReservationCreateResponse;
+import roomescape.application.reservation.response.UserReservationUpdateResponse;
 import roomescape.application.reservation.response.UserReservationsResponse;
 import roomescape.common.auth.LoginUser;
 import roomescape.domain.user.User;
@@ -36,22 +36,22 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationCreateResponse> createReservation(
+    public ResponseEntity<UserReservationCreateResponse> createReservation(
             @Valid @RequestBody ReservationCreateRequest request,
             @LoginUser User loginUser
     ) {
-        ReservationCreateResponse response = reservationService.createReservationByUser(request, loginUser);
+        UserReservationCreateResponse response = reservationService.createReservationByUser(request, loginUser);
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ReservationUpdateResponse> updateReservation(
+    public ResponseEntity<UserReservationUpdateResponse> updateReservation(
             @PathVariable Long id,
-            @RequestBody ReservationUpdateRequest request,
+            @RequestBody UserReservationUpdateRequest request,
             @LoginUser User loginUser
     ) {
-        ReservationUpdateResponse response = reservationService.updateReservationByUser(id, request, loginUser);
+        UserReservationUpdateResponse response = reservationService.updateReservationByUser(id, request, loginUser);
         return ResponseEntity.ok(response);
     }
 
