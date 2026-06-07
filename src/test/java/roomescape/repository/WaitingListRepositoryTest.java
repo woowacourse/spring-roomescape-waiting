@@ -17,7 +17,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Import(WaitingListRepository.class)
@@ -39,6 +43,25 @@ class WaitingListRepositoryTest {
 
         theme = Theme.createWithId(1L, "테스트 테마", "테스트용 설명입니다", "https://thumbnail.com");
         reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    }
+
+    @Nested
+    class save {
+
+        @Test
+        void 동일한_조건으로_중복_저장하면_ALREADY_ON_WAITING_LIST_예외발생() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            WaitingList first = WaitingList.create("오리", date, theme, reservationTime);
+            waitingListRepository.save(first);
+
+            WaitingList duplicate = WaitingList.create("오리", date, theme, reservationTime);
+
+            // when & then
+            assertThatThrownBy(() -> waitingListRepository.save(duplicate))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
     }
 
     @Nested

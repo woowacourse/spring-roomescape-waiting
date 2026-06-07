@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,6 +10,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
 import roomescape.dto.WaitingListRow;
@@ -40,7 +43,11 @@ public class WaitingListRepository {
                 .addValue("themeId", waitingListWithoutId.getTheme().getId())
                 .addValue("createdAt", Timestamp.valueOf(waitingListWithoutId.getCreatedAt()));
 
-        jdbcTemplate.update(sql, param, keyHolder);
+        try {
+            jdbcTemplate.update(sql, param, keyHolder);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
 
         final long waitingListId = keyHolder.getKey().longValue();
         return waitingListWithoutId.withId(waitingListId);
