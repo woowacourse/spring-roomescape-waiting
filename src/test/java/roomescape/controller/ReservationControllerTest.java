@@ -32,7 +32,7 @@ import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
-import roomescape.exception.ReservationConcurrentModificationException;
+import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
@@ -217,7 +217,7 @@ class ReservationControllerTest {
 
     @Test
     void DELETE_reservations_id_예약_정보가_동시에_변경되면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new ReservationConcurrentModificationException())
+        willThrow(new ReservationConcurrentConflictException())
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(1L, 1L));
 
         mockMvc.perform(delete("/reservations/1"))

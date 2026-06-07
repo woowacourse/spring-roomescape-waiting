@@ -2,12 +2,10 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import roomescape.TestClockConfig;
 import roomescape.domain.Reservation;
@@ -15,19 +13,17 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.response.ReservationResponses;
 import roomescape.dto.response.ReservationWithStatusResponses;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
-import roomescape.exception.ReservationConcurrentModificationException;
+import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.fake.FakeReservationRepository;
 import roomescape.repository.fake.FakeReservationTimeRepository;
@@ -272,7 +268,7 @@ class ReservationServiceTest {
         reservationRepository.failDeleteOnce();
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
-                .isInstanceOf(ReservationConcurrentModificationException.class)
+                .isInstanceOf(ReservationConcurrentConflictException.class)
                 .hasMessage("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요.");
     }
 
@@ -289,7 +285,7 @@ class ReservationServiceTest {
         reservationRepository.failUpdateWaitingToReservedOnce();
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
-                .isInstanceOf(ReservationConcurrentModificationException.class)
+                .isInstanceOf(ReservationConcurrentConflictException.class)
                 .hasMessage("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요.");
         assertThat(reservationRepository.findById(waitingId).orElseThrow().getStatus())
                 .isEqualTo(ReservationStatus.WAITING);

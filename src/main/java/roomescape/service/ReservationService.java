@@ -19,7 +19,7 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
-import roomescape.exception.ReservationConcurrentModificationException;
+import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
@@ -247,7 +247,7 @@ public class ReservationService {
 
     private void validateReservationModified(int affected) {
         if (affected == 0) {
-            throw new ReservationConcurrentModificationException();
+            throw new ReservationConcurrentConflictException();
         }
     }
 }

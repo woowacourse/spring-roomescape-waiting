@@ -20,7 +20,7 @@ public class RoomescapeExceptionStatusMapper {
             Map.entry(InvalidLoginException.class, HttpStatus.UNAUTHORIZED),
             Map.entry(UnauthenticatedException.class, HttpStatus.UNAUTHORIZED),
             Map.entry(UnauthorizedException.class, HttpStatus.FORBIDDEN),
-            Map.entry(ReservationConcurrentModificationException.class, HttpStatus.CONFLICT),
+            Map.entry(ReservationConcurrentConflictException.class, HttpStatus.CONFLICT),
             Map.entry(ReservationNotFoundForWaitingException.class, HttpStatus.CONFLICT),
             Map.entry(ReservationNotReservedException.class, HttpStatus.CONFLICT),
             Map.entry(ReservationNotWaitingException.class, HttpStatus.CONFLICT),
