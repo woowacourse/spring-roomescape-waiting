@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static roomescape.application.ReservationModificationUseCase.CANNOT_MOVE_TO_RESERVED_SLOT;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -31,6 +32,7 @@ import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.config.FixedClockConfig;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.repository.ReservationJdbcRepository;
 import roomescape.repository.ReservationTimeJdbcRepository;
@@ -189,6 +191,20 @@ class ReservationModificationUseCaseIntegrationTest {
 
         assertThat(findReservationNamesBySlot(future)).isEmpty();
         assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");
+    }
+
+    @Test
+    void 이미_예약이_있는_슬롯으로_변경하면_update_맥락의_예외_메시지를_던진다() {
+        Long reservationId = insertReservation("민욱", future);
+        insertReservation("브라운", anotherFuture);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
+
+        assertThatThrownBy(() -> reservationModificationUseCase.updateMyReservation(reservationId, "민욱", request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage(CANNOT_MOVE_TO_RESERVED_SLOT);
+
+        assertThat(findReservationNamesBySlot(future)).containsExactly("민욱");
+        assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("브라운");
     }
 
     @Test

@@ -12,9 +12,12 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
+import roomescape.domain.exception.ConflictException;
 
 @Service
 public class ReservationModificationUseCase {
+
+    public static final String CANNOT_MOVE_TO_RESERVED_SLOT = "이미 예약이 있는 시간으로는 예약을 옮길 수 없습니다.";
 
     private final ReservationCommandService reservationCommandService;
     private final ReservationWaitingCommandService reservationWaitingCommandService;
@@ -69,6 +72,8 @@ public class ReservationModificationUseCase {
                 targetTime,
                 existing.getTheme()
         );
+
+        validateSlotConflict(existing, targetSlot);
         Reservation reservation = reservationCommandService.updateMine(
                 existing,
                 new Member(name),
@@ -87,4 +92,11 @@ public class ReservationModificationUseCase {
                 });
     }
 
+    private void validateSlotConflict(Reservation existing, Slot targetSlot) {
+        reservationQueryService.findBySlot(targetSlot)
+                .filter(found -> !found.equals(existing))
+                .ifPresent(found -> {
+                    throw new ConflictException(CANNOT_MOVE_TO_RESERVED_SLOT);
+                });
+    }
 }
