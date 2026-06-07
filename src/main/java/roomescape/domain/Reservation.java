@@ -38,7 +38,7 @@ public class Reservation {
         return new Reservation(null, w.getName(), w.getDate(), w.getTime(), w.getTheme());
     }
 
-    public ReservationDateTime scheduledAt() {
+    public ReservationDateTime dateTime() {
         return ReservationDateTime.of(date, time.getStartAt());
     }
 

@@ -101,7 +101,7 @@ public class ReservationService {
     @Transactional
     public void deleteByOwner(Long id, String name) {
         Reservation reservation = findByIdAndName(id, name);
-        reservationPolicy.validateCancellable(reservation.scheduledAt());
+        reservationPolicy.validateCancellable(reservation.dateTime());
 
         reservationRepository.deleteById(id);
         promoteFirstWaitingIfExists(reservation);
@@ -134,7 +134,7 @@ public class ReservationService {
     @Transactional
     public ReservationResult updateByOwner(ReservationUpdateCommand command) {
         Reservation reservation = findByIdAndName(command.getId(), command.getName());
-        reservationPolicy.validateUpdatable(reservation.scheduledAt());
+        reservationPolicy.validateUpdatable(reservation.dateTime());
 
         ReservationTime newTime = findTimeOrThrow(command.getTimeId());
         reservationPolicy.validateUpdateTarget(

@@ -109,19 +109,19 @@ class ReservationTest {
     }
 
     @Nested
-    @DisplayName("자기 시점 노출")
-    class ScheduledAt {
+    @DisplayName("예약 시점 노출")
+    class DateTime {
 
         @Test
-        @DisplayName("scheduledAt()은 예약의 날짜+시작시각을 시점으로 합성한다")
+        @DisplayName("dateTime()은 예약의 날짜+시작시각을 시점으로 합성한다")
         void 시점_합성() {
             Reservation reservation = Reservation.withId(
                     1L, "브라운", LocalDate.of(2050, 12, 31), time(1, LocalTime.of(10, 0)), theme(1));
 
             // 시점이 2050-12-31 10:00임을 행위로 확인 - getter로 들여다보지 않는다
-            assertThat(reservation.scheduledAt()
+            assertThat(reservation.dateTime()
                     .startsAfter(LocalDate.of(2050, 12, 31).atTime(9, 59))).isTrue();
-            assertThat(reservation.scheduledAt()
+            assertThat(reservation.dateTime()
                     .startsAfter(LocalDate.of(2050, 12, 31).atTime(10, 1))).isFalse();
         }
     }
