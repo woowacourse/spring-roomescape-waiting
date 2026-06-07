@@ -1,5 +1,6 @@
 package roomescape.support;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.theme.Theme;
 import roomescape.repository.reservationslot.ReservationSlotRepository;
 
 public class FakeReservationSlotRepository implements ReservationSlotRepository {
@@ -32,6 +34,15 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
                 .filter(slot -> Objects.equals(slot.getTheme(), reservationSlot.getTheme()))
                 .filter(slot -> Objects.equals(slot.getTime(), reservationSlot.getTime()))
                 .findFirst();
+    }
+
+    @Override
+    public List<ReservationSlot> findByDateAndTheme(final LocalDate date, final Theme theme) {
+        return slots.values()
+                .stream()
+                .filter(slot -> Objects.equals(slot.getDate(), date))
+                .filter(slot -> Objects.equals(slot.getTheme(), theme))
+                .toList();
     }
 
     @Override

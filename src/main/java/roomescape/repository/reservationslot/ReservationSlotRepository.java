@@ -1,8 +1,10 @@
 package roomescape.repository.reservationslot;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.theme.Theme;
 
 public interface ReservationSlotRepository {
 
@@ -13,6 +15,8 @@ public interface ReservationSlotRepository {
     Optional<ReservationSlot> findById(long slotId);
 
     Optional<ReservationSlot> findBySlot(ReservationSlot reservationSlot);
+
+    List<ReservationSlot> findByDateAndTheme(LocalDate date, Theme theme);
 
     ReservationSlot save(ReservationSlot reservationSlot);
 

@@ -211,6 +211,7 @@ class ReservationApiTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
 
         createReservation("브라운", futureDate.toString(), 1L, 1L);
+        insertReservationSlot(futureDate, 1L, 2L);
 
         RestAssured.given().log().all()
                 .queryParam("date", futureDate.toString())

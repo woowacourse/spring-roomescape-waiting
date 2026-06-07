@@ -214,6 +214,7 @@ class ReservationServiceTest {
         private final ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
+                reservationSlotRepository,
                 themeService
         );
         private final ReservationService reservationService = new ReservationService(
