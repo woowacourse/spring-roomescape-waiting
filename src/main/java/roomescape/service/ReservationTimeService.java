@@ -32,7 +32,7 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public CreateReservationTimeResponse addReservationTime(CreateReservationTimeCommand command) {
+    public CreateReservationTimeResponse createReservationTime(CreateReservationTimeCommand command) {
         ReservationTime reservationTime = ReservationTime.createWithoutId(command.startAt());
         ReservationTime newReservationTime = reservationTimeDao.insert(reservationTime);
         return CreateReservationTimeResponse.from(newReservationTime);

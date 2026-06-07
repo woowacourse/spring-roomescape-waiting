@@ -36,7 +36,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
+    public ReservationWaitingResponse createReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);

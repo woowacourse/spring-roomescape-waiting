@@ -56,7 +56,7 @@ class ReservationTimeServiceTest {
         CreateReservationTimeCommand command = new CreateReservationTimeCommand(LocalTime.of(10, 0));
 
         // when
-        CreateReservationTimeResponse response = reservationTimeService.addReservationTime(command);
+        CreateReservationTimeResponse response = reservationTimeService.createReservationTime(command);
 
         // then
         assertThat(response.startAt()).isEqualTo(LocalTime.of(10, 0));

@@ -43,7 +43,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
+    public ReservationResponse createReservation(CreateReservationCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);

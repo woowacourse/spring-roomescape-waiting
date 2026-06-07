@@ -26,13 +26,13 @@ public class AdminThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> addTheme(@Valid @RequestBody ThemeRequest request) {
+    public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody ThemeRequest request) {
         CreateThemeCommand command = new CreateThemeCommand(
                 request.name(),
                 request.description(),
                 request.thumbnail()
         );
-        ThemeResponse response = themeService.addTheme(command);
+        ThemeResponse response = themeService.createTheme(command);
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }

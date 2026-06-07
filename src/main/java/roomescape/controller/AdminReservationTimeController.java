@@ -29,7 +29,7 @@ public class AdminReservationTimeController {
     public ResponseEntity<CreateReservationTimeResponse> addReservationTime(
             @Valid @RequestBody ReservationTimeRequest request) {
         CreateReservationTimeCommand command = new CreateReservationTimeCommand(request.startAt());
-        CreateReservationTimeResponse response = reservationTimeService.addReservationTime(command);
+        CreateReservationTimeResponse response = reservationTimeService.createReservationTime(command);
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }

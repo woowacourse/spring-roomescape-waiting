@@ -56,7 +56,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when
-        ReservationWaitingResponse response = waitingService.addReservationWaiting(command, LocalDateTime.now());
+        ReservationWaitingResponse response = waitingService.createReservationWaiting(command, LocalDateTime.now());
 
         // then
         assertThat(response)
@@ -75,7 +75,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.NOT_FOUND));
@@ -93,7 +93,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.CONFLICT));
@@ -109,10 +109,10 @@ class ReservationWaitingServiceTest {
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         );
-        waitingService.addReservationWaiting(command, LocalDateTime.now());
+        waitingService.createReservationWaiting(command, LocalDateTime.now());
 
         // when & then
-        assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.CONFLICT));
@@ -126,12 +126,12 @@ class ReservationWaitingServiceTest {
         reservationDao.insert(Reservation.createWithoutId("로지",
                 new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
 
-        waitingService.addReservationWaiting(new CreateReservationWaitingCommand(
+        waitingService.createReservationWaiting(new CreateReservationWaitingCommand(
                 "브라운", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         ), LocalDateTime.now());
 
         // when
-        ReservationWaitingResponse response = waitingService.addReservationWaiting(
+        ReservationWaitingResponse response = waitingService.createReservationWaiting(
                 new CreateReservationWaitingCommand(
                         "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
                 ), LocalDateTime.now());

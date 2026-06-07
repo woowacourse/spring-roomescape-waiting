@@ -66,7 +66,7 @@ class ReservationServiceTest {
                 "브라운", LocalDate.now().plusDays(1), time.getId(), theme.getId()
         );
 
-        ReservationResponse response = reservationService.addReservation(command, LocalDateTime.now());
+        ReservationResponse response = reservationService.createReservation(command, LocalDateTime.now());
 
         assertThat(response)
                 .extracting(ReservationResponse::name, ReservationResponse::date)
@@ -80,7 +80,7 @@ class ReservationServiceTest {
                 "브라운", LocalDate.now().plusDays(1), 999L, theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.NOT_FOUND));
@@ -93,7 +93,7 @@ class ReservationServiceTest {
                 "브라운", LocalDate.now().plusDays(1), time.getId(), 999L
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.NOT_FOUND));
@@ -110,7 +110,7 @@ class ReservationServiceTest {
                 "브라운", date, time.getId(), theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.CONFLICT));
@@ -124,7 +124,7 @@ class ReservationServiceTest {
                 "브라운", LocalDate.now().minusDays(1), time.getId(), theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY));

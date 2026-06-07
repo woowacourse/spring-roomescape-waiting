@@ -28,7 +28,7 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse addTheme(CreateThemeCommand command) {
+    public ThemeResponse createTheme(CreateThemeCommand command) {
         validateUniqueTheme(command.name());
 
         Theme theme = Theme.createWithoutId(command.name(), command.description(), command.thumbnail());

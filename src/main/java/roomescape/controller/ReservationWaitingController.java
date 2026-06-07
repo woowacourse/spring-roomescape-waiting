@@ -23,11 +23,11 @@ public class ReservationWaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationWaitingResponse> addReservationWaiting(@Valid @RequestBody ReservationWaitingRequest request) {
+    public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(@Valid @RequestBody ReservationWaitingRequest request) {
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 request.name(), request.reservationDate(), request.timeId(), request.themeId()
         );
-        ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(command, LocalDateTime.now());
+        ReservationWaitingResponse response = reservationWaitingService.createReservationWaiting(command, LocalDateTime.now());
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }

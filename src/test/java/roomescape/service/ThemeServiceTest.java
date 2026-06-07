@@ -53,7 +53,7 @@ class ThemeServiceTest {
         CreateThemeCommand command = new CreateThemeCommand("방탈출1", "설명", "https://thumb.com");
 
         // when
-        ThemeResponse response = themeService.addTheme(command);
+        ThemeResponse response = themeService.createTheme(command);
 
         // then
         assertThat(response.name()).isEqualTo("방탈출1");
@@ -66,7 +66,7 @@ class ThemeServiceTest {
         saveTheme("방탈출1", "설명", "https://thumb.com");
 
         // when & then
-        assertThatThrownBy(() -> themeService.addTheme(command))
+        assertThatThrownBy(() -> themeService.createTheme(command))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.CONFLICT));
