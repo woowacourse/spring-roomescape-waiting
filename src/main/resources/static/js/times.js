@@ -1,36 +1,48 @@
 document.addEventListener("DOMContentLoaded", () => {
     const state = {
         themes: [],
-        dates: [],
         rankedThemes: [],
-        times: [],
+        slots: [],
         selectedThemeId: null,
-        selectedDateId: null,
-        userReservationName: "",
+        selectedDate: "",
+        selectedSlotId: null,
+        currentUserName: "",
         userReservations: [],
         editingReservationId: null,
+        editSlotsByReservationId: {},
         editDateByReservationId: {},
-        editTimesByReservationId: {}
+        editSlotIdByReservationId: {}
     };
 
     const modalTriggers = document.querySelectorAll("[data-modal-open]");
     const modalClosers = document.querySelectorAll("[data-modal-close]");
     const themeList = document.getElementById("theme-list");
-    const dateList = document.getElementById("date-list");
     const rankList = document.getElementById("rank-list");
     const timeList = document.getElementById("time-list");
     const timeSection = document.getElementById("time-section");
     const selectionSummary = document.getElementById("selection-summary");
     const reservationFormSummary = document.getElementById("reservation-form-summary");
-    const selectedThemeInput = document.getElementById("selected-theme-id");
-    const selectedDateInput = document.getElementById("selected-date-id");
+    const selectedSlotInput = document.getElementById("selected-slot-id");
+    const reservationDateInput = document.getElementById("reservation-date");
     const showTimesButton = document.getElementById("show-times-button");
     const resetSelectionButton = document.getElementById("reset-selection-button");
     const statusStrip = document.getElementById("status-strip");
-    const userReservationSearchForm = document.getElementById("user-reservation-search-form");
-    const userReservationNameInput = document.getElementById("user-reservation-name");
+    const authStatus = document.getElementById("auth-status");
+    const currentUserSummary = document.getElementById("current-user-summary");
+    const logoutButton = document.getElementById("logout-button");
+    const signupForm = document.getElementById("signup-form");
+    const loginForm = document.getElementById("login-form");
+    const signupMessage = document.getElementById("signup-message");
+    const loginMessage = document.getElementById("login-message");
+    const reservationForm = document.getElementById("reservation-form");
+    const reservationMessage = document.getElementById("reservation-message");
+    const refreshReservationsButton = document.getElementById("refresh-reservations-button");
+    const userReservationDescription = document.getElementById("user-reservation-description");
     const userReservationMessage = document.getElementById("user-reservation-message");
     const userReservationList = document.getElementById("user-reservation-list");
+
+    const today = new Date();
+    reservationDateInput.value = localDateString(today);
 
     document.querySelectorAll("[data-scroll-target]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -73,16 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.remove("modal-open");
     });
 
-    function updateStatus(message) {
-        statusStrip.querySelector("p").textContent = message;
-    }
-
-    function formatDate(date) {
-        return date;
-    }
-
-    function formatShortDate(date) {
-        return date.slice(5).replace("-", ".");
+    function localDateString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
     }
 
     function escapeHtml(value) {
@@ -94,21 +101,78 @@ document.addEventListener("DOMContentLoaded", () => {
             .replaceAll("'", "&#039;");
     }
 
-    function findTheme() {
-        return state.themes.find((theme) => theme.id === state.selectedThemeId);
+    function formatWaitingStatus(waitingNumber) {
+        if (waitingNumber === 0) {
+            return "바로 예약 확정";
+        }
+        return `현재 대기 ${waitingNumber}명`;
     }
 
-    function findDate() {
-        return state.dates.find((date) => date.id === state.selectedDateId);
+    function setStatus(message) {
+        statusStrip.querySelector("p").textContent = message;
+    }
+
+    function setMessage(element, message, kind = "") {
+        element.textContent = message;
+        element.className = "form-message";
+        if (kind) {
+            element.classList.add(kind);
+        }
+    }
+
+    function findTheme(themeId = state.selectedThemeId) {
+        return state.themes.find((theme) => theme.id === themeId);
+    }
+
+    function updateAuthUi() {
+        const loggedIn = Boolean(state.currentUserName);
+        authStatus.textContent = loggedIn
+            ? `${state.currentUserName}님으로 로그인되어 있습니다.`
+            : "로그인이 필요합니다.";
+        currentUserSummary.textContent = loggedIn
+            ? `${state.currentUserName}님으로 예약할 수 있습니다.`
+            : "로그인 후 예약할 수 있습니다.";
+        userReservationDescription.textContent = loggedIn
+            ? `${state.currentUserName}님의 예약 목록입니다.`
+            : "로그인 후 예약 목록을 확인할 수 있습니다.";
+        logoutButton.disabled = !loggedIn;
+        reservationForm.querySelector('button[type="submit"]').disabled = !loggedIn;
+    }
+
+    async function parseResponse(response) {
+        if (response.status === 204) {
+            return null;
+        }
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
+    }
+
+    async function fetchJson(url, options = {}) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                Accept: "application/json",
+                ...(options.body ? { "Content-Type": "application/json" } : {}),
+                ...(options.headers || {})
+            }
+        });
+        const result = await parseResponse(response);
+        if (!response.ok) {
+            const error = new Error(result?.message || "요청에 실패했습니다.");
+            error.status = response.status;
+            error.result = result;
+            throw error;
+        }
+        return result;
     }
 
     function renderThemes() {
         themeList.innerHTML = state.themes.map((theme) => `
             <label class="theme-card theme-card-refined${state.selectedThemeId === theme.id ? " selected" : ""}">
                 <input type="radio" name="themeId" value="${theme.id}" ${state.selectedThemeId === theme.id ? "checked" : ""}>
-                <img class="theme-thumbnail" src="/images/theme-placeholder.svg" alt="${theme.name}">
-                <span class="theme-name">${theme.name}</span>
-                <span class="theme-description">${theme.content}</span>
+                <img class="theme-thumbnail" src="${escapeHtml(theme.url)}" alt="${escapeHtml(theme.name)}">
+                <span class="theme-name">${escapeHtml(theme.name)}</span>
+                <span class="theme-description">${escapeHtml(theme.content)}</span>
             </label>
         `).join("");
 
@@ -120,51 +184,124 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderDates() {
-        dateList.innerHTML = state.dates.map((date) => `
-            <label class="date-card date-card-refined${state.selectedDateId === date.id ? " selected" : ""}">
-                <input type="radio" name="dateId" value="${date.id}" ${state.selectedDateId === date.id ? "checked" : ""}>
-                <span class="date-day">${formatShortDate(date.reservationDate)}</span>
-                <span class="date-full">${formatDate(date.reservationDate)}</span>
-            </label>
-        `).join("");
-
-        dateList.querySelectorAll('input[name="dateId"]').forEach((input) => {
-            input.addEventListener("change", () => {
-                state.selectedDateId = Number(input.value);
-                renderDates();
-            });
-        });
-    }
-
     function renderRankedThemes() {
         rankList.innerHTML = state.rankedThemes.map((theme, index) => `
             <li>
-                <img class="rank-thumbnail" src="/images/theme-placeholder.svg" alt="${theme.themeName}">
+                <img class="rank-thumbnail" src="${escapeHtml(theme.thumbnailUrl)}" alt="${escapeHtml(theme.name)}">
                 <span class="rank-number">${index + 1}</span>
                 <div>
-                    <strong>${theme.themeName}</strong>
+                    <strong>${escapeHtml(theme.name)}</strong>
                 </div>
             </li>
         `).join("");
     }
 
-    function renderTimes() {
-        timeList.innerHTML = state.times.map((time) => `
-            <label class="time-card time-card-refined available">
-                <input type="radio" name="timeId" value="${time.timeId}" form="reservation-form">
-                <span class="card-pill">${time.waitingNumber === 0 ? "CONFIRMED" : "WAITING"}</span>
-                <span class="time-value">${time.startAt}</span>
-                <span class="time-status">${formatWaitingStatus(time.waitingNumber)}</span>
+    function renderSlots() {
+        if (!state.slots.length) {
+            timeList.innerHTML = `
+                <div class="empty-state">
+                    <strong>선택한 조건에 가능한 시간이 없습니다.</strong>
+                </div>
+            `;
+            selectedSlotInput.value = "";
+            return;
+        }
+
+        timeList.innerHTML = state.slots.map((slot) => `
+            <label class="time-card time-card-refined available${state.selectedSlotId === slot.slotId ? " selected" : ""}">
+                <input type="radio" name="slotId" value="${slot.slotId}" form="reservation-form" ${state.selectedSlotId === slot.slotId ? "checked" : ""}>
+                <span class="card-pill">${slot.waitingNumber === 0 ? "CONFIRMED" : "WAITING"}</span>
+                <span class="time-value">${slot.startAt}</span>
+                <span class="time-status">${formatWaitingStatus(slot.waitingNumber)}</span>
             </label>
         `).join("");
+
+        timeList.querySelectorAll('input[name="slotId"]').forEach((input) => {
+            input.addEventListener("change", () => {
+                state.selectedSlotId = Number(input.value);
+                selectedSlotInput.value = String(state.selectedSlotId);
+                renderSlots();
+            });
+        });
+
+        selectedSlotInput.value = state.selectedSlotId ? String(state.selectedSlotId) : "";
     }
 
-    function formatWaitingStatus(waitingNumber) {
-        if (waitingNumber === 0) {
-            return "바로 예약 확정";
+    function renderReservations() {
+        if (!state.currentUserName) {
+            userReservationList.innerHTML = `
+                <div class="empty-state">
+                    <strong>로그인 후 예약 목록을 확인할 수 있습니다.</strong>
+                </div>
+            `;
+            return;
         }
-        return `현재 대기 ${waitingNumber}명`;
+
+        if (state.userReservations.length === 0) {
+            userReservationList.innerHTML = `
+                <div class="empty-state">
+                    <strong>${escapeHtml(state.currentUserName)}</strong>님의 예약이 없습니다.
+                </div>
+            `;
+            return;
+        }
+
+        userReservationList.innerHTML = state.userReservations.map((reservation) => {
+            const slot = reservation.slot;
+            const isEditing = state.editingReservationId === reservation.id;
+            const currentDate = state.editDateByReservationId[reservation.id] || slot.date;
+            const currentSlotId = state.editSlotIdByReservationId[reservation.id] || slot.id;
+            const editSlots = state.editSlotsByReservationId[reservation.id] || [];
+            const slotOptions = editSlots.length
+                ? editSlots.map((editSlot) => `
+                    <option value="${editSlot.slotId}" ${currentSlotId === editSlot.slotId ? "selected" : ""}>
+                        ${editSlot.startAt} · ${formatWaitingStatus(editSlot.waitingNumber)}
+                    </option>
+                `).join("")
+                : `<option value="">가능한 시간이 없습니다.</option>`;
+
+            return `
+                <article class="user-reservation-card">
+                    <div class="user-reservation-main">
+                        <div>
+                            <span class="card-pill">예약 번호 ${reservation.id}</span>
+                            <h3>${escapeHtml(slot.theme.name)}</h3>
+                            <p>${escapeHtml(slot.theme.content)}</p>
+                        </div>
+                        <div class="reservation-date-time">
+                            <strong>${slot.date}</strong>
+                            <span>${slot.startAt.startAt}</span>
+                            <span>${formatReservationStatus(reservation.status, reservation.waitingNumber)}</span>
+                        </div>
+                    </div>
+                    ${isEditing ? `
+                        <form class="reservation-edit-form" data-edit-form data-id="${reservation.id}">
+                            <label>
+                                날짜
+                                <input type="date" name="date" data-edit-date data-id="${reservation.id}" value="${currentDate}">
+                            </label>
+                            <label>
+                                시간
+                                <select name="slotId" data-edit-slot data-id="${reservation.id}">
+                                    ${slotOptions}
+                                </select>
+                            </label>
+                            <div class="reservation-card-actions">
+                                <button type="submit" class="primary-button">변경 저장</button>
+                                <button type="button" class="secondary-button" data-edit-cancel>취소</button>
+                            </div>
+                        </form>
+                    ` : `
+                        <div class="reservation-card-actions">
+                            <button type="button" class="secondary-button" data-edit-id="${reservation.id}">변경</button>
+                            <button type="button" class="danger-button" data-cancel-id="${reservation.id}">예약 취소</button>
+                        </div>
+                    `}
+                </article>
+            `;
+        }).join("");
+
+        bindReservationEvents();
     }
 
     function formatReservationStatus(status, waitingNumber) {
@@ -177,92 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return status;
     }
 
-    function renderUserReservations() {
-        if (!state.userReservationName) {
-            userReservationList.innerHTML = "";
-            return;
-        }
-
-        if (state.userReservations.length === 0) {
-            userReservationList.innerHTML = `
-                <div class="empty-state">
-                    <strong>${escapeHtml(state.userReservationName)}</strong>님의 예약이 없습니다.
-                </div>
-            `;
-            return;
-        }
-
-        userReservationList.innerHTML = state.userReservations.map((reservation) => {
-            const reservationSlot = reservation.reservationSlot;
-            const reservationId = reservation.id;
-            const isEditing = state.editingReservationId === reservationId;
-            const selectedStartWhen = state.editDateByReservationId[reservationId] || reservationSlot.date.startWhen;
-            const editTimes = state.editTimesByReservationId[reservationId] || [];
-            const dateOptions = state.dates.map((date) => `
-                <option value="${date.reservationDate}" data-date-id="${date.id}" ${date.reservationDate === selectedStartWhen ? "selected" : ""}>
-                    ${date.reservationDate}
-                </option>
-            `).join("");
-            const timeOptions = buildEditTimeOptions(reservation, editTimes);
-
-            return `
-                <article class="user-reservation-card">
-                    <div class="user-reservation-main">
-                        <div>
-                            <span class="card-pill">예약 번호 ${reservationId}</span>
-                            <h3>${escapeHtml(reservationSlot.theme.name)}</h3>
-                            <p>${escapeHtml(reservationSlot.theme.content)}</p>
-                        </div>
-                        <div class="reservation-date-time">
-                            <strong>${reservationSlot.date.startWhen}</strong>
-                            <span>${reservationSlot.time.startAt}</span>
-                            <span>${formatReservationStatus(reservation.status, reservation.waitingNumber)}</span>
-                        </div>
-                    </div>
-                    ${isEditing ? `
-                        <form class="reservation-edit-form" data-edit-form data-id="${reservationId}">
-                            <label>
-                                날짜
-                                <select name="startWhen" data-edit-date data-id="${reservationId}">
-                                    ${dateOptions}
-                                </select>
-                            </label>
-                            <label>
-                                시간
-                                <select name="startAt" data-edit-time>
-                                    ${timeOptions}
-                                </select>
-                            </label>
-                            <div class="reservation-card-actions">
-                                <button type="submit" class="primary-button">변경 저장</button>
-                                <button type="button" class="secondary-button" data-edit-cancel>취소</button>
-                            </div>
-                        </form>
-                    ` : `
-                        <div class="reservation-card-actions">
-                            <button type="button" class="secondary-button" data-edit-id="${reservationId}">변경</button>
-                            <button type="button" class="danger-button" data-cancel-id="${reservationId}">예약 취소</button>
-                        </div>
-                    `}
-                </article>
-            `;
-        }).join("");
-
-        bindUserReservationEvents();
-    }
-
-    function buildEditTimeOptions(reservation, times) {
-        const options = new Map();
-        options.set(reservation.reservationSlot.time.startAt, reservation.reservationSlot.time.startAt);
-        times
-            .forEach((time) => options.set(time.startAt, time.startAt));
-
-        return [...options.values()].map((startAt) => `
-            <option value="${startAt}" ${startAt === reservation.reservationSlot.time.startAt ? "selected" : ""}>${startAt}</option>
-        `).join("");
-    }
-
-    function bindUserReservationEvents() {
+    function bindReservationEvents() {
         userReservationList.querySelectorAll("[data-cancel-id]").forEach((button) => {
             button.addEventListener("click", async () => {
                 await cancelReservation(Number(button.dataset.cancelId));
@@ -271,27 +323,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
         userReservationList.querySelectorAll("[data-edit-id]").forEach((button) => {
             button.addEventListener("click", async () => {
-                const reservation = findUserReservation(Number(button.dataset.editId));
+                const reservation = findReservation(Number(button.dataset.editId));
+                if (!reservation) {
+                    return;
+                }
                 state.editingReservationId = reservation.id;
-                state.editDateByReservationId[reservation.id] = reservation.reservationSlot.date.startWhen;
-                renderUserReservations();
-                await loadEditTimes(reservation, reservation.reservationSlot.date.id);
+                state.editDateByReservationId[reservation.id] = reservation.slot.date;
+                state.editSlotIdByReservationId[reservation.id] = reservation.slot.id;
+                renderReservations();
+                await loadEditSlots(reservation, reservation.slot.date);
             });
         });
 
         userReservationList.querySelectorAll("[data-edit-cancel]").forEach((button) => {
             button.addEventListener("click", () => {
                 state.editingReservationId = null;
-                renderUserReservations();
+                renderReservations();
             });
         });
 
-        userReservationList.querySelectorAll("[data-edit-date]").forEach((select) => {
-            select.addEventListener("change", async () => {
-                const reservation = findUserReservation(Number(select.dataset.id));
-                const selectedOption = select.options[select.selectedIndex];
-                state.editDateByReservationId[reservation.id] = selectedOption.value;
-                await loadEditTimes(reservation, Number(selectedOption.dataset.dateId));
+        userReservationList.querySelectorAll("[data-edit-date]").forEach((input) => {
+            input.addEventListener("change", async () => {
+                const reservation = findReservation(Number(input.dataset.id));
+                if (!reservation) {
+                    return;
+                }
+                state.editDateByReservationId[reservation.id] = input.value;
+                await loadEditSlots(reservation, input.value);
             });
         });
 
@@ -299,58 +357,104 @@ document.addEventListener("DOMContentLoaded", () => {
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
                 const formData = new FormData(form);
-                await updateReservation(Number(form.dataset.id), {
-                    startWhen: formData.get("startWhen"),
-                    startAt: formData.get("startAt")
-                });
+                const slotId = Number(formData.get("slotId"));
+                if (!slotId) {
+                    setMessage(userReservationMessage, "변경할 시간을 선택해 주세요.", "error");
+                    return;
+                }
+                await updateReservation(Number(form.dataset.id), slotId);
             });
         });
     }
 
-    function findUserReservation(id) {
+    function findReservation(id) {
         return state.userReservations.find((reservation) => reservation.id === id);
     }
 
-    function setUserReservationMessage(text, type = "") {
-        userReservationMessage.textContent = text;
-        userReservationMessage.className = "form-message";
-        if (type) {
-            userReservationMessage.classList.add(type);
+    async function loadThemesAndRanks() {
+        const [themeResult, rankResult] = await Promise.all([
+            fetchJson("/themes"),
+            fetchJson("/themes/rank")
+        ]);
+
+        state.themes = themeResult.themes;
+        state.rankedThemes = rankResult.popularThemes;
+
+        renderThemes();
+        renderRankedThemes();
+    }
+
+    async function loadCurrentReservations({ silent = false } = {}) {
+        try {
+            const result = await fetchJson("/reservations");
+            state.currentUserName = result.username;
+            state.userReservations = result.reservations;
+            state.editingReservationId = null;
+            state.editSlotsByReservationId = {};
+            state.editDateByReservationId = {};
+            state.editSlotIdByReservationId = {};
+            updateAuthUi();
+            renderReservations();
+        } catch (error) {
+            if (error.status === 401) {
+                state.currentUserName = "";
+                state.userReservations = [];
+                state.editingReservationId = null;
+                state.editSlotsByReservationId = {};
+                state.editDateByReservationId = {};
+                state.editSlotIdByReservationId = {};
+                updateAuthUi();
+                renderReservations();
+                if (!silent) {
+                    setMessage(userReservationMessage, "로그인 후 예약을 확인할 수 있습니다.", "error");
+                }
+                return;
+            }
+            if (!silent) {
+                setMessage(userReservationMessage, error.message, "error");
+            }
         }
     }
 
-    async function parseResponse(response) {
-        const text = await response.text();
-        if (!text) {
-            return null;
+    async function loadSlotsForSelection() {
+        if (!state.selectedThemeId || !state.selectedDate) {
+            setStatus("테마와 날짜를 모두 선택해 주세요.");
+            return;
         }
-        return JSON.parse(text);
+
+        const theme = findTheme();
+        if (!theme) {
+            setStatus("선택한 테마를 찾을 수 없습니다.");
+            return;
+        }
+
+        const result = await fetchJson(
+            `/reservation-slots?themeId=${state.selectedThemeId}&date=${state.selectedDate}`
+        );
+        state.slots = result.reservationSlots;
+        state.selectedSlotId = state.slots[0]?.slotId || null;
+        renderSlots();
+        timeSection.hidden = false;
+        selectionSummary.textContent = `${theme.name} · ${state.selectedDate} 기준으로 가능한 시간입니다.`;
+        reservationFormSummary.textContent = `${theme.name} · ${state.selectedDate}`;
+        setStatus(state.slots.length > 0 ? "가능한 시간을 불러왔습니다." : "선택한 조건에 가능한 시간이 없습니다.");
+        timeSection.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    async function fetchJson(url) {
-        const response = await fetch(url, { headers: { Accept: "application/json" } });
-        if (!response.ok) {
-            throw new Error(`Request failed: ${url}`);
+    async function loadEditSlots(reservation, date) {
+        try {
+            const result = await fetchJson(
+                `/reservation-slots?themeId=${reservation.slot.theme.id}&date=${date}`
+            );
+            const slots = result.reservationSlots;
+            state.editSlotsByReservationId[reservation.id] = slots;
+            if (!slots.some((slot) => slot.slotId === state.editSlotIdByReservationId[reservation.id])) {
+                state.editSlotIdByReservationId[reservation.id] = slots[0]?.slotId || null;
+            }
+            renderReservations();
+        } catch (error) {
+            setMessage(userReservationMessage, "변경 가능한 시간을 불러오지 못했습니다.", "error");
         }
-        return response.json();
-    }
-
-    async function loadUserReservations(name) {
-        const response = await fetch(`/reservations?name=${encodeURIComponent(name)}`, {
-            headers: { Accept: "application/json" }
-        });
-        const result = await parseResponse(response);
-
-        if (!response.ok) {
-            throw new Error(result?.message || "예약 목록을 불러오지 못했습니다.");
-        }
-
-        state.userReservationName = result.username;
-        state.userReservations = result.reservations;
-        state.editingReservationId = null;
-        state.editDateByReservationId = {};
-        state.editTimesByReservationId = {};
-        renderUserReservations();
     }
 
     async function cancelReservation(id) {
@@ -358,169 +462,181 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const response = await fetch(`/reservations/${id}?name=${encodeURIComponent(state.userReservationName)}`, {
+        const response = await fetch(`/reservations/${id}`, {
             method: "DELETE",
             headers: { Accept: "application/json" }
         });
         const result = await parseResponse(response);
-
         if (!response.ok) {
-            setUserReservationMessage(result?.message || "예약 취소 중 문제가 발생했습니다.", "error");
+            setMessage(userReservationMessage, result?.message || "예약 취소 중 문제가 발생했습니다.", "error");
             return;
         }
 
-        setUserReservationMessage("예약이 취소되었습니다.", "success");
-        await loadUserReservations(state.userReservationName);
+        setMessage(userReservationMessage, "예약이 취소되었습니다.", "success");
+        await loadCurrentReservations({ silent: true });
     }
 
-    async function updateReservation(id, payload) {
+    async function updateReservation(id, slotId) {
         const response = await fetch(`/reservations/${id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                Accept: "application/json"
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ slotId })
         });
         const result = await parseResponse(response);
-
         if (!response.ok) {
-            setUserReservationMessage(result?.message || "예약 변경 중 문제가 발생했습니다.", "error");
+            setMessage(userReservationMessage, result?.message || "예약 변경 중 문제가 발생했습니다.", "error");
             return;
         }
 
-        setUserReservationMessage("예약이 변경되었습니다.", "success");
-        await loadUserReservations(state.userReservationName);
+        setMessage(userReservationMessage, "예약이 변경되었습니다.", "success");
+        await loadCurrentReservations({ silent: true });
     }
 
-    async function loadEditTimes(reservation, dateId) {
+    async function submitAuth(endpoint, form, messageElement) {
+        const formData = new FormData(form);
+        const payload = {
+            name: String(formData.get("name") || "").trim(),
+            password: String(formData.get("password") || "").trim()
+        };
+
         try {
-            const times = await fetchJson(
-                `/reservation-slots?themeId=${reservation.reservationSlot.theme.id}&dateId=${dateId}`
-            );
-            state.editTimesByReservationId[reservation.id] = times;
-            renderUserReservations();
+            const result = await fetchJson(endpoint, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            state.currentUserName = result.name;
+            setMessage(messageElement, `${result.name}님으로 로그인되었습니다.`, "success");
+            form.reset();
+            updateAuthUi();
+            await loadCurrentReservations({ silent: true });
         } catch (error) {
-            setUserReservationMessage("변경 가능한 시간을 불러오지 못했습니다.", "error");
+            setMessage(messageElement, error.message, "error");
         }
     }
 
-    async function loadInitialData() {
-        const [themes, dates, rankedThemes] = await Promise.all([
-            fetchJson("/themes"),
-            fetchJson("/reservation-dates"),
-            fetchJson("/themes/rank")
-        ]);
+    signupForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await submitAuth("/signup", signupForm, signupMessage);
+    });
 
-        state.themes = themes;
-        state.dates = dates;
-        state.rankedThemes = rankedThemes;
+    loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await submitAuth("/login", loginForm, loginMessage);
+    });
 
-        renderThemes();
-        renderDates();
-        renderRankedThemes();
-    }
+    logoutButton.addEventListener("click", async () => {
+        try {
+            await fetchJson("/logout", { method: "DELETE" });
+        } catch (error) {
+            // logout should still clear local UI state
+        }
+        state.currentUserName = "";
+        state.userReservations = [];
+        state.editingReservationId = null;
+        state.editSlotsByReservationId = {};
+        state.editDateByReservationId = {};
+        state.editSlotIdByReservationId = {};
+        setMessage(loginMessage, "로그아웃했습니다.", "success");
+        updateAuthUi();
+        renderReservations();
+    });
+
+    refreshReservationsButton.addEventListener("click", async () => {
+        await loadCurrentReservations();
+    });
 
     showTimesButton.addEventListener("click", async () => {
-        if (!state.selectedThemeId || !state.selectedDateId) {
-            updateStatus("테마와 날짜를 모두 선택해 주세요.");
+        state.selectedThemeId = state.selectedThemeId || Number(themeList.querySelector('input[name="themeId"]:checked')?.value || 0);
+        state.selectedDate = reservationDateInput.value;
+        if (!state.selectedThemeId || !state.selectedDate) {
+            setStatus("테마와 날짜를 모두 선택해 주세요.");
             return;
         }
 
-        const selectedTheme = findTheme();
-        const selectedDate = findDate();
-
-        state.times = await fetchJson(
-            `/reservation-slots?themeId=${state.selectedThemeId}&dateId=${state.selectedDateId}`
-        );
-        renderTimes();
-        selectedThemeInput.value = String(state.selectedThemeId);
-        selectedDateInput.value = String(state.selectedDateId);
-        selectionSummary.textContent = `${selectedTheme.name} · ${selectedDate.reservationDate} 기준으로 가능한 시간입니다.`;
-        reservationFormSummary.textContent = `${selectedTheme.name} · ${selectedDate.reservationDate}`;
-        timeSection.hidden = false;
-        updateStatus("가능한 시간을 불러왔습니다.");
-        timeSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        try {
+            await loadSlotsForSelection();
+        } catch (error) {
+            setStatus(error.message);
+        }
     });
 
     resetSelectionButton.addEventListener("click", () => {
         state.selectedThemeId = null;
-        state.selectedDateId = null;
-        state.times = [];
+        state.selectedDate = reservationDateInput.value;
+        state.selectedSlotId = null;
+        state.slots = [];
         renderThemes();
-        renderDates();
+        renderSlots();
         timeSection.hidden = true;
-        updateStatus("테마와 날짜를 먼저 선택해 주세요.");
+        setStatus("테마와 날짜를 먼저 선택해 주세요.");
     });
 
-    const reservationForm = document.getElementById("reservation-form");
-    const message = document.getElementById("reservation-message");
+    reservationDateInput.addEventListener("change", () => {
+        state.selectedDate = reservationDateInput.value;
+    });
 
     reservationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const formData = new FormData(reservationForm);
-        const payload = {
-            name: formData.get("name"),
-            themeId: Number(formData.get("themeId")),
-            dateId: Number(formData.get("dateId")),
-            timeId: Number(formData.get("timeId"))
-        };
-
-        message.textContent = "";
-        message.className = "form-message";
-
-        try {
-            const response = await fetch("/reservations", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await parseResponse(response);
-
-            if (!response.ok) {
-                message.textContent = result?.message || "예약 요청 중 문제가 발생했습니다.";
-                message.classList.add("error");
-                return;
-            }
-
-            const reservationName = String(payload.name);
-            message.textContent = reservationName + "님의 예약 요청이 완료되었습니다.";
-            message.classList.add("success");
-
-            userReservationNameInput.value = reservationName;
-            await loadUserReservations(reservationName);
-
-            window.setTimeout(() => {
-                window.location.reload();
-            }, 600);
-        } catch (error) {
-            message.textContent = "서버와 통신하지 못했습니다. 잠시 후 다시 시도해 주세요.";
-            message.classList.add("error");
+        if (!state.currentUserName) {
+            setMessage(reservationMessage, "로그인 후 예약할 수 있습니다.", "error");
+            return;
         }
-    });
 
-    userReservationSearchForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const name = new FormData(userReservationSearchForm).get("name").trim();
-        if (!name) {
-            setUserReservationMessage("예약자 이름을 입력해 주세요.", "error");
+        const formData = new FormData(reservationForm);
+        const slotId = Number(formData.get("slotId"));
+        if (!slotId) {
+            setMessage(reservationMessage, "예약할 시간을 선택해 주세요.", "error");
             return;
         }
 
         try {
-            setUserReservationMessage("");
-            await loadUserReservations(name);
+            const result = await fetchJson("/reservations", {
+                method: "POST",
+                body: JSON.stringify({ slotId })
+            });
+            setMessage(
+                reservationMessage,
+                `${result.theme.name} 예약이 완료되었습니다. (${result.date} ${result.startAt})`,
+                "success"
+            );
+            await loadCurrentReservations({ silent: true });
         } catch (error) {
-            setUserReservationMessage(error.message, "error");
+            setMessage(reservationMessage, error.message, "error");
         }
     });
 
-    loadInitialData().catch(() => {
-        updateStatus("초기 데이터를 불러오지 못했습니다.");
+    themeList.addEventListener("change", (event) => {
+        if (event.target.name !== "themeId") {
+            return;
+        }
+        state.selectedThemeId = Number(event.target.value);
+        renderThemes();
     });
+
+    userReservationList.addEventListener("change", async (event) => {
+        const input = event.target;
+        if (input.dataset.editDate === undefined) {
+            return;
+        }
+        const reservation = findReservation(Number(input.dataset.id));
+        if (!reservation) {
+            return;
+        }
+        state.editDateByReservationId[reservation.id] = input.value;
+        await loadEditSlots(reservation, input.value);
+    });
+
+    loadThemesAndRanks()
+        .then(() => loadCurrentReservations({ silent: true }))
+        .catch(() => {
+            setStatus("초기 데이터를 불러오지 못했습니다.");
+        })
+        .finally(() => {
+            updateAuthUi();
+            renderReservations();
+        });
 });

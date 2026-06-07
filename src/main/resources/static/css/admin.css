@@ -157,7 +157,8 @@ a {
 }
 
 .token-row input,
-.admin-form input {
+.admin-form input,
+.admin-form select {
     width: 100%;
     min-height: 46px;
     padding: 0 14px;
@@ -168,7 +169,8 @@ a {
 }
 
 .token-row input:focus,
-.admin-form input:focus {
+.admin-form input:focus,
+.admin-form select:focus {
     border-color: var(--blue);
 }
 
@@ -186,8 +188,63 @@ a {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.field-grid-reservation {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .field-grid-single {
     grid-template-columns: minmax(0, 280px);
+}
+
+.reservation-slot-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.slot-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.slot-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.slot-card input {
+    align-self: flex-start;
+}
+
+.slot-card.selected {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 1px rgba(45, 104, 224, 0.15);
+}
+
+.slot-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--blue-soft);
+    color: var(--blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.slot-status {
+    color: var(--muted);
+    font-size: 0.92rem;
 }
 
 .primary-button,

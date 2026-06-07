@@ -1,168 +1,49 @@
 # spring-roomescape-waiting
 
-## 기능 목록
+방탈출 예약 시스템입니다.  
+사용자는 세션 로그인 후 테마와 날짜를 기준으로 예약 슬롯을 조회하고, `slotId`로 예약을 생성/변경/취소합니다.  
+관리자는 `X-ADMIN-TOKEN` 헤더로 인증하고 테마, 예약 시간, 예약을 관리합니다.
 
-### 예약 관리
+## 화면
 
-- 사용자는 이름, 날짜(LocalDate), 시간 ID, 테마 ID를 입력해 예약을 생성한다.
-- 예약 생성 시 이름이 비어 있으면 예외를 반환한다.
-- 예약 생성 시 날짜, 시간, 테마 값이 누락되면 예외를 반환한다.
-- 사용자는 이름으로 본인의 예약 목록을 조회한다.
-- 사용자는 본인의 예약을 취소한다.
-- 사용자는 본인의 예약 날짜와 시간 ID를 변경한다.
-- 예약 변경 시 날짜와 시간 ID가 모두 누락되면 기존 예약 날짜와 시간을 유지하고 수정 시각을 갱신한다.
-- 예약 변경 시 같은 날짜와 시간으로 다시 수정해도 수정 시각을 갱신하고, 대기 순서를 수정 시각 기준으로 재정렬한다.
-- 대기 순서 재정렬 시 가장 앞선 예약은 확정 예약이 되고, 나머지는 대기 예약이 된다.
-- 예약 변경 시 존재하지 않는 날짜나 시간 ID가 입력되면 예외를 반환한다.
-- 예약 변경 시 변경하려는 날짜와 시간이 현재보다 이전이면 예외를 반환한다.
-- 예약 변경 시 같은 사용자가 변경하려는 날짜, 시간, 테마에 이미 예약한 내역이 있으면 예외를 반환한다.
-- 관리자는 전체 예약 목록을 조회한다.
-- 관리자는 예약을 추가한다.
-- 관리자는 예약 ID로 예약을 삭제한다.
+- `GET /` 사용자 예약 페이지
+- `GET /admin` 관리자 페이지
 
-### 예약 시간 관리
+## 인증
 
-- 사용자는 특정 날짜와 테마에 대한 예약 슬롯 목록을 조회한다.
-- 관리자는 전체 예약 시간 목록을 조회한다.
-- 관리자는 예약 시간을 추가한다.
-- 관리자는 예약 시간을 삭제한다.
-- 예약 시간 입력이 없거나 형식이 올바르지 않으면 예외를 반환한다.
-- 존재하지 않는 시간을 삭제하려 해도 성공 응답을 반환한다.
-- 이미 예약에 사용 중인 시간을 삭제하려 하면 예외를 반환한다.
+### `POST /signup`
 
-### 테마 관리
-
-- 사용자는 전체 테마 목록을 조회한다.
-- 사용자는 확정 예약과 대기 예약을 모두 포함한 인기 테마 랭킹을 조회한다.
-- 관리자는 전체 테마 목록을 조회한다.
-- 관리자는 테마를 추가한다.
-- 관리자는 테마를 삭제한다.
-- 예약 생성 시 테마 값이 누락되면 예외를 반환한다.
-- 존재하지 않는 테마를 삭제하려 해도 성공 응답을 반환한다.
-- 이미 예약에 사용 중인 테마를 삭제하려 하면 예외를 반환한다.
-
-### 공통 예외 처리
-
-- 관리자 API는 `X-ADMIN-TOKEN` 헤더가 올바르지 않으면 `401 Unauthorized`를 반환한다.
-- 비즈니스 예외는 `{"code": "...", "message": "..."}` 형식으로 반환한다.
-- 요청 본문의 타입이나 형식이 올바르지 않으면 `INPUT_FORMAT_ERROR`를 반환한다.
-- 처리하지 못한 서버 예외는 공통 에러 응답으로 반환한다.
-
-## 자기 API 명세
-
-### 공통 규칙
-
-- Base URL: `/`
-- 관리자 API 헤더: `X-ADMIN-TOKEN: {admin-token}`
-- Content-Type: `application/json`
-
-### 화면 경로
-
-#### `GET /`
-
-- 설명: 사용자 예약 페이지 반환
-- 응답: `times` 뷰 렌더링
-
-#### `GET /admin`
-
-- 설명: 관리자 페이지 반환
-- 응답: `admin` 뷰 렌더링
-
-### 예약
-
-#### `GET /admin/reservations`
-
-- 설명: 전체 예약 조회
-- 인증: 관리자
-- 응답 `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "date": "2026-05-01",
-    "startAt": {
-      "id": 1,
-      "startAt": "10:00"
-    },
-    "theme": {
-      "id": 1,
-      "name": "공포",
-      "content": "오금이 저리는 공포입니다.",
-      "url": "/themes/scary"
-    },
-    "username": "보예",
-    "waitingNumber": 0,
-    "status": "CONFIRMED"
-  }
-]
-```
-
-#### `POST /admin/reservations`
-
-- 설명: 예약 추가
-- 인증: 관리자
-- 요청 본문
+회원가입 후 세션에 로그인 상태를 저장합니다.
 
 ```json
 {
   "name": "보예",
-  "date": "2026-05-01",
-  "timeId": 2,
-  "themeId": 3
+  "password": "password"
 }
 ```
 
-- 응답 `201 Created`
+### `POST /login`
 
-```json
-{
-  "id": 29,
-  "date": "2026-05-01",
-  "startAt": "11:00",
-  "theme": {
-    "id": 3,
-    "name": "청춘물",
-    "content": "학교 배경인 테마 입니다.",
-    "url": "/themes/youth"
-  }
-}
-```
-
-#### `POST /reservations`
-
-- 설명: 예약 생성
-- 요청 본문
+로그인 후 세션에 로그인 상태를 저장합니다.
 
 ```json
 {
   "name": "보예",
-  "date": "2026-05-01",
-  "timeId": 2,
-  "themeId": 3
+  "password": "password"
 }
 ```
 
-- 응답 `201 Created`
+### `DELETE /logout`
 
-```json
-{
-  "id": 29,
-  "date": "2026-05-01",
-  "startAt": "11:00",
-  "theme": {
-    "id": 3,
-    "name": "청춘물",
-    "content": "학교 배경인 테마 입니다.",
-    "url": "/themes/youth"
-  }
-}
-```
+현재 세션을 종료합니다.
 
-#### `GET /reservations?name={name}`
+## 사용자 예약
 
-- 설명: 사용자 이름으로 예약 목록 조회
-- 응답 `200 OK`
+### `GET /reservations`
+
+현재 로그인한 사용자의 예약 목록을 조회합니다.
+
+응답 예시:
 
 ```json
 {
@@ -184,158 +65,107 @@
           "url": "/themes/youth"
         }
       },
-      "status": "WAITING",
+      "waitingNumber": 1,
+      "status": "WAITING"
+    }
+  ]
+}
+```
+
+### `POST /reservations`
+
+예약을 생성합니다.
+
+```json
+{
+  "slotId": 20
+}
+```
+
+### `PATCH /reservations/{id}`
+
+예약 슬롯을 변경합니다.
+
+```json
+{
+  "slotId": 21
+}
+```
+
+### `DELETE /reservations/{id}`
+
+예약을 취소합니다.
+
+## 예약 슬롯 조회
+
+### `GET /reservation-slots?themeId={themeId}&date={date}`
+
+특정 테마와 날짜의 예약 슬롯 목록을 조회합니다.
+
+응답은 `reservationSlots`로 감싸서 내려갑니다.
+
+```json
+{
+  "reservationSlots": [
+    {
+      "slotId": 1,
+      "timeId": 1,
+      "startAt": "10:00",
+      "waitingNumber": 0
+    },
+    {
+      "slotId": 2,
+      "timeId": 2,
+      "startAt": "11:00",
       "waitingNumber": 1
     }
   ]
 }
 ```
 
-#### `PATCH /reservations/{id}`
+## 테마
 
-- 설명: 사용자 예약 날짜와 시간 변경. 날짜와 시간 ID가 모두 누락되면 기존 값을 유지하고 수정 시각을 갱신한다. 같은 날짜와 시간으로 다시 수정해도 수정 시각 기준으로 대기 순서가 재정렬된다.
-- 요청 본문
+### `GET /themes`
 
-```json
-{
-  "date": "2026-05-10",
-  "timeId": 4
-}
-```
-
-- 응답 `204 No Content`
-
-#### `DELETE /reservations/{id}`
-
-- 설명: 사용자 예약 취소
-- 응답 `204 No Content`
-
-#### `DELETE /admin/reservations/{id}`
-
-- 설명: 예약 삭제
-- 인증: 관리자
-- 응답 `204 No Content`
-
-### 예약 슬롯
-
-#### `GET /reservation-slots?themeId={themeId}&date={date}`
-
-- 설명: 특정 테마와 날짜의 예약 슬롯 조회
-- 응답 `200 OK`
-
-```json
-[
-  {
-    "timeId": 1,
-    "startAt": "10:00",
-    "waitingNumber": 0
-  },
-  {
-    "timeId": 2,
-    "startAt": "11:00",
-    "waitingNumber": 1
-  }
-]
-```
-
-#### `GET /admin/times`
-
-- 설명: 전체 예약 시간 목록 조회
-- 인증: 관리자
-- 응답 `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "startAt": "10:00"
-  }
-]
-```
-
-#### `POST /admin/times`
-
-- 설명: 예약 시간 추가
-- 인증: 관리자
-- 요청 본문
+전체 테마 목록을 조회합니다.
 
 ```json
 {
-  "startAt": "18:00"
+  "themes": [
+    {
+      "id": 1,
+      "name": "공포",
+      "content": "오금이 저리는 공포입니다.",
+      "url": "/themes/scary"
+    }
+  ]
 }
 ```
 
-- 응답 `201 Created`
+### `GET /themes/rank`
+
+최근 7일 기준 인기 테마 랭킹을 조회합니다.
 
 ```json
 {
-  "id": 6,
-  "startAt": "18:00"
+  "popularThemes": [
+    {
+      "id": 1,
+      "name": "공포",
+      "thumbnailUrl": "/themes/scary",
+      "rank": 1
+    }
+  ]
 }
 ```
 
-#### `DELETE /admin/times/{id}`
+### `GET /admin/themes`
 
-- 설명: 예약 시간 삭제. 존재하지 않는 시간이어도 성공 응답을 반환한다.
-- 인증: 관리자
-- 응답 `204 No Content`
+관리자용 테마 목록을 조회합니다.
 
-### 테마
+### `POST /admin/themes`
 
-#### `GET /themes`
-
-- 설명: 전체 테마 목록 조회
-- 응답 `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "name": "공포",
-    "content": "오금이 저리는 공포입니다.",
-    "url": "/themes/scary"
-  }
-]
-```
-
-#### `GET /themes/rank`
-
-- 설명: 확정 예약과 대기 예약을 모두 포함한 인기 테마 랭킹 조회
-- 응답 `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "themeName": "공포",
-    "url": "/themes/scary",
-    "rank": 1
-  }
-]
-```
-
-#### `GET /admin/themes`
-
-- 설명: 관리자용 테마 목록 조회
-- 인증: 관리자
-- 응답 `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "name": "공포",
-    "content": "오금이 저리는 공포입니다.",
-    "url": "/themes/scary"
-  }
-]
-```
-
-#### `POST /admin/themes`
-
-- 설명: 테마 추가
-- 인증: 관리자
-- 요청 본문
+테마를 추가합니다.
 
 ```json
 {
@@ -345,19 +175,72 @@
 }
 ```
 
-- 응답 `201 Created`
+### `DELETE /admin/themes/{id}`
+
+테마를 삭제합니다.
+
+## 예약 시간
+
+### `GET /admin/times`
+
+전체 예약 시간 목록을 조회합니다.
+
+### `POST /admin/times`
+
+예약 시간을 추가합니다.
 
 ```json
 {
-  "id": 13,
-  "name": "추리",
-  "content": "단서를 조합해 탈출하는 테마입니다.",
-  "url": "/themes/detective"
+  "startAt": "18:00"
 }
 ```
 
-#### `DELETE /admin/themes/{id}`
+### `DELETE /admin/times/{id}`
 
-- 설명: 테마 삭제. 존재하지 않는 테마여도 성공 응답을 반환한다.
-- 인증: 관리자
-- 응답 `204 No Content`
+예약 시간을 삭제합니다.
+
+## 관리자 예약
+
+### `GET /admin/reservations`
+
+전체 예약 목록을 조회합니다.
+
+### `POST /admin/reservations`
+
+예약을 추가합니다.
+
+```json
+{
+  "username": "보예",
+  "slotId": 20
+}
+```
+
+### `PATCH /admin/reservations/{id}`
+
+예약 슬롯을 변경합니다.
+
+```json
+{
+  "slotId": 21
+}
+```
+
+### `DELETE /admin/reservations/{id}`
+
+예약을 삭제합니다.
+
+## 공통 규칙
+
+- 관리자 API는 `X-ADMIN-TOKEN` 헤더가 필요합니다.
+- 요청 본문이나 파라미터 형식이 잘못되면 `INPUT_FORMAT_ERROR`를 반환합니다.
+- 비즈니스 예외는 `{"code": "...", "message": "..."}` 형식으로 반환합니다.
+- 처리하지 못한 예외는 공통 에러 응답으로 반환합니다.
+
+## 프론트 동작
+
+- 사용자 페이지는 회원가입/로그인 후 예약을 진행합니다.
+- 예약은 `테마 + 날짜`를 선택한 뒤 `reservationSlots` 목록에서 `slotId`를 골라 생성합니다.
+- 내 예약 섹션에서는 현재 로그인한 사용자의 예약만 조회합니다.
+- 관리자 페이지는 테마/시간/예약 관리와 예약 추가를 제공합니다.
+
