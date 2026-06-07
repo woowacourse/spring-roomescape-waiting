@@ -68,8 +68,11 @@ public class ReservationFacade {
         reservationService.deleteWaitingByNameAndReservationId(name, reservationId);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
-        reservationService.updateMyReservation(updateMyReservation, name, reservationId);
+        Reservation reservation = reservationService.updateMyReservation(updateMyReservation, name,
+            reservationId);
+        reservationService.promoteFirstWaiting(reservation);
     }
 
     public List<MyReservationResponse> findReservationsByName(String name) {

@@ -101,11 +101,13 @@ public class ReservationService {
         reservationDao.delete(reservationId);
     }
 
-    public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
+    public Reservation updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
         isReservationExists(updateMyReservation.date(), updateMyReservation.timeId(), reservation.getTheme().getId());
         reservationDao.updateReservation(updateMyReservation.date(), updateMyReservation.timeId(), name, reservationId);
+
+        return reservation;
     }
 
     public List<MyReservationResponse> findAllByName(String name) {
