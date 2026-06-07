@@ -50,7 +50,7 @@ class JdbcReservationRepositoryTest {
     @Test
     void save() {
         // when
-        Reservation saved = saveReservation("홍길동", "도심 탈출", LocalDate.of(2030, 3, 1), LocalTime.of(13, 0));
+        Reservation saved = saveReservation("테스트홍길동", "도심 탈출", LocalDate.of(2030, 3, 1), LocalTime.of(13, 0));
 
         // then
         assertThat(saved.getId()).isNotNull();
@@ -61,12 +61,12 @@ class JdbcReservationRepositoryTest {
     @Test
     void findById() {
         // given
-        Reservation saved = saveReservation("김철수", "미로 탈출", LocalDate.of(2030, 3, 2), LocalTime.of(15, 0));
+        Reservation saved = saveReservation("테스트김철수", "미로 탈출", LocalDate.of(2030, 3, 2), LocalTime.of(15, 0));
 
         // when & then
         assertThat(reservationRepository.findById(saved.getId()))
                 .hasValueSatisfying(found -> {
-                    assertThat(found.getUser().getName()).isEqualTo("김철수");
+                    assertThat(found.getUser().getName()).isEqualTo("테스트김철수");
                     assertThat(found.getSlot().getDate()).isEqualTo(LocalDate.of(2030, 3, 2));
                     assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
                 });
@@ -76,7 +76,7 @@ class JdbcReservationRepositoryTest {
     @Test
     void deleteById() {
         // given
-        Reservation saved = saveReservation("이영희", "우주 탈출", LocalDate.of(2030, 3, 3), LocalTime.of(16, 0));
+        Reservation saved = saveReservation("테스트이영희", "우주 탈출", LocalDate.of(2030, 3, 3), LocalTime.of(16, 0));
 
         // when
         assertThat(reservationRepository.deleteById(saved.getId())).isEqualTo(1);
@@ -89,7 +89,7 @@ class JdbcReservationRepositoryTest {
     @Test
     void existsBySlotIdAndUserId() {
         // given
-        Reservation saved = saveReservation("박민수", "심해 탈출", LocalDate.of(2030, 3, 4), LocalTime.of(11, 0));
+        Reservation saved = saveReservation("테스트박민수", "심해 탈출", LocalDate.of(2030, 3, 4), LocalTime.of(11, 0));
 
         // then
         assertThat(reservationRepository.existsBySlotIdAndUserId(

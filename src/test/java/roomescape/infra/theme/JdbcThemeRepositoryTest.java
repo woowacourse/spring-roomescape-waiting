@@ -86,22 +86,22 @@ class JdbcThemeRepositoryTest {
         );
 
         reservationRepository.save(Reservation.create(
-                userRepository.save(User.create("홍길동")),
+                userRepository.save(User.create("테스트홍길동")),
                 popularSlot,
                 LocalDateTime.of(2030, 1, 1, 9, 0)
         ));
         reservationRepository.save(Reservation.create(
-                userRepository.save(User.create("김철수")),
+                userRepository.save(User.create("테스트김철수")),
                 popularSlot,
                 LocalDateTime.of(2030, 1, 1, 9, 5)
         ));
         reservationRepository.save(Reservation.create(
-                userRepository.save(User.create("이영희")),
+                userRepository.save(User.create("테스트이영희")),
                 popularSlot,
                 LocalDateTime.of(2030, 1, 1, 9, 10)
         ));
         reservationRepository.save(Reservation.create(
-                userRepository.save(User.create("박민수")),
+                userRepository.save(User.create("테스트박민수")),
                 lessPopularSlot,
                 LocalDateTime.of(2030, 1, 2, 9, 0)
         ));

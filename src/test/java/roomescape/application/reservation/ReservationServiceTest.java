@@ -118,11 +118,10 @@ class ReservationServiceTest {
                 ReservationStatus.WAITING,
                 LocalDateTime.of(2030, 1, 1, 10, 5)
         );
-        given(userRepository.findByName("김철수")).willReturn(Optional.of(user));
         given(reservationRepository.findAllReservationsByUserId(10L)).willReturn(List.of(reservation));
 
         // when
-        UserReservationsResponse response = reservationService.getUserReservations("김철수");
+        UserReservationsResponse response = reservationService.getUserReservations(user);
 
         // then
         assertThat(response.username()).isEqualTo("김철수");
@@ -132,9 +131,8 @@ class ReservationServiceTest {
                     assertThat(payload).extracting("slot.date").isEqualTo(LocalDate.of(2030, 1, 3));
                     assertThat(payload).extracting("status").isEqualTo(ReservationStatus.WAITING);
                 });
-        verify(userRepository, times(1)).findByName("김철수");
         verify(reservationRepository, times(1)).findAllReservationsByUserId(10L);
-        verifyNoInteractions(slotRepository);
+        verifyNoInteractions(slotRepository, userRepository);
     }
 
     @DisplayName("기존 사용자가 있는 경우 예약을 생성할 수 있다")
@@ -166,7 +164,6 @@ class ReservationServiceTest {
                 LocalDateTime.of(2030, 1, 1, 10, 5)
         );
 
-        given(userRepository.findByName("홍길동")).willReturn(Optional.of(user));
         given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(slot));
         given(reservationRepository.existsBySlotIdAndUserId(20L, 10L)).willReturn(false);
         given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
@@ -174,15 +171,13 @@ class ReservationServiceTest {
                 List.of(savedReservation, waitingReservation));
 
         // when
-        ReservationCreateResponse response = reservationService.createReservationByUser(request, "홍길동");
+        ReservationCreateResponse response = reservationService.createReservationByUser(request, user);
 
         // then
         assertThat(response.id()).isEqualTo(100L);
         assertThat(response.date()).isEqualTo(LocalDate.of(2030, 1, 1));
         assertThat(response.startAt()).isEqualTo(LocalTime.of(13, 0));
         assertThat((Object) response.theme()).extracting("name").isEqualTo("도심 탈출");
-        verify(userRepository, times(1)).findByName("홍길동");
-        verify(userRepository, never()).save(any(User.class));
         verify(slotRepository, times(1)).findByIdForUpdate(20L);
         verify(reservationRepository, times(1)).existsBySlotIdAndUserId(20L, 10L);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
@@ -197,31 +192,24 @@ class ReservationServiceTest {
         }));
     }
 
-    @DisplayName("사용자가 없으면 예외를 던진다")
+    @DisplayName("예약 슬롯이 없으면 예외를 던진다")
     @Test
-    void createReservationByUserWhenUserNotFound() {
+    void createReservationByUserWhenSlotNotFound() {
         // given
         ReservationCreateRequest request = new ReservationCreateRequest(21L);
-        ReservationSlot slot = ReservationSlot.of(
-                21L,
-                LocalDate.of(2030, 1, 1),
-                ReservationTime.of(31L, LocalTime.of(14, 0)),
-                Theme.of(41L, "미로 탈출", "미로 탈출 설명", "/themes/41")
-        );
-
-        given(userRepository.findByName("박민수")).willReturn(Optional.empty());
+        given(slotRepository.findByIdForUpdate(21L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservationByUser(request, "박민수"))
+        assertThatThrownBy(() -> reservationService.createReservationByUser(request, User.of(99L, "박민수")))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(ErrorCode.USER_NOT_FOUND);
-        verify(userRepository, times(1)).findByName("박민수");
-        verify(slotRepository, never()).findByIdForUpdate(anyLong());
+                .isEqualTo(ErrorCode.RESERVATION_SLOT_NOT_FOUND);
+        verify(slotRepository, times(1)).findByIdForUpdate(21L);
         verify(reservationRepository, never()).existsBySlotIdAndUserId(anyLong(), anyLong());
         verify(reservationRepository, never()).save(any(Reservation.class));
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
         verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 
     @DisplayName("이미 같은 슬롯에 예약이 있으면 예외를 던진다")
@@ -237,21 +225,20 @@ class ReservationServiceTest {
                 Theme.of(42L, "우주 탈출", "우주 탈출 설명", "/themes/42")
         );
 
-        given(userRepository.findByName("홍길동")).willReturn(Optional.of(user));
         given(slotRepository.findByIdForUpdate(22L)).willReturn(Optional.of(slot));
         given(reservationRepository.existsBySlotIdAndUserId(22L, 13L)).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservationByUser(request, "홍길동"))
+        assertThatThrownBy(() -> reservationService.createReservationByUser(request, user))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_ALREADY_EXISTS);
-        verify(userRepository, times(1)).findByName("홍길동");
         verify(slotRepository, times(1)).findByIdForUpdate(22L);
         verify(reservationRepository, times(1)).existsBySlotIdAndUserId(22L, 13L);
         verify(reservationRepository, never()).save(any(Reservation.class));
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
         verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 
     @DisplayName("관리자가 예약을 삭제할 수 있다")
@@ -323,7 +310,7 @@ class ReservationServiceTest {
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
 
         // when
-        reservationService.cancelReservationByUser(1L, "홍길동");
+        reservationService.cancelReservationByUser(1L, User.of(10L, "홍길동"));
 
         // then
         verify(reservationRepository, times(1)).findByIdAndUsername(1L, "홍길동");
@@ -336,23 +323,10 @@ class ReservationServiceTest {
     @Test
     void cancelReservationByUserWhenNotOwner() {
         // given
-        Reservation reservation = Reservation.of(
-                1L,
-                User.of(10L, "홍길동"),
-                ReservationSlot.of(
-                        20L,
-                        LocalDate.of(2030, 1, 2),
-                        ReservationTime.of(30L, LocalTime.of(13, 0)),
-                        Theme.of(40L, "도심 탈출", "도심 탈출 설명", "/themes/40")
-                ),
-                0,
-                ReservationStatus.CONFIRMED,
-                LocalDateTime.of(2030, 1, 1, 10, 0)
-        );
         given(reservationRepository.findByIdAndUsername(1L, "김철수")).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelReservationByUser(1L, "김철수"))
+        assertThatThrownBy(() -> reservationService.cancelReservationByUser(1L, User.of(11L, "김철수")))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);

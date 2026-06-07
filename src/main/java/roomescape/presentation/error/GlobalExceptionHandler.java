@@ -129,7 +129,13 @@ public class GlobalExceptionHandler {
                  THEME_NOT_FOUND,
                  USER_NOT_FOUND -> HttpStatus.NOT_FOUND;
 
+            case USER_ALREADY_EXISTS -> HttpStatus.CONFLICT;
+
             case RESERVATION_NOT_OWNER -> HttpStatus.FORBIDDEN;
+
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
 
             case INTERNAL_SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };

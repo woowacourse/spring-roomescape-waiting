@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
+import roomescape.domain.user.UserRole;
 
 @Repository
 public class JdbcUserRepository implements UserRepository {
@@ -17,11 +18,22 @@ public class JdbcUserRepository implements UserRepository {
     private static final String TABLE_NAME = "users";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_NAME = "name";
-    private static final String FIND_ALL_SQL = "select id, name from users order by id";
-    private static final String FIND_BY_NAME_SQL = "select id, name from users where name = :name";
+    private static final String COLUMN_PASSWORD = "password";
+    private static final String COLUMN_ROLE = "role";
+    private static final String FIND_ALL_SQL = "select id, name, password, role from users order by id";
+    private static final String FIND_BY_NAME_SQL = "select id, name, password, role from users where name = :name";
+    private static final String EXISTS_BY_NAME_SQL = """
+            select exists(
+                select 1
+                from users
+                where name = :name
+            )
+            """;
     private static final RowMapper<User> USER_ROW_MAPPER = (rs, rowNum) -> User.of(
             rs.getLong(COLUMN_ID),
-            rs.getString(COLUMN_NAME)
+            rs.getString(COLUMN_NAME),
+            rs.getString(COLUMN_PASSWORD),
+            UserRole.valueOf(rs.getString(COLUMN_ROLE))
     );
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -37,8 +49,10 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public User save(User user) {
         Number key = insertUser.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue(COLUMN_NAME, user.getName()));
-        return User.of(extractId(key), user.getName());
+                .addValue(COLUMN_NAME, user.getName())
+                .addValue(COLUMN_PASSWORD, user.getPassword())
+                .addValue(COLUMN_ROLE, user.getRole().name()));
+        return User.of(extractId(key), user.getName(), user.getPassword(), user.getRole());
     }
 
     public List<User> findAll() {
@@ -53,6 +67,16 @@ public class JdbcUserRepository implements UserRepository {
                 USER_ROW_MAPPER
         );
         return result.stream().findFirst();
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        Boolean exists = jdbcTemplate.queryForObject(
+                EXISTS_BY_NAME_SQL,
+                new MapSqlParameterSource().addValue(COLUMN_NAME, name),
+                Boolean.class
+        );
+        return Boolean.TRUE.equals(exists);
     }
 
     private long extractId(Number key) {

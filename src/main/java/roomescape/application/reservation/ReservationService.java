@@ -37,20 +37,18 @@ public class ReservationService {
         return ReservationsResponse.of(reservationRepository.findAll());
     }
 
-    public UserReservationsResponse getUserReservations(String username) {
-        User user = findByUsernameOrThrow(username);
-        List<Reservation> userReservations = reservationRepository.findAllReservationsByUserId(user.getId());
-        return UserReservationsResponse.of(username, userReservations);
+    public UserReservationsResponse getUserReservations(User loginUser) {
+        List<Reservation> userReservations = reservationRepository.findAllReservationsByUserId(loginUser.getId());
+        return UserReservationsResponse.of(loginUser.getName(), userReservations);
     }
 
     @Transactional
-    public ReservationCreateResponse createReservationByUser(ReservationCreateRequest request, String username) {
-        User user = findByUsernameOrThrow(username);
+    public ReservationCreateResponse createReservationByUser(ReservationCreateRequest request, User loginUser) {
         ReservationSlot slot = findSlotByIdForUpdateOrThrow(request.slotId());
         LocalDateTime now = LocalDateTime.now(clock);
-        validateReservable(slot, user, now);
+        validateReservable(slot, loginUser, now);
 
-        Reservation savedReservation = reservationRepository.save(Reservation.create(user, slot, now));
+        Reservation savedReservation = reservationRepository.save(Reservation.create(loginUser, slot, now));
 
         recalculateReservationsForSlot(slot);
         return ReservationCreateResponse.from(savedReservation);
@@ -73,20 +71,19 @@ public class ReservationService {
     public ReservationUpdateResponse updateReservationByUser(
             Long id,
             ReservationUpdateRequest request,
-            String username
+            User loginUser
     ) {
         LocalDateTime now = LocalDateTime.now(clock);
 
-        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, username);
-        
+        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, loginUser.getName());
+
         ReservationSlot currentSlot = reservation.getSlot();
         currentSlot.validateIsNotInPast(now);
 
         ReservationSlot targetSlot = findSlotByIdOrThrow(request.slotId());
         validateSameReservationSlot(currentSlot, targetSlot);
 
-        User user = findByUsernameOrThrow(username);
-        validateReservable(targetSlot, user, now);
+        validateReservable(targetSlot, loginUser, now);
 
         Reservation updatedReservation = reservationRepository.update(reservation.moveTo(targetSlot, now));
 
@@ -124,16 +121,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservationByUser(Long id, String username) {
-        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, username);
+    public void cancelReservationByUser(Long id, User loginUser) {
+        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, loginUser.getName());
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationRepository.deleteById(id);
         recalculateReservationsForSlot(reservation.getSlot());
-    }
-
-    private Reservation findReservationByIdAndUsernameOrThrow(Long id, String username) {
-        return reservationRepository.findByIdAndUsername(id, username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void recalculateReservationsForSlot(ReservationSlot slot) {
@@ -162,6 +154,11 @@ public class ReservationService {
 
     private Reservation findByIdOrThrow(Long id) {
         return reservationRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    private Reservation findReservationByIdAndUsernameOrThrow(Long id, String username) {
+        return reservationRepository.findByIdAndUsername(id, username)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 

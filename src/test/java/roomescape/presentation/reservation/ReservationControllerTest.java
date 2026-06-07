@@ -25,10 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.mock.web.MockHttpSession;
 import roomescape.application.reservation.ReservationService;
+import roomescape.common.auth.LoginUserArgumentResolver;
+import roomescape.common.auth.SessionKeys;
+import roomescape.common.config.AuthWebConfig;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
@@ -36,6 +39,7 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserRole;
 import roomescape.presentation.error.GlobalExceptionHandler;
 import roomescape.presentation.reservation.request.ReservationCreateRequest;
 import roomescape.presentation.reservation.response.ReservationCreateResponse;
@@ -43,7 +47,7 @@ import roomescape.presentation.reservation.response.UserReservationsResponse;
 
 @DisplayName("예약 컨트롤러")
 @WebMvcTest(controllers = ReservationController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, AuthWebConfig.class, LoginUserArgumentResolver.class})
 class ReservationControllerTest {
 
     @Autowired
@@ -56,6 +60,10 @@ class ReservationControllerTest {
     @DisplayName("예약자 이름으로 예약 목록을 조회할 수 있다")
     void getUserReservations() throws Exception {
         // given
+        MockHttpSession session = new MockHttpSession();
+        User loginUser = User.of(10L, "홍길동", "", UserRole.USER);
+        session.setAttribute(SessionKeys.LOGIN_USER, loginUser);
+
         Reservation reservation = Reservation.of(
                 1L,
                 User.of(10L, "홍길동"),
@@ -69,11 +77,11 @@ class ReservationControllerTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationService.getUserReservations("홍길동"))
+        given(reservationService.getUserReservations(loginUser))
                 .willReturn(UserReservationsResponse.of("홍길동", List.of(reservation)));
 
         // when & then
-        mockMvc.perform(get("/reservations").param("name", "홍길동"))
+        mockMvc.perform(get("/reservations").session(session))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.username").value("홍길동"))
@@ -84,7 +92,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[0].waitingNumber").value(0))
                 .andExpect(jsonPath("$.reservations[0].status").value("CONFIRMED"));
 
-        verify(reservationService, times(1)).getUserReservations("홍길동");
+        verify(reservationService, times(1)).getUserReservations(loginUser);
     }
 
     @Test
@@ -92,7 +100,8 @@ class ReservationControllerTest {
     void createReservation() throws Exception {
         // given
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute("username", "홍길동");
+        User loginUser = User.of(10L, "홍길동", "", UserRole.USER);
+        session.setAttribute(SessionKeys.LOGIN_USER, loginUser);
         Reservation reservation = Reservation.of(
                 1L,
                 User.of(10L, "홍길동"),
@@ -106,7 +115,7 @@ class ReservationControllerTest {
                 ReservationStatus.WAITING,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationService.createReservationByUser(any(ReservationCreateRequest.class), eq("홍길동")))
+        given(reservationService.createReservationByUser(any(ReservationCreateRequest.class), eq(loginUser)))
                 .willReturn(ReservationCreateResponse.from(reservation));
 
         // when & then
@@ -130,14 +139,18 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.theme.content").value("도심 탈출 설명"))
                 .andExpect(jsonPath("$.theme.url").value("/themes/40"));
 
-        verify(reservationService, times(1)).createReservationByUser(any(ReservationCreateRequest.class), eq("홍길동"));
+        verify(reservationService, times(1)).createReservationByUser(any(ReservationCreateRequest.class), eq(loginUser));
     }
 
     @Test
     @DisplayName("잘못된 예약 요청이면 필드 에러를 내려준다")
     void createReservationWhenValidationFails() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.LOGIN_USER, User.of(10L, "홍길동", "", UserRole.USER));
+
         // when & then
         mockMvc.perform(post("/reservations")
+                        .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("""
@@ -151,7 +164,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("slotId"))
                 .andExpect(jsonPath("$.fieldErrors[0].message").value("슬롯은 필수 선택 사항 입니다. 슬롯을 선택해주세요."));
 
-        verify(reservationService, never()).createReservationByUser(any(ReservationCreateRequest.class), anyString());
+        verify(reservationService, never()).createReservationByUser(any(ReservationCreateRequest.class), any(User.class));
     }
 
     @Test
@@ -159,12 +172,13 @@ class ReservationControllerTest {
     void cancelReservation() throws Exception {
         // given
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute("username", "홍길동");
+        User loginUser = User.of(10L, "홍길동", "", UserRole.USER);
+        session.setAttribute(SessionKeys.LOGIN_USER, loginUser);
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}", 1L).session(session))
                 .andExpect(status().isNoContent());
 
-        verify(reservationService, times(1)).cancelReservationByUser(1L, "홍길동");
+        verify(reservationService, times(1)).cancelReservationByUser(1L, loginUser);
     }
 }

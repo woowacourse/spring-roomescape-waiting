@@ -23,16 +23,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.reservation.ReservationService;
-import roomescape.common.auth.AdminRequestValidator;
+import roomescape.common.auth.AdminAccessInterceptor;
+import roomescape.common.auth.LoginUserArgumentResolver;
+import roomescape.common.auth.SessionKeys;
+import roomescape.common.config.AuthWebConfig;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserRole;
 import roomescape.presentation.error.GlobalExceptionHandler;
 import roomescape.presentation.reservation.request.ReservationUpdateRequest;
 import roomescape.presentation.reservation.response.ReservationUpdateResponse;
@@ -40,7 +45,12 @@ import roomescape.presentation.reservation.response.ReservationsResponse;
 
 @DisplayName("관리자 예약 컨트롤러")
 @WebMvcTest(controllers = AdminReservationController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({
+        GlobalExceptionHandler.class,
+        AuthWebConfig.class,
+        LoginUserArgumentResolver.class,
+        AdminAccessInterceptor.class
+})
 class AdminReservationControllerTest {
 
     @Autowired
@@ -49,13 +59,13 @@ class AdminReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
-    @MockitoBean
-    private AdminRequestValidator validator;
-
     @Test
     @DisplayName("관리자는 전체 예약 목록을 조회할 수 있다")
     void getAllReservation() throws Exception {
         // given
+        MockHttpSession session = new MockHttpSession();
+        User admin = User.of(1L, "admin", "", UserRole.ADMIN);
+        session.setAttribute(SessionKeys.LOGIN_USER, admin);
         Reservation reservation = Reservation.of(
                 1L,
                 User.of(10L, "홍길동"),
@@ -69,11 +79,10 @@ class AdminReservationControllerTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(validator.isUnauthorized(any())).willReturn(false);
         given(reservationService.getAllReservations()).willReturn(ReservationsResponse.of(List.of(reservation)));
 
         // when & then
-        mockMvc.perform(get("/admin/reservations"))
+        mockMvc.perform(get("/admin/reservations").session(session))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.reservations[0].username").value("홍길동"))
@@ -82,7 +91,6 @@ class AdminReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[0].slot.theme.name").value("도심 탈출"))
                 .andExpect(jsonPath("$.reservations[0].status").value("CONFIRMED"));
 
-        verify(validator, times(1)).isUnauthorized(any());
         verify(reservationService, times(1)).getAllReservations();
     }
 
@@ -90,13 +98,13 @@ class AdminReservationControllerTest {
     @DisplayName("권한이 없으면 전체 예약 목록을 조회할 수 없다")
     void getAllReservationWhenUnauthorized() throws Exception {
         // given
-        given(validator.isUnauthorized(any())).willReturn(true);
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.LOGIN_USER, User.of(10L, "홍길동", "", UserRole.USER));
 
         // when & then
-        mockMvc.perform(get("/admin/reservations"))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/admin/reservations").session(session))
+                .andExpect(status().isForbidden());
 
-        verify(validator, times(1)).isUnauthorized(any());
         verifyNoInteractions(reservationService);
     }
 
@@ -104,13 +112,13 @@ class AdminReservationControllerTest {
     @DisplayName("관리자는 예약을 삭제할 수 있다")
     void deleteReservation() throws Exception {
         // given
-        given(validator.isUnauthorized(any())).willReturn(false);
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.LOGIN_USER, User.of(1L, "admin", "", UserRole.ADMIN));
 
         // when & then
-        mockMvc.perform(delete("/admin/reservations/{id}", 1L))
+        mockMvc.perform(delete("/admin/reservations/{id}", 1L).session(session))
                 .andExpect(status().isNoContent());
 
-        verify(validator, times(1)).isUnauthorized(any());
         verify(reservationService, times(1)).deleteReservationByAdmin(1L);
     }
 
@@ -131,12 +139,14 @@ class AdminReservationControllerTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(validator.isUnauthorized(any())).willReturn(false);
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.LOGIN_USER, User.of(1L, "admin", "", UserRole.ADMIN));
         given(reservationService.updateReservationByAdmin(eq(1L), any(ReservationUpdateRequest.class)))
                 .willReturn(ReservationUpdateResponse.from(reservation));
 
         // when & then
         mockMvc.perform(patch("/admin/reservations/{id}", 1L)
+                        .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("""
@@ -151,7 +161,6 @@ class AdminReservationControllerTest {
                 .andExpect(jsonPath("$.startAt").value("13:00"))
                 .andExpect(jsonPath("$.theme.name").value("도심 탈출"));
 
-        verify(validator, times(1)).isUnauthorized(any());
         verify(reservationService, times(1)).updateReservationByAdmin(eq(1L), any(ReservationUpdateRequest.class));
     }
 }
