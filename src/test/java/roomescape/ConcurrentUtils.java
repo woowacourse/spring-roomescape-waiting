@@ -32,4 +32,31 @@ public class ConcurrentUtils {
         executorService.awaitTermination(10, TimeUnit.SECONDS);
     }
 
+    public static void doConcurrent(Runnable... tasks) {
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(tasks.length);
+        ExecutorService executor = Executors.newFixedThreadPool(tasks.length);
+
+        for (Runnable task : tasks) {
+            executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    task.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        startLatch.countDown();
+        try {
+            doneLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        executor.shutdown();
+    }
+
 }

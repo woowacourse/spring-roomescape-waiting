@@ -75,7 +75,6 @@ public class ReservationService {
         return changed.findByName(requesterName);
     }
 
-
     private ReservationSlot getSlotAndReservationsWithLock(Long slotId) {
         ReservationSlot slot = getSlotWithLock(slotId);
         List<Reservation> activeReservations = getReservationsOfSlot(slot);
@@ -91,7 +90,7 @@ public class ReservationService {
         return reservationRepository.findReservedAndWaitingBySlotId(slot.getId());
     }
 
-    private void cancelAndPromote(Reservations changed) {
+    public void cancelAndPromote(Reservations changed) {
         changed.values().forEach(reservationRepository::updateStatus);
     }
 

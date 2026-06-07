@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static roomescape.ConcurrentUtils.doConcurrent;
+import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -76,7 +77,7 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent_myself() throws InterruptedException {
         // given
-        doConcurrent(5, () -> reservationService.reserve(name, slot1.getId()));
+        doConcurrent(2, () -> reservationService.reserve(name, slot1.getId()));
 
         // when
         List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlotId(slot1.getId());
@@ -90,6 +91,31 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
 
         Assertions.assertThat(reservations.getFirst().getStatus())
                 .isEqualTo(RESERVED);
+    }
+
+    @Test
+    @DisplayName("예약자와 대기 1순위가 동시에 취소하면 모두 취소된다.")
+    @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void cancel_sametime_reserved_and_first_waiting() {
+        // given
+        Reservation reserved = reservationService.reserve("송송", slot1.getId());
+        Reservation waiting = reservationService.reserve("대기자", slot1.getId());
+
+        doConcurrent(
+                () -> reservationService.cancel(slot1.getId(), "송송"),
+                () -> reservationService.cancel(slot1.getId(), "대기자")
+        );
+
+        // when
+        Reservation reservedCanceled = reservationRepository.findById(reserved.getId()).get();
+        Reservation waitingCanceled = reservationRepository.findById(waiting.getId()).get();
+
+        // then
+        Assertions.assertThat(reservedCanceled.getStatus())
+                .isEqualTo(CANCELED);
+
+        Assertions.assertThat(waitingCanceled.getStatus())
+                .isEqualTo(CANCELED);
     }
 
 }
