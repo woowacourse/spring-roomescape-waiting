@@ -7,8 +7,10 @@ import roomescape.auth.LoginMember;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
 import roomescape.dto.ReservationResult;
+import roomescape.dto.StoreReservationResult;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.StoreReservationResponse;
 import roomescape.service.ReservationService;
 
 import java.util.List;
@@ -24,10 +26,10 @@ public class AdminStoreReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getStoreReservations(
+    public ResponseEntity<List<StoreReservationResponse>> getStoreReservations(
             @LoginMember(role = Role.MANAGER) Member manager) {
-        List<ReservationResult> reservations = reservationService.findByStoreId(manager.getStoreId());
-        return ResponseEntity.ok().body(ReservationResponse.fromAll(reservations));
+        List<StoreReservationResult> reservations = reservationService.findByStoreId(manager.getStoreId());
+        return ResponseEntity.ok().body(StoreReservationResponse.fromAll(reservations));
     }
 
     @PatchMapping("/{id}")

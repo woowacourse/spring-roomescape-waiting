@@ -561,6 +561,10 @@ async function loadManagerReservations() {
                 <td>${r.date}</td>
                 <td>${r.time.startAt.slice(0, 5)}</td>
                 <td>${r.theme.name}</td>
+                <td>
+                    <div class="cell-main">${r.member.name}</div>
+                    <div class="cell-sub">${r.member.email}</div>
+                </td>
                 <td class="actions">
                     <button type="button" class="btn btn-sm btn-secondary" data-edit-id="${r.id}" data-edit-date="${r.date}" data-edit-time-id="${r.time.id}">변경</button>
                     <button type="button" class="btn btn-sm btn-danger" data-delete-id="${r.id}">삭제</button>

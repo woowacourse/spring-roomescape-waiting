@@ -584,6 +584,16 @@ table.reservation-table {
     justify-content: flex-end;
 }
 
+.reservation-table .cell-main {
+    font-weight: 600;
+}
+
+.reservation-table .cell-sub {
+    margin-top: 2px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
 /* ─── modal ──────────────────────────────── */
 
 .modal-overlay {

@@ -13,6 +13,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
 import roomescape.dto.CreatedWaitResult;
 import roomescape.dto.ReservationResult;
+import roomescape.dto.StoreReservationResult;
 import roomescape.dto.WaitingResponseResult;
 import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
@@ -47,7 +48,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResult> findByStoreId(Long storeId) {
+    public List<StoreReservationResult> findByStoreId(Long storeId) {
         return reservationDao.findByStoreId(storeId);
     }
 

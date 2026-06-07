@@ -94,6 +94,26 @@ public class AdminStoreReservationControllerTest {
                 INSERT_SINGLE_THEME_SQL,
                 INSERT_TWO_RESERVATIONS_SQL
         })
+        void 예약_목록에_예약한_손님_정보가_포함된다() {
+            String cookie = loginAndGetCookie(GANGNAM_MANAGER_EMAIL);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().get("/api/v1/admin/store/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("[0].member.name", is("일반유저"))
+                    .body("[0].member.email", is(REGULAR_USER_EMAIL));
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_TWO_STORES_SQL,
+                INSERT_MEMBERS_SQL,
+                INSERT_SINGLE_TIME_SQL,
+                INSERT_SINGLE_THEME_SQL,
+                INSERT_TWO_RESERVATIONS_SQL
+        })
         void 다른_매장_매니저는_자기_매장의_예약만_본다() {
             String cookie = loginAndGetCookie(HONGDAE_MANAGER_EMAIL);
 
