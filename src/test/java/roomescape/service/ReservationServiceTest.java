@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import common.exception.ErrorCode;
@@ -174,6 +175,28 @@ class ReservationServiceTest {
             Assertions.assertThatThrownBy(() -> reservationService.update(request, EXISTS_ID, LocalDateTime.MAX))
                     .isInstanceOf(RoomEscapeException.class)
                     .hasMessage(ErrorCode.PAST_RESERVATION_NOT_ALLOWED.getMessage());
+        }
+
+        @Test
+        void WAITING_예약을_수정하면_승격이_발생하지_않는다() {
+            Reservation waiting = RoomEscapeFixture.reservation().id(2L).name("대기자")
+                    .status(Status.WAITING).createdAt(NOW).build();
+            Reservation updated = RoomEscapeFixture.reservation().id(2L).name("대기자")
+                    .status(Status.WAITING).createdAt(NOW).build();
+
+            given(reservationRepository.findById(2L)).willReturn(Optional.of(waiting));
+            given(slotService.findOrCreate(any(), anyLong(), anyLong())).willReturn(SLOT);
+            given(reservationRepository.findAllBySlot(any()))
+                    .willReturn(List.of())
+                    .willReturn(List.of(updated));
+            given(reservationRepository.update(anyLong(), any())).willReturn(updated);
+
+            ReservationUpdateRequest request = new ReservationUpdateRequest("대기자",
+                    LocalDate.of(2099, 11, 11), 1L, 1L);
+
+            reservationService.update(request, 2L, LocalDateTime.MIN);
+
+            verify(reservationRepository, times(0)).updateStatus(anyLong(), any());
         }
     }
 
