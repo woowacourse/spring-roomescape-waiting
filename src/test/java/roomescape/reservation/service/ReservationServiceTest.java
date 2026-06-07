@@ -10,6 +10,7 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -390,9 +391,7 @@ class ReservationServiceTest {
         ReservationTime time = saveReservationTime(14);
         return reservationRepository.save(Reservation.create(
                 NAME,
-                PAST_DATE,
-                time,
-                saveTheme(),
+                ReservationSlot.of(saveTheme(), PAST_DATE, time),
                 LocalDateTime.of(PAST_DATE, time.getStartAt()).minusMinutes(1)
         ));
     }

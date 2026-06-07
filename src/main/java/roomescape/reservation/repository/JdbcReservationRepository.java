@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InfrastructureException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -42,15 +43,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getString("theme_description"),
                 resultSet.getString("theme_thumbnail")
         );
+        ReservationSlot slot = new ReservationSlot(
+                theme,
+                resultSet.getDate("date").toLocalDate(),
+                reservationTime
+        );
 
         return new Reservation(
                 resultSet.getLong("reservation_id"),
                 fromDbValue(resultSet.getString("status")),
                 resultSet.getObject("waiting_rank", Long.class),
                 resultSet.getString("name"),
-                resultSet.getDate("date").toLocalDate(),
-                reservationTime,
-                theme
+                slot
         );
     };
 
@@ -519,7 +523,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsConflict(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean existsConflict(String name, ReservationSlot slot) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -528,11 +532,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                name,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
+        ));
     }
 
     @Override
-    public boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id) {
+    public boolean existsConflictExcluding(String name, ReservationSlot slot, Long id) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -541,7 +552,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId, id));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                name,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId(),
+                id
+        ));
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -162,9 +163,7 @@ class ReservationTimeServiceTest {
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(Reservation.create(
                 name,
-                date,
-                time,
-                theme,
+                ReservationSlot.of(theme, date, time),
                 LocalDateTime.of(date, time.getStartAt()).minusMinutes(1)
         ));
     }
