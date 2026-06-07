@@ -2,11 +2,13 @@ package roomescape.fixture;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.dto.WaitingCreateCommand;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
 
 public class ReservationFixture {
@@ -50,6 +52,16 @@ public class ReservationFixture {
         return new WaitingCreateCommand(KAYA, FUTURE_RESERVATION_DATE, themeId, timeId, now);
     }
 
+    public static WaitingCreateCommand futurePinoWaitingCreateCommand(Long themeId, Long timeId,
+                                                                      LocalDateTime now) {
+        return new WaitingCreateCommand(PINO, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+    }
+
+    public static WaitingCreateCommand futureNeoWaitingCreateCommand(Long themeId, Long timeId,
+                                                                     LocalDateTime now) {
+        return new WaitingCreateCommand(NEO, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+    }
+
     public static ReservationUpdateCommand futureStarkUpdateCommand(Long timeId, LocalDateTime now) {
         return new ReservationUpdateCommand(FUTURE_RESERVATION_UPDATE_DATE, timeId, now);
     }
@@ -81,6 +93,15 @@ public class ReservationFixture {
     public static User userNameNeo() {
         return User.builder()
                 .name(NEO)
+                .build();
+    }
+
+    public static ReservationSlot futureReservationSlot(Long themeId, Long timeId, LocalTime startAt) {
+        return ReservationSlot.builder()
+                .date(FUTURE_RESERVATION_DATE)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(startAt)
                 .build();
     }
 
