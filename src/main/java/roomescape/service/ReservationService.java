@@ -136,22 +136,24 @@ public class ReservationService {
     @Transactional
     public Reservation updateMyReservationAndPromoteWaitlist(Long id, String name, ReservationUpdateRequest request) {
         Reservation original = getReservation(id);
+        updateMyReservation(name, request, original);
+
+        promoteFirstWaitlistToReservation(original);
+        return getReservation(id);
+    }
+
+    private void updateMyReservation(String name, ReservationUpdateRequest request, Reservation original) {
         Reservation updated = original.changeBy(
                 name,
                 LocalDateTime.now(),
                 request.date(),
                 getReservationTime(request.timeId())
         );
-        verifyNoConflict(updated);
-        reservationRepository.updateDateTime(updated);
-
-        promoteFirstWaitlistToReservation(original);
-        return getReservation(id);
-    }
-
-    private void verifyNoConflict(Reservation reservation) {
-        if (reservationRepository.existsBy(reservation)) {
+        try {
+            reservationRepository.updateDateTime(updated);
+        } catch (ReservationSlotAlreadyOccupiedException e) {
             throw new RoomEscapeException(DUPLICATE_RESERVATION, "이미 같은 시점·테마에 예약이 존재합니다.");
         }
     }
+
 }

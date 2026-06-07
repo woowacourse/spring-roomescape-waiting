@@ -254,6 +254,17 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void updateDateTime(Reservation updated) {
+        try {
+            update(updated);
+        } catch (DuplicateKeyException e) {
+            if (isReservationSlotUniqueViolation(e)) {
+                throw new ReservationSlotAlreadyOccupiedException(e);
+            }
+            throw e;
+        }
+    }
+
+    private void update(Reservation updated) {
         String sql = """
                 UPDATE reservation
                 SET date = ?, time_id = ?
