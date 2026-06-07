@@ -1,6 +1,10 @@
 package roomescape.repository;
 
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -57,6 +61,18 @@ class ReservationRepositoryTest {
             assertThat(saved.getId()).isNotNull();
             assertThat(saved.getName()).isEqualTo("검프");
             assertThat(saved.getReservationDate().getDate()).isEqualTo(date);
+        }
+
+        @Test
+        void 동일한_날짜_시간_테마로_중복_저장하면_TIME_ALREADY_RESERVED_예외발생() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            reservationRepository.save(Reservation.create("검프", date, reservationTime, theme));
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.save(Reservation.create("리오", date, reservationTime, theme)))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
         }
     }
 

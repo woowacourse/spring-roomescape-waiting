@@ -141,22 +141,6 @@ class ReservationServiceTest {
                     .isInstanceOf(BusinessException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
         }
-
-        @Test
-        void 동시_요청으로_유니크_제약조건_위반시_예외발생() {
-            // given
-            ReservationCreateCommand request = new ReservationCreateCommand("오리", futureDate, 1L, 1L);
-
-            given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
-            given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-            given(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
-            given(reservationRepository.save(any(Reservation.class))).willThrow(new DataIntegrityViolationException("unique constraint"));
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.create(request))
-                    .isInstanceOf(BusinessException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
-        }
     }
 
     @Nested

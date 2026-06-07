@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
@@ -41,12 +40,8 @@ public class ReservationService {
 
         validateNotDuplicated(reservation);
 
-        try {
-            final Reservation savedReservation = reservationRepository.save(reservation);
-            return ReservationResult.from(savedReservation);
-        } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
-        }
+        final Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationResult.from(savedReservation);
     }
 
     public AvailableDateResult getReservationOptions() {
