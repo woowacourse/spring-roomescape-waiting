@@ -1,6 +1,8 @@
 package roomescape.presentation.reservation;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,6 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import roomescape.application.reservation.ReservationService;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
@@ -76,7 +79,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.username").value("홍길동"))
                 .andExpect(jsonPath("$.reservations[0].id").value(1))
                 .andExpect(jsonPath("$.reservations[0].slot.date").value("2030-01-02"))
-                .andExpect(jsonPath("$.reservations[0].slot.startAt").value("13:00"))
+                .andExpect(jsonPath("$.reservations[0].slot.startAt.startAt").value("13:00"))
                 .andExpect(jsonPath("$.reservations[0].slot.theme.name").value("도심 탈출"))
                 .andExpect(jsonPath("$.reservations[0].waitingNumber").value(0))
                 .andExpect(jsonPath("$.reservations[0].status").value("CONFIRMED"));
@@ -88,6 +91,8 @@ class ReservationControllerTest {
     @DisplayName("예약을 생성할 수 있다")
     void createReservation() throws Exception {
         // given
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("username", "홍길동");
         Reservation reservation = Reservation.of(
                 1L,
                 User.of(10L, "홍길동"),
@@ -101,19 +106,17 @@ class ReservationControllerTest {
                 ReservationStatus.WAITING,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationService.createReservation(any(ReservationCreateRequest.class)))
+        given(reservationService.createReservationByUser(any(ReservationCreateRequest.class), eq("홍길동")))
                 .willReturn(ReservationCreateResponse.from(reservation));
 
         // when & then
         mockMvc.perform(post("/reservations")
+                        .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "username": "홍길동",
-                                  "date": "2030-01-01",
-                                  "timeId": 30,
-                                  "themeId": 40
+                                  "slotId": 20
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -127,7 +130,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.theme.content").value("도심 탈출 설명"))
                 .andExpect(jsonPath("$.theme.url").value("/themes/40"));
 
-        verify(reservationService, times(1)).createReservation(any(ReservationCreateRequest.class));
+        verify(reservationService, times(1)).createReservationByUser(any(ReservationCreateRequest.class), eq("홍길동"));
     }
 
     @Test
@@ -139,25 +142,27 @@ class ReservationControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "date": "2030-01-01",
-                                  "timeId": 30,
-                                  "themeId": 40
+                                  "username": "홍길동"
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value(ErrorCode.INPUT_FORMAT_ERROR.name()))
-                .andExpect(jsonPath("$.fieldErrors[0].field").value("username"))
-                .andExpect(jsonPath("$.fieldErrors[0].message").value("이름은 비어있을 수 없습니다."));
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("slotId"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("슬롯은 필수 선택 사항 입니다. 슬롯을 선택해주세요."));
 
-        verify(reservationService, never()).createReservation(any(ReservationCreateRequest.class));
+        verify(reservationService, never()).createReservationByUser(any(ReservationCreateRequest.class), anyString());
     }
 
     @Test
     @DisplayName("예약을 취소할 수 있다")
     void cancelReservation() throws Exception {
+        // given
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("username", "홍길동");
+
         // when & then
-        mockMvc.perform(delete("/reservations/{id}", 1L).param("name", "홍길동"))
+        mockMvc.perform(delete("/reservations/{id}", 1L).session(session))
                 .andExpect(status().isNoContent());
 
         verify(reservationService, times(1)).cancelReservationByUser(1L, "홍길동");

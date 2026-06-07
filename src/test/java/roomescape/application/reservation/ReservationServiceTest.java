@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
@@ -140,14 +139,9 @@ class ReservationServiceTest {
 
     @DisplayName("기존 사용자가 있는 경우 예약을 생성할 수 있다")
     @Test
-    void createReservationWithExistingUser() {
+    void createReservationByUserWithExistingUser() {
         // given
-        ReservationCreateRequest request = new ReservationCreateRequest(
-                "홍길동",
-                LocalDate.of(2030, 1, 1),
-                30L,
-                40L
-        );
+        ReservationCreateRequest request = new ReservationCreateRequest(20L);
         User user = User.of(10L, "홍길동");
         ReservationSlot slot = ReservationSlot.of(
                 20L,
@@ -173,14 +167,14 @@ class ReservationServiceTest {
         );
 
         given(userRepository.findByName("홍길동")).willReturn(Optional.of(user));
-        given(slotRepository.findByScheduleForUpdate(30L, LocalDate.of(2030, 1, 1), 40L)).willReturn(Optional.of(slot));
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(slot));
         given(reservationRepository.existsBySlotIdAndUserId(20L, 10L)).willReturn(false);
         given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(
                 List.of(savedReservation, waitingReservation));
 
         // when
-        ReservationCreateResponse response = reservationService.createReservation(request);
+        ReservationCreateResponse response = reservationService.createReservationByUser(request, "홍길동");
 
         // then
         assertThat(response.id()).isEqualTo(100L);
@@ -189,7 +183,7 @@ class ReservationServiceTest {
         assertThat((Object) response.theme()).extracting("name").isEqualTo("도심 탈출");
         verify(userRepository, times(1)).findByName("홍길동");
         verify(userRepository, never()).save(any(User.class));
-        verify(slotRepository, times(1)).findByScheduleForUpdate(30L, LocalDate.of(2030, 1, 1), 40L);
+        verify(slotRepository, times(1)).findByIdForUpdate(20L);
         verify(reservationRepository, times(1)).existsBySlotIdAndUserId(20L, 10L);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
         verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
@@ -203,67 +197,38 @@ class ReservationServiceTest {
         }));
     }
 
-    @DisplayName("사용자가 없으면 생성 후 재조회해서 예약을 생성할 수 있다")
+    @DisplayName("사용자가 없으면 예외를 던진다")
     @Test
-    void createReservationCreatesUserAfterDuplicateKey() {
+    void createReservationByUserWhenUserNotFound() {
         // given
-        ReservationCreateRequest request = new ReservationCreateRequest(
-                "박민수",
-                LocalDate.of(2030, 1, 1),
-                31L,
-                41L
-        );
-        User user = User.of(12L, "박민수");
+        ReservationCreateRequest request = new ReservationCreateRequest(21L);
         ReservationSlot slot = ReservationSlot.of(
                 21L,
                 LocalDate.of(2030, 1, 1),
                 ReservationTime.of(31L, LocalTime.of(14, 0)),
                 Theme.of(41L, "미로 탈출", "미로 탈출 설명", "/themes/41")
         );
-        Reservation savedReservation = Reservation.of(
-                102L,
-                user,
-                slot,
-                null,
-                ReservationStatus.WAITING,
-                LocalDateTime.of(2030, 1, 1, 10, 0)
-        );
 
-        given(userRepository.findByName("박민수"))
-                .willReturn(Optional.empty())
-                .willReturn(Optional.of(user));
-        given(userRepository.save(any(User.class))).willThrow(new DuplicateKeyException("duplicate"));
-        given(slotRepository.findByScheduleForUpdate(31L, LocalDate.of(2030, 1, 1), 41L)).willReturn(Optional.of(slot));
-        given(reservationRepository.existsBySlotIdAndUserId(21L, 12L)).willReturn(false);
-        given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
-        given(reservationRepository.findAllBySlotIdOrderByReservedAt(21L)).willReturn(List.of());
+        given(userRepository.findByName("박민수")).willReturn(Optional.empty());
 
-        // when
-        ReservationCreateResponse response = reservationService.createReservation(request);
-
-        // then
-        assertThat(response.id()).isEqualTo(102L);
-        assertThat(response.date()).isEqualTo(LocalDate.of(2030, 1, 1));
-        assertThat(response.startAt()).isEqualTo(LocalTime.of(14, 0));
-        verify(userRepository, times(2)).findByName("박민수");
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(slotRepository, times(1)).findByScheduleForUpdate(31L, LocalDate.of(2030, 1, 1), 41L);
-        verify(reservationRepository, times(1)).existsBySlotIdAndUserId(21L, 12L);
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
-        verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(21L);
+        // when & then
+        assertThatThrownBy(() -> reservationService.createReservationByUser(request, "박민수"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.USER_NOT_FOUND);
+        verify(userRepository, times(1)).findByName("박민수");
+        verify(slotRepository, never()).findByIdForUpdate(anyLong());
+        verify(reservationRepository, never()).existsBySlotIdAndUserId(anyLong(), anyLong());
+        verify(reservationRepository, never()).save(any(Reservation.class));
+        verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
         verify(reservationRepository, never()).batchUpdate(any());
     }
 
     @DisplayName("이미 같은 슬롯에 예약이 있으면 예외를 던진다")
     @Test
-    void createReservationWhenAlreadyExists() {
+    void createReservationByUserWhenAlreadyExists() {
         // given
-        ReservationCreateRequest request = new ReservationCreateRequest(
-                "홍길동",
-                LocalDate.of(2030, 1, 1),
-                32L,
-                42L
-        );
+        ReservationCreateRequest request = new ReservationCreateRequest(22L);
         User user = User.of(13L, "홍길동");
         ReservationSlot slot = ReservationSlot.of(
                 22L,
@@ -273,16 +238,16 @@ class ReservationServiceTest {
         );
 
         given(userRepository.findByName("홍길동")).willReturn(Optional.of(user));
-        given(slotRepository.findByScheduleForUpdate(32L, LocalDate.of(2030, 1, 1), 42L)).willReturn(Optional.of(slot));
+        given(slotRepository.findByIdForUpdate(22L)).willReturn(Optional.of(slot));
         given(reservationRepository.existsBySlotIdAndUserId(22L, 13L)).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservation(request))
+        assertThatThrownBy(() -> reservationService.createReservationByUser(request, "홍길동"))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_ALREADY_EXISTS);
         verify(userRepository, times(1)).findByName("홍길동");
-        verify(slotRepository, times(1)).findByScheduleForUpdate(32L, LocalDate.of(2030, 1, 1), 42L);
+        verify(slotRepository, times(1)).findByIdForUpdate(22L);
         verify(reservationRepository, times(1)).existsBySlotIdAndUserId(22L, 13L);
         verify(reservationRepository, never()).save(any(Reservation.class));
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
@@ -353,9 +318,7 @@ class ReservationServiceTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(slotRepository.findByScheduleForUpdate(30L, LocalDate.of(2030, 1, 2), 40L)).willReturn(
-                Optional.of(reservation.getSlot()));
+        given(reservationRepository.findByIdAndUsername(1L, "홍길동")).willReturn(Optional.of(reservation));
         given(reservationRepository.deleteById(1L)).willReturn(1);
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
 
@@ -363,8 +326,7 @@ class ReservationServiceTest {
         reservationService.cancelReservationByUser(1L, "홍길동");
 
         // then
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(slotRepository, times(1)).findByScheduleForUpdate(30L, LocalDate.of(2030, 1, 2), 40L);
+        verify(reservationRepository, times(1)).findByIdAndUsername(1L, "홍길동");
         verify(reservationRepository, times(1)).deleteById(1L);
         verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
         verify(reservationRepository, never()).batchUpdate(any());
@@ -387,15 +349,14 @@ class ReservationServiceTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.findByIdAndUsername(1L, "김철수")).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reservationService.cancelReservationByUser(1L, "김철수"))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(ErrorCode.RESERVATION_NOT_OWNER);
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(slotRepository, never()).findByScheduleForUpdate(anyLong(), any(), anyLong());
+                .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
+        verify(reservationRepository, times(1)).findByIdAndUsername(1L, "김철수");
         verify(reservationRepository, never()).deleteById(anyLong());
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
     }
