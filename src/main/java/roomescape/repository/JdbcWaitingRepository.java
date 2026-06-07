@@ -185,12 +185,12 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Optional<Waiting> findPromotableWaitingBySlot(ReservationSlot slot) {
         String sql = """
                 SELECT w.id AS id,
-                            w.name,
-                            w.date,
-                            w.waiting_number,
-                            t.id AS reservation_time_id,
-                            t.start_at AS time_value,
-                            th.id AS reservation_theme_id,
+                           w.name,
+                           w.date,
+                           w.waiting_number,
+                           t.id AS reservation_time_id,
+                           t.start_at AS time_value,
+                           th.id AS reservation_theme_id,
                            th.name AS reservation_theme_name,
                            th.description AS reservation_theme_description,
                            th.image_url AS reservation_theme_image_url
@@ -202,6 +202,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 WHERE w.date = :date
                     AND t.id = :time_id
                     AND th.id = :theme_id
+                ORDER BY w.waiting_number ASC
                 LIMIT 1;
                 """;
 
