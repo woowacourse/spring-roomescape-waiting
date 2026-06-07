@@ -18,7 +18,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationApiTest {
+public class ReservationAcceptanceTest {
 
   @LocalServerPort
   int port;
