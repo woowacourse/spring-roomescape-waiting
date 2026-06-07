@@ -142,7 +142,10 @@ public class ReservationService {
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         } catch (DataIntegrityViolationException exception) {
-            throw new NotFoundException("선택한 예약 시간 또는 테마가 존재하지 않습니다. 다른 예약 정보를 선택해주세요.");
+            if (hasMissingReservationDependency(reservation)) {
+                throw new NotFoundException("선택한 예약 시간 또는 테마가 존재하지 않습니다. 다른 예약 정보를 선택해주세요.");
+            }
+            throw exception;
         }
     }
 
@@ -153,7 +156,24 @@ public class ReservationService {
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         } catch (DataIntegrityViolationException exception) {
-            throw new NotFoundException("선택한 예약 시간이 존재하지 않습니다. 다른 시간을 선택해주세요.");
+            if (hasMissingTime(reservation)) {
+                throw new NotFoundException("선택한 예약 시간이 존재하지 않습니다. 다른 시간을 선택해주세요.");
+            }
+            throw exception;
         }
+    }
+
+    private boolean hasMissingReservationDependency(Reservation reservation) {
+        return hasMissingTime(reservation) || hasMissingTheme(reservation);
+    }
+
+    private boolean hasMissingTime(Reservation reservation) {
+        Long timeId = reservation.getSlot().time().getId();
+        return !reservationTimeRepository.existsById(timeId);
+    }
+
+    private boolean hasMissingTheme(Reservation reservation) {
+        Long themeId = reservation.getSlot().theme().getId();
+        return !themeRepository.existsById(themeId);
     }
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -36,6 +37,7 @@ class ReservationServiceTest {
     private static final LocalDate NEXT_FUTURE_DATE = TODAY.plusDays(2);
     private static final LocalDate PAST_DATE = TODAY.minusDays(1);
     private static final long NOT_FOUND_ID = 37L;
+    private static final String TOO_LONG_NAME = "a".repeat(256);
 
     @Autowired
     private ReservationService reservationService;
@@ -145,6 +147,19 @@ class ReservationServiceTest {
         // when, then
         assertThatThrownBy(() -> reservationService.create(NAME, FUTURE_DATE, time.getId(), NOT_FOUND_ID))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("예약 시간과 테마가 존재하면 다른 무결성 예외를 NotFound로 변환하지 않는다.")
+    public void create_fail_whenIntegrityViolationIsNotMissingDependency() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.create(TOO_LONG_NAME, FUTURE_DATE, time.getId(), theme.getId()))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .isNotInstanceOf(NotFoundException.class);
     }
 
     @Test
