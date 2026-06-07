@@ -69,7 +69,7 @@ public class ReservationWaiting {
         }
     }
 
-    public Reservation toReservation() {
+    public Reservation promoteToReservation() {
         return new Reservation(this.name, this.slot);
     }
 }

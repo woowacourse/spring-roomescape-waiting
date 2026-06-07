@@ -2,7 +2,6 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.dto.reservation.MyReservationResponse;
@@ -114,7 +113,7 @@ public class ReservationService {
 
         reservationWaitingQueryDao.findFirstWaitingBySlot(reservation.getSlot())
                 .ifPresent(waiting -> {
-                    reservationUpdateDao.insert(waiting.toReservation());
+                    reservationUpdateDao.insert(waiting.promoteToReservation());
                     reservationWaitingUpdateDao.delete(waiting.getId());
                         });
     }
