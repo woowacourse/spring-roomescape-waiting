@@ -7,6 +7,7 @@ import java.util.List;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public record UserReservationsResponse(
@@ -41,19 +42,27 @@ public record UserReservationsResponse(
 
     private record ReservationSlotPayload(
             Long id,
-            ThemePayload theme,
             LocalDate date,
-            @JsonFormat(pattern = "HH:mm")
-            LocalTime startAt
+            ReservationTimePayload startAt,
+            ThemePayload theme
     ) {
-
         private static ReservationSlotPayload from(ReservationSlot slot) {
             return new ReservationSlotPayload(
                     slot.getId(),
-                    ThemePayload.from(slot.getTheme()),
                     slot.getDate(),
-                    slot.getTime().getStartAt()
+                    ReservationTimePayload.from(slot.getTime()),
+                    ThemePayload.from(slot.getTheme())
             );
+        }
+    }
+
+    private record ReservationTimePayload(
+            Long id,
+            @JsonFormat(pattern = "HH:mm")
+            LocalTime startAt
+    ) {
+        private static ReservationTimePayload from(ReservationTime time) {
+            return new ReservationTimePayload(time.getId(), time.getStartAt());
         }
     }
 
@@ -63,7 +72,6 @@ public record UserReservationsResponse(
             String content,
             String url
     ) {
-
         private static ThemePayload from(Theme theme) {
             return new ThemePayload(
                     theme.getId(),

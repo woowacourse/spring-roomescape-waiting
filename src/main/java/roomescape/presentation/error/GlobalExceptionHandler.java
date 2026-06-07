@@ -119,6 +119,7 @@ public class GlobalExceptionHandler {
         return switch (errorCode) {
             case RESERVATION_SLOT_IN_PAST,
                  RESERVATION_ALREADY_EXISTS,
+                 RESERVATION_SAME_SLOT,
                  RESERVATION_TIME_IN_USE,
                  THEME_IN_USE, INPUT_FORMAT_ERROR -> HttpStatus.BAD_REQUEST;
 

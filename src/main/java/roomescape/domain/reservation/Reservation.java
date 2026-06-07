@@ -61,4 +61,8 @@ public class Reservation {
     public Reservation updateWaiting(int waitingNumber) {
         return new Reservation(id, user, slot, waitingNumber, ReservationStatus.WAITING, reservedAt);
     }
+
+    public Reservation moveTo(ReservationSlot newSlot, LocalDateTime newReservedAt) {
+        return new Reservation(id, user, newSlot, waitingNumber, status, newReservedAt);
+    }
 }

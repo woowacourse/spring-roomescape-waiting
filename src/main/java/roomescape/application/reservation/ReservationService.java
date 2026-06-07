@@ -7,7 +7,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
 import roomescape.domain.reservation.Reservation;
@@ -16,8 +15,11 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
+import roomescape.presentation.reservation.request.AdminReservationCreateRequest;
 import roomescape.presentation.reservation.request.ReservationCreateRequest;
+import roomescape.presentation.reservation.request.ReservationUpdateRequest;
 import roomescape.presentation.reservation.response.ReservationCreateResponse;
+import roomescape.presentation.reservation.response.ReservationUpdateResponse;
 import roomescape.presentation.reservation.response.ReservationsResponse;
 import roomescape.presentation.reservation.response.UserReservationsResponse;
 
@@ -42,20 +44,76 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCreateResponse createReservation(ReservationCreateRequest request) {
-        User user = findOrCreateByUsername(request.username());
-
-        ReservationSlot slot = slotRepository.findByScheduleForUpdate(request.timeId(), request.date(), request.themeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND)); // TODO: 슬롯 배치 생성 추가
-
+    public ReservationCreateResponse createReservationByUser(ReservationCreateRequest request, String username) {
+        User user = findByUsernameOrThrow(username);
+        ReservationSlot slot = findSlotByIdForUpdateOrThrow(request.slotId());
         LocalDateTime now = LocalDateTime.now(clock);
         validateReservable(slot, user, now);
 
         Reservation savedReservation = reservationRepository.save(Reservation.create(user, slot, now));
 
         recalculateReservationsForSlot(slot);
-
         return ReservationCreateResponse.from(savedReservation);
+    }
+
+    @Transactional
+    public ReservationCreateResponse createReservationByAdmin(AdminReservationCreateRequest request) {
+        User user = findByUsernameOrThrow(request.username());
+        ReservationSlot slot = findSlotByIdOrThrow(request.slotId());
+        LocalDateTime now = LocalDateTime.now(clock);
+        validateReservationNotDuplicated(slot, user);
+
+        Reservation savedReservation = reservationRepository.save(Reservation.create(user, slot, now));
+
+        recalculateReservationsForSlot(slot);
+        return ReservationCreateResponse.from(savedReservation);
+    }
+
+    @Transactional
+    public ReservationUpdateResponse updateReservationByUser(
+            Long id,
+            ReservationUpdateRequest request,
+            String username
+    ) {
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, username);
+        
+        ReservationSlot currentSlot = reservation.getSlot();
+        currentSlot.validateIsNotInPast(now);
+
+        ReservationSlot targetSlot = findSlotByIdOrThrow(request.slotId());
+        validateSameReservationSlot(currentSlot, targetSlot);
+
+        User user = findByUsernameOrThrow(username);
+        validateReservable(targetSlot, user, now);
+
+        Reservation updatedReservation = reservationRepository.update(reservation.moveTo(targetSlot, now));
+
+        recalculateReservationsForSlot(currentSlot);
+        recalculateReservationsForSlot(targetSlot);
+
+        return ReservationUpdateResponse.from(updatedReservation);
+    }
+
+    @Transactional
+    public ReservationUpdateResponse updateReservationByAdmin(Long id, ReservationUpdateRequest request) {
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        Reservation reservation = findByIdOrThrow(id);
+        ReservationSlot currentSlot = reservation.getSlot();
+
+        ReservationSlot targetSlot = findSlotByIdOrThrow(request.slotId());
+        validateSameReservationSlot(currentSlot, targetSlot);
+
+        validateReservationNotDuplicated(targetSlot, reservation.getUser());
+
+        Reservation updatedReservation = reservationRepository.update(reservation.moveTo(targetSlot, now));
+
+        recalculateReservationsForSlot(currentSlot);
+        recalculateReservationsForSlot(targetSlot);
+
+        return ReservationUpdateResponse.from(updatedReservation);
     }
 
     @Transactional
@@ -66,35 +124,16 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservationByUser(Long id, String name) {
-        Reservation reservation = findByIdOrThrow(id);
-        validateOwner(reservation, name);
-        lockReservationSlot(reservation);
+    public void cancelReservationByUser(Long id, String username) {
+        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, username);
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationRepository.deleteById(id);
-
         recalculateReservationsForSlot(reservation.getSlot());
     }
 
-    private User findOrCreateByUsername(String username) {
-        return userRepository.findByName(username)
-                .orElseGet(() -> createUser(username));
-    }
-
-    private User createUser(String username) {
-        try {
-            return userRepository.save(User.create(username));
-        } catch (DuplicateKeyException exception) {
-            return findByUsernameOrThrow(username);
-        }
-    }
-
-    private void validateReservable(ReservationSlot slot, User user, LocalDateTime now) {
-        slot.validateIsNotInPast(now);
-
-        if (reservationRepository.existsBySlotIdAndUserId(slot.getId(), user.getId())) {
-            throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
-        }
+    private Reservation findReservationByIdAndUsernameOrThrow(Long id, String username) {
+        return reservationRepository.findByIdAndUsername(id, username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void recalculateReservationsForSlot(ReservationSlot slot) {
@@ -102,16 +141,13 @@ public class ReservationService {
         if (reservations.isEmpty()) {
             return;
         }
-
-        List<Reservation> updatedReservations = assignWaitingNumbersAndStatuses(reservations);
-        reservationRepository.batchUpdate(updatedReservations);
+        reservationRepository.batchUpdate(assignWaitingNumbersAndStatuses(reservations));
     }
 
     private List<Reservation> assignWaitingNumbersAndStatuses(List<Reservation> reservations) {
         List<Reservation> updatedReservations = new ArrayList<>();
 
         updatedReservations.add(reservations.getFirst().updateConfirmed());
-
         for (int index = 1; index < reservations.size(); index++) {
             updatedReservations.add(reservations.get(index).updateWaiting(index));
         }
@@ -129,17 +165,30 @@ public class ReservationService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
-    private void validateOwner(Reservation reservation, String name) {
-        if (!reservation.getUser().getName().equals(name)) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_OWNER);
+    private ReservationSlot findSlotByIdOrThrow(Long slotId) {
+        return slotRepository.findById(slotId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND));
+    }
+
+    private ReservationSlot findSlotByIdForUpdateOrThrow(Long slotId) {
+        return slotRepository.findByIdForUpdate(slotId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND));
+    }
+
+    private void validateReservable(ReservationSlot slot, User user, LocalDateTime now) {
+        slot.validateIsNotInPast(now);
+        validateReservationNotDuplicated(slot, user);
+    }
+
+    private void validateReservationNotDuplicated(ReservationSlot slot, User user) {
+        if (reservationRepository.existsBySlotIdAndUserId(slot.getId(), user.getId())) {
+            throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }
 
-    private void lockReservationSlot(Reservation reservation) {
-        slotRepository.findByScheduleForUpdate(
-                reservation.getSlot().getTime().getId(),
-                reservation.getSlot().getDate(),
-                reservation.getSlot().getTheme().getId()
-        ).orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_SLOT_NOT_FOUND));
+    private void validateSameReservationSlot(ReservationSlot currentSlot, ReservationSlot targetSlot) {
+        if (currentSlot.getId().equals(targetSlot.getId())) {
+            throw new BusinessException(ErrorCode.RESERVATION_SAME_SLOT);
+        }
     }
 }

@@ -28,8 +28,8 @@ public class AdminReservationTimeController {
     private final AdminRequestValidator validator;
 
     @GetMapping
-    public ResponseEntity<ReservationTimesResponse> getAllReservationTimes(HttpServletRequest request) {
-        if (validator.isUnauthorized(request)) {
+    public ResponseEntity<ReservationTimesResponse> getAllReservationTimes(HttpServletRequest httpRequest) {
+        if (validator.isUnauthorized(httpRequest)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(reservationTimeService.getAllReservationTime());
@@ -38,9 +38,9 @@ public class AdminReservationTimeController {
     @PostMapping
     public ResponseEntity<TimeCreateResponse> createReservationTime(
             @Valid @RequestBody TimeCreateRequest request,
-            HttpServletRequest httpServletRequest
+            HttpServletRequest httpRequest
     ) {
-        if (validator.isUnauthorized(httpServletRequest)) {
+        if (validator.isUnauthorized(httpRequest)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         TimeCreateResponse response = reservationTimeService.createReservationTime(request);
@@ -49,8 +49,8 @@ public class AdminReservationTimeController {
     }
 
     @DeleteMapping("/{timeId}")
-    public ResponseEntity<Void> deleteReservationTime(HttpServletRequest request, @PathVariable Long timeId) {
-        if (validator.isUnauthorized(request)) {
+    public ResponseEntity<Void> deleteReservationTime(HttpServletRequest httpRequest, @PathVariable Long timeId) {
+        if (validator.isUnauthorized(httpRequest)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         reservationTimeService.deleteReservationTime(timeId);

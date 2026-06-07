@@ -7,13 +7,17 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    Optional<Reservation> findById(Long id);
-
     List<Reservation> findAllBySlotIdOrderByReservedAt(Long slotId);
 
     List<Reservation> findAllReservationsByUserId(Long userId);
 
+    Optional<Reservation> findById(Long id);
+
+    Optional<Reservation> findByIdAndUsername(Long id, String username);
+
     Reservation save(Reservation userReservation);
+
+    Reservation update(Reservation reservation);
 
     void batchUpdate(List<Reservation> reservations);
 

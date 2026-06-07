@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservation.ReservationCountResult;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -79,6 +80,29 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             join theme th on rs.theme_id = th.id
             where rs.id = :id
             """;
+    private static final String FIND_BY_ID_FOR_UPDATE_SQL = """
+            select rs.id,
+                   rs.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.id = :id
+            for update
+            """;
+    private static final String FIND_WAITING_COUNTS_BY_THEME_ID_AND_DATE_SQL = """
+            select rt.id as time_id,
+                   rt.start_at,
+                   count(case when r.status = 'WAITING' then 1 end) as waiting_count
+            from reservation_slot rs
+            join reservation_time rt on rs.time_id = rt.id
+            left join reservation r on r.reservation_slot_id = rs.id
+            where rs.theme_id = :themeId
+              and rs.date = :date
+            group by rt.id, rt.start_at
+            order by rt.start_at, rt.id
+            """;
     private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> ReservationSlot.of(
             rs.getLong(COLUMN_ID),
             rs.getDate(COLUMN_DATE).toLocalDate(),
@@ -111,6 +135,16 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 .addValue(COLUMN_TIME_ID, reservation.getTime().getId())
                 .addValue(COLUMN_THEME_ID, reservation.getTheme().getId()));
         return ReservationSlot.of(extractId(key), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+    }
+
+    @Override
+    public Optional<ReservationSlot> findById(Long id) {
+        return findById(FIND_BY_ID_SQL, id);
+    }
+
+    @Override
+    public Optional<ReservationSlot> findByIdForUpdate(Long id) {
+        return findById(FIND_BY_ID_FOR_UPDATE_SQL, id);
     }
 
     public List<ReservationSlot> findAll() {
@@ -165,13 +199,22 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return findBySchedule(FIND_BY_SCHEDULE_FOR_UPDATE_SQL, timeId, date, themeId);
     }
 
-    public Optional<ReservationSlot> findById(Long id) {
-        List<ReservationSlot> result = jdbcTemplate.query(
-                FIND_BY_ID_SQL,
-                new MapSqlParameterSource().addValue(COLUMN_ID, id),
-                RESERVATION_SLOT_ROW_MAPPER
+    @Override
+    public List<ReservationCountResult> findWaitingCountsByThemeIdAndDate(
+            Long themeId,
+            LocalDate date
+    ) {
+        return jdbcTemplate.query(
+                FIND_WAITING_COUNTS_BY_THEME_ID_AND_DATE_SQL,
+                new MapSqlParameterSource()
+                        .addValue(PARAM_THEME_ID, themeId)
+                        .addValue(COLUMN_DATE, date),
+                (rs, rowNum) -> ReservationCountResult.of(
+                        rs.getLong(COLUMN_TIME_ID),
+                        rs.getTime(COLUMN_START_AT).toLocalTime(),
+                        rs.getLong("waiting_count")
+                )
         );
-        return result.stream().findFirst();
     }
 
     private long extractId(Number key) {
@@ -188,6 +231,15 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                         .addValue(PARAM_TIME_ID, timeId)
                         .addValue(COLUMN_DATE, date)
                         .addValue(PARAM_THEME_ID, themeId),
+                RESERVATION_SLOT_ROW_MAPPER
+        );
+        return result.stream().findFirst();
+    }
+
+    private Optional<ReservationSlot> findById(String sql, Long id) {
+        List<ReservationSlot> result = jdbcTemplate.query(
+                sql,
+                new MapSqlParameterSource().addValue(COLUMN_ID, id),
                 RESERVATION_SLOT_ROW_MAPPER
         );
         return result.stream().findFirst();

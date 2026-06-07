@@ -81,6 +81,29 @@ public class JdbcReservationRepository implements ReservationRepository {
             join theme th on rs.theme_id = th.id
             where r.id = :id
             """;
+    private static final String FIND_BY_ID_AND_USERNAME_SQL = """
+            select r.id as user_reservation_id,
+                   r.waiting_number,
+                   r.status,
+                   u.id as user_id,
+                   u.name as user_name,
+                   rs.id as reservation_slot_id,
+                   rs.date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   th.id as theme_id,
+                   th.name as theme_name,
+                   th.content as theme_content,
+                   th.url as theme_url,
+                   r.reserved_at
+            from reservation r
+            join users u on r.user_id = u.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where r.id = :id
+              and u.name = :username
+            """;
 
     private static final String FIND_ALL_BY_USER_ID_SQL = """
             select r.id as user_reservation_id,
@@ -218,12 +241,39 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdAndUsername(Long id, String username) {
+        List<Reservation> result = jdbcTemplate.query(
+                FIND_BY_ID_AND_USERNAME_SQL,
+                new MapSqlParameterSource()
+                        .addValue("id", id)
+                        .addValue("username", username),
+                RESERVATION_ROW_MAPPER
+        );
+        return result.stream().findFirst();
+    }
+
+    @Override
     public List<Reservation> findAllReservationsByUserId(Long userId) {
         return jdbcTemplate.query(
                 FIND_ALL_BY_USER_ID_SQL,
                 new MapSqlParameterSource().addValue("userId", userId),
                 RESERVATION_ROW_MAPPER
         );
+    }
+
+    @Override
+    public Reservation update(Reservation reservation) {
+        jdbcTemplate.update(
+                UPDATE_SQL,
+                new MapSqlParameterSource()
+                        .addValue("id", reservation.getId())
+                        .addValue("slotId", reservation.getSlot().getId())
+                        .addValue("userId", reservation.getUser().getId())
+                        .addValue("waitingNumber", reservation.getWaitingNumber())
+                        .addValue("status", reservation.getStatus().name())
+                        .addValue("reservedAt", Timestamp.valueOf(reservation.getReservedAt()))
+        );
+        return reservation;
     }
 
     public List<Reservation> findAllBySlotIdOrderByReservedAt(Long slotId) {

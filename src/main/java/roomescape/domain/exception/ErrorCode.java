@@ -7,6 +7,7 @@ public enum ErrorCode {
     RESERVATION_SLOT_IN_PAST("예약 가능한 시간이 아닙니다."),
     RESERVATION_SLOT_NOT_FOUND("예약 가능한 슬롯을 찾을 수 없습니다."),
     RESERVATION_ALREADY_EXISTS("이미 예약된 시간입니다."),
+    RESERVATION_SAME_SLOT("동일한 슬롯으로는 수정할 수 없습니다."),
     RESERVATION_NOT_FOUND("예약을 찾을 수 없습니다."),
     RESERVATION_NOT_OWNER("본인 예약만 취소할 수 있습니다."),
     RESERVATION_TIME_NOT_FOUND("예약 시간을 찾을 수 없습니다."),
