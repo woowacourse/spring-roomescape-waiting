@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.fixture.ReservationFixture;
 import roomescape.theme.domain.fixture.ThemeFixture;
@@ -63,7 +62,7 @@ class ReservationTimeServiceTest {
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.create(command)).isInstanceOf(DuplicateException.class);
+        assertThatThrownBy(() -> reservationTimeService.create(command)).isInstanceOf(ConflictException.class);
     }
 
     @Test

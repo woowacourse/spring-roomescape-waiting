@@ -102,14 +102,18 @@ public class ReservationService {
 
     private void validateOwner(String username, Reservation reservation) {
         if (!reservation.isOwner(username)) {
-            throw new ForbiddenException("예약 취소 권한이 없습니다.");
+            throw new ForbiddenException("해당 예약에 대한 권한이 없습니다.");
         }
     }
 
     private void promoteToReservation(LocalDate date, ReservationTime time, Theme theme) {
         Optional<Reservation> nextWaitingReservation = reservationRepository.findNextWaitingReservation(date,
                 time.getId(), theme.getId());
-        nextWaitingReservation.ifPresent(waiting -> reservationRepository.update(waiting.reserved()));
+        try {
+            nextWaitingReservation.ifPresent(waiting -> reservationRepository.update(waiting.reserved()));
+        } catch (DuplicateException e) {
+            throw new ConflictException("예약 상태가 변경되어 요청을 처리할 수 없습니다.");
+        }
     }
 
     private Long findWaitingOrder(Reservation reservation) {

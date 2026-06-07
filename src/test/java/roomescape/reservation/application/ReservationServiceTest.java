@@ -16,6 +16,7 @@ import roomescape.common.exception.InactiveException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.fixture.ReservationFixture;
 import roomescape.theme.domain.fixture.ThemeFixture;
+import roomescape.time.domain.fixture.ReservationTimeFixture;
 import roomescape.reservation.domain.fake.FakeReservationRepository;
 import roomescape.time.domain.fake.FakeReservationTimeRepository;
 import roomescape.theme.domain.fake.FakeThemeRepository;
@@ -149,7 +150,8 @@ class ReservationServiceTest {
     void 예약자_이름으로_예약_내역을_조회한다() {
         // given
         reservationRepository.save(ReservationFixture.createDefaultReservation("바니"));
-        reservationRepository.save(ReservationFixture.createDefaultReservation("포비"));
+        reservationRepository.save(ReservationFixture.createWaitingReservation("포비", ThemeFixture.createThemeWithId(),
+                ReservationTimeFixture.createDefaultReservationTime()));
 
         // when
         List<ReservationWaitingInfo> responses = reservationService.getReservationsByName("바니");
