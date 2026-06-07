@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,8 +41,7 @@ class WaitingListTest {
     @Test
     void ID가_null이면_예외발생() {
         assertThatThrownBy(() -> WaitingList.createWithId(null, "재즈", LocalDate.now(), reservationTime, theme, LocalDateTime.now()))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_ID_NULL);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

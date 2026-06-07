@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 
@@ -23,8 +21,7 @@ class ReservationDateTest {
     @Test
     void 날짜가_null이면_예외발생() {
         assertThatThrownBy(() -> new ReservationDate(null))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_NULL);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

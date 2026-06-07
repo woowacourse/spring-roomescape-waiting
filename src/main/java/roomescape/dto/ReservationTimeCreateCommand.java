@@ -7,11 +7,11 @@ import java.time.LocalTime;
 
 public record ReservationTimeCreateCommand(
         @DateTimeFormat(pattern = "hh:mm")
-        @NotNull(message = "START_TIME_NULL")
+        @NotNull(message = "시작 시간은 비워둘 수 없습니다.")
         LocalTime startAt,
 
         @DateTimeFormat(pattern = "hh:mm")
-        @NotNull(message = "END_TIME_NULL")
+        @NotNull(message = "종료 시간은 비워둘 수 없습니다.")
         LocalTime endAt
 ) {
 }

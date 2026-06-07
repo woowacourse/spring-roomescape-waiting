@@ -1,14 +1,13 @@
 package roomescape.domain;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class WaitingList {
 
@@ -21,7 +20,7 @@ public class WaitingList {
 
     private static void validateId(final Long id) {
         if (id == null) {
-            throw new BusinessException(ErrorCode.WAITING_LIST_ID_NULL);
+            throw new IllegalArgumentException("예약 대기 ID는 비워둘 수 없습니다.");
         }
     }
 

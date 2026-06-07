@@ -3,8 +3,6 @@ package roomescape.domain;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,23 +22,20 @@ class ThemeTest {
     @NullAndEmptySource
     void 설명이_null이거나_비어있으면_예외발생(final String description) {
         assertThatThrownBy(() -> Theme.create("우테코", description, "https://wooteco.com/thumbnail.jpg"))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DESCRIPTION_NULL_OR_BLANK);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 설명이_너무_짧으면_예외발생() {
         assertThatThrownBy(() -> Theme.create("우테코", "짧다", "https://wooteco.com/thumbnail.jpg"))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DESCRIPTION_TOO_SHORT);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     void 썸네일_URL이_null이거나_비어있으면_예외발생(final String thumbnailUrl) {
         assertThatThrownBy(() -> Theme.create("우테코", "우테코는 재밌어", thumbnailUrl))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THUMBNAIL_URL_NULL_OR_BLANK);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -53,8 +48,7 @@ class ThemeTest {
     @Test
     void ID가_null이면_예외발생() {
         assertThatThrownBy(() -> Theme.createWithId(null, "우테코", "우테코는 재밌어", "https://wooteco.com/thumbnail.jpg"))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THEME_ID_NULL);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

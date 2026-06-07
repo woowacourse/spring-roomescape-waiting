@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import lombok.Getter;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 @Getter
 public class Theme {
@@ -25,23 +23,23 @@ public class Theme {
 
     private static void validateId(final Long id) {
         if (id == null) {
-            throw new BusinessException(ErrorCode.THEME_ID_NULL);
+            throw new IllegalArgumentException("테마 ID는 비워둘 수 없습니다.");
         }
     }
 
     private void validateDescription(final String description) {
         if (description == null || description.isBlank()) {
-            throw new BusinessException(ErrorCode.DESCRIPTION_NULL_OR_BLANK);
+            throw new IllegalArgumentException("테마 설명은 비워둘 수 없습니다.");
         }
 
         if (description.length() < DESCRIPTION_MINIMUM_LENGTH) {
-            throw new BusinessException(ErrorCode.DESCRIPTION_TOO_SHORT);
+            throw new IllegalArgumentException("테마 설명은 최소 5자 이상이어야 합니다.");
         }
     }
 
     private void validateThumbnailUrl(final String thumbnailUrl) {
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new BusinessException(ErrorCode.THUMBNAIL_URL_NULL_OR_BLANK);
+            throw new IllegalArgumentException("테마 썸네일 URL은 비워둘 수 없습니다.");
         }
     }
 

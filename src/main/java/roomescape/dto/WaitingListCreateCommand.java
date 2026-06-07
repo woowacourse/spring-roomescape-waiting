@@ -7,18 +7,18 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 
 public record WaitingListCreateCommand(
-        @NotNull(message = "PERSON_NAME_NULL_OR_BLANK")
-        @NotBlank(message = "PERSON_NAME_NULL_OR_BLANK")
+        @NotNull(message = "예약 대기자 이름은 비워둘 수 없습니다.")
+        @NotBlank(message = "예약 대기자 이름은 비워둘 수 없습니다.")
         String name,
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        @NotNull(message = "DATE_NULL")
+        @NotNull(message = "대기를 걸어둘 예약 날짜는 비워둘 수 없습니다.")
         LocalDate date,
 
-        @NotNull(message = "TIME_ID_NULL")
+        @NotNull(message = "대기를 걸어둘 예약 시간 ID는 비워둘 수 없습니다.")
         Long timeId,
 
-        @NotNull(message = "THEME_ID_NULL")
+        @NotNull(message = "대기를 걸어둘 테마 ID는 비워둘 수 없습니다.")
         Long themeId
 ) {
 }
