@@ -40,7 +40,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 theme
         );
 
-        return new Reservation(
+        return Reservation.reconstruct(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("name"),
                 reservationSlot

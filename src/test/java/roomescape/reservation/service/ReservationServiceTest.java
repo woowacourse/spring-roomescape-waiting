@@ -13,6 +13,7 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationEntry;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Slot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -420,7 +421,11 @@ class ReservationServiceTest {
     }
 
     private Reservation savePastReservation() {
-        return reservationRepository.save(new Reservation(NAME, PAST_DATE, saveReservationTime(14), saveTheme()));
+        return reservationRepository.save(Reservation.reconstruct(
+                null,
+                NAME,
+                new Slot(PAST_DATE, saveReservationTime(14), saveTheme())
+        ));
     }
 
     private ReservationTime saveReservationTime(int hour) {

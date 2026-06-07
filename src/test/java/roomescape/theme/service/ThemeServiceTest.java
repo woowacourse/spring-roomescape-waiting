@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Slot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -108,7 +109,7 @@ class ThemeServiceTest {
                 "https://example.com/theme.png"
         );
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        reservationRepository.save(new Reservation("브라운", LocalDate.now().plusDays(1), time, theme));
+        reservationRepository.save(reservation("브라운", LocalDate.now().plusDays(1), time, theme));
 
         // when, then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
@@ -127,10 +128,10 @@ class ThemeServiceTest {
         ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
 
         LocalDate now = LocalDate.of(2026, 10, 15);
-        reservationRepository.save(new Reservation("브라운", LocalDate.of(2026, 10, 8), time, popularTheme));
-        reservationRepository.save(new Reservation("레아", LocalDate.of(2026, 10, 8), time2, popularTheme));
-        reservationRepository.save(new Reservation("제이슨", LocalDate.of(2026, 10, 9), time, lessPopularTheme));
-        reservationRepository.save(new Reservation("포비", now, time, outOfRangeTheme));
+        reservationRepository.save(reservation("브라운", LocalDate.of(2026, 10, 8), time, popularTheme));
+        reservationRepository.save(reservation("레아", LocalDate.of(2026, 10, 8), time2, popularTheme));
+        reservationRepository.save(reservation("제이슨", LocalDate.of(2026, 10, 9), time, lessPopularTheme));
+        reservationRepository.save(reservation("포비", now, time, outOfRangeTheme));
 
         // when
         List<Theme> popularThemes = themeService.findPopularThemes(7, now, 10);
@@ -141,4 +142,7 @@ class ThemeServiceTest {
                 .containsExactly(popularTheme.getId(), lessPopularTheme.getId());
     }
 
+    private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return Reservation.reconstruct(null, name, new Slot(date, time, theme));
+    }
 }

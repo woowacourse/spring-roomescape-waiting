@@ -23,27 +23,17 @@ public class Reservation {
         return create(name, createSlot(date, time, theme), now);
     }
 
-    public static Reservation create(String name, Slot slot, LocalDateTime now) {
-        validate(now, name, slot);
+    private static Reservation create(String name, Slot slot, LocalDateTime now) {
+        validateNewReservation(now, name, slot);
         return new Reservation(null, name, slot);
     }
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, name, createSlot(date, time, theme));
+    public static Reservation reconstruct(Long id, String name, Slot slot) {
+        validateSavedReservation(name, slot);
+        return new Reservation(id, name, slot);
     }
 
-    public Reservation(String name, Slot slot) {
-        this(null, name, slot);
-    }
-
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, name, createSlot(date, time, theme));
-    }
-
-    public Reservation(Long id, String name, Slot slot) {
-        validateName(name);
-        validateSlot(slot);
-
+    private Reservation(Long id, String name, Slot slot) {
         this.id = id;
         this.name = name;
         this.slot = slot;
@@ -53,7 +43,7 @@ public class Reservation {
         Slot updatedSlot = createSlot(date, time, slot.theme());
         validatePastDateTime(now, updatedSlot);
 
-        return new Reservation(id, name, updatedSlot);
+        return reconstruct(id, name, updatedSlot);
     }
 
     public Reservation withId(Long id) {
@@ -63,16 +53,21 @@ public class Reservation {
             throw new InvalidRequestException("이미 식별자가 존재하는 예약입니다.");
         }
 
-        return new Reservation(id, name, slot);
+        return reconstruct(id, name, slot);
     }
 
-    private static void validate(
+    private static void validateNewReservation(
             LocalDateTime now,
             String name,
             Slot slot) {
         validateName(name);
         validateSlot(slot);
         validatePastDateTime(now, slot);
+    }
+
+    private static void validateSavedReservation(String name, Slot slot) {
+        validateName(name);
+        validateSlot(slot);
     }
 
     private static void validateName(String name) {
@@ -149,4 +144,3 @@ public class Reservation {
         return Objects.hashCode(id);
     }
 }
-

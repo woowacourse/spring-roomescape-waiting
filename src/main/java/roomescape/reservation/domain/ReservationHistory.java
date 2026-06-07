@@ -19,7 +19,7 @@ public record ReservationHistory(
     }
 
     private Reservation toReservation() {
-        return new Reservation(
+        return Reservation.reconstruct(
                 reservationId,
                 name,
                 slot
