@@ -62,7 +62,7 @@ public class ReservationTimeService {
 
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         Set<ReservationTime> reservedTimes = reservations.stream()
-                .map(Reservation::getTime)
+                .map(reservation -> reservation.getSlot().time())
                 .collect(Collectors.toCollection(HashSet::new));
 
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();

@@ -89,8 +89,7 @@ class ReservationTest {
 
         Reservation reservation = Reservation.create("브라운", date, time, theme, now);
 
-        assertThat(reservation.getDate()).isEqualTo(date);
-        assertThat(reservation.getTime()).isEqualTo(time);
+        assertThat(reservation.getSlot()).isEqualTo(new Slot(date, time, theme));
     }
 
     @Test

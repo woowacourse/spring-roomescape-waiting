@@ -49,11 +49,24 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<ReservationsResponse> listByName(
+    public ResponseEntity<ReservationsResponse> listActiveByName(
             @NotBlank(message = "예약자 이름은 비어 있을 수 없습니다.")
             @RequestParam("name") String name
     ) {
         List<ReservationResponse> reservations = reservationService.findByName(name)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(ReservationsResponse.from(reservations));
+    }
+
+    @GetMapping("/canceled")
+    public ResponseEntity<ReservationsResponse> listCanceledByName(
+            @NotBlank(message = "예약자 이름은 비어 있을 수 없습니다.")
+            @RequestParam("name") String name
+    ) {
+        List<ReservationResponse> reservations = reservationService.findCanceledByName(name)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

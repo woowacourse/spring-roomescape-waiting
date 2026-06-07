@@ -12,50 +12,41 @@ import java.util.Objects;
 @Getter
 public class Reservation {
     private final Long id;
-    private final ReservationStatus status;
-    private final Long waitingRank;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Slot slot;
 
     public static Reservation create(String name,
                                      LocalDate date,
                                      ReservationTime time,
                                      Theme theme,
                                      LocalDateTime now) {
-        validate(now, name, date, time, theme);
-        return new Reservation(null, null, null, name, date, time, theme);
+        return create(name, createSlot(date, time, theme), now);
+    }
+
+    public static Reservation create(String name, Slot slot, LocalDateTime now) {
+        validate(now, name, slot);
+        return new Reservation(null, name, slot);
     }
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, null, null, name, date, time, theme);
+        this(null, name, createSlot(date, time, theme));
+    }
+
+    public Reservation(String name, Slot slot) {
+        this(null, name, slot);
     }
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, null, null, name, date, time, theme);
+        this(id, name, createSlot(date, time, theme));
     }
 
-    public Reservation(
-            Long id,
-            ReservationStatus status,
-            Long waitingRank,
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme) {
+    public Reservation(Long id, String name, Slot slot) {
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+        validateSlot(slot);
 
         this.id = id;
-        this.status = status;
-        this.waitingRank = waitingRank;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
     public Reservation withId(Long id) {
@@ -65,30 +56,30 @@ public class Reservation {
             throw new InvalidRequestException("이미 식별자가 존재하는 예약입니다.");
         }
 
-        return new Reservation(id, status, waitingRank, name, date, time, theme);
-    }
-
-    public Reservation cancel() {
-        return new Reservation(id, ReservationStatus.CANCELED, null, name, date, time, theme);
+        return new Reservation(id, name, slot);
     }
 
     private static void validate(
             LocalDateTime now,
             String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme) {
+            Slot slot) {
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
-        validatePastDateTime(now, date, time);
+        validateSlot(slot);
+        validatePastDateTime(now, slot);
     }
 
     private static void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new InvalidRequestException("예약자 이름은 비어 있을 수 없습니다.");
         }
+    }
+
+    private static Slot createSlot(LocalDate date, ReservationTime time, Theme theme) {
+        validateDate(date);
+        validateTime(time);
+        validateTheme(theme);
+
+        return new Slot(date, time, theme);
     }
 
     private static void validateDate(LocalDate date) {
@@ -109,8 +100,14 @@ public class Reservation {
         }
     }
 
-    private static void validatePastDateTime(LocalDateTime now, LocalDate date, ReservationTime time) {
-        if (isReservationDateTimeBefore(now, date, time)) {
+    private static void validateSlot(Slot slot) {
+        if (slot == null) {
+            throw new InvalidRequestException("예약 슬롯은 비어 있을 수 없습니다.");
+        }
+    }
+
+    private static void validatePastDateTime(LocalDateTime now, Slot slot) {
+        if (slot.isPast(now)) {
             throw new InvalidRequestException("현재 시각 이후의 날짜와 시간을 선택해주세요.");
         }
     }
@@ -122,11 +119,7 @@ public class Reservation {
     }
 
     public boolean isPast(LocalDateTime now) {
-        return isReservationDateTimeBefore(now, this.date, this.time);
-    }
-
-    private static boolean isReservationDateTimeBefore(LocalDateTime now, LocalDate date, ReservationTime time) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+        return slot.isPast(now);
     }
 
     public boolean isReservedBy(String name) {

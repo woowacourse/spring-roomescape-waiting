@@ -8,6 +8,10 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationEntry;
+import roomescape.reservation.domain.ReservationHistory;
+import roomescape.reservation.domain.ReservationSequence;
+import roomescape.reservation.repository.ReservationHistoryRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -22,20 +26,23 @@ import java.util.Optional;
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ReservationHistoryRepository reservationHistoryRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
+                              ReservationHistoryRepository reservationHistoryRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationHistoryRepository = reservationHistoryRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+    public List<ReservationEntry> findAll() {
+        return ReservationSequence.entriesOf(reservationRepository.findAll());
     }
 
     @Transactional
@@ -61,7 +68,7 @@ public class ReservationService {
                 reservation.getName(),
                 date,
                 time,
-                reservation.getTheme(),
+                reservation.getSlot().theme(),
                 LocalDateTime.now()
         ).withId(reservation.getId());
 
@@ -69,8 +76,19 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findByName(String name) {
-        return reservationRepository.findByName(name);
+    public List<ReservationEntry> findByName(String name) {
+        return ReservationSequence.entriesOf(reservationRepository.findAllForName(name))
+                .stream()
+                .filter(entry -> entry.reservation().isReservedBy(name))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationEntry> findCanceledByName(String name) {
+        return reservationHistoryRepository.findByName(name)
+                .stream()
+                .map(ReservationHistory::canceled)
+                .toList();
     }
 
     @Transactional
@@ -88,7 +106,9 @@ public class ReservationService {
             throw new InvalidRequestException("이미 지난 예약은 취소할 수 없습니다.");
         }
 
-        reservationRepository.moveToHistory(reservation.cancel());
+        if (reservationHistoryRepository.saveFromReservation(reservation.getId())) {
+            reservationRepository.deleteById(reservation.getId());
+        }
     }
 
     @Transactional
@@ -97,7 +117,7 @@ public class ReservationService {
                 .ifPresent(reservation -> reservationRepository.deleteById(id));
     }
 
-    private Reservation findReservation(Long reservationId){
+    private Reservation findReservation(Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("변경할 예약이 존재하지 않습니다. 예약 목록을 확인해주세요."));
     }

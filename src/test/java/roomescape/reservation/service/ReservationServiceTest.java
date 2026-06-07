@@ -10,6 +10,7 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationEntry;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -62,9 +63,13 @@ class ReservationServiceTest {
         Reservation reservation = createReservation(NAME, FUTURE_DATE, time, theme);
 
         // then
-        assertThat(reservationService.findAll()).containsExactly(reservation);
-        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-        assertThat(reservation.getWaitingRank()).isZero();
+        assertThat(reservationService.findAll())
+                .singleElement()
+                .satisfies(entry -> {
+                    assertThat(entry.reservation().getId()).isEqualTo(reservation.getId());
+                    assertThat(entry.status()).isEqualTo(ReservationStatus.RESERVED);
+                    assertThat(entry.waitingRank()).isZero();
+                });
     }
 
     @Test
@@ -94,10 +99,16 @@ class ReservationServiceTest {
         Reservation waitingReservation = createReservation(OTHER_NAME, FUTURE_DATE, time, theme);
 
         // then
-        assertThat(reservedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-        assertThat(reservedReservation.getWaitingRank()).isZero();
-        assertThat(waitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
-        assertThat(waitingReservation.getWaitingRank()).isEqualTo(1L);
+        assertThat(reservationService.findAll())
+                .extracting(
+                        entry -> entry.reservation().getId(),
+                        ReservationEntry::status,
+                        ReservationEntry::waitingRank
+                )
+                .containsExactly(
+                        tuple(reservedReservation.getId(), ReservationStatus.RESERVED, 0L),
+                        tuple(waitingReservation.getId(), ReservationStatus.WAITING, 1L)
+                );
     }
 
     @Test
@@ -164,10 +175,10 @@ class ReservationServiceTest {
         reservationService.delete(reservedReservation.getId());
 
         // then
-        Reservation promotedReservation = reservationService.findByName(OTHER_NAME).get(0);
-        assertThat(promotedReservation.getId()).isEqualTo(waitingReservation.getId());
-        assertThat(promotedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-        assertThat(promotedReservation.getWaitingRank()).isZero();
+        ReservationEntry promotedReservation = reservationService.findByName(OTHER_NAME).get(0);
+        assertThat(promotedReservation.reservation().getId()).isEqualTo(waitingReservation.getId());
+        assertThat(promotedReservation.status()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(promotedReservation.waitingRank()).isZero();
         assertThat(countHistoryByReservationId(reservedReservation.getId())).isZero();
     }
 
@@ -195,10 +206,10 @@ class ReservationServiceTest {
         reservationService.cancel(reservedReservation.getId(), NAME);
 
         // then
-        Reservation promotedReservation = reservationService.findByName(OTHER_NAME).get(0);
-        assertThat(promotedReservation.getId()).isEqualTo(waitingReservation.getId());
-        assertThat(promotedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-        assertThat(promotedReservation.getWaitingRank()).isZero();
+        ReservationEntry promotedReservation = reservationService.findByName(OTHER_NAME).get(0);
+        assertThat(promotedReservation.reservation().getId()).isEqualTo(waitingReservation.getId());
+        assertThat(promotedReservation.status()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(promotedReservation.waitingRank()).isZero();
         assertThat(countHistoryByReservationId(reservedReservation.getId())).isEqualTo(1);
     }
 
@@ -214,12 +225,13 @@ class ReservationServiceTest {
         // then
         assertThat(reservationService.findAll()).isEmpty();
         assertThat(countHistoryByReservationId(reservation.getId())).isEqualTo(1);
-        assertThat(reservationService.findByName(NAME))
+        assertThat(reservationService.findByName(NAME)).isEmpty();
+        assertThat(reservationService.findCanceledByName(NAME))
                 .singleElement()
                 .satisfies(canceledReservation -> {
-                    assertThat(canceledReservation.getId()).isEqualTo(reservation.getId());
-                    assertThat(canceledReservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
-                    assertThat(canceledReservation.getWaitingRank()).isNull();
+                    assertThat(canceledReservation.reservation().getId()).isEqualTo(reservation.getId());
+                    assertThat(canceledReservation.status()).isEqualTo(ReservationStatus.CANCELED);
+                    assertThat(canceledReservation.waitingRank()).isNull();
                 });
     }
 
@@ -272,17 +284,17 @@ class ReservationServiceTest {
 
         // then
         assertThat(updatedReservation.getId()).isEqualTo(reservation.getId());
-        assertThat(updatedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
-        assertThat(updatedReservation.getTime()).isEqualTo(newTime);
+        assertThat(updatedReservation.getSlot().date()).isEqualTo(NEXT_FUTURE_DATE);
+        assertThat(updatedReservation.getSlot().time()).isEqualTo(newTime);
         assertThat(countHistoryByReservationId(reservation.getId())).isZero();
 
-        Reservation savedReservation = reservationService.findAll().get(0);
+        Reservation savedReservation = reservationService.findAll().get(0).reservation();
         assertThat(savedReservation.getId()).isEqualTo(reservation.getId());
-        assertThat(savedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
-        assertThat(savedReservation.getTime()).isEqualTo(newTime);
+        assertThat(savedReservation.getSlot().date()).isEqualTo(NEXT_FUTURE_DATE);
+        assertThat(savedReservation.getSlot().time()).isEqualTo(newTime);
 
         assertThat(reservationService.findByName(NAME))
-                .extracting(Reservation::getStatus)
+                .extracting(ReservationEntry::status)
                 .containsExactly(ReservationStatus.RESERVED);
     }
 
@@ -310,7 +322,7 @@ class ReservationServiceTest {
         assertThat(countHistoryByReservationId(reservation.getId())).isZero();
 
         assertThat(reservationService.findByName(NAME))
-                .extracting(Reservation::getStatus, Reservation::getWaitingRank)
+                .extracting(ReservationEntry::status, ReservationEntry::waitingRank)
                 .containsExactly(tuple(ReservationStatus.WAITING, 1L));
     }
 

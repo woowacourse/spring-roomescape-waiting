@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationEntry;
+import roomescape.reservation.domain.ReservationSequence;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -121,8 +123,8 @@ class ReservationConcurrencyTest {
         assertThat(results)
                 .extracting(ExecutionResult::reservation)
                 .allSatisfy(reservation -> {
-                    assertThat(reservation.getDate()).isEqualTo(targetDate);
-                    assertThat(reservation.getTime()).isEqualTo(targetTime);
+                    assertThat(reservation.getSlot().date()).isEqualTo(targetDate);
+                    assertThat(reservation.getSlot().time()).isEqualTo(targetTime);
                 });
         assertQueueIsConsistent(targetDate, theme, REQUEST_COUNT);
     }
@@ -141,18 +143,19 @@ class ReservationConcurrencyTest {
 
     private void assertQueueIsConsistent(LocalDate date, Theme theme, int reservationCount) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, theme.getId());
+        List<ReservationEntry> entries = ReservationSequence.entriesOf(reservations);
 
         assertThat(reservations).hasSize(reservationCount);
-        assertThat(reservations)
-                .extracting(Reservation::getStatus)
+        assertThat(entries)
+                .extracting(ReservationEntry::status)
                 .filteredOn(status -> status == ReservationStatus.RESERVED)
                 .hasSize(1);
-        assertThat(reservations)
-                .extracting(Reservation::getStatus)
+        assertThat(entries)
+                .extracting(ReservationEntry::status)
                 .filteredOn(status -> status == ReservationStatus.WAITING)
                 .hasSize(reservationCount - 1);
-        assertThat(reservations)
-                .extracting(Reservation::getWaitingRank)
+        assertThat(entries)
+                .extracting(ReservationEntry::waitingRank)
                 .containsExactlyInAnyOrderElementsOf(LongStream.range(0, reservationCount).boxed().toList());
     }
 

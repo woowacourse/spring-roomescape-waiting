@@ -256,6 +256,12 @@ public class MissionStepTest {
                 .when().get("/reservations?name=레아")
                 .then().log().all()
                 .statusCode(200)
+                .body("reservations.size()", is(0));
+
+        RestAssured.given().log().all()
+                .when().get("/reservations/canceled?name=레아")
+                .then().log().all()
+                .statusCode(200)
                 .body("reservations[0].status", is("CANCELED"))
                 .body("reservations[0].waitingRank", nullValue());
     }
