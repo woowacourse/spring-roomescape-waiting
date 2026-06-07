@@ -117,15 +117,13 @@ class ReservationServiceTest {
     @Test
     void 확정_예약이_삭제되면_첫_대기가_승격한다() {
       // given
-      Reservation canceledReservation = Reservation.of(RESERVATION_ID, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.CANCELED);
       Reservation waitingReservation = Reservation.of(WAITING_ID, "대기자", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
 
-      when(reservationDao.findById(RESERVATION_ID)).thenReturn(canceledReservation);
       when(reservationDao.findFirstWaitingByDateTimeTheme(DEFAULT_DATE, DEFAULT_TIME.getId(), DEFAULT_THEME.getId()))
           .thenReturn(Optional.of(waitingReservation));
 
       // when
-      reservationService.promoteFirstWaiting(RESERVATION_ID);
+      reservationService.promoteFirstWaiting(waitingReservation);
 
       // then
       verify(reservationDao).updateStatus(WAITING_ID, ReservationStatus.RESERVED);
@@ -151,17 +149,6 @@ class ReservationServiceTest {
       // when // then
       assertThatThrownBy(() -> reservationService.deleteMyReservation(RESERVATION_ID, NAME))
           .isInstanceOf(InvalidReservationStateException.class);
-    }
-
-    @Test
-    void 확정_예약이_삭제되지_않았다면_대기_승격시_예외를_발생한다() {
-      // given
-      Reservation reservation = Reservation.of(RESERVATION_ID, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
-      when(reservationDao.findById(RESERVATION_ID)).thenReturn(reservation);
-
-      // when // then
-      assertThatThrownBy(() -> reservationService.promoteFirstWaiting(RESERVATION_ID))
-          .isInstanceOf(IllegalStateException.class);
     }
   }
 }

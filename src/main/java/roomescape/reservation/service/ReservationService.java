@@ -72,17 +72,16 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
-    public void deleteMyReservation(Long id, String name) {
+    public Reservation deleteMyReservation(Long id, String name) {
         Reservation reservation = reservationDao.findById(id);
         validateReservationAuthority(name, reservation);
         validateIsNotReserved(reservation, ReservationStatus.RESERVED, "예약 상태의 예약만 취소할 수 있습니다.");
         reservationDao.delete(id);
+
+        return reservation;
     }
 
-    public void promoteFirstWaiting(Long id) {
-        Reservation reservation = reservationDao.findById(id);
-        validateReservedIsCanceled(reservation);
-
+    public void promoteFirstWaiting(Reservation reservation) {
         reservationDao.findFirstWaitingByDateTimeTheme(
             reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
         ).ifPresent(waiting -> {

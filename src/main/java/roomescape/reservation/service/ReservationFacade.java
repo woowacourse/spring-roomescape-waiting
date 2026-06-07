@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ResourceInUseException;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
@@ -59,8 +60,8 @@ public class ReservationFacade {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
-        reservationService.deleteMyReservation(reservationId, name);
-        reservationService.promoteFirstWaiting(reservationId);
+        Reservation reservation = reservationService.deleteMyReservation(reservationId, name);
+        reservationService.promoteFirstWaiting(reservation);
     }
 
     public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {
