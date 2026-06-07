@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.common.exception.ConflictException;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
@@ -23,6 +24,7 @@ import roomescape.service.ReservationService;
 import roomescape.service.dto.command.ReservationCommand;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationServiceConcurrencyTest {
     private final String name = "브라운";
     private final LocalDate futureDate = LocalDate.parse(FUTURE_DATE);
