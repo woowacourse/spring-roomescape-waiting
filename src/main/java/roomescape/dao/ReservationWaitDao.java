@@ -6,11 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWait;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.dto.projection.WaitingResponseProjection;
 
 import java.sql.PreparedStatement;

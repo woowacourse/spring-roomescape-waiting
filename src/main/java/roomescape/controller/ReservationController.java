@@ -4,14 +4,14 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
-import roomescape.dto.result.ReservationResult;
-import roomescape.dto.result.WaitingResponseResult;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.MyReservationsAndWaitsResponse;
 import roomescape.dto.response.PostReservationWaitResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.WaitingResponse;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.WaitingResponseResult;
 import roomescape.service.ReservationService;
 
 import java.net.URI;

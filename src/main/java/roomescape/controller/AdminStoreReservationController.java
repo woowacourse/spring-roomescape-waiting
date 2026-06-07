@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
-import roomescape.dto.result.ReservationResult;
-import roomescape.dto.result.StoreReservationResult;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.StoreReservationResponse;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.StoreReservationResult;
 import roomescape.service.ReservationService;
 
 import java.util.List;
