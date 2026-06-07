@@ -91,7 +91,7 @@ public class ReservationService {
     public void delete(Long reservationId) {
         Reservation reservation = getReservation(reservationId);
         reservationDao.delete(reservationId);
-        waitingService.convertFirstWaitingToReservation(reservation.getSlot());
+        waitingService.promoteFirstWaiting(reservation.getSlot());
     }
 
     private ReservationTime getTime(long timeId) {

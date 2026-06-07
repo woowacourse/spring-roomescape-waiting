@@ -54,7 +54,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void convertFirstWaitingToReservation(ReservationSlot slot) {
+    public void promoteFirstWaiting(ReservationSlot slot) {
         reservationWaitingDao.selectFirstBySlot(slot).ifPresent(waiting -> {
             reservationDao.insert(Reservation.createWithoutId(waiting.getName(), slot));
             reservationWaitingDao.delete(waiting.getId());
