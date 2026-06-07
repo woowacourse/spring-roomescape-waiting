@@ -92,9 +92,33 @@ class ReservationTest {
         assertThat(reservation.isInPast(NOW)).isFalse();
     }
 
+    @Test
+    void confirm_예약_확정인_경우_예외() {
+        Reservation reservation = build(LocalDate.of(2026, 5, 7), LocalTime.of(12, 0), ReservationStatus.RESERVED);
+        assertThatThrownBy(reservation::confirm)
+                .isInstanceOf(InvalidDomainException.class)
+                .hasMessage("예약 대기 상태만 확정할 수 있습니다.");
+    }
+
+    @Test
+    void confirm_예약_대기인_경우_올바르게_예약_확정으로_변경() {
+        Reservation reservation = build(LocalDate.of(2026, 5, 7), LocalTime.of(12, 0), ReservationStatus.WAITING);
+        Reservation confirmed = reservation.confirm();
+
+        assertThat(confirmed.isReserved()).isTrue();
+        assertThat(reservation.isWaiting()).isTrue();
+
+    }
+
     private Reservation build(LocalDate date, LocalTime time) {
         Theme theme = new Theme(1L, "테마", "설명", "https://thumbnail.url");
         ReservationTime reservationTime = new ReservationTime(1L, time);
         return new Reservation(null, USER, theme, date, reservationTime, STORE, ReservationStatus.RESERVED);
+    }
+
+    private Reservation build(LocalDate date, LocalTime time, ReservationStatus status) {
+        Theme theme = new Theme(1L, "테마", "설명", "https://thumbnail.url");
+        ReservationTime reservationTime = new ReservationTime(1L, time);
+        return new Reservation(null, USER, theme, date, reservationTime, STORE, status);
     }
 }
