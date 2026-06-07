@@ -10,10 +10,6 @@ public interface ReservationSlotRepository {
 
     Optional<ReservationSlot> findByIdForUpdate(Long id);
 
-    Optional<ReservationSlot> findBySchedule(Long timeId, LocalDate date, Long themeId);
-
-    Optional<ReservationSlot> findByScheduleForUpdate(Long timeId, LocalDate date, Long themeId);
-
     List<ReservationCountResult> findWaitingCountsByThemeIdAndDate(Long themeId, LocalDate date);
 
     ReservationSlot save(ReservationSlot reservation);

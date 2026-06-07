@@ -49,28 +49,6 @@ class JdbcReservationSlotRepositoryTest {
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2030, 2, 1));
     }
 
-    @DisplayName("예약 슬롯을 일정으로 조회할 수 있다")
-    @Test
-    void findBySchedule() {
-        // given
-        ReservationSlot saved = saveSlot(
-                "미스터리",
-                "단서를 따라가는 추리 테마",
-                "/themes/mystery-night",
-                LocalDate.of(2030, 2, 2),
-                LocalTime.of(13, 0)
-        );
-
-        // when & then
-        assertThat(slotRepository.findBySchedule(saved.getTime().getId(), saved.getDate(), saved.getTheme().getId()))
-                .hasValueSatisfying(slot -> {
-                    assertThat(slot.getId()).isEqualTo(saved.getId());
-                    assertThat(slot.getDate()).isEqualTo(saved.getDate());
-                    assertThat(slot.getTime().getId()).isEqualTo(saved.getTime().getId());
-                    assertThat(slot.getTheme().getId()).isEqualTo(saved.getTheme().getId());
-                });
-    }
-
     @DisplayName("시간과 테마로 예약 슬롯 존재 여부를 확인할 수 있다")
     @Test
     void existsByTimeIdAndThemeId() {

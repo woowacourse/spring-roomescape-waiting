@@ -35,15 +35,15 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
+    public List<ReservationTime> findAll() {
+        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), RESERVATION_TIME_ROW_MAPPER);
+    }
+
+    @Override
     public ReservationTime save(ReservationTime reservationTime) {
         Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
                 .addValue(COLUMN_START_AT, Time.valueOf(reservationTime.getStartAt())));
         return ReservationTime.of(extractId(key), reservationTime.getStartAt());
-    }
-
-    @Override
-    public List<ReservationTime> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), RESERVATION_TIME_ROW_MAPPER);
     }
 
     @Override

@@ -20,7 +20,6 @@ public class JdbcUserRepository implements UserRepository {
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_ROLE = "role";
-    private static final String FIND_ALL_SQL = "select id, name, password, role from users order by id";
     private static final String FIND_BY_NAME_SQL = "select id, name, password, role from users where name = :name";
     private static final String EXISTS_BY_NAME_SQL = """
             select exists(
@@ -47,19 +46,6 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     @Override
-    public User save(User user) {
-        Number key = insertUser.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue(COLUMN_NAME, user.getName())
-                .addValue(COLUMN_PASSWORD, user.getPassword())
-                .addValue(COLUMN_ROLE, user.getRole().name()));
-        return User.of(extractId(key), user.getName(), user.getPassword(), user.getRole());
-    }
-
-    public List<User> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), USER_ROW_MAPPER);
-    }
-
-    @Override
     public Optional<User> findByName(String name) {
         List<User> result = jdbcTemplate.query(
                 FIND_BY_NAME_SQL,
@@ -67,6 +53,15 @@ public class JdbcUserRepository implements UserRepository {
                 USER_ROW_MAPPER
         );
         return result.stream().findFirst();
+    }
+
+    @Override
+    public User save(User user) {
+        Number key = insertUser.executeAndReturnKey(new MapSqlParameterSource()
+                .addValue(COLUMN_NAME, user.getName())
+                .addValue(COLUMN_PASSWORD, user.getPassword())
+                .addValue(COLUMN_ROLE, user.getRole().name()));
+        return User.of(extractId(key), user.getName(), user.getPassword(), user.getRole());
     }
 
     @Override

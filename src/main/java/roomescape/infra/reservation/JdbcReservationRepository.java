@@ -207,27 +207,27 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Reservation save(Reservation reservation) {
-        Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue("reservation_slot_id", reservation.getSlot().getId())
-                .addValue("user_id", reservation.getUser().getId())
-                .addValue("waiting_number", reservation.getWaitingNumber())
-                .addValue("status", reservation.getStatus().name())
-                .addValue("reserved_at", Timestamp.valueOf(reservation.getReservedAt())));
-
-        return Reservation.of(
-                extractId(key),
-                reservation.getUser(),
-                reservation.getSlot(),
-                reservation.getWaitingNumber(),
-                reservation.getStatus(),
-                reservation.getReservedAt()
-        );
+    public List<Reservation> findAll() {
+        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), RESERVATION_ROW_MAPPER);
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, new MapSqlParameterSource(), RESERVATION_ROW_MAPPER);
+    public List<Reservation> findAllBySlotIdOrderByReservedAt(Long slotId) {
+        List<Reservation> result = jdbcTemplate.query(
+                FIND_ALL_BY_SLOT_ID_ORDER_SQL,
+                new MapSqlParameterSource().addValue("slotId", slotId),
+                RESERVATION_ROW_MAPPER
+        );
+        return result;
+    }
+
+    @Override
+    public List<Reservation> findAllReservationsByUserId(Long userId) {
+        return jdbcTemplate.query(
+                FIND_ALL_BY_USER_ID_SQL,
+                new MapSqlParameterSource().addValue("userId", userId),
+                RESERVATION_ROW_MAPPER
+        );
     }
 
     @Override
@@ -253,11 +253,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllReservationsByUserId(Long userId) {
-        return jdbcTemplate.query(
-                FIND_ALL_BY_USER_ID_SQL,
-                new MapSqlParameterSource().addValue("userId", userId),
-                RESERVATION_ROW_MAPPER
+    public Reservation save(Reservation reservation) {
+        Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
+                .addValue("reservation_slot_id", reservation.getSlot().getId())
+                .addValue("user_id", reservation.getUser().getId())
+                .addValue("waiting_number", reservation.getWaitingNumber())
+                .addValue("status", reservation.getStatus().name())
+                .addValue("reserved_at", Timestamp.valueOf(reservation.getReservedAt())));
+
+        return Reservation.of(
+                extractId(key),
+                reservation.getUser(),
+                reservation.getSlot(),
+                reservation.getWaitingNumber(),
+                reservation.getStatus(),
+                reservation.getReservedAt()
         );
     }
 
@@ -274,31 +284,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                         .addValue("reservedAt", Timestamp.valueOf(reservation.getReservedAt()))
         );
         return reservation;
-    }
-
-    public List<Reservation> findAllBySlotIdOrderByReservedAt(Long slotId) {
-        return jdbcTemplate.query(
-                FIND_ALL_BY_SLOT_ID_ORDER_SQL,
-                new MapSqlParameterSource().addValue("slotId", slotId),
-                RESERVATION_ROW_MAPPER
-        );
-    }
-
-    @Override
-    public boolean existsBySlotIdAndUserId(Long slotId, Long userId) {
-        Boolean exists = jdbcTemplate.queryForObject(
-                EXISTS_BY_SLOT_ID_AND_USER_ID_SQL,
-                new MapSqlParameterSource()
-                        .addValue("slotId", slotId)
-                        .addValue("userId", userId),
-                Boolean.class
-        );
-        return exists != null && exists;
-    }
-
-    @Override
-    public int deleteById(Long id) {
-        return jdbcTemplate.update(DELETE_BY_ID_SQL, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
@@ -318,6 +303,23 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .toArray(SqlParameterSource[]::new);
 
         jdbcTemplate.batchUpdate(UPDATE_SQL, batch);
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        return jdbcTemplate.update(DELETE_BY_ID_SQL, new MapSqlParameterSource().addValue("id", id));
+    }
+
+    @Override
+    public boolean existsBySlotIdAndUserId(Long slotId, Long userId) {
+        Boolean exists = jdbcTemplate.queryForObject(
+                EXISTS_BY_SLOT_ID_AND_USER_ID_SQL,
+                new MapSqlParameterSource()
+                        .addValue("slotId", slotId)
+                        .addValue("userId", userId),
+                Boolean.class
+        );
+        return exists != null && exists;
     }
 
     private long extractId(Number key) {
