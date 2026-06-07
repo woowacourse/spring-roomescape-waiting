@@ -4,12 +4,13 @@ import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public class Reservations {
     private final List<Reservation> reservations;
 
     public Reservations(List<Reservation> reservations) {
-        this.reservations = reservations;
+        this.reservations = Objects.requireNonNull(reservations);
     }
 
     public Reservation reserve(ReservationName reservationName, Slot foundSlot, LocalDateTime now) {

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import roomescape.RoomEscapeFixture;
 
@@ -13,6 +14,11 @@ class ReservationsTest {
     private static final Slot SLOT = RoomEscapeFixture.slot().build();
     private static final ReservationName NAME = new ReservationName("zeze");
     private static final LocalDateTime NOW = RoomEscapeFixture.PAST_DATE_TIME;
+
+    @Test
+    void null로_생성되면_예외가_발생한다() {
+        Assertions.assertThatThrownBy(() -> new Reservations(null)).isInstanceOf(NullPointerException.class);
+    }
 
     @Test
     void 예약이_없으면_APPROVED로_생성된다() {
