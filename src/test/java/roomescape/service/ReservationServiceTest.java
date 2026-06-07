@@ -192,6 +192,43 @@ class ReservationServiceTest {
     }
 
     @Test
+    void update_같은_날짜와_시간이면_예외() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(
+                1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", futureDate, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("기존 예약과 변경할 예약이 동일한 날짜와 시간입니다.");
+
+        then(reservationDao).should(never()).existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L);
+        then(reservationDao).should(never()).update(any(Reservation.class));
+    }
+
+    @Test
+    void update_예약_변경_중_저장이_충돌하면_예약_충돌_예외() {
+        fixClock();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
+        LocalDate originalDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);
+        Reservation reservation = new Reservation(
+                1L, "브라운", originalDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(updateDate, 2L, 1L)).willReturn(false);
+        given(reservationDao.update(any(Reservation.class))).willThrow(new DataConflictException(new RuntimeException()));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
+
+        then(reservationDao).should(never()).findFirstWaitingBySlot(originalDate, 1L, 1L);
+    }
+
+    @Test
     void update_본인_예약이_아니면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);

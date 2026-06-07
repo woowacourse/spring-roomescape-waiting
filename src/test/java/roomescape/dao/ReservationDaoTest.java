@@ -86,6 +86,20 @@ class ReservationDaoTest {
     }
 
     @Test
+    void update_예약_저장_중복_예외() {
+        LocalDate date = LocalDate.of(2026, 12, 31);
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        ReservationTime ten = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        ReservationTime eleven = new ReservationTime(2L, java.time.LocalTime.of(11, 0));
+        Reservation first = reservationDao.save(new Reservation("브라운", date, LocalDateTime.now(), ten, theme));
+        reservationDao.save(new Reservation("이든", date, LocalDateTime.now(), eleven, theme));
+        Reservation duplicated = new Reservation(first.getId(), first.getName(), date, first.getCreatedAt(), eleven, theme);
+
+        assertThatThrownBy(() -> reservationDao.update(duplicated))
+                .isInstanceOf(DataConflictException.class);
+    }
+
+    @Test
     void delete_예약_삭제() {
         int beforeSize = reservationDao.findAll(0, 100).size();
         reservationDao.delete(1L);

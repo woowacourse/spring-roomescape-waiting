@@ -241,6 +241,26 @@ class ReservationControllerTest extends ControllerTest {
                 .body("message", equalTo("이미 예약된 시간입니다."));
     }
 
+    @DisplayName("같은 날짜와 시간으로 예약 변경하면 409")
+    @Test
+    void 같은_날짜와_시간으로_예약_변경하면_409() {
+        String date = LocalDate.now().plusDays(1).toString();
+        long id = createReservation("브라운", date, 1, 1);
+
+        Map<String, Object> updateParams = new HashMap<>();
+        updateParams.put("date", date);
+        updateParams.put("timeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("username", "브라운")
+                .body(updateParams)
+                .when().patch("/reservations/{id}", id)
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("기존 예약과 변경할 예약이 동일한 날짜와 시간입니다."));
+    }
+
     @DisplayName("본인 예약이 아니면 변경할 수 없다")
     @Test
     void 본인_예약이_아니면_변경할_수_없다() {
