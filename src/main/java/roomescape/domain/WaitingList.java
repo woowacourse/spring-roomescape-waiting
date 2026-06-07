@@ -1,12 +1,14 @@
 package roomescape.domain;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @Getter
 public class WaitingList {
 
@@ -16,15 +18,6 @@ public class WaitingList {
     private final ReservationTime reservationTime;
     private final Theme theme;
     private final LocalDateTime createdAt;
-
-    private WaitingList(final Long id, final PersonName name, final ReservationDate date, final ReservationTime reservationTime, final Theme theme, final LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.reservationDate = date;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
-        this.createdAt = createdAt;
-    }
 
     private static void validateId(final Long id) {
         if (id == null) {
