@@ -80,16 +80,16 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservationForSlotKey = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
 
-        slotService.ensure(reservationForSlotKey.getTheme().getId(), reservationForSlotKey.getTime().getId());
-        slotService.lock(reservationForSlotKey.getTheme().getId(), reservationForSlotKey.getTime().getId());
+        slotService.ensure(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
+        slotService.lock(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        reservation.getTime().validateExpired(LocalDateTime.now());
+        reservation.validateExpired(LocalDateTime.now());
         if (reservation.isReserved()) {
             ReservationWaitings waitings = new ReservationWaitings(
                     reservationRepository.findAllWaitingBy(
-                            reservation.getTime().getId(),
-                            reservation.getTheme().getId()));
+                            reservation.getTimeId(),
+                            reservation.getThemeId()));
             waitings.earliest()
                     .map(Reservation::promote)
                     .ifPresent(reservationRepository::update);
@@ -106,8 +106,8 @@ public class ReservationServiceImpl implements ReservationService {
                         reservation,
                         new ReservationWaitings(
                                 reservationRepository.findAllWaitingBy(
-                                        reservation.getTime().getId(),
-                                        reservation.getTheme().getId()))))
+                                        reservation.getTimeId(),
+                                        reservation.getThemeId()))))
                 .map(ReservationWithWaitingOrderResponse::from)
                 .toList();
     }
@@ -117,8 +117,8 @@ public class ReservationServiceImpl implements ReservationService {
     public void cancelForUser(Long id, String name) {
         Reservation reservationForSlotKey = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        slotService.ensure(reservationForSlotKey.getTheme().getId(), reservationForSlotKey.getTime().getId());
-        slotService.lock(reservationForSlotKey.getTheme().getId(), reservationForSlotKey.getTime().getId());
+        slotService.ensure(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
+        slotService.lock(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
 
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
@@ -126,8 +126,8 @@ public class ReservationServiceImpl implements ReservationService {
         if (reservation.isReserved()) {
             ReservationWaitings waitings = new ReservationWaitings(
                     reservationRepository.findAllWaitingBy(
-                            reservation.getTime().getId(),
-                            reservation.getTheme().getId()));
+                            reservation.getTimeId(),
+                            reservation.getThemeId()));
             waitings.earliest()
                     .map(Reservation::promote)
                     .ifPresent(reservationRepository::update);
@@ -149,21 +149,21 @@ public class ReservationServiceImpl implements ReservationService {
             throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
         }
 
-        if (reservationRepository.isDuplicatedWithName(name, reservation.getTheme().getId(), newTime)) {
+        if (reservationRepository.isDuplicatedWithName(name, reservation.getThemeId(), newTime)) {
             throw new DuplicateReservationException();
         }
 
         if (reservation.isReserved()) {
             ReservationWaitings waitings = new ReservationWaitings(
                     reservationRepository.findAllWaitingBy(
-                            reservation.getTime().getId(),
-                            reservation.getTheme().getId()));
+                            reservation.getTimeId(),
+                            reservation.getThemeId()));
             waitings.earliest()
                     .map(Reservation::promote)
                     .ifPresent(reservationRepository::update);
         }
 
-        if (reservationRepository.isDuplicated(reservation.getTheme().getId(), newTime)) {
+        if (reservationRepository.isDuplicated(reservation.getThemeId(), newTime)) {
             return reservationRepository.update(reservation
                     .withTime(newTime)
                     .withStatus(Status.WAITING)

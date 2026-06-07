@@ -89,4 +89,16 @@ public class Reservation {
             throw new ForbiddenRequestException();
         }
     }
+
+    public void validateExpired(LocalDateTime dateTime) {
+        time.validateExpired(dateTime);
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
+    }
 }
