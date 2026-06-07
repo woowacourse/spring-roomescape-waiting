@@ -17,6 +17,7 @@ import java.util.List;
 import static roomescape.global.exception.ErrorCode.*;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
 
     private final ReservationWaitingDao reservationWaitingDao;

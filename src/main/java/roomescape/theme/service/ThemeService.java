@@ -14,6 +14,7 @@ import static roomescape.global.exception.ErrorCode.CANNOT_DELETE_RESERVED_THEME
 import static roomescape.global.exception.ErrorCode.THEME_NOT_FOUND;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ReservationDao reservationDao;
@@ -37,6 +38,7 @@ public class ThemeService {
         return themeDao.selectTopThemesByReservation(startDate, endDate, limit);
     }
 
+    @Transactional
     public Theme add(String name, String description, String image) {
         Theme theme = new Theme(name, description, image);
         return themeDao.insert(theme);

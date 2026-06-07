@@ -15,6 +15,7 @@ import java.util.List;
 import static roomescape.global.exception.ErrorCode.CANNOT_DELETE_RESERVED_TIME;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeService {
 
     private final ReservationDao reservationDao;
@@ -38,6 +39,7 @@ public class TimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTime add(LocalTime startAt) {
         ReservationTime time = new ReservationTime(startAt);
         return timeDao.insert(time);

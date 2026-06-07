@@ -17,6 +17,7 @@ import java.util.List;
 import static roomescape.global.exception.ErrorCode.*;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ThemeDao themeDao;
@@ -39,7 +40,6 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
     }
 
-    @Transactional
     public List<Reservation> findAllByName(String name) {
         return reservationDao.selectByName(name);
     }
