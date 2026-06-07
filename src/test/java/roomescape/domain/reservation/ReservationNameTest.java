@@ -1,12 +1,12 @@
 package roomescape.domain.reservation;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import roomescape.common.exception.RoomEscapeException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.common.exception.RoomEscapeException;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 public class ReservationNameTest {
     private static final String UNDER_SIZE_NAME = "";

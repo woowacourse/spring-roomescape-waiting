@@ -1,8 +1,9 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalTime;
 
 public class ReservationTimeTest {
     @Test

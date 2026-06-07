@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import static org.mockito.BDDMockito.given;
-
-import java.time.LocalDate;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +10,10 @@ import roomescape.common.exception.RoomEscapeException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
+
+import java.time.LocalDate;
+
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {

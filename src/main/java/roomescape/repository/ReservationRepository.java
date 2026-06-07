@@ -18,22 +18,22 @@ import java.util.Optional;
 @Repository
 public class ReservationRepository {
     private static final String SELECT_BASE = """
-        SELECT r.id          AS reservation_id,
-               r.name        AS reservation_name,
-               r.status      AS reservation_status,
-               r.slot_id     AS slot_id,
-               s.date        AS slot_date,
-               t.id          AS reservation_time_id,
-               t.start_at    AS reservation_time_start_at,
-               th.id         AS theme_id,
-               th.name       AS theme_name,
-               th.description AS theme_description,
-               th.thumbnail_url AS theme_thumbnail_url
-        FROM reservation r
-        JOIN slot s              ON r.slot_id = s.id
-        JOIN reservation_time t  ON s.time_id = t.id
-        JOIN theme th            ON s.theme_id = th.id
-        """;
+            SELECT r.id          AS reservation_id,
+                   r.name        AS reservation_name,
+                   r.status      AS reservation_status,
+                   r.slot_id     AS slot_id,
+                   s.date        AS slot_date,
+                   t.id          AS reservation_time_id,
+                   t.start_at    AS reservation_time_start_at,
+                   th.id         AS theme_id,
+                   th.name       AS theme_name,
+                   th.description AS theme_description,
+                   th.thumbnail_url AS theme_thumbnail_url
+            FROM reservation r
+            JOIN slot s              ON r.slot_id = s.id
+            JOIN reservation_time t  ON s.time_id = t.id
+            JOIN theme th            ON s.theme_id = th.id
+            """;
 
     private static final RowMapper<Reservation> ROW_MAPPER = (rs, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
@@ -74,13 +74,11 @@ public class ReservationRepository {
                 .usingColumns("slot_id", "name", "status");
     }
 
-    
 
     public Reservations findAll() {
         return new Reservations(jdbcTemplate.query(SELECT_BASE, ROW_MAPPER));
     }
 
-    
 
     public Optional<Reservation> findById(Long id) {
         List<Reservation> result = jdbcTemplate.query(
@@ -99,7 +97,7 @@ public class ReservationRepository {
                 ROW_MAPPER));
     }
 
-    
+
     public Reservations findBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
         return new Reservations(jdbcTemplate.query(
@@ -108,7 +106,7 @@ public class ReservationRepository {
                 ROW_MAPPER));
     }
 
-    
+
     public Optional<Reservation> findFirstWaitingBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
         List<Reservation> result = jdbcTemplate.query(
@@ -118,7 +116,7 @@ public class ReservationRepository {
         return result.stream().findFirst();
     }
 
-    
+
     public boolean existsBySlotIdAndName(Long slotId, String name) {
         MapSqlParameterSource params = new MapSqlParameterSource("slotId", slotId)
                 .addValue("name", name);
@@ -132,7 +130,6 @@ public class ReservationRepository {
                 Boolean.class));
     }
 
-    
 
     public boolean existsApprovedBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
@@ -160,7 +157,6 @@ public class ReservationRepository {
                 Boolean.class));
     }
 
-    
 
     public Reservation update(Long id, Reservation reservation) {
         MapSqlParameterSource params = new MapSqlParameterSource("id", id)
@@ -171,7 +167,6 @@ public class ReservationRepository {
         return findById(id).orElseThrow();
     }
 
-    
 
     public void updateStatusById(Long id, Status status) {
         MapSqlParameterSource params = new MapSqlParameterSource("id", id)
@@ -180,18 +175,16 @@ public class ReservationRepository {
         jdbcTemplate.update("UPDATE reservation SET status = :status WHERE id = :id", params);
     }
 
-    
 
     public Reservation save(Reservation reservation) {
         MapSqlParameterSource params = new MapSqlParameterSource("slot_id", reservation.getSlotId())
                 .addValue("name", reservation.getName().getValue())
-                .addValue( "status", reservation.getStatus().name());
+                .addValue("status", reservation.getStatus().name());
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return reservation.withId(generatedKey);
     }
 
-    
 
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = :id",
@@ -202,10 +195,10 @@ public class ReservationRepository {
     public boolean existsById(Long id) {
         MapSqlParameterSource param = new MapSqlParameterSource("id", id);
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
-                SELECT EXISTS (
-                    SELECT 1 FROM reservation WHERE id = :id
-                )
-                """,
+                        SELECT EXISTS (
+                            SELECT 1 FROM reservation WHERE id = :id
+                        )
+                        """,
                 param,
                 Boolean.class));
     }

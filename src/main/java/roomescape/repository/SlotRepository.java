@@ -1,7 +1,5 @@
 package roomescape.repository;
 
-import java.util.List;
-import java.util.Optional;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,22 +10,11 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public class SlotRepository {
-    private static final String SELECT_BASE = """
-            SELECT s.id            AS slot_id,
-                   s.date          AS slot_date,
-                   rt.id           AS reservation_time_id,
-                   rt.start_at     AS reservation_time_start_at,
-                   t.id            AS theme_id,
-                   t.name          AS theme_name,
-                   t.description   AS theme_description,
-                   t.thumbnail_url AS theme_thumbnail_url
-            FROM slot s
-            INNER JOIN reservation_time rt ON s.time_id  = rt.id
-            INNER JOIN theme             t  ON s.theme_id = t.id
-            """;
-
     public static final RowMapper<Slot> SLOT_ROW_MAPPER = (rs, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
                 rs.getLong("reservation_time_id"),
@@ -43,7 +30,19 @@ public class SlotRepository {
                 reservationTime,
                 theme);
     };
-
+    private static final String SELECT_BASE = """
+            SELECT s.id            AS slot_id,
+                   s.date          AS slot_date,
+                   rt.id           AS reservation_time_id,
+                   rt.start_at     AS reservation_time_start_at,
+                   t.id            AS theme_id,
+                   t.name          AS theme_name,
+                   t.description   AS theme_description,
+                   t.thumbnail_url AS theme_thumbnail_url
+            FROM slot s
+            INNER JOIN reservation_time rt ON s.time_id  = rt.id
+            INNER JOIN theme             t  ON s.theme_id = t.id
+            """;
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 

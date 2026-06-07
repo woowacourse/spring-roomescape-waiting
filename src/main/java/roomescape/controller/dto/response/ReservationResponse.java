@@ -1,8 +1,9 @@
 package roomescape.controller.dto.response;
 
-import java.time.LocalDate;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Slot;
+
+import java.time.LocalDate;
 
 public class ReservationResponse {
     private final long id;
@@ -37,11 +38,31 @@ public class ReservationResponse {
                 ThemeResponse.toDto(slot.getTheme()));
     }
 
-    public long getId() { return id; }
-    public String getName() { return name; }
-    public LocalDate getDate() { return date; }
-    public String getState() { return state; }
-    public Integer getRank() { return rank; }
-    public ReservationTimeResponse getTime() { return time; }
-    public ThemeResponse getTheme() { return theme; }
+    public long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public Integer getRank() {
+        return rank;
+    }
+
+    public ReservationTimeResponse getTime() {
+        return time;
+    }
+
+    public ThemeResponse getTheme() {
+        return theme;
+    }
 }

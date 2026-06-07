@@ -1,7 +1,18 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.reservation.Status;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
+import roomescape.domain.theme.ThumbnailUrl;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -12,19 +23,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
-import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.Slot;
-import roomescape.domain.reservation.Status;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThumbnailUrl;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @JdbcTest
 @Import(value = {

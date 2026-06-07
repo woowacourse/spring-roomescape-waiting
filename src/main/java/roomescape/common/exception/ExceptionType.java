@@ -1,9 +1,10 @@
 package roomescape.common.exception;
 
+import org.springframework.http.HttpStatus;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
 
 public enum ExceptionType {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, BadRequestException.class),

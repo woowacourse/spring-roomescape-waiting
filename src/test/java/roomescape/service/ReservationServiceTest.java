@@ -1,18 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +24,19 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
     private static final String URL = "https://zeze.com/thumb.jpg";
@@ -54,11 +54,16 @@ class ReservationServiceTest {
     private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
     private static final long EXISTS_ID = 1L;
 
-    @Mock private SlotRepository slotRepository;
-    @Mock private ReservationRepository reservationRepository;
-    @Mock private ReservationTimeRepository reservationTimeRepository;
-    @Mock private ThemeRepository themeRepository;
-    @InjectMocks private ReservationService reservationService;
+    @Mock
+    private SlotRepository slotRepository;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ReservationTimeRepository reservationTimeRepository;
+    @Mock
+    private ThemeRepository themeRepository;
+    @InjectMocks
+    private ReservationService reservationService;
 
     @Test
     void 예약_취소_성공() {

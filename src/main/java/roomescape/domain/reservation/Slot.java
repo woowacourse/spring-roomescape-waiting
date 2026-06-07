@@ -1,11 +1,10 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import roomescape.common.exception.UnprocessableException;
 import roomescape.domain.theme.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Slot {
     private final Long id;
