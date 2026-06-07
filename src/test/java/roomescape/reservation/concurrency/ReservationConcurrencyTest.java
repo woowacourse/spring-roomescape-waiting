@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.BookingCreateCommand;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.support.ApiIntegrationTestHelper;
@@ -57,7 +57,7 @@ class ReservationConcurrencyTest {
 
         for (int i = 0; i < threadCount; i++) {
             String name = "사용자" + i;
-            submit(executor, latch, () -> waitingService.save(new ReservationCreateCommand(name, BASE_DATE, themeId, timeId), PAST));
+            submit(executor, latch, () -> waitingService.save(new BookingCreateCommand(name, BASE_DATE, themeId, timeId), PAST));
         }
 
         latch.countDown();
@@ -92,7 +92,7 @@ class ReservationConcurrencyTest {
             Long reservationId = reservationIds.get(i);
 
             submit(executor, latch, () -> reservationService.delete(reservationId, "타스", PAST));
-            submit(executor, latch, () -> waitingService.save(new ReservationCreateCommand("카야", date, themeId, timeId), PAST));
+            submit(executor, latch, () -> waitingService.save(new BookingCreateCommand("카야", date, themeId, timeId), PAST));
         }
 
         latch.countDown();

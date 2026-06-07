@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import roomescape.global.BadRequestException;
 import roomescape.global.ConflictException;
 import roomescape.global.ForbiddenException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.BookingCreateCommand;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -72,7 +72,7 @@ class WaitingServiceTest {
         when(waitingRepository.save(any())).thenReturn(saved);
 
         waitingService.save(
-                new ReservationCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
+                new BookingCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0));
 
         verify(waitingRepository).save(any());
@@ -85,7 +85,7 @@ class WaitingServiceTest {
         when(timeRepository.findById(1L)).thenReturn(Optional.of(time));
 
         assertThatThrownBy(() -> waitingService.save(
-                new ReservationCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L),
+                new BookingCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L),
                 LocalDateTime.of(2026, 5, 6, 11, 0)))
                 .isExactlyInstanceOf(BadRequestException.class);
     }
@@ -99,7 +99,7 @@ class WaitingServiceTest {
         when(waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(any(), any(), any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(
-                new ReservationCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
+                new BookingCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0)))
                 .isExactlyInstanceOf(ConflictException.class);
     }
@@ -112,7 +112,7 @@ class WaitingServiceTest {
         when(reservationRepository.existsByNameAndDateAndThemeAndTime(any(), any(), any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(
-                new ReservationCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
+                new BookingCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0)))
                 .isExactlyInstanceOf(ConflictException.class);
     }

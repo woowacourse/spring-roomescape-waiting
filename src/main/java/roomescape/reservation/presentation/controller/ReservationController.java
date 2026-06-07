@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.BookingCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
@@ -40,7 +40,7 @@ public class ReservationController {
     public ResponseEntity<Void> save(
             @Valid @RequestBody ReservationCreateRequest request
     ) {
-        ReservationCreateCommand createCommand = request.toCommand();
+        BookingCreateCommand createCommand = request.toCommand();
         waitingService.save(createCommand, LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.CREATED).build();

@@ -12,7 +12,7 @@ import roomescape.global.BadRequestException;
 import roomescape.global.ConflictException;
 import roomescape.global.ForbiddenException;
 import roomescape.global.NotFoundException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.BookingCreateCommand;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -45,7 +45,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void save(ReservationCreateCommand request, LocalDateTime requested) {
+    public void save(BookingCreateCommand request, LocalDateTime requested) {
         ReservationTime time = findTimeById(request.timeId());
         validateReservationDateTime(request.date(), time.getStartAt(), requested);
 
