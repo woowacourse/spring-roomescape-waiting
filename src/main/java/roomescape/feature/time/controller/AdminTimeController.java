@@ -3,6 +3,7 @@ package roomescape.feature.time.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,15 +22,11 @@ import roomescape.feature.time.service.TimeService;
 @RestController
 @RequestMapping("/api/admin/times")
 @Validated
+@RequiredArgsConstructor
 public class AdminTimeController {
 
     private final TimeService timeService;
     private final TimeMapper timeMapper;
-
-    public AdminTimeController(TimeService timeService, TimeMapper timeMapper) {
-        this.timeService = timeService;
-        this.timeMapper = timeMapper;
-    }
 
     @GetMapping
     public ResponseEntity<List<TimeResponseDto>> getTimes() {

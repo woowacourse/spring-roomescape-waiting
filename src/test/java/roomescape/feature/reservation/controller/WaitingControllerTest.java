@@ -180,7 +180,7 @@ class WaitingControllerTest {
             when(waitingService.cancelWaitingReservation(eq(1L), eq(new ReserverName(ReservationFixture.FUTURE.getName()))))
                 .thenReturn(sampleCancelResponse());
 
-            mockMvc.perform(patch("/api/reservations/1/waitings/cancel")
+            mockMvc.perform(patch("/api/reservations/waitings/1/cancel")
                     .queryParam("name", ReservationFixture.FUTURE.getName()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(1)));
@@ -191,7 +191,7 @@ class WaitingControllerTest {
             when(waitingService.cancelWaitingReservation(eq(999L), eq(new ReserverName(ReservationFixture.FUTURE.getName()))))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-            mockMvc.perform(patch("/api/reservations/999/waitings/cancel")
+            mockMvc.perform(patch("/api/reservations/waitings/999/cancel")
                     .queryParam("name", ReservationFixture.FUTURE.getName()))
                 .andExpect(status().is4xxClientError());
         }
@@ -201,14 +201,14 @@ class WaitingControllerTest {
             when(waitingService.cancelWaitingReservation(eq(1L), eq(new ReserverName("다른예약자"))))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN));
 
-            mockMvc.perform(patch("/api/reservations/1/waitings/cancel")
+            mockMvc.perform(patch("/api/reservations/waitings/1/cancel")
                     .queryParam("name", "다른예약자"))
                 .andExpect(status().is4xxClientError());
         }
 
         @Test
         void name_파라미터가_없으면_4xx를_반환한다() throws Exception {
-            mockMvc.perform(patch("/api/reservations/1/waitings/cancel"))
+            mockMvc.perform(patch("/api/reservations/waitings/1/cancel"))
                 .andExpect(status().is4xxClientError());
         }
 
@@ -217,7 +217,7 @@ class WaitingControllerTest {
             when(waitingService.cancelWaitingReservation(eq(1L), eq(new ReserverName(ReservationFixture.FUTURE.getName()))))
                 .thenThrow(new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION));
 
-            mockMvc.perform(patch("/api/reservations/1/waitings/cancel")
+            mockMvc.perform(patch("/api/reservations/waitings/1/cancel")
                     .queryParam("name", ReservationFixture.FUTURE.getName()))
                 .andExpect(status().is4xxClientError());
         }

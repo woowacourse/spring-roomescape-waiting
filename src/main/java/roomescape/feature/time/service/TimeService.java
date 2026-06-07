@@ -2,6 +2,7 @@ package roomescape.feature.time.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
+@RequiredArgsConstructor
 public class TimeService {
 
     private final ReservationRepository reservationRepository;
@@ -26,16 +28,8 @@ public class TimeService {
     private final ThemeRepository themeRepository;
     private final TimeMapper timeMapper;
 
-    public TimeService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository, TimeMapper timeMapper) {
-        this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
-        this.themeRepository = themeRepository;
-        this.timeMapper = timeMapper;
-    }
-
     public List<TimeResponseDto> getTimes() {
-        return timeRepository.findAllByNotDeleted()
+        return timeRepository.findAll()
             .stream()
             .map(timeMapper::toResponseDto)
             .toList();

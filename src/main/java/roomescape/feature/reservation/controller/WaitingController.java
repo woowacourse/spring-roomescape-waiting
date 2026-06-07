@@ -2,6 +2,7 @@ package roomescape.feature.reservation.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,26 +21,22 @@ import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.service.WaitingService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/reservations/waitings")
 @Validated
+@RequiredArgsConstructor
 public class WaitingController {
 
     private final WaitingService waitingService;
     private final ReservationMapper reservationMapper;
 
-    public WaitingController(WaitingService waitingService, ReservationMapper reservationMapper) {
-        this.waitingService = waitingService;
-        this.reservationMapper = reservationMapper;
-    }
-
-    @PostMapping("/reservations/waitings")
+    @PostMapping
     public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
         @Valid @RequestBody ReservationCreateRequestDto requestDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(waitingService.saveWaitingReservation(reservationMapper.toCreateCommand(requestDto)));
     }
 
-    @PatchMapping("/reservations/{id}/waitings/cancel")
+    @PatchMapping("/{id}/cancel")
     public ResponseEntity<ReservationCancelResponseDto> cancelWaitingReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
         @RequestParam String name

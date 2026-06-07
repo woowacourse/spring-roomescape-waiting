@@ -1,6 +1,7 @@
 package roomescape.feature.reservation.mapper;
 
 import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
@@ -18,15 +19,11 @@ import roomescape.feature.time.mapper.TimeMapper;
 import roomescape.global.domain.EntityStatus;
 
 @Component
+@RequiredArgsConstructor
 public final class ReservationMapper {
 
     private final TimeMapper timeMapper;
     private final ThemeMapper themeMapper;
-
-    public ReservationMapper(TimeMapper timeMapper, ThemeMapper themeMapper) {
-        this.timeMapper = timeMapper;
-        this.themeMapper = themeMapper;
-    }
 
     public ReservationCreateCommand toCreateCommand(ReservationCreateRequestDto requestDto) {
         return new ReservationCreateCommand(new ReserverName(requestDto.name()), requestDto.date(), requestDto.timeId(),
@@ -47,6 +44,10 @@ public final class ReservationMapper {
     }
 
     private ReservationEditableStatus getStatus(Reservation reservation) {
+        if (reservation.getStatus() == ReservationStatus.DELETED) {
+            return ReservationEditableStatus.DELETED;
+        }
+
         if (reservation.getStatus() == ReservationStatus.CANCELED) {
             return ReservationEditableStatus.CANCELED;
         }

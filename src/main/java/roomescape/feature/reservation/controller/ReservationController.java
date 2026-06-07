@@ -3,6 +3,7 @@ package roomescape.feature.reservation.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,15 +27,11 @@ import roomescape.feature.reservation.service.ReservationService;
 @RestController
 @RequestMapping("/api/reservations")
 @Validated
+@RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReservationMapper reservationMapper;
-
-    public ReservationController(ReservationService reservationService, ReservationMapper reservationMapper) {
-        this.reservationService = reservationService;
-        this.reservationMapper = reservationMapper;
-    }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getReservationsByName(

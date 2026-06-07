@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.feature.reservation.dto.response.ReservationEditableStatus;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
-import roomescape.feature.reservation.service.ReservationService;
+import roomescape.feature.reservation.service.AdminReservationService;
 import roomescape.feature.theme.dto.response.ReservationThemeResponseDto;
 import roomescape.feature.time.dto.response.ReservationTimeResponseDto;
 import roomescape.fixture.ThemeFixture;
@@ -35,7 +35,7 @@ class AdminReservationControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ReservationService reservationService;
+    private AdminReservationService reservationService;
 
     private ReservationResponseDto sampleResponse() {
         return new ReservationResponseDto(

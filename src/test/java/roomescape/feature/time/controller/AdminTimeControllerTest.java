@@ -46,8 +46,8 @@ class AdminTimeControllerTest {
         @Test
         void 예약_시간_목록을_조회한다() throws Exception {
             when(timeService.getTimes()).thenReturn(List.of(
-                new TimeResponseDto(1L, LocalTime.of(10, 0)),
-                new TimeResponseDto(2L, LocalTime.of(15, 30))
+                new TimeResponseDto(1L, LocalTime.of(10, 0), false),
+                new TimeResponseDto(2L, LocalTime.of(15, 30), true)
             ));
 
             mockMvc.perform(get("/api/admin/times"))
@@ -71,7 +71,7 @@ class AdminTimeControllerTest {
         @Test
         void 예약_시간을_생성한다() throws Exception {
             when(timeMapper.toCreateCommand(any())).thenReturn(new TimeCreateCommand(LocalTime.of(10, 0)));
-            when(timeService.saveTime(any())).thenReturn(new TimeResponseDto(1L, LocalTime.of(10, 0)));
+            when(timeService.saveTime(any())).thenReturn(new TimeResponseDto(1L, LocalTime.of(10, 0), false));
 
             mockMvc.perform(post("/api/admin/times")
                     .contentType(MediaType.APPLICATION_JSON)

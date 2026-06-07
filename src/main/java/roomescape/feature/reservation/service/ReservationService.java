@@ -10,8 +10,6 @@ import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 
 public interface ReservationService {
 
-    List<ReservationResponseDto> getReservations();
-
     List<ReservationResponseDto> getReservationsByName(ReserverName name);
 
     ReservationCreateResponseDto saveReservation(ReservationCreateCommand command);
@@ -19,6 +17,4 @@ public interface ReservationService {
     ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command);
 
     ReservationCancelResponseDto cancelReservation(Long id, ReserverName name);
-
-    void deleteReservationById(Long id);
 }

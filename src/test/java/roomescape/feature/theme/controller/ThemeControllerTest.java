@@ -33,9 +33,9 @@ class ThemeControllerTest {
         void 활성_테마_목록을_조회한다() throws Exception {
             when(themeService.getThemes()).thenReturn(List.of(
                 new ThemeResponseDto(1L, ThemeFixture.VALID.getName(), ThemeFixture.VALID.getDescription(),
-                    ThemeFixture.VALID.getImageUrl()),
+                    ThemeFixture.VALID.getImageUrl(), false),
                 new ThemeResponseDto(2L, ThemeFixture.VALID_ANOTHER.getName(),
-                    ThemeFixture.VALID_ANOTHER.getDescription(), ThemeFixture.VALID_ANOTHER.getImageUrl())
+                    ThemeFixture.VALID_ANOTHER.getDescription(), ThemeFixture.VALID_ANOTHER.getImageUrl(), false)
             ));
 
             mockMvc.perform(get("/api/themes"))
@@ -60,7 +60,7 @@ class ThemeControllerTest {
         void 인기_테마_목록을_조회한다() throws Exception {
             when(themeService.getPopularThemes()).thenReturn(List.of(
                 new ThemeResponseDto(1L, ThemeFixture.VALID.getName(), ThemeFixture.VALID.getDescription(),
-                    ThemeFixture.VALID.getImageUrl())
+                    ThemeFixture.VALID.getImageUrl(), false)
             ));
 
             mockMvc.perform(get("/api/themes/rankings/last-7-days"))

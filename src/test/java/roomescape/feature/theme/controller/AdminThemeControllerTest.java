@@ -5,11 +5,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+    import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,23 @@ class AdminThemeControllerTest {
     }
 
     @Nested
+    class 테마_목록_조회 {
+
+        @Test
+        void 삭제된_테마를_포함한_전체_테마_목록을_조회한다() throws Exception {
+            when(themeService.getAllThemes()).thenReturn(List.of(
+                new ThemeResponseDto(1L, "테마1", "설명1", "https://example.com/1.png", false),
+                new ThemeResponseDto(2L, "테마2", "설명2", "https://example.com/2.png", true)
+            ));
+
+            mockMvc.perform(get("/api/admin/themes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[1].deleted", equalTo(true)));
+        }
+    }
+
+    @Nested
     class 테마_생성 {
 
         @Test
@@ -68,7 +88,8 @@ class AdminThemeControllerTest {
             when(themeService.saveTheme(any())).thenReturn(new ThemeResponseDto(1L,
                 ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl()
+                ThemeFixture.VALID.getImageUrl(),
+                false
             ));
 
             mockMvc.perform(post("/api/admin/themes")

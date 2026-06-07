@@ -18,6 +18,7 @@ public enum ReservationErrorType implements ErrorType {
     PAST_RESERVATION_CANCEL(HttpStatus.CONFLICT, "지난 예약은 취소할 수 없습니다."),
     NOT_ACTIVE_RESERVATION(HttpStatus.CONFLICT, "활성된 예약이 아닙니다."),
     ALREADY_CANCELED(HttpStatus.CONFLICT, "이미 취소된 예약입니다."),
+    ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 예약입니다."),
     NOT_WAITING_RESERVATION(HttpStatus.CONFLICT, "대기중인 예약이 아닙니다."),
     RESERVATION_NOT_CHANGED(HttpStatus.BAD_REQUEST, "변경할 내용이 없습니다."),
     ILLEGAL_RESERVER_NAME(HttpStatus.BAD_REQUEST, "예약자명이 부적절합니다.");

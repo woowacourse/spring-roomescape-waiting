@@ -235,11 +235,11 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
         <tr>
-          <th>ID</th><th>이미지</th><th>이름</th><th>설명</th><th>삭제</th>
+          <th>ID</th><th>이미지</th><th>이름</th><th>설명</th><th>상태</th><th>삭제</th>
         </tr>
         </thead>
         <tbody id="themeList">
-        <tr><td colspan="5" class="text-center text-muted py-4">로딩 중...</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">로딩 중...</td></tr>
         </tbody>
       </table>
     </div>
@@ -264,11 +264,11 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
         <tr>
-          <th>ID</th><th>시작 시간</th><th>삭제</th>
+          <th>ID</th><th>시작 시간</th><th>상태</th><th>삭제</th>
         </tr>
         </thead>
         <tbody id="timeList">
-        <tr><td colspan="3" class="text-center text-muted py-4">로딩 중...</td></tr>
+        <tr><td colspan="4" class="text-center text-muted py-4">로딩 중...</td></tr>
         </tbody>
       </table>
     </div>
@@ -419,7 +419,9 @@
             <td>${escapeHtml(res.theme.name)}</td>
             <td>${escapeHtml(res.time.startAt)}</td>
             <td>${renderReservationStatusBadge(res)}</td>
-            <td><button class="btn btn-danger btn-sm" onclick="deleteReservation(${res.id})">삭제</button></td>
+            <td>${res.status === 'DELETED'
+                ? '<span class="text-muted">—</span>'
+                : `<button class="btn btn-danger btn-sm" onclick="deleteReservation(${res.id})">삭제</button>`}</td>
         </tr>
     `).join('');
 
@@ -467,6 +469,9 @@
   function renderReservationStatusBadge(reservation) {
     const { status, waitingNumber } = reservation;
 
+    if (status === 'DELETED') {
+      return '<span class="badge bg-dark">삭제됨</span>';
+    }
     if (status === 'CANCELED') {
       return '<span class="badge bg-secondary">취소됨</span>';
     }
@@ -569,18 +574,19 @@
 
   async function loadThemes() {
     try {
-      const themes = await requestJson('/api/themes');
+      const themes = await requestJson('/api/admin/themes');
       const list = document.getElementById('themeList');
       const reservationThemeSelect = document.getElementById('reservationThemeId');
       const reservationThemeFilter = document.getElementById('reservationThemeFilter');
 
+      const activeThemes = themes.filter(theme => !theme.deleted);
       reservationThemeSelect.innerHTML = '<option value="">테마를 선택하세요</option>' +
-          themes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
+          activeThemes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
       reservationThemeFilter.innerHTML = '<option value="">전체 테마</option>' +
           themes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
 
       if (themes.length === 0) {
-        list.innerHTML = emptyRow(5, '등록된 테마가 없습니다.');
+        list.innerHTML = emptyRow(6, '등록된 테마가 없습니다.');
         return;
       }
 
@@ -590,12 +596,17 @@
               <td><img src="${escapeHtml(theme.imageUrl)}" alt="${escapeHtml(theme.name)}"></td>
               <td>${escapeHtml(theme.name)}</td>
               <td>${escapeHtml(theme.description)}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="deleteTheme(${theme.id})">삭제</button></td>
+              <td>${theme.deleted
+                  ? '<span class="badge bg-dark">삭제됨</span>'
+                  : '<span class="badge bg-success">사용 중</span>'}</td>
+              <td>${theme.deleted
+                  ? '<span class="text-muted">—</span>'
+                  : `<button class="btn btn-danger btn-sm" onclick="deleteTheme(${theme.id})">삭제</button>`}</td>
           </tr>
       `).join('');
     } catch (error) {
       document.getElementById('themeList').innerHTML =
-          emptyRow(5, error.data?.message || '테마 목록을 불러오지 못했습니다.');
+          emptyRow(6, error.data?.message || '테마 목록을 불러오지 못했습니다.');
     }
   }
 
@@ -706,7 +717,7 @@
       const list = document.getElementById('timeList');
 
       if (times.length === 0) {
-        list.innerHTML = emptyRow(3, '등록된 시간이 없습니다.');
+        list.innerHTML = emptyRow(4, '등록된 시간이 없습니다.');
         return;
       }
 
@@ -714,12 +725,17 @@
           <tr>
               <td>${time.id}</td>
               <td>${escapeHtml(time.startAt)}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="deleteTime(${time.id})">삭제</button></td>
+              <td>${time.deleted
+                  ? '<span class="badge bg-dark">삭제됨</span>'
+                  : '<span class="badge bg-success">사용 중</span>'}</td>
+              <td>${time.deleted
+                  ? '<span class="text-muted">—</span>'
+                  : `<button class="btn btn-danger btn-sm" onclick="deleteTime(${time.id})">삭제</button>`}</td>
           </tr>
       `).join('');
     } catch (error) {
       document.getElementById('timeList').innerHTML =
-          emptyRow(3, error.data?.message || '시간 목록을 불러오지 못했습니다.');
+          emptyRow(4, error.data?.message || '시간 목록을 불러오지 못했습니다.');
     }
   }
 

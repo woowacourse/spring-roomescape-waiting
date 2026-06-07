@@ -1,8 +1,11 @@
 package roomescape.feature.time.domain;
 
 import java.time.LocalTime;
+import java.util.Objects;
+import lombok.Getter;
 import roomescape.global.domain.EntityStatus;
 
+@Getter
 public class Time {
 
     private final Long id;
@@ -23,15 +26,19 @@ public class Time {
         return new Time(id, startAt, status);
     }
 
-    public Long getId() {
-        return id;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Time other)) {
+            return false;
+        }
+        return id != null && id.equals(other.id);
     }
 
-    public LocalTime getStartAt() {
-        return startAt;
-    }
-
-    public EntityStatus getStatus() {
-        return status;
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

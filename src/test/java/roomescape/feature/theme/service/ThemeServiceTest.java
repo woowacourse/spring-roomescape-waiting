@@ -3,10 +3,8 @@ package roomescape.feature.theme.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -40,14 +38,12 @@ class ThemeServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
-    @Mock
-    private ThemeMapper themeMapper;
 
     private ThemeService themeService;
 
     @BeforeEach
     void setUp() {
-        themeService = new ThemeService(themeRepository, themeMapper);
+        themeService = new ThemeService(themeRepository, new ThemeMapper());
     }
 
     @Nested
@@ -55,19 +51,9 @@ class ThemeServiceTest {
 
         @Test
         void 테마가_없으면_빈_목록을_반환한다() {
-            // given
             when(themeRepository.findAllByNotDeleted()).thenReturn(List.of());
 
-            // when
-            List<ThemeResponseDto> actualResults = themeService.getThemes();
-
-            // then
-            assertThat(actualResults).isEmpty();
-
-            verify(themeRepository, times(1)).findAllByNotDeleted();
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoInteractions(themeMapper);
+            assertThat(themeService.getThemes()).isEmpty();
         }
 
         @Test
@@ -77,13 +63,11 @@ class ThemeServiceTest {
             Theme theme2 = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", EntityStatus.ACTIVE);
 
             ThemeResponseDto expectedResult1 = new ThemeResponseDto(theme1.getId(), theme1.getName(),
-                    theme1.getDescription(), theme1.getImageUrl());
+                    theme1.getDescription(), theme1.getImageUrl(), false);
             ThemeResponseDto expectedResult2 = new ThemeResponseDto(theme2.getId(), theme2.getName(),
-                    theme2.getDescription(), theme2.getImageUrl());
+                    theme2.getDescription(), theme2.getImageUrl(), false);
 
             when(themeRepository.findAllByNotDeleted()).thenReturn(List.of(theme1, theme2));
-            when(themeMapper.toResponseDto(theme1)).thenReturn(expectedResult1);
-            when(themeMapper.toResponseDto(theme2)).thenReturn(expectedResult2);
 
             // when
             List<ThemeResponseDto> actualResults = themeService.getThemes();
@@ -91,12 +75,31 @@ class ThemeServiceTest {
             // then
             assertThat(actualResults).containsExactly(expectedResult1, expectedResult2);
 
-            verify(themeRepository, times(1)).findAllByNotDeleted();
-            verify(themeMapper, times(1)).toResponseDto(theme1);
-            verify(themeMapper, times(1)).toResponseDto(theme2);
+            verify(themeRepository).findAllByNotDeleted();
+            verify(themeRepository, never()).findAll();
+        }
 
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoMoreInteractions(themeMapper);
+        @Test
+        void 삭제된_테마를_포함한_전체_테마_목록을_조회한다() {
+            // given
+            Theme active = Theme.reconstruct(1L, "테마1", "설명1", "https://example.com/1.png", EntityStatus.ACTIVE);
+            Theme deleted = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", EntityStatus.DELETED);
+
+            ThemeResponseDto activeDto = new ThemeResponseDto(active.getId(), active.getName(),
+                    active.getDescription(), active.getImageUrl(), false);
+            ThemeResponseDto deletedDto = new ThemeResponseDto(deleted.getId(), deleted.getName(),
+                    deleted.getDescription(), deleted.getImageUrl(), true);
+
+            when(themeRepository.findAll()).thenReturn(List.of(active, deleted));
+
+            // when
+            List<ThemeResponseDto> actualResults = themeService.getAllThemes();
+
+            // then
+            assertThat(actualResults).containsExactly(activeDto, deletedDto);
+
+            verify(themeRepository).findAll();
+            verify(themeRepository, never()).findAllByNotDeleted();
         }
     }
 
@@ -111,7 +114,7 @@ class ThemeServiceTest {
                     EntityStatus.ACTIVE
             );
             ThemeResponseDto expectedResult = new ThemeResponseDto(
-                    ID, NAME, DESCRIPTION, IMAGE_URL
+                    ID, NAME, DESCRIPTION, IMAGE_URL, false
             );
 
             LocalDate today = LocalDate.now();
@@ -121,21 +124,12 @@ class ThemeServiceTest {
 
             when(themeRepository.findPopularThemesDateBetween(startDate, endDate, limit))
                     .thenReturn(List.of(popular));
-            when(themeMapper.toResponseDto(popular)).thenReturn(expectedResult);
 
             // when
             List<ThemeResponseDto> actualResults = themeService.getPopularThemes();
 
             // then
             assertThat(actualResults).containsExactly(expectedResult);
-
-            verify(themeRepository, times(1))
-                    .findPopularThemesDateBetween(startDate, endDate, limit);
-            verify(themeMapper, times(1))
-                    .toResponseDto(popular);
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoMoreInteractions(themeMapper);
         }
 
         @Test
@@ -154,12 +148,6 @@ class ThemeServiceTest {
 
             // then
             assertThat(results).isEmpty();
-
-            verify(themeRepository, times(1))
-                    .findPopularThemesDateBetween(startDate, endDate, limit);
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoInteractions(themeMapper);
         }
     }
 
@@ -179,13 +167,12 @@ class ThemeServiceTest {
                     EntityStatus.ACTIVE
             );
             ThemeResponseDto expectedResult = new ThemeResponseDto(
-                    ID, NAME, DESCRIPTION, IMAGE_URL
+                    ID, NAME, DESCRIPTION, IMAGE_URL, false
             );
 
             when(themeRepository.existsThemeByNameAndNotDeleted(NAME))
                     .thenReturn(false);
             when(themeRepository.save(any(Theme.class))).thenReturn(saved);
-            when(themeMapper.toResponseDto(saved)).thenReturn(expectedResult);
 
             // when
             ThemeResponseDto actualResult = themeService.saveTheme(command);
@@ -193,12 +180,7 @@ class ThemeServiceTest {
             // then
             assertThat(actualResult).isEqualTo(expectedResult);
 
-            verify(themeRepository, times(1)).existsThemeByNameAndNotDeleted(NAME);
-            verify(themeRepository, times(1)).save(any(Theme.class));
-            verify(themeMapper, times(1)).toResponseDto(saved);
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoMoreInteractions(themeMapper);
+            verify(themeRepository).save(any(Theme.class));
         }
 
         @Test
@@ -217,11 +199,7 @@ class ThemeServiceTest {
                     .isInstanceOf(GeneralException.class)
                     .hasMessage("이미 등록된 테마입니다.");
 
-            verify(themeRepository, times(1))
-                    .existsThemeByNameAndNotDeleted(NAME);
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoInteractions(themeMapper);
+            verify(themeRepository, never()).save(any(Theme.class));
         }
     }
 
@@ -237,11 +215,7 @@ class ThemeServiceTest {
             themeService.deleteThemeById(ID);
 
             // then
-            verify(themeRepository, times(1)).existsThemeByIdAndNotDeleted(ID);
-            verify(themeRepository, times(1)).deleteThemeById(ID);
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoInteractions(themeMapper);
+            verify(themeRepository).deleteThemeById(ID);
         }
 
         @Test
@@ -255,11 +229,7 @@ class ThemeServiceTest {
                     .isInstanceOf(GeneralException.class)
                     .hasMessage("테마를 찾을 수 없습니다.");
 
-            verify(themeRepository, times(1))
-                    .existsThemeByIdAndNotDeleted(NOT_EXISTS_THEME_ID);
-
-            verifyNoMoreInteractions(themeRepository);
-            verifyNoInteractions(themeMapper);
+            verify(themeRepository, never()).deleteThemeById(any());
         }
     }
 }

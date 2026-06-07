@@ -2,7 +2,12 @@ package roomescape.feature.reservation.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.reservation.domain.Reservation;
@@ -14,6 +19,7 @@ import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
+import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
@@ -25,31 +31,30 @@ import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
-public class ReservationManagementService implements ReservationService, WaitingService {
+@RequiredArgsConstructor
+public class ReservationManagementService implements ReservationService, AdminReservationService, WaitingService {
+
+    private static final int MAX_CONCURRENCY_ATTEMPTS = 2;
+    private static final long CONCURRENCY_BACKOFF_MILLIS = 50L;
+    private static final double CONCURRENCY_BACKOFF_MULTIPLIER = 2.0;
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationMapper reservationMapper;
 
-    public ReservationManagementService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository, ReservationMapper reservationMapper) {
-        this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
-        this.themeRepository = themeRepository;
-        this.reservationMapper = reservationMapper;
-    }
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<ReservationResponseDto> getReservations() {
-        List<Reservation> reservations = reservationRepository.findReservationsByNotDeleted();
+        List<Reservation> reservations = reservationRepository.findAllReservations();
         return convertReservationsToDto(reservations);
     }
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
         return reservations.stream()
-            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
-            .toList();
+                .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
+                .toList();
     }
 
     private Integer getWaitingNumber(Reservation reservation) {
@@ -57,30 +62,30 @@ public class ReservationManagementService implements ReservationService, Waiting
             return null;
         }
 
-        return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(),
-            reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return reservationRepository.countByIdLessThanEqualAndSlot(reservation.getId(), reservation.getSlot().toSlotKey());
     }
 
     @Override
     public List<ReservationResponseDto> getReservationsByName(ReserverName name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndNotDeleted(name);
         return reservations.stream()
-            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
-            .toList();
+                .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
+                .toList();
     }
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.ACTIVE);
 
-        validateNotReservedByOther(reservation);
+        validateNotReservedOrWaitedByOther(reservation);
 
-        try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
-        } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
     }
 
     private Reservation createReservation(ReservationCreateCommand command, ReservationStatus status) {
@@ -98,7 +103,7 @@ public class ReservationManagementService implements ReservationService, Waiting
 
         if (!parameterErrorResponses.isEmpty()) {
             throw new GeneralParametersException(ReservationErrorType.FIELD_RESOURCE_NOT_FOUND,
-                parameterErrorResponses);
+                    parameterErrorResponses);
         }
 
         return Reservation.create(command.name(), command.date(), time, theme, status);
@@ -106,47 +111,73 @@ public class ReservationManagementService implements ReservationService, Waiting
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command) {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         Time newTime = timeRepository.findTimeByIdAndNotDeleted(command.timeId())
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
         Theme newTheme = themeRepository.findThemeByIdAndNotDeleted(command.themeId())
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
 
         Reservation updated = existingReservation.update(command.name(), command.date(), newTime, newTheme);
 
-        validateNotReservedByOther(updated);
+        validateNotReservedOrWaitedByOther(updated);
 
-        try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
-        } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        eventPublisher.publishEvent(new SlotReleasedEvent(existingReservation.getSlot().toSlotKey()));
+
+        return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
     }
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelActive(name)));
+        Reservation canceledReservation = reservation.cancelActive(name);
+        reservationRepository.changeStatus(
+                id, reservation.getVersion(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+
+        eventPublisher.publishEvent(new SlotReleasedEvent(canceledReservation.getSlot().toSlotKey()));
+
+        return reservationMapper.toCancelResponseDto(canceledReservation);
     }
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public void deleteReservationById(Long id) {
-        if (!reservationRepository.existsReservationByIdAndNotDeleted(id)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
-        }
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+        reservationRepository.update(reservation.delete());
 
-        reservationRepository.deleteReservationById(id);
+        if (reservation.getStatus() == ReservationStatus.ACTIVE) {
+            eventPublisher.publishEvent(new SlotReleasedEvent(reservation.getSlot().toSlotKey()));
+        }
     }
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.WAITING);
 
@@ -154,27 +185,29 @@ public class ReservationManagementService implements ReservationService, Waiting
         validateNotReservedByMyself(reservation);
         validateAlreadyReserved(reservation);
 
-        try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
-        } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
-        }
+        return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
     }
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelWaiting(name)));
+        Reservation canceledReservation = reservation.cancelWaiting(name);
+        reservationRepository.changeStatus(
+                id, reservation.getVersion(), ReservationStatus.WAITING, ReservationStatus.CANCELED);
+
+        return reservationMapper.toCancelResponseDto(canceledReservation);
     }
 
-    private void validateNotReservedByOther(Reservation reservation) {
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme())) {
+    private void validateNotReservedOrWaitedByOther(Reservation reservation) {
+        if (reservationRepository.existsActiveOrWaitingReservation(reservation.getSlot().toSlotKey())) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
     }
@@ -192,11 +225,7 @@ public class ReservationManagementService implements ReservationService, Waiting
     }
 
     private void validateAlreadyReserved(Reservation reservation) {
-        boolean alreadyReserved = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
+        boolean alreadyReserved = reservationRepository.existsActiveReservation(reservation.getSlot().toSlotKey());
 
         if (!alreadyReserved) {
             throw new GeneralException(ReservationErrorType.NOT_RESERVED);

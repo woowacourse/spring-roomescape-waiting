@@ -1,46 +1,62 @@
 package roomescape.feature.reservation.domain;
 
 import java.time.LocalDate;
+import lombok.Getter;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.error.exception.GeneralException;
 
+@Getter
 public class Reservation {
 
     private final Long id;
     private final ReserverName name;
-    private final Schedule schedule;
-    private final Theme theme;
+    private final Slot slot;
     private final ReservationStatus status;
+    private final long version;
 
-    private Reservation(Long id, ReserverName name, Schedule schedule, Theme theme, ReservationStatus status) {
+    private Reservation(Long id, ReserverName name, Slot slot, ReservationStatus status, long version) {
         this.id = id;
         this.name = name;
-        this.schedule = schedule;
-        this.theme = theme;
+        this.slot = slot;
         this.status = status;
+        this.version = version;
     }
 
     public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
-        Schedule schedule = new Schedule(date, time);
-        validateFuture(schedule);
+        Slot slot = new Slot(date, time, theme);
+        validateFuture(slot);
 
-        return new Reservation(null, name, schedule, theme, status);
+        return new Reservation(null, name, slot, status, 0L);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status) {
-        return new Reservation(id, name, new Schedule(date, time), theme, status);
+        return new Reservation(id, name, new Slot(date, time, theme), status, 0L);
+    }
+
+    public static Reservation reconstruct(
+        Long id, ReserverName name, LocalDate date,
+        Time time, Theme theme, ReservationStatus status, long version) {
+        return new Reservation(id, name, new Slot(date, time, theme), status, version);
     }
 
     public Reservation update(ReserverName requestName, LocalDate newDate, Time newTime, Theme newTheme) {
-        Schedule newSchedule = new Schedule(newDate, newTime);
-        validateUpdatable(requestName, newSchedule);
-        validateChanged(newSchedule, newTheme);
+        Slot newSlot = new Slot(newDate, newTime, newTheme);
+        validateUpdatable(requestName, newSlot);
+        validateChanged(newSlot);
 
-        return new Reservation(this.id, this.name, newSchedule, newTheme, this.status);
+        return new Reservation(this.id, this.name, newSlot, this.status, this.version);
+    }
+
+    public Reservation delete() {
+        if (this.status == ReservationStatus.DELETED) {
+            throw new GeneralException(ReservationErrorType.ALREADY_DELETED);
+        }
+
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.DELETED, this.version);
     }
 
     public Reservation cancelActive(ReserverName requestName) {
@@ -49,7 +65,7 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.version);
     }
 
     public Reservation cancelWaiting(ReserverName requestName) {
@@ -58,25 +74,33 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.version);
+    }
+
+    public Reservation confirmWaiting() {
+        if (this.status != ReservationStatus.WAITING) {
+            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
+        }
+
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.ACTIVE, this.version);
     }
 
     private void validateCancelable(ReserverName requestName) {
         if (!this.name.equals(requestName)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
-        if (this.schedule.isPast()) {
+        if (this.slot.isPast()) {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
         }
     }
 
-    private static void validateFuture(Schedule schedule) {
-        if (schedule.isPast()) {
+    private static void validateFuture(Slot slot) {
+        if (slot.isPast()) {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CREATE);
         }
     }
 
-    private void validateUpdatable(ReserverName requestName, Schedule newSchedule) {
+    private void validateUpdatable(ReserverName requestName, Slot newSlot) {
         if (!this.name.equals(requestName)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
         }
@@ -84,54 +108,25 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
-        validateFuture(this.schedule);
-        validateFuture(newSchedule);
+        validateFuture(this.slot);
+        validateFuture(newSlot);
     }
 
-    private void validateChanged(Schedule newSchedule, Theme newTheme) {
-        if (isSameSchedule(newSchedule) && isSameTheme(newTheme)) {
+    private void validateChanged(Slot newSlot) {
+        if (this.slot.equals(newSlot)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_NOT_CHANGED);
         }
     }
 
-    private boolean isSameSchedule(Schedule newSchedule) {
-        return this.schedule.date().equals(newSchedule.date())
-            && isSameId(this.schedule.time().getId(), newSchedule.time().getId());
-    }
-
-    private boolean isSameTheme(Theme newTheme) {
-        return isSameId(this.theme.getId(), newTheme.getId());
-    }
-
-    private boolean isSameId(Long currentId, Long newId) {
-        return currentId != null && currentId.equals(newId);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public ReserverName getName() {
-        return name;
-    }
-
-    public boolean hasDifferentName(ReserverName name) {
-        return !this.name.equals(name);
-    }
-
     public LocalDate getDate() {
-        return schedule.date();
+        return slot.getDate();
     }
 
     public Time getTime() {
-        return schedule.time();
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
+        return slot.getTheme();
     }
 }

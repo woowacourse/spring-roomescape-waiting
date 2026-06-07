@@ -123,6 +123,26 @@ class JdbcTimeRepositoryTest {
                 );
             findSucceeded = true;
         }
+
+        @Test
+        @Order(2)
+        void 삭제된_시간을_포함한_전체_예약_시간을_조회한다() {
+            // given
+            Time deletedTime = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time activeTime = timeRepository.save(Time.create(LocalTime.of(11, 30)));
+            timeRepository.deleteTimeById(deletedTime.getId());
+
+            // when
+            List<Time> actual = timeRepository.findAll();
+
+            // then
+            assertThat(actual)
+                .extracting(Time::getId, Time::getStartAt, Time::getStatus)
+                .containsExactly(
+                    tuple(deletedTime.getId(), deletedTime.getStartAt(), EntityStatus.DELETED),
+                    tuple(activeTime.getId(), activeTime.getStartAt(), EntityStatus.ACTIVE)
+                );
+        }
     }
 
     @Nested

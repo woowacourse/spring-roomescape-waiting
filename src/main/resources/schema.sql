@@ -27,6 +27,7 @@ CREATE TABLE reservation (
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     status ENUM('ACTIVE', 'CANCELED', 'DELETED', 'WAITING') DEFAULT 'ACTIVE',
+    version BIGINT NOT NULL DEFAULT 0,
     active_flag BOOLEAN GENERATED ALWAYS AS (
         CASE WHEN status = 'ACTIVE' THEN true END
     ),
@@ -49,3 +50,11 @@ ON reservation_time (active_start_at);
 
 CREATE UNIQUE INDEX uq_active_theme
 ON theme (active_name);
+
+CREATE TABLE shedlock (
+    name VARCHAR(64) NOT NULL,
+    lock_until TIMESTAMP(3) NOT NULL,
+    locked_at TIMESTAMP(3) NOT NULL,
+    locked_by VARCHAR(255) NOT NULL,
+    PRIMARY KEY (name)
+);

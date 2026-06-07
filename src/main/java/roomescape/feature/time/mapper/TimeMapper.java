@@ -12,16 +12,12 @@ import roomescape.global.domain.EntityStatus;
 @Component
 public final class TimeMapper {
 
-    public TimeMapper() {
-
-    }
-
     public TimeCreateCommand toCreateCommand(TimeCreateRequestDto requestDto) {
         return new TimeCreateCommand(requestDto.startAt());
     }
 
     public TimeResponseDto toResponseDto(Time time) {
-        return new TimeResponseDto(time.getId(), time.getStartAt());
+        return new TimeResponseDto(time.getId(), time.getStartAt(), time.getStatus() == EntityStatus.DELETED);
     }
 
     public ReservationTimeResponseDto toReservationResponseDto(Time time) {

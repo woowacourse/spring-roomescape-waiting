@@ -43,8 +43,8 @@
 1. 활성(ACTIVE) 상태의 예약을 생성합니다.
 2. 삭제된 예약 시간 또는 삭제된 테마로는 예약을 생성할 수 없습니다.
 3. 현재보다 과거의 날짜/시간으로는 예약을 생성할 수 없습니다.
-4. 같은 날짜, 시간, 테마의 활성(ACTIVE) 예약이 이미 있으면 생성할 수 없습니다.
-5. 삭제, 취소, 대기 상태의 예약은 중복 예약 검사에서 제외합니다.
+4. 같은 날짜, 시간, 테마에 활성(ACTIVE) 또는 대기(WAITING) 예약이 이미 있으면 생성할 수 없습니다.
+5. 삭제, 취소 상태의 예약은 중복 예약 검사에서 제외합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -57,7 +57,7 @@
 | RC4 | 예약자명이 공백이거나 20자를 초과한 경우                 | 400 Bad Request           | 상태 값이 올바르지 않습니다.      |
 | RC5 | 참조 자원이 존재하지 않는 경우                       | 404 Not Found             | 조회할 자원이 존재하지 않습니다.    |
 | RC6 | 이미 지난 날짜/시간으로 예약하려는 경우                  | 409 Conflict              | 지난 예약은 생성할 수 없습니다     |
-| RC7 | date, timeId, themeId에 해당하는 활성 예약이 존재하는 경우 | 409 Conflict           | 이미 예약된 날짜, 시간, 테마입니다. |
+| RC7 | date, timeId, themeId에 해당하는 활성 또는 대기 예약이 존재하는 경우 | 409 Conflict      | 이미 예약된 날짜, 시간, 테마입니다. |
 | RC8 | 서버 오류인 경우                               | 500 Internal Server Error | 예상치 못한 오류가 발생했습니다.    |
 
 ### 파라미터별 에러 메시지
@@ -198,10 +198,11 @@
 
 ```text
 1. 등록된 전체 예약 목록을 조회합니다.
-2. 삭제되지 않은 예약만 조회합니다.
-3. 예약이 삭제되지 않았다면 연결된 예약 시간 또는 테마가 삭제되어 있어도 예약 이력으로 조회합니다.
+2. 관리자는 소프트 삭제된 예약도 모두 조회합니다.
+3. 연결된 예약 시간 또는 테마가 삭제되어 있어도 예약 이력으로 조회합니다.
 4. 각 예약에 상태(status), 상태 메시지(message), 대기 순번(waitingNumber)을 함께 반환합니다.
-5. 조회 가능한 예약이 없으면 빈 목록을 반환합니다.
+5. 소프트 삭제된 예약은 status가 DELETED로 반환됩니다.
+6. 조회 가능한 예약이 없으면 빈 목록을 반환합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -240,6 +241,26 @@
     "status": "EDITABLE",
     "message": "",
     "waitingNumber": null
+  },
+  {
+    "id": 2,
+    "name": "제이슨",
+    "date": "2026-05-04",
+    "time": {
+      "id": 2,
+      "startAt": "12:00",
+      "deleted": false
+    },
+    "theme": {
+      "id": 1,
+      "name": "피온피온",
+      "description": "설명",
+      "imageUrl": "https://roomescape.com/images/themes/ring-banner.png",
+      "deleted": false
+    },
+    "status": "DELETED",
+    "message": "삭제된 예약입니다.",
+    "waitingNumber": null
   }
 ]
 ```
@@ -267,17 +288,21 @@
 1. 예약 ID로 예약을 삭제합니다.
 2. 예약 삭제는 실제 DELETE가 아니라 status를 DELETED로 변경하는 soft delete로 처리합니다.
 3. 이미 삭제된 예약은 존재하지 않는 예약으로 처리합니다.
+4. 활성(ACTIVE) 예약을 삭제하면 같은 날짜·시간·테마의 가장 빠른 대기(WAITING) 예약이 자동으로 활성(ACTIVE)으로 승격됩니다.
+5. 대기·취소 상태의 예약을 삭제할 때는 자동 승격이 발생하지 않습니다.
+6. 자동 승격은 삭제가 커밋된 후 별도 트랜잭션에서 처리되며, 해당 날짜·시간·테마에 이미 활성(ACTIVE) 예약이 있으면 승격하지 않습니다.
+7. 자동 승격이 실패해도 예약 삭제 요청 자체는 성공으로 응답합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
 
-| ID  | 상황                          | HTTP Code                 | 상위 에러 메시지          |
-|-----|-----------------------------|---------------------------|--------------------|
-| RD1 | 요청 처리 성공                    | 204 No Content            | 없음                 |
-| RD2 | 예약 ID의 자료형이 올바르지 않은 경우      | 400 Bad Request           | 요청 형식이 올바르지 않습니다.  |
-| RD3 | 예약 ID의 값이 제약 조건을 만족하지 못한 경우 | 400 Bad Request           | 요청 값이 올바르지 않습니다.   |
-| RD4 | 예약 ID가 존재하지 않는 경우           | 404 Not Found             | 예약을 찾을 수 없습니다.     |
-| RD5 | 서버 오류인 경우                   | 500 Internal Server Error | 예상치 못한 오류가 발생했습니다. |
+| ID  | 상황                          | HTTP Code                 | 상위 에러 메시지                    |
+|-----|-----------------------------|---------------------------|------------------------------|
+| RD1 | 요청 처리 성공                    | 204 No Content            | 없음                           |
+| RD2 | 예약 ID의 자료형이 올바르지 않은 경우      | 400 Bad Request           | 요청 형식이 올바르지 않습니다.            |
+| RD3 | 예약 ID의 값이 제약 조건을 만족하지 못한 경우 | 400 Bad Request           | 요청 값이 올바르지 않습니다.             |
+| RD4 | 예약 ID가 존재하지 않는 경우           | 404 Not Found             | 예약을 찾을 수 없습니다.               |
+| RD5 | 서버 오류인 경우                   | 500 Internal Server Error | 예상치 못한 오류가 발생했습니다.           |
 
 ### 파라미터별 에러 메시지
 
@@ -468,8 +493,12 @@
 6. 기존 예약 또는 변경하려는 예약이 이미 지났다면 변경할 수 없습니다.
 7. 삭제된 예약 시간 또는 삭제된 테마로는 예약을 변경할 수 없습니다.
 8. 변경 내용이 기존 예약과 동일하면(같은 날짜, 시간, 테마) 변경할 수 없습니다.
-9. 변경하려는 날짜, 시간, 테마에 다른 활성 예약이 이미 있으면 변경할 수 없습니다.
-10. 삭제, 취소, 대기 상태의 예약은 중복 예약 검사에서 제외합니다.
+9. 변경하려는 날짜, 시간, 테마에 다른 활성 또는 대기 예약이 이미 있으면 변경할 수 없습니다.
+10. 삭제, 취소 상태의 예약은 중복 예약 검사에서 제외합니다.
+11. 조회 후 변경을 반영하기 전에 다른 요청이 같은 예약을 먼저 변경하면(동시 수정 충돌) 자동으로 재시도합니다. 재시도 시점의 상태에 따라 변경이 반영되거나, 변경 불가 상태(활성 아님·미존재 등)면 해당 검증 결과로 응답하며, 재시도로도 충돌이 해소되지 않으면 서버 오류로 응답합니다.
+12. 예약을 변경하면 변경 전(원래)의 날짜·시간·테마 슬롯에서 가장 빠른 대기(WAITING) 예약이 자동으로 활성(ACTIVE)으로 승격됩니다.
+13. 자동 승격은 변경이 커밋된 후 별도 트랜잭션에서 처리되며, 원래 슬롯에 이미 활성(ACTIVE) 예약이 있으면 승격하지 않습니다.
+14. 자동 승격이 실패해도 예약 변경 요청 자체는 성공으로 응답합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -488,7 +517,7 @@
 | RP10 | 변경하려는 예약 시간 또는 테마가 존재하지 않는 경우          | 404 Not Found             | 수정할 자원이 존재하지 않습니다.    |
 | RP11 | 활성(ACTIVE) 예약이 아닌 경우                    | 409 Conflict              | 활성된 예약이 아닙니다.         |
 | RP12 | 기존 또는 변경할 예약이 이미 지난 경우                  | 409 Conflict              | 지난 예약은 변경할 수 없습니다.    |
-| RP13 | date, timeId, themeId에 해당하는 활성 예약이 존재하는 경우 | 409 Conflict           | 이미 예약된 날짜, 시간, 테마입니다. |
+| RP13 | date, timeId, themeId에 해당하는 활성 또는 대기 예약이 존재하는 경우 | 409 Conflict      | 이미 예약된 날짜, 시간, 테마입니다. |
 | RP14 | 서버 오류인 경우                               | 500 Internal Server Error | 예상치 못한 오류가 발생했습니다.    |
 
 ### 파라미터별 에러 메시지
@@ -688,6 +717,9 @@
 5. 활성된(ACTIVE) 예약만 취소할 수 있습니다.
 6. 삭제된 예약은 존재하지 않는 예약으로 처리합니다.
 7. 이미 지난 예약은 취소할 수 없습니다.
+8. 활성 예약을 취소하면 같은 날짜·시간·테마의 가장 빠른 대기(WAITING) 예약이 자동으로 활성(ACTIVE)으로 승격됩니다.
+9. 자동 승격은 취소가 커밋된 후 별도 트랜잭션에서 처리되며, 해당 날짜·시간·테마에 이미 활성(ACTIVE) 예약이 있으면 승격하지 않습니다.
+10. 자동 승격이 실패해도 예약 취소 요청 자체는 성공으로 응답합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -825,7 +857,7 @@
 
 </details>
 
-### `PATCH /api/reservations/{id}/waitings/cancel?name={name}` 사용자 대기 예약 취소 API
+### `PATCH /api/reservations/waitings/{id}/cancel?name={name}` 사용자 대기 예약 취소 API
 
 <details>
 <summary>세부 내용</summary>
@@ -1299,8 +1331,9 @@
 
 ```text
 1. 등록된 전체 예약 시간을 조회합니다.
-2. 삭제되지 않은 예약 시간만 조회합니다.
-3. 조회 가능한 예약 시간이 없으면 빈 목록을 반환합니다.
+2. 관리자는 소프트 삭제된 예약 시간도 모두 조회합니다.
+3. 소프트 삭제된 예약 시간은 deleted가 true로 반환됩니다.
+4. 조회 가능한 예약 시간이 없으면 빈 목록을 반환합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -1322,11 +1355,13 @@
 [
   {
     "id": 1,
-    "startAt": "10:00"
+    "startAt": "10:00",
+    "deleted": false
   },
   {
     "id": 2,
-    "startAt": "11:00"
+    "startAt": "11:00",
+    "deleted": true
   }
 ]
 ```
@@ -1393,7 +1428,8 @@
 ```json
 {
   "id": 1,
-  "startAt": "20:30"
+  "startAt": "20:30",
+  "deleted": false
 }
 ```
 
@@ -1564,13 +1600,15 @@
     "id": 1,
     "name": "링",
     "description": "이것은 링 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/ring.png"
+    "imageUrl": "https://roomescape.com/images/themes/ring.png",
+    "deleted": false
   },
   {
     "id": 2,
     "name": "감옥",
     "description": "이것은 감옥 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/prison-room.png"
+    "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+    "deleted": false
   }
 ]
 ```
@@ -1628,13 +1666,15 @@
     "id": 1,
     "name": "링",
     "description": "이것은 링 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/ring.png"
+    "imageUrl": "https://roomescape.com/images/themes/ring.png",
+    "deleted": false
   },
   {
     "id": 2,
     "name": "감옥",
     "description": "이것은 감옥 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/prison-room.png"
+    "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+    "deleted": false
   }
 ]
 ```
@@ -1642,6 +1682,66 @@
 ### 실패 예시
 
 #### HR2 서버 오류
+
+```json
+{
+  "message": "예상치 못한 오류가 발생했습니다."
+}
+```
+
+</details>
+
+### `GET /api/admin/themes` 관리자 테마 목록 조회 API
+
+<details>
+<summary>세부 내용</summary>
+
+### 기능 요구사항
+
+```text
+1. 등록된 전체 테마를 조회합니다.
+2. 관리자는 소프트 삭제된 테마도 모두 조회합니다.
+3. 소프트 삭제된 테마는 deleted가 true로 반환됩니다.
+4. 조회 가능한 테마가 없으면 빈 목록을 반환합니다.
+```
+
+### 상황별 HTTP Code 및 상위 메시지
+
+| ID  | 상황        | HTTP Code                 | 상위 에러 메시지          |
+|-----|-----------|---------------------------|--------------------|
+| HM1 | 요청 처리 성공  | 200 OK                    | 없음                 |
+| HM2 | 서버 오류인 경우 | 500 Internal Server Error | 예상치 못한 오류가 발생했습니다. |
+
+### Request Body
+
+없음
+
+### Response Body
+
+#### HM1 성공 예시
+
+```json
+[
+  {
+    "id": 1,
+    "name": "링",
+    "description": "이것은 링 방탈출 설명입니다.",
+    "imageUrl": "https://roomescape.com/images/themes/ring.png",
+    "deleted": false
+  },
+  {
+    "id": 2,
+    "name": "감옥",
+    "description": "이것은 감옥 방탈출 설명입니다.",
+    "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+    "deleted": true
+  }
+]
+```
+
+### 실패 예시
+
+#### HM2 서버 오류
 
 ```json
 {
@@ -1714,7 +1814,8 @@
   "id": 1,
   "name": "브라운",
   "description": "테마 설명",
-  "imageUrl": "https://roomescape.com/images/themes/prison-room.png"
+  "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+  "deleted": false
 }
 ```
 
@@ -1924,6 +2025,7 @@
 #### 예약 관리 기능
 
 전체 예약 내역을 관리합니다. (필터링, 정렬 기준 제공)
+소프트 삭제된 예약도 `삭제됨` 상태로 함께 표시되며, 삭제된 예약에는 삭제 버튼을 노출하지 않습니다.
 
 <img alt="관리자 예약 관리" src="https://github.com/user-attachments/assets/741f5147-0abe-4a9a-bf4c-81cd507d98bd" />
 
@@ -1936,11 +2038,13 @@
 #### 테마 관리 기능
 
 등록된 전체 테마를 관리합니다. (ID 순으로 정렬)
+소프트 삭제된 테마도 `삭제됨` 상태로 함께 표시되며, 삭제된 테마에는 삭제 버튼을 노출하지 않습니다. (예약 추가 폼에는 삭제되지 않은 테마만 선택지로 제공합니다.)
 
 <img alt="관리자 테마 관리" src="https://github.com/user-attachments/assets/15da0dc8-03aa-452d-994f-3a50f7c26de4" />
 
 #### 시간 추가 및 관리 기능
 
 시간을 등록하고, 등록된 전체 시간을 관리합니다. (ID 순으로 정렬)
+소프트 삭제된 시간도 `삭제됨` 상태로 함께 표시되며, 삭제된 시간에는 삭제 버튼을 노출하지 않습니다.
 
 <img alt="관리자 시간 등록 및 관리" src="https://github.com/user-attachments/assets/68bf0fc6-ddf7-4661-a849-95b9f368ccaa" />
