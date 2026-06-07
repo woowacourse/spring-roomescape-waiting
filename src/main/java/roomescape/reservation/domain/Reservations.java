@@ -52,8 +52,8 @@ public record Reservations(
         return new Reservations(List.of(cancelTarget));
     }
 
-    public Reservations cancelByManager(Long reservationId) {
-        Reservation cancelTarget = findById(reservationId);
+    public Reservations cancelByManager(String requesterName) {
+        Reservation cancelTarget = findByName(requesterName);
 
         if (cancelTarget.isReserved()) {
             cancelTarget.cancelByManager();

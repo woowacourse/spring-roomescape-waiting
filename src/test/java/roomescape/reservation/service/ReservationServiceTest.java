@@ -129,7 +129,7 @@ class ReservationServiceTest {
         Reservation savedReservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), LocalDateTime.now()));
 
         // when
-        Reservation actual = reservationService.cancelByManager(slot1.getId(), savedReservation.getId());
+        Reservation actual = reservationService.cancelByManager(slot1.getId(), savedReservation.getName());
 
         // then
         Assertions.assertThat(actual.getStatus())

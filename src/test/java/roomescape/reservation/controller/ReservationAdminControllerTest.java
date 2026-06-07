@@ -65,11 +65,11 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
         Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
-        Integer reservationId = createReservationWithToken(managerToken, slotId);
+        createReservationWithToken(managerToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .when().patch("/admin/slots/" + slotId + "/reservations/" + reservationId + "/cancel")
+                .when().patch("/admin/slots/" + slotId + "/reservations/" + "admin" + "/cancel")
                 .then().log().all()
                 .statusCode(200);
 

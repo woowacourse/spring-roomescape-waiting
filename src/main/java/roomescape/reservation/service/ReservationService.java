@@ -40,11 +40,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation cancelByManager(Long slotId, Long reservationId) {
+    public Reservation cancelByManager(Long slotId, String requesterName) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservations changed = slot.cancelByManager(reservationId, LocalDateTime.now());
+        Reservations changed = slot.cancelByManager(requesterName, LocalDateTime.now());
         cancelAndPromote(changed);
-        return changed.findById(reservationId);
+        return changed.findByName(requesterName);
     }
 
     @Transactional

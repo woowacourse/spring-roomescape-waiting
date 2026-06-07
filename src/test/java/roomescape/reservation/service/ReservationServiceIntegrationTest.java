@@ -120,7 +120,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserved_when_cancel_same_name() {
             // given
             Reservation reservation = saveReservation(name, slot1);
-            reservationService.cancelByManager(slot1.getId(), reservation.getId());
+            reservationService.cancelByManager(slot1.getId(), reservation.getName());
 
             // when
             Reservation actual = reservationService.reserve(name, slot1.getId());
@@ -136,7 +136,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             // given
             String anotherName = "다른사람";
             Reservation saved = saveReservation(name, slot1);
-            reservationService.cancelByManager(slot1.getId(), saved.getId());
+            reservationService.cancelByManager(slot1.getId(), saved.getName());
 
             // when
             Reservation actual = reservationService.reserve(anotherName, slot1.getId());
@@ -185,7 +185,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             Reservation saved = saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.cancelByManager(slot1.getId(), saved.getId());
+            Reservation actual = reservationService.cancelByManager(slot1.getId(), saved.getName());
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -260,7 +260,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             Reservation reservation2 = saveWaitReservation(name2, slot1);
 
             // when
-            reservationService.cancelByManager(slot1.getId(), reservation1.getId());
+            reservationService.cancelByManager(slot1.getId(), reservation1.getName());
             Reservation canceled = reservationRepository.findById(reservation1.getId()).get();
             Reservation promoted = reservationRepository.findById(reservation2.getId()).get();
 

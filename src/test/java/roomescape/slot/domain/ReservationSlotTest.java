@@ -109,6 +109,29 @@ class ReservationSlotTest {
     }
 
     @Test
+    @DisplayName("슬롯의 예약을 취소하면, 취소 대상은 CANCEL, 대기 1순위는 RESERVED가 된다.")
+    void cancel() {
+        // given
+        String name = "송송";
+        String waiterName = "대기자";
+        Reservation reserved = Reservation.load(1L, name, 2L, RESERVED, LocalDateTime.now());
+        Reservation waiting = Reservation.load(2L, waiterName, 2L, WAITING, LocalDateTime.now());
+        ReservationSlot mySlot = slot.withReservations(new Reservations(List.of(reserved, waiting)));
+
+        // when
+        Reservations changed = mySlot.cancel(name, LocalDateTime.now());
+        Reservation canceled = changed.findByName(name);
+        Reservation promoted = changed.findByName(waiterName);
+
+        // then
+        Assertions.assertThat(canceled.getStatus())
+                .isEqualTo(CANCELED);
+
+        Assertions.assertThat(promoted.getStatus())
+                .isEqualTo(RESERVED);
+    }
+
+    @Test
     @DisplayName("이미 지난 슬롯의 예약을 취소하면 예외가 발생한다.")
     void cancel_past_slot() {
         // given
@@ -129,7 +152,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.cancelByManager(reserved.getId(), LocalDateTime.now()))
+        assertThatThrownBy(() -> slot.cancelByManager(reserved.getName(), LocalDateTime.now()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }

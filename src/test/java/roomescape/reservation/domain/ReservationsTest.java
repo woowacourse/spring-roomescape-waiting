@@ -153,7 +153,7 @@ class ReservationsTest {
         Reservations reservations = new Reservations(List.of(reserved, waiting));
 
         // when
-        Reservations changed = reservations.cancelByManager(reserved.getId());
+        Reservations changed = reservations.cancelByManager(reserved.getName());
         Reservation canceled = changed.findById(1L);
         Reservation promoted = changed.findById(2L);
 

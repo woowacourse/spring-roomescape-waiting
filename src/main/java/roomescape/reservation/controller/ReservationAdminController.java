@@ -45,12 +45,12 @@ public class ReservationAdminController {
     }
 
     @AuthGuard(roles = MANAGER)
-    @PatchMapping("/slots/{slotId}/reservations/{reservationId}/cancel")
+    @PatchMapping("/slots/{slotId}/reservations/{name}/cancel")
     public ResponseEntity<ReservationDetailDto> cancelReservation(
             @PathVariable Long slotId,
-            @PathVariable Long reservationId
+            @PathVariable String name
     ) {
-        Reservation canceled = reservationService.cancelByManager(slotId, reservationId);
+        Reservation canceled = reservationService.cancelByManager(slotId, name);
         ReservationDetailDto responseData = ReservationDetailDto.from(canceled);
         return ResponseEntity.ok(responseData);
     }

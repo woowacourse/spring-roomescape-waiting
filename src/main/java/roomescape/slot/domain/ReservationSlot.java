@@ -54,9 +54,9 @@ public class ReservationSlot {
         return reservations.cancel(requesterName);
     }
 
-    public Reservations cancelByManager(Long reservationId, LocalDateTime reservedAt) {
+    public Reservations cancelByManager(String requesterName, LocalDateTime reservedAt) {
         validateNotPast(reservedAt);
-        return reservations.cancelByManager(reservationId);
+        return reservations.cancelByManager(requesterName);
     }
 
     public Reservations reschedule(ReservationSlot newSlot, String requesterName, LocalDateTime requestAt) {
