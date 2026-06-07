@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
@@ -42,13 +43,16 @@ public class ReservationService {
 
     @Transactional
     public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
+        ReservationTime time = reservationTimeService.getById(command.timeId());
+        Theme theme = themeService.findById(command.themeId());
+
+        ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
+        validateSlotAvailable(null, command.name(), slot);
+        Reservation newReservation = new Reservation(command.name(), slot, requestTime);
+
         try {
-            Reservation saved = createReservation(command, requestTime);
-            boolean hasBooking = reservationRepository.hasBookingAtSameTime(saved.getName(), saved.getSlot());
-            boolean hasWaiting = reservationWaitingRepository.hasWaitingAtSameTime(saved.toWaiting());
-            saved.validate(hasBooking, hasWaiting);
-            saved = reservationRepository.save(saved);
-            return ReservationResult.from(saved);
+            Reservation result = reservationRepository.save(newReservation);
+            return ReservationResult.from(result);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
@@ -56,15 +60,40 @@ public class ReservationService {
 
     @Transactional
     public void update(ReservationUpdateCommand command, long id, String name, LocalDateTime requestTime) {
-        Reservation updated = updateReservation(command, id, name, requestTime);
-        boolean hasBooking = reservationRepository.isAlreadyBookedByOthers(updated);
-        boolean hasWaiting = reservationWaitingRepository.hasWaitingAtSameTime(updated.toWaiting());
-        updated.validate(hasBooking, hasWaiting);
+        Reservation reservation = getById(id);
+        reservation.validateDeletableByUser(name, requestTime);
+
+        ReservationTime newTime = null;
+        if (command.timeId() != null) {
+            newTime = reservationTimeService.getById(command.timeId());
+        }
+
+        ReservationSlot temporalSlot = reservation.generateTemporalSlot(command.date(), newTime);
+        validateSlotAvailable(id, name, temporalSlot);
+        Reservation updated = reservation.update(command.date(), newTime, name, requestTime);
 
         try {
             reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void validateSlotAvailable(Long id, String name, ReservationSlot slot) {
+        boolean isBooked = false;
+        if (id == null) {
+            isBooked = reservationRepository.hasBookingAtSameTime(name, slot);
+        }
+
+        boolean isBookedByOthers = false;
+        if (id != null) {
+            isBookedByOthers = reservationRepository.isAlreadyBookedByOthers(id, name, slot);
+        }
+
+        boolean isAlreadyWaiting = reservationWaitingRepository.hasWaitingAtSameTime(name, slot);
+
+        if (isBooked || isBookedByOthers || isAlreadyWaiting) {
+            throw new InvalidBusinessStateException(ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
     }
 
@@ -96,22 +125,6 @@ public class ReservationService {
                 () -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND)
         );
     }
-
-    private Reservation createReservation(ReservationCommand command, LocalDateTime requestTime) {
-        ReservationTime time = reservationTimeService.getById(command.timeId());
-        Theme theme = themeService.findById(command.themeId());
-
-        return new Reservation(command.name(), command.date(), time, theme, requestTime);
-    }
-
-
-    private Reservation updateReservation(ReservationUpdateCommand command, long id, String name,
-                                          LocalDateTime requestTime) {
-        Reservation reservation = getById(id);
-        ReservationTime newTime = command.timeId() != null ? reservationTimeService.getById(command.timeId()) : null;
-        return reservation.update(command.date(), newTime, name, requestTime);
-    }
-
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
         for (ReservationWaiting waiting : lockedWaitings) {

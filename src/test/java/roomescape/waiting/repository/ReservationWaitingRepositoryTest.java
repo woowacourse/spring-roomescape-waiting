@@ -180,8 +180,8 @@ class ReservationWaitingRepositoryTest {
                 new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay());
 
         // when & then
-        assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target1)).isTrue();
-        assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target2)).isFalse();
+        assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target1.getName(), target1.getSlot())).isTrue();
+        assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target2.getName(), target2.getSlot())).isFalse();
     }
 
     @Test

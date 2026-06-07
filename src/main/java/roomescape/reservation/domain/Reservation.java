@@ -4,11 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.global.exception.ForbiddenException;
-import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.waiting.domain.ReservationWaiting;
 
 public class Reservation {
     private final Long id;
@@ -28,21 +26,30 @@ public class Reservation {
         this(null, name, new ReservationSlot(date, time, theme), requestTime);
     }
 
+    public Reservation(String name, ReservationSlot reservationSlot, LocalDateTime requestTime) {
+        this(null, name, reservationSlot, requestTime);
+    }
+
     public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
         validateOwner(userName);
         validateExpiry(requestTime);
 
-        LocalDate targetDate = getNewDateValue(newDate);
-        ReservationTime targetTime = getNewReservationTimeValue(newTime);
+        ReservationSlot targetSlot = generateTemporalSlot(newDate, newTime);
 
         Reservation updated = new Reservation(
                 this.id,
                 this.name,
-                new ReservationSlot(targetDate, targetTime, this.slot.theme()),
+                targetSlot,
                 requestTime
         );
         updated.validateExpiry(requestTime);
         return updated;
+    }
+
+    public ReservationSlot generateTemporalSlot(LocalDate newDate, ReservationTime newTime) {
+        LocalDate targetDate = getNewDateValue(newDate);
+        ReservationTime targetTime = getNewReservationTimeValue(newTime);
+        return new ReservationSlot(targetDate, targetTime, this.slot.theme());
     }
 
     private LocalDate getNewDateValue(LocalDate newDate) {
@@ -75,23 +82,7 @@ public class Reservation {
     }
 
     private void validateExpiry(LocalDateTime requestTime) {
-        if (this.slot.isDateBefore(requestTime.toLocalDate())) {
-            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_DATE);
-        }
-
-        if (this.slot.isExpired(requestTime)) {
-            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_TIME);
-        }
-    }
-
-    public void validate(boolean hasSameTimeBooking, boolean hasSameTimeWaiting) {
-        if (hasSameTimeBooking || hasSameTimeWaiting) {
-            throw new InvalidBusinessStateException(ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
-        }
-    }
-
-    public ReservationWaiting toWaiting() {
-        return new ReservationWaiting(null, name, slot, updatedAt);
+        this.slot.validateNotExpired(requestTime);
     }
 
     public Long getId() {

@@ -55,12 +55,12 @@ public class ReservationRepository {
         );
     }
 
-    public boolean isAlreadyBookedByOthers(Reservation reservation) {
+    public boolean isAlreadyBookedByOthers(Long id, String name, ReservationSlot reservationSlot) {
         return reservationDao.existsByDateAndTimeIdAndNameAndIdNot(
-                reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getName(),
-                reservation.getId()
+                reservationSlot.date(),
+                reservationSlot.time().getId(),
+                name,
+                id
         );
     }
 }

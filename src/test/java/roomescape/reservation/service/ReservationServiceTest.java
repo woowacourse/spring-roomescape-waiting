@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -139,7 +140,8 @@ class ReservationServiceTest {
         given(themeService.findById(1L)).willReturn(theme);
         // 예약은 없지만(false) 대기열에 있음(true)
         given(reservationRepository.hasBookingAtSameTime(anyString(), any(ReservationSlot.class))).willReturn(false);
-        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(anyString(), any(ReservationSlot.class))).willReturn(
+                true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.save(command, now()))
@@ -268,7 +270,8 @@ class ReservationServiceTest {
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeService.getById(1L)).willReturn(time);
-        given(reservationRepository.isAlreadyBookedByOthers(any(Reservation.class))).willReturn(true);
+        given(reservationRepository.isAlreadyBookedByOthers(anyLong(), anyString(),
+                any(ReservationSlot.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(command, 1L, "브라운", now()))
@@ -290,8 +293,10 @@ class ReservationServiceTest {
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeService.getById(1L)).willReturn(time);
-        given(reservationRepository.isAlreadyBookedByOthers(any(Reservation.class))).willReturn(false);
-        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
+        given(reservationRepository.isAlreadyBookedByOthers(anyLong(), anyString(),
+                any(ReservationSlot.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(anyString(), any(ReservationSlot.class))).willReturn(
+                true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(command, 1L, "브라운", now()))
@@ -430,4 +435,3 @@ class ReservationServiceTest {
         then(reservationQueryDao).should().queryPopularThemes(from, to, 10);
     }
 }
-

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
@@ -121,7 +122,31 @@ class ReservationWaitingServiceTest {
 
         given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(anyString(), any(ReservationSlot.class))).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
+    }
+
+    @Test
+    @DisplayName("예약 대기 생성 시, 동시간대에 본인이 이미 예약을 가지고 있는 상태라면 InvalidBusinessStateException이 발생한다.")
+    void save_HasBookingAtSameTime_ThrowsInvalidBusinessStateException() {
+        // given
+        givenReservationTimeAndTheme();
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
+
+        ReservationWaitingCommand command = new ReservationWaitingCommand(
+                "브라운", futureDate, 1L, 1L
+        );
+
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
+                Optional.of(targetReservation));
+        given(reservationRepository.hasBookingAtSameTime(anyString(), any(ReservationSlot.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
@@ -145,7 +170,7 @@ class ReservationWaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
-                .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
+                .hasMessage(roomescape.reservation.exception.ReservationErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
@@ -163,7 +188,7 @@ class ReservationWaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command, today.atTime(11, 0)))
                 .isInstanceOf(InvalidBusinessStateException.class)
-                .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
+                .hasMessage(roomescape.reservation.exception.ReservationErrorCode.INVALID_TIME.getMessage());
     }
 
     @Test
@@ -240,7 +265,7 @@ class ReservationWaitingServiceTest {
         assertThatThrownBy(
                 () -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
-                .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
+                .hasMessage(roomescape.reservation.exception.ReservationErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
@@ -259,7 +284,7 @@ class ReservationWaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.deleteOwnedWaitingById(1L, "브라운", today.atTime(11, 0)))
                 .isInstanceOf(InvalidBusinessStateException.class)
-                .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
+                .hasMessage(roomescape.reservation.exception.ReservationErrorCode.INVALID_TIME.getMessage());
     }
 
     @Test

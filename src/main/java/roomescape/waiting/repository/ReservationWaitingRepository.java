@@ -32,11 +32,11 @@ public class ReservationWaitingRepository {
         reservationWaitingDao.delete(reservationWaiting);
     }
 
-    public boolean hasWaitingAtSameTime(ReservationWaiting reservationWaiting) {
+    public boolean hasWaitingAtSameTime(String name, ReservationSlot reservationSlot) {
         return reservationWaitingDao.existsByDateAndTimeIdAndName(
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime().getId(),
-                reservationWaiting.getName()
+                reservationSlot.date(),
+                reservationSlot.time().getId(),
+                name
         );
     }
 

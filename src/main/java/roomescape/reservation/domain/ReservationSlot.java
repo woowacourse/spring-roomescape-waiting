@@ -18,4 +18,15 @@ public record ReservationSlot(
         LocalDateTime startDateTime = LocalDateTime.of(this.date, this.time.getStartAt());
         return requestTime.isAfter(startDateTime);
     }
+
+    public void validateNotExpired(LocalDateTime requestTime) {
+        if (isDateBefore(requestTime.toLocalDate())) {
+            throw new roomescape.global.exception.InvalidBusinessStateException(
+                    roomescape.reservation.exception.ReservationErrorCode.INVALID_DATE);
+        }
+        if (isExpired(requestTime)) {
+            throw new roomescape.global.exception.InvalidBusinessStateException(
+                    roomescape.reservation.exception.ReservationErrorCode.INVALID_TIME);
+        }
+    }
 }

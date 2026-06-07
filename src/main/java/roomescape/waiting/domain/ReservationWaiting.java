@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Objects;
 import roomescape.global.exception.ForbiddenException;
-import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
@@ -37,29 +36,7 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
     }
 
     private void validateExpiry(LocalDateTime current) {
-        if (this.slot.isDateBefore(current.toLocalDate())) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_DATE);
-        }
-
-        if (this.slot.isExpired(current)) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_TIME);
-        }
-    }
-
-    public void validate(Reservation targetReservation, boolean hasSameTimeBooking, boolean hasDuplicateWaiting) {
-        validateNoConflictWithReservation(targetReservation);
-        if (hasSameTimeBooking) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
-        }
-        if (hasDuplicateWaiting) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
-        }
-    }
-
-    private void validateNoConflictWithReservation(Reservation targetReservation) {
-        if (Objects.equals(this.name, targetReservation.getName())) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
-        }
+        this.slot.validateNotExpired(current);
     }
 
     public Reservation toReservation(LocalDateTime requestTime) {
