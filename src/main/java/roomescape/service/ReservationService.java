@@ -5,7 +5,6 @@ import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 import jakarta.annotation.Nonnull;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -106,11 +105,7 @@ public class ReservationService {
     }
 
     private int calculateWaitingOrder(Waitlist waitlist) {
-        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(
-            waitlist.getDate(),
-            waitlist.getTime().getId(),
-            waitlist.getTheme().getId()
-        );
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(waitlist.getSlot().getId());
 
         return waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
     }
@@ -168,11 +163,7 @@ public class ReservationService {
     }
 
     private void cancelAndPromoteNextWaitlist(Reservation reservation) {
-        LocalDate date = reservation.getDate();
-        Long timeId = reservation.getTime().getId();
-        Long themeId = reservation.getTheme().getId();
-
-        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(date, timeId, themeId);
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(reservation.getSlot().getId());
         Optional<Waitlist> firstWaitlist = waitlistOrderPolicy.selectPromotionTarget(sameSlotWaitlists);
 
         reservationRepository.deleteById(reservation.getId());

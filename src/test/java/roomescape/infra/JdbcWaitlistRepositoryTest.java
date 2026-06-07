@@ -50,19 +50,13 @@ class JdbcWaitlistRepositoryTest {
     void 같은_슬롯의_대기_목록을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
+        Slot slot = slotRepository.getOrCreate(new Slot(FUTURE_SECOND_DATE, reservationTime, theme));
 
-        Long brieId = waitlistRepository.save(createReservation("브리", reservationTime, theme),
-            CREATED_AT);
-        Long pobiId = waitlistRepository.save(createReservation("포비", reservationTime, theme),
-            CREATED_AT);
-        Long neoId = waitlistRepository.save(createReservation("네오", reservationTime, theme),
-            CREATED_AT);
+        Long brieId = waitlistRepository.save(new Reservation("브리", slot), CREATED_AT);
+        Long pobiId = waitlistRepository.save(new Reservation("포비", slot), CREATED_AT);
+        Long neoId = waitlistRepository.save(new Reservation("네오", slot), CREATED_AT);
 
-        List<Waitlist> waitlists = waitlistRepository.findBySlot(
-            FUTURE_SECOND_DATE,
-            reservationTime.getId(),
-            theme.getId()
-        );
+        List<Waitlist> waitlists = waitlistRepository.findBySlotId(slot.getId());
 
         assertThat(waitlists)
             .extracting(Waitlist::getId)
@@ -86,8 +80,4 @@ class JdbcWaitlistRepositoryTest {
         );
     }
 
-    private Reservation createReservation(String name, ReservationTime time, Theme theme) {
-        Slot slot = slotRepository.getOrCreate(new Slot(FUTURE_SECOND_DATE, time, theme));
-        return new Reservation(name, slot);
-    }
 }

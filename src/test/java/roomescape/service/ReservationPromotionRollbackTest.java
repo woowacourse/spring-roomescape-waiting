@@ -68,12 +68,9 @@ class ReservationPromotionRollbackTest {
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
         reservationService.reserveOrWait(neoRequest);
+        Long slotId = reservationRepository.findById(savedReservation.getId()).orElseThrow().getSlot().getId();
 
-        Waitlist promotedWaitlist = waitlistRepository.findBySlot(
-            FUTURE_SECOND_DATE,
-            tenClock.getId(),
-            theme.getId()
-        ).getFirst();
+        Waitlist promotedWaitlist = waitlistRepository.findBySlotId(slotId).getFirst();
 
         doThrow(new RuntimeException("대기 삭제 실패"))
             .when(waitlistRepository)

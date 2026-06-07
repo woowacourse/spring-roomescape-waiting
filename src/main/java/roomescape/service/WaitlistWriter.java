@@ -52,11 +52,7 @@ public class WaitlistWriter {
     }
 
     private int calculateWaitingOrder(Waitlist waitlist) {
-        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(
-            waitlist.getDate(),
-            waitlist.getTime().getId(),
-            waitlist.getTheme().getId()
-        );
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(waitlist.getSlot().getId());
 
         return waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
     }

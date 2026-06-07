@@ -515,6 +515,7 @@ class ReservationServiceTest {
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
         reservationService.reserveOrWait(neoRequest);
         reservationService.reserveOrWait(pobiRequest);
+        Long slotId = reservationRepository.findById(savedReservation.getId()).orElseThrow().getSlot().getId();
         reservationService.cancelMyReservation(savedReservation.getId(), "브라운");
 
         List<Reservation> reservations = reservationService.getReservations();
@@ -522,11 +523,7 @@ class ReservationServiceTest {
             .extracting(Reservation::getName)
             .contains("네오");
 
-        List<Waitlist> waitlists = waitlistRepository.findBySlot(
-            FUTURE_SECOND_DATE,
-            tenClock.getId(),
-            theme.getId()
-        );
+        List<Waitlist> waitlists = waitlistRepository.findBySlotId(slotId);
         assertThat(waitlists)
             .extracting(Waitlist::getName)
             .doesNotContain("네오");
@@ -561,6 +558,10 @@ class ReservationServiceTest {
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
         reservationService.reserveOrWait(neoRequest);
         reservationService.reserveOrWait(pobiRequest);
+
+        Long slotId = reservationRepository.findById(savedReservation.getId())
+            .orElseThrow().getSlot().getId();
+
         reservationService.deleteReservation(savedReservation.getId());
 
         List<Reservation> reservations = reservationService.getReservations();
@@ -568,11 +569,7 @@ class ReservationServiceTest {
             .extracting(Reservation::getName)
             .contains("네오");
 
-        List<Waitlist> waitlists = waitlistRepository.findBySlot(
-            FUTURE_SECOND_DATE,
-            tenClock.getId(),
-            theme.getId()
-        );
+        List<Waitlist> waitlists = waitlistRepository.findBySlotId(slotId);
         assertThat(waitlists)
             .extracting(Waitlist::getName)
             .doesNotContain("네오");

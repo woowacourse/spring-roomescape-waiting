@@ -2,7 +2,6 @@ package roomescape.infra;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -145,7 +144,7 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     }
 
     @Override
-    public List<Waitlist> findBySlot(LocalDate date, Long timeId, Long themeId) {
+    public List<Waitlist> findBySlotId(Long slotId) {
         String sql = """
             SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
                    t.id as time_id, t.start_at as time_value,
@@ -155,11 +154,11 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
             INNER JOIN slot as s ON w.slot_id = s.id
             INNER JOIN reservation_time as t ON s.time_id = t.id
             INNER JOIN theme as th ON s.theme_id = th.id
-            WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ?
+            WHERE w.slot_id = ?
             ORDER BY w.created_at ASC, w.id ASC;
             """;
 
-        return jdbcTemplate.query(sql, wailtListRowMapper, date, timeId, themeId);
+        return jdbcTemplate.query(sql, wailtListRowMapper, slotId);
     }
 
     private Long getSlotId(Reservation reservation) {
