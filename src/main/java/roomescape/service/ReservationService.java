@@ -73,7 +73,7 @@ public class ReservationService {
         }
 
         for (Waitlist waitlist : waitlistRepository.findAll()) {
-            results.add(ReservationWithStatus.waitingWithOrder(waitlist, calculateWaitingOrder(waitlist)));
+            results.add(ReservationWithStatus.waiting(waitlist, calculateWaitingOrder(waitlist)));
         }
 
         results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
@@ -91,7 +91,7 @@ public class ReservationService {
         }
 
         for (Waitlist waitlist : waitlistRepository.findByName(name)) {
-            results.add(ReservationWithStatus.waitingWithOrder(waitlist, calculateWaitingOrder(waitlist)));
+            results.add(ReservationWithStatus.waiting(waitlist, calculateWaitingOrder(waitlist)));
         }
 
         results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()

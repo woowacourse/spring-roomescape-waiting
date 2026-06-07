@@ -164,6 +164,7 @@ class ReservationServiceTest {
         assertThat(reservationWithStatus.getTime().getId()).isEqualTo(reservationTime.getId());
         assertThat(reservationWithStatus.getTheme().getId()).isEqualTo(theme.getId());
         assertThat(reservationWithStatus.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(reservationWithStatus.getWaitingOrder()).isEqualTo(2);
 
         Waitlist waitlist = waitlistRepository.getById(
             reservationWithStatus.getId(),
