@@ -27,6 +27,10 @@ public class Reservation {
         return of(name, slotId, ReservationStatus.WAITING, reservedAt);
     }
 
+    public static Reservation reserve(String name, Long slotId, ReservationStatus status, LocalDateTime reservedAt) {
+        return of(name, slotId, status, reservedAt);
+    }
+
     private static Reservation of(String name, Long slotId, ReservationStatus status, LocalDateTime reservedAt) {
         validateName(name);
         return new Reservation(null, name, slotId, status, reservedAt);

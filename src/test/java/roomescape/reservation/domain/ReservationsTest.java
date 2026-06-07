@@ -46,26 +46,26 @@ class ReservationsTest {
     }
 
     @Test
-    @DisplayName("다른 사람의 확정 예약이 있으면 true를 반환한다.")
-    void hasReservedByOthers_returnTrue() {
+    @DisplayName("확정 예약이 있으면 true를 반환한다.")
+    void hasReserved_returnTrue() {
         // given
         Reservations reservations = new Reservations(List.of(
                 Reservation.load(1L, anotherName, slotId, RESERVED, LocalDateTime.now())
         ));
 
         // when & then
-        Assertions.assertThat(reservations.hasReservedByOthers(name))
+        Assertions.assertThat(reservations.hasReserved())
                 .isTrue();
     }
 
     @Test
-    @DisplayName("다른 사람의 확정 예약이 없으면 false를 반환한다.")
-    void hasReservedByOthers_returnFalse() {
+    @DisplayName("확정 예약이 없으면 false를 반환한다.")
+    void hasReserved_returnFalse() {
         // given
         Reservations reservations = new Reservations(List.of());
 
         // when & then
-        Assertions.assertThat(reservations.hasReservedByOthers(name))
+        Assertions.assertThat(reservations.hasReserved())
                 .isFalse();
     }
 

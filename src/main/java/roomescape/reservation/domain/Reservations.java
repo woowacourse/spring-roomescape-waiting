@@ -19,20 +19,14 @@ public record Reservations(
         values = new ArrayList<>(values);
     }
 
-    // TODO RESERVED, WAITING 판단 로직 수정 이상함.
     public Reservation reserve(String requesterName, Long slotId, LocalDateTime reservedAt) {
-        validateNotAlreadyBookedBy(requesterName);
-        if (hasReservedByOthers(requesterName)) {
-            return register(Reservation.wait(requesterName, slotId, reservedAt));
-        }
-        return register(Reservation.reserve(requesterName, slotId, reservedAt));
+        ReservationStatus status = decideStatus(requesterName);
+        return register(requesterName, slotId, reservedAt, status);
     }
 
-    // TODO reserve()에 재활용하기.
     public ReservationStatus decideStatus(String requesterName) {
         validateNotAlreadyBookedBy(requesterName);
-
-        if (hasReservedByOthers()) {
+        if (hasReserved()) {
             return ReservationStatus.WAITING;
         }
 
@@ -40,12 +34,10 @@ public record Reservations(
     }
 
     public Reservations cancel(String requesterName) {
-        Reservation cancelTarget = findByName(requesterName);
-
+        Reservation cancelTarget = popByName(requesterName);
         if (cancelTarget.isReserved()) {
             cancelTarget.cancel(requesterName);
-            return promoteWaiting().map(promoting -> new Reservations(List.of(cancelTarget, promoting)))
-                    .orElseGet(() -> new Reservations(List.of(cancelTarget)));
+            return withPromotedIfPresent(cancelTarget);
         }
 
         cancelTarget.cancel(requesterName);
@@ -53,12 +45,10 @@ public record Reservations(
     }
 
     public Reservations cancelByManager(String requesterName) {
-        Reservation cancelTarget = findByName(requesterName);
-
+        Reservation cancelTarget = popByName(requesterName);
         if (cancelTarget.isReserved()) {
             cancelTarget.cancelByManager();
-            return promoteWaiting().map(promoting -> new Reservations(List.of(cancelTarget, promoting)))
-                    .orElseGet(() -> new Reservations(List.of(cancelTarget)));
+            return withPromotedIfPresent(cancelTarget);
         }
 
         cancelTarget.cancelByManager();
@@ -67,11 +57,9 @@ public record Reservations(
 
     public Reservations reschedule(Long newSlotId, String requesterName, ReservationStatus status) {
         Reservation target = popByName(requesterName);
-
         if (target.isReserved()) {
             target.reschedule(newSlotId, requesterName, status);
-            return promoteWaiting().map(promoting -> new Reservations(List.of(target, promoting)))
-                    .orElseGet(() -> new Reservations(List.of(target)));
+            return withPromotedIfPresent(target);
         }
 
         target.reschedule(newSlotId, requesterName, status);
@@ -80,15 +68,25 @@ public record Reservations(
 
     public Reservations rescheduleByManager(Long newSlotId, String requesterName, ReservationStatus status) {
         Reservation target = popByName(requesterName);
-
         if (target.isReserved()) {
             target.rescheduleByManager(newSlotId, status);
-            return promoteWaiting().map(promoting -> new Reservations(List.of(target, promoting)))
-                    .orElseGet(() -> new Reservations(List.of(target)));
+            return withPromotedIfPresent(target);
         }
 
         target.rescheduleByManager(newSlotId, status);
         return new Reservations(List.of(target));
+    }
+
+    private Reservations withPromotedIfPresent(Reservation target) {
+        return promoteWaiting().map(promoting -> new Reservations(List.of(target, promoting)))
+                .orElseGet(() -> new Reservations(List.of(target)));
+    }
+
+    public Optional<Reservation> promoteWaiting() {
+        return values.stream()
+                .filter(Reservation::isWaiting)
+                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId))
+                .map(Reservation::promote);
     }
 
     public void validateNotAlreadyBookedBy(String requestName) {
@@ -100,26 +98,9 @@ public record Reservations(
         }
     }
 
-    public Optional<Reservation> promoteWaiting() {
-        return values.stream()
-                .filter(Reservation::isWaiting)
-                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId))
-                .map(Reservation::promote);
-    }
-
-    public boolean hasReservedByOthers(String name) {
-        return values.stream()
-                .anyMatch(reservation -> !reservation.isOwner(name) && reservation.isReserved());
-    }
-
-    public boolean hasReservedByOthers() {
+    public boolean hasReserved() {
         return values.stream()
                 .anyMatch(Reservation::isReserved);
-    }
-
-    private Reservation register(Reservation reservation) {
-        values.add(reservation);
-        return reservation;
     }
 
     public Reservation findByName(String requesterName) {
@@ -140,6 +121,12 @@ public record Reservations(
                 .filter(r -> r.getId() != null && r.getId().equals(reservationId))
                 .findFirst()
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+    }
+
+    private Reservation register(String requesterName, Long slotId, LocalDateTime reservedAt, ReservationStatus status) {
+        Reservation reserved = Reservation.reserve(requesterName, slotId, status, reservedAt);
+        values.add(reserved);
+        return reserved;
     }
 
 }
