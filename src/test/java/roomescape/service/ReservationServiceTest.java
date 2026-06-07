@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -207,6 +208,60 @@ class ReservationServiceTest {
         given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
         assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 승인된_예약_취소_시_첫_번째_대기자가_승급된다() {
+        givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
+        Reservation approved = Reservation.load(1L, NAME, "APPROVED", DUMMY_SLOT);
+        Reservation waiting = Reservation.load(2L, "대기자", "WAITING", DUMMY_SLOT);
+
+        given(reservationRepository.getById(1L)).willReturn(approved);
+        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(waiting)));
+
+        reservationService.cancel(1L, NAME);
+
+        verify(reservationRepository).updateStatusById(2L, Status.APPROVED);
+    }
+
+    @Test
+    void 대기_예약_취소_시_승급이_일어나지_않는다() {
+        givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
+        Reservation waiting = Reservation.load(1L, NAME, "WAITING", DUMMY_SLOT);
+        given(reservationRepository.getById(1L)).willReturn(waiting);
+
+        reservationService.cancel(1L, NAME);
+
+        verify(reservationRepository, never()).updateStatusById(any(), any());
+    }
+
+    @Test
+    void 승인된_예약의_슬롯_변경_시_기존_슬롯의_첫_번째_대기자가_승급된다() {
+        Slot newSlot = Slot.load(2L, LocalDate.of(2099, 6, 1), ReservationTime.of(1L, LocalTime.of(11, 0)), Theme.load(1L, "any", "any", URL));
+        Reservation existing = Reservation.load(1L, NAME, "APPROVED", DUMMY_SLOT);
+        Reservation waitingInOldSlot = Reservation.load(3L, "대기자", "WAITING", DUMMY_SLOT);
+
+        given(reservationRepository.getById(1L)).willReturn(existing);
+        given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create(NAME, newSlot));
+        given(reservationRepository.findBySlotId(2L)).willReturn(new Reservations(List.of()));
+        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(waitingInOldSlot)));
+
+        reservationService.update(ReservationUpdateCommand.from(new ReservationUpdateRequest(NAME, LocalDate.of(2099, 6, 1), 1L, 1L)), 1L);
+
+        verify(reservationRepository).updateStatusById(3L, Status.APPROVED);
+    }
+
+    @Test
+    void 승인된_예약의_슬롯_미변경_시_승급이_일어나지_않는다() {
+        Reservation existing = Reservation.load(1L, NAME, "APPROVED", DUMMY_SLOT);
+
+        given(reservationRepository.getById(1L)).willReturn(existing);
+        given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create(NAME, DUMMY_SLOT));
+        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(existing)));
+
+        reservationService.update(ReservationUpdateCommand.from(new ReservationUpdateRequest(NAME, LocalDate.of(2099, 1, 1), 1L, 1L)), 1L);
+
+        verify(reservationRepository, never()).updateStatusById(any(), any());
     }
 
     @Test
