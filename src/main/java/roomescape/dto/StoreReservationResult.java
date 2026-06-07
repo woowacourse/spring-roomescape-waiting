@@ -8,6 +8,6 @@ public record StoreReservationResult(
         Reservation reservation,
         Theme theme,
         Store store,
-        MemberSummary member
+        MemberSummaryProjection member
 ) {
 }

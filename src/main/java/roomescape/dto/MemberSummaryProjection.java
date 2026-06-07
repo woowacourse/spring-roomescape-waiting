@@ -1,6 +1,6 @@
 package roomescape.dto;
 
-public record MemberSummary(
+public record MemberSummaryProjection(
         Long id,
         String email,
         String name

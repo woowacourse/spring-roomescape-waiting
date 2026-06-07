@@ -9,7 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
-import roomescape.dto.MemberSummary;
+import roomescape.dto.MemberSummaryProjection;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.StoreReservationResult;
 
@@ -222,7 +222,7 @@ public class ReservationDao {
                     resultSet.getLong("store_id"),
                     resultSet.getString("store_name")
             );
-            MemberSummary member = new MemberSummary(
+            MemberSummaryProjection member = new MemberSummaryProjection(
                     resultSet.getLong("member_id"),
                     resultSet.getString("member_email"),
                     resultSet.getString("member_name")

@@ -1,7 +1,7 @@
 package roomescape.dto.response;
 
 import roomescape.domain.Reservation;
-import roomescape.dto.MemberSummary;
+import roomescape.dto.MemberSummaryProjection;
 import roomescape.dto.StoreReservationResult;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public record StoreReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme,
         StoreResponse store,
-        MemberSummary member
+        MemberSummaryProjection member
 ) {
     public static StoreReservationResponse from(StoreReservationResult storeReservationResult) {
         Reservation reservation = storeReservationResult.reservation();
