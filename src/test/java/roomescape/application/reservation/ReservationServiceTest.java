@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
@@ -36,6 +37,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
+import roomescape.presentation.reservation.request.AdminReservationCreateRequest;
 import roomescape.presentation.reservation.request.ReservationCreateRequest;
 import roomescape.presentation.reservation.response.ReservationCreateResponse;
 import roomescape.presentation.reservation.response.ReservationsResponse;
@@ -190,6 +192,88 @@ class ReservationServiceTest {
             assertThat(updatedReservations.get(1).getWaitingNumber()).isEqualTo(1);
             return true;
         }));
+    }
+
+    @DisplayName("관리자가 예약을 생성할 수 있다")
+    @Test
+    void createReservationByAdmin() {
+        // given
+        AdminReservationCreateRequest request = new AdminReservationCreateRequest("홍길동", 20L);
+        User user = User.of(10L, "홍길동");
+        ReservationSlot slot = ReservationSlot.of(
+                20L,
+                LocalDate.of(2030, 1, 1),
+                ReservationTime.of(30L, LocalTime.of(13, 0)),
+                Theme.of(40L, "도심 탈출", "도심 탈출 설명", "/themes/40")
+        );
+        Reservation savedReservation = Reservation.of(
+                100L,
+                user,
+                slot,
+                null,
+                ReservationStatus.WAITING,
+                LocalDateTime.of(2030, 1, 1, 10, 0)
+        );
+        Reservation waitingReservation = Reservation.of(
+                101L,
+                User.of(11L, "김철수"),
+                slot,
+                1,
+                ReservationStatus.WAITING,
+                LocalDateTime.of(2030, 1, 1, 10, 5)
+        );
+
+        given(userRepository.findByName("홍길동")).willReturn(Optional.of(user));
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(slot));
+        given(reservationRepository.existsBySlotIdAndUserId(20L, 10L)).willReturn(false);
+        given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
+        given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(
+                List.of(savedReservation, waitingReservation));
+
+        // when
+        ReservationCreateResponse response = reservationService.createReservationByAdmin(request);
+
+        // then
+        assertThat(response.id()).isEqualTo(100L);
+        assertThat(response.date()).isEqualTo(LocalDate.of(2030, 1, 1));
+        assertThat(response.startAt()).isEqualTo(LocalTime.of(13, 0));
+        assertThat((Object) response.theme()).extracting("name").isEqualTo("도심 탈출");
+        verify(userRepository, times(1)).findByName("홍길동");
+        verify(slotRepository, times(1)).findByIdForUpdate(20L);
+        verify(reservationRepository, times(1)).existsBySlotIdAndUserId(20L, 10L);
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
+        verify(reservationRepository, times(1)).batchUpdate(any());
+    }
+
+    @DisplayName("예약 저장 중 유니크 제약 위반이 발생하면 이미 예약된 시간으로 처리한다")
+    @Test
+    void createReservationByUserWhenSaveDuplicate() {
+        // given
+        ReservationCreateRequest request = new ReservationCreateRequest(20L);
+        User user = User.of(10L, "홍길동");
+        ReservationSlot slot = ReservationSlot.of(
+                20L,
+                LocalDate.of(2030, 1, 1),
+                ReservationTime.of(30L, LocalTime.of(13, 0)),
+                Theme.of(40L, "도심 탈출", "도심 탈출 설명", "/themes/40")
+        );
+
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(slot));
+        given(reservationRepository.existsBySlotIdAndUserId(20L, 10L)).willReturn(false);
+        given(reservationRepository.save(any(Reservation.class))).willThrow(new UniqueConstraintViolationException());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.createReservationByUser(request, user))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.RESERVATION_ALREADY_EXISTS);
+        verify(slotRepository, times(1)).findByIdForUpdate(20L);
+        verify(reservationRepository, times(1)).existsBySlotIdAndUserId(20L, 10L);
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
+        verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 
     @DisplayName("예약 슬롯이 없으면 예외를 던진다")

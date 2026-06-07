@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.common.security.PasswordEncoder;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
@@ -30,15 +31,12 @@ public class AuthService {
     }
 
     public User signup(SignupRequest request) {
-        if (userRepository.existsByName(request.name())) {
+        User user = User.create(request.name(), passwordEncoder.encode(request.password()), UserRole.USER);
+
+        try {
+            return userRepository.save(user);
+        } catch (UniqueConstraintViolationException exception) {
             throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
         }
-
-        User user = User.create(
-                request.name(),
-                passwordEncoder.encode(request.password()),
-                UserRole.USER
-        );
-        return userRepository.save(user);
     }
 }

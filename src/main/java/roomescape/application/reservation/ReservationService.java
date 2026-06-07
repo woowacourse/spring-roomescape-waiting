@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
@@ -48,7 +49,7 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now(clock);
         validateReservable(slot, loginUser, now);
 
-        Reservation savedReservation = reservationRepository.save(Reservation.create(loginUser, slot, now));
+        Reservation savedReservation = saveReservation(loginUser, slot, now);
 
         recalculateReservationsForSlot(slot);
         return ReservationCreateResponse.from(savedReservation);
@@ -57,11 +58,11 @@ public class ReservationService {
     @Transactional
     public ReservationCreateResponse createReservationByAdmin(AdminReservationCreateRequest request) {
         User user = findByUsernameOrThrow(request.username());
-        ReservationSlot slot = findSlotByIdOrThrow(request.slotId());
+        ReservationSlot slot = findSlotByIdForUpdateOrThrow(request.slotId());
         LocalDateTime now = LocalDateTime.now(clock);
-        validateReservationNotDuplicated(slot, user);
+        validateReservable(slot, user, now);
 
-        Reservation savedReservation = reservationRepository.save(Reservation.create(user, slot, now));
+        Reservation savedReservation = saveReservation(user, slot, now);
 
         recalculateReservationsForSlot(slot);
         return ReservationCreateResponse.from(savedReservation);
@@ -179,6 +180,14 @@ public class ReservationService {
 
     private void validateReservationNotDuplicated(ReservationSlot slot, User user) {
         if (reservationRepository.existsBySlotIdAndUserId(slot.getId(), user.getId())) {
+            throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
+    }
+
+    private Reservation saveReservation(User user, ReservationSlot slot, LocalDateTime reservedAt) {
+        try {
+            return reservationRepository.save(Reservation.create(user, slot, reservedAt));
+        } catch (UniqueConstraintViolationException exception) {
             throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }

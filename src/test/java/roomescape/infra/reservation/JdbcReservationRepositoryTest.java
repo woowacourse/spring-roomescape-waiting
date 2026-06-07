@@ -1,5 +1,6 @@
 package roomescape.infra.reservation;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
@@ -55,6 +57,29 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @DisplayName("같은 사용자와 슬롯으로 다시 저장하면 중복 예외가 발생한다")
+    @Test
+    void saveWhenDuplicate() {
+        // given
+        User user = userRepository.save(User.create("중복예약사용자"));
+        Theme theme = themeRepository.save(Theme.create("중복예약테마", "설명", "/themes/dup"));
+        ReservationTime time = timeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        ReservationSlot slot = slotRepository.save(ReservationSlot.create(LocalDate.of(2030, 3, 1), time, theme));
+
+        reservationRepository.save(Reservation.create(
+                user,
+                slot,
+                LocalDateTime.of(2030, 3, 1, 10, 0)
+        ));
+
+        // when & then
+        assertThatThrownBy(() -> reservationRepository.save(Reservation.create(
+                user,
+                slot,
+                LocalDateTime.of(2030, 3, 1, 10, 5)
+        ))).isInstanceOf(UniqueConstraintViolationException.class);
     }
 
     @DisplayName("예약을 id로 조회할 수 있다")

@@ -1,5 +1,6 @@
 package roomescape.infra.user;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.user.User;
 
 @DisplayName("사용자 JDBC 저장소")
@@ -50,5 +52,16 @@ class JdbcUserRepositoryTest {
         // when & then
         assertThat(userRepository.existsByName("테스트이름")).isTrue();
         assertThat(userRepository.existsByName("없는이름")).isFalse();
+    }
+
+    @DisplayName("같은 이름의 사용자를 두 번 저장하면 중복 예외가 발생한다")
+    @Test
+    void saveWhenDuplicateName() {
+        // given
+        userRepository.save(User.create("중복이름"));
+
+        // when & then
+        assertThatThrownBy(() -> userRepository.save(User.create("중복이름")))
+                .isInstanceOf(UniqueConstraintViolationException.class);
     }
 }

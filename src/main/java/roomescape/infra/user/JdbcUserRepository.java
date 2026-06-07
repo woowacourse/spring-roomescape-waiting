@@ -3,11 +3,13 @@ package roomescape.infra.user;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
@@ -57,10 +59,16 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public User save(User user) {
-        Number key = insertUser.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue(COLUMN_NAME, user.getName())
-                .addValue(COLUMN_PASSWORD, user.getPassword())
-                .addValue(COLUMN_ROLE, user.getRole().name()));
+        Number key;
+        try {
+            key = insertUser.executeAndReturnKey(new MapSqlParameterSource()
+                    .addValue(COLUMN_NAME, user.getName())
+                    .addValue(COLUMN_PASSWORD, user.getPassword())
+                    .addValue(COLUMN_ROLE, user.getRole().name()));
+        } catch (DuplicateKeyException exception) {
+            throw new UniqueConstraintViolationException(exception);
+        }
+
         return User.of(extractId(key), user.getName(), user.getPassword(), user.getRole());
     }
 

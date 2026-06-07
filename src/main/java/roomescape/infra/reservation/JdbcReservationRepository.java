@@ -3,12 +3,14 @@ package roomescape.infra.reservation;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
@@ -254,12 +256,17 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue("reservation_slot_id", reservation.getSlot().getId())
-                .addValue("user_id", reservation.getUser().getId())
-                .addValue("waiting_number", reservation.getWaitingNumber())
-                .addValue("status", reservation.getStatus().name())
-                .addValue("reserved_at", Timestamp.valueOf(reservation.getReservedAt())));
+        Number key;
+        try {
+            key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
+                    .addValue("reservation_slot_id", reservation.getSlot().getId())
+                    .addValue("user_id", reservation.getUser().getId())
+                    .addValue("waiting_number", reservation.getWaitingNumber())
+                    .addValue("status", reservation.getStatus().name())
+                    .addValue("reserved_at", Timestamp.valueOf(reservation.getReservedAt())));
+        } catch (DuplicateKeyException exception) {
+            throw new UniqueConstraintViolationException(exception);
+        }
 
         return Reservation.of(
                 extractId(key),
