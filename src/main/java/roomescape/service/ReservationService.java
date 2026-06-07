@@ -57,9 +57,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation update(long id, LocalDate date, long timeId) {
+    public Reservation update(long id, String username, LocalDate date, long timeId) {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        validateOwned(reservation, username);
         ReservationTime time = validateReservationTime(timeId);
         Reservation updated = reservation.withUpdated(date, time, LocalDateTime.now(clock));
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
@@ -166,7 +167,7 @@ public class ReservationService {
 
     private void validateOwned(Reservation reservation, String username) {
         if (!reservation.isOwnedBy(username)) {
-            throw new ForbiddenException("본인의 예약 또는 대기만 취소할 수 있습니다.");
+            throw new ForbiddenException("본인의 예약 또는 대기만 관리할 수 있습니다.");
         }
     }
 

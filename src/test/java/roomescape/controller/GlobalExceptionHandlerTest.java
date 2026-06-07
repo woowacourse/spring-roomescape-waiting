@@ -73,7 +73,7 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/test/forbidden")
         void forbidden() {
-            throw new ForbiddenException("본인의 예약 또는 대기만 취소할 수 있습니다.");
+            throw new ForbiddenException("본인의 예약 또는 대기만 관리할 수 있습니다.");
         }
 
         @GetMapping("/test/past")
@@ -144,7 +144,7 @@ class GlobalExceptionHandlerTest {
     void forbidden_403() throws Exception {
         mockMvc.perform(get("/test/forbidden"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("본인의 예약 또는 대기만 취소할 수 있습니다."));
+                .andExpect(jsonPath("$.message").value("본인의 예약 또는 대기만 관리할 수 있습니다."));
     }
 
     @DisplayName("PastReservationException → 422")

@@ -220,7 +220,7 @@
 
 | 기능 | 메서드 / URL | 요청 본문 | 응답 |
 |------|------------|---------|------|
-| **예약 변경** | `PATCH /reservations/{id}` | `{date, timeId}` | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` |
+| **예약 변경** | `PATCH /reservations/{id}?username={name}` | `{date, timeId}` | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` |
 
 ---
 
@@ -253,7 +253,7 @@
 | **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}]`                                       |
 | **내 예약 통합 조회**     | `GET /reservations/me?username={name}` | —                                   | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber, reservationStatus}]`                        |
 | **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}`                                         |
-| **예약 변경**           | `PATCH /reservations/{id}`          | `{date, timeId}`                       | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` (첫 번째 대기가 있으면 자동 예약 전환)                 |
+| **예약 변경**           | `PATCH /reservations/{id}?username={name}` | `{date, timeId}`                 | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` (첫 번째 대기가 있으면 자동 예약 전환)                 |
 | **예약 삭제**           | `DELETE /reservations/{id}?username={name}` | —                              | `204` (첫 번째 대기가 있으면 자동 예약 전환)                                                                                                     |
 
 ### 예약 대기 API 명세

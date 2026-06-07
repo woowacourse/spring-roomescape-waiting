@@ -52,7 +52,7 @@ class ReservationControllerTest extends ControllerTest {
                 .when().delete("/reservations/{id}", id)
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("본인의 예약 또는 대기만 취소할 수 있습니다."));
+                .body("message", equalTo("본인의 예약 또는 대기만 관리할 수 있습니다."));
     }
 
     @DisplayName("존재하지 않는 예약 삭제하면 404")
@@ -174,6 +174,7 @@ class ReservationControllerTest extends ControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("username", "브라운")
                 .body(updateParams)
                 .when().patch("/reservations/{id}", id)
                 .then().log().all()
@@ -192,6 +193,7 @@ class ReservationControllerTest extends ControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("username", "브라운")
                 .body(params)
                 .when().patch("/reservations/{id}", 999)
                 .then().log().all()
@@ -210,6 +212,7 @@ class ReservationControllerTest extends ControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("username", "브라운")
                 .body(updateParams)
                 .when().patch("/reservations/{id}", id)
                 .then().log().all()
@@ -230,11 +233,31 @@ class ReservationControllerTest extends ControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("username", "브라운")
                 .body(updateParams)
                 .when().patch("/reservations/{id}", id)
                 .then().log().all()
                 .statusCode(409)
                 .body("message", equalTo("이미 예약된 시간입니다."));
+    }
+
+    @DisplayName("본인 예약이 아니면 변경할 수 없다")
+    @Test
+    void 본인_예약이_아니면_변경할_수_없다() {
+        long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
+
+        Map<String, Object> updateParams = new HashMap<>();
+        updateParams.put("date", LocalDate.now().plusDays(2).toString());
+        updateParams.put("timeId", 2);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("username", "이든")
+                .body(updateParams)
+                .when().patch("/reservations/{id}", id)
+                .then().log().all()
+                .statusCode(403)
+                .body("message", equalTo("본인의 예약 또는 대기만 관리할 수 있습니다."));
     }
 
     @DisplayName("빈 슬롯에 대기 신청하면 409")
@@ -381,7 +404,7 @@ class ReservationControllerTest extends ControllerTest {
                 .when().delete("/reservations/waiting/{id}", waitingId)
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("본인의 예약 또는 대기만 취소할 수 있습니다."));
+                .body("message", equalTo("본인의 예약 또는 대기만 관리할 수 있습니다."));
     }
 
     @DisplayName("존재하지 않는 대기 취소하면 404")

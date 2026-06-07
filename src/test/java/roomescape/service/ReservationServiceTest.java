@@ -136,7 +136,7 @@ class ReservationServiceTest {
         given(reservationDao.findFirstWaitingBySlot(originalDate, 1L, 1L))
                 .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
 
-        Reservation result = reservationService.update(1L, updateDate, 2L);
+        Reservation result = reservationService.update(1L, "브라운", updateDate, 2L);
 
         assertThat(result).isEqualTo(updated);
         then(reservationDao).should().update(any(Reservation.class));
@@ -164,7 +164,7 @@ class ReservationServiceTest {
                 .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
         given(reservationDao.save(waiting)).willThrow(new DataConflictException(new RuntimeException()));
 
-        assertThatThrownBy(() -> reservationService.update(1L, updateDate, 2L))
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
                 .isInstanceOf(ReservationConflictException.class);
 
         then(reservationDao).should().update(any(Reservation.class));
@@ -183,12 +183,28 @@ class ReservationServiceTest {
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
 
-        assertThatThrownBy(() -> reservationService.update(1L, updateDate, 2L))
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
                 .isInstanceOf(PastReservationException.class)
                 .hasMessage("과거 예약은 변경할 수 없습니다.");
 
         then(reservationDao).should(never()).update(any(Reservation.class));
         then(reservationDao).should(never()).findFirstWaitingBySlot(pastDate, 1L, 1L);
+    }
+
+    @Test
+    void update_본인_예약이_아니면_예외() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);
+        Reservation reservation = new Reservation(
+                1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "이든", updateDate, 2L))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인의 예약 또는 대기만 관리할 수 있습니다.");
+
+        then(reservationTimeDao).should(never()).findById(2L);
+        then(reservationDao).should(never()).update(any(Reservation.class));
     }
 
     @Test
@@ -273,7 +289,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.delete(1L, "이든"))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessage("본인의 예약 또는 대기만 취소할 수 있습니다.");
+                .hasMessage("본인의 예약 또는 대기만 관리할 수 있습니다.");
     }
 
     @Test
@@ -372,7 +388,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.deleteWaiting(1L, "이든"))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessage("본인의 예약 또는 대기만 취소할 수 있습니다.");
+                .hasMessage("본인의 예약 또는 대기만 관리할 수 있습니다.");
     }
 
     @Test

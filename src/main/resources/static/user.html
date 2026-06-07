@@ -1204,7 +1204,7 @@
     }
 
     try {
-      const res = await fetch(`${API}/reservations/${editingReservationId}`, {
+      const res = await fetch(`${API}/reservations/${editingReservationId}?username=${encodeURIComponent(username)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date, timeId: Number(timeId) })
