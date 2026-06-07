@@ -32,10 +32,6 @@ public class TimeDao {
         return jdbcInsert.executeAndReturnKey(Map.of("start_at", startAt)).longValue();
     }
 
-    public Time findById(long id) {
-        return jdbcTemplate.queryForObject("select id, start_at from reservation_time where id = ?", timeRowMapper, id);
-    }
-
     public List<Time> findAll() {
         return jdbcTemplate.query("SELECT id, start_at FROM reservation_time", timeRowMapper);
     }

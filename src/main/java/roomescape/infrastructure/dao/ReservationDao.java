@@ -71,15 +71,15 @@ public class ReservationDao {
 
     public int findOrderByReservationId(long reservationId, long slotId) {
         String sql = """
-            SELECT COUNT(*)
-            FROM reservation r
-            WHERE r.reservation_slot_id = ?
-              AND r.updated_at < (
-                  SELECT updated_at
-                  FROM reservation r2
-                  WHERE r2.id = ?
-              )
-            """;
+                SELECT COUNT(*)
+                FROM reservation r
+                WHERE r.reservation_slot_id = ?
+                  AND r.updated_at < (
+                      SELECT updated_at
+                      FROM reservation r2
+                      WHERE r2.id = ?
+                  )
+                """;
 
         return jdbcTemplate.queryForObject(
                 sql,
@@ -130,10 +130,10 @@ public class ReservationDao {
     }
 
     public void update(Long reservationId, Long reservationSlotId) {
-        jdbcTemplate.update("UPDATE reservation SET reservation_slot_id = ?  WHERE id = ?", reservationSlotId , reservationId);
+        jdbcTemplate.update("UPDATE reservation SET reservation_slot_id = ?  WHERE id = ?", reservationSlotId, reservationId);
     }
 
     public void delete(Long id, Status status) {
-        jdbcTemplate.update("UPDATE reservation SET status = ?  WHERE id = ?", status.name() , id);
+        jdbcTemplate.update("UPDATE reservation SET status = ?  WHERE id = ?", status.name(), id);
     }
 }

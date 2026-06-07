@@ -42,15 +42,6 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Long save(String name, String description, String thumbnailUrl) {
-        return jdbcInsert.executeAndReturnKey(Map.of(
-                "name", name,
-                "description", description,
-                "thumbnail_url", thumbnailUrl
-        )).longValue();
-    }
-
-    @Override
     public List<Theme> findPopularThemes(int size, LocalDate from, LocalDate to) {
         final String sql = """
                 SELECT
@@ -95,7 +86,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 
                 LEFT JOIN reservation res
                     ON res.reservation_slot_id = rs.id
-                    AND res.status = 'RESERVED'
+                    AND res.status != 'CANCELED'
                 
                 GROUP BY rt.id, rt.start_at
                 ORDER BY rt.start_at
@@ -106,6 +97,15 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query("SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
+    }
+
+    @Override
+    public Long save(String name, String description, String thumbnailUrl) {
+        return jdbcInsert.executeAndReturnKey(Map.of(
+                "name", name,
+                "description", description,
+                "thumbnail_url", thumbnailUrl
+        )).longValue();
     }
 
     @Override

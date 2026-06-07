@@ -42,20 +42,6 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
     }
 
     @Override
-    public Reservation findById(Long id) {
-        String sql = """
-                SELECT  r.id,
-                        r.name AS name,
-                        r.reservation_slot_id AS reservation_slot_id,
-                        r.status AS status,
-                        r.updated_at AS updated_at
-                FROM reservation AS r
-                where r.id = ?
-                """;
-        return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
-    }
-
-    @Override
     public List<ReservationResponse> findByUserName(String username) {
         String sql = """
                 SELECT rv.id AS reservation_id,
@@ -66,13 +52,20 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                        th.description AS theme_description,
                        th.thumbnail_url AS theme_thumbnail,
                        t.start_at AS time_value,
-                       (
-                           SELECT COUNT(*)
-                           FROM reservation rv2
-                           WHERE rv2.reservation_slot_id = rv.reservation_slot_id
-                             AND rv2.status = 'RESERVED'
-                             AND rv2.id < rv.id
-                       ) AS waiting_order
+                       CASE
+                           WHEN rv.status = 'RESERVED' THEN 0
+                           WHEN rv.status = 'CANCELED' THEN 0
+                           ELSE (
+                               SELECT COUNT(*)
+                               FROM reservation rv2
+                               WHERE rv2.reservation_slot_id = rv.reservation_slot_id
+                                 AND rv2.status = 'WAITING'
+                                 AND (
+                                     rv2.updated_at < rv.updated_at
+                                     OR (rv2.updated_at = rv.updated_at AND rv2.id < rv.id)
+                                 )
+                           ) + 1
+                       END AS waiting_order
                 FROM reservation AS rv
                 INNER JOIN reservation_slot AS rs ON rv.reservation_slot_id = rs.id
                 INNER JOIN reservation_time AS t ON rs.time_id = t.id

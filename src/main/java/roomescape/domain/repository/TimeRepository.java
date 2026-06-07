@@ -6,8 +6,7 @@ import java.util.List;
 import roomescape.domain.Time;
 
 public interface TimeRepository {
-    Long save(LocalTime startAt);
-    Time findById(long id);
     List<Time> findAll();
+    Long save(LocalTime startAt);
     void delete(Long id);
 }

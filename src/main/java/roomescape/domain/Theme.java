@@ -29,7 +29,7 @@ public class Theme {
 
     private void validateDescriptionLength(String description) {
         if (description.length() > 255) {
-            throw new CustomException(ErrorCode.THEME_NAME_TOO_LONG);
+            throw new CustomException(ErrorCode.THEME_DESCRIPTION_TOO_LONG);
         }
     }
 

@@ -35,13 +35,13 @@ public class Reservation {
     }
 
     public void promote() {
-        if (!isWaiting()){
+        if (!isWaiting()) {
             throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
         }
         this.status = Status.RESERVED;
     }
 
-    public void update(LocalDateTime now, long reservationSlotId, Status status){
+    public void update(LocalDateTime now, long reservationSlotId, Status status) {
         validateUpdateAt(now);
         validateNotCanceledStatus();
         this.reservationSlotId = reservationSlotId;
@@ -68,7 +68,7 @@ public class Reservation {
         }
     }
 
-    private void validateNotCanceledStatus(){
+    private void validateNotCanceledStatus() {
         if (this.status == Status.CANCELED) {
             throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
         }

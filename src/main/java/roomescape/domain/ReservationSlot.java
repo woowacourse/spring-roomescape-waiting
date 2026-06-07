@@ -17,17 +17,6 @@ public class ReservationSlot {
         this.reservations = new ArrayList<>(reservations);
     }
 
-    public int calculateOrder(Reservation reservation) {
-        if (reservation.isReserved()) {
-            return 0;
-        }
-
-        return (int) reservations.stream()
-                .filter(Reservation::isWaiting)
-                .filter(it -> it.isUpdatedAtBefore(reservation))
-                .count() + 1;
-    }
-
     public Reservation reserve(String name, LocalDateTime now) {
         validateUniqueReservation(name);
         validateNotPastReservation(now, ErrorCode.PAST_DATE_RESERVATION);
@@ -37,19 +26,6 @@ public class ReservationSlot {
         return newReservation;
     }
 
-    public Reservation findReservation(Long reservationId) {
-        return reservations.stream()
-                .filter(r -> r.getId().equals(reservationId))
-                .findFirst()
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
-    }
-
-    public Optional<Reservation> getReservedReservation() {
-        return reservations.stream()
-                .filter(r -> r.getStatus() == Status.RESERVED)
-                .findFirst();
-    }
 
     public Reservation moveIn(Reservation reservation, String name, LocalDateTime now) {
         validateReservationOwner(reservation, name);
@@ -73,26 +49,6 @@ public class ReservationSlot {
         return reservation;
     }
 
-    public Reservation deleteReservation(Long reservationId, String name, LocalDateTime now) {
-        Reservation reservation = findReservation(reservationId);
-        validateReservationOwner(reservation, name);
-        validateNotPastReservation(now, ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
-
-        promoteReservation(reservation);
-        reservation.cancel(now);
-        reservations.remove(reservation);
-        return reservation;
-    }
-
-    private void validateUniqueReservation(String name) {
-        boolean duplicated = reservations.stream()
-                .anyMatch(reservation -> reservation.getName().equals(name));
-
-        if (duplicated) {
-            throw new CustomException(ErrorCode.ALREADY_EXISTS_RESERVATION);
-        }
-    }
-
     private Status calculateStatus() {
         if (reservations.isEmpty()) {
             return Status.RESERVED;
@@ -109,6 +65,35 @@ public class ReservationSlot {
         }
     }
 
+    public Reservation deleteReservation(Long reservationId, String name, LocalDateTime now) {
+        Reservation reservation = findReservation(reservationId);
+        validateReservationOwner(reservation, name);
+        validateNotPastReservation(now, ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
+
+        promoteReservation(reservation);
+        reservation.cancel(now);
+        reservations.remove(reservation);
+        return reservation;
+    }
+
+    public int calculateOrder(Reservation reservation) {
+        if (reservation.isReserved()) {
+            return 0;
+        }
+        return (int) reservations.stream()
+                .filter(Reservation::isWaiting)
+                .filter(it -> it.isUpdatedAtBefore(reservation))
+                .count() + 1;
+    }
+
+    private Reservation findReservation(Long reservationId) {
+        return reservations.stream()
+                .filter(r -> r.getId().equals(reservationId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
+    }
+
     private void validateNotPastReservation(LocalDateTime now, ErrorCode code) {
         LocalDateTime reservationTime = LocalDateTime.of(slot.date(), slot.time().getStartAt());
         if (reservationTime.isBefore(now)) {
@@ -116,17 +101,25 @@ public class ReservationSlot {
         }
     }
 
-    private void validateNotPastSlot(ReservationSlotInfo slotInfo, LocalDateTime now) {
-        LocalDateTime slotTime = LocalDateTime.of(slotInfo.date(), slotInfo.time().getStartAt());
-        if (slotTime.isBefore(now)) {
-            throw new CustomException(ErrorCode.ALREADY_PAST_RESERVATION_SLOT);
-        }
-    }
-
     private void validateReservationOwner(Reservation reservation, String name) {
         if (!reservation.getName().equals(name)) {
             throw new CustomException(ErrorCode.COMMON_UNAUTHORIZED);
         }
+    }
+
+    private void validateUniqueReservation(String name) {
+        boolean duplicated = reservations.stream()
+                .anyMatch(reservation -> reservation.getName().equals(name));
+
+        if (duplicated) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_RESERVATION);
+        }
+    }
+
+    public Optional<Reservation> getReservedReservation() {
+        return reservations.stream()
+                .filter(r -> r.getStatus() == Status.RESERVED)
+                .findFirst();
     }
 
     public ReservationSlotInfo getSlot() {

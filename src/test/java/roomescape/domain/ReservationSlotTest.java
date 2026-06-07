@@ -98,29 +98,6 @@ class ReservationSlotTest {
     }
 
     @Test
-    @DisplayName("예약 아이디로 예약을 찾는다")
-    void 예약_조회() {
-        LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = createReservation(1L, "브라운", Status.RESERVED, now);
-        ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(reservation)));
-
-        Reservation foundReservation = reservationSlot.findReservation(1L);
-
-        assertThat(foundReservation).isEqualTo(reservation);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 예약을 찾으면 예외가 발생한다")
-    void 없는_예약_조회_예외() {
-        LocalDateTime now = LocalDateTime.now();
-        ReservationSlot reservationSlot = createReservationSlot(now, List.of());
-
-        assertThatThrownBy(() -> reservationSlot.findReservation(1L))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.NOT_EXIST_RESERVATION.getMessage());
-    }
-
-    @Test
     @DisplayName("확정 예약을 삭제하면 예약이 취소된다")
     void 확정_예약_삭제() {
         LocalDateTime now = LocalDateTime.now();

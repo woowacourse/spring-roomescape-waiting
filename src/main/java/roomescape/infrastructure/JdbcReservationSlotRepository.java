@@ -13,11 +13,11 @@ import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationSlotInfo;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.repository.ReservationSlotRepository;
-import roomescape.domain.ReservationSlotInfo;
 
 @Repository
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
@@ -56,49 +56,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         this.reservationInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
-
-    }
-
-    public Long save(LocalDate date, Long timeId, Long themeId) {
-        return reservationSlotInsert.executeAndReturnKey(Map.of(
-                "date", date,
-                "time_id", timeId,
-                "theme_id", themeId
-        )).longValue();
-    }
-
-    @Override
-    public Reservation saveReservation(Reservation reservation) {
-        Long id = reservationInsert.executeAndReturnKey(Map.of(
-                "name", reservation.getName(),
-                "reservation_slot_id", reservation.getReservationSlotId(),
-                "status", reservation.getStatus().name(),
-                "updated_at", reservation.getUpdateAt()
-        )).longValue();
-
-        return new Reservation(
-                id,
-                reservation.getName(),
-                reservation.getReservationSlotId(),
-                reservation.getStatus(),
-                reservation.getUpdateAt()
-        );
-    }
-
-    @Override
-    public void updateReservation(Reservation reservation) {
-        jdbcTemplate.update("""
-                UPDATE reservation
-                SET reservation_slot_id = ?,
-                    status = ?,
-                    updated_at = ?
-                WHERE id = ?
-                """,
-                reservation.getReservationSlotId(),
-                reservation.getStatus().name(),
-                reservation.getUpdateAt(),
-                reservation.getId()
-        );
     }
 
     @Override
@@ -116,48 +73,45 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     private Long findReservationSlotIdByReservationId(Long reservationId) {
         String sql = """
-            SELECT reservation_slot_id
-            FROM reservation
-            WHERE id = ?
-            """;
-
+                SELECT reservation_slot_id
+                FROM reservation
+                WHERE id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, Long.class, reservationId);
     }
 
     private ReservationSlotInfo findSlotById(Long id) {
         String sql = """
-            SELECT rs.id,
-                   rs.date,
-                   t.id AS time_id,
-                   t.start_at AS time_value,
-                   th.id AS theme_id,
-                   th.name AS theme_name,
-                   th.description AS theme_description,
-                   th.thumbnail_url AS theme_thumbnail
-            FROM reservation_slot rs
-            INNER JOIN reservation_time t
-                ON rs.time_id = t.id
-            INNER JOIN theme th
-                ON rs.theme_id = th.id
-            WHERE rs.id = ?
-            """;
-
+                SELECT rs.id,
+                       rs.date,
+                       t.id AS time_id,
+                       t.start_at AS time_value,
+                       th.id AS theme_id,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail
+                FROM reservation_slot rs
+                INNER JOIN reservation_time t
+                    ON rs.time_id = t.id
+                INNER JOIN theme th
+                    ON rs.theme_id = th.id
+                WHERE rs.id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, slotRowMapper, id);
     }
 
     private List<Reservation> findActiveReservationsBySlotId(Long slotId) {
         String sql = """
-            SELECT id,
-                   name,
-                   reservation_slot_id,
-                   status,
-                   updated_at
-            FROM reservation
-            WHERE reservation_slot_id = ?
-              AND status != 'CANCELED'
-            ORDER BY updated_at ASC, id ASC
-            """;
-
+                SELECT id,
+                       name,
+                       reservation_slot_id,
+                       status,
+                       updated_at
+                FROM reservation
+                WHERE reservation_slot_id = ?
+                  AND status != 'CANCELED'
+                ORDER BY updated_at ASC, id ASC
+                """;
         return jdbcTemplate.query(sql, reservationRowMapper, slotId);
     }
 
@@ -171,7 +125,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                   AND r.time_id = ?
                   AND r.theme_id = ?
                 """;
-
         List<Long> result = jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> rs.getLong("id"),
@@ -179,7 +132,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 timeId,
                 themeId
         );
-
         return result.stream().findFirst();
     }
 
@@ -199,5 +151,47 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 INNER JOIN theme AS th ON r.theme_id = th.id
                 """;
         return jdbcTemplate.query(sql, slotRowMapper);
+    }
+
+    @Override
+    public Long save(LocalDate date, Long timeId, Long themeId) {
+        return reservationSlotInsert.executeAndReturnKey(Map.of(
+                "date", date,
+                "time_id", timeId,
+                "theme_id", themeId
+        )).longValue();
+    }
+
+    @Override
+    public Reservation saveReservation(Reservation reservation) {
+        Long id = reservationInsert.executeAndReturnKey(Map.of(
+                "name", reservation.getName(),
+                "reservation_slot_id", reservation.getReservationSlotId(),
+                "status", reservation.getStatus().name(),
+                "updated_at", reservation.getUpdateAt()
+        )).longValue();
+        return new Reservation(
+                id,
+                reservation.getName(),
+                reservation.getReservationSlotId(),
+                reservation.getStatus(),
+                reservation.getUpdateAt()
+        );
+    }
+
+    @Override
+    public void updateReservation(Reservation reservation) {
+        jdbcTemplate.update("""
+                        UPDATE reservation
+                        SET reservation_slot_id = ?,
+                            status = ?,
+                            updated_at = ?
+                        WHERE id = ?
+                        """,
+                reservation.getReservationSlotId(),
+                reservation.getStatus().name(),
+                reservation.getUpdateAt(),
+                reservation.getId()
+        );
     }
 }
