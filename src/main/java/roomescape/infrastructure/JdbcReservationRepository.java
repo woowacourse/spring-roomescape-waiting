@@ -41,15 +41,6 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-//    public Long save(String name, Long reservationSlotId, LocalDateTime now) {
-//        return jdbcInsert.executeAndReturnKey(Map.of(
-//                "name", name,
-//                "reservation_slot_id", reservationSlotId,
-//                "status", Status.RESERVED.name(),
-//                "updated_at", now
-//        )).longValue();
-//    }
-
     @Override
     public Reservation findById(Long id) {
         String sql = """
@@ -63,26 +54,6 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                 """;
         return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
     }
-
-//    public int findOrderByReservationId(long reservationId, long slotId) {
-//        String sql = """
-//            SELECT COUNT(*)
-//            FROM reservation r
-//            WHERE r.reservation_slot_id = ?
-//              AND r.updated_at < (
-//                  SELECT updated_at
-//                  FROM reservation r2
-//                  WHERE r2.id = ?
-//              )
-//            """;
-//
-//        return jdbcTemplate.queryForObject(
-//                sql,
-//                Integer.class,
-//                slotId,
-//                reservationId
-//        );
-//    }
 
     @Override
     public List<ReservationResponse> findByUserName(String username) {
@@ -110,25 +81,4 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                 """;
         return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
     }
-
-//    public boolean existByNameReservationIdStatus(String name, Long reservationSlotId, Status status) {
-//        String sql = """
-//                SELECT EXISTS (
-//                    SELECT 1
-//                    FROM reservation
-//                    WHERE name = ?
-//                      AND reservation_slot_id = ?
-//                      AND status = ?
-//                )
-//                """;
-//        return jdbcTemplate.queryForObject(sql, Boolean.class, name, reservationSlotId, status.name());
-//    }
-//
-//    public void update(Long reservationId, Long reservationSlotId) {
-//        jdbcTemplate.update("UPDATE reservation SET reservation_slot_id = ?  WHERE id = ?", reservationSlotId , reservationId);
-//    }
-//
-//    public void delete(Long id, Status status) {
-//        jdbcTemplate.update("UPDATE reservation SET status = ?  WHERE id = ?", status.name() , id);
-//    }
 }

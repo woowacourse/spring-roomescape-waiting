@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ThemeResponse;
-import roomescape.repository.ThemeDao;
+import roomescape.infrastructure.dao.ThemeDao;
 
 @Service
 public class ThemeService {

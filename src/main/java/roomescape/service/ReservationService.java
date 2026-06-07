@@ -13,8 +13,6 @@ import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
-import roomescape.domain.repository.TimeRepository;
-import roomescape.domain.vo.Slot;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.CustomException;
@@ -24,14 +22,11 @@ import roomescape.exception.ErrorCode;
 public class ReservationService {
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationQueryRepository reservationQueryRepository;
-    private final TimeRepository timeRepository;
 
-    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository, TimeRepository timeRepository) {
+    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository) {
         this.reservationSlotRepository = reservationSlotRepository;
         this.reservationQueryRepository = reservationQueryRepository;
-        this.timeRepository = timeRepository;
     }
-
 
     @Transactional
     public ReservationResponse save(LocalDateTime now, ReservationRequest request) {

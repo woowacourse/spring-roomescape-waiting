@@ -15,9 +15,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.domain.entity.Time;
+import roomescape.domain.Time;
 import roomescape.domain.repository.ReservationSlotRepository;
-import roomescape.domain.vo.Slot;
+import roomescape.domain.ReservationSlotInfo;
 
 @Repository
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
@@ -25,7 +25,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private final SimpleJdbcInsert reservationSlotInsert;
     private final SimpleJdbcInsert reservationInsert;
 
-    private final RowMapper<Slot> slotRowMapper = (rs, rowNum) -> new Slot(
+    private final RowMapper<ReservationSlotInfo> slotRowMapper = (rs, rowNum) -> new ReservationSlotInfo(
             rs.getLong("id"),
             rs.getDate("date").toLocalDate(),
             new Time(
@@ -103,9 +103,9 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     @Override
     public ReservationSlot findById(Long id) {
-        Slot slot = findSlotById(id);
+        ReservationSlotInfo slot = findSlotById(id);
         List<Reservation> reservations = findActiveReservationsBySlotId(id);
-        return new ReservationSlot(id, slot, reservations);
+        return new ReservationSlot(slot, reservations);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return jdbcTemplate.queryForObject(sql, Long.class, reservationId);
     }
 
-    private Slot findSlotById(Long id) {
+    private ReservationSlotInfo findSlotById(Long id) {
         String sql = """
             SELECT rs.id,
                    rs.date,

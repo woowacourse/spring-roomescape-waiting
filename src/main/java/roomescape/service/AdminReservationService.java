@@ -3,7 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dto.AdminReservationResponse;
-import roomescape.repository.ReservationSlotDao;
+import roomescape.infrastructure.dao.ReservationSlotDao;
 
 @Service
 public class AdminReservationService {
@@ -16,7 +16,7 @@ public class AdminReservationService {
 
     public List<AdminReservationResponse> getAllReservations() {
         return reservationSlotDao.findAll().stream()
-                .map(r -> AdminReservationResponse.from(r, r.getTheme()))
+                .map(AdminReservationResponse::from)
                 .toList();
     }
 }

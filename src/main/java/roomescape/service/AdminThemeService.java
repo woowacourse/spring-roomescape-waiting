@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.ThemeRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ThemeDao;
+import roomescape.infrastructure.dao.ThemeDao;
 
 @Service
 public class AdminThemeService {

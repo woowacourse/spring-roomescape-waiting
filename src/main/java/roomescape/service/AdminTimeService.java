@@ -11,7 +11,7 @@ import roomescape.dto.TimeRequest;
 import roomescape.dto.TimeResponse;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.TimeDao;
+import roomescape.infrastructure.dao.TimeDao;
 
 @Service
 public class AdminTimeService {
