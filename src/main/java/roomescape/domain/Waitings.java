@@ -1,9 +1,12 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
+
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
@@ -22,11 +25,26 @@ public class Waitings {
         this.waitings = assignRanks(waitings);
     }
 
-    public Waiting enqueue(Member member, Reservation reservation) {
+    public Waiting enqueue(Member member, Reservation reservation, LocalDateTime now) {
         validateReservationMatchesSlot(reservation);
+        validateNotReservationOwner(member, reservation);
         validateCanCreate(member);
-        Waiting created = Waiting.create(member, reservation);
+        Waiting created = Waiting.create(member, slot, now);
         return created.withRank((long) waitings.size() + 1);
+    }
+
+    private void validateNotReservationOwner(Member member, Reservation reservation) {
+        if (reservation.isSameMember(member)) {
+            throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
+        }
+    }
+
+    public Optional<Waiting> peekFirst() {
+        return waitings.stream().findFirst();
+    }
+
+    public boolean isEmpty() {
+        return waitings.isEmpty();
     }
 
     public List<Waiting> getAll() {
@@ -35,7 +53,7 @@ public class Waitings {
 
     public List<Waiting> ofMember(Long memberId) {
         return waitings.stream()
-                .filter(waiting -> Objects.equals(waiting.getMember().getId(), memberId))
+                .filter(waiting -> Objects.equals(waiting.getMemberId(), memberId))
                 .toList();
     }
 
@@ -49,7 +67,8 @@ public class Waitings {
     }
 
     private void validateCanCreate(Member member) {
-        if (waitings.stream().anyMatch(waiting -> waiting.isSameMember(member))) {
+        if (waitings.stream()
+                .anyMatch(waiting -> waiting.isSameMember(member))) {
             throw new DuplicateEntityException("이미 대기 신청한 슬롯입니다.");
         }
         if (waitings.size() >= MAX_WAITING_COUNT) {
@@ -58,15 +77,14 @@ public class Waitings {
     }
 
     private void validateReservationMatchesSlot(Reservation reservation) {
-        if (!Objects.equals(reservation.getSlot(), slot)) {
+        if (!reservation.isOnSlot(slot)) {
             throw new BusinessRuleViolationException("같은 슬롯의 예약에만 대기를 생성할 수 있습니다.");
         }
     }
 
     private void validateAllBelongToSlot(Slot slot, List<Waiting> waitings) {
         boolean hasDifferentSlot = waitings.stream()
-                .map(Waiting::getSlot)
-                .anyMatch(waitingSlot -> !Objects.equals(waitingSlot, slot));
+                .anyMatch(waiting -> !waiting.isOnSlot(slot));
         if (hasDifferentSlot) {
             throw new BusinessRuleViolationException("같은 슬롯의 대기만 묶을 수 있습니다.");
         }

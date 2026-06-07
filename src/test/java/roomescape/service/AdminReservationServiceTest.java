@@ -17,37 +17,51 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
-import roomescape.dao.jdbc.StoreJdbcDao;
+import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
+import roomescape.dao.jdbc.StoreJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
+import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
+import roomescape.domain.Waiting;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
+import roomescape.dto.request.WaitingRequestDto;
 import roomescape.dto.response.PageResponse;
+import roomescape.worker.PromotionOutboxWorker;
 
 @JdbcTest
-@Import({AdminReservationService.class, ReservationCreator.class, ReservationJdbcDao.class, TimeJdbcDao.class,
-        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class})
+@Import({AdminReservationService.class, ReservationCreator.class, WaitingService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
+        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class,
+        PromotionOutboxWorker.class, PromotionService.class})
 @ActiveProfiles("test")
 class AdminReservationServiceTest {
 
     @Autowired
     private AdminReservationService adminReservationService;
     @Autowired
+    private WaitingService waitingService;
+    @Autowired
+    private PromotionOutboxWorker promotionOutboxWorker;
+    @Autowired
     private ReservationDao reservationDao;
+    @Autowired
+    private WaitingDao waitingDao;
     @Autowired
     private MemberDao memberDao;
     @Autowired
@@ -81,6 +95,13 @@ class AdminReservationServiceTest {
         savedTheme2 = themeDao.insert(new Theme(new Name("방탈출 이름2"), "http://thumbnail_url", "방탈출을 할 수 있다."));
         requestDto1 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
         requestDto2 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), storeId);
+    }
+
+    private Member saveMember(String name, String email) {
+        jdbcTemplate.update(
+                "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                name, email, "password", "USER");
+        return memberDao.findByEmail(email).orElseThrow();
     }
 
     @Nested
@@ -184,6 +205,23 @@ class AdminReservationServiceTest {
         }
 
         @Test
+        @DisplayName("예약을 다른 슬롯으로 수정하면 비워진 원래 슬롯의 대기자가 승격된다")
+        void promotesWaiterOnVacatedSlotAfterUpdate() {
+            Reservation saved = adminReservationService.createByAdmin(requestDto1);
+            Member waiter = saveMember("대기자", "waiter-update@test.com");
+            waitingService.create(
+                    new WaitingRequestDto(requestDto1.date(), savedTime1.getId(), savedTheme1.getId(), storeId),
+                    waiter);
+
+            // 예약을 다른 슬롯으로 옮겨 원래 슬롯을 비운다.
+            adminReservationService.update(saved.getId(),
+                    new ReservationPatchDto(LocalDate.now().plusDays(5), savedTime2.getId()));
+            promotionOutboxWorker.processPendingTasks();
+
+            assertThat(reservationDao.findAllByMemberId(waiter.getId())).hasSize(1);
+        }
+
+        @Test
         @DisplayName("존재하지 않는 id를 수정하면 예외를 반환한다")
         void throwsWhenIdNotFound() {
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime1.getId());
@@ -223,6 +261,58 @@ class AdminReservationServiceTest {
         void throwsWhenIdNotFound() {
             assertThatThrownBy(() -> adminReservationService.cancelByAdmin(-1L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("이미 취소된 예약을 다시 취소하면 예외를 반환한다")
+        void throwsWhenCancelingAlreadyCanceled() {
+            Reservation saved = reservationDao.insert(Reservation.createByAdmin(
+                    member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, new Store(storeId, "강남점")));
+            adminReservationService.cancelByAdmin(saved.getId());
+
+            assertThatThrownBy(() -> adminReservationService.cancelByAdmin(saved.getId()))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+
+        @Test
+        @DisplayName("과거 슬롯의 예약을 취소해도 대기자를 승격하지 않는다")
+        void doesNotPromoteForPastSlot() {
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            Reservation reservation = reservationDao.insert(Reservation.createByAdmin(
+                    member, pastDate, savedTime1, savedTheme1, new Store(storeId, "강남점")));
+            Member waiter = saveMember("대기1", "waiting1@test.com");
+            waitingDao.insert(Waiting.reconstruct(
+                    null, waiter, pastDate, savedTime1, savedTheme1, new Store(storeId, "강남점")));
+
+            adminReservationService.cancelByAdmin(reservation.getId());
+            promotionOutboxWorker.processPendingTasks();
+
+            assertThat(reservationDao.findAllByMemberId(waiter.getId())).isEmpty();
+        }
+
+        @Test
+        @DisplayName("예약을 취소하면 첫 번째 대기자가 예약으로 승격되고 대기열에서 제거된다")
+        void promotesFirstWaitingOnCancel() {
+            Reservation reservation = reservationDao.insert(Reservation.createByAdmin(
+                    member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, new Store(storeId, "강남점")));
+            Member firstWaiter = saveMember("대기1", "waiting1@test.com");
+            Member secondWaiter = saveMember("대기2", "waiting2@test.com");
+            WaitingRequestDto waitingDto = new WaitingRequestDto(
+                    LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
+            waitingService.create(waitingDto, firstWaiter);
+            waitingService.create(waitingDto, secondWaiter);
+
+            adminReservationService.cancelByAdmin(reservation.getId());
+            promotionOutboxWorker.processPendingTasks();
+
+            assertThat(reservationDao.findAllByMemberId(firstWaiter.getId()))
+                    .anyMatch(r -> r.getStatus() == ReservationStatus.BOOKED);
+            assertThat(waitingService.findAll())
+                    .singleElement()
+                    .satisfies(remaining -> {
+                        assertThat(remaining.getMember().getId()).isEqualTo(secondWaiter.getId());
+                        assertThat(remaining.getRank()).isEqualTo(1L);
+                    });
         }
     }
 

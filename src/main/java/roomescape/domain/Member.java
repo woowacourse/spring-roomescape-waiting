@@ -87,8 +87,15 @@ public class Member {
     }
 
     public Long getStoreId() {
-        if(store == null) return null;
+        if (store == null) {
+            return null;
+        }
         return store.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     @Override
@@ -97,10 +104,5 @@ public class Member {
             return false;
         }
         return id != null && Objects.equals(id, member.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

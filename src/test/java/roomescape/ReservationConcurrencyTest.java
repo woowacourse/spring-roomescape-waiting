@@ -20,7 +20,6 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
@@ -71,6 +70,8 @@ class ReservationConcurrencyTest {
 
     @AfterEach
     void tearDown() {
+        jdbcTemplate.update("DELETE FROM promotion_outbox");
+        jdbcTemplate.update("DELETE FROM waitings");
         jdbcTemplate.update("DELETE FROM reservations");
         jdbcTemplate.update("DELETE FROM times");
         jdbcTemplate.update("DELETE FROM themes");

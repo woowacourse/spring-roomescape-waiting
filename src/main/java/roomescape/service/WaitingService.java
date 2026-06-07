@@ -1,9 +1,12 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
@@ -25,13 +28,19 @@ public class WaitingService {
     }
 
     public Waiting create(WaitingRequestDto waitingRequestDto, Member member) {
+        // 전제조건: "대기 최대 5명" 보장은 같은 슬롯의 모든 쓰기 경로가 아래 예약 행 락(findBySlotKeyForUpdate)을
+        // 먼저 잡아 직렬화된다는 가정 위에서만 성립한다. 이 앵커를 우회해 큐에 직접 INSERT하는 경로가 생기면 보장이 깨진다.
         Reservation reservation = reservationDao.findBySlotKeyForUpdate(waitingRequestDto.themeId(),
                         waitingRequestDto.timeId(), waitingRequestDto.date(), waitingRequestDto.storeId())
                 .orElseThrow(() -> new BusinessRuleViolationException("예약이 존재하지 않아 대기가 불가능합니다."));
 
         Waitings waitings = waitingDao.findQueueBySlotForUpdate(reservation.getSlot());
-        Waiting ranked = waitings.enqueue(member, reservation);
-        return waitingDao.insert(ranked);
+        Waiting ranked = waitings.enqueue(member, reservation, LocalDateTime.now());
+        try {
+            return waitingDao.insert(ranked);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateEntityException("이미 대기 신청한 슬롯입니다.");
+        }
     }
 
     public void delete(Long waitingId) {

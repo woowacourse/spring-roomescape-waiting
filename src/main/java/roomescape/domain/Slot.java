@@ -26,6 +26,10 @@ public class Slot {
         return time.isReservationBefore(now, date);
     }
 
+    public boolean isInStore(Store store) {
+        return this.store.equals(store);
+    }
+
     public LocalDate getDate() {
         return date;
     }
@@ -44,6 +48,14 @@ public class Slot {
 
     public Long getStoreId() {
         return store.getId();
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
     }
 
     @Override

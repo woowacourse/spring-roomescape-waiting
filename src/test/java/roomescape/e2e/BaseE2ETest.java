@@ -35,7 +35,7 @@ public abstract class BaseE2ETest {
 
     protected void truncateAll() {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-        for (String table : List.of("waitings", "reservations", "members", "stores", "themes", "times")) {
+        for (String table : List.of("promotion_outbox", "waitings", "reservations", "members", "stores", "themes", "times")) {
             jdbcTemplate.execute("TRUNCATE TABLE " + table);
             jdbcTemplate.execute("ALTER TABLE " + table + " ALTER COLUMN id RESTART WITH 1");
         }

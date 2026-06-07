@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
@@ -20,11 +21,11 @@ public class Waiting {
         this.rank = rank;
     }
 
-    static Waiting create(Member member, Reservation reservation) {
-        if (reservation.isSameMember(member)) {
-            throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
+    static Waiting create(Member member, Slot slot, LocalDateTime now) {
+        if (slot.isPast(now)) {
+            throw new BusinessRuleViolationException("지난 시간에 대한 대기 생성은 불가능합니다.");
         }
-        return new Waiting(null, member, reservation.getSlot(), null);
+        return new Waiting(null, member, slot, null);
     }
 
     public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Store store) {
@@ -43,8 +44,20 @@ public class Waiting {
         return this.member.equals(member);
     }
 
+    public Reservation promote() {
+        return Reservation.createByAdmin(member, slot.getDate(), slot.getTime(), slot.getTheme(), slot.getStore());
+    }
+
     public boolean isInStore(Store store) {
-        return slot.getStore().equals(store);
+        return slot.isInStore(store);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
+    }
+
+    public boolean isOnSlot(Slot slot) {
+        return this.slot.equals(slot);
     }
 
     @Override
@@ -66,6 +79,10 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    public Long getMemberId() {
+        return member.getId();
     }
 
     public Slot getSlot() {

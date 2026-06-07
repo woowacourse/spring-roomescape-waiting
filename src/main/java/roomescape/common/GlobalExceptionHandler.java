@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -19,6 +21,8 @@ import roomescape.common.exception.handler.FormatHandler;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final List<FormatHandler> formatHandlers;
 
@@ -67,6 +71,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(DataIntegrityViolationException e, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(problem(HttpStatus.CONFLICT, "데이터 충돌", "이미 존재하는 데이터와 충돌이 발생했습니다.", request));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ProblemDetail> handleUnexpected(RuntimeException e, HttpServletRequest request) {
+        log.error("처리되지 않은 예외가 발생했습니다.", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(problem(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류", "예상치 못한 오류가 발생했습니다.", request));
     }
 
     private ProblemDetail problem(HttpStatus status, String title, String detail, HttpServletRequest request) {

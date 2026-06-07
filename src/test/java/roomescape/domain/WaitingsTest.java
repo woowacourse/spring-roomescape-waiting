@@ -42,7 +42,26 @@ class WaitingsTest {
         Slot otherSlot = new Slot(LocalDate.now().plusDays(1), time, theme, store);
         Waitings waitings = new Waitings(otherSlot, new ArrayList<>());
 
-        assertThatThrownBy(() -> waitings.enqueue(waitingMember, reservation))
+        assertThatThrownBy(() -> waitings.enqueue(waitingMember, reservation, LocalDateTime.now()))
+                .isInstanceOf(BusinessRuleViolationException.class);
+    }
+
+    @Test
+    @DisplayName("이미 지난 슬롯에는 대기를 생성할 수 없다")
+    void throwsWhenSlotIsPast() {
+        Member reserver = new Member(1L, "예약자", "reserver@test.com", "password", MemberRole.USER);
+        Member waitingMember = new Member(2L, "유저", "user@test.com", "password", MemberRole.USER);
+        Theme theme = new Theme(1L, new Name("테마"), "http://thumbnail", "설명");
+        Store store = new Store(1L, "강남점");
+        Time time = new Time(1L, LocalTime.of(13, 0));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createByUser(
+                reserver, date, time, theme, store, LocalDateTime.now());
+        Waitings waitings = new Waitings(reservation.getSlot(), new ArrayList<>());
+
+        LocalDateTime afterSlot = LocalDateTime.of(date, LocalTime.of(13, 0)).plusMinutes(1);
+
+        assertThatThrownBy(() -> waitings.enqueue(waitingMember, reservation, afterSlot))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 }
