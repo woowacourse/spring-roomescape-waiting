@@ -44,6 +44,13 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.INVALID_REQUEST));
     }
 
+    @ExceptionHandler(DataInconsistencyException.class)
+    public ResponseEntity<ErrorResponse> handlerDataInconsistency(DataInconsistencyException e) {
+        log.error("Data inconsistency exception: {}", e.getMessage());
+        return ResponseEntity.status(e.getHttpStatus())
+                .body(ErrorResponse.of(e.getErrorCode()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnhandled(Exception e) {
         log.error("Unhandled exception", e);

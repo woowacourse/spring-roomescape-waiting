@@ -1,11 +1,13 @@
 package roomescape.reservation.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.error.DataInconsistencyException;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -45,6 +47,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public List<ReservationWithWaitingOrderResponse> getAllByName(String name) {
+        return reservationRepository.findAllByName(name).stream()
+                .map(ReservationWithWaitingOrderResponse::from)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
         ReservationTime time = findTime(request.timeId());
@@ -53,16 +62,21 @@ public class ReservationServiceImpl implements ReservationService {
         validateThemeId(themeId);
         validateNotHoliday(time);
         Theme theme = themeRepository.findById(themeId);
-        if (reservationRepository.isDuplicatedWithName(request.name(), themeId, time)) {
+        validateNotDuplicated(request.name(), themeId, time);
+        Status status = Status.from(reservationRepository.hasConfirmedReservation(themeId, time));
+        Reservation newReservation = new Reservation(request.name(), time, theme, status, LocalDateTime.now());
+        try {
+            return reservationRepository.save(newReservation);
+        } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
         }
-        Status status = Status.from(reservationRepository.hasConfirmedReservation(themeId, time));
-        Reservation newReservation = new Reservation(request.name(),
-                time,
-                theme,
-                status,
-                LocalDateTime.now());
-        return reservationRepository.save(newReservation);
+    }
+
+    private ReservationTime findTime(Long timeId) {
+        if (timeId == null) {
+            throw new IllegalArgumentException("예약 시간은 필수입니다.");
+        }
+        return timeService.findById(timeId);
     }
 
     private void validateThemeId(Long themeId) {
@@ -80,55 +94,51 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 
-    private ReservationTime findTime(Long timeId) {
-        if (timeId == null) {
-            throw new IllegalArgumentException("예약 시간은 필수입니다.");
+    private void validateNotDuplicated(String name, Long themeId, ReservationTime time) {
+        if (reservationRepository.isDuplicatedWithName(name, themeId, time)) {
+            throw new DuplicateReservationException();
         }
-        return timeService.findById(timeId);
     }
 
     @Override
     @Transactional
     public void cancel(Long id) {
-        boolean deleted = reservationRepository.deleteById(id);
-        if (!deleted) {
-            throw new ReservationNotFoundException(id);
-        }
-    }
-
-    @Override
-    public List<ReservationWithWaitingOrderResponse> getAllByName(String name) {
-        return reservationRepository.findAllByName(name).stream()
-                .map(ReservationWithWaitingOrderResponse::from)
-                .toList();
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        cancelWithPromotion(reservation);
     }
 
     @Override
     @Transactional
     public void cancelForUser(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.validateOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
+        cancelWithPromotion(reservation);
+    }
+
+    private void cancelWithPromotion(Reservation reservation) {
         promoteNextWaiting(reservation);
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservation.getId());
     }
 
     @Override
     @Transactional
     public Reservation update(Long id, Long timeId) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.getTime().validateUpdatableReservation();
-        promoteNextWaiting(reservation);
+        Long themeId = reservation.getTheme().getId();
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
+        validateNotDuplicated(reservation.getName(), themeId, newTime);
+        promoteNextWaiting(reservation);
         Status status = Status.from(
-                reservationRepository.hasConfirmedReservation(reservation.getTheme().getId(), newTime));
+                reservationRepository.hasConfirmedReservation(themeId, newTime));
         boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now(), status);
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
-
         }
         return reservation.withTimeAndStatus(newTime, status);
     }
@@ -138,7 +148,7 @@ public class ReservationServiceImpl implements ReservationService {
             reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
                     .ifPresent(waitingId -> {
                         if (!reservationRepository.promoteToReserved(waitingId)) {
-                            throw new IllegalStateException("대기 예약 승격에 실패했습니다. id: " + waitingId);
+                            throw new DataInconsistencyException("대기 예약 승격에 실패했습니다. id: " + waitingId);
                         }
                     });
         }
