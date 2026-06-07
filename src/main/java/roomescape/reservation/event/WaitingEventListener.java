@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.reservation.application.service.PromotionService;
-import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.event.schema.WaitingPromotedToReservation;
 import roomescape.reservation.event.schema.WaitingSaved;
 
@@ -15,7 +15,7 @@ import roomescape.reservation.event.schema.WaitingSaved;
 public class WaitingEventListener {
 
     private final PromotionService promotionService;
-    private final WaitingService waitingService;
+    private final WaitingCommandService waitingCommandService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleWaitingSaved(WaitingSaved event) {
@@ -24,6 +24,6 @@ public class WaitingEventListener {
 
     @EventListener
     public void handleWaitingPromoted(WaitingPromotedToReservation event) {
-        waitingService.deleteOldestBySlot(event.date(), event.themeId(), event.timeId());
+        waitingCommandService.deleteOldestBySlot(event.date(), event.themeId(), event.timeId());
     }
 }

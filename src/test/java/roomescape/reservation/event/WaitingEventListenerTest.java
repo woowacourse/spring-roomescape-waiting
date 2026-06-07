@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.application.service.PromotionService;
-import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.event.schema.WaitingPromotedToReservation;
 import roomescape.reservation.event.schema.WaitingSaved;
 
@@ -21,7 +21,7 @@ class WaitingEventListenerTest {
     private PromotionService promotionService;
 
     @Mock
-    private WaitingService waitingService;
+    private WaitingCommandService waitingCommandService;
 
     @InjectMocks
     private WaitingEventListener listener;
@@ -47,6 +47,6 @@ class WaitingEventListenerTest {
 
         listener.handleWaitingPromoted(event);
 
-        verify(waitingService).deleteOldestBySlot(date, themeId, timeId);
+        verify(waitingCommandService).deleteOldestBySlot(date, themeId, timeId);
     }
 }

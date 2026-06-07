@@ -20,7 +20,7 @@ import roomescape.global.BadRequestException;
 import roomescape.global.ConflictException;
 import roomescape.global.ForbiddenException;
 import roomescape.reservation.application.dto.BookingCreateCommand;
-import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -32,7 +32,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
-class WaitingServiceTest {
+class WaitingCommandServiceTest {
 
     @Mock
     private WaitingRepository waitingRepository;
@@ -50,7 +50,7 @@ class WaitingServiceTest {
     private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
-    private WaitingService waitingService;
+    private WaitingCommandService waitingCommandService;
 
     private final ReservationTime time = ReservationTime.builder()
             .id(1L).startAt(LocalTime.of(10, 0))
@@ -71,7 +71,7 @@ class WaitingServiceTest {
         when(waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(any(), any(), any(), any())).thenReturn(false);
         when(waitingRepository.save(any())).thenReturn(saved);
 
-        waitingService.save(
+        waitingCommandService.save(
                 new BookingCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0));
 
@@ -84,7 +84,7 @@ class WaitingServiceTest {
     void save_throws_on_past_datetime() {
         when(timeRepository.findById(1L)).thenReturn(Optional.of(time));
 
-        assertThatThrownBy(() -> waitingService.save(
+        assertThatThrownBy(() -> waitingCommandService.save(
                 new BookingCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L),
                 LocalDateTime.of(2026, 5, 6, 11, 0)))
                 .isExactlyInstanceOf(BadRequestException.class);
@@ -98,7 +98,7 @@ class WaitingServiceTest {
         when(reservationRepository.existsByNameAndDateAndThemeAndTime(any(), any(), any(), any())).thenReturn(false);
         when(waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(any(), any(), any(), any())).thenReturn(true);
 
-        assertThatThrownBy(() -> waitingService.save(
+        assertThatThrownBy(() -> waitingCommandService.save(
                 new BookingCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0)))
                 .isExactlyInstanceOf(ConflictException.class);
@@ -111,7 +111,7 @@ class WaitingServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByNameAndDateAndThemeAndTime(any(), any(), any(), any())).thenReturn(true);
 
-        assertThatThrownBy(() -> waitingService.save(
+        assertThatThrownBy(() -> waitingCommandService.save(
                 new BookingCreateCommand("카야", LocalDate.of(2028, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0)))
                 .isExactlyInstanceOf(ConflictException.class);
@@ -125,7 +125,7 @@ class WaitingServiceTest {
 
         when(waitingRepository.findById(id)).thenReturn(Optional.of(waiting));
 
-        waitingService.delete(id, "타스");
+        waitingCommandService.delete(id, "타스");
 
         verify(waitingRepository).delete(id);
     }
@@ -138,7 +138,7 @@ class WaitingServiceTest {
 
         when(waitingRepository.findById(id)).thenReturn(Optional.of(waiting));
 
-        assertThatThrownBy(() -> waitingService.delete(id, "카야"))
+        assertThatThrownBy(() -> waitingCommandService.delete(id, "카야"))
                 .isExactlyInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationErrorMessage.FORBIDDEN_WAITING_ACCESS.getMessage());
     }

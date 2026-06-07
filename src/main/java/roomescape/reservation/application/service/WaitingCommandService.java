@@ -3,7 +3,6 @@ package roomescape.reservation.application.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.event.schema.WaitingSaved;
 import roomescape.reservation.exception.ReservationErrorMessage;
-import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
@@ -28,7 +26,7 @@ import roomescape.theme.exception.ThemeErrorMessage;
 
 @RequiredArgsConstructor
 @Service
-public class WaitingService {
+public class WaitingCommandService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
@@ -36,13 +34,6 @@ public class WaitingService {
     private final ReservationTimeRepository timeRepository;
 
     private final ApplicationEventPublisher eventPublisher;
-
-    @Transactional(readOnly = true)
-    public List<WaitingResponse> findAllByName(String name) {
-        return waitingRepository.findByName(name).stream()
-                .map(WaitingResponse::from)
-                .toList();
-    }
 
     @Transactional
     public void save(BookingCreateCommand request, LocalDateTime requested) {

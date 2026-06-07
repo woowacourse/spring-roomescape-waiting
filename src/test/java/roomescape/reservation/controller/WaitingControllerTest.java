@@ -17,7 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.reservation.application.service.WaitingQueryService;
-import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
 import roomescape.reservation.presentation.controller.WaitingController;
 import roomescape.reservation.presentation.dto.WaitingResponse;
@@ -29,7 +29,7 @@ class WaitingControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private WaitingService waitingService;
+    private WaitingCommandService waitingCommandService;
 
     @MockitoBean
     private WaitingQueryService waitingQueryService;
@@ -65,7 +65,7 @@ class WaitingControllerTest {
     @DisplayName("본인 대기를 취소할 수 있다.")
     @Test
     void cancel_waiting() throws Exception {
-        doNothing().when(waitingService).delete(any(), any());
+        doNothing().when(waitingCommandService).delete(any(), any());
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/waitings/1")
                         .param("name", "카야"))

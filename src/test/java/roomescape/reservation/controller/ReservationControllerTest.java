@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.reservation.application.service.ReservationService;
-import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.presentation.controller.ReservationController;
 
 @WebMvcTest(ReservationController.class)
@@ -23,7 +23,7 @@ public class ReservationControllerTest {
     private ReservationService reservationService;
 
     @MockitoBean
-    private WaitingService waitingService;
+    private WaitingCommandService waitingCommandService;
 
     @Test
     void save_reservation() throws Exception {
