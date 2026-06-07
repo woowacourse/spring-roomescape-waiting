@@ -13,10 +13,11 @@
 <header class="admin-topbar">
     <div class="admin-topbar-inner">
         <a href="/admin" class="admin-brand">ROOMESCAPE ADMIN</a>
-        <nav class="admin-nav">
+        <nav class="admin-nav" id="admin-nav" hidden>
             <button type="button" class="admin-nav-button active" data-tab-target="themes-panel">테마 관리</button>
             <button type="button" class="admin-nav-button" data-tab-target="times-panel">예약 시간 관리</button>
             <button type="button" class="admin-nav-button" data-tab-target="reservations-panel">예약 관리</button>
+            <button type="button" class="admin-nav-button danger-button" id="logout-button" style="margin-left: 20px;">로그아웃</button>
         </nav>
     </div>
 </header>
@@ -26,19 +27,36 @@
         <div>
             <p class="admin-kicker">관리자 페이지</p>
             <h1>테마, 시간, 예약을 관리할 수 있습니다.</h1>
-            <p class="admin-hero-description">관리자 토큰을 입력한 뒤 각 항목을 추가하거나 삭제하세요.</p>
+            <p class="admin-hero-description">각 항목을 조회하고 추가하거나 삭제하세요.</p>
         </div>
-        <form id="admin-token-form" class="token-form">
-            <label for="admin-token">관리자 토큰</label>
-            <div class="token-row">
-                <input id="admin-token" name="adminToken" type="password" placeholder="X-ADMIN-TOKEN 값을 입력하세요" autocomplete="off">
-                <button type="submit" class="primary-button">저장</button>
+    </section>
+
+    <section id="login-panel" class="admin-panel">
+        <div class="panel-header">
+            <div>
+                <p class="admin-kicker">인증</p>
+                <h2>관리자 로그인</h2>
             </div>
-            <p id="token-message" class="helper-text">토큰은 브라우저에만 저장됩니다.</p>
+        </div>
+        <form id="login-form" class="admin-form">
+            <div class="field-grid field-grid-single">
+                <label>
+                    <span>이름</span>
+                    <input type="text" name="name" placeholder="이름을 입력하세요" required autocomplete="username">
+                </label>
+                <label>
+                    <span>비밀번호</span>
+                    <input type="password" name="password" placeholder="비밀번호를 입력하세요" required autocomplete="current-password">
+                </label>
+            </div>
+            <div class="form-actions" style="margin-top: 12px; justify-content: flex-start; gap: 16px;">
+                <button type="submit" class="primary-button">로그인</button>
+                <p id="login-form-message" class="form-message"></p>
+            </div>
         </form>
     </section>
 
-    <section id="themes-panel" class="admin-panel">
+    <section id="themes-panel" class="admin-panel" hidden>
         <div class="panel-header">
             <div>
                 <p class="admin-kicker">테마 관리</p>

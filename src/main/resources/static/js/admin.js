@@ -1,14 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const TOKEN_KEY = "roomescape-admin-token";
     const state = {
-        token: localStorage.getItem(TOKEN_KEY) || "",
         themes: [],
         slots: []
     };
 
-    const tokenInput = document.getElementById("admin-token");
-    const tokenForm = document.getElementById("admin-token-form");
-    const tokenMessage = document.getElementById("token-message");
     const themesList = document.getElementById("themes-list");
     const timesList = document.getElementById("times-list");
     const reservationsList = document.getElementById("reservations-list");
@@ -25,8 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminModal = document.getElementById("admin-modal");
     const adminModalMessage = document.getElementById("admin-modal-message");
     const adminModalClosers = document.querySelectorAll("[data-admin-modal-close]");
+    const loginPanel = document.getElementById("login-panel");
+    const loginForm = document.getElementById("login-form");
+    const loginMessage = document.getElementById("login-form-message");
+    const adminNav = document.getElementById("admin-nav");
+    const logoutButton = document.getElementById("logout-button");
 
-    tokenInput.value = state.token;
     reservationDateInput.value = localDateString(new Date());
 
     function localDateString(date) {
@@ -59,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: {
                 Accept: "application/json",
                 ...(options.body ? { "Content-Type": "application/json" } : {}),
-                "X-ADMIN-TOKEN": state.token,
                 ...(options.headers || {})
             }
         });
@@ -167,8 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadThemes() {
         const response = await adminFetch("/admin/themes", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("로그인이 필요하거나 관리자 권한이 없습니다.");
         }
         const result = await parseResponse(response);
         state.themes = result.themes;
@@ -178,8 +176,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadTimes() {
         const response = await adminFetch("/admin/times", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("로그인이 필요하거나 관리자 권한이 없습니다.");
         }
         const result = await parseResponse(response);
         renderTimes(result.times);
@@ -187,8 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadReservations() {
         const response = await adminFetch("/admin/reservations", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("로그인이 필요하거나 관리자 권한이 없습니다.");
         }
         const result = await parseResponse(response);
         renderReservations(result.reservations);
@@ -214,15 +212,41 @@ document.addEventListener("DOMContentLoaded", () => {
         renderSlots();
     }
 
-    async function refreshAll() {
-        if (!state.token) {
-            return;
+    function showLogin(visible) {
+        if (visible) {
+            loginPanel.hidden = false;
+            adminNav.hidden = true;
+            panels.forEach((panel) => {
+                if (panel !== loginPanel) {
+                    panel.hidden = true;
+                }
+            });
+        } else {
+            loginPanel.hidden = true;
+            adminNav.hidden = false;
+            const activeTab = document.querySelector(".admin-nav-button.active");
+            const targetId = activeTab ? activeTab.dataset.tabTarget : "themes-panel";
+            panels.forEach((panel) => {
+                panel.hidden = panel.id !== targetId;
+            });
         }
-        await Promise.all([loadThemes(), loadTimes(), loadReservations()]);
-        await loadReservationSlots().catch(() => {
-            // 선택 조건이 없거나 슬롯을 불러오지 못해도 전체 새로고침은 유지한다.
-        });
-        bindDeleteButtons();
+    }
+
+    async function refreshAll() {
+        try {
+            await Promise.all([loadThemes(), loadTimes(), loadReservations()]);
+            await loadReservationSlots().catch(() => {
+                // 선택 조건이 없거나 슬롯을 불러오지 못해도 전체 새로고침은 유지한다.
+            });
+            bindDeleteButtons();
+            showLogin(false);
+        } catch (error) {
+            if (error.message === "로그인이 필요하거나 관리자 권한이 없습니다.") {
+                showLogin(true);
+            } else {
+                openModal(error.message);
+            }
+        }
     }
 
     function bindDeleteButtons() {
@@ -240,9 +264,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                const response = await adminFetch(endpoint, { method: "DELETE" });
-                if (response.status === 401) {
-                    openModal("관리자 토큰이 올바르지 않습니다.");
+                 const response = await adminFetch(endpoint, { method: "DELETE" });
+                if (response.status === 401 || response.status === 403) {
+                    openModal("로그인이 필요하거나 관리자 권한이 없습니다.");
                     return;
                 }
                 if (!response.ok) {
@@ -266,16 +290,40 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    tokenForm.addEventListener("submit", async (event) => {
+    loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        state.token = tokenInput.value.trim();
-        localStorage.setItem(TOKEN_KEY, state.token);
-        setMessage(tokenMessage, "토큰을 저장했습니다.", "success");
+        const formData = new FormData(loginForm);
+        const payload = {
+            name: String(formData.get("name") || "").trim(),
+            password: String(formData.get("password") || "").trim()
+        };
+
         try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const result = await parseResponse(response);
+            if (!response.ok) {
+                throw new Error(result?.message || "로그인에 실패했습니다.");
+            }
+            if (result.role !== "ADMIN") {
+                throw new Error("관리자 권한이 없습니다.");
+            }
+            setMessage(loginMessage, "로그인 성공!", "success");
+            loginForm.reset();
             await refreshAll();
         } catch (error) {
-            setMessage(tokenMessage, error.message, "error");
+            setMessage(loginMessage, error.message, "error");
         }
+    });
+
+    logoutButton.addEventListener("click", async () => {
+        try {
+            await fetch("/logout", { method: "DELETE" });
+        } catch (e) {}
+        showLogin(true);
     });
 
     tabButtons.forEach((button) => {
@@ -410,9 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await refreshAll();
     });
 
-    if (state.token) {
-        refreshAll().catch((error) => {
-            setMessage(tokenMessage, error.message, "error");
-        });
-    }
+    refreshAll().catch((error) => {
+        console.error("Failed to load admin data: ", error.message);
+    });
 });
