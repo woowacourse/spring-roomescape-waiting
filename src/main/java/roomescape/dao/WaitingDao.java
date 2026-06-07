@@ -120,8 +120,8 @@ public class WaitingDao {
                 INNER JOIN reservation_time rt ON w.time_id = rt.id
                 INNER JOIN theme t ON w.theme_id = t.id
                 WHERE w.date = ? AND rt.id = ? AND t.id = ?
-                    ORDER BY w.created_at ASC;
-                LIMIT 1;
+                    ORDER BY w.created_at ASC
+                LIMIT 1
                 """;
         return jdbcTemplate.query(
                         sql,
