@@ -179,6 +179,30 @@ public class WaitingListRepository {
         return count != null && count > 0;
     }
 
+    public boolean existsByTimeId(final Long timeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE time_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+
+        return count != null && count > 0;
+    }
+
+    public boolean existsByThemeId(final Long themeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE theme_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
+
+        return count != null && count > 0;
+    }
+
     private long insertWaitingList(final WaitingList waitingList) {
         final String sql = """
                 INSERT INTO waiting_list (name, date, time_id, theme_id, created_at)

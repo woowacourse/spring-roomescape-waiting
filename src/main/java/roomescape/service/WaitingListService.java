@@ -35,14 +35,14 @@ public class WaitingListService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public WaitingListResult create(final WaitingListCreateCommand createCommand) {
+    public WaitingListResult create(final WaitingListCreateCommand createCommand, final LocalDate today, final LocalTime now) {
         final ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
         final Theme findTheme = themeRepository.findById(createCommand.themeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
 
         final WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findReservationTime, findTheme);
-        validateFuture(waitingList);
+        validateFuture(waitingList, today, now);
 
         final LocalDate date = waitingList.getReservationDate().date();
         final Long timeId = findReservationTime.getId();
@@ -62,7 +62,7 @@ public class WaitingListService {
         return WaitingListResult.from(savedWaitingList, waitingOrder);
     }
 
-    public void delete(final WaitingListDeleteCommand deleteCommand) {
+    public void delete(final WaitingListDeleteCommand deleteCommand, final LocalDate today, final LocalTime now) {
         final WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
 
@@ -70,7 +70,7 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
 
-        validateFuture(findWaitingList);
+        validateFuture(findWaitingList, today, now);
 
         final boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
         if (!deleted) {
@@ -109,12 +109,12 @@ public class WaitingListService {
                 ).toList();
     }
 
-    private static void validateFuture(final WaitingList waitingList) {
-        if (waitingList.getReservationDate().isPast()) {
+    private static void validateFuture(final WaitingList waitingList, final LocalDate today, final LocalTime now) {
+        if (waitingList.getReservationDate().isPast(today)) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }
-        final LocalTime now = LocalTime.now();
-        if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore(now)) {
+
+        if (waitingList.getReservationDate().isSameDay(today) && waitingList.getReservationTime().isBefore(now)) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }

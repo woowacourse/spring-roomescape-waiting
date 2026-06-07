@@ -18,6 +18,8 @@ import roomescape.dto.WaitingListResult;
 import roomescape.service.WaitingListService;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class WaitingListController {
 
     @PostMapping
     public ResponseEntity<WaitingListResult> create(@RequestBody @Valid final WaitingListCreateCommand createCommand) {
-        final WaitingListResult result = waitingListService.create(createCommand);
+        final WaitingListResult result = waitingListService.create(createCommand, LocalDate.now(), LocalTime.now());
         return ResponseEntity.created(URI.create("/waiting-list/" + result.id()))
                 .body(result);
     }
@@ -46,7 +48,7 @@ public class WaitingListController {
             @PathVariable final Long id,
             @RequestBody final WaitingListDeleteRequest waitingListDeleteRequest) {
         final WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(id, waitingListDeleteRequest.name());
-        waitingListService.delete(deleteCommand);
+        waitingListService.delete(deleteCommand, LocalDate.now(), LocalTime.now());
         return ResponseEntity.noContent()
                 .build();
     }

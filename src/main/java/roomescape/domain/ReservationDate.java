@@ -16,11 +16,11 @@ public record ReservationDate(
         }
     }
 
-    public boolean isPast() {
-        return date.isBefore(LocalDate.now());
+    public boolean isPast(final LocalDate date) {
+        return this.date.isBefore(date);
     }
 
-    public boolean isToday() {
-        return date.isEqual(LocalDate.now());
+    public boolean isSameDay(final LocalDate date) {
+        return this.date.isEqual(date);
     }
 }

@@ -29,8 +29,8 @@ class ReservationDateTest {
         final ReservationDate today = new ReservationDate(LocalDate.now());
         final ReservationDate tomorrow = new ReservationDate(LocalDate.now().plusDays(1));
 
-        assertThat(today.isToday()).isTrue();
-        assertThat(tomorrow.isToday()).isFalse();
+        assertThat(today.isSameDay(LocalDate.now())).isTrue();
+        assertThat(tomorrow.isSameDay(LocalDate.now())).isFalse();
     }
 
     @Test
@@ -38,7 +38,7 @@ class ReservationDateTest {
         final ReservationDate yesterday = new ReservationDate(LocalDate.now().minusDays(1));
         final ReservationDate today = new ReservationDate(LocalDate.now());
 
-        assertThat(yesterday.isPast()).isTrue();
-        assertThat(today.isPast()).isFalse();
+        assertThat(yesterday.isPast(LocalDate.now())).isTrue();
+        assertThat(today.isPast(LocalDate.now())).isFalse();
     }
 }

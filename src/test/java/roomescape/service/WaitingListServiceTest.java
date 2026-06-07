@@ -78,7 +78,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(any(WaitingList.class))).willReturn(1);
 
         // when
-        WaitingListResult result = waitingListService.create(createCommand);
+        WaitingListResult result = waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9,0));
 
         // then
         Assertions.assertThat(result.waitingOrder()).isEqualTo(1);
@@ -116,7 +116,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(any(WaitingList.class))).willReturn(1);
 
         // when
-        WaitingListResult result = waitingListService.create(createCommand);
+        WaitingListResult result = waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9, 0));
 
         // then
         Assertions.assertThat(result.waitingOrder()).isEqualTo(1);
@@ -143,7 +143,7 @@ class WaitingListServiceTest {
         given(reservationTimeRepository.findById(timeId)).willReturn(Optional.empty());
 
         // when && then
-        Assertions.assertThatThrownBy(() -> waitingListService.create(createCommand))
+        Assertions.assertThatThrownBy(() -> waitingListService.create(createCommand, LocalDate.now(), LocalTime.now()))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_NOT_FOUND);
         verify(waitingListRepository, never()).save(any(WaitingList.class));
@@ -169,7 +169,7 @@ class WaitingListServiceTest {
         given(themeRepository.findById(themeId)).willReturn(Optional.empty());
 
         // when && then
-        Assertions.assertThatThrownBy(() -> waitingListService.create(createCommand))
+        Assertions.assertThatThrownBy(() -> waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THEME_NOT_FOUND);
         verify(waitingListRepository, never()).save(any(WaitingList.class));
@@ -190,7 +190,7 @@ class WaitingListServiceTest {
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.create(createCommand))
+        assertThatThrownBy(() -> waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
     }
@@ -203,15 +203,14 @@ class WaitingListServiceTest {
         Long themeId = 1L;
         WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, timeId, themeId);
 
-        LocalTime now = LocalTime.of(11, 0);
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now.minusHours(1), now.plusHours(2));
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10, 0), LocalTime.of(11, 0));
         given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
 
         Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.create(createCommand))
+        assertThatThrownBy(() -> waitingListService.create(createCommand, today, LocalTime.of(12, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
     }
@@ -235,7 +234,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(name, tomorrow, themeId, timeId)).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.create(createCommand))
+        assertThatThrownBy(() -> waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
     }
@@ -264,7 +263,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.create(createCommand))
+        assertThatThrownBy(() -> waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_REQUIRED);
     }
@@ -283,7 +282,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.deleteById(waitingListId)).willReturn(true);
 
         // when
-        waitingListService.delete(deleteCommand);
+        waitingListService.delete(deleteCommand, LocalDate.now(), LocalTime.now());
 
         // then
         verify(waitingListRepository).deleteById(waitingListId);
@@ -299,7 +298,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand, LocalDate.now(), LocalTime.now()))
                 .isInstanceOf(BusinessException.class)
                         .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_FOUND);
 
@@ -320,7 +319,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand, LocalDate.now(), LocalTime.now()))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
 
@@ -341,7 +340,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand, LocalDate.now(), LocalTime.of(9, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
 
@@ -356,13 +355,13 @@ class WaitingListServiceTest {
         Long waitingListId = 1L;
         WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
 
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.now().minusHours(1), LocalTime.now());
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
         WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now(), reservationTime, theme, LocalDateTime.now().minusDays(1));
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand, LocalDate.now(), LocalTime.of(12, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
 
