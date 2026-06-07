@@ -22,7 +22,7 @@ class ReservationTest {
     @DisplayName("아직 DB에 추가되지 않은 예약은 id가 없다.")
     void unpersist_reservation_null_id() {
         // given & when
-        Reservation unpersisted = Reservation.reserve(name, slotId, LocalDateTime.now());
+        Reservation unpersisted = Reservation.reserve(name, slotId, RESERVED, LocalDateTime.now());
 
         // then
         assertThat(unpersisted.getId())
@@ -37,11 +37,11 @@ class ReservationTest {
         String emptyName = "";
 
         // when & then
-        assertThatThrownBy(() -> Reservation.reserve(nullName, slotId, LocalDateTime.now()))
+        assertThatThrownBy(() -> Reservation.reserve(nullName, slotId, RESERVED, LocalDateTime.now()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
 
-        assertThatThrownBy(() -> Reservation.reserve(emptyName, slotId, LocalDateTime.now()))
+        assertThatThrownBy(() -> Reservation.reserve(emptyName, slotId, RESERVED, LocalDateTime.now()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
     }

@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 @JdbcTest
 class ReservationRepositoryTest {
@@ -110,8 +111,8 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         saveAll(List.of(
-                Reservation.reserve(name, slot1.getId(), LocalDateTime.now()),
-                Reservation.reserve(name, slot2.getId(), LocalDateTime.now())
+                Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()),
+                Reservation.reserve(name, slot2.getId(), RESERVED, LocalDateTime.now())
         ));
 
         // when

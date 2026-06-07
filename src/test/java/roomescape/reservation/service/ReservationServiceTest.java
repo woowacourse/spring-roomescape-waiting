@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 
 class ReservationServiceTest {
@@ -72,8 +73,8 @@ class ReservationServiceTest {
     void readAll() {
         // given
         reservationRepository.saveAll(List.of(
-                Reservation.reserve(name, slot1.getId(), LocalDateTime.now()),
-                Reservation.reserve(name, slot2.getId(), LocalDateTime.now())
+                Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()),
+                Reservation.reserve(name, slot2.getId(), RESERVED, LocalDateTime.now())
         ));
 
         // when
@@ -98,7 +99,7 @@ class ReservationServiceTest {
     void reserved_duplicated() {
         // given
         String anotherName = "다른사람";
-        reservationRepository.save(Reservation.reserve(name, slot1.getId(), LocalDateTime.now()));
+        reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
 
         // when
         Reservation actual = reservationService.reserve(anotherName, slot1.getId());
@@ -111,7 +112,7 @@ class ReservationServiceTest {
     @DisplayName("취소된 예약이 있을 때 동일한 사람이 새로 예약할 수 있다.")
     void reserved_when_cancel_same_name() {
         // given
-        Reservation reservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), LocalDateTime.now()));
+        Reservation reservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
         reservation.updateStatus(ReservationStatus.CANCELED);
         reservationRepository.updateStatus(reservation);
 
@@ -119,14 +120,14 @@ class ReservationServiceTest {
         Reservation actual = reservationService.reserve(name, slot1.getId());
 
         // then
-        Assertions.assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        Assertions.assertThat(actual.getStatus()).isEqualTo(RESERVED);
     }
 
     @Test
     @DisplayName("관리자 전용으로 예약을 취소하면 CANCELED 상태가 된다.")
     void cancelByManager() {
         // given
-        Reservation savedReservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), LocalDateTime.now()));
+        Reservation savedReservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
 
         // when
         Reservation actual = reservationService.cancelByManager(slot1.getId(), savedReservation.getName());
@@ -140,7 +141,7 @@ class ReservationServiceTest {
     @DisplayName("본인의 예약을 취소할 수 있다.")
     void cancel() {
         // given
-        reservationRepository.save(Reservation.reserve(name, slot1.getId(), LocalDateTime.now()));
+        reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
 
         // when
         Reservation actual = reservationService.cancel(slot1.getId(), name);
@@ -154,7 +155,7 @@ class ReservationServiceTest {
     @DisplayName("슬롯에 본인 예약이 없는데 취소하면 NOT_FOUND 예외가 발생한다.")
     void cancel_no_reservation_in_slot() {
         // given
-        reservationRepository.save(Reservation.reserve(name, slot1.getId(), LocalDateTime.now()));
+        reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
         String anotherName = "다른사람";
 
         // when & then
@@ -169,7 +170,7 @@ class ReservationServiceTest {
         // given
         ReservationDate pastDate = ReservationDate.load(99L, LocalDate.now().minusDays(1), true);
         ReservationSlot pastSlot = reservationSlotRepository.save(ReservationSlot.of(pastDate, reservationTime1, theme1));
-        reservationRepository.save(Reservation.reserve(name, pastSlot.getId(), LocalDateTime.now()));
+        reservationRepository.save(Reservation.reserve(name, pastSlot.getId(), RESERVED, LocalDateTime.now()));
 
         // when & then
         assertThatThrownBy(() -> reservationService.cancel(pastSlot.getId(), name))
