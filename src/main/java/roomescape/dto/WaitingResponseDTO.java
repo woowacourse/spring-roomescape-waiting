@@ -9,20 +9,23 @@ public record WaitingResponseDTO(
         LocalDate date,
         ReservationTimeResponseDTO time,
         ThemeResponseDTO theme,
-        Long waitingNumber
+        Long waitingNumber,
+        Long waitingOrder
 ) {
 
-    public static WaitingResponseDTO from(Waiting waiting) {
+    public static WaitingResponseDTO from(Waiting waiting, Long waitingOrder) {
         return new WaitingResponseDTO(
                 waiting.getId(),
                 waiting.getName(),
                 waiting.getReservationSlot().getDate(),
-                ReservationTimeResponseDTO.from(
-                        waiting.getReservationSlot().getTime()
-                ),
+                ReservationTimeResponseDTO.from(waiting.getReservationSlot().getTime()),
                 ThemeResponseDTO.from(waiting.getReservationSlot().getTheme()),
-                waiting.getWaitingNumber()
+                waiting.getWaitingNumber(),
+                waitingOrder
         );
     }
 
+    public static WaitingResponseDTO from(Waiting waiting) {
+        return from(waiting, null);
+    }
 }

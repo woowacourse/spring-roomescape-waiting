@@ -80,24 +80,21 @@ public class WaitingService {
     @Transactional(readOnly = true)
     public List<WaitingResponseDTO> readAllWaiting() {
         return waitingRepository.findAll().stream()
-                .map(waiting -> calculateWaitingNumber(waiting))
-                .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
-    }
-
-    private Waiting calculateWaitingNumber(Waiting waiting) {
-        return Waiting.of(
-                waiting.getId(),
-                waiting.getName(),
-                waiting.getReservationSlot(),
-                waitingRepository.countWaitingOrder(waiting)
-        );
+                .map(waitingWithOrder -> WaitingResponseDTO.from(
+                        waitingWithOrder.waiting(),
+                        waitingWithOrder.waitingOrder())
+                )
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<WaitingResponseDTO> findWaitingsByName(String name) {
         return waitingRepository.findByName(name).stream()
-                .map(waiting -> calculateWaitingNumber(waiting))
-                .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
+                .map(waitingWithOrder -> WaitingResponseDTO.from(
+                        waitingWithOrder.waiting(),
+                        waitingWithOrder.waitingOrder())
+                )
+                .toList();
     }
 
     @Transactional

@@ -56,6 +56,38 @@ public class JdbcWaitingRepository implements WaitingRepository {
         };
     }
 
+    private static RowMapper<WaitingWithOrder> getWaitingWithOrderRowMapper() {
+        return (resultSet, rowNum) -> {
+            ReservationTime time = ReservationTime.of(
+                    resultSet.getLong("reservation_time_id"),
+                    LocalTime.parse(resultSet.getString("time_value"))
+            );
+
+            Theme theme = Theme.of(resultSet.getLong("reservation_theme_id"),
+                    resultSet.getString("reservation_theme_name"),
+                    resultSet.getString("reservation_theme_description"),
+                    resultSet.getString("reservation_theme_image_url")
+            );
+
+            ReservationSlot slot = ReservationSlot.of(
+                    resultSet.getDate("date").toLocalDate(),
+                    time,
+                    theme
+            );
+
+            Waiting waiting = Waiting.of(
+                    resultSet.getLong("id"),
+                    resultSet.getString("name"),
+                    slot,
+                    resultSet.getLong("waiting_number"));
+
+            return WaitingWithOrder.of(
+                    waiting,
+                    resultSet.getLong("waiting_order")
+            );
+        };
+    }
+
     @Override
     public Waiting save(Waiting waiting) {
         ReservationSlot slot = waiting.getReservationSlot();
@@ -114,52 +146,79 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findAll() {
+    public List<WaitingWithOrder> findAll() {
         String sql = """
-                SELECT w.id AS id,
-                           w.name,
-                           w.date,
-                           w.waiting_number,
-                           t.id AS reservation_time_id,
-                           t.start_at AS time_value,
-                           th.id AS reservation_theme_id,
-                           th.name AS reservation_theme_name,
-                           th.description AS reservation_theme_description,
-                           th.image_url AS reservation_theme_image_url
-                    FROM waiting AS w
-                    INNER JOIN reservation_time AS t
-                      ON w.time_id = t.id
-                    INNER JOIN theme AS th
-                      ON w.theme_id = th.id
+                    SELECT w1.id AS id,
+                               w1.name,
+                               w1.date,
+                               w1.waiting_number,
+                               t.id AS reservation_time_id,
+                               t.start_at AS time_value,
+                               th.id AS reservation_theme_id,
+                               th.name AS reservation_theme_name,
+                               th.description AS reservation_theme_description,
+                               th.image_url AS reservation_theme_image_url,
+                               (
+                                    SELECT COUNT(*)
+                                    FROM waiting AS w2
+                                    WHERE w2.date = w1.date
+                                          AND w2.time_id = w1.time_id
+                                          AND w2.theme_id = w1.theme_id 
+                                          AND w2.waiting_number <= w1.waiting_number
+                                ) AS waiting_order
+                        FROM waiting AS w1
+                        INNER JOIN reservation_time AS t
+                          ON w1.time_id = t.id
+                        INNER JOIN theme AS th
+                          ON w1.theme_id = th.id
+                        ORDER BY
+                            w1.date ASC,
+                            w1.time_id ASC,
+                            w1.theme_id ASC,
+                            w1.waiting_number ASC;
                 """;
 
-        return jdbcTemplate.query(sql, getWaitingRowMapper());
+        return jdbcTemplate.query(sql, getWaitingWithOrderRowMapper());
+
     }
 
     @Override
-    public List<Waiting> findByName(String name) {
+    public List<WaitingWithOrder> findByName(String name) {
         String sql = """
-                    SELECT w.id AS id,
-                           w.name,
-                           w.date,
-                           w.waiting_number,
-                           t.id AS reservation_time_id,
-                           t.start_at AS time_value,
-                           th.id AS reservation_theme_id,
-                           th.name AS reservation_theme_name,
-                           th.description AS reservation_theme_description,
-                           th.image_url AS reservation_theme_image_url
-                    FROM waiting AS w
-                    INNER JOIN reservation_time AS t
-                      ON w.time_id = t.id
-                    INNER JOIN theme AS th
-                      ON w.theme_id = th.id
-                    WHERE w.name = :name
+                    SELECT w1.id AS id,
+                               w1.name,
+                               w1.date,
+                               w1.waiting_number,
+                               t.id AS reservation_time_id,
+                               t.start_at AS time_value,
+                               th.id AS reservation_theme_id,
+                               th.name AS reservation_theme_name,
+                               th.description AS reservation_theme_description,
+                               th.image_url AS reservation_theme_image_url,
+                               (
+                                    SELECT COUNT(*)
+                                    FROM waiting AS w2
+                                    WHERE w2.date = w1.date
+                                          AND w2.time_id = w1.time_id
+                                          AND w2.theme_id = w1.theme_id 
+                                          AND w2.waiting_number <= w1.waiting_number
+                                ) AS waiting_order
+                        FROM waiting AS w1
+                        INNER JOIN reservation_time AS t
+                          ON w1.time_id = t.id
+                        INNER JOIN theme AS th
+                          ON w1.theme_id = th.id
+                        WHERE w1.name = :name
+                        ORDER BY
+                            w1.date ASC,
+                            w1.time_id ASC,
+                            w1.theme_id ASC,
+                            w1.waiting_number ASC;
                 """;
 
         Map<String, Object> params = Map.of("name", name);
 
-        return jdbcTemplate.query(sql, params, getWaitingRowMapper());
+        return jdbcTemplate.query(sql, params, getWaitingWithOrderRowMapper());
     }
 
     @Override
@@ -213,26 +272,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
         List<Waiting> result = jdbcTemplate.query(sql, params, getWaitingRowMapper());
         return result.stream().findFirst();
-    }
-
-    @Override
-    public Long countWaitingOrder(Waiting waiting) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM waiting
-                WHERE date = :date
-                      AND time_id = :time_id
-                      AND theme_id = :theme_id 
-                      AND waiting_number <= :waiting_number
-                """;
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", waiting.getReservationSlot().getDate())
-                .addValue("time_id", waiting.getReservationSlot().getTime().getId())
-                .addValue("theme_id", waiting.getReservationSlot().getTheme().getId())
-                .addValue("waiting_number", waiting.getWaitingNumber());
-
-        return jdbcTemplate.queryForObject(sql, params, Long.class);
     }
 
     @Override

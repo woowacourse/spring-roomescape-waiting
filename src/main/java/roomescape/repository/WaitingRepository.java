@@ -16,16 +16,14 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(Long id);
 
-    List<Waiting> findAll();
+    List<WaitingWithOrder> findAll();
 
-    List<Waiting> findByName(String name);
+    List<WaitingWithOrder> findByName(String name);
 
     Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
             Theme theme);
 
     Optional<Waiting> findPromotableWaitingBySlot(ReservationSlot slot);
-
-    Long countWaitingOrder(Waiting waiting);
 
     boolean existsByNameAndSlot(String name, ReservationSlot slot);
 }
