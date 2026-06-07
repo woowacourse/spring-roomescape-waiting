@@ -43,7 +43,7 @@ class ReservationCancellationRollbackTest {
         doThrow(new RuntimeException("대기 삭제 실패"))
                 .when(reservationWaitingRepository).deleteById(anyLong());
 
-        assertThatThrownBy(() -> reservationService.deleteById(1L))
+        assertThatThrownBy(() -> reservationService.cancelById(1L))
                 .isInstanceOf(RuntimeException.class);
 
         // 첫 번째 쓰기(예약 소유자 변경)가 커밋되지 않고 롤백되어, 데이터가 원상태로 유지된다.

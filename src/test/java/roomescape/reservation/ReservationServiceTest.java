@@ -119,7 +119,7 @@ class ReservationServiceTest {
         Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.parse("2026-08-06"), theme, time);
         when(fixture.reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        fixture.reservationService.deleteById(1L);
+        fixture.reservationService.cancelById(1L);
 
         verify(fixture.reservationRepository).deleteById(1L);
     }
@@ -130,7 +130,7 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         when(fixture.reservationRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.deleteById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.cancelById(1L));
     }
 
     @Test
@@ -147,7 +147,7 @@ class ReservationServiceTest {
         when(fixture.reservationWaitingRepository.findEarliestByReservationId(1L))
                 .thenReturn(Optional.of(earliest));
 
-        fixture.reservationService.deleteById(1L);
+        fixture.reservationService.cancelById(1L);
 
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         verify(fixture.reservationRepository).update(captor.capture());
@@ -169,7 +169,7 @@ class ReservationServiceTest {
 
         assertThrows(
                 ConflictException.class,
-                () -> fixture.reservationService.deleteByIdAndName(1L, "쿠다")
+                () -> fixture.reservationService.cancelByIdAndName(1L, "쿠다")
         );
     }
 
@@ -188,7 +188,7 @@ class ReservationServiceTest {
         when(fixture.reservationWaitingRepository.findEarliestByReservationId(1L))
                 .thenReturn(Optional.of(earliest));
 
-        fixture.reservationService.deleteByIdAndName(1L, "쿠다");
+        fixture.reservationService.cancelByIdAndName(1L, "쿠다");
 
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         verify(fixture.reservationRepository).update(captor.capture());

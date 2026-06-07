@@ -41,7 +41,7 @@ public class ReservationAdminPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.deleteById(id);
+            reservationService.cancelById(id);
         } catch (ApiException exception) {
             redirectAttributes.addAttribute("errorCode", exception.getCode());
             return "redirect:/pages/admin/reservations";

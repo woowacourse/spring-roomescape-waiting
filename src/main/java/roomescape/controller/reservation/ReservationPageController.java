@@ -222,7 +222,7 @@ public class ReservationPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.deleteByIdAndName(id, reservationName);
+            reservationService.cancelByIdAndName(id, reservationName);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,

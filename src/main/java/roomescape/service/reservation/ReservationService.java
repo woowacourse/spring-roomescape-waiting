@@ -58,18 +58,18 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(final long id) {
+    public void cancelById(final long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
-                        "삭제할 예약이 없습니다."
+                        "취소할 예약이 없습니다."
                 ));
 
         cancelOrPromote(reservation);
     }
 
     @Transactional
-    public void deleteByIdAndName(final long id, final String name) {
+    public void cancelByIdAndName(final long id, final String name) {
         reservationValidator.validateLookupName(name);
 
         Reservation reservation = reservationRepository.findByIdAndName(id, name)
@@ -97,7 +97,7 @@ public class ReservationService {
     }
 
     private void promote(final Reservation reservation, final ReservationWaiting earliestWaiting) {
-        reservationRepository.update(reservation.withName(earliestWaiting.getName()));
+        reservationRepository.update(reservation.changeOwnerTo(earliestWaiting.getName()));
         reservationWaitingRepository.deleteById(earliestWaiting.getId());
     }
 
@@ -139,7 +139,7 @@ public class ReservationService {
         if (reservationWaitingRepository.existsByReservationId(reservationId)) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_HAS_WAITINGS,
-                    "대기자가 있는 예약은 변경하거나 삭제할 수 없습니다."
+                    "대기자가 있는 예약은 변경할 수 없습니다."
             );
         }
     }
