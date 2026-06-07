@@ -261,7 +261,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
         String sql = """
                 select time_id
                 from reservation
-                where theme_id = ?and date = ?
+                where theme_id = ? and date = ?
                 """;
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> resultSet.getLong("time_id"), themeId, date);
     }
