@@ -17,7 +17,6 @@ import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailRespon
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
-import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.application.readmodel.WaitingReadModel;
 
@@ -160,9 +159,11 @@ public class ReservationService {
         long newScheduleId = resolveNewScheduleId(body, oldReservationDetail, reservationId);
         validateNotSameSchedule(oldScheduleId, newScheduleId);
 
-        Waiting firstWaiting = popFirstWaiting(oldScheduleId);
-        updateReservationSchedule(reservationId, newScheduleId);
-        promoteWaitingIfPresent(firstWaiting, oldScheduleId);
+        reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
+                reservationId,
+                oldScheduleId,
+                newScheduleId
+        );
 
         return new ReservationSaveResponse(reservationId, reservation.getMemberId(), newScheduleId);
     }
@@ -186,30 +187,6 @@ public class ReservationService {
         return newScheduleId;
     }
 
-    private Waiting popFirstWaiting(long scheduleId) {
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForPromotion(scheduleId)
-                .orElse(null);
-        if (firstWaiting != null) {
-            waitingRepository.deleteById(firstWaiting.getId());
-        }
-        return firstWaiting;
-    }
-
-    private void updateReservationSchedule(long reservationId, long newScheduleId) {
-        try {
-            int affectedRow = reservationRepository.updateScheduleById(reservationId, newScheduleId);
-            validateReservationUpdated(affectedRow);
-        } catch (DuplicateKeyException e) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
-        }
-    }
-
-    private void promoteWaitingIfPresent(Waiting waiting, long oldScheduleId) {
-        if (waiting != null) {
-            reservationRepository.save(new Reservation(null, waiting.getMemberId(), oldScheduleId));
-        }
-    }
-
     private Reservation getReservationOrThrow(long reservationId) {
         return reservationRepository.findByIdForPromotion(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
@@ -226,12 +203,6 @@ public class ReservationService {
     ) {
         if (!reservation.isSameMemberId(memberId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservation.getId());
-        }
-    }
-
-    private void validateReservationUpdated(int affectedRow) {
-        if (affectedRow != 1) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
         }
     }
 

@@ -72,4 +72,58 @@ class ReservationPromotionServiceIntegrationTest {
         assertThat(reservationRepository.existsByMemberIdAndScheduleId(firstWaiting.getMemberId(), scheduleId))
                 .isFalse();
     }
+
+    @Test
+    @DisplayName("선두 대기 삭제 후 예약 스케줄 변경에 실패하면 기존 예약과 선두 대기가 모두 롤백된다.")
+    void changeReservationScheduleAndPromoteFirstWaiting_트랜잭션_테스트_1() {
+        long reservationId = 1L;
+        long oldScheduleId = 1L;
+        long newScheduleId = 4L;
+        Waiting firstWaiting = waitingRepository.save(new Waiting(null, 2L, oldScheduleId));
+        doThrow(new RuntimeException("예약 스케줄 변경 실패"))
+                .when(reservationRepository)
+                .updateScheduleById(reservationId, newScheduleId);
+
+        assertThatThrownBy(() -> reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
+                reservationId,
+                oldScheduleId,
+                newScheduleId
+        ))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("예약 스케줄 변경 실패");
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow();
+        assertThat(reservation.getScheduleId()).isEqualTo(oldScheduleId);
+        assertThat(waitingRepository.findById(firstWaiting.getId())).isPresent();
+        assertThat(reservationRepository.existsByMemberIdAndScheduleId(firstWaiting.getMemberId(), oldScheduleId))
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("선두 대기 삭제와 예약 스케줄 변경 후 승격 예약 저장에 실패하면 기존 예약과 선두 대기가 모두 롤백된다.")
+    void changeReservationScheduleAndPromoteFirstWaiting_트랜잭션_테스트_2() {
+        long reservationId = 1L;
+        long oldScheduleId = 1L;
+        long newScheduleId = 4L;
+        Waiting firstWaiting = waitingRepository.save(new Waiting(null, 2L, oldScheduleId));
+        doThrow(new RuntimeException("승격 예약 저장 실패"))
+                .when(reservationRepository)
+                .save(any(Reservation.class));
+
+        assertThatThrownBy(() -> reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
+                reservationId,
+                oldScheduleId,
+                newScheduleId
+        ))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("승격 예약 저장 실패");
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow();
+        assertThat(reservation.getScheduleId()).isEqualTo(oldScheduleId);
+        assertThat(waitingRepository.findById(firstWaiting.getId())).isPresent();
+        assertThat(reservationRepository.existsByMemberIdAndScheduleId(firstWaiting.getMemberId(), oldScheduleId))
+                .isFalse();
+    }
 }

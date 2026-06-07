@@ -64,4 +64,52 @@ class ReservationPromotionServiceTest {
                         && promoted.getScheduleId().equals(scheduleId)
         ));
     }
+
+    @Test
+    @DisplayName("예약 스케줄을 변경하면 기존 스케줄의 선두 대기자를 예약으로 승격한다.")
+    void changeReservationScheduleAndPromoteFirstWaiting_테스트_1() {
+        long reservationId = 1L;
+        long oldScheduleId = 10L;
+        long newScheduleId = 20L;
+        Waiting firstWaiting = new Waiting(100L, 3L, oldScheduleId);
+        when(waitingRepository.findFirstByScheduleIdForPromotion(oldScheduleId))
+                .thenReturn(Optional.of(firstWaiting));
+        when(reservationRepository.updateScheduleById(reservationId, newScheduleId))
+                .thenReturn(1);
+
+        reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
+                reservationId,
+                oldScheduleId,
+                newScheduleId
+        );
+
+        verify(waitingRepository).deleteById(firstWaiting.getId());
+        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
+        verify(reservationRepository).save(argThat(promoted ->
+                promoted.getMemberId().equals(firstWaiting.getMemberId())
+                        && promoted.getScheduleId().equals(oldScheduleId)
+        ));
+    }
+
+    @Test
+    @DisplayName("예약 스케줄 변경 시 선두 대기자가 없으면 예약 스케줄만 변경한다.")
+    void changeReservationScheduleAndPromoteFirstWaiting_테스트_2() {
+        long reservationId = 1L;
+        long oldScheduleId = 10L;
+        long newScheduleId = 20L;
+        when(waitingRepository.findFirstByScheduleIdForPromotion(oldScheduleId))
+                .thenReturn(Optional.empty());
+        when(reservationRepository.updateScheduleById(reservationId, newScheduleId))
+                .thenReturn(1);
+
+        reservationPromotionService.changeReservationScheduleAndPromoteFirstWaiting(
+                reservationId,
+                oldScheduleId,
+                newScheduleId
+        );
+
+        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
+        verify(waitingRepository, never()).deleteById(anyLong());
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
 }

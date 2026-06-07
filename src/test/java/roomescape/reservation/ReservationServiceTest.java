@@ -15,7 +15,6 @@ import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailRespon
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
-import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
@@ -32,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -163,15 +161,13 @@ class ReservationServiceTest {
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleIdForPromotion(3L)).thenReturn(Optional.empty());
 
         ReservationSaveResponse response = reservationService.updateForUser(request, reservationId, 1L);
 
         assertThat(response.id()).isEqualTo(reservationId);
         assertThat(response.memberId()).isEqualTo(1L);
         assertThat(response.scheduleId()).isEqualTo(99L);
-        verify(reservationRepository).updateScheduleById(reservationId, 99L);
+        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservationId, 3L, 99L);
     }
 
     @Test
@@ -189,15 +185,13 @@ class ReservationServiceTest {
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleIdForPromotion(3L)).thenReturn(Optional.empty());
 
         ReservationSaveResponse response = reservationService.updateForManager(request, reservationId);
 
         assertThat(response.id()).isEqualTo(reservationId);
         assertThat(response.memberId()).isEqualTo(1L);
         assertThat(response.scheduleId()).isEqualTo(99L);
-        verify(reservationRepository).updateScheduleById(reservationId, 99L);
+        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservationId, 3L, 99L);
     }
 
     @Test
@@ -212,7 +206,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 999L))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).findDetailById(reservationId);
-        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(anyLong(), anyLong(), anyLong());
     }
 
     @Test
@@ -236,7 +230,7 @@ class ReservationServiceTest {
         verify(scheduleService).validateNotPastDate(oldReservation.date());
         verify(scheduleService).validateNotPastTime(oldReservation.date(), oldReservation.startAt());
         verify(scheduleService, never()).findScheduleIdByDateAndTimeIdAndThemeId(any(LocalDate.class), anyLong(), anyLong());
-        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(anyLong(), anyLong(), anyLong());
     }
 
     @Test
@@ -251,24 +245,17 @@ class ReservationServiceTest {
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Waiting waiting = new Waiting(200L, 5L, oldScheduleId);
 
         when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
         when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, newScheduleId)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleIdForPromotion(oldScheduleId)).thenReturn(Optional.of(waiting));
 
         reservationService.updateForUser(request, reservationId, 1L);
 
-        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
-        verify(reservationRepository).save(argThat(promoted ->
-                promoted.getMemberId().equals(waiting.getMemberId())
-                        && promoted.getScheduleId().equals(waiting.getScheduleId())
-        ));
-        verify(waitingRepository).deleteById(waiting.getId());
+        verify(reservationPromotionService)
+                .changeReservationScheduleAndPromoteFirstWaiting(reservationId, oldScheduleId, newScheduleId);
     }
 
     @Test
@@ -292,7 +279,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
                 .isInstanceOf(EscapeRoomException.class);
 
-        verify(reservationRepository, never()).updateScheduleById(reservationId, newScheduleId);
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(anyLong(), anyLong(), anyLong());
     }
 
     @Test
