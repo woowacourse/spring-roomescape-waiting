@@ -5,12 +5,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.auth.Role;
-import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
+import roomescape.dto.MemberSummary;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.StoreReservationResult;
 
@@ -55,10 +54,7 @@ public class ReservationDao {
                 s.id as store_id,
                 s.name as store_name,
                 m.email as member_email,
-                m.password as member_password,
-                m.name as member_name,
-                m.role as member_role,
-                m.store_id as member_store_id
+                m.name as member_name
             FROM reservation as r
             INNER JOIN reservation_time as t ON r.time_id = t.id
             INNER JOIN theme as th ON r.theme_id = th.id
@@ -226,13 +222,10 @@ public class ReservationDao {
                     resultSet.getLong("store_id"),
                     resultSet.getString("store_name")
             );
-            Member member = new Member(
+            MemberSummary member = new MemberSummary(
                     resultSet.getLong("member_id"),
                     resultSet.getString("member_email"),
-                    resultSet.getString("member_password"),
-                    resultSet.getString("member_name"),
-                    Role.valueOf(resultSet.getString("member_role")),
-                    resultSet.getObject("member_store_id", Long.class)
+                    resultSet.getString("member_name")
             );
             return new StoreReservationResult(reservation, theme, store, member);
         };
