@@ -70,7 +70,7 @@ public class ReservationTime {
         );
     }
 
-    public boolean isBefore() {
-        return startAt.isBefore(LocalTime.now());
+    public boolean isBefore(LocalTime time) {
+        return startAt.isBefore(time);
     }
 }

@@ -165,7 +165,7 @@ class WaitingListServiceTest {
         Long themeId = 1L;
         WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, timeId, themeId);
 
-        LocalTime now = LocalTime.now();
+        LocalTime now = LocalTime.of(11, 0);
         ReservationTime reservationTime = ReservationTime.createWithId(timeId, now.minusHours(1), now.plusHours(2));
         given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
 
@@ -194,7 +194,7 @@ class WaitingListServiceTest {
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
 
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, timeId, themeId)).willReturn(true);
-        given(waitingListRepository.existsByNameAndDateAndTimeAndTheme(name, tomorrow, themeId, timeId)).willReturn(true);
+        given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(name, tomorrow, themeId, timeId)).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -370,7 +370,8 @@ class WaitingListServiceTest {
     void 사용자명으로_예약대기_목록_조회() {
         // given
         String name = "검프";
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.now().plusHours(1), LocalTime.now().plusHours(2));
+        LocalTime now = LocalTime.of(11, 0);
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, now.plusHours(1), now.plusHours(2));
         Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
         WaitingList waitingList = WaitingList.createWithId(1L, name, LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now().minusDays(1));
 

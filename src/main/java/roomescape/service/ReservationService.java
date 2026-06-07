@@ -19,8 +19,10 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +33,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingListRepository waitingListRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
@@ -45,6 +48,10 @@ public class ReservationService {
         final Theme theme = getTheme(themeId);
 
         validateAvailable(date, timeId, themeId);
+
+        if (waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new BusinessException(ErrorCode.QUEUED_WAITING_LIST);
+        }
 
         final Reservation newReservation = Reservation.create(data.name(), date, reservationTime, theme);
 
@@ -186,7 +193,8 @@ public class ReservationService {
 
     private void validateFutureOrPresentTime(final LocalDate date, final ReservationTime reservationTime) {
         final LocalDate today = LocalDate.now();
-        if (date.equals(today) && reservationTime.isBefore()) {
+        final LocalTime now = LocalTime.now();
+        if (date.equals(today) && reservationTime.isBefore(now)) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }

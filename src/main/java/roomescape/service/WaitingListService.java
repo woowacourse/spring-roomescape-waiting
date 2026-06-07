@@ -21,6 +21,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
-        if (waitingListRepository.existsByNameAndDateAndTimeAndTheme(
+        if (waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(
                 waitingList.getName(), waitingList.getReservationDate().date(), findTheme.getId(), findReservationTime.getId()
             )
         ) {
@@ -112,7 +113,8 @@ public class WaitingListService {
         if (waitingList.getReservationDate().isPast()) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }
-        if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore()) {
+        final LocalTime now = LocalTime.now();
+        if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore(now)) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }

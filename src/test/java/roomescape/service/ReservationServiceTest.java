@@ -23,6 +23,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,6 +47,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private WaitingListRepository waitingListRepository;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -112,6 +116,23 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.create(request))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
+    }
+
+    @Test
+    void 예약_대기가_존재하는데_예약_생성을_시도할시_예외발생() {
+        // given
+        ReservationCreateCommand request = new ReservationCreateCommand("오리", futureDate, 1L, 1L);
+
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
+        given(waitingListRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.QUEUED_WAITING_LIST);
     }
 
     @Test

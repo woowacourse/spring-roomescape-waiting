@@ -185,7 +185,7 @@ public class ReservationRepository {
                     rt.id,
                     rt.start_at,
                     CASE
-                        WHEN r.id IS NOT NULL THEN TRUE
+                        WHEN r.id IS NOT NULL OR w.id IS NOT NULL THEN TRUE
                         ELSE FALSE
                     END AS reserved
                 FROM reservation_time rt
@@ -193,12 +193,18 @@ public class ReservationRepository {
                     ON r.time_id = rt.id
                    AND r.date = ?
                    AND r.theme_id = ?
+                LEFT JOIN waiting_list w
+                    ON w.time_id = rt.id
+                   AND w.date = ?
+                   AND w.theme_id = ?
                 ORDER BY rt.start_at;
                 """;
 
         return jdbcTemplate.query(
                         sql,
                         ReservationRepository::mapToTimesWithStatus,
+                        date,
+                        themeId,
                         date,
                         themeId
                 ).stream()

@@ -155,7 +155,7 @@ public class WaitingListRepository {
         }
     }
 
-    public boolean existsByNameAndDateAndTimeAndTheme(final String name, final LocalDate date, final Long timeId, final Long themeId) {
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(final String name, final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
@@ -163,6 +163,18 @@ public class WaitingListRepository {
                 """;
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+
+        return count != null && count > 0;
+    }
+
+    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE date = ? AND time_id = ? AND theme_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
 
         return count != null && count > 0;
     }
