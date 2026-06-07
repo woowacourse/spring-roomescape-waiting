@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,6 +62,9 @@ class ReservationServiceTest {
 
     @Mock
     Clock clock;
+
+    @Mock
+    ExpiryValidator expiryValidator;
 
     @InjectMocks
     ReservationService reservationService;
@@ -134,12 +138,9 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(time));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 20)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        doThrow(InvalidReservationDateValueException.class)
+                .when(expiryValidator)
+                .validate(any(), any());
 
         //when & then
         assertThatThrownBy(() -> reservationService.makeReservation(
@@ -163,13 +164,6 @@ class ReservationServiceTest {
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(time));
-
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 14)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(themeRepository.findById(any()))
                 .thenReturn(Optional.empty());
@@ -312,13 +306,6 @@ class ReservationServiceTest {
                         )
                 ));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 8)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(updatedTime));
 
@@ -419,12 +406,9 @@ class ReservationServiceTest {
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 17)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        doThrow(InvalidReservationDateValueException.class)
+                .when(expiryValidator)
+                .validate(any(), any());
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -444,13 +428,6 @@ class ReservationServiceTest {
                         new ReservationTime(1L, LocalTime.of(11, 0)),
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
-
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 8)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.empty());
@@ -474,16 +451,9 @@ class ReservationServiceTest {
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 15)
-                        .atTime(10, 30)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-
-        when(reservationTimeRepository.findById(any()))
-                .thenReturn(Optional.of(new ReservationTime(2L, LocalTime.of(10, 0))));
+        doThrow(InvalidTimeStartAtValueException.class)
+                .when(expiryValidator)
+                .validate(any(), any());
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -503,14 +473,6 @@ class ReservationServiceTest {
                         new ReservationTime(1L, LocalTime.of(11, 0)),
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
-
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 15)
-                        .atTime(10, 30)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(11, 0))));
@@ -547,13 +509,6 @@ class ReservationServiceTest {
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 8)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(updatedTime));
 
@@ -580,13 +535,6 @@ class ReservationServiceTest {
                         new ReservationTime(1L, LocalTime.of(10, 0)),
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
-
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 8)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(updatedTime));
@@ -620,13 +568,6 @@ class ReservationServiceTest {
                         originalTime,
                         theme
                 )));
-
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 8)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(updatedTime));
@@ -767,13 +708,6 @@ class ReservationServiceTest {
                         theme
                 )));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 8)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-
         when(reservationRepository.deleteById(any()))
                 .thenReturn(1);
 
@@ -846,12 +780,9 @@ class ReservationServiceTest {
                         theme
                 )));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 16)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        doThrow(InvalidReservationDateValueException.class)
+                .when(expiryValidator)
+                .validate(any(), any());
 
         //when & then
         assertThatThrownBy(() ->reservationService.deleteReservationById(1L, "brown"))

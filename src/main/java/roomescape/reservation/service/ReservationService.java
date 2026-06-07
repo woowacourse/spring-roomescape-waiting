@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
-import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.ReservationSlotHasWaitingException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -26,7 +24,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.InvalidTimeStartAtValueException;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.repository.ReservationTimeRepository;
 
@@ -38,16 +35,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final ExpiryValidator expiryValidator;
+
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationWaitingRepository reservationWaitingRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              Clock clock) {
+                              Clock clock,
+                              ExpiryValidator expiryValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.expiryValidator = expiryValidator;
     }
 
     public Reservation makeReservation(ReservationCommand command) {
@@ -59,7 +60,7 @@ public class ReservationService {
         validateDoNotHaveWaiting(command.date(), command.timeId(), command.themeId());
 
         ReservationTime time = getReservationTime(command.timeId());
-        validateExpiry(command.date(), time.getStartAt());
+        expiryValidator.validate(command.date(), time.getStartAt());
 
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(ThemeNotFoundException::new);
@@ -82,18 +83,6 @@ public class ReservationService {
     private ReservationTime getReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(TimeNotFoundException::new);
-    }
-
-    private void validateExpiry(LocalDate date, LocalTime startAt) {
-        LocalDate nowDate = LocalDate.now(clock);
-
-        if (nowDate.isAfter(date)) {
-            throw new InvalidReservationDateValueException();
-        }
-
-        if (nowDate.equals(date) && LocalTime.now(clock).isAfter(startAt)) {
-            throw new InvalidTimeStartAtValueException();
-        }
     }
 
     public List<ReservationWithStatusResult> findReservationsByName(String name) {
@@ -162,14 +151,14 @@ public class ReservationService {
         Reservation original = getReservation(id);
 
         validateReservationOwnership(original, name);
-        validateExpiry(
+        expiryValidator.validate(
                 original.getDate(),
                 original.getReservationTime().getStartAt()
         );
 
         Reservation updated = updateField(command, original);
 
-        validateExpiry(
+        expiryValidator.validate(
                 updated.getDate(),
                 updated.getReservationTime().getStartAt()
         );
@@ -253,7 +242,7 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
 
         validateReservationOwnership(reservation, name);
-        validateExpiry(
+        expiryValidator.validate(
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt()
         );
