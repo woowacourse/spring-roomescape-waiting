@@ -166,15 +166,47 @@ document.addEventListener("DOMContentLoaded", () => {
         return result;
     }
 
+    const THEME_META = {
+        "공포": { genre: "호러/스릴러", difficulty: 4, duration: "60분", players: "2-6인" },
+        "스릴러": { genre: "스릴러/탈출", difficulty: 3, duration: "60분", players: "2-5인" },
+        "청춘물": { genre: "드라마/감성", difficulty: 2, duration: "60분", players: "2-4인" },
+        "미스터리": { genre: "추리/미스터리", difficulty: 4, duration: "75분", players: "2-5인" },
+        "판타지": { genre: "판타지/어드벤처", difficulty: 3, duration: "60분", players: "2-6인" },
+        "우주": { genre: "SF/스릴러", difficulty: 5, duration: "75분", players: "2-4인" },
+        "잠입": { genre: "액션/잠입", difficulty: 3, duration: "60분", players: "2-4인" },
+        "재난": { genre: "서바이벌/재난", difficulty: 4, duration: "60분", players: "2-5인" },
+        "사극": { genre: "사극/추리", difficulty: 3, duration: "60분", players: "2-6인" },
+        "모험": { genre: "어드벤처", difficulty: 3, duration: "60분", players: "2-6인" },
+        "코미디": { genre: "코미디/드라마", difficulty: 2, duration: "60분", players: "2-4인" },
+        "느와르": { genre: "느와르/액션", difficulty: 4, duration: "75분", players: "2-5인" }
+    };
+
+    function getMeta(name) {
+        return THEME_META[name] || { genre: "일반 탈출", difficulty: 3, duration: "60분", players: "2-5인" };
+    }
+
     function renderThemes() {
-        themeList.innerHTML = state.themes.map((theme) => `
-            <label class="theme-card theme-card-refined${state.selectedThemeId === theme.id ? " selected" : ""}">
-                <input type="radio" name="themeId" value="${theme.id}" ${state.selectedThemeId === theme.id ? "checked" : ""}>
-                <img class="theme-thumbnail" src="${escapeHtml(theme.url)}" alt="${escapeHtml(theme.name)}">
-                <span class="theme-name">${escapeHtml(theme.name)}</span>
-                <span class="theme-description">${escapeHtml(theme.content)}</span>
-            </label>
-        `).join("");
+        themeList.innerHTML = state.themes.map((theme) => {
+            const meta = getMeta(theme.name);
+            const stars = "★".repeat(meta.difficulty) + "☆".repeat(5 - meta.difficulty);
+            return `
+                <label class="theme-card theme-card-refined${state.selectedThemeId === theme.id ? " selected" : ""}">
+                    <input type="radio" name="themeId" value="${theme.id}" ${state.selectedThemeId === theme.id ? "checked" : ""}>
+                    <div class="theme-image-wrapper">
+                        <img class="theme-thumbnail" src="${escapeHtml(theme.url)}" alt="${escapeHtml(theme.name)}">
+                        <span class="theme-genre-badge">${escapeHtml(meta.genre)}</span>
+                    </div>
+                    <div class="theme-info-box">
+                        <span class="theme-name">${escapeHtml(theme.name)}</span>
+                        <div class="theme-meta-line">
+                            <span class="theme-diff">${stars}</span>
+                            <span class="theme-time-tag">${meta.duration} / ${meta.players}</span>
+                        </div>
+                        <span class="theme-description">${escapeHtml(theme.content)}</span>
+                    </div>
+                </label>
+            `;
+        }).join("");
 
         themeList.querySelectorAll('input[name="themeId"]').forEach((input) => {
             input.addEventListener("change", () => {
@@ -185,15 +217,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderRankedThemes() {
-        rankList.innerHTML = state.rankedThemes.map((theme, index) => `
-            <li>
-                <img class="rank-thumbnail" src="${escapeHtml(theme.thumbnailUrl)}" alt="${escapeHtml(theme.name)}">
-                <span class="rank-number">${index + 1}</span>
-                <div>
-                    <strong>${escapeHtml(theme.name)}</strong>
-                </div>
-            </li>
-        `).join("");
+        rankList.innerHTML = state.rankedThemes.map((theme, index) => {
+            const meta = getMeta(theme.name);
+            const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`;
+            return `
+                <li>
+                    <div class="rank-thumbnail-wrapper">
+                        <img class="rank-thumbnail" src="${escapeHtml(theme.thumbnailUrl)}" alt="${escapeHtml(theme.name)}">
+                        <span class="rank-badge">${medal}</span>
+                    </div>
+                    <div class="rank-details">
+                        <strong>${escapeHtml(theme.name)}</strong>
+                        <span class="rank-genre">${escapeHtml(meta.genre)}</span>
+                    </div>
+                </li>
+            `;
+        }).join("");
     }
 
     function renderSlots() {
