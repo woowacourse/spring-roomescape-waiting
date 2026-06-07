@@ -237,11 +237,11 @@ class ReservationServiceConcurrencyTest {
     }
 
     private ReservationTime saveReservationTime(int hour) {
-        return reservationTimeRepository.save(new ReservationTime(LocalTime.of(hour, 0)));
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
 
     private Theme saveTheme() {
-        return themeRepository.save(new Theme(
+        return themeRepository.save(Theme.create(
                 "동시성 탈출",
                 "동시에 예약해도 대기열 순서가 유지되는지 확인하는 테마입니다.",
                 "https://example.com/concurrency-theme.png"

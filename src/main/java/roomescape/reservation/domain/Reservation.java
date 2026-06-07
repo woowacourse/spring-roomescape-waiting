@@ -15,9 +15,9 @@ public class Reservation {
     private final ReservationStatus status;
     private final Long waitingRank;
     private final String name;
+    private final Theme theme;
     private final LocalDate date;
     private final ReservationTime time;
-    private final Theme theme;
 
     public static Reservation create(String name,
                                      LocalDate date,

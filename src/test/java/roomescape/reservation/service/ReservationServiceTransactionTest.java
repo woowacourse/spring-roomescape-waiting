@@ -101,11 +101,11 @@ class ReservationServiceTransactionTest {
     }
 
     private ReservationTime saveReservationTime(int hour) {
-        return reservationTimeRepository.save(new ReservationTime(LocalTime.of(hour, 0)));
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
 
     private Theme saveTheme() {
-        return themeRepository.save(new Theme(
+        return themeRepository.save(Theme.create(
                 "레벨2 탈출",
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://example.com/theme.png"

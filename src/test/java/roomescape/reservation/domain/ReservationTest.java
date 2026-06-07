@@ -15,8 +15,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTest {
 
-    private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-    private final Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+    private final ReservationTime time = ReservationTime.create(LocalTime.of(10, 0)).withId(1L);
+    private final Theme theme = Theme.create(
+            "레벨2 탈출",
+            "우테코 레벨2를 탈출하는 내용입니다.",
+            "https://example.com/theme.png"
+    ).withId(1L);
 
     @Test
     @DisplayName("예약자 이름이 비어있으면 도메인 예외가 발생한다.")

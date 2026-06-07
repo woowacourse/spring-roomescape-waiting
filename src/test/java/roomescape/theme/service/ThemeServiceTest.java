@@ -113,7 +113,7 @@ class ThemeServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://example.com/theme.png"
         );
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         saveReservation("브라운", LocalDate.now().plusDays(1), time, theme);
 
         // when
@@ -133,7 +133,7 @@ class ThemeServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://example.com/theme.png"
         );
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         themeService.deactivate(theme.getId());
 
         // when, then
@@ -150,12 +150,12 @@ class ThemeServiceTest {
     @DisplayName("지정된 일 수 및 갯수를 기준으로 인기 테마를 조회한다.")
     public void findPopularThemes() {
         // given
-        Theme popularTheme = themeRepository.save(new Theme("인기 테마", "인기 테마 설명", "https://example.com/popular.png"));
-        Theme lessPopularTheme = themeRepository.save(new Theme("덜 인기 테마", "덜 인기 테마 설명", "https://example.com/less-popular.png"));
-        Theme outOfRangeTheme = themeRepository.save(new Theme("기간 밖 테마", "기간 밖 테마 설명", "https://example.com/out-of-range.png"));
+        Theme popularTheme = themeRepository.save(Theme.create("인기 테마", "인기 테마 설명", "https://example.com/popular.png"));
+        Theme lessPopularTheme = themeRepository.save(Theme.create("덜 인기 테마", "덜 인기 테마 설명", "https://example.com/less-popular.png"));
+        Theme outOfRangeTheme = themeRepository.save(Theme.create("기간 밖 테마", "기간 밖 테마 설명", "https://example.com/out-of-range.png"));
 
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
 
         LocalDate now = LocalDate.of(2026, 10, 15);
         saveReservation("브라운", LocalDate.of(2026, 10, 8), time, popularTheme);

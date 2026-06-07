@@ -11,17 +11,17 @@ public class ReservationTime {
     private final Long id;
     private final LocalTime startAt;
 
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt);
+    public static ReservationTime create(LocalTime startAt) {
+        validateStartAt(startAt);
+        return new ReservationTime(null, startAt);
     }
 
     public ReservationTime(Long id, LocalTime startAt) {
-        validateStartAt(startAt);
         this.id = id;
         this.startAt = startAt;
     }
 
-    private void validateStartAt(LocalTime startAt) {
+    private static void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
             throw new InvalidRequestException("예약 시간은 비어 있을 수 없습니다.");
         }

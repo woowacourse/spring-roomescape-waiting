@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
+        ReservationTime reservationTime = ReservationTime.create(startAt);
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
             throw new ConflictException("이미 등록된 예약 시간입니다. 다른 시간을 입력해주세요.");
         }

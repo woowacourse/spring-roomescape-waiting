@@ -82,8 +82,8 @@ class ReservationTimeServiceTest {
     @DisplayName("예약이 존재하는 예약 시간도 비활성화한다.")
     public void deactivate_success_whenReservationExists() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.create("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
         saveReservation("브라운", LocalDate.of(2026, 5, 14), reservationTime, theme);
 
         // when
@@ -98,8 +98,8 @@ class ReservationTimeServiceTest {
     @DisplayName("비활성화된 예약 시간으로 예약을 생성하면 예외가 발생한다.")
     public void createReservation_fail_whenReservationTimeInactive() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.create("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
         reservationTimeService.deactivate(reservationTime.getId());
 
         // when, then
@@ -126,10 +126,10 @@ class ReservationTimeServiceTest {
     @DisplayName("특정 날짜 및 테마의 예약 가능한 시간들을 반환한다.")
     public void findAvailableTimes_success() {
         // given
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Theme targetTheme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
-        Theme nonTargetTheme = themeRepository.save(new Theme("레벨3 탈출", "우테코 레벨3를 탈출하는 내용입니다.", "https://example.com/theme.png"));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
+        Theme targetTheme = themeRepository.save(Theme.create("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
+        Theme nonTargetTheme = themeRepository.save(Theme.create("레벨3 탈출", "우테코 레벨3를 탈출하는 내용입니다.", "https://example.com/theme.png"));
 
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
 
