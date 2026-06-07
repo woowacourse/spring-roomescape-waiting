@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationWaitDao;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +26,9 @@ class ReservationServiceTransactionTest {
 
     @MockitoSpyBean
     ReservationWaitDao reservationWaitDao;
+
+    @MockitoSpyBean
+    ReservationDao reservationDao;
 
     @Autowired
     ReservationService reservationService;
@@ -65,5 +69,30 @@ class ReservationServiceTransactionTest {
 
         assertThat(owner).as("양도 과정이 롤백되어 원소유자 그대로").isEqualTo(ownerId);
         assertThat(waits).as("대기 중인 예약이 롤백되지 않고 남아있음").isEqualTo(1L);
+    }
+
+    @Test
+    void 승급_자체가_실패하면_대기자가_유실되지_않고_롤백된다() {
+        long ownerId = 1L;
+        long waiterId = 2L;
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (member_id, date, time_id, theme_id, store_id) VALUES (?, '2027-01-01', 1, 1, 1)",
+                ownerId);
+        Long reservationId = jdbcTemplate.queryForObject("SELECT id FROM reservation", Long.class);
+        jdbcTemplate.update(
+                "INSERT INTO reservation_wait (reservation_id, member_id, created_at) VALUES (?, ?, '2026-12-01 10:00:00')",
+                reservationId, waiterId);
+
+        doThrow(RuntimeException.class)
+                .when(reservationDao).updateMemberId(reservationId, waiterId);
+        assertThatThrownBy(() -> reservationService.deleteReservation(reservationId, ownerId))
+                .isInstanceOf(RuntimeException.class);
+
+        Long owner = jdbcTemplate.queryForObject("SELECT member_id FROM reservation WHERE id = ?", Long.class, reservationId);
+        Long waits = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ?", Long.class, reservationId);
+
+        assertThat(owner).as("승급이 실패하면 소유자는 원소유자 그대로").isEqualTo(ownerId);
+        assertThat(waits).as("승급 실패 시 대기자가 큐에서 사라지지 않아야 한다").isEqualTo(1L);
     }
 }
