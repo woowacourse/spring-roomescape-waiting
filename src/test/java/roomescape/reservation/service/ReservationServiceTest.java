@@ -113,7 +113,7 @@ class ReservationServiceTest {
     void reserved_when_cancel_same_name() {
         // given
         Reservation reservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
-        reservation.updateStatus(ReservationStatus.CANCELED);
+        reservation.cancel(name);
         reservationRepository.updateStatus(reservation);
 
         // when

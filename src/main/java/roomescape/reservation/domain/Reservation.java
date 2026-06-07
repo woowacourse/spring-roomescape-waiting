@@ -40,19 +40,6 @@ public class Reservation {
         this.status = ReservationStatus.CANCELED;
     }
 
-    public void changeSchedule(String requesterName, Long newSlotId) {
-        validateOwner(requesterName);
-        validateNotCanceled();
-        validateNotWaiting();
-        this.slotId = newSlotId;
-    }
-
-    public void changeScheduleByManager(Long newSlotId) {
-        validateNotCanceled();
-        validateNotWaiting();
-        this.slotId = newSlotId;
-    }
-
     public void reschedule(Long newSlotId, String requesterName, ReservationStatus status) {
         validateOwner(requesterName);
         validateNotCanceled();
@@ -108,12 +95,6 @@ public class Reservation {
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
-        }
-    }
-
-    private void validateNotWaiting() {
-        if (status == ReservationStatus.WAITING) {
-            throw new ReservationException(RESERVATION_ALREADY_WAITING);
         }
     }
 

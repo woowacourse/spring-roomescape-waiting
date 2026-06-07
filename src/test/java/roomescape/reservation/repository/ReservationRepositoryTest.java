@@ -178,7 +178,7 @@ class ReservationRepositoryTest {
     void updateState_canceled() {
         // given
         Reservation saved = save(ReservationFixture.reservation(name, slot1));
-        saved.updateStatus(CANCELED);
+        saved.cancel(name);
 
         // when
         jdbcReservationRepository.updateStatus(saved);
@@ -194,7 +194,7 @@ class ReservationRepositoryTest {
     void updateSchedule() {
         // given
         Reservation saved = save(ReservationFixture.reservation(name, slot1));
-        saved.changeSchedule(name, slot3.getId());
+        saved.reschedule(slot3.getId(), name, RESERVED);
 
         // when
         jdbcReservationRepository.updateSchedule(saved);
