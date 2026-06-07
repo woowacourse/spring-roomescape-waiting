@@ -69,8 +69,7 @@ class WaitingServiceTest {
         WaitingRequestDTO waitingRequestDTO = new WaitingRequestDTO(name, date,
                 reservationTime.getId(), theme.getId());
 
-        WaitingResponseDTO expectedResponse = new WaitingResponseDTO(2L, name, date,
-                ReservationTimeResponseDTO.from(reservationTime), ThemeResponseDTO.from(theme), 2L);
+        WaitingResponseDTO expectedResponse = WaitingResponseDTO.from(Waiting.of(2L, name, slot, 2L));
 
         //when
         WaitingResponseDTO waitingResponseDTO = waitingService.addWaiting(waitingRequestDTO);

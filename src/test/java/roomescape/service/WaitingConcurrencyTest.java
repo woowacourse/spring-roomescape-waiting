@@ -93,7 +93,8 @@ class WaitingConcurrencyTest {
         executorService.shutdown();
 
         List<Long> numbers = waitingRepository.findAll().stream()
-                .filter(w -> w.getReservationSlot().equals(slot))
+                .filter(w -> w.waiting().getReservationSlot().equals(slot))
+                .map(w -> w.waiting())
                 .map(Waiting::getWaitingNumber)
                 .toList();
 
