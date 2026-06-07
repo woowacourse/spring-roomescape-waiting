@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class ReservationTimeRepository {
+public class JdbcReservationTimeRepository implements ReservationTimeRepository {
     private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (resultSet, rowNum) ->
             ReservationTime.of(resultSet.getLong("id"), resultSet.getTime("start_at").toLocalTime());
     private static final String EXISTS_BY_ID = """
@@ -26,7 +27,7 @@ public class ReservationTimeRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public ReservationTimeRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationTimeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_time")

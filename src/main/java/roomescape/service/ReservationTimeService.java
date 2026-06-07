@@ -8,8 +8,8 @@ import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.SlotRepository;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.SlotRepository;
 
 import java.time.LocalDate;
 import java.util.List;

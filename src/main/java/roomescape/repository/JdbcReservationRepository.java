@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class ReservationRepository {
+public class JdbcReservationRepository implements ReservationRepository {
     private static final String SELECT_BASE = """
             SELECT r.id          AS reservation_id,
                    r.name        AS reservation_name,
@@ -66,14 +67,13 @@ public class ReservationRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public ReservationRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    public JdbcReservationRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id")
                 .usingColumns("slot_id", "name", "status");
     }
-
 
     public Reservations findAll() {
         return new Reservations(jdbcTemplate.query(SELECT_BASE, ROW_MAPPER));
@@ -97,7 +97,6 @@ public class ReservationRepository {
                 ROW_MAPPER));
     }
 
-
     public Reservations findBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
         return new Reservations(jdbcTemplate.query(
@@ -105,17 +104,6 @@ public class ReservationRepository {
                 param,
                 ROW_MAPPER));
     }
-
-
-    public Optional<Reservation> findFirstWaitingBySlotId(Long slotId) {
-        MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
-        List<Reservation> result = jdbcTemplate.query(
-                SELECT_BASE + "WHERE r.slot_id = :slotId AND r.status = 'WAITING' ORDER BY r.created_at ASC LIMIT 1",
-                param,
-                ROW_MAPPER);
-        return result.stream().findFirst();
-    }
-
 
     public boolean existsBySlotIdAndName(Long slotId, String name) {
         MapSqlParameterSource params = new MapSqlParameterSource("slotId", slotId)
@@ -129,7 +117,6 @@ public class ReservationRepository {
                 params,
                 Boolean.class));
     }
-
 
     public boolean existsApprovedBySlotId(Long slotId) {
         MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
@@ -157,7 +144,6 @@ public class ReservationRepository {
                 Boolean.class));
     }
 
-
     public Reservation update(Long id, Reservation reservation) {
         MapSqlParameterSource params = new MapSqlParameterSource("id", id)
                 .addValue("slot_id", reservation.getSlotId())
@@ -167,14 +153,12 @@ public class ReservationRepository {
         return findById(id).orElseThrow();
     }
 
-
     public void updateStatusById(Long id, Status status) {
         MapSqlParameterSource params = new MapSqlParameterSource("id", id)
                 .addValue("status", status.name());
 
         jdbcTemplate.update("UPDATE reservation SET status = :status WHERE id = :id", params);
     }
-
 
     public Reservation save(Reservation reservation) {
         MapSqlParameterSource params = new MapSqlParameterSource("slot_id", reservation.getSlotId())
@@ -185,12 +169,10 @@ public class ReservationRepository {
         return reservation.withId(generatedKey);
     }
 
-
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = :id",
                 new MapSqlParameterSource("id", id));
     }
-
 
     public boolean existsById(Long id) {
         MapSqlParameterSource param = new MapSqlParameterSource("id", id);

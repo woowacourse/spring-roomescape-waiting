@@ -7,11 +7,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Slot;
+import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.theme.ThumbnailUrl;
 
 import java.time.Clock;
@@ -28,10 +32,10 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @JdbcTest
 @Import(value = {
-        ReservationTimeRepository.class,
-        ThemeRepository.class,
-        SlotRepository.class,
-        ReservationRepository.class
+        JdbcReservationTimeRepository.class,
+        JdbcThemeRepository.class,
+        JdbcSlotRepository.class,
+        JdbcReservationRepository.class
 })
 class SlotRepositoryTest {
     private final static Clock FIXED_CLOCK = Clock.fixed(

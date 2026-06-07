@@ -8,13 +8,14 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
+import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.theme.Theme;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class SlotRepository {
+public class JdbcSlotRepository implements SlotRepository {
     public static final RowMapper<Slot> SLOT_ROW_MAPPER = (rs, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
                 rs.getLong("reservation_time_id"),
@@ -46,7 +47,7 @@ public class SlotRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public SlotRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    public JdbcSlotRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("slot")

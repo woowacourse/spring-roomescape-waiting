@@ -9,8 +9,8 @@ import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
-import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.domain.reservation.SlotRepository;
+import roomescape.domain.theme.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,7 +37,7 @@ public class ThemeService {
     }
 
     public Theme find(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요."));
+        return themeRepository.getById(themeId);
     }
 
     public List<Theme> findAll() {

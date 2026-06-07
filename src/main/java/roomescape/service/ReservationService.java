@@ -3,22 +3,21 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
+import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.domain.theme.ThemeRepository;
 
 import java.time.LocalDateTime;
 
@@ -42,8 +41,8 @@ public class ReservationService {
 
     @Transactional
     public Reservation reserve(ReservationCreateRequest request, LocalDateTime now) {
-        ReservationTime time = findTimeById(request.getTimeId());
-        Theme theme = findThemeById(request.getThemeId());
+        ReservationTime time = reservationTimeRepository.getById(request.getTimeId());
+        Theme theme = themeRepository.getById(request.getThemeId());
         ReservationDate date = new ReservationDate(request.getDate());
 
         Slot slot = slotRepository.findByDateAndTimeAndTheme(date, time, theme)
@@ -52,20 +51,16 @@ public class ReservationService {
             throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
         }
 
-        if (reservationRepository.existsBySlotIdAndName(slot.getId(), request.getName())) {
+        Reservations existing = reservationRepository.findBySlotId(slot.getId());
+        if (existing.hasByName(request.getName())) {
             throw new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
         }
 
-        boolean hasApproved = reservationRepository.existsApprovedBySlotId(slot.getId());
-        Status status = hasApproved ? Status.WAITING : Status.APPROVED;
-
-        Reservation reservation = Reservation.create(request.getName(), status, slot);
-        return reservationRepository.save(reservation);
+        return reservationRepository.save(existing.join(request.getName(), slot));
     }
 
     public Reservation find(long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. 입력을 확인해 주세요."));
+        Reservation reservation = reservationRepository.getById(id);
 
         if (reservation.isWaiting()) {
             Reservations slotReservations = reservationRepository.findBySlotId(reservation.getSlotId());
@@ -86,8 +81,8 @@ public class ReservationService {
     public Reservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation existing = find(id);
 
-        ReservationTime newTime = findTimeById(request.getTimeId());
-        Theme newTheme = findThemeById(request.getThemeId());
+        ReservationTime newTime = reservationTimeRepository.getById(request.getTimeId());
+        Theme newTheme = themeRepository.getById(request.getThemeId());
         ReservationDate newDate = new ReservationDate(request.getDate());
 
         Slot newSlot = slotRepository.findByDateAndTimeAndTheme(newDate, newTime, newTheme)
@@ -96,20 +91,19 @@ public class ReservationService {
             throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
         }
 
+        Reservations slotReservations = reservationRepository.findBySlotId(newSlot.getId()).excluding(id);
         boolean isSelf = existing.getSlotId().equals(newSlot.getId()) && existing.isSameName(request.getName());
-        if (reservationRepository.existsBySlotIdAndName(newSlot.getId(), request.getName()) && !isSelf) {
+        if (slotReservations.hasByName(request.getName()) && !isSelf) {
             throw new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
         }
 
-        boolean hasApproved = reservationRepository.existsApprovedBySlotIdExcluding(newSlot.getId(), id);
-        Status newStatus = hasApproved ? Status.WAITING : Status.APPROVED;
-
-        Reservation updated = Reservation.create(request.getName(), newStatus, newSlot);
+        Reservation updated = slotReservations.join(request.getName(), newSlot);
         reservationRepository.update(id, updated);
 
         boolean slotChanged = !existing.getSlotId().equals(newSlot.getId());
         if (slotChanged && existing.isApproved()) {
-            reservationRepository.findFirstWaitingBySlotId(existing.getSlotId())
+            reservationRepository.findBySlotId(existing.getSlotId())
+                    .firstWaiting()
                     .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
         }
 
@@ -118,11 +112,8 @@ public class ReservationService {
 
     @Transactional
     public void cancel(long reservationId, String name, LocalDateTime now) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. 입력을 확인해 주세요."));
-
-        Slot slot = slotRepository.findById(reservation.getSlotId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 슬롯입니다."));
+        Reservation reservation = reservationRepository.getById(reservationId);
+        Slot slot = slotRepository.getById(reservation.getSlotId());
 
         if (slot.isPast(now)) {
             throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
@@ -135,18 +126,9 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
 
         if (reservation.isApproved()) {
-            reservationRepository.findFirstWaitingBySlotId(slot.getId())
+            reservationRepository.findBySlotId(slot.getId())
+                    .firstWaiting()
                     .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
         }
-    }
-
-    private ReservationTime findTimeById(long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다. 입력을 확인해 주세요."));
-    }
-
-    private Theme findThemeById(long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요."));
     }
 }
