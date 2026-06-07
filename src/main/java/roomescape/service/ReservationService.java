@@ -84,7 +84,6 @@ public class ReservationService {
 
         final Reservation modifiedReservation = originalReservation.modify(command.date(), findReservationTime, findTheme);
 
-        modifiedReservation.validateNotPast();
         validateNotDuplicated(modifiedReservation);
 
         reservationRepository.update(modifiedReservation);

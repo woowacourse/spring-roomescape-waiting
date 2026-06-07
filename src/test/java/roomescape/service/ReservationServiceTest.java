@@ -194,6 +194,24 @@ class ReservationServiceTest {
         }
 
         @Test
+        void 변경할_날짜가_과거면_예외발생() {
+            // given
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", pastDate, 1L, 1L);
+            Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+
+            given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
+            given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+            given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.modify(request))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
+            verify(reservationRepository, never()).update(any());
+        }
+
+        @Test
         void 슬롯이_달라지면_대기자가_있으면_승격() {
             // given
             ReservationTime newTime = ReservationTime.createWithId(2L, LocalTime.of(13, 0), LocalTime.of(14, 0));

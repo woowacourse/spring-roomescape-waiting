@@ -70,13 +70,16 @@ public class Reservation {
     }
 
     public Reservation modify(final LocalDate newDate, final ReservationTime newReservationTime, final Theme theme) {
-        return new Reservation(
+        Reservation reservation = new Reservation(
                 this.id,
                 this.name,
                 new ReservationDate(newDate),
                 newReservationTime,
                 theme
         );
+
+        reservation.validateNotPast();
+        return reservation;
     }
 
     public void validateNotPast() {
