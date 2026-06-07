@@ -135,12 +135,12 @@ public class ReservationApplicationTest {
         // then
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM reservation", Integer.class);
         String name = jdbcTemplate.queryForObject("select name from reservation LIMIT 1", String.class);
-        Integer waitinCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
+        Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
 
         assertAll(
                 () -> assertThat(count).isEqualTo(1),
                 () -> assertThat(name).isEqualTo("도우너"),
-                () -> assertThat(waitinCount).isEqualTo(1)
+                () -> assertThat(waitingCount).isEqualTo(1)
         );
     }
 
