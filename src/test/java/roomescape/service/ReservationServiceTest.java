@@ -136,7 +136,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경() {
+    void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경_및_이벤트_발생() {
         // given
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", futureDate.plusDays(1), 2L);
         Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
@@ -154,6 +154,7 @@ class ReservationServiceTest {
         assertThat(response.date()).isEqualTo(request.date());
         assertThat(response.time().id()).isEqualTo(2L);
         verify(reservationRepository).updateDateAndTime(any(Reservation.class));
+        verify(eventPublisher).publishEvent(any(ReservationCanceledEvent.class));
     }
 
     @Test

@@ -55,6 +55,7 @@ public class ReservationService {
         return ReservationResult.from(savedReservation);
     }
 
+    @Transactional
     public ReservationResult modify(final ReservationModifyCommand reservationModifyCommand) {
         final Long reservationId = reservationModifyCommand.reservationId();
         final Reservation originalReservation = getReservation(reservationId);
@@ -82,6 +83,7 @@ public class ReservationService {
         validateAvailable(date, timeId, modifiedReservation.getTheme().getId());
 
         reservationRepository.updateDateAndTime(modifiedReservation);
+        callEventListenerForWaitingListApproval(originalReservation);
         return ReservationResult.from(modifiedReservation);
     }
 
