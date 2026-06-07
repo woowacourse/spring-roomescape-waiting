@@ -19,7 +19,6 @@ const ERROR_MESSAGES = {
   'TIME_ALREADY_RESERVED': '선택하신 시간은 이미 예약이 마감되었습니다. 다른 시간을 선택해 주세요.',
   'DATE_ALREADY_PASSED': '지난 날짜는 예약할 수 없습니다. 오늘 이후의 날짜를 선택해 주세요.',
   'INVALID_INPUT_VALUE': '입력 정보가 올바르지 않습니다. 날짜, 시간, 이름 형식을 다시 확인해 주세요.',
-  'PERSON_NAME_NULL_OR_BLANK': '예약자 이름을 입력해 주세요.',
   'WAITING_LIST_NOT_REQUIRED': '해당 시간에 예약이 존재하지 않기 때문에 예약 대기 불가합니다.',
   'ALREADY_ON_WAITING_LIST': '이미 해당 조건의 예약 대기 신청이 존재합니다.',
   'TIME_ALREADY_PASSED': '이미 지난 시간입니다.',
@@ -204,7 +203,7 @@ async function loadTimeSlots() {
       const slot = document.createElement('div');
       slot.className = 'time-slot' + (t.reserved ? ' reserved' : '');
       const label = formatTime(t.startAt);
-      
+
       if (t.reserved) {
         slot.innerHTML = `
           <div>${label}</div>
@@ -271,7 +270,7 @@ function closeModal() { $('booking-modal').classList.remove('open'); }
 async function submitBooking() {
   const name = $('booking-name').value.trim();
   if (!name) {
-    showToast(ERROR_MESSAGES['PERSON_NAME_NULL_OR_BLANK'], 'error');
+    showToast('예약자 이름을 입력해 주세요.', 'error');
     return;
   }
 
@@ -306,8 +305,8 @@ function openWaitingListModal(timeId, timeLabel) {
   setTimeout(() => $('waiting-name').focus(), 50);
 }
 
-function closeWaitingListModal() { 
-  $('waiting-list-modal').classList.remove('open'); 
+function closeWaitingListModal() {
+  $('waiting-list-modal').classList.remove('open');
   waitingTimeId = null;
 }
 
@@ -318,7 +317,7 @@ function closeWaitingResultModal() {
 async function submitWaitingList() {
   const name = $('waiting-name').value.trim();
   if (!name) {
-    showToast(ERROR_MESSAGES['PERSON_NAME_NULL_OR_BLANK'], 'error');
+    showToast('예약 대기자 이름을 입력해 주세요.', 'error');
     return;
   }
 
@@ -359,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('modal-cancel-btn').addEventListener('click', closeModal);
   $('booking-modal').addEventListener('click', e => { if (e.target === $('booking-modal')) closeModal(); });
   $('confirm-booking-btn').addEventListener('click', submitBooking);
-  
+
   // Waiting List Modal
   $('waiting-list-modal-close-btn').addEventListener('click', closeWaitingListModal);
   $('waiting-list-modal-cancel-btn').addEventListener('click', closeWaitingListModal);
