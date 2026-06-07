@@ -116,27 +116,23 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationByAdmin(Long id) {
-        Reservation reservation = findByIdOrThrow(id);
-        reservationRepository.deleteById(reservation.getId());
+        Reservation reservation = findReservationByIdForUpdateOrThrow(id);
+        int deletedRow = reservationRepository.deleteById(reservation.getId());
+        if (deletedRow == 0) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
         recalculateReservationsForSlot(reservation.getSlot());
     }
 
     @Transactional
     public void cancelReservationByUser(Long id, User loginUser) {
-        Reservation reservation = findReservationByIdAndUsernameOrThrow(id, loginUser.getName());
+        Reservation reservation = findReservationByIdAndUsernameForUpdateOrThrow(id, loginUser.getName());
         reservation.validateCancellable(LocalDateTime.now(clock));
-        reservationRepository.deleteById(reservation.getId());
+        int deletedRow = reservationRepository.deleteById(reservation.getId());
+        if (deletedRow == 0) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
         recalculateReservationsForSlot(reservation.getSlot());
-    }
-
-    private User findByUsernameOrThrow(String username) {
-        return userRepository.findByName(username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private Reservation findByIdOrThrow(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private Reservation findReservationByIdForUpdateOrThrow(Long id) {
@@ -212,6 +208,11 @@ public class ReservationService {
             return new ReservationSlots(firstSlot, secondSlot);
         }
         return new ReservationSlots(secondSlot, firstSlot);
+    }
+
+    private User findByUsernameOrThrow(String username) {
+        return userRepository.findByName(username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private record ReservationSlots(ReservationSlot currentSlot, ReservationSlot targetSlot) {

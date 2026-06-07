@@ -631,7 +631,7 @@ class ReservationServiceTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
         given(reservationRepository.deleteById(1L)).willReturn(1);
 
@@ -639,7 +639,7 @@ class ReservationServiceTest {
         reservationService.deleteReservationByAdmin(1L);
 
         // then
-        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).findByIdForUpdate(1L);
         verify(reservationRepository, times(1)).deleteById(1L);
         verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
         verify(reservationRepository, never()).batchUpdate(any());
@@ -649,16 +649,47 @@ class ReservationServiceTest {
     @Test
     void deleteReservationByAdminWhenNotFound() {
         // given
-        given(reservationRepository.findById(1L)).willReturn(Optional.empty());
+        given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reservationService.deleteReservationByAdmin(1L))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).findByIdForUpdate(1L);
         verify(reservationRepository, never()).deleteById(anyLong());
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
+    }
+
+    @DisplayName("관리자가 예약 삭제 중 영향받은 행이 없으면 재계산하지 않는다")
+    @Test
+    void deleteReservationByAdminWhenDeletedRowZero() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                User.of(10L, "홍길동"),
+                ReservationSlot.of(
+                        20L,
+                        LocalDate.of(2030, 1, 2),
+                        ReservationTime.of(30L, LocalTime.of(13, 0)),
+                        Theme.of(40L, "도심 탈출", "도심 탈출 설명", "/themes/40")
+                ),
+                0,
+                ReservationStatus.CONFIRMED,
+                LocalDateTime.of(2030, 1, 1, 10, 0)
+        );
+        given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.deleteById(1L)).willReturn(0);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteReservationByAdmin(1L))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
+        verify(reservationRepository, times(1)).findByIdForUpdate(1L);
+        verify(reservationRepository, times(1)).deleteById(1L);
+        verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
+        verify(reservationRepository, never()).batchUpdate(any());
     }
 
     @DisplayName("사용자가 본인 예약을 취소할 수 있다")
@@ -678,7 +709,7 @@ class ReservationServiceTest {
                 ReservationStatus.CONFIRMED,
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
-        given(reservationRepository.findByIdAndUsername(1L, "홍길동")).willReturn(Optional.of(reservation));
+        given(reservationRepository.findByIdAndUsernameForUpdate(1L, "홍길동")).willReturn(Optional.of(reservation));
         given(reservationRepository.deleteById(1L)).willReturn(1);
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
 
@@ -686,7 +717,7 @@ class ReservationServiceTest {
         reservationService.cancelReservationByUser(1L, User.of(10L, "홍길동"));
 
         // then
-        verify(reservationRepository, times(1)).findByIdAndUsername(1L, "홍길동");
+        verify(reservationRepository, times(1)).findByIdAndUsernameForUpdate(1L, "홍길동");
         verify(reservationRepository, times(1)).deleteById(1L);
         verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
         verify(reservationRepository, never()).batchUpdate(any());
@@ -696,15 +727,46 @@ class ReservationServiceTest {
     @Test
     void cancelReservationByUserWhenNotOwner() {
         // given
-        given(reservationRepository.findByIdAndUsername(1L, "김철수")).willReturn(Optional.empty());
+        given(reservationRepository.findByIdAndUsernameForUpdate(1L, "김철수")).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reservationService.cancelReservationByUser(1L, User.of(11L, "김철수")))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-        verify(reservationRepository, times(1)).findByIdAndUsername(1L, "김철수");
+        verify(reservationRepository, times(1)).findByIdAndUsernameForUpdate(1L, "김철수");
         verify(reservationRepository, never()).deleteById(anyLong());
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
+    }
+
+    @DisplayName("사용자가 예약 취소 중 영향받은 행이 없으면 재계산하지 않는다")
+    @Test
+    void cancelReservationByUserWhenDeletedRowZero() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                User.of(10L, "홍길동"),
+                ReservationSlot.of(
+                        20L,
+                        LocalDate.of(2030, 1, 2),
+                        ReservationTime.of(30L, LocalTime.of(13, 0)),
+                        Theme.of(40L, "도심 탈출", "도심 탈출 설명", "/themes/40")
+                ),
+                0,
+                ReservationStatus.CONFIRMED,
+                LocalDateTime.of(2030, 1, 1, 10, 0)
+        );
+        given(reservationRepository.findByIdAndUsernameForUpdate(1L, "홍길동")).willReturn(Optional.of(reservation));
+        given(reservationRepository.deleteById(1L)).willReturn(0);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.cancelReservationByUser(1L, User.of(10L, "홍길동")))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
+        verify(reservationRepository, times(1)).findByIdAndUsernameForUpdate(1L, "홍길동");
+        verify(reservationRepository, times(1)).deleteById(1L);
+        verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
+        verify(reservationRepository, never()).batchUpdate(any());
     }
 }
