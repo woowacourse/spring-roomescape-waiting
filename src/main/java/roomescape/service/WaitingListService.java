@@ -21,6 +21,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -43,17 +44,16 @@ public class WaitingListService {
         final WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findReservationTime, findTheme);
         validateFuture(waitingList);
 
-        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waitingList.getReservationDate().date(), findReservationTime.getId(), findTheme.getId()
-            )
+        final LocalDate date = waitingList.getReservationDate().date();
+        final Long timeId = findReservationTime.getId();
+        final Long themeId = findTheme.getId();
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                && !waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)
         ) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
-        if (waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(
-                waitingList.getName(), waitingList.getReservationDate().date(), findTheme.getId(), findReservationTime.getId()
-            )
-        ) {
+        if (waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(waitingList.getName(), date, timeId, themeId)) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
 
