@@ -9,9 +9,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWithStatus;
+import roomescape.domain.Slot;
 import roomescape.domain.Waitlist;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.WaitlistRepository;
 
 @Service
@@ -20,15 +22,18 @@ public class WaitlistWriter {
 
     private final ReservationRepository reservationRepository;
     private final WaitlistRepository waitlistRepository;
+    private final SlotRepository slotRepository;
     private final WaitlistOrderPolicy waitlistOrderPolicy;
 
     public WaitlistWriter(
         ReservationRepository reservationRepository,
         WaitlistRepository waitlistRepository,
+        SlotRepository slotRepository,
         WaitlistOrderPolicy waitlistOrderPolicy
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
+        this.slotRepository = slotRepository;
         this.waitlistOrderPolicy = waitlistOrderPolicy;
     }
 
@@ -36,7 +41,10 @@ public class WaitlistWriter {
     public ReservationWithStatus save(Reservation reservation, LocalDateTime createdAt) {
         verifyNoDuplicateReservation(reservation);
 
-        Long savedId = waitlistRepository.save(reservation, createdAt);
+        Slot slot = slotRepository.getOrCreate(reservation.getSlot());
+        Reservation reservationWithSlot = new Reservation(reservation.getName(), slot);
+
+        Long savedId = waitlistRepository.save(reservationWithSlot, createdAt);
         Waitlist waitlist = waitlistRepository.getById(savedId, "존재하지 않는 예약 대기입니다.");
         int waitingOrder = calculateWaitingOrder(waitlist);
 

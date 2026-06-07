@@ -14,14 +14,17 @@ import org.springframework.context.annotation.Import;
 import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @JdbcTest
 @Import({
     JdbcReservationRepository.class,
+    JdbcSlotRepository.class,
     JdbcReservationTimeRepository.class,
     JdbcThemeRepository.class,
     TestClockConfig.class
@@ -42,12 +45,15 @@ class JdbcReservationRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private SlotRepository slotRepository;
+
     @Test
     void 예약을_저장한다() {
         ReservationTime reservationTime = createReservationTime(LocalTime.of(10, 0));
         Theme theme = createTheme();
 
-        Long saveId = reservationRepository.save(new Reservation(
+        Long saveId = reservationRepository.save(createReservation(
             "브라운", FUTURE_THIRD_DATE, reservationTime, theme));
 
         Optional<Reservation> reservation = reservationRepository.findById(saveId);
@@ -67,11 +73,11 @@ class JdbcReservationRepositoryTest {
         ReservationTime twelveClock = createReservationTime(TWELVE);
         Theme theme = createTheme();
 
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브리", FUTURE_SECOND_DATE, tenClock, theme));
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브라운", FUTURE_THIRD_DATE, twelveClock, theme));
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브리", FUTURE_THIRD_DATE, tenClock, theme));
 
         List<Reservation> reservations = reservationRepository.findAll();
@@ -91,9 +97,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime twelveClock = createReservationTime(TWELVE);
         Theme theme = createTheme();
 
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브라운", FUTURE_THIRD_DATE, twelveClock, theme));
-        Long findId = reservationRepository.save(new Reservation(
+        Long findId = reservationRepository.save(createReservation(
             "브리", FUTURE_THIRD_DATE, tenClock, theme));
 
         Optional<Reservation> reservation = reservationRepository.findById(findId);
@@ -114,11 +120,11 @@ class JdbcReservationRepositoryTest {
         ReservationTime twelveClock = createReservationTime(TWELVE);
         Theme findTheme = createTheme();
 
-        Long firstSaveId = reservationRepository.save(new Reservation(
+        Long firstSaveId = reservationRepository.save(createReservation(
             "브라운", findDate, twelveClock, findTheme));
-        Long secondSaveId = reservationRepository.save(new Reservation(
+        Long secondSaveId = reservationRepository.save(createReservation(
             "브리", findDate, tenClock, findTheme));
-        Long thirdSaveId = reservationRepository.save(new Reservation(
+        Long thirdSaveId = reservationRepository.save(createReservation(
             "브리", FUTURE_SECOND_DATE, tenClock, findTheme));
 
         Set<Long> findReservationsId = reservationRepository.findReservedTimeIdsByDateAndThemeId(findDate,
@@ -135,7 +141,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브라운", FUTURE_THIRD_DATE, reservationTime, theme));
 
         assertThat(reservationRepository.existsByTimeId(reservationTime.getId())).isTrue();
@@ -147,7 +153,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브라운", FUTURE_THIRD_DATE, reservationTime, theme));
 
         assertThat(reservationRepository.existsByThemeId(theme.getId())).isTrue();
@@ -160,7 +166,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        Reservation reservation = new Reservation("브라운", findDate, reservationTime, theme);
+        Reservation reservation = createReservation("브라운", findDate, reservationTime, theme);
         reservationRepository.save(reservation);
 
         assertThat(reservationRepository.existsBy(reservation)).isTrue();
@@ -171,7 +177,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        Long saveId = reservationRepository.save(new Reservation(
+        Long saveId = reservationRepository.save(createReservation(
             "브라운", FUTURE_SECOND_DATE, reservationTime, theme));
         reservationRepository.deleteById(saveId);
 
@@ -184,9 +190,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime anotherTime = createReservationTime(TWELVE);
         Theme theme = createTheme();
 
-        reservationRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
-        reservationRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, anotherTime, theme));
-        reservationRepository.save(new Reservation("네오", FUTURE_THIRD_DATE, reservationTime, theme));
+        reservationRepository.save(createReservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
+        reservationRepository.save(createReservation("네오", FUTURE_SECOND_DATE, anotherTime, theme));
+        reservationRepository.save(createReservation("네오", FUTURE_THIRD_DATE, reservationTime, theme));
 
         List<Reservation> neoReservations = reservationRepository.findByName("네오");
 
@@ -211,5 +217,10 @@ class JdbcReservationRepositoryTest {
             theme.getDescription(),
             theme.getThumbnailImageUrl()
         );
+    }
+
+    private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(new Slot(date, time, theme));
+        return new Reservation(name, slot);
     }
 }

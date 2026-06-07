@@ -22,11 +22,13 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 import roomescape.dto.ReservationRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
@@ -47,6 +49,8 @@ public class ReserveOrWaitRaceConditionTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private WaitlistRepository waitlistRepository;
+    @Autowired
+    private SlotRepository slotRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
 
@@ -173,11 +177,10 @@ public class ReserveOrWaitRaceConditionTest {
     }
 
     private Reservation createReservation(String name, ReservationTime reservationTime, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(new Slot(FUTURE_FIRST_DATE, reservationTime, theme));
         return new Reservation(
             name,
-            FUTURE_FIRST_DATE,
-            reservationTime,
-            theme
+            slot
         );
     }
 

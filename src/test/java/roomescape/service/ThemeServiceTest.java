@@ -14,11 +14,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ThemeRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -36,6 +38,9 @@ class ThemeServiceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private SlotRepository slotRepository;
 
     @Test
     void 테마를_추가한다() {
@@ -121,7 +126,7 @@ class ThemeServiceTest {
             THEME_THUMBNAIL
         ));
 
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(createReservation(
             "브라운",
             LocalDate.now().plusDays(1),
             reservationTime.orElseThrow(),
@@ -152,5 +157,10 @@ class ThemeServiceTest {
                 "침몰하는 잠수함",
                 "은행 금고"
             );
+    }
+
+    private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(new Slot(date, time, theme));
+        return new Reservation(name, slot);
     }
 }

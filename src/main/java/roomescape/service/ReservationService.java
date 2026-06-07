@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 import roomescape.domain.exception.RoomEscapeException;
@@ -26,6 +27,7 @@ import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
@@ -35,6 +37,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final WaitlistRepository waitlistRepository;
+    private final SlotRepository slotRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
@@ -44,6 +47,7 @@ public class ReservationService {
 
     public ReservationService(
         ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
+        SlotRepository slotRepository,
         ReservationTimeRepository timeRepository,
         ThemeRepository themeRepository,
         Clock clock,
@@ -53,6 +57,7 @@ public class ReservationService {
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
+        this.slotRepository = slotRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
@@ -180,9 +185,7 @@ public class ReservationService {
 
         Reservation updated = new Reservation(
             promotedReservation.getName(),
-            promotedReservation.getDate(),
-            promotedReservation.getTime(),
-            promotedReservation.getTheme()
+            promotedReservation.getSlot()
         );
 
         reservationRepository.save(updated);
@@ -199,8 +202,15 @@ public class ReservationService {
             getReservationTime(request.timeId())
         );
         verifyNoConflict(updated);
-        reservationRepository.updateDateTime(updated);
+        Reservation updatedWithSlot = withSavedSlot(updated);
+        reservationRepository.updateDateTime(updatedWithSlot);
+        
         return getReservation(id);
+    }
+
+    private Reservation withSavedSlot(Reservation reservation) {
+        Slot slot = slotRepository.getOrCreate(reservation.getSlot());
+        return new Reservation(reservation.getId(), reservation.getName(), slot);
     }
 
     private void verifyNoConflict(Reservation reservation) {

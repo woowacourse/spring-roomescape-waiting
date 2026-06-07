@@ -18,6 +18,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 import roomescape.domain.exception.RoomEscapeException;
@@ -25,6 +26,7 @@ import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
@@ -54,6 +56,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private SlotRepository slotRepository;
 
     @Test
     void 예약을_추가한다() {
@@ -373,7 +378,7 @@ class ReservationServiceTest {
         ReservationTime pastTime = createReservationTime(BEFORE_FIXED_TIME);
         Theme theme = createTheme();
         String name = "브라운";
-        Long reservationId = reservationRepository.save(new Reservation(
+        Long reservationId = reservationRepository.save(createReservation(
             name,
             FIXED_TODAY,
             pastTime,
@@ -608,5 +613,10 @@ class ReservationServiceTest {
             theme.getDescription(),
             theme.getThumbnailImageUrl()
         );
+    }
+
+    private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(new Slot(date, time, theme));
+        return new Reservation(name, slot);
     }
 }

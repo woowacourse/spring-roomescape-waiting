@@ -5,14 +5,20 @@ import java.time.LocalDateTime;
 
 public class Slot {
 
+    private final Long id;
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
 
-    public Slot(LocalDate date, ReservationTime time, Theme theme) {
+    public Slot(Long id, LocalDate date, ReservationTime time, Theme theme) {
+        this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    public Slot(LocalDate date, ReservationTime time, Theme theme) {
+        this(null, date, time, theme);
     }
 
     public boolean isPast(LocalDateTime now) {
@@ -31,6 +37,10 @@ public class Slot {
 
     public Long getThemeId() {
         return theme.getId();
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public LocalDate getDate() {

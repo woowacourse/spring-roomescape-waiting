@@ -65,6 +65,10 @@ public class Waitlist {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
         return slot.getDate();
     }

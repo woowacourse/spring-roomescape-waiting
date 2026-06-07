@@ -12,15 +12,18 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
 @JdbcTest
 @Import({
     JdbcReservationRepository.class,
+    JdbcSlotRepository.class,
     JdbcReservationTimeRepository.class,
     JdbcThemeRepository.class,
     JdbcWaitlistRepository.class
@@ -40,16 +43,19 @@ class JdbcWaitlistRepositoryTest {
     @Autowired
     private WaitlistRepository waitlistRepository;
 
+    @Autowired
+    private SlotRepository slotRepository;
+
     @Test
     void 같은_슬롯의_대기_목록을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        Long brieId = waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme),
+        Long brieId = waitlistRepository.save(createReservation("브리", reservationTime, theme),
             CREATED_AT);
-        Long pobiId = waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme),
+        Long pobiId = waitlistRepository.save(createReservation("포비", reservationTime, theme),
             CREATED_AT);
-        Long neoId = waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme),
+        Long neoId = waitlistRepository.save(createReservation("네오", reservationTime, theme),
             CREATED_AT);
 
         List<Waitlist> waitlists = waitlistRepository.findBySlot(
@@ -78,5 +84,10 @@ class JdbcWaitlistRepositoryTest {
             theme.getDescription(),
             theme.getThumbnailImageUrl()
         );
+    }
+
+    private Reservation createReservation(String name, ReservationTime time, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(new Slot(FUTURE_SECOND_DATE, time, theme));
+        return new Reservation(name, slot);
     }
 }

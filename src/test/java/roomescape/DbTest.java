@@ -47,10 +47,10 @@ public class DbTest {
             "공포", "무서운 테마", "https://example.com/horror.jpg"
         );
         Long themeId = jdbcTemplate.queryForObject("SELECT id from theme limit 1", Long.class);
-        jdbcTemplate.update(
-            "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-            "브라운", FUTURE_FIRST_DATE, timeId, themeId
-        );
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)", FUTURE_FIRST_DATE, timeId,
+            themeId);
+        Long slotId = jdbcTemplate.queryForObject("SELECT id from slot limit 1", Long.class);
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES (?, ?)", "브라운", slotId);
 
         List<Map> reservations = RestAssured.given().log().all()
             .when().get("/reservations")
