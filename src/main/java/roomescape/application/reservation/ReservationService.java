@@ -7,9 +7,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
@@ -185,7 +185,7 @@ public class ReservationService {
     private Reservation saveReservation(User user, ReservationSlot slot, LocalDateTime reservedAt) {
         try {
             return reservationRepository.save(Reservation.create(user, slot, reservedAt));
-        } catch (UniqueConstraintViolationException exception) {
+        } catch (DuplicateResourceException exception) {
             throw new BusinessException(ErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import roomescape.domain.exception.UniqueConstraintViolationException;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -63,7 +63,7 @@ class JdbcReservationSlotRepositoryTest {
 
         // when & then
         assertThatThrownBy(() -> slotRepository.save(slot))
-                .isInstanceOf(UniqueConstraintViolationException.class);
+                .isInstanceOf(DuplicateResourceException.class);
     }
 
     @DisplayName("시간과 테마로 예약 슬롯 존재 여부를 확인할 수 있다")

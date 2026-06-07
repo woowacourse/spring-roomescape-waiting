@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.common.security.Pbkdf2PasswordEncoder;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
@@ -102,7 +102,7 @@ class AuthServiceTest {
     @DisplayName("이미 존재하는 사용자는 회원가입할 수 없다")
     void signupWhenUserAlreadyExists() {
         // given
-        given(userRepository.save(any())).willThrow(new UniqueConstraintViolationException());
+        given(userRepository.save(any())).willThrow(new DuplicateResourceException());
         AuthService authService = new AuthService(userRepository, passwordEncoder);
 
         // when & then

@@ -2,10 +2,10 @@ package roomescape.application.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.common.security.PasswordEncoder;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.user.UserRole;
@@ -35,7 +35,7 @@ public class AuthService {
 
         try {
             return userRepository.save(user);
-        } catch (UniqueConstraintViolationException exception) {
+        } catch (DuplicateResourceException exception) {
             throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
         }
     }

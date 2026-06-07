@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import roomescape.domain.exception.UniqueConstraintViolationException;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.domain.user.User;
 
 @DisplayName("사용자 JDBC 저장소")
@@ -62,6 +62,6 @@ class JdbcUserRepositoryTest {
 
         // when & then
         assertThatThrownBy(() -> userRepository.save(User.create("중복이름")))
-                .isInstanceOf(UniqueConstraintViolationException.class);
+                .isInstanceOf(DuplicateResourceException.class);
     }
 }

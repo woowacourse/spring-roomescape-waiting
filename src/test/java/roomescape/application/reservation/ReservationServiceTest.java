@@ -27,9 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.InOrder;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.application.exception.DuplicateResourceException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
@@ -307,7 +307,7 @@ class ReservationServiceTest {
 
         given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(slot));
         given(reservationRepository.existsBySlotIdAndUserId(20L, 10L)).willReturn(false);
-        given(reservationRepository.save(any(Reservation.class))).willThrow(new UniqueConstraintViolationException());
+        given(reservationRepository.save(any(Reservation.class))).willThrow(new DuplicateResourceException());
 
         // when & then
         assertThatThrownBy(() -> reservationService.createReservationByUser(request, user))
