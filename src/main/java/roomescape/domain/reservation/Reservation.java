@@ -41,8 +41,8 @@ public class Reservation {
         return new Reservation(this.id, this.name, date, this.theme, time);
     }
 
-    public Reservation withName(final String name) {
-        return new Reservation(this.id, name, this.date, this.theme, this.time);
+    public Reservation changeOwnerTo(final String newOwnerName) {
+        return new Reservation(this.id, newOwnerName, this.date, this.theme, this.time);
     }
 
     public boolean hasName(final String name) {
