@@ -134,14 +134,14 @@ class ReservationWaitingJdbcRepositoryTest {
     }
 
     @Test
-    void findFirstBySlot은_생성시각이_가장_빠른_대기를_반환한다() {
+    void findFirstBySlot은_생성_ID가_가장_작은_대기를_반환한다() {
         repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
-        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
+        repository.save(waiting("밀란", reservation.getSlot(), WAITING_CREATED_AT));
 
         Optional<ReservationWaiting> found = repository.findFirstBySlot(reservation.getSlot());
 
         assertThat(found).isPresent();
-        assertThat(found.get().getWaiter()).isEqualTo(member("민욱"));
+        assertThat(found.get().getWaiter()).isEqualTo(member("브라운"));
     }
 
     @Test

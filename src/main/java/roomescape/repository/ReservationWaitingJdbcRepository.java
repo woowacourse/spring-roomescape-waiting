@@ -123,7 +123,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     public Optional<ReservationWaiting> findFirstBySlot(Slot slot) {
         String sql = SELECT_BASE + """
                 WHERE rw.date = ? AND rw.time_id = ? AND rw.theme_id = ?
-                ORDER BY rw.created_at ASC, rw.id ASC
+                ORDER BY rw.id ASC
                 LIMIT 1
                 """;
 
