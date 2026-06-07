@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -24,27 +25,33 @@ public class WaitlistWriter {
     private final WaitlistRepository waitlistRepository;
     private final SlotRepository slotRepository;
     private final WaitlistOrderPolicy waitlistOrderPolicy;
+    private final Clock clock;
 
     public WaitlistWriter(
         ReservationRepository reservationRepository,
         WaitlistRepository waitlistRepository,
         SlotRepository slotRepository,
-        WaitlistOrderPolicy waitlistOrderPolicy
+        WaitlistOrderPolicy waitlistOrderPolicy,
+        Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
         this.slotRepository = slotRepository;
         this.waitlistOrderPolicy = waitlistOrderPolicy;
+        this.clock = clock;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ReservationWithStatus save(Reservation reservation, LocalDateTime createdAt) {
-        verifyNoDuplicateReservation(reservation);
-
+    public ReservationWithStatus save(Reservation reservation) {
         Slot slot = slotRepository.getOrCreate(reservation.getSlot());
-        Reservation reservationWithSlot = new Reservation(reservation.getName(), slot);
+        slotRepository.lockById(slot.getId());
 
+        Reservation reservationWithSlot = new Reservation(reservation.getName(), slot);
+        verifyNoDuplicateReservation(reservationWithSlot);
+
+        LocalDateTime createdAt = LocalDateTime.now(clock);
         Long savedId = waitlistRepository.save(reservationWithSlot, createdAt);
+        
         Waitlist waitlist = waitlistRepository.getById(savedId, "존재하지 않는 예약 대기입니다.");
         int waitingOrder = calculateWaitingOrder(waitlist);
 

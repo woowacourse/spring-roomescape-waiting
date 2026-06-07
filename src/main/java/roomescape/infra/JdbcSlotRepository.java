@@ -35,4 +35,14 @@ public class JdbcSlotRepository implements SlotRepository {
 
         return new Slot(id, slot.getDate(), slot.getTime(), slot.getTheme());
     }
+
+    @Override
+    public void lockById(Long id) {
+        jdbcTemplate.queryForObject("""
+            SELECT id
+            FROM slot
+            WHERE id = ?
+            FOR UPDATE
+            """, Long.class, id);
+    }
 }

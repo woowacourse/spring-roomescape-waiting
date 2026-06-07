@@ -13,11 +13,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.support.TransactionTemplate;
+import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -33,6 +36,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
 @SpringBootTest
+@Import(TestClockConfig.class)
 public class ReserveOrWaitRaceConditionTest {
 
     private static final LocalDate FUTURE_FIRST_DATE = LocalDate.now().plusDays(1);
@@ -106,6 +110,67 @@ public class ReserveOrWaitRaceConditionTest {
         assertThat(results).hasSize(requestCount);
         assertThat(reservedCount).isEqualTo(1);
         assertThat(waitingCount).isEqualTo(requestCount - 1);
+    }
+
+    @Test
+    void 이미_예약된_슬롯에_동시에_대기를_신청하면_응답_순번이_중복되지_않는다() throws InterruptedException {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        reservationService.reserveOrWait(new ReservationRequest(
+            "브라운",
+            FUTURE_FIRST_DATE,
+            reservationTime.getId(),
+            theme.getId()
+        ));
+
+        List<ReservationRequest> waitlistRequests = List.of(
+            new ReservationRequest("네오", FUTURE_FIRST_DATE, reservationTime.getId(), theme.getId()),
+            new ReservationRequest("포비", FUTURE_FIRST_DATE, reservationTime.getId(), theme.getId()),
+            new ReservationRequest("준", FUTURE_FIRST_DATE, reservationTime.getId(), theme.getId()),
+            new ReservationRequest("워니", FUTURE_FIRST_DATE, reservationTime.getId(), theme.getId()),
+            new ReservationRequest("브리", FUTURE_FIRST_DATE, reservationTime.getId(), theme.getId())
+        );
+
+        ExecutorService executor = Executors.newFixedThreadPool(waitlistRequests.size());
+
+        CountDownLatch readyLatch = new CountDownLatch(waitlistRequests.size());
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(waitlistRequests.size());
+
+        Queue<ReservationWithStatus> results = new ConcurrentLinkedQueue<>();
+        Queue<Throwable> exceptions = new ConcurrentLinkedQueue<>();
+
+        for (ReservationRequest request : waitlistRequests) {
+            executor.submit(() -> {
+                try {
+                    readyLatch.countDown();
+                    startLatch.await();
+
+                    results.add(reservationService.reserveOrWait(request));
+                } catch (Throwable e) {
+                    exceptions.add(e);
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        assertThat(readyLatch.await(3, TimeUnit.SECONDS)).isTrue();
+        startLatch.countDown();
+        assertThat(doneLatch.await(10, TimeUnit.SECONDS)).isTrue();
+
+        executor.shutdown();
+
+        List<Integer> waitingOrders = results.stream()
+            .map(ReservationWithStatus::getWaitingOrder)
+            .sorted()
+            .toList();
+
+        assertThat(exceptions).isEmpty();
+        assertThat(results).hasSize(waitlistRequests.size());
+        assertThat(results).allSatisfy(result -> assertThat(result.getStatus()).isEqualTo(ReservationStatus.WAITING));
+        assertThat(waitingOrders).containsExactly(1, 2, 3, 4, 5);
     }
 
     @Test

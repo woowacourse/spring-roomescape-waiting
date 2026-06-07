@@ -127,7 +127,7 @@ public class ReservationService {
             Reservation saved = reservationWriter.save(reservation);
             return ReservationWithStatus.reserved(saved);
         } catch (DuplicateKeyException e) {
-            return waitlistWriter.save(reservation, now);
+            return waitlistWriter.save(reservation);
         }
     }
 
