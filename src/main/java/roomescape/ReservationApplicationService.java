@@ -24,7 +24,9 @@ public class ReservationApplicationService {
     }
 
     public ReservationWaiting saveWaiting(String name, LocalDate date, Long themeId, Long timeId) {
-        validateWaiting(name, date, themeId, timeId);
+
+        Reservation reservation = reservationService.findByDateAndThemeIdAndTimeId(date, themeId, timeId);
+        validateReservationOwner(name, reservation);
 
         return reservationWaitingService.save(name, date, themeId, timeId);
     }
@@ -47,9 +49,7 @@ public class ReservationApplicationService {
         });
     }
 
-    private void validateWaiting(String name, LocalDate date, Long themeId, Long timeId) {
-
-        Reservation reservation = reservationService.findByDateAndThemeIdAndTimeId(date, themeId, timeId);
+    private void validateReservationOwner(String name, Reservation reservation) {
 
         if (name.equals(reservation.getName())) {
             throw new ConflictException(
