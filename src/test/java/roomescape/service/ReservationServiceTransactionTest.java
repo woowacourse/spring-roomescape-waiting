@@ -13,6 +13,7 @@ import roomescape.dao.ReservationWaitDao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
@@ -94,5 +95,27 @@ class ReservationServiceTransactionTest {
 
         assertThat(owner).as("승급이 실패하면 소유자는 원소유자 그대로").isEqualTo(ownerId);
         assertThat(waits).as("승급 실패 시 대기자가 큐에서 사라지지 않아야 한다").isEqualTo(1L);
+    }
+
+    @Test
+    void 대기생성후_대기조회_실패시_대기신청_롤백() {
+        long ownerId = 1L;
+        long waiterId = 2L;
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (member_id, date, time_id, theme_id, store_id) "
+                        + "VALUES (?, '2027-01-01', 1, 1, 1)",
+                ownerId);
+        Long reservationId = jdbcTemplate.queryForObject("SELECT id FROM reservation", Long.class);
+
+        doThrow(RuntimeException.class)
+                .when(reservationWaitDao).findWaitOrder(anyLong());
+        assertThatThrownBy(() -> reservationService.createWait(reservationId, waiterId))
+                .isInstanceOf(RuntimeException.class);
+
+        Long waits = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ?", Long.class, reservationId);
+
+        assertThat(waits).as("대기생성 실패시 대기신청이 생성되지 않아야 한다.").isEqualTo(0L);
     }
 }
