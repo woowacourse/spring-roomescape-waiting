@@ -90,7 +90,7 @@ public class ReservationService {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
         reservationDao.delete(reservation.getId());
-        convertFirstWaitingToReservation(reservation);
+        convertFirstWaitingToReservationIfReservable(reservation);
     }
 
     public List<Reservation> findAllByName(String username) {
@@ -150,6 +150,13 @@ public class ReservationService {
                         .thenComparing(r -> r.reservation().getTime().getStartAt())
                         .thenComparing(MyReservation::reservationType))
                 .toList();
+    }
+
+    private void convertFirstWaitingToReservationIfReservable(Reservation reservation) {
+        if (reservation.isPast(LocalDateTime.now(clock))) {
+            return;
+        }
+        convertFirstWaitingToReservation(reservation);
     }
 
     private void convertFirstWaitingToReservation(Reservation canceledReservation) {

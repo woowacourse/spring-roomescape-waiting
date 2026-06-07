@@ -36,9 +36,13 @@ public class Reservation {
     }
 
     public void validateCancellable(LocalDateTime now) {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
+        if (isPast(now)) {
             throw new PastReservationException("이미 지난 예약은 취소할 수 없습니다.");
         }
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
     public boolean isOwnedBy(String username) {
