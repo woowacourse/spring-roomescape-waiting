@@ -6,7 +6,6 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
-import java.util.List;
 
 class ReservationDateTest {
 
@@ -103,16 +102,5 @@ class ReservationDateTest {
 
         // then
         Assertions.assertThat(reservationDate.isToday()).isTrue();
-    }
-
-    @Test
-    void getReservableDates_오늘부터_14일_반환() {
-        // when
-        List<LocalDate> dates = ReservationDate.getReservableDates();
-
-        // then
-        Assertions.assertThat(dates).hasSize(14);
-        Assertions.assertThat(dates.getFirst()).isEqualTo(LocalDate.now());
-        Assertions.assertThat(dates.getLast()).isEqualTo(LocalDate.now().plusDays(13));
     }
 }

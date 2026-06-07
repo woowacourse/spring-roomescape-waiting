@@ -45,7 +45,7 @@ public class ReservationService {
     }
 
     public AvailableDateResult getReservationOptions() {
-        return new AvailableDateResult(ReservationDate.getReservableDates());
+        return new AvailableDateResult(ReservationPolicy.getReservableDates());
     }
 
     public List<ReservationResult> getReservationsByName(final String name) {
