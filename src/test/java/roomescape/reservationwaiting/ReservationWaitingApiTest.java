@@ -100,7 +100,7 @@ class ReservationWaitingApiTest {
                                 }
                                 """))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("RESERVATION_WAITING_DUPLICATED"))
+                .andExpect(jsonPath("$.code").value("RESERVATION_WAITING_BY_RESERVER"))
                 .andExpect(jsonPath("$.status").value(409));
     }
 

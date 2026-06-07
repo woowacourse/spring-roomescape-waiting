@@ -198,7 +198,7 @@ class ReservationPageApiTest {
                 .when().post("/pages/user/reservations/waitings")
                 .then().log().all()
                 .statusCode(302)
-                .header("Location", containsString("errorCode=RESERVATION_WAITING_DUPLICATED"));
+                .header("Location", containsString("errorCode=RESERVATION_WAITING_BY_RESERVER"));
     }
 
     private void createTheme(final long id, final String name) {

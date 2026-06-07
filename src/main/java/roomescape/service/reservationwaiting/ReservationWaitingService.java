@@ -29,8 +29,7 @@ public class ReservationWaitingService {
     }
 
     public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
-        Long reservationId = findReservationId(date, themeId, timeId);
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "예약 정보가 없으면 대기 생성이 불가능합니다."
@@ -50,7 +49,7 @@ public class ReservationWaitingService {
     private void validateWaitableName(final Reservation reservation, final String waitingName) {
         if (reservation.getName().equals(waitingName)) {
             throw new ConflictException(
-                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    ErrorCode.RESERVATION_WAITING_BY_RESERVER,
                     "이미 예약한 사람은 같은 예약에 대기할 수 없습니다."
             );
         }
@@ -61,14 +60,6 @@ public class ReservationWaitingService {
                     "이미 같은 예약에 대기 중입니다."
             );
         }
-    }
-
-    private Long findReservationId(final LocalDate date, final Long themeId, final Long timeId) {
-        return reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, themeId, timeId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.RESERVATION_NOT_FOUND,
-                        "예약 정보가 없으면 대기 생성이 불가능합니다."
-                ));
     }
 
     public void deleteByIdAndName(Long waitingId, String name) {
