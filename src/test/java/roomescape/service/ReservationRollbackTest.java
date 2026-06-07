@@ -56,10 +56,11 @@ public class ReservationRollbackTest extends ServiceTest {
         ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
         ReservationResponse response = reservationService.create(request);
         Slot slot = reservationDao.findById(response.id()).orElseThrow().getSlot();
+        String fakeUserName = "fake";
 
         Mockito.when(waitingDao.findFirstBySlotIdOrderByCreatedAt(slot.getId())).
                 thenReturn(Optional.of(new Waiting(LocalDateTime.of(2040, 12, 12, 12, 12, 12),
-                        slot.getId(), "fake")));
+                        slot.getId(), fakeUserName)));
 
         doThrow(new RuntimeException("waitingDao 강제 실패")).when(waitingDao).delete(anyLong());
 
@@ -69,7 +70,7 @@ public class ReservationRollbackTest extends ServiceTest {
                         .isInstanceOf(RuntimeException.class),
                 () -> assertThat(reservationDao.findAll()).hasSize(1),
                 () -> assertThat(reservationDao.findById(response.id())).isPresent(),
-                () -> assertThat(reservationDao.findAllByName("대기자1")).isEmpty()
+                () -> assertThat(reservationDao.findAllByName(fakeUserName)).isEmpty()
         );
     }
 
