@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -65,6 +67,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteById(final long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -72,10 +75,10 @@ public class ReservationService {
                         "삭제된 예약 데이터가 없습니다."
                 ));
 
-        validateNoWaiting(reservation);
-        deleteReservation(reservation);
+        cancelReservation(reservation);
     }
 
+    @Transactional
     public void deleteByIdAndName(final long id, final String name) {
         ReservationName lookupName = ReservationName.from(name);
 
@@ -93,8 +96,7 @@ public class ReservationService {
         }
 
         validateCancelable(reservation);
-        validateNoWaiting(reservation);
-        deleteReservation(reservation);
+        cancelReservation(reservation);
     }
 
     public Reservation updateByIdAndName(
@@ -158,6 +160,32 @@ public class ReservationService {
         }
     }
 
+    private void cancelReservation(final Reservation reservation) {
+        reservationWaitingRepository.findFirstBySlot(reservation.getSlot())
+                .ifPresentOrElse(
+                        firstWaiting -> promoteFirstWaiting(reservation, firstWaiting),
+                        () -> deleteReservation(reservation)
+                );
+    }
+
+    private void promoteFirstWaiting(final Reservation reservation, final ReservationWaiting firstWaiting) {
+        deleteReservation(reservation);
+        savePromotedReservation(firstWaiting);
+        reservationWaitingRepository.delete(firstWaiting);
+    }
+
+    private void savePromotedReservation(final ReservationWaiting firstWaiting) {
+        try {
+            Reservation promotedReservation = createNewReservation(
+                    firstWaiting.getName(),
+                    firstWaiting.getReservation().getSlot()
+            );
+            reservationRepository.save(promotedReservation);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
+        }
+    }
+
     private void validateCancelable(final Reservation reservation) {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new ConflictException(
@@ -172,15 +200,6 @@ public class ReservationService {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
                     "이미 지난 예약은 변경할 수 없습니다."
-            );
-        }
-    }
-
-    private void validateNoWaiting(final Reservation reservation) {
-        if (!reservationWaitingRepository.findLineBySlot(reservation.getSlot()).isEmpty()) {
-            throw new ConflictException(
-                    ErrorCode.RESERVATION_HAS_WAITING,
-                    "예약 대기가 존재하는 예약은 바로 삭제할 수 없습니다."
             );
         }
     }

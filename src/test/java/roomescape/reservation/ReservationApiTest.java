@@ -173,6 +173,32 @@ class ReservationApiTest {
     }
 
     @Test
+    void 예약_삭제_시_첫_번째_대기가_예약으로_전환된다() {
+        createTheme();
+        createReservationTime("10:00");
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        createReservation("브라운", futureDate.toString(), 1L, 1L);
+        insertReservationWaiting(1L, "아루", "2026-06-07 12:00:00");
+        insertReservationWaiting(1L, "도기", "2026-06-07 12:01:00");
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+        String reservationName = jdbcTemplate.queryForObject("SELECT name FROM reservation", String.class);
+        Integer waitingCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation_waiting", Integer.class);
+        String waitingName = jdbcTemplate.queryForObject("SELECT name FROM reservation_waiting", String.class);
+
+        assertThat(reservationCount).isEqualTo(1);
+        assertThat(reservationName).isEqualTo("아루");
+        assertThat(waitingCount).isEqualTo(1);
+        assertThat(waitingName).isEqualTo("도기");
+    }
+
+    @Test
     void 예약과_시간_연결() {
         createTheme();
         createReservationTime("10:00");
@@ -398,11 +424,22 @@ class ReservationApiTest {
         );
     }
 
+    private void insertReservationWaiting(final Long slotId, final String name, final String requestedAt) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (slot_id, name, requested_at) VALUES (?, ?, ?)",
+                slotId,
+                name,
+                requestedAt
+        );
+    }
+
     private void clearTables() {
+        jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");

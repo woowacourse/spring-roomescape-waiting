@@ -146,6 +146,28 @@ class JdbcReservationWaitingRepositoryTest {
         assertThat(waitingLine.sequenceOf(saved.getId())).isOne();
     }
 
+    @Test
+    @DisplayName("슬롯의 첫 번째 대기를 조회한다")
+    void findFirstBySlot() {
+        Reservation reservation = createReservation();
+        ReservationWaiting second = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "도기",
+                LocalDateTime.parse("2026-08-05T12:01:00")
+        ));
+        ReservationWaiting first = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        ));
+
+        ReservationWaiting found = jdbcReservationWaitingRepository.findFirstBySlot(reservation.getSlot())
+                .orElseThrow();
+
+        assertThat(found).isEqualTo(first);
+        assertThat(found).isNotEqualTo(second);
+    }
+
     private Reservation createReservation() {
         Theme theme = jdbcThemeRepository.save(
                 Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")

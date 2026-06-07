@@ -109,17 +109,29 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 대기가 존재하는 예약은 삭제할 수 없다")
+    @DisplayName("예약을 삭제하면 첫 번째 대기가 예약으로 전환된다")
     void deleteByIdWithWaiting() {
         Fixture fixture = new Fixture();
         Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
-        fixture.reservationWaitingRepository.save(ReservationWaiting.createNew(
+        ReservationWaiting firstWaiting = fixture.reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
+        ReservationWaiting secondWaiting = fixture.reservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "도기",
+                LocalDateTime.parse("2026-08-05T12:01:00")
+        ));
 
-        assertThrows(ConflictException.class, () -> fixture.reservationService.deleteById(reservation.getId()));
+        fixture.reservationService.deleteById(reservation.getId());
+
+        assertThat(fixture.reservationRepository.findById(reservation.getId())).isEmpty();
+        assertThat(fixture.reservationRepository.findAll())
+                .extracting(Reservation::getName)
+                .containsExactly("아루");
+        assertThat(fixture.reservationWaitingRepository.findById(firstWaiting.getId())).isEmpty();
+        assertThat(fixture.reservationWaitingRepository.findById(secondWaiting.getId())).contains(secondWaiting);
     }
 
     @Test

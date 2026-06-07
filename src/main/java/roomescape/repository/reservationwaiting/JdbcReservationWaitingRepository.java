@@ -117,6 +117,38 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public Optional<ReservationWaiting> findFirstBySlot(final ReservationSlot slot) {
+        String sql = """
+                SELECT rw.id,
+                       rw.name AS waiting_name,
+                       rw.requested_at,
+                       r.id AS reservation_id,
+                       r.name AS reservation_name,
+                       rw.slot_id,
+                       s.date,
+                       r.created_at,
+                       rt.id AS time_id,
+                       rt.start_at,
+                       t.id AS theme_id,
+                       t.name AS theme_name,
+                       t.description,
+                       t.thumbnail_url
+                FROM reservation_waiting AS rw
+                INNER JOIN reservation_slot AS s ON rw.slot_id = s.id
+                INNER JOIN reservation AS r ON r.slot_id = s.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
+                WHERE rw.slot_id = ?
+                ORDER BY rw.requested_at, rw.id
+                LIMIT 1
+                """;
+
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, slot.getId())
+                .stream()
+                .findFirst();
+    }
+
+    @Override
     public ReservationWaitingLine findLineBySlot(final ReservationSlot slot) {
         String sql = """
                 SELECT rw.id,
