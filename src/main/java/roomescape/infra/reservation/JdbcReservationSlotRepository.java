@@ -58,20 +58,27 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             group by rt.id, rt.start_at
             order by rt.start_at, rt.id
             """;
-    private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> ReservationSlot.of(
-            rs.getLong(COLUMN_ID),
-            rs.getDate(COLUMN_DATE).toLocalDate(),
-            ReservationTime.of(
-                    rs.getLong(COLUMN_TIME_ID),
-                    rs.getTime(COLUMN_START_AT).toLocalTime()
-            ),
-            Theme.of(
-                    rs.getLong(COLUMN_THEME_ID),
-                    rs.getString(COLUMN_THEME_NAME),
-                    rs.getString(COLUMN_THEME_CONTENT),
-                    rs.getString(COLUMN_THEME_URL)
+    private static final String EXISTS_BY_DATE_AND_THEME_ID_AND_TIME_ID_SQL = """
+            select exists (
+                select 1
+                from reservation_slot
+                where date = :date
+                  and theme_id = :themeId
+                  and time_id = :timeId
             )
-    );
+            """;
+    private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> ReservationSlot
+            .of(
+                    rs.getLong(COLUMN_ID),
+                    rs.getDate(COLUMN_DATE).toLocalDate(),
+                    ReservationTime.of(
+                            rs.getLong(COLUMN_TIME_ID),
+                            rs.getTime(COLUMN_START_AT).toLocalTime()),
+                    Theme.of(
+                            rs.getLong(COLUMN_THEME_ID),
+                            rs.getString(COLUMN_THEME_NAME),
+                            rs.getString(COLUMN_THEME_CONTENT),
+                            rs.getString(COLUMN_THEME_URL)));
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -88,16 +95,14 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         List<ReservationSlot> result = jdbcTemplate.query(
                 FIND_BY_ID_FOR_UPDATE_SQL,
                 new MapSqlParameterSource().addValue(COLUMN_ID, id),
-                RESERVATION_SLOT_ROW_MAPPER
-        );
+                RESERVATION_SLOT_ROW_MAPPER);
         return result.stream().findFirst();
     }
 
     @Override
     public List<ReservationCountResult> findWaitingCountsByThemeIdAndDate(
             Long themeId,
-            LocalDate date
-    ) {
+            LocalDate date) {
         return jdbcTemplate.query(
                 FIND_WAITING_COUNTS_BY_THEME_ID_AND_DATE_SQL,
                 new MapSqlParameterSource()
@@ -107,9 +112,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                         rs.getLong(COLUMN_SLOT_ID),
                         rs.getLong(COLUMN_TIME_ID),
                         rs.getTime(COLUMN_START_AT).toLocalTime(),
-                        rs.getLong("waiting_count")
-                )
-        );
+                        rs.getLong("waiting_count")));
     }
 
     @Override
@@ -123,7 +126,20 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         } catch (DuplicateKeyException exception) {
             throw new DuplicateResourceException(exception);
         }
-        return ReservationSlot.of(extractId(key), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return ReservationSlot.of(extractId(key), reservation.getDate(), reservation.getTime(),
+                reservation.getTheme());
+    }
+
+    @Override
+    public boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId) {
+        Boolean exists = jdbcTemplate.queryForObject(
+                EXISTS_BY_DATE_AND_THEME_ID_AND_TIME_ID_SQL,
+                new MapSqlParameterSource()
+                        .addValue("date", date)
+                        .addValue("themeId", themeId)
+                        .addValue("timeId", timeId),
+                Boolean.class);
+        return Boolean.TRUE.equals(exists);
     }
 
     private long extractId(Number key) {

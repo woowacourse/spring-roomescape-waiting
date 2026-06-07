@@ -66,6 +66,26 @@ class JdbcReservationSlotRepositoryTest {
                 .isInstanceOf(DuplicateResourceException.class);
     }
 
+    @DisplayName("특정 날짜, 테마 ID, 시간 ID를 갖는 슬롯의 존재 여부를 확인할 수 있다")
+    @Test
+    void existsByDateAndThemeIdAndTimeId() {
+        // given
+        Theme theme = themeRepository.save(Theme.create("스릴러", "긴장감 넘치는 추격 테마", "/themes/thriller-night"));
+        ReservationTime time = timeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        LocalDate date = LocalDate.of(2030, 2, 1);
+
+        slotRepository.save(ReservationSlot.create(date, time, theme));
+
+        // when
+        boolean exists = slotRepository.existsByDateAndThemeIdAndTimeId(date, theme.getId(), time.getId());
+        boolean notExists = slotRepository.existsByDateAndThemeIdAndTimeId(date.plusDays(1), theme.getId(),
+                time.getId());
+
+        // then
+        assertThat(exists).isTrue();
+        assertThat(notExists).isFalse();
+    }
+
     private ReservationSlot saveSlot(
             String themeName,
             String description,

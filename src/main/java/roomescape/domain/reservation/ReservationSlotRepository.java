@@ -11,4 +11,6 @@ public interface ReservationSlotRepository {
     List<ReservationCountResult> findWaitingCountsByThemeIdAndDate(Long themeId, LocalDate date);
 
     ReservationSlot save(ReservationSlot reservation);
+
+    boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 }
