@@ -4,11 +4,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRankResult;
 import roomescape.domain.theme.ThemeRepository;
@@ -26,7 +26,6 @@ public class ThemeService {
     private static final int RANK_DAYS_LIMIT = 7;
 
     private final ThemeRepository themeRepository;
-    private final ReservationSlotRepository slotRepository;
     private final Clock clock;
 
     public ThemesResponse getAllTheme() {
@@ -54,12 +53,13 @@ public class ThemeService {
 
     @Transactional
     public void deleteTheme(Long id) {
-        if (slotRepository.existsByThemeId(id)) {
+        try {
+            int deletedRow = themeRepository.deleteById(id);
+            if (deletedRow == 0) {
+                throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
+            }
+        } catch (DataIntegrityViolationException exception) {
             throw new BusinessException(ErrorCode.THEME_IN_USE);
-        }
-        int deletedRow = themeRepository.deleteById(id);
-        if (deletedRow == 0) {
-            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
         }
     }
 }

@@ -1,5 +1,6 @@
 package roomescape.infra.reservation;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -47,6 +49,21 @@ class JdbcReservationSlotRepositoryTest {
         // then
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2030, 2, 1));
+    }
+
+    @DisplayName("중복 예약 슬롯은 유니크 제약 위반을 발생시킨다")
+    @Test
+    void saveWhenDuplicate() {
+        // given
+        Theme theme = themeRepository.save(Theme.create("스릴러", "긴장감 넘치는 추격 테마", "/themes/thriller-night"));
+        ReservationTime time = timeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        ReservationSlot slot = ReservationSlot.create(LocalDate.of(2030, 2, 1), time, theme);
+
+        slotRepository.save(slot);
+
+        // when & then
+        assertThatThrownBy(() -> slotRepository.save(slot))
+                .isInstanceOf(UniqueConstraintViolationException.class);
     }
 
     @DisplayName("시간과 테마로 예약 슬롯 존재 여부를 확인할 수 있다")

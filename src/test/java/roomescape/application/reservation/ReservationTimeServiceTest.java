@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.presentation.reservation.request.TimeCreateRequest;
@@ -33,14 +33,11 @@ class ReservationTimeServiceTest {
     @Mock
     private ReservationTimeRepository timeRepository;
 
-    @Mock
-    private ReservationSlotRepository slotRepository;
-
     private ReservationTimeService reservationTimeService;
 
     @BeforeEach
     void setUp() {
-        reservationTimeService = new ReservationTimeService(timeRepository, slotRepository);
+        reservationTimeService = new ReservationTimeService(timeRepository);
     }
 
     @DisplayName("예약 시간 목록을 조회할 수 있다")
@@ -60,7 +57,6 @@ class ReservationTimeServiceTest {
                         .extracting("startAt")
                         .isEqualTo(LocalTime.of(10, 0)));
         verify(timeRepository, times(1)).findAll();
-        verifyNoInteractions(slotRepository);
     }
 
     @DisplayName("예약 시간을 저장할 수 있다")
@@ -78,21 +74,18 @@ class ReservationTimeServiceTest {
         assertThat(response.id()).isEqualTo(10L);
         assertThat(response.startAt()).isEqualTo(LocalTime.of(18, 30));
         verify(timeRepository, times(1)).save(any(ReservationTime.class));
-        verifyNoInteractions(slotRepository);
     }
 
     @DisplayName("사용 중이 아닌 예약 시간은 삭제할 수 있다")
     @Test
     void deleteReservationTime() {
         // given
-        given(slotRepository.existsByTimeId(1L)).willReturn(false);
         given(timeRepository.deleteById(1L)).willReturn(1);
 
         // when
         reservationTimeService.deleteReservationTime(1L);
 
         // then
-        verify(slotRepository, times(1)).existsByTimeId(1L);
         verify(timeRepository, times(1)).deleteById(1L);
     }
 
@@ -100,22 +93,20 @@ class ReservationTimeServiceTest {
     @Test
     void deleteReservationTimeWhenInUse() {
         // given
-        given(slotRepository.existsByTimeId(1L)).willReturn(true);
+        given(timeRepository.deleteById(1L)).willThrow(new DataIntegrityViolationException("fk"));
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_TIME_IN_USE);
-        verify(slotRepository, times(1)).existsByTimeId(1L);
-        verify(timeRepository, never()).deleteById(1L);
+        verify(timeRepository, times(1)).deleteById(1L);
     }
 
     @DisplayName("존재하지 않는 예약 시간은 삭제할 수 없다")
     @Test
     void deleteReservationTimeWhenNotFound() {
         // given
-        given(slotRepository.existsByTimeId(1L)).willReturn(false);
         given(timeRepository.deleteById(1L)).willReturn(0);
 
         // when & then
@@ -123,7 +114,6 @@ class ReservationTimeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_TIME_NOT_FOUND);
-        verify(slotRepository, times(1)).existsByTimeId(1L);
         verify(timeRepository, times(1)).deleteById(1L);
     }
 }

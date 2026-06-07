@@ -3,11 +3,13 @@ package roomescape.infra.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.exception.UniqueConstraintViolationException;
 import roomescape.domain.reservation.ReservationCountResult;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotRepository;
@@ -144,10 +146,15 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     @Override
     public ReservationSlot save(ReservationSlot reservation) {
-        Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue(COLUMN_DATE, reservation.getDate())
-                .addValue(COLUMN_TIME_ID, reservation.getTime().getId())
-                .addValue(COLUMN_THEME_ID, reservation.getTheme().getId()));
+        Number key;
+        try {
+            key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
+                    .addValue(COLUMN_DATE, reservation.getDate())
+                    .addValue(COLUMN_TIME_ID, reservation.getTime().getId())
+                    .addValue(COLUMN_THEME_ID, reservation.getTheme().getId()));
+        } catch (DuplicateKeyException exception) {
+            throw new UniqueConstraintViolationException(exception);
+        }
         return ReservationSlot.of(extractId(key), reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 

@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.domain.exception.BusinessException;
 import roomescape.domain.exception.ErrorCode;
-import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRankResult;
 import roomescape.domain.theme.ThemeRepository;
@@ -45,14 +45,11 @@ class ThemeServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
-    @Mock
-    private ReservationSlotRepository slotRepository;
-
     private ThemeService themeService;
 
     @BeforeEach
     void setUp() {
-        themeService = new ThemeService(themeRepository, slotRepository, FIXED_CLOCK);
+        themeService = new ThemeService(themeRepository, FIXED_CLOCK);
     }
 
     @DisplayName("테마 목록을 조회할 수 있다")
@@ -72,7 +69,6 @@ class ThemeServiceTest {
                         .extracting("name")
                         .isEqualTo("심해 공포"));
         verify(themeRepository, times(1)).findAll();
-        verifyNoInteractions(slotRepository);
     }
 
     @DisplayName("관리자용 테마 목록을 조회할 수 있다")
@@ -92,7 +88,6 @@ class ThemeServiceTest {
                         .extracting("url")
                         .isEqualTo("/themes/chase"));
         verify(themeRepository, times(1)).findAll();
-        verifyNoInteractions(slotRepository);
     }
 
     @DisplayName("최근 인기 테마를 조회할 수 있다")
@@ -123,7 +118,6 @@ class ThemeServiceTest {
                     assertThat(payload).extracting("rank").isEqualTo(2);
                 });
         verify(themeRepository, times(1)).findPopularThemes(10, LocalDate.of(2030, 1, 1), LocalDate.of(2030, 1, 8));
-        verifyNoInteractions(slotRepository);
     }
 
     @DisplayName("테마를 저장할 수 있다")
@@ -143,21 +137,18 @@ class ThemeServiceTest {
         assertThat(response.content()).isEqualTo("심해 탈출 공포 테마");
         assertThat(response.url()).isEqualTo("/themes/deep-sea");
         verify(themeRepository, times(1)).save(any(Theme.class));
-        verifyNoInteractions(slotRepository);
     }
 
     @DisplayName("사용 중이 아닌 테마는 삭제할 수 있다")
     @Test
     void deleteTheme() {
         // given
-        given(slotRepository.existsByThemeId(1L)).willReturn(false);
         given(themeRepository.deleteById(1L)).willReturn(1);
 
         // when
         themeService.deleteTheme(1L);
 
         // then
-        verify(slotRepository, times(1)).existsByThemeId(1L);
         verify(themeRepository, times(1)).deleteById(1L);
     }
 
@@ -165,22 +156,20 @@ class ThemeServiceTest {
     @Test
     void deleteThemeWhenInUse() {
         // given
-        given(slotRepository.existsByThemeId(1L)).willReturn(true);
+        given(themeRepository.deleteById(1L)).willThrow(new DataIntegrityViolationException("fk"));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(1L))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.THEME_IN_USE);
-        verify(slotRepository, times(1)).existsByThemeId(1L);
-        verify(themeRepository, never()).deleteById(anyLong());
+        verify(themeRepository, times(1)).deleteById(1L);
     }
 
     @DisplayName("존재하지 않는 테마는 삭제할 수 없다")
     @Test
     void deleteThemeWhenNotFound() {
         // given
-        given(slotRepository.existsByThemeId(1L)).willReturn(false);
         given(themeRepository.deleteById(1L)).willReturn(0);
 
         // when & then
@@ -188,7 +177,6 @@ class ThemeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.THEME_NOT_FOUND);
-        verify(slotRepository, times(1)).existsByThemeId(1L);
         verify(themeRepository, times(1)).deleteById(1L);
     }
 }

@@ -632,6 +632,7 @@ class ReservationServiceTest {
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
         given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(reservation.getSlot()));
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
         given(reservationRepository.deleteById(1L)).willReturn(1);
 
@@ -639,10 +640,13 @@ class ReservationServiceTest {
         reservationService.deleteReservationByAdmin(1L);
 
         // then
-        verify(reservationRepository, times(1)).findByIdForUpdate(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
-        verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
+        InOrder inOrder = inOrder(reservationRepository, slotRepository);
+        inOrder.verify(reservationRepository).findByIdForUpdate(1L);
+        inOrder.verify(slotRepository).findByIdForUpdate(20L);
+        inOrder.verify(reservationRepository).deleteById(1L);
+        inOrder.verify(reservationRepository).findAllBySlotIdOrderByReservedAt(20L);
         verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 
     @DisplayName("관리자가 찾을 수 없는 예약을 삭제하면 예외를 던진다")
@@ -679,6 +683,7 @@ class ReservationServiceTest {
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
         given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(reservation.getSlot()));
         given(reservationRepository.deleteById(1L)).willReturn(0);
 
         // when & then
@@ -686,10 +691,13 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-        verify(reservationRepository, times(1)).findByIdForUpdate(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
+        InOrder inOrder = inOrder(reservationRepository, slotRepository);
+        inOrder.verify(reservationRepository).findByIdForUpdate(1L);
+        inOrder.verify(slotRepository).findByIdForUpdate(20L);
+        inOrder.verify(reservationRepository).deleteById(1L);
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
         verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 
     @DisplayName("사용자가 본인 예약을 취소할 수 있다")
@@ -710,6 +718,7 @@ class ReservationServiceTest {
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
         given(reservationRepository.findByIdAndUsernameForUpdate(1L, "홍길동")).willReturn(Optional.of(reservation));
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(reservation.getSlot()));
         given(reservationRepository.deleteById(1L)).willReturn(1);
         given(reservationRepository.findAllBySlotIdOrderByReservedAt(20L)).willReturn(List.of());
 
@@ -717,10 +726,13 @@ class ReservationServiceTest {
         reservationService.cancelReservationByUser(1L, User.of(10L, "홍길동"));
 
         // then
-        verify(reservationRepository, times(1)).findByIdAndUsernameForUpdate(1L, "홍길동");
-        verify(reservationRepository, times(1)).deleteById(1L);
-        verify(reservationRepository, times(1)).findAllBySlotIdOrderByReservedAt(20L);
+        InOrder inOrder = inOrder(reservationRepository, slotRepository);
+        inOrder.verify(reservationRepository).findByIdAndUsernameForUpdate(1L, "홍길동");
+        inOrder.verify(slotRepository).findByIdForUpdate(20L);
+        inOrder.verify(reservationRepository).deleteById(1L);
+        inOrder.verify(reservationRepository).findAllBySlotIdOrderByReservedAt(20L);
         verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 
     @DisplayName("본인 예약이 아니면 취소할 수 없다")
@@ -757,6 +769,7 @@ class ReservationServiceTest {
                 LocalDateTime.of(2030, 1, 1, 10, 0)
         );
         given(reservationRepository.findByIdAndUsernameForUpdate(1L, "홍길동")).willReturn(Optional.of(reservation));
+        given(slotRepository.findByIdForUpdate(20L)).willReturn(Optional.of(reservation.getSlot()));
         given(reservationRepository.deleteById(1L)).willReturn(0);
 
         // when & then
@@ -764,9 +777,12 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-        verify(reservationRepository, times(1)).findByIdAndUsernameForUpdate(1L, "홍길동");
-        verify(reservationRepository, times(1)).deleteById(1L);
+        InOrder inOrder = inOrder(reservationRepository, slotRepository);
+        inOrder.verify(reservationRepository).findByIdAndUsernameForUpdate(1L, "홍길동");
+        inOrder.verify(slotRepository).findByIdForUpdate(20L);
+        inOrder.verify(reservationRepository).deleteById(1L);
         verify(reservationRepository, never()).findAllBySlotIdOrderByReservedAt(anyLong());
         verify(reservationRepository, never()).batchUpdate(any());
+        verifyNoInteractions(userRepository);
     }
 }

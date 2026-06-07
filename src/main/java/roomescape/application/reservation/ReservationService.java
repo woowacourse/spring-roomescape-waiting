@@ -117,31 +117,28 @@ public class ReservationService {
     @Transactional
     public void deleteReservationByAdmin(Long id) {
         Reservation reservation = findReservationByIdForUpdateOrThrow(id);
+        ReservationSlot slot = findSlotByIdForUpdateOrThrow(reservation.getSlot().getId());
         int deletedRow = reservationRepository.deleteById(reservation.getId());
         if (deletedRow == 0) {
             throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
         }
-        recalculateReservationsForSlot(reservation.getSlot());
+        recalculateReservationsForSlot(slot);
     }
 
     @Transactional
     public void cancelReservationByUser(Long id, User loginUser) {
         Reservation reservation = findReservationByIdAndUsernameForUpdateOrThrow(id, loginUser.getName());
         reservation.validateCancellable(LocalDateTime.now(clock));
+        ReservationSlot slot = findSlotByIdForUpdateOrThrow(reservation.getSlot().getId());
         int deletedRow = reservationRepository.deleteById(reservation.getId());
         if (deletedRow == 0) {
             throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
         }
-        recalculateReservationsForSlot(reservation.getSlot());
+        recalculateReservationsForSlot(slot);
     }
 
     private Reservation findReservationByIdForUpdateOrThrow(Long id) {
         return reservationRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-    }
-
-    private Reservation findReservationByIdAndUsernameOrThrow(Long id, String username) {
-        return reservationRepository.findByIdAndUsername(id, username)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
