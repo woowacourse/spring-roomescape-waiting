@@ -233,7 +233,7 @@
 | **관리자 테마 추가**    | `POST /admin/themes`           | `{name, description, thumbnail_url}`   | `201 Location: /themes/{id}`                                          |
 | **관리자 테마 삭제**    | `DELETE /admin/themes/{id}`    | —                                      | `204`                                                                 |
 | **관리자 예약 조회**    | `GET /admin/reservations`      | —                                      | `200 [{id, name, date, themeName, time}]`                             |
-| **관리자 예약 삭제**    | `DELETE /admin/reservations/{id}` | —                                   | `204` (첫 번째 대기가 있으면 자동 예약 전환)                              |
+| **관리자 예약 삭제**    | `DELETE /admin/reservations/{id}` | —                                   | `204` (이용 가능한 슬롯이면 첫 번째 대기 자동 예약 전환)                     |
 
 ### 공통 API (시간)
 
