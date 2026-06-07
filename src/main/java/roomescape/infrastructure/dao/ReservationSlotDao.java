@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infrastructure.dao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,16 +10,16 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.domain.ReservationSlot;
+import roomescape.domain.entity.ReservationSlotEntity;
 import roomescape.domain.Theme;
-import roomescape.domain.Time;
+import roomescape.domain.entity.Time;
 
 @Repository
 public class ReservationSlotDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
-    private final RowMapper<ReservationSlot> reservationRowMapper = (rs, rowNum) -> new ReservationSlot(
+    private final RowMapper<ReservationSlotEntity> reservationRowMapper = (rs, rowNum) -> new ReservationSlotEntity(
             rs.getLong("id"),
             rs.getDate("date").toLocalDate(),
             new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
@@ -41,7 +41,7 @@ public class ReservationSlotDao {
         )).longValue();
     }
 
-    public ReservationSlot findById(Long id) {
+    public ReservationSlotEntity findById(Long id) {
         String sql = """
                 SELECT r.id, 
                        r.date,
@@ -80,7 +80,7 @@ public class ReservationSlotDao {
         return result.stream().findFirst();
     }
 
-    public List<ReservationSlot> findAll() {
+    public List<ReservationSlotEntity> findAll() {
         String sql = """
                 SELECT r.id, 
                        r.date,

@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infrastructure.dao;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.domain.Time;
+import roomescape.domain.entity.Time;
 
 @Repository
 public class TimeDao {
