@@ -34,9 +34,7 @@ public class Reservation {
     }
 
     public void ensureNotPast(LocalDateTime now) {
-        LocalDateTime requestDateTime = LocalDateTime.of(slot.getDate().getValue(), slot.getTime().getStartAt());
-
-        if (requestDateTime.isBefore(now)) {
+        if (slot.isBefore(now)) {
             throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
         }
     }

@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.theme.Theme;
 
@@ -30,6 +31,12 @@ public class Slot {
 
     public boolean isSame(Reservation target) {
         return id == target.getSlot().getId();
+    }
+
+    public boolean isBefore(LocalDateTime now) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date.getValue(), time.getStartAt());
+
+        return reservationDateTime.isBefore(now);
     }
 
     public long getId() {

@@ -26,11 +26,11 @@ public class RoomEscapeFixture {
     public static final LocalDateTime PAST_DATE_TIME = LocalDateTime.of(2000, 11, 11, 10, 0);
     public static final LocalDateTime FUTURE_DATE_TIME = LocalDateTime.of(2099, 11, 11, 10, 0);
 
-    static final ReservationName NAME = new ReservationName("zeze");
-    static final ReservationDate FUTURE_DATE = new ReservationDate(FUTURE_DATE_TIME.toLocalDate());
-    static final ReservationDate PAST_DATE = new ReservationDate(PAST_DATE_TIME.toLocalDate());
-    static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
-    static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
+    public static final ReservationName NAME = new ReservationName("zeze");
+    public static final ReservationDate FUTURE_DATE = new ReservationDate(FUTURE_DATE_TIME.toLocalDate());
+    public static final ReservationDate PAST_DATE = new ReservationDate(PAST_DATE_TIME.toLocalDate());
+    public static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
+    public static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
 
     public static SlotBuilder slot() {
         return new SlotBuilder();
