@@ -50,13 +50,6 @@ public class ReservationTimeRepository {
                 .findFirst();
     }
 
-    public Optional<ReservationTime> findByIdForUpdate(Long id) {
-        String query = "SELECT * FROM reservation_time WHERE id = ? FOR UPDATE";
-        return jdbcTemplate.query(query, rowMapper, id)
-                .stream()
-                .findFirst();
-    }
-
     public void deleteById(Long id) {
         String query = "delete from reservation_time where id = ?";
         jdbcTemplate.update(query, id);

@@ -71,7 +71,7 @@ public class AdminThemeService {
 
     private void validateDuplicateTheme(String name) {
         if (adminThemeRepository.existsByName(name)) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_THEME_NAME);
         }
     }
 }

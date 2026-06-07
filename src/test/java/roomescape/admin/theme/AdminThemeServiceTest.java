@@ -10,12 +10,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.admin.theme.dto.AdminThemeRequest;
 import roomescape.admin.theme.dto.AdminThemeResponse;
 import roomescape.admin.theme.dto.AdminThemesResponse;
@@ -59,7 +59,7 @@ class AdminThemeServiceTest {
 
         assertThatThrownBy(() -> adminThemeService.createTheme(request))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION_NAME);
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_THEME_NAME);
     }
 
     @Test

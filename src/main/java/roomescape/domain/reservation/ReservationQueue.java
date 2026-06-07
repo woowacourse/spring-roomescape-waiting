@@ -1,37 +1,37 @@
-package roomescape.domain.waiting;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import roomescape.domain.waiting.dto.WaitingRequest;
-import roomescape.domain.waiting.dto.WaitingResponse;
+import roomescape.domain.reservation.dto.ReservationRequest;
+import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
 import roomescape.infra.queue.AsyncQueue;
 import roomescape.infra.queue.JobResult;
 
 @Component
-public class WaitingQueue extends AsyncQueue<WaitingRequest, WaitingResponse> {
+public class ReservationQueue extends AsyncQueue<ReservationRequest, ReservationResponse> {
 
-    private final WaitingService waitingService;
+    private final ReservationService reservationService;
 
-    public WaitingQueue(WaitingService waitingService) {
-        this.waitingService = waitingService;
+    public ReservationQueue(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @Override
-    protected String toSlotId(WaitingRequest request) {
+    protected String toSlotId(ReservationRequest request) {
         return request.date() + ":" + request.timeId() + ":" + request.themeId();
     }
 
     @Override
-    protected String toJobId(WaitingRequest request) {
+    protected String toJobId(ReservationRequest request) {
         return request.date() + ":" + request.timeId() + ":" + request.themeId() + ":" + request.name();
     }
 
     @Override
-    protected JobResult<WaitingResponse> process(WaitingRequest request) {
+    protected JobResult<ReservationResponse> process(ReservationRequest request) {
         try {
-            return JobResult.success(waitingService.createWaiting(request));
+            return JobResult.success(reservationService.createReservation(request));
         } catch (RoomescapeException e) {
             return JobResult.failed(e.getMessage());
         }
