@@ -258,6 +258,7 @@ class ReservationServiceTest {
 
     @Test
     void delete_지난_예약도_삭제() {
+        fixClock();
         LocalDate pastDate = fixedNow.toLocalDate().minusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme);
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
@@ -265,6 +266,9 @@ class ReservationServiceTest {
         reservationService.delete(1L);
 
         then(reservationDao).should().delete(1L);
+        then(reservationDao).should(never()).findFirstWaitingBySlot(pastDate, 1L, 1L);
+        then(reservationDao).should(never()).save(any(Reservation.class));
+        then(reservationDao).should(never()).deleteWaiting(10L);
     }
 
     @Test
@@ -286,6 +290,7 @@ class ReservationServiceTest {
 
     @Test
     void delete_관리자_예약_삭제_시_첫번째_대기를_예약으로_전환한다() {
+        fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
@@ -302,6 +307,7 @@ class ReservationServiceTest {
 
     @Test
     void delete_대기_전환_중_예약_저장이_실패하면_대기를_삭제하지_않는다() {
+        fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
