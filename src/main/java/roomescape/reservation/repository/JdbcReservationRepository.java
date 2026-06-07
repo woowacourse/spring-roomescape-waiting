@@ -129,10 +129,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
                 WHERE r.id = ?
-                ORDER BY r.date ASC,
-                         rt.start_at ASC,
-                         r.request_order ASC,
-                         r.id ASC
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, id)
