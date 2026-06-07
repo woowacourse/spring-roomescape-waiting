@@ -47,15 +47,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponseDTO addReservation(ReservationRequestDTO reservationRequestDTO) {
+        LocalDate date = reservationRequestDTO.date();
         ReservationTime time = reservationTimeRepository.findById(reservationRequestDTO.timeId())
                 .orElseThrow(() -> new RoomEscapeException(
                         ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
         Theme theme = themeRepository.findById(reservationRequestDTO.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
-        LocalDate date = reservationRequestDTO.date();
 
         ReservationSlot slot = ReservationSlot.of(date, time, theme);
-
         validateDuplicateReservation(slot);
 
         Reservation reservation = Reservation.create(reservationRequestDTO.name(), slot);
@@ -114,6 +113,8 @@ public class ReservationService {
         ReservationTime time = reservationTimeRepository.findById(request.timeId()).orElseThrow(
                 () -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND)
         );
+
+        reservationRepository.findBySlotWithLock(reservation.getReservationSlot());
 
         ReservationSlot slotForUpdate = ReservationSlot.of(
                 request.date(),
