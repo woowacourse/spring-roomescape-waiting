@@ -39,6 +39,6 @@ public class MyReservationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteMyReservation(@OwnerOnly String name, @PathVariable Long id) {
-        reservationService.deleteById(id, name, LocalDateTime.now());
+        reservationService.deleteByUser(id, name, LocalDateTime.now());
     }
 }

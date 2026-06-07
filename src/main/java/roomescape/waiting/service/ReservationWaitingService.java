@@ -45,7 +45,7 @@ public class ReservationWaitingService {
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
         Reservation targetReservation = validateTargetReservationExists(newReservationWaiting.getSlot());
         boolean hasSameTimeBooking = reservationRepository.hasBookingAtSameTime(
-                newReservationWaiting.toReservation(requestTime));
+                newReservationWaiting.getName(), newReservationWaiting.getSlot());
         boolean hasDuplicateWaiting = reservationWaitingRepository.hasWaitingAtSameTime(newReservationWaiting);
         newReservationWaiting.validate(targetReservation, hasSameTimeBooking, hasDuplicateWaiting);
 

@@ -44,7 +44,7 @@ public class ReservationService {
     public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
         try {
             Reservation saved = createReservation(command, requestTime);
-            boolean hasBooking = reservationRepository.hasBookingAtSameTime(saved);
+            boolean hasBooking = reservationRepository.hasBookingAtSameTime(saved.getName(), saved.getSlot());
             boolean hasWaiting = reservationWaitingRepository.hasWaitingAtSameTime(saved.toWaiting());
             saved.validate(hasBooking, hasWaiting);
             saved = reservationRepository.save(saved);
@@ -60,6 +60,7 @@ public class ReservationService {
         boolean hasBooking = reservationRepository.isAlreadyBookedByOthers(updated);
         boolean hasWaiting = reservationWaitingRepository.hasWaitingAtSameTime(updated.toWaiting());
         updated.validate(hasBooking, hasWaiting);
+
         try {
             reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
@@ -68,10 +69,20 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(long id, String name, LocalDateTime requestTime) {
+    public void deleteByUser(long id, String name, LocalDateTime requestTime) {
         Reservation reservation = getById(id);
-        reservation.validateDeletable(name, requestTime);
+        reservation.validateDeletableByUser(name, requestTime);
+        processDeletion(reservation, requestTime);
+    }
 
+    @Transactional
+    public void deleteByAdmin(long id, LocalDateTime requestTime) {
+        Reservation reservation = getById(id);
+        reservation.validateDeletableByAdmin(requestTime);
+        processDeletion(reservation, requestTime);
+    }
+
+    private void processDeletion(Reservation reservation, LocalDateTime requestTime) {
         List<ReservationWaiting> waitings = reservationWaitingRepository.queryAllBySlotForUpdate(
                 new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
         );
@@ -104,14 +115,7 @@ public class ReservationService {
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
         for (ReservationWaiting waiting : lockedWaitings) {
-            Reservation candidate = new Reservation(
-                    null,
-                    waiting.getName(),
-                    waiting.getSlot(),
-                    waiting.getSlot().date().atStartOfDay()
-            );
-
-            if (!reservationRepository.hasBookingAtSameTime(candidate)) {
+            if (!reservationRepository.hasBookingAtSameTime(waiting.getName(), waiting.getSlot())) {
                 createReservationFromWaiting(waiting, requestTime);
                 return;
             }

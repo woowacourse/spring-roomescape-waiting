@@ -90,12 +90,8 @@ class ReservationRepositoryTest {
     @DisplayName("동일 시간 예약 여부를 확인할 수 있다.")
     void hasBookingAtSameTime_returnsTrueIfSameUserHasBooking() {
         Reservation saved = reservationRepository.save(buildReservation("브라운"));
-
-        Reservation candidate1 = new Reservation(null, "브라운", saved.getSlot(), saved.getUpdatedAt());
-        Reservation candidate2 = new Reservation(null, "포비", saved.getSlot(), saved.getUpdatedAt());
-
-        assertThat(reservationRepository.hasBookingAtSameTime(candidate1)).isTrue();
-        assertThat(reservationRepository.hasBookingAtSameTime(candidate2)).isFalse();
+        assertThat(reservationRepository.hasBookingAtSameTime("브라운", saved.getSlot())).isTrue();
+        assertThat(reservationRepository.hasBookingAtSameTime("포비", saved.getSlot())).isFalse();
     }
 
     private Reservation buildReservation(String name) {

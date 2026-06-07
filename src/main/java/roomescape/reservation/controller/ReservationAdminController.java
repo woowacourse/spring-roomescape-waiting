@@ -40,6 +40,6 @@ public class ReservationAdminController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        reservationService.deleteById(id, null, LocalDateTime.now());
+        reservationService.deleteByAdmin(id, LocalDateTime.now());
     }
 }

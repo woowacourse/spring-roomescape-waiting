@@ -167,7 +167,7 @@ class ConcurrencyIntegrationTest {
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.deleteById(1L, "브라운", java.time.LocalDateTime.now()),
+                () -> reservationService.deleteByUser(1L, "브라운", java.time.LocalDateTime.now()),
                 100,
                 NotFoundException.class
         );

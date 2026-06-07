@@ -69,7 +69,7 @@ class ReservationTest {
                 LocalDate.now().plusDays(1).atStartOfDay());
 
         // when & then
-        assertThatCode(() -> reservation.validateDeletable("브라운", LocalDateTime.now()))
+        assertThatCode(() -> reservation.validateDeletableByUser("브라운", LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
@@ -82,7 +82,7 @@ class ReservationTest {
                 LocalDate.now().plusDays(1).atStartOfDay());
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateDeletable("코니", java.time.LocalDateTime.now()))
+        assertThatThrownBy(() -> reservation.validateDeletableByUser("코니", java.time.LocalDateTime.now()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -97,7 +97,7 @@ class ReservationTest {
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateDeletable("브라운", requestTime))
+        assertThatThrownBy(() -> reservation.validateDeletableByUser("브라운", requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
@@ -114,7 +114,7 @@ class ReservationTest {
         LocalDateTime requestTime = today.atTime(11, 0);
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateDeletable("브라운", requestTime))
+        assertThatThrownBy(() -> reservation.validateDeletableByUser("브라운", requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_TIME.getMessage());
     }

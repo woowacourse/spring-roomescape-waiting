@@ -47,11 +47,11 @@ public class ReservationRepository {
         reservationDao.delete(reservation);
     }
 
-    public boolean hasBookingAtSameTime(Reservation reservation) {
+    public boolean hasBookingAtSameTime(String name, ReservationSlot reservationSlot) {
         return reservationDao.existsByDateAndTimeIdAndName(
-                reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getName()
+                reservationSlot.date(),
+                reservationSlot.time().getId(),
+                name
         );
     }
 

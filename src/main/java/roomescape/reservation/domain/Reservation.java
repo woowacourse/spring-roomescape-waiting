@@ -59,8 +59,12 @@ public class Reservation {
         return newTime;
     }
 
-    public void validateDeletable(String name, LocalDateTime requestTime) {
+    public void validateDeletableByUser(String name, LocalDateTime requestTime) {
         validateOwner(name);
+        validateExpiry(requestTime);
+    }
+
+    public void validateDeletableByAdmin(LocalDateTime requestTime) {
         validateExpiry(requestTime);
     }
 

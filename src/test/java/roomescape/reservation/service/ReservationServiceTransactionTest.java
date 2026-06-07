@@ -82,7 +82,7 @@ public class ReservationServiceTransactionTest {
 
         // when
         assertThatThrownBy(
-                () -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
+                () -> reservationService.deleteByUser(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -111,7 +111,7 @@ public class ReservationServiceTransactionTest {
 
         // when
         assertThatThrownBy(
-                () -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
+                () -> reservationService.deleteByUser(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
