@@ -285,9 +285,23 @@ async function createReservation(event) {
     }
 }
 
-async function fetchReservationsByName(name) {
+async function fetchActiveReservationsByName(name) {
     const response = await api(`/reservations?name=${encodeURIComponent(name)}`);
     return sortReservations(response.reservations || []);
+}
+
+async function fetchCanceledReservationsByName(name) {
+    const response = await api(`/reservations/canceled?name=${encodeURIComponent(name)}`);
+    return sortReservations(response.reservations || []);
+}
+
+async function fetchReservationsByName(name) {
+    const [activeReservations, canceledReservations] = await Promise.all([
+        fetchActiveReservationsByName(name),
+        fetchCanceledReservationsByName(name)
+    ]);
+
+    return [...activeReservations, ...canceledReservations];
 }
 
 async function loadMyReservations() {
