@@ -1,6 +1,8 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +19,12 @@ import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationResponses;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Reservations;
+import roomescape.service.ReservationCreateCommand;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationUpdateCommand;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @RestController
 public class ReservationController {
@@ -32,7 +36,7 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationCreateRequest request) {
-        Reservation reservation = reservationService.reserve(request, LocalDateTime.now());
+        Reservation reservation = reservationService.reserve(ReservationCreateCommand.from(request));
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(reservation.getId())
@@ -43,7 +47,7 @@ public class ReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<ReservationResponses> findList(@RequestParam(required = false) String name) {
-        Reservations reservations = reservationService.findList(name);
+        Reservations reservations = reservationService.findAll(name);
         return ResponseEntity.ok(ReservationResponses.toDto(reservations));
     }
 
@@ -55,13 +59,13 @@ public class ReservationController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable long id, @RequestParam String name) {
-        reservationService.cancel(id, name, LocalDateTime.now());
+        reservationService.cancel(id, name);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> update(@Valid @RequestBody ReservationUpdateRequest request, @PathVariable long id) {
-        Reservation updated = reservationService.update(request, id, LocalDateTime.now());
+        Reservation updated = reservationService.update(ReservationUpdateCommand.from(request), id);
         return ResponseEntity.ok(ReservationResponse.toDto(updated));
     }
 }

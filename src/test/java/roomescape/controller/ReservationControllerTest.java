@@ -63,7 +63,7 @@ class ReservationControllerTest {
     @Test
     void 예약_생성_성공시_201을_반환한다() throws Exception {
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.of(2099, 1, 1), 1L, 1L);
-        given(reservationService.reserve(any(), any())).willReturn(approvedReservation());
+        given(reservationService.reserve(any())).willReturn(approvedReservation());
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ class ReservationControllerTest {
     @Test
     void 예약_생성시_서비스에서_중복_예외_발생시_409를_반환한다() throws Exception {
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.of(2099, 1, 1), 1L, 1L);
-        given(reservationService.reserve(any(), any()))
+        given(reservationService.reserve(any()))
                 .willThrow(new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요."));
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +115,7 @@ class ReservationControllerTest {
     @Test
     void 예약_생성시_과거_날짜면_422를_반환한다() throws Exception {
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.of(2000, 1, 1), 1L, 1L);
-        given(reservationService.reserve(any(), any()))
+        given(reservationService.reserve(any()))
                 .willThrow(new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요"));
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +125,7 @@ class ReservationControllerTest {
 
     @Test
     void 예약_전체_목록_조회_성공시_200을_반환한다() throws Exception {
-        given(reservationService.findList(null))
+        given(reservationService.findAll(any()))
                 .willReturn(new Reservations(List.of(approvedReservation(), waitingReservation())));
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isOk())
@@ -134,7 +134,7 @@ class ReservationControllerTest {
 
     @Test
     void 이름으로_예약_목록_조회_성공시_200을_반환한다() throws Exception {
-        given(reservationService.findList("zeze"))
+        given(reservationService.findAll(any()))
                 .willReturn(new Reservations(List.of(approvedReservation())));
         mockMvc.perform(get("/reservations").param("name", "zeze"))
                 .andExpect(status().isOk())
@@ -167,7 +167,7 @@ class ReservationControllerTest {
     @Test
     void 예약_삭제시_이름이_다르면_401을_반환한다() throws Exception {
         willThrow(new UnauthorizedException("예약자명이 다릅니다."))
-                .given(reservationService).cancel(anyLong(), anyString(), any());
+                .given(reservationService).cancel(anyLong(), anyString());
         mockMvc.perform(delete("/reservations/1").param("name", "other"))
                 .andExpect(status().isUnauthorized());
     }
@@ -181,7 +181,7 @@ class ReservationControllerTest {
     @Test
     void 예약_수정_성공시_200을_반환한다() throws Exception {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.of(2099, 6, 1), 1L, 1L);
-        given(reservationService.update(any(), anyLong(), any())).willReturn(approvedReservation());
+        given(reservationService.update(any(), anyLong())).willReturn(approvedReservation());
         mockMvc.perform(put("/reservations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -192,7 +192,7 @@ class ReservationControllerTest {
     @Test
     void 예약_수정시_존재하지_않는_예약이면_404를_반환한다() throws Exception {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.of(2099, 6, 1), 1L, 1L);
-        given(reservationService.update(any(), anyLong(), any()))
+        given(reservationService.update(any(), anyLong()))
                 .willThrow(new NotFoundException("존재하지 않는 예약입니다. 입력을 확인해 주세요."));
         mockMvc.perform(put("/reservations/999")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -203,7 +203,7 @@ class ReservationControllerTest {
     @Test
     void 예약_수정시_과거_날짜면_422를_반환한다() throws Exception {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.of(2000, 1, 1), 1L, 1L);
-        given(reservationService.update(any(), anyLong(), any()))
+        given(reservationService.update(any(), anyLong()))
                 .willThrow(new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요"));
         mockMvc.perform(put("/reservations/1")
                         .contentType(MediaType.APPLICATION_JSON)

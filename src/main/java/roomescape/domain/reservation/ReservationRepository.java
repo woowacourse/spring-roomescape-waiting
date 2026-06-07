@@ -4,6 +4,7 @@ import roomescape.common.exception.NotFoundException;
 
 import java.util.Optional;
 
+
 public interface ReservationRepository {
     Reservations findAll();
     Optional<Reservation> findById(Long id);

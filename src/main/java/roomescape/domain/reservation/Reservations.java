@@ -1,5 +1,7 @@
 package roomescape.domain.reservation;
 
+import roomescape.common.exception.ConflictException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,12 +17,19 @@ public class Reservations {
         return Reservation.create(name, status, slot);
     }
 
-    public Reservations excluding(Long id) {
-        return new Reservations(values.stream().filter(r -> !r.getId().equals(id)).toList());
+    public void conflictByName(Reservation reservation) {
+        if (hasByName(reservation)) {
+            throw new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+        }
     }
 
-    public boolean hasByName(String name) {
-        return values.stream().anyMatch(r -> r.isSameName(name));
+    public boolean hasByName(Reservation other) {
+        return values.stream()
+                .anyMatch(r -> r.isSameName(other));
+    }
+
+    public Reservations excluding(Long id) {
+        return new Reservations(values.stream().filter(r -> !r.getId().equals(id)).toList());
     }
 
     public Optional<Reservation> firstWaiting() {

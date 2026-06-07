@@ -35,8 +35,8 @@ public class ReservationNameTest {
         String source = "zeze";
         ReservationName zeze = new ReservationName(source);
         assertSoftly(softly -> {
-            softly.assertThat(zeze.isSame(source)).isTrue();
-            softly.assertThat(zeze.isSame("diff")).isFalse();
+            softly.assertThat(zeze.isSame(zeze)).isTrue();
+            softly.assertThat(zeze.isSame(new ReservationName("diff"))).isFalse();
         });
     }
 }

@@ -1,5 +1,9 @@
 package roomescape.domain.reservation;
 
+import roomescape.common.exception.UnauthorizedException;
+
+import java.time.LocalDateTime;
+
 public class Reservation {
     private final Long id;
     private final ReservationName name;
@@ -23,6 +27,10 @@ public class Reservation {
         return new Reservation(id, new ReservationName(name), Status.from(status), slot);
     }
 
+    public static Reservation create(String name, Slot slot) {
+        return new Reservation(null, new ReservationName(name), Status.WAITING, slot);
+    }
+
     public static Reservation create(String name, Status status, Slot slot) {
         return new Reservation(null, new ReservationName(name), status, slot);
     }
@@ -43,8 +51,18 @@ public class Reservation {
         return status == Status.WAITING;
     }
 
-    public boolean isSameName(String other) {
-        return name.isSame(other);
+    public boolean isSameName(Reservation other) {
+        return name.isSame(other.name);
+    }
+
+    public void validateCancellable(LocalDateTime now) {
+        slot.validateNotPast(now);
+    }
+
+    public void validateOwner(String ownerName) {
+        if (!name.isSame(new ReservationName(ownerName))) {
+            throw new UnauthorizedException("예약자명이 다릅니다.");
+        }
     }
 
     public Long getId() {

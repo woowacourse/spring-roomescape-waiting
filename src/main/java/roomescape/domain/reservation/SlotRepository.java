@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import roomescape.common.exception.NotFoundException;
 import roomescape.domain.theme.Theme;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +21,10 @@ public interface SlotRepository {
     default Slot getById(long id) {
         return findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 슬롯입니다."));
+    }
+
+    default Slot findOrCreate(ReservationDate date, ReservationTime time, Theme theme, LocalDateTime now) {
+        return findByDateAndTimeAndTheme(date, time, theme)
+                .orElseGet(() -> save(Slot.create(date, time, theme, now)));
     }
 }

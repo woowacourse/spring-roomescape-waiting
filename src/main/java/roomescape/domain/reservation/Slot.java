@@ -26,18 +26,18 @@ public class Slot {
 
     public static Slot create(ReservationDate date, ReservationTime time, Theme theme, LocalDateTime now) {
         Slot slot = new Slot(null, date, time, theme);
-        slot.ensureNotPast(now);
+        slot.validateNotPast(now);
         return slot;
+    }
+
+    public void validateNotPast(LocalDateTime now) {
+        if (isPast(now)) {
+            throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
+        }
     }
 
     public Slot withId(long generatedKey) {
         return new Slot(generatedKey, date, time, theme);
-    }
-
-    private void ensureNotPast(LocalDateTime now) {
-        if (LocalDateTime.of(date.getDate(), time.getStartAt()).isBefore(now)) {
-            throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
-        }
     }
 
     public boolean isPast(LocalDateTime now) {

@@ -25,6 +25,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -180,7 +181,7 @@ class ReservationRepositoryTest {
         Reservation saved = reservationRepository.save(given);
 
         Reservations reservations = reservationRepository.findBySlotId(slot.getId());
-        boolean exists = reservations.hasByName(saved.getName().getValue());
+        boolean exists = reservations.hasByName(saved);
 
         assertThat(exists).isTrue();
     }

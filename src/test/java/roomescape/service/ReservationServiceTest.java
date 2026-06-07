@@ -16,32 +16,28 @@ import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
-import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
     private static final String URL = "https://zeze.com/thumb.jpg";
     private static final String NAME = "제제";
-    private static final LocalDateTime TODAY = LocalDateTime.of(2026, 5, 10, 10, 0, 0);
 
     private static final Slot DUMMY_SLOT = Slot.load(
             1L,
@@ -54,132 +50,75 @@ class ReservationServiceTest {
     private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
     private static final long EXISTS_ID = 1L;
 
-    @Mock
-    private SlotRepository slotRepository;
-    @Mock
-    private ReservationRepository reservationRepository;
-    @Mock
-    private ReservationTimeRepository reservationTimeRepository;
-    @Mock
-    private ThemeRepository themeRepository;
-    @InjectMocks
-    private ReservationService reservationService;
+    @Mock private Clock clock;
+    @Mock private ReservationAssembler assembler;
+    @Mock private ReservationRepository reservationRepository;
+    @InjectMocks private ReservationService reservationService;
+
+    private void givenNow(LocalDateTime dateTime) {
+        given(clock.instant()).willReturn(dateTime.toInstant(ZoneOffset.UTC));
+        given(clock.getZone()).willReturn(ZoneOffset.UTC);
+    }
 
     @Test
     void 예약_취소_성공() {
+        givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(slotRepository.getById(1L)).willReturn(DUMMY_SLOT);
         given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
-        reservationService.cancel(1L, NAME, LocalDateTime.MIN);
+        reservationService.cancel(1L, NAME);
         verify(reservationRepository).deleteById(1L);
     }
 
     @Test
     void 존재하지_않는_예약_취소시_예외_발생() {
         given(reservationRepository.getById(999L)).willThrow(NotFoundException.class);
-        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, NAME, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, NAME))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 존재하지_않는_시간으로_예약시_예외() {
-        given(reservationTimeRepository.getById(999L)).willThrow(NotFoundException.class);
+        given(assembler.from(any(ReservationCreateCommand.class))).willThrow(NotFoundException.class);
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-05-03"), 999L, 1L);
-        Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MAX))
+        Assertions.assertThatThrownBy(() -> reservationService.reserve(ReservationCreateCommand.from(request)))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 지나간_날짜로_예약_시_예외가_발생해야_한다() {
-        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
-        Theme theme = Theme.load(1L, "테마1", "설명", URL);
+        given(assembler.from(any(ReservationCreateCommand.class))).willThrow(new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요"));
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MAX));
-    }
-
-    @Test
-    void 같은_날짜이며_시간이_1초_전이면_예약에_성공해야_한다() {
-        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
-        Theme theme = Theme.load(1L, "테마1", "설명", URL);
-        ReservationCreateRequest request = new ReservationCreateRequest(NAME, LocalDate.of(2026, 4, 5), 1L, 1L);
-        Slot mockSlot = Slot.load(1L, LocalDate.of(2026, 4, 5), reservationTime, theme);
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(mockSlot));
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
-        given(reservationRepository.save(any())).willReturn(DUMMY);
-        Assertions.assertThatNoException()
-                .isThrownBy(() -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59)));
-    }
-
-    @Test
-    void 같은_날짜이며_시간이_1초_지났다면_예약에_실패해야_한다() {
-        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
-        Theme theme = Theme.load(1L, "테마1", "설명", URL);
-        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        Assertions.assertThatThrownBy(
-                () -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 11, 0, 1)));
+        Assertions.assertThatThrownBy(() -> reservationService.reserve(ReservationCreateCommand.from(request)))
+                .isInstanceOf(UnprocessableException.class);
     }
 
     @Test
     void 미래로_예약하면_성공해야_한다() {
-        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
-        Theme theme = Theme.load(1L, "테마1", "설명", URL);
-        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
-        Slot mockSlot = Slot.load(1L, LocalDate.parse("2026-04-05"), reservationTime, theme);
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(mockSlot));
+        Reservation assembled = Reservation.create(NAME, DUMMY_SLOT);
+        given(assembler.from(any(ReservationCreateCommand.class))).willReturn(assembled);
         given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
         given(reservationRepository.save(any())).willReturn(DUMMY);
-        Assertions.assertThatNoException().isThrownBy(
-                () -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59)));
+        Assertions.assertThatNoException().isThrownBy(() -> reservationService.reserve(
+                ReservationCreateCommand.from(new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L))));
     }
 
     @Test
     void 예약_생성시_이미_예약된_예약이면_예외가_발생한다() {
-        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
-        Theme theme = Theme.load(1L, "테마1", "설명", URL);
-        Slot mockSlot = Slot.load(1L, LocalDate.parse("2099-04-05"), reservationTime, theme);
-        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2099-04-05"), 1L, 1L);
-
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(mockSlot));
-        Reservation existingReservation = Reservation.load(1L, "zeze", "APPROVED", mockSlot);
+        Reservation assembled = Reservation.create("zeze", DUMMY_SLOT);
+        given(assembler.from(any(ReservationCreateCommand.class))).willReturn(assembled);
+        Reservation existingReservation = Reservation.load(1L, "zeze", "APPROVED", DUMMY_SLOT);
         given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(existingReservation)));
 
-        Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.reserve(
+                        ReservationCreateCommand.from(new ReservationCreateRequest("zeze", LocalDate.parse("2099-04-05"), 1L, 1L))))
                 .isInstanceOf(ConflictException.class);
-    }
-
-    @Test
-    void 이미_slot이_생성되어_있으면_원래_slot을_사용한다() {
-        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
-        Theme theme = Theme.load(1L, "테마1", "설명", URL);
-        Slot existingSlot = Slot.load(1L, LocalDate.parse("2099-04-05"), reservationTime, theme);
-        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2099-04-05"), 1L, 1L);
-
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(existingSlot));
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
-        given(reservationRepository.save(any())).willReturn(DUMMY);
-
-        reservationService.reserve(request, LocalDateTime.MIN);
-
-        verify(slotRepository, never()).save(any());
     }
 
     @Test
     void 예약_수정시_ID가_없으면_예외가_발생한다() {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
         given(reservationRepository.getById(999L)).willThrow(new NotFoundException("존재하지 않는 예약입니다. 입력을 확인해 주세요."));
-        Assertions.assertThatThrownBy(() -> reservationService.update(request, 999L, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다. 입력을 확인해 주세요.");
     }
@@ -188,9 +127,9 @@ class ReservationServiceTest {
     void 예약_수정시_과거_날짜의_예약이면_예외가_발생한다() {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2000-04-06"), 1L, 1L);
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(reservationTimeRepository.getById(1L)).willReturn(ReservationTime.of(1L, LocalTime.parse("11:00")));
-        given(themeRepository.getById(1L)).willReturn(Theme.load(1L, "any", "any", URL));
-        Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MAX))
+        given(assembler.from(any(ReservationUpdateCommand.class))).willThrow(new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요"));
+
+        Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .isInstanceOf(UnprocessableException.class)
                 .hasMessage("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
     }
@@ -199,8 +138,8 @@ class ReservationServiceTest {
     void 예약_수정시_시간을_찾을_수_없으면_예외가_발생한다() {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(reservationTimeRepository.getById(1L)).willThrow(new NotFoundException("존재하지 않는 시간입니다. 입력을 확인해 주세요."));
-        Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+        given(assembler.from(any(ReservationUpdateCommand.class))).willThrow(new NotFoundException("존재하지 않는 시간입니다. 입력을 확인해 주세요."));
+        Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 시간입니다. 입력을 확인해 주세요.");
     }
@@ -213,67 +152,61 @@ class ReservationServiceTest {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
 
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(reservationTimeRepository.getById(1L)).willReturn(reservationTime);
-        given(themeRepository.getById(1L)).willReturn(theme);
-        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(newSlot));
+        given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create("zeze", newSlot));
         Reservation conflicting = Reservation.load(2L, "zeze", "APPROVED", newSlot);
         given(reservationRepository.findBySlotId(2L)).willReturn(new Reservations(List.of(conflicting)));
 
-        Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
     }
 
     @Test
     void 예약_수정시_같은_슬롯이면_자기_자신이므로_중복이_아니어야_한다() {
-        LocalDate date = LocalDate.of(2099, 1, 1);
-        LocalTime startAt = LocalTime.of(10, 0);
         long timeId = 1L;
         long themeId = 1L;
         String name = "zeze";
 
-        ReservationTime time = ReservationTime.of(timeId, startAt);
+        ReservationTime time = ReservationTime.of(timeId, LocalTime.of(10, 0));
         Theme theme = Theme.load(themeId, "any", "any", URL);
-        Slot slot = Slot.load(1L, date, time, theme);
+        Slot slot = Slot.load(1L, LocalDate.of(2099, 1, 1), time, theme);
         Reservation existing = Reservation.load(1L, name, "APPROVED", slot);
 
-        ReservationUpdateRequest request = new ReservationUpdateRequest(name, date, timeId, themeId);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(name, LocalDate.of(2099, 1, 1), timeId, themeId);
 
         given(reservationRepository.getById(1L)).willReturn(existing);
-        given(reservationTimeRepository.getById(timeId)).willReturn(time);
-        given(themeRepository.getById(themeId)).willReturn(theme);
-        given(slotRepository.findByDateAndTimeAndTheme(any(), any(), any())).willReturn(Optional.of(slot));
+        given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create(name, slot));
         given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(existing)));
         given(reservationRepository.update(eq(1L), any())).willReturn(existing);
 
-        Assertions.assertThatCode(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+        Assertions.assertThatCode(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void 예약_삭제_시_ID가_존재하지_않으면_예외가_발생한다() {
         given(reservationRepository.getById(NOT_EXISTS_ID)).willThrow(NotFoundException.class);
-        Assertions.assertThatThrownBy(() -> reservationService.cancel(NOT_EXISTS_ID, NAME, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(NOT_EXISTS_ID, NAME))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 예약_삭제_시_이름이_다르면_예외가_발생한다() {
+        givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
         Reservation reservation = RoomEscapeFixture.reservation();
         given(reservationRepository.getById(EXISTS_ID)).willReturn(reservation);
-        given(slotRepository.getById(1L)).willReturn(DUMMY_SLOT);
-        Assertions.assertThatThrownBy(() -> reservationService.cancel(EXISTS_ID, "diff", TODAY))
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(EXISTS_ID, "diff"))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 예약_삭제_시_문제가_없으면_삭제되어야_한다() {
+        givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
         Reservation reservation = RoomEscapeFixture.reservation();
         given(reservationRepository.getById(EXISTS_ID)).willReturn(reservation);
-        given(slotRepository.getById(1L)).willReturn(DUMMY_SLOT);
         given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
-        assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue(),
-                TODAY)).doesNotThrowAnyException();
+        assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue()))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -297,7 +230,7 @@ class ReservationServiceTest {
     void 이름_없이_목록_조회시_전체_예약을_반환한다() {
         given(reservationRepository.findAll()).willReturn(new Reservations(List.of(DUMMY)));
 
-        Reservations results = reservationService.findList(null);
+        Reservations results = reservationService.findAll(null);
 
         Assertions.assertThat(results.getValues()).hasSize(1);
         Assertions.assertThat(results.getValues().get(0).getId()).isEqualTo(EXISTS_ID);
@@ -307,7 +240,7 @@ class ReservationServiceTest {
     void 이름으로_목록_조회시_해당_이름의_예약만_반환한다() {
         given(reservationRepository.findByName(NAME)).willReturn(new Reservations(List.of(DUMMY)));
 
-        Reservations results = reservationService.findList(NAME);
+        Reservations results = reservationService.findAll(NAME);
 
         Assertions.assertThat(results.getValues()).hasSize(1);
         Assertions.assertThat(results.getValues().get(0).getName().getValue()).isEqualTo(NAME);

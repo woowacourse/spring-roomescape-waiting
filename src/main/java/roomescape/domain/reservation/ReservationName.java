@@ -17,7 +17,7 @@ public class ReservationName {
         this.value = striped;
     }
 
-    public void validateLength(String value) {
+    private void validateLength(String value) {
         if (value.length() < MIN_NAME_LENGTH || value.length() > MAX_NAME_LENGTH) {
             throw new BadRequestException("이름 길이는 1자 ~ 20자 사이여야 합니다.");
         }
@@ -27,8 +27,8 @@ public class ReservationName {
         return value;
     }
 
-    public boolean isSame(String other) {
-        return value.equals(other);
+    public boolean isSame(ReservationName other) {
+        return value.equals(other.value);
     }
 
     @Override
