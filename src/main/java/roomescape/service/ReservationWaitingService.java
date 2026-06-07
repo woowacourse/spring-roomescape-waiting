@@ -41,10 +41,10 @@ public class ReservationWaitingService {
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);
 
-        lockReservationForSlot(slot);
         validateUniqueReservationWaiting(command.name(), slot);
         validateNotDuplicateWithReservation(command.name(), slot);
         validatePastDatetime(slot, now);
+        lockReservationForSlot(slot);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot);
         ReservationWaiting savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
