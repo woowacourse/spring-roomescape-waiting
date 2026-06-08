@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.exception.DuplicateException;
 
-    public class ReservationLine {
+public class ReservationLine {
 
     private final ReservationSlot slot;
     private final Reservation reservedReservation;
@@ -26,14 +26,12 @@ import roomescape.exception.DuplicateException;
         return new Reservation(name, slot, now, decideReservationStatus());
     }
 
-    public int findWaitingNumber(Reservation target) {
-        validateWaitingNumberTarget(target);
-        int waitingNumber = 1;
-        for (Reservation waiting : waitings) {
-            if (waiting.isSameReservation(target)) {
-                return waitingNumber;
+    public int findWaitingIndex(Reservation target) {
+        validateWaitingIndexTarget(target);
+        for (int index = 0; index < waitings.size(); index++) {
+            if (waitings.get(index).isSameReservation(target)) {
+                return index;
             }
-            waitingNumber++;
         }
         throw new IllegalArgumentException("예약 대기를 찾을 수 없습니다.");
     }
@@ -110,16 +108,16 @@ import roomescape.exception.DuplicateException;
                 .anyMatch(target -> !target.getSlot().hasSameSlot(slot));
 
         if (hasDifferentSlot) {
-            throw new IllegalArgumentException("대기 순번은 같은 예약 슬롯에 대해서만 계산 가능합니다.");
+            throw new IllegalArgumentException("대기 위치는 같은 예약 슬롯에 대해서만 계산 가능합니다.");
         }
     }
 
-    private void validateWaitingNumberTarget(Reservation target) {
+    private void validateWaitingIndexTarget(Reservation target) {
         if (target == null) {
-            throw new IllegalArgumentException("대기 순번 계산을 위해 예약 대기는 필수입니다.");
+            throw new IllegalArgumentException("대기 위치 계산을 위해 예약 대기는 필수입니다.");
         }
         if (!target.getSlot().hasSameSlot(slot)) {
-            throw new IllegalArgumentException("대기 순번은 같은 예약 슬롯에 대해서만 계산 가능합니다.");
+            throw new IllegalArgumentException("대기 위치는 같은 예약 슬롯에 대해서만 계산 가능합니다.");
         }
     }
 }
