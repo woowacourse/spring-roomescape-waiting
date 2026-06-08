@@ -76,13 +76,13 @@ public class Reservation {
         return reconstruct(id, member, date, time, theme, ReservationStatus.BOOKED, null, 0L, null);
     }
 
-    public static Reservation fromWaiting(Waiting waiting) {
+    public static Reservation from(Member member, Slot slot) {
         return new Builder()
-                .member(waiting.getMember())
-                .date(waiting.getDate())
-                .time(waiting.getTime())
-                .theme(waiting.getTheme())
-                .storeId(waiting.getStoreId())
+                .member(member)
+                .date(slot.getDate())
+                .time(slot.getTime())
+                .theme(slot.getTheme())
+                .storeId(slot.getStoreId())
                 .build();
     }
 

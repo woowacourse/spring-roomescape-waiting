@@ -36,7 +36,7 @@ public class Waiting {
         if (isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간의 예약 대기는 예약으로 전환할 수 없습니다.");
         }
-        return Reservation.fromWaiting(this);
+        return Reservation.from(member, getSlot());
     }
 
     public boolean isPast(LocalDateTime now) {
