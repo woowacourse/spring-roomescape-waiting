@@ -1,11 +1,14 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.NotFoundException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
 public interface SlotRepository {
     List<Slot> findAll();
@@ -28,7 +31,7 @@ public interface SlotRepository {
 
     default Slot getById(long id) {
         return findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 슬롯입니다."));
+                .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 예약 슬롯을 찾을 수 없습니다. : " + id));
     }
 
     default Slot findOrCreate(ReservationDate date, ReservationTime time, Theme theme, LocalDateTime now) {

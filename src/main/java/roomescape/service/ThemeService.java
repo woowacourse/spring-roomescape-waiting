@@ -2,9 +2,9 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.NotFoundException;
 import roomescape.controller.dto.request.ThemeCreateRequest;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -57,11 +57,11 @@ public class ThemeService {
     @Transactional
     public void delete(long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요.");
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, themeId);
         }
 
         if (slotRepository.existsByThemeId(themeId)) {
-            throw new ConflictException("테마를 사용하는 예약이 존재합니다. 관련 예약을 지우고 요청해 주세요");
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, themeId);
         }
 
         themeRepository.deleteById(themeId);

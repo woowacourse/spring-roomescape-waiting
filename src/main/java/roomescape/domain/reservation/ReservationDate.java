@@ -1,13 +1,19 @@
 package roomescape.domain.reservation;
 
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.DomainPreconditions;
+
 import java.time.LocalDate;
 import java.util.Objects;
+
+import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.DomainPreconditions.requireNonNull;
 
 public class ReservationDate {
     private final LocalDate date;
 
     public ReservationDate(LocalDate date) {
-        this.date = Objects.requireNonNull(date);
+        this.date = requireNonNull(date, INVALID_INPUT, "예약 날짜는 비어있을 수 없습니다.");
     }
 
     public LocalDate getDate() {

@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
 import org.junit.jupiter.api.Test;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
@@ -12,20 +13,20 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 public class ReservationTest {
 
     private Slot validSlot() {
-        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
+        ReservationTime time = ReservationTime.load(1L, LocalTime.of(10, 0));
         Theme theme = Theme.load(1L, "공포의 방", "설명", "https://zeze.com/thumb.jpg");
         return Slot.load(1L, LocalDate.of(2099, 1, 1), time, theme);
     }
 
     @Test
     void 이름이_NULL이면_예외가_발생한다() {
-        assertThatThrownBy(() -> Reservation.create(null, Status.APPROVED, validSlot()))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> Reservation.create(null, validSlot()))
+                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 정상적인_예약_생성은_성공한다() {
-        Reservation reservation = Reservation.create("zeze", Status.APPROVED, validSlot());
+        Reservation reservation = Reservation.create("zeze", validSlot()).withStatus(Status.APPROVED);
 
         assertThat(reservation.getName().getValue()).isEqualTo("zeze");
         assertThat(reservation.getStatus()).isEqualTo(Status.APPROVED);

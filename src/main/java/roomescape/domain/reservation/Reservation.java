@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.UnauthorizedException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 
 import java.time.LocalDateTime;
 
@@ -31,12 +32,12 @@ public class Reservation {
         return new Reservation(null, new ReservationName(name), Status.WAITING, slot);
     }
 
-    public static Reservation create(String name, Status status, Slot slot) {
-        return new Reservation(null, new ReservationName(name), status, slot);
-    }
-
     public Reservation withId(Long id) {
         return new Reservation(id, name, status, slot);
+    }
+
+    public Reservation withStatus(Status status) {
+        return new Reservation(id, name, status, slot, rank);
     }
 
     public Reservation withRank(Rank rank) {
@@ -61,7 +62,7 @@ public class Reservation {
 
     public void validateOwner(String ownerName) {
         if (!name.isSame(new ReservationName(ownerName))) {
-            throw new UnauthorizedException("예약자명이 다릅니다.");
+            throw new RoomEscapeException(DomainErrorCode.FORBIDDEN, ownerName);
         }
     }
 

@@ -1,33 +1,40 @@
 package roomescape.domain.theme;
 
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.DomainPreconditions;
+
 import java.util.Objects;
 
+import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.DomainPreconditions.requireNonBlank;
+import static roomescape.domain.DomainPreconditions.requireNonNull;
+
 public class Theme {
-    private final long id;
+    private final Long id;
     private final ThemeName name;
     private final String description;
     private final ThumbnailUrl thumbnailUrl;
 
-    private Theme(long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
+    private Theme(Long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         this.id = id;
-        this.name = Objects.requireNonNull(name);
-        this.description = Objects.requireNonNull(description);
-        this.thumbnailUrl = Objects.requireNonNull(thumbnailUrl);
+        this.name = requireNonNull(name, INVALID_INPUT, "테마 이름은 비어있을 수 없습니다.");
+        this.description = requireNonBlank(description, INVALID_INPUT, "테마 설명은 비어있을 수 없습니다.");
+        this.thumbnailUrl = requireNonNull(thumbnailUrl, INVALID_INPUT, "테마 섬네일 URL은 비어있을 수 없습니다.");
     }
 
-    public static Theme load(long id, String name, String description, String thumbnailUrl) {
+    public static Theme load(Long id, String name, String description, String thumbnailUrl) {
         return new Theme(id, new ThemeName(name), description, new ThumbnailUrl(thumbnailUrl));
     }
 
     public static Theme create(ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
-        return new Theme(0L, name, description, thumbnailUrl);
+        return new Theme(null, name, description, thumbnailUrl);
     }
 
-    public Theme withId(long generatedKey) {
+    public Theme withId(Long generatedKey) {
         return new Theme(generatedKey, name, description, thumbnailUrl);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -49,7 +56,7 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) o;
-        return id == theme.id;
+        return Objects.equals(id, theme.id);
     }
 
     @Override

@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.common.exception.RoomEscapeException;
+import roomescape.domain.RoomEscapeException;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -27,7 +27,7 @@ public class ReservationNameTest {
     @Test
     void null이_입력되면_예외가_발생한다() {
         String name = null;
-        Assertions.assertThatThrownBy(() -> new ReservationName(name)).isInstanceOf(NullPointerException.class);
+        Assertions.assertThatThrownBy(() -> new ReservationName(name)).isInstanceOf(RoomEscapeException.class);
     }
 
     @Test

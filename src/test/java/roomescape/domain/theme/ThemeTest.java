@@ -2,6 +2,7 @@ package roomescape.domain.theme;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
+import roomescape.domain.RoomEscapeException;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -24,6 +25,6 @@ public class ThemeTest {
     @MethodSource("nullCases")
     void 매개변수에_NULL이_포함되면_예외가_발생한다(ThemeName themeName, String description, ThumbnailUrl thumbnailUrl) {
         Assertions.assertThatThrownBy(() -> Theme.create(themeName, description, thumbnailUrl))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 }

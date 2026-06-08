@@ -2,13 +2,14 @@ package roomescape.domain.reservation;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.RoomEscapeException;
 
 import java.time.LocalDate;
 
 public class ReservationDateTest {
     @Test
     void null을_입력받으면_예외가_발생한다() {
-        Assertions.assertThatThrownBy(() -> new ReservationDate(null)).isInstanceOf(NullPointerException.class);
+        Assertions.assertThatThrownBy(() -> new ReservationDate(null)).isInstanceOf(RoomEscapeException.class);
     }
 
     @Test

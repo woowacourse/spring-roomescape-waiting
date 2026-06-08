@@ -1,8 +1,11 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.NotFoundException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 
 import java.util.Optional;
+
+import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
 
 public interface ReservationRepository {
@@ -26,6 +29,6 @@ public interface ReservationRepository {
 
     default Reservation getById(Long id) {
         return findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. 입력을 확인해 주세요."));
+                .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 예약을 찾을 수 없습니다. : " + id));
     }
 }

@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public class JdbcSlotRepository implements SlotRepository {
     public static final RowMapper<Slot> SLOT_ROW_MAPPER = (rs, rowNum) -> {
-        ReservationTime reservationTime = ReservationTime.of(
+        ReservationTime reservationTime = ReservationTime.load(
                 rs.getLong("reservation_time_id"),
                 rs.getTime("reservation_time_start_at").toLocalTime());
         Theme theme = Theme.load(

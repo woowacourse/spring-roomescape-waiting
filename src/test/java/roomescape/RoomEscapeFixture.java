@@ -23,7 +23,7 @@ public class RoomEscapeFixture {
     );
     private static final ReservationName NAME = new ReservationName("zeze");
     private static final ReservationDate DATE = new ReservationDate(LocalDate.of(2099, 11, 11));
-    private static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
+    private static final ReservationTime TIME = ReservationTime.create(LocalTime.of(10, 0));
     private static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
 
     public static Slot slot() {
@@ -31,6 +31,6 @@ public class RoomEscapeFixture {
     }
 
     public static Reservation reservation() {
-        return Reservation.create(NAME.getValue(), Status.APPROVED, slot());
+        return Reservation.create(NAME.getValue(), slot()).withStatus(Status.APPROVED);
     }
 }

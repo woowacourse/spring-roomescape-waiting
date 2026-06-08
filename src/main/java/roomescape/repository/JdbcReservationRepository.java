@@ -37,7 +37,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
 
     private static final RowMapper<Reservation> ROW_MAPPER = (rs, rowNum) -> {
-        ReservationTime reservationTime = ReservationTime.of(
+        ReservationTime reservationTime = ReservationTime.load(
                 rs.getLong("reservation_time_id"),
                 rs.getTime("reservation_time_start_at").toLocalTime()
         );
@@ -79,7 +79,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         return new Reservations(jdbcTemplate.query(SELECT_BASE, ROW_MAPPER));
     }
 
-
     public Optional<Reservation> findById(Long id) {
         List<Reservation> result = jdbcTemplate.query(
                 SELECT_BASE + "WHERE r.id = :id",
@@ -87,7 +86,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ROW_MAPPER);
         return result.stream().findFirst();
     }
-
 
     public Reservations findByName(String name) {
         MapSqlParameterSource param = new MapSqlParameterSource("name", name);
@@ -103,45 +101,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT_BASE + "WHERE r.slot_id = :slotId ORDER BY r.created_at ASC",
                 param,
                 ROW_MAPPER));
-    }
-
-    public boolean existsBySlotIdAndName(Long slotId, String name) {
-        MapSqlParameterSource params = new MapSqlParameterSource("slotId", slotId)
-                .addValue("name", name);
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
-                        SELECT EXISTS (
-                            SELECT 1 FROM reservation WHERE slot_id = :slotId AND name = :name
-                        )
-                        """,
-                params,
-                Boolean.class));
-    }
-
-    public boolean existsApprovedBySlotId(Long slotId) {
-        MapSqlParameterSource param = new MapSqlParameterSource("slotId", slotId);
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
-                        SELECT EXISTS (
-                            SELECT 1 FROM reservation WHERE slot_id = :slotId AND status = 'APPROVED'
-                        )
-                        """,
-                param,
-                Boolean.class));
-    }
-
-    public boolean existsApprovedBySlotIdExcluding(Long slotId, Long excludeId) {
-        MapSqlParameterSource params = new MapSqlParameterSource("slotId", slotId)
-                .addValue("excludeId", excludeId);
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
-                        SELECT EXISTS (
-                            SELECT 1 FROM reservation
-                            WHERE slot_id = :slotId AND status = 'APPROVED' AND id != :excludeId
-                        )
-                        """,
-                params,
-                Boolean.class));
     }
 
     public Reservation update(Long id, Reservation reservation) {
@@ -170,8 +129,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation WHERE id = :id",
-                new MapSqlParameterSource("id", id));
+        MapSqlParameterSource param = new MapSqlParameterSource("id", id);
+        jdbcTemplate.update("DELETE FROM reservation WHERE id = :id", param);
     }
 
     public boolean existsById(Long id) {

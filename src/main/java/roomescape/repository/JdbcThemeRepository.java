@@ -2,6 +2,8 @@ package roomescape.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.theme.Theme;
@@ -20,20 +22,14 @@ public class JdbcThemeRepository implements ThemeRepository {
                     rs.getString("description"),
                     rs.getString("thumbnail_url"));
 
-    private static final String EXISTS_BY_ID = """
-            SELECT EXISTS (
-                SELECT 1 
-                    FROM theme
-                    WHERE id = ?
-                    )
-            """;
+    private static final String BASE_SQL = "SELECT id, name, description, thumbnail_url FROM THEME";
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public JdbcThemeRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcThemeRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
     }
@@ -50,8 +46,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, thumbnail_url FROM THEME";
-        return jdbcTemplate.query(sql, THEME_ROW_MAPPER);
+        return jdbcTemplate.query(BASE_SQL, THEME_ROW_MAPPER);
     }
 
     public List<Theme> findFamous(long days, LocalDate date, long limit) {
@@ -64,30 +59,40 @@ public class JdbcThemeRepository implements ThemeRepository {
                 INNER JOIN (
                     SELECT theme_id, count(theme_id) AS cnt
                     FROM RESERVATION
-                    WHERE date BETWEEN ? AND ?
+                    WHERE date BETWEEN :startDate AND :endDate
                     GROUP BY theme_id
                     ORDER BY count(theme_id) DESC, theme_id DESC
-                    LIMIT ?
+                    LIMIT :limit
                 ) AS topN ON t.id = topN.theme_id
                 ORDER BY topN.cnt DESC, topN.theme_id DESC
                 """;
 
-        return jdbcTemplate.query(sql, THEME_ROW_MAPPER, startDate, endDate, limit);
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate)
+                .addValue("limit", limit);
+
+        return jdbcTemplate.query(sql, params, THEME_ROW_MAPPER);
     }
 
     public void deleteById(long themeId) {
-        String sql = "DELETE FROM theme WHERE id = ?";
-        jdbcTemplate.update(sql, themeId);
+        MapSqlParameterSource param = new MapSqlParameterSource("id", themeId);
+        jdbcTemplate.update("DELETE FROM theme WHERE id = :id", param);
     }
 
     public boolean existsById(long themeId) {
+        MapSqlParameterSource param = new MapSqlParameterSource("id", themeId);
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(EXISTS_BY_ID, Boolean.class, themeId));
+                jdbcTemplate.queryForObject(
+                        "SELECT EXISTS (SELECT 1 FROM theme WHERE id = :id)",
+                        param,
+                        Boolean.class)
+        );
     }
 
     public Optional<Theme> findById(long themeId) {
-        String sql = "SELECT id, name, description, thumbnail_url FROM THEME WHERE id = ?";
-        List<Theme> result = jdbcTemplate.query(sql, THEME_ROW_MAPPER, themeId);
+        MapSqlParameterSource param = new MapSqlParameterSource("id", themeId);
+        List<Theme> result = jdbcTemplate.query(BASE_SQL + " WHERE id = :id", param, THEME_ROW_MAPPER);
         return result.stream().findFirst();
     }
 }

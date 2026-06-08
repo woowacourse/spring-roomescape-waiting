@@ -58,7 +58,7 @@ class SlotRepositoryTest {
     private ReservationRepository reservationRepository;
 
     private ReservationTime givenTime(int hour) {
-        return reservationTimeRepository.save(ReservationTime.of(LocalTime.of(hour, 0)));
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
 
     private Theme givenTheme(String name) {
@@ -213,8 +213,8 @@ class SlotRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        reservationRepository.save(Reservation.create("유저1", Status.APPROVED, slot));
-        reservationRepository.save(Reservation.create("유저2", Status.WAITING, slot));
+        reservationRepository.save(Reservation.create("유저1", slot).withStatus(Status.APPROVED));
+        reservationRepository.save(Reservation.create("유저2", slot).withStatus(Status.WAITING));
 
         List<Slot> slots = slotRepository.findAllByName("유저1");
 

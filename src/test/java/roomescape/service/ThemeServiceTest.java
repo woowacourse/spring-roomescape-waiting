@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.common.exception.NotFoundException;
-import roomescape.common.exception.RoomEscapeException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.theme.ThemeRepository;
 
@@ -31,7 +31,7 @@ public class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마_조회_시_예외가_발생한다() {
         // given
-        given(themeRepository.getById(999L)).willThrow(new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요."));
+        given(themeRepository.getById(999L)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, 999L));
 
         // when & then
         Assertions.assertThatThrownBy(() -> themeService.find(999L)).isInstanceOf(RoomEscapeException.class);

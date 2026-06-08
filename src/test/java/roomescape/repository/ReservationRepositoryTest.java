@@ -62,7 +62,7 @@ class ReservationRepositoryTest {
     private ReservationRepository reservationRepository;
 
     private ReservationTime givenTime(int hour) {
-        return reservationTimeRepository.save(ReservationTime.of(LocalTime.of(hour, 0)));
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
 
     private Theme givenTheme(String name) {
@@ -79,7 +79,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation persisted = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation persisted = Reservation.create("유저", slot).withStatus(Status.APPROVED);
 
         Reservation saved = reservationRepository.save(persisted);
 
@@ -95,12 +95,12 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation persisted = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation persisted = Reservation.create("유저", slot).withStatus(Status.APPROVED);
 
         reservationRepository.save(persisted);
 
         assertThatThrownBy(() -> {
-            Reservation conflict = Reservation.create("유저", Status.WAITING, slot);
+            Reservation conflict = Reservation.create("유저", slot).withStatus(Status.WAITING);
             reservationRepository.save(conflict);
         }).isInstanceOf(DataAccessException.class);
     }
@@ -111,8 +111,8 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given1 = Reservation.create("유저1", Status.APPROVED, slot);
-        Reservation given2 = Reservation.create("유저2", Status.WAITING, slot);
+        Reservation given1 = Reservation.create("유저1", slot).withStatus(Status.APPROVED);
+        Reservation given2 = Reservation.create("유저2", slot).withStatus(Status.WAITING);
         reservationRepository.save(given1);
         reservationRepository.save(given2);
 
@@ -127,7 +127,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
 
         Reservation saved = reservationRepository.save(given);
         Optional<Reservation> found = reservationRepository.findById(saved.getId());
@@ -146,7 +146,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
         Reservation saved = reservationRepository.save(given);
 
         reservationRepository.deleteById(saved.getId());
@@ -160,8 +160,8 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given1 = Reservation.create("유저1", Status.APPROVED, slot);
-        Reservation given2 = Reservation.create("유저2", Status.WAITING, slot);
+        Reservation given1 = Reservation.create("유저1", slot).withStatus(Status.APPROVED);
+        Reservation given2 = Reservation.create("유저2", slot).withStatus(Status.WAITING);
         reservationRepository.save(given1);
         reservationRepository.save(given2);
 
@@ -176,7 +176,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
         Reservation saved = reservationRepository.save(given);
 
         Reservations reservations = reservationRepository.findBySlotId(slot.getId());
@@ -191,7 +191,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
         reservationRepository.save(given);
 
         Reservations reservations = reservationRepository.findBySlotId(slot.getId());
@@ -206,7 +206,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.WAITING, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.WAITING);
         Reservation saved = reservationRepository.save(given);
 
         reservationRepository.updateStatusById(saved.getId(), Status.APPROVED);
@@ -227,8 +227,8 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given1 = Reservation.create("유저1", Status.APPROVED, slot);
-        Reservation given2 = Reservation.create("유저2", Status.WAITING, slot);
+        Reservation given1 = Reservation.create("유저1", slot).withStatus(Status.APPROVED);
+        Reservation given2 = Reservation.create("유저2", slot).withStatus(Status.WAITING);
         reservationRepository.save(given1);
         reservationRepository.save(given2);
 
@@ -244,10 +244,10 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.WAITING, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.WAITING);
         Reservation saved = reservationRepository.save(given);
 
-        Reservation updated = Reservation.create("수정유저", Status.APPROVED, slot);
+        Reservation updated = Reservation.create("수정유저", slot).withStatus(Status.APPROVED);
         Reservation result = reservationRepository.update(saved.getId(), updated);
 
         assertSoftly(softly -> {
@@ -263,7 +263,7 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", Status.APPROVED, slot);
+        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
         Reservation saved = reservationRepository.save(given);
 
         assertThat(reservationRepository.existsById(saved.getId())).isTrue();

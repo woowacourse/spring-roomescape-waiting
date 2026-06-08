@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.ConflictException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,14 +13,13 @@ public class Reservations {
         this.values = List.copyOf(values);
     }
 
-    public Reservation join(String name, Slot slot) {
-        Status status = values.stream().anyMatch(Reservation::isApproved) ? Status.WAITING : Status.APPROVED;
-        return Reservation.create(name, status, slot);
+    public Status nextStatus() {
+        return values.stream().anyMatch(Reservation::isApproved) ? Status.WAITING : Status.APPROVED;
     }
 
     public void conflictByName(Reservation reservation) {
         if (hasByName(reservation)) {
-            throw new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, reservation.getName().getValue());
         }
     }
 

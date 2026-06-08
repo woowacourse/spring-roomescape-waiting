@@ -1,24 +1,27 @@
 package roomescape.domain.theme;
 
-import roomescape.common.exception.BadRequestException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.DomainPreconditions;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
+
+import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.DomainPreconditions.require;
+import static roomescape.domain.DomainPreconditions.requireNonBlank;
 
 public class ThumbnailUrl {
     private static final Pattern URL_PATTERN = Pattern.compile("^https?://.+");
     private final String value;
 
     public ThumbnailUrl(String value) {
-        validate(value);
+        requireNonBlank(value, INVALID_INPUT, "이미지 주소는 비어있을 수 없습니다.");
+        require(isValidPattern(value), INVALID_INPUT, "유효하지 않은 이미지 주소입니다. URL은 https로 시작해야 합니다.");
         this.value = value;
     }
 
-    private void validate(String value) {
-        Objects.requireNonNull(value);
-        if (!URL_PATTERN.matcher(value).matches()) {
-            throw new BadRequestException("유효하지 않은 이미지 주소입니다. URL은 https로 시작해야 합니다.");
-        }
+    private boolean isValidPattern(String value) {
+        return URL_PATTERN.matcher(value).matches();
     }
 
     public String getValue() {

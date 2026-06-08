@@ -36,7 +36,7 @@ public class ReservationService {
 
         existing.conflictByName(assembled);
 
-        return reservationRepository.save(existing.join(assembled.getName().getValue(), slot));
+        return reservationRepository.save(assembled.withStatus(existing.nextStatus()));
     }
 
     public Reservation find(long id) {
@@ -66,7 +66,7 @@ public class ReservationService {
         Reservations slotReservations = reservationRepository.findBySlotId(newSlot.getId()).excluding(id);
         slotReservations.conflictByName(assembled);
 
-        Reservation updated = slotReservations.join(assembled.getName().getValue(), newSlot);
+        Reservation updated = assembled.withStatus(slotReservations.nextStatus());
         reservationRepository.update(id, updated);
 
         boolean slotChanged = !existing.getSlotId().equals(newSlot.getId());

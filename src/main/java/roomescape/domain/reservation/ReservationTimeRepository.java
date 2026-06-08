@@ -1,10 +1,13 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.NotFoundException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
 public interface ReservationTimeRepository {
     ReservationTime save(ReservationTime time);
@@ -21,6 +24,6 @@ public interface ReservationTimeRepository {
 
     default ReservationTime getById(long id) {
         return findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다. 입력을 확인해 주세요."));
+                .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 시간을 찾을 수 없습니다. : " + id));
     }
 }

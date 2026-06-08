@@ -1,10 +1,15 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.UnprocessableException;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.DomainPreconditions;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.DomainPreconditions.requireNonNull;
 
 public class Slot {
     private final Long id;
@@ -14,10 +19,9 @@ public class Slot {
 
     public Slot(Long id, ReservationDate date, ReservationTime time, Theme theme) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-
+        this.date = requireNonNull(date, INVALID_INPUT, "예약일은 비어있을 수 없습니다.");
+        this.time = requireNonNull(time, INVALID_INPUT, "예약 시간은 비어있을 수 없습니다.");
+        this.theme = requireNonNull(theme, INVALID_INPUT, "예약 테마는 비어있을 수 없습니다.");
     }
 
     public static Slot load(Long id, LocalDate date, ReservationTime time, Theme theme) {
@@ -32,11 +36,11 @@ public class Slot {
 
     public void validateNotPast(LocalDateTime now) {
         if (isPast(now)) {
-            throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
+            throw new RoomEscapeException(DomainErrorCode.PAST_DATE, date.getDate(), time.getStartAt());
         }
     }
 
-    public Slot withId(long generatedKey) {
+    public Slot withId(Long generatedKey) {
         return new Slot(generatedKey, date, time, theme);
     }
 
