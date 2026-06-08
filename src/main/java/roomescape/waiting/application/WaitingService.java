@@ -90,6 +90,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void promoteWaitingWithoutReservation() {
         List<Waiting> waitings = waitingRepository.findFirstWaitingsWithoutReservation();
 
