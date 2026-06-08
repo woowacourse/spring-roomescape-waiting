@@ -35,8 +35,45 @@
     <div class="section-header">
         <div class="section-title">예약 목록</div>
     </div>
+    <div class="reservation-filter-panel">
+        <div class="filter-preset-row">
+            <div class="filter-preset-tabs">
+                <button type="button" class="filter-preset" data-range="today" onclick="selectDatePreset('today')">오늘</button>
+                <button type="button" class="filter-preset" data-range="lastMonth" onclick="selectDatePreset('lastMonth')">지난 달</button>
+                <button type="button" class="filter-preset" data-range="thisMonth" onclick="selectDatePreset('thisMonth')">이번 달</button>
+                <button type="button" class="filter-preset" data-range="nextMonth" onclick="selectDatePreset('nextMonth')">다음 달</button>
+                <button type="button" class="filter-preset" data-range="custom" onclick="selectDatePreset('custom', false)">기간 선택</button>
+            </div>
+            <div class="status-filter-group" aria-label="보기 옵션">
+                <span>보기 옵션</span>
+                <label class="status-filter-option">
+                    <input type="checkbox" id="show-reserved-checkbox" checked>
+                    <span>예약</span>
+                </label>
+                <label class="status-filter-option">
+                    <input type="checkbox" id="show-waiting-checkbox" checked>
+                    <span>대기</span>
+                </label>
+            </div>
+        </div>
+        <div class="date-range-row">
+            <label class="date-field">
+                <span>시작일</span>
+                <input type="date" id="start-date-input"
+                       onmousedown="selectDatePreset('custom', false)"
+                       onfocus="selectDatePreset('custom', false)">
+            </label>
+            <label class="date-field">
+                <span>종료일</span>
+                <input type="date" id="end-date-input"
+                       onmousedown="selectDatePreset('custom', false)"
+                       onfocus="selectDatePreset('custom', false)">
+            </label>
+            <button type="button" class="btn-filter-search" onclick="loadReservations()">조회</button>
+        </div>
+    </div>
     <div class="toolbar">
-        <input type="search" id="search-input" placeholder="이름, 날짜, 시간, 테마 검색">
+        <input type="search" id="search-input" placeholder="이름, 날짜, 시간, 테마, 상태, 순번 검색">
     </div>
     <div class="table-wrap">
         <table>
@@ -47,6 +84,8 @@
                 <th data-sort="date">날짜<span class="sort-indicator"></span></th>
                 <th data-sort="time">시간<span class="sort-indicator"></span></th>
                 <th data-sort="theme">테마<span class="sort-indicator"></span></th>
+                <th data-sort="status">상태<span class="sort-indicator"></span></th>
+                <th data-sort="turn">대기 순번<span class="sort-indicator"></span></th>
                 <th class="right">관리</th>
             </tr>
             </thead>
@@ -64,19 +103,26 @@
     let sortCriteria = [];
 
     window.onload = () => {
-        document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+        document.getElementById('date-input').value = getTodayString();
+        selectDatePreset('thisMonth', false);
         document.getElementById('search-input').addEventListener('input', renderReservations);
+        document.getElementById('show-reserved-checkbox').addEventListener('change', updateStatusFilter);
+        document.getElementById('show-waiting-checkbox').addEventListener('change', updateStatusFilter);
         document.querySelectorAll('th[data-sort]').forEach(th => {
             th.addEventListener('click', () => {
                 toggleSort(th.dataset.sort);
                 renderReservations();
             });
         });
-        Promise.all([loadThemes(), loadTimes()]).then(loadReservations);
+        loadReservations();
+        loadThemes().catch(showError);
+        loadTimes().catch(showError);
     };
 
     function loadReservations() {
-        return fetch('/admin/reservations')
+        const startDate = document.getElementById('start-date-input').value;
+        const endDate = document.getElementById('end-date-input').value;
+        return fetch(`/admin/reservation-statuses?startDate=${startDate}&endDate=${endDate}`)
             .then(handleResponse)
             .then(data => {
                 reservations = data;
@@ -111,19 +157,22 @@
         const body = document.getElementById('reservation-body');
         updateSortIndicators();
         const rows = reservations
+            .filter(matchesStatusFilter)
             .filter(reservation => {
                 const haystack = [
                     reservation.name,
                     reservation.date,
                     reservation.time?.startAt,
-                    reservation.theme?.name
+                    reservation.theme?.name,
+                    getStatusLabel(reservation.status),
+                    reservation.turn
                 ].join(' ').toLowerCase();
                 return haystack.includes(query);
             })
             .sort(compareReservation);
 
         if (rows.length === 0) {
-            body.innerHTML = `<tr><td colspan="6" class="empty">예약이 없습니다</td></tr>`;
+            body.innerHTML = `<tr><td colspan="8" class="empty">예약 또는 대기가 없습니다</td></tr>`;
             return;
         }
 
@@ -134,9 +183,31 @@
                 <td>${reservation.date}</td>
                 <td class="accent">${formatTime(reservation.time?.startAt)}</td>
                 <td>${escapeHtml(reservation.theme?.name || '')}</td>
-                <td class="right"><button class="btn-danger" onclick="deleteReservation(${reservation.id})">삭제</button></td>
+                <td>${renderStatusBadge(reservation.status)}</td>
+                <td>${reservation.turn ?? '-'}</td>
+                <td class="right">${renderActions(reservation)}</td>
             </tr>
         `).join('');
+    }
+
+    function updateStatusFilter(event) {
+        if (!hasSelectedStatusFilter()) {
+            event.target.checked = true;
+            return;
+        }
+        renderReservations();
+    }
+
+    function hasSelectedStatusFilter() {
+        return document.getElementById('show-reserved-checkbox').checked
+            || document.getElementById('show-waiting-checkbox').checked;
+    }
+
+    function matchesStatusFilter(reservation) {
+        if (reservation.status === 'WAITING') {
+            return document.getElementById('show-waiting-checkbox').checked;
+        }
+        return document.getElementById('show-reserved-checkbox').checked;
     }
 
     function compareReservation(a, b) {
@@ -150,17 +221,44 @@
                 return criterion.direction === 'asc' ? result : -result;
             }
         }
+        return compareDefaultReservation(a, b);
+    }
+
+    function compareDefaultReservation(a, b) {
+        const dateResult = String(a.date).localeCompare(String(b.date), 'ko', { numeric: true });
+        if (dateResult !== 0) {
+            return dateResult;
+        }
+        const timeResult = String(a.time?.startAt || '').localeCompare(String(b.time?.startAt || ''), 'ko', { numeric: true });
+        if (timeResult !== 0) {
+            return timeResult;
+        }
+        const themeResult = String(a.theme?.name || '').localeCompare(String(b.theme?.name || ''), 'ko', { numeric: true });
+        if (themeResult !== 0) {
+            return themeResult;
+        }
+        const statusResult = getStatusOrder(a.status) - getStatusOrder(b.status);
+        if (statusResult !== 0) {
+            return statusResult;
+        }
+        const turnResult = getTurnOrder(a.turn) - getTurnOrder(b.turn);
+        if (turnResult !== 0) {
+            return turnResult;
+        }
         return String(a.id).localeCompare(String(b.id), 'ko', { numeric: true });
     }
 
     function getSortValue(reservation, key) {
-        return {
+        const values = {
             id: reservation.id,
             name: reservation.name,
             date: reservation.date,
             time: reservation.time?.startAt,
-            theme: reservation.theme?.name
-        }[key] || '';
+            theme: reservation.theme?.name,
+            status: getStatusOrder(reservation.status),
+            turn: getTurnOrder(reservation.turn)
+        };
+        return values[key] ?? '';
     }
 
     function toggleSort(key) {
@@ -221,8 +319,108 @@
             .catch(showError);
     }
 
+    function deleteWaiting(id) {
+        fetch(`/admin/waitings/${id}`, { method: 'DELETE' })
+            .then(handleResponse)
+            .then(() => {
+                showToast('대기가 삭제되었습니다', 'success');
+                loadReservations();
+            })
+            .catch(showError);
+    }
+
+    function selectDatePreset(range, shouldLoad = true) {
+        updateActivePreset(range);
+        setDateInputsEnabled(range === 'custom');
+        if (range === 'custom') {
+            return;
+        }
+
+        const today = new Date();
+        let start = today;
+        let end = today;
+
+        if (range === 'thisMonth') {
+            start = getMonthStart(today);
+            end = getMonthEnd(today);
+        }
+        if (range === 'nextMonth') {
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            start = getMonthStart(nextMonth);
+            end = getMonthEnd(nextMonth);
+        }
+        if (range === 'lastMonth') {
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            start = getMonthStart(lastMonth);
+            end = getMonthEnd(lastMonth);
+        }
+
+        document.getElementById('start-date-input').value = formatDate(start);
+        document.getElementById('end-date-input').value = formatDate(end);
+
+        if (shouldLoad) {
+            loadReservations();
+        }
+    }
+
+    function updateActivePreset(range) {
+        document.querySelectorAll('.filter-preset').forEach(button => {
+            button.classList.toggle('active', button.dataset.range === range);
+        });
+    }
+
+    function setDateInputsEnabled(enabled) {
+        document.getElementById('start-date-input').readOnly = !enabled;
+        document.getElementById('end-date-input').readOnly = !enabled;
+    }
+
+    function renderActions(reservation) {
+        if (reservation.status === 'WAITING') {
+            return `<button class="btn-danger table-action-button" onclick="deleteWaiting(${reservation.id})">삭제</button>`;
+        }
+        return `<button class="btn-danger table-action-button" onclick="deleteReservation(${reservation.id})">삭제</button>`;
+    }
+
+    function renderStatusBadge(status) {
+        if (status === 'WAITING') {
+            return '<span class="status-badge waiting">대기</span>';
+        }
+        return '<span class="status-badge reserved">예약</span>';
+    }
+
+    function getStatusLabel(status) {
+        return status === 'WAITING' ? '대기' : '예약';
+    }
+
+    function getStatusOrder(status) {
+        return status === 'WAITING' ? 1 : 0;
+    }
+
+    function getTurnOrder(turn) {
+        return turn ?? 0;
+    }
+
     function formatTime(value) {
         return value ? value.slice(0, 5) : '';
+    }
+
+    function getMonthStart(date) {
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    }
+
+    function getMonthEnd(date) {
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+
+    function formatDate(value) {
+        const year = value.getFullYear();
+        const month = String(value.getMonth() + 1).padStart(2, '0');
+        const date = String(value.getDate()).padStart(2, '0');
+        return `${year}-${month}-${date}`;
+    }
+
+    function getTodayString() {
+        return formatDate(new Date());
     }
 
     function escapeHtml(value) {

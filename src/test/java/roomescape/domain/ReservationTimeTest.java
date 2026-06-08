@@ -28,4 +28,25 @@ class ReservationTimeTest {
         // then
         assertThat(result.getStartAt()).isEqualTo(startAt);
     }
+
+    @Test
+    void 아이디가_같으면_같은_예약시간이다() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("10:00"));
+        ReservationTime sameIdTime = new ReservationTime(1L, LocalTime.parse("11:00"));
+
+        // when & then
+        assertThat(time).isEqualTo(sameIdTime);
+        assertThat(time).hasSameHashCodeAs(sameIdTime);
+    }
+
+    @Test
+    void 아이디가_없으면_시간이_같아도_같은_예약시간이_아니다() {
+        // given
+        ReservationTime time = new ReservationTime(null, LocalTime.parse("10:00"));
+        ReservationTime sameStartAtTime = new ReservationTime(null, LocalTime.parse("10:00"));
+
+        // when & then
+        assertThat(time).isNotEqualTo(sameStartAtTime);
+    }
 }

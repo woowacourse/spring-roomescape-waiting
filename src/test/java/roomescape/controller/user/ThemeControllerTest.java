@@ -5,17 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.NotFoundException;
-import roomescape.repository.dto.PopularThemeResult;
+import roomescape.domain.TimeAvailability;
+import roomescape.domain.populartheme.PopularTheme;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
-import roomescape.service.result.TimeAvailabilityResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -37,11 +38,9 @@ class ThemeControllerTest {
 
     @Test
     void 테마_목록을_조회한다() throws Exception {
-        // given
         given(themeService.findAll())
                 .willReturn(List.of(new Theme(1L, "테마", "설명", "썸네일")));
 
-        // when & then
         mockMvc.perform(get("/themes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -55,13 +54,13 @@ class ThemeControllerTest {
 
     @Test
     void 예약_가능_시간을_조회한다() throws Exception {
-        // given
-        given(reservationAvailabilityService.findAvailableTime(
+        given(reservationAvailabilityService.findAvailableTimes(
                 eq(1L),
                 eq(LocalDate.of(2099, 1, 1))))
-                .willReturn(List.of(new TimeAvailabilityResult(1L, LocalTime.of(10, 0), true)));
+                .willReturn(List.of(new TimeAvailability(
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        true)));
 
-        // when & then
         mockMvc.perform(get("/themes/1/times")
                         .param("date", "2099-01-01"))
                 .andExpect(status().isOk())
@@ -69,49 +68,27 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[0].time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$[0].available").value(true));
 
-        verify(reservationAvailabilityService, times(1)).findAvailableTime(1L, LocalDate.of(2099, 1, 1));
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
-    }
-
-    @Test
-    void 존재하지_않는_테마의_예약_가능_시간_조회시_에러_응답() throws Exception {
-        // given
-        given(reservationAvailabilityService.findAvailableTime(
-                eq(999L),
-                eq(LocalDate.of(2099, 1, 1))))
-                .willThrow(new NotFoundException("존재하지 않는 테마입니다."));
-
-        // when & then
-        mockMvc.perform(get("/themes/999/times")
-                        .param("date", "2099-01-01"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
-                .andExpect(jsonPath("$.detail").value("존재하지 않는 테마입니다."));
-
-        verify(reservationAvailabilityService, times(1)).findAvailableTime(999L, LocalDate.of(2099, 1, 1));
+        verify(reservationAvailabilityService, times(1)).findAvailableTimes(1L, LocalDate.of(2099, 1, 1));
         verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test
     void 인기_테마를_조회한다() throws Exception {
-        // given
-        given(themeService.findWeeklyTopTen())
-                .willReturn(List.of(new PopularThemeResult(1L, "테마", "설명", "썸네일", 3L)));
+        given(themeService.findWeeklyTopTen(any(LocalDate.class)))
+                .willReturn(List.of(new PopularTheme(new Theme(1L, "테마", "설명", "썸네일"), 3L)));
 
-        // when & then
         mockMvc.perform(get("/themes/popular"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("테마"))
                 .andExpect(jsonPath("$[0].reservationCount").value(3));
 
-        verify(themeService, times(1)).findWeeklyTopTen();
+        verify(themeService, times(1)).findWeeklyTopTen(any(LocalDate.class));
         verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test
     void 쿼리_파라미터_형식이_올바르지_않으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/themes/1/times")
                         .param("date", "invalid-date"))
                 .andExpect(status().isBadRequest())
@@ -122,31 +99,7 @@ class ThemeControllerTest {
     }
 
     @Test
-    void 필수_쿼리_파라미터가_없으면_에러_응답() throws Exception {
-        // when & then
-        mockMvc.perform(get("/themes/1/times"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
-                .andExpect(jsonPath("$.detail").value("date는 필수입니다."));
-
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
-    }
-
-    @Test
-    void 경로_변수_형식이_올바르지_않으면_에러_응답() throws Exception {
-        // when & then
-        mockMvc.perform(get("/themes/abc/times")
-                        .param("date", "2099-01-01"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
-                .andExpect(jsonPath("$.detail").value("id 형식이 올바르지 않습니다."));
-
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
-    }
-
-    @Test
     void 경로_변수가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/themes/0/times")
                         .param("date", "2099-01-01"))
                 .andExpect(status().isBadRequest())

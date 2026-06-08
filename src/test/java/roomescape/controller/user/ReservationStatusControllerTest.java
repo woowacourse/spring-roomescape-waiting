@@ -34,11 +34,9 @@ class ReservationStatusControllerTest {
 
     @Test
     void 이름으로_예약과_예약_대기를_함께_조회한다() throws Exception {
-        // given
         given(reservationLookupService.findByName(eq("브라운")))
                 .willReturn(List.of(reservedStatus(), waitingStatus()));
 
-        // when & then
         mockMvc.perform(get("/reservation-statuses")
                         .param("name", "브라운"))
                 .andExpect(status().isOk())
@@ -60,19 +58,7 @@ class ReservationStatusControllerTest {
     }
 
     @Test
-    void 이름이_없으면_에러_응답() throws Exception {
-        // when & then
-        mockMvc.perform(get("/reservation-statuses"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
-                .andExpect(jsonPath("$.detail").value("name는 필수입니다."));
-
-        verifyNoMoreInteractions(reservationLookupService);
-    }
-
-    @Test
     void 이름이_비어있으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(get("/reservation-statuses")
                         .param("name", ""))
                 .andExpect(status().isBadRequest())

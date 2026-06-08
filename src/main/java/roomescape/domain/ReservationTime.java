@@ -15,6 +15,10 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
+    public ReservationTime withId(Long id) {
+        return new ReservationTime(id, startAt);
+    }
+
     public Long getId() {
         return id;
     }
@@ -25,8 +29,14 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (!(o instanceof ReservationTime that)) return false;
-        return Objects.equals(id, that.id);
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     private void validateTime(LocalTime startAt) {

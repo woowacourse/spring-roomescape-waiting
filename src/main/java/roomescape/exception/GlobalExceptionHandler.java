@@ -3,6 +3,7 @@ package roomescape.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import roomescape.controller.dto.ErrorResponse;
+import roomescape.controller.dto.response.ErrorResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -27,7 +28,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
-                .orElse(ErrorCode.INVALID_INPUT.getMessage());
+                .orElse(ErrorCode.INVALID_INPUT.getDetail());
         return invalidInput(detail);
     }
 
@@ -37,7 +38,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(ConstraintViolation::getMessage)
-                .orElse(ErrorCode.INVALID_INPUT.getMessage());
+                .orElse(ErrorCode.INVALID_INPUT.getDetail());
         return invalidInput(detail);
     }
 
@@ -66,21 +67,28 @@ public class GlobalExceptionHandler {
             return modelAndView;
         }
         return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode));
+                .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
     }
 
     @ExceptionHandler(RoomescapeException.class)
     public ResponseEntity<ErrorResponse> handleRoomescapeException(RoomescapeException e) {
-        return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.from(e));
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ErrorResponse.from(errorCode, e.getMessage()));
+    }
+
+    @ExceptionHandler(TransientDataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleTransientDataAccessException() {
+        ErrorCode errorCode = ErrorCode.TEMPORARY_UNAVAILABLE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException() {
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-
         return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode));
+                .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
     }
 
     private ResponseEntity<ErrorResponse> invalidInput(String detail) {

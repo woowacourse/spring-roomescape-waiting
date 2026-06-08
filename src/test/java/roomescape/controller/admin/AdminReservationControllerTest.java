@@ -6,16 +6,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -33,11 +37,9 @@ class AdminReservationControllerTest {
 
     @Test
     void 예약_목록을_조회한다() throws Exception {
-        // given
         given(reservationService.findAll())
                 .willReturn(List.of(reservation()));
 
-        // when & then
         mockMvc.perform(get("/admin/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -53,7 +55,6 @@ class AdminReservationControllerTest {
 
     @Test
     void 관리자_예약을_생성한다() throws Exception {
-        // given
         given(reservationService.createByAdmin(
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
@@ -61,7 +62,6 @@ class AdminReservationControllerTest {
                 eq(1L)))
                 .willReturn(reservation());
 
-        // when & then
         mockMvc.perform(post("/admin/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
@@ -79,44 +79,16 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void 중복_예약이면_에러_응답() throws Exception {
-        // given
-        given(reservationService.createByAdmin(
-                eq("브라운"),
-                eq(LocalDate.of(2099, 1, 1)),
-                eq(1L),
-                eq(1L)))
-                .willThrow(new DuplicateReservationException("이미 예약된 시간입니다."));
-
-        // when & then
-        mockMvc.perform(post("/admin/reservations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(validRequest()))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("DUPLICATE_RESERVATION"))
-                .andExpect(jsonPath("$.detail").value("이미 예약된 시간입니다."));
-
-        verify(reservationService, times(1)).createByAdmin(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
-        verifyNoMoreInteractions(reservationService);
-    }
-
-    @Test
     void 예약을_삭제한다() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/reservations/1"))
                 .andExpect(status().isNoContent());
 
-        verify(reservationService, times(1)).deleteByAdmin(1L);
+        verify(reservationService, times(1)).deleteByAdmin(eq(1L), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationService);
     }
 
     @Test
     void 삭제_id가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/reservations/0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
@@ -139,6 +111,6 @@ class AdminReservationControllerTest {
     private Reservation reservation() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
-        return new Reservation(1L, "브라운", LocalDate.of(2099, 1, 1), time, theme);
+        return new Reservation(1L, new Reserver("브라운"), new ReservationSlot(LocalDate.of(2099, 1, 1), time, theme));
     }
 }

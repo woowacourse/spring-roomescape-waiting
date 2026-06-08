@@ -5,12 +5,13 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.dto.ReservationRequest;
-import roomescape.controller.dto.ReservationResponse;
+import roomescape.controller.dto.request.ReservationRequest;
+import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Validated
@@ -45,7 +46,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id) {
-        service.deleteByAdmin(id);
+        service.deleteByAdmin(id, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }

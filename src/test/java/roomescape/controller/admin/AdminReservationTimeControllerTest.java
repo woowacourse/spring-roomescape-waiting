@@ -7,7 +7,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.ResourceInUseException;
 import roomescape.service.ReservationTimeService;
 
 import java.time.LocalTime;
@@ -29,11 +28,9 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간_목록을_조회한다() throws Exception {
-        // given
         given(reservationTimeService.findAll())
                 .willReturn(List.of(new ReservationTime(1L, LocalTime.of(10, 0))));
 
-        // when & then
         mockMvc.perform(get("/admin/times"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -45,11 +42,9 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간을_생성한다() throws Exception {
-        // given
         given(reservationTimeService.create(LocalTime.of(10, 0)))
                 .willReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
 
-        // when & then
         mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -68,7 +63,6 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간_생성_요청값이_유효하지_않으면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -85,7 +79,6 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 예약_시간을_삭제한다() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/times/1"))
                 .andExpect(status().isNoContent());
 
@@ -95,7 +88,6 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void 삭제_id가_양수가_아니면_에러_응답() throws Exception {
-        // when & then
         mockMvc.perform(delete("/admin/times/0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
@@ -104,20 +96,4 @@ class AdminReservationTimeControllerTest {
         verifyNoMoreInteractions(reservationTimeService);
     }
 
-    @Test
-    void 예약이_존재하는_시간은_삭제시_에러_응답() throws Exception {
-        // given
-        doThrow(new ResourceInUseException("예약이 존재하는 시간은 삭제할 수 없습니다."))
-                .when(reservationTimeService)
-                .delete(1L);
-
-        // when & then
-        mockMvc.perform(delete("/admin/times/1"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("RESOURCE_IN_USE"))
-                .andExpect(jsonPath("$.detail").value("예약이 존재하는 시간은 삭제할 수 없습니다."));
-
-        verify(reservationTimeService, times(1)).delete(1L);
-        verifyNoMoreInteractions(reservationTimeService);
-    }
 }

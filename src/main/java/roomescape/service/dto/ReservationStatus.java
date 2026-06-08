@@ -1,9 +1,6 @@
 package roomescape.service.dto;
 
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.service.result.WaitingResult;
+import roomescape.domain.*;
 
 import java.time.LocalDate;
 
@@ -17,26 +14,29 @@ public record ReservationStatus(
         Long turn
 ) {
     public static ReservationStatus reserved(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         return new ReservationStatus(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
+                slot.getDate(),
+                slot.getTime(),
+                slot.getTheme(),
                 Status.RESERVED,
                 null
         );
     }
 
-    public static ReservationStatus waiting(WaitingResult waiting) {
+    public static ReservationStatus waiting(WaitingWithTurn waitingWithTurn) {
+        ReservationWaiting waiting = waitingWithTurn.waiting();
+        ReservationSlot slot = waiting.getSlot();
         return new ReservationStatus(
-                waiting.id(),
-                waiting.name(),
-                waiting.date(),
-                waiting.time(),
-                waiting.theme(),
+                waiting.getId(),
+                waiting.getName(),
+                slot.getDate(),
+                slot.getTime(),
+                slot.getTheme(),
                 Status.WAITING,
-                waiting.turn()
+                waitingWithTurn.turn()
         );
     }
 }

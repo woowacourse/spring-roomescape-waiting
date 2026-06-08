@@ -6,7 +6,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
 
 import java.sql.PreparedStatement;
@@ -19,6 +21,26 @@ import java.util.Optional;
 public class ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getObject("time_value", LocalTime.class));
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("description"),
+                resultSet.getString("thumbnail"));
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class), time, theme
+        );
+
+        return new Reservation(
+                resultSet.getLong("reservation_id"),
+                new Reserver(resultSet.getString("username")),
+                slot
+        );
+    };
 
     public ReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -68,7 +90,32 @@ public class ReservationRepository {
         return result.stream().findAny();
     }
 
-    public List<Reservation> findByName(String name) {
+    public Optional<Reservation> findByIdForUpdate(Long id) {
+        return lockById(id)
+                .flatMap(this::findById);
+    }
+
+    public List<Reservation> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                SELECT
+                    r.id as reservation_id,
+                    r.name as username,
+                    r.date,
+                    rt.id as time_id,
+                    rt.start_at as time_value,
+                    t.id as theme_id,
+                    t.name as theme_name,
+                    t.description,
+                    t.thumbnail
+                FROM reservation as r
+                JOIN reservation_time as rt ON r.time_id = rt.id
+                JOIN theme as t ON r.theme_id = t.id
+                WHERE r.date BETWEEN ? AND ?;
+                """;
+        return jdbcTemplate.query(sql, reservationRowMapper, startDate, endDate);
+    }
+
+    public List<Reservation> findByReserver(Reserver reserver) {
         String sql = """
                 SELECT
                     r.id as reservation_id,
@@ -88,24 +135,26 @@ public class ReservationRepository {
                 WHERE r.name = ?
                 ORDER BY r.id;
                 """;
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, reserver.getName());
     }
 
-    public Long insert(Reservation reservation) {
+    public Reservation insert(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         String sql = "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement pstmt = connection.prepareStatement(
                     sql,
-                    new String[]{"id"});
+                    new String[]{"id"}
+            );
             pstmt.setString(1, reservation.getName());
-            pstmt.setObject(2, reservation.getDate());
-            pstmt.setLong(3, reservation.getTime().getId());
-            pstmt.setLong(4, reservation.getTheme().getId());
+            pstmt.setObject(2, slot.getDate());
+            pstmt.setLong(3, slot.getTime().getId());
+            pstmt.setLong(4, slot.getTheme().getId());
             return pstmt;
         }, keyHolder);
-
-        return keyHolder.getKey().longValue();
+        Long id = keyHolder.getKey().longValue();
+        return reservation.withId(id);
     }
 
     public int delete(Long id) {
@@ -114,46 +163,29 @@ public class ReservationRepository {
     }
 
     public int update(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?;";
         return jdbcTemplate.update(
                 sql,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId(),
                 reservation.getId());
     }
 
-    public List<Reservation> findReservationsByThemeAndDate(Long themeId, LocalDate date) {
-        String sql = """
-                SELECT
-                    r.id as reservation_id,
-                    r.name as username,
-                    r.date,
-                    rt.id as time_id,
-                    rt.start_at as time_value,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description,
-                    t.thumbnail
-                FROM reservation as r
-                INNER JOIN reservation_time as rt
-                  ON r.time_id = rt.id
-                INNER JOIN theme as t
-                  ON r.theme_id = t.id
-                WHERE t.id = ?\s
-                AND r.date = ?;
-                """;
-        return jdbcTemplate.query(sql, reservationRowMapper, themeId, date);
-    }
-
-    public boolean existsWith(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlot(ReservationSlot slot) {
         String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId());
         return count != null && count > 0;
     }
 
-    public boolean existsWithForUpdate(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlotForUpdate(ReservationSlot slot) {
         String sql = """
                 SELECT id
                 FROM reservation
@@ -166,15 +198,22 @@ public class ReservationRepository {
         List<Long> ids = jdbcTemplate.query(
                 sql,
                 (resultSet, rowNum) -> resultSet.getLong("id"),
-                date,
-                timeId,
-                themeId);
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId());
         return !ids.isEmpty();
     }
 
-    public boolean existsByNameWith(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean existsByReserverAndSlot(Reserver reserver, ReservationSlot slot) {
         String sql = "SELECT count(*) FROM reservation WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                reserver.getName(),
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId()
+        );
         return count != null && count > 0;
     }
 
@@ -190,22 +229,8 @@ public class ReservationRepository {
         return count != null && count > 0;
     }
 
-    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
-        ReservationTime time = new ReservationTime(
-                resultSet.getLong("time_id"),
-                resultSet.getObject("time_value", LocalTime.class));
-        Theme theme = new Theme(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail"));
-
-        Reservation reservation = new Reservation(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("username"),
-                resultSet.getObject("date", LocalDate.class),
-                time,
-                theme);
-        return reservation;
-    };
+    private Optional<Long> lockById(Long id) {
+        String sql = "SELECT id FROM reservation WHERE id = ? FOR UPDATE;";
+        return jdbcTemplate.queryForList(sql, Long.class, id).stream().findFirst();
+    }
 }

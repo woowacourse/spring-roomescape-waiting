@@ -6,17 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
-import roomescape.repository.dto.WaitingWithTurn;
+import roomescape.domain.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JdbcTest
@@ -42,18 +41,18 @@ class ReservationWaitingRepositoryTest {
         // given
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름", "테마 설명", "썸네일");
-        ReservationWaiting waiting = new ReservationWaiting(null, "브라운", date, time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(null, new Reserver("브라운"), new ReservationSlot(date, time, theme));
 
         // when
-        Long id = waitingRepository.insert(waiting);
+        ReservationWaiting saved = waitingRepository.insert(waiting);
 
         // then
-        ReservationWaiting savedWaiting = waitingRepository.findById(id).get();
+        ReservationWaiting savedWaiting = waitingRepository.findById(saved.getId()).get();
         assertAll(
-                () -> assertThat(id).isNotNull(),
+                () -> assertThat(saved.getId()).isNotNull(),
                 () -> assertThat(savedWaiting.getName()).isEqualTo(waiting.getName()),
-                () -> assertThat(savedWaiting.getDate()).isEqualTo(waiting.getDate()),
-                () -> assertThat(savedWaiting.getTime().getStartAt()).isEqualTo(waiting.getTime().getStartAt()));
+                () -> assertThat(savedWaiting.getSlot().getDate()).isEqualTo(waiting.getSlot().getDate()),
+                () -> assertThat(savedWaiting.getSlot().getTime().getStartAt()).isEqualTo(waiting.getSlot().getTime().getStartAt()));
     }
 
     @Test
@@ -63,9 +62,9 @@ class ReservationWaitingRepositoryTest {
         Theme theme1 = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
         ReservationTime time2 = findTimeByStartAt("12:00");
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
-        ReservationWaiting waiting1 = new ReservationWaiting(null, "브라운", date, time1, theme1);
-        ReservationWaiting waiting2 = new ReservationWaiting(null, "구구", date, time2, theme2);
-        Long id1 = waitingRepository.insert(waiting1);
+        ReservationWaiting waiting1 = new ReservationWaiting(null, new Reserver("브라운"), new ReservationSlot(date, time1, theme1));
+        ReservationWaiting waiting2 = new ReservationWaiting(null, new Reserver("구구"), new ReservationSlot(date, time2, theme2));
+        Long id1 = waitingRepository.insert(waiting1).getId();
         waitingRepository.insert(waiting2);
 
         // when
@@ -82,22 +81,73 @@ class ReservationWaitingRepositoryTest {
         ReservationTime time2 = findTimeByStartAt("12:00");
         Theme theme1 = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
-        waitingRepository.insert(new ReservationWaiting(null, "구구", date, time1, theme1));
-        waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time1, theme1));
-        waitingRepository.insert(new ReservationWaiting(null, "브라운", date.plusDays(1), time2, theme2));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("구구"), new ReservationSlot(date, time1, theme1)));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("브라운"), new ReservationSlot(date, time1, theme1)));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("브라운"), new ReservationSlot(date.plusDays(1), time2, theme2)));
 
         // when
-        List<WaitingWithTurn> result = waitingRepository.findByNameWithTurn("브라운");
+        List<WaitingWithTurn> result = waitingRepository.findByReserverWithTurn(new Reserver("브라운"));
 
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
                 () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getName())
                         .containsExactly("브라운", "브라운"),
-                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getDate())
+                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getSlot().getDate())
                         .containsExactly(date, date.plusDays(1)),
                 () -> assertThat(result).extracting(WaitingWithTurn::turn)
                         .containsExactly(2L, 1L));
+    }
+
+    @Test
+    void 생성_시간이_같으면_아이디_순서로_대기_순번을_계산한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        LocalDateTime sameCreatedAt = LocalDateTime.of(2023, 8, 5, 10, 0);
+        Long id1 = insertWaitingWithCreatedAt("구구", slot, sameCreatedAt);
+        Long id2 = insertWaitingWithCreatedAt("브라운", slot, sameCreatedAt);
+
+        // when
+        List<WaitingWithTurn> result1 = waitingRepository.findByReserverWithTurn(new Reserver("구구"));
+        List<WaitingWithTurn> result2 = waitingRepository.findByReserverWithTurn(new Reserver("브라운"));
+
+        // then
+        assertAll(
+                () -> assertThat(result1)
+                        .extracting(waitingWithTurn -> waitingWithTurn.waiting().getId(), WaitingWithTurn::turn)
+                        .containsExactly(tuple(id1, 1L)),
+                () -> assertThat(result2)
+                        .extracting(waitingWithTurn -> waitingWithTurn.waiting().getId(), WaitingWithTurn::turn)
+                        .containsExactly(tuple(id2, 2L))
+        );
+    }
+
+    @Test
+    void 날짜_범위에_해당하는_예약_대기_목록을_순번과_함께_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("범위밖1"), new ReservationSlot(date.minusDays(1), time, theme)));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("브라운"), slot));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("구구"), slot));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("범위밖2"), new ReservationSlot(date.plusDays(1), time, theme)));
+
+        // when
+        List<WaitingWithTurn> result = waitingRepository.findByDateRange(date, date);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result)
+                        .extracting(
+                                waitingWithTurn -> waitingWithTurn.waiting().getName(),
+                                WaitingWithTurn::turn)
+                        .containsExactlyInAnyOrder(
+                                tuple("브라운", 1L),
+                                tuple("구구", 2L)));
     }
 
     @Test
@@ -106,10 +156,10 @@ class ReservationWaitingRepositoryTest {
         String name = "브라운";
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        waitingRepository.insert(new ReservationWaiting(null, name, date, time, theme));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver(name), new ReservationSlot(date, time, theme)));
 
         // when
-        boolean result = waitingRepository.existsByNameWith(name, date, time.getId(), theme.getId());
+        boolean result = waitingRepository.existsByReserverAndSlot(new Reserver(name), new ReservationSlot(date, time, theme));
 
         // then
         assertThat(result).isTrue();
@@ -121,7 +171,7 @@ class ReservationWaitingRepositoryTest {
         String name = "브라운";
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(null, new Reserver(name), new ReservationSlot(date, time, theme));
         waitingRepository.insert(waiting);
 
         // when & then
@@ -134,8 +184,8 @@ class ReservationWaitingRepositoryTest {
         // given
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
-        Long id2 = waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("브라운"), new ReservationSlot(date, time, theme)));
+        Long id2 = waitingRepository.insert(new ReservationWaiting(null, new Reserver("구구"), new ReservationSlot(date, time, theme))).getId();
 
         // when
         WaitingWithTurn result = waitingRepository.findByIdWithTurn(id2).get();
@@ -145,6 +195,44 @@ class ReservationWaitingRepositoryTest {
                 () -> assertThat(result.waiting().getId()).isEqualTo(id2),
                 () -> assertThat(result.waiting().getName()).isEqualTo("구구"),
                 () -> assertThat(result.turn()).isEqualTo(2L));
+    }
+
+    @Test
+    void 슬롯의_첫번째_예약_대기를_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        ReservationTime otherTime = findTimeByStartAt("12:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        ReservationWaiting firstWaiting = waitingRepository.insert(new ReservationWaiting(null, new Reserver("브라운"), slot));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("구구"), slot));
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("도라"), new ReservationSlot(date, otherTime, theme)));
+
+        // when
+        ReservationWaiting result = waitingRepository.findFirstBySlotForUpdate(slot).get();
+
+        // then
+        assertAll(
+                () -> assertThat(result.getId()).isEqualTo(firstWaiting.getId()),
+                () -> assertThat(result.getName()).isEqualTo("브라운"),
+                () -> assertThat(result.getSlot().getDate()).isEqualTo(slot.getDate()),
+                () -> assertThat(result.getSlot().getTime().getId()).isEqualTo(slot.getTime().getId()),
+                () -> assertThat(result.getSlot().getTheme().getId()).isEqualTo(slot.getTheme().getId()));
+    }
+
+    @Test
+    void 슬롯에_예약_대기가_없으면_빈_값을_반환한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        ReservationTime otherTime = findTimeByStartAt("12:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        waitingRepository.insert(new ReservationWaiting(null, new Reserver("브라운"), new ReservationSlot(date, otherTime, theme)));
+
+        // when
+        boolean result = waitingRepository.findFirstBySlotForUpdate(new ReservationSlot(date, time, theme)).isEmpty();
+
+        // then
+        assertThat(result).isTrue();
     }
 
     private ReservationTime findTimeByStartAt(String startAt) {
@@ -159,4 +247,16 @@ class ReservationWaitingRepositoryTest {
                 }, startAt);
     }
 
+    private Long insertWaitingWithCreatedAt(String name, ReservationSlot slot, LocalDateTime createdAt) {
+        jdbcTemplate.update("""
+                        INSERT INTO reservation_waiting(name, date, time_id, theme_id, created_at)
+                        VALUES (?, ?, ?, ?, ?);
+                        """,
+                name,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId(),
+                createdAt);
+        return jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_waiting;", Long.class);
+    }
 }

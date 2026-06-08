@@ -250,24 +250,34 @@
 
     function updateReservation(id) {
         const name = nameInput.value.trim();
+        const reservation = findReservation(id, 'RESERVED');
+        if (!reservation) {
+            showToast('예약 정보를 찾을 수 없습니다', 'error');
+            return;
+        }
         const dateInput = document.getElementById(`edit-date-${id}`);
         if (!dateInput.value) {
             showToast('변경할 날짜를 선택해주세요', 'error');
             return;
         }
-        if (!editingTimeId) {
-            showToast('변경할 시간을 선택해주세요', 'error');
+        const dateChanged = dateInput.value !== reservation.date;
+        if (!dateChanged && !editingTimeId) {
+            showToast('변경할 날짜 또는 시간을 선택해주세요', 'error');
             return;
+        }
+
+        const body = {name: name};
+        if (dateChanged) {
+            body.date = dateInput.value;
+        }
+        if (editingTimeId) {
+            body.timeId = editingTimeId;
         }
 
         fetch(`/reservations/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: name,
-                date: dateInput.value,
-                timeId: editingTimeId
-            })
+            body: JSON.stringify(body)
         })
             .then(handleResponse)
             .then(() => {

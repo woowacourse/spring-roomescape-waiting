@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.dto.PopularThemeResponse;
-import roomescape.controller.dto.ThemeResponse;
-import roomescape.controller.dto.TimeAvailabilityResponse;
+import roomescape.controller.dto.response.PopularThemeResponse;
+import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.controller.dto.response.TimeAvailabilityResponse;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
 
@@ -36,8 +36,9 @@ public class ThemeController {
 
     @GetMapping("/{id}/times")
     public ResponseEntity<List<TimeAvailabilityResponse>> getAvailableTimes(
-            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id, @RequestParam("date") LocalDate date) {
-        List<TimeAvailabilityResponse> times = reservationAvailabilityService.findAvailableTime(id, date).stream()
+            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id, @RequestParam("date") LocalDate date
+    ) {
+        List<TimeAvailabilityResponse> times = reservationAvailabilityService.findAvailableTimes(id, date).stream()
                 .map(TimeAvailabilityResponse::from)
                 .toList();
         return ResponseEntity.ok(times);
@@ -45,7 +46,7 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<PopularThemeResponse>> getPopularThemes() {
-        List<PopularThemeResponse> themes = themeService.findWeeklyTopTen().stream()
+        List<PopularThemeResponse> themes = themeService.findWeeklyTopTen(LocalDate.now()).stream()
                 .map(PopularThemeResponse::from)
                 .toList();
         return ResponseEntity.ok(themes);
