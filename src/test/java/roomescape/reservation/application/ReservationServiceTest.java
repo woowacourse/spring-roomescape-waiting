@@ -484,6 +484,42 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약 시간이 변경되지 않으면 대기를 승격하지 않는다")
+    void updateReservationSchedule_success_when_schedule_not_changed() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(1))
+        );
+        Theme savedTheme = themeRepository.save(
+                Theme.create("공포", "아니", "https://good.com/thumb-nail/1")
+        );
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(
+                Reservation.create(
+                        "인직",
+                        date,
+                        savedTime,
+                        savedTheme
+                )
+        );
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", date, savedTime, savedTheme)
+        );
+
+        // when
+        reservationService.updateReservationSchedule(new ReservationUpdateCommand(
+                savedReservation.getId(),
+                date,
+                savedTime.getId(),
+                "인직"
+        ));
+
+        // then
+        assertThat(reservationRepository.findAll()).containsExactly(savedReservation);
+        assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+    }
+
+    @Test
     @DisplayName("존재하지 않는 예약 아이디로 수정하면 예외가 발생한다")
     void updateReservationSchedule_fail_with_not_found_reservation() {
         // given
