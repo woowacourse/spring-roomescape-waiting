@@ -36,9 +36,7 @@ public class ReservationService {
     }
 
     public List<ReservationOrderResponse> findByName(String name) {
-        List<Reservation> myReservations = reservationDao.findByName(name);
-
-        return myReservations.stream()
+        return reservationDao.findByName(name).stream()
                 .map(reservation -> {
                     long order = calculateOrder(reservation);
                     return new ReservationOrderResponse(
