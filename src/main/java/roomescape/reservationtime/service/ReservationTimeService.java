@@ -13,7 +13,6 @@ import roomescape.reservationtime.service.dto.request.ReservationTimeCreateReque
 import roomescape.reservationtime.service.dto.response.ReservationTimeResponse;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
@@ -33,6 +32,7 @@ public class ReservationTimeService {
             .orElseThrow(ReservationTimeNotFoundException::new);
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeCreateRequest data) {
         final ReservationTime reservationTime = ReservationTime.create(data.startAt());
 
@@ -40,6 +40,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedTime);
     }
 
+    @Transactional
     public void delete(final Long timeId) {
         final boolean deleted = deleteReservationTime(timeId);
 

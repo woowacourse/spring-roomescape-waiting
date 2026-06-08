@@ -19,13 +19,13 @@ import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final Clock clock;
 
+    @Transactional
     public Waiting create(
         final String customerName,
         final LocalDate reservationDate,
@@ -43,6 +43,7 @@ public class WaitingService {
         return saveWaiting(waiting);
     }
 
+    @Transactional
     public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
         final Waiting waiting = getWaitingById(waitingId);
 
@@ -56,6 +57,7 @@ public class WaitingService {
         deleteWaiting(waitingId);
     }
 
+    @Transactional
     public void deleteByIdForPromotion(final long waitingId) {
         deleteWaiting(waitingId);
     }
@@ -66,6 +68,7 @@ public class WaitingService {
             .orElseThrow(WaitingNotFoundException::new);
     }
 
+    @Transactional
     public Optional<Waiting> findEarliestWaitingBySlot(
         final LocalDate reservationDate,
         final long timeId,

@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.waiting.service.WaitingService;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class WaitingPromotionService {
 

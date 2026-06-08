@@ -20,7 +20,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ReservationService {
 
@@ -56,6 +55,7 @@ public class ReservationService {
             .orElseThrow(ReservationNotFoundException::new);
     }
 
+    @Transactional
     public Reservation create(
         final String customerName,
         final LocalDate reservationDate,
@@ -72,6 +72,7 @@ public class ReservationService {
         return saveReservation(reservation);
     }
 
+    @Transactional
     public void promote(
         final CustomerName customerName,
         final LocalDate reservationDate,
@@ -87,6 +88,7 @@ public class ReservationService {
         saveReservation(promotedReservation);
     }
 
+    @Transactional
     public Reservation updateByCustomer(final Long reservationId, final LocalDate date, final ReservationTime time) {
         final Reservation originReservation = getReservation(reservationId);
         originReservation.validateModifiableByCustomer(LocalDate.now(clock));
@@ -94,12 +96,14 @@ public class ReservationService {
         return updateSchedule(date, time, originReservation);
     }
 
+    @Transactional
     public Reservation updateByAdmin(final Long reservationId, final LocalDate date, final ReservationTime time) {
         final Reservation originReservation = getReservation(reservationId);
 
         return updateSchedule(date, time, originReservation);
     }
 
+    @Transactional
     public void cancel(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
         reservation.validateCancelableByCustomer(LocalDate.now(clock));
@@ -107,6 +111,7 @@ public class ReservationService {
         deleteReservation(reservation.getId());
     }
 
+    @Transactional
     public void deleteById(final Long reservationId) {
         deleteReservation(reservationId);
     }

@@ -15,7 +15,6 @@ import roomescape.theme.service.dto.request.ThemeCreateRequest;
 import roomescape.theme.service.dto.response.ThemeResponse;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ThemeService {
 
@@ -46,6 +45,7 @@ public class ThemeService {
             .toList();
     }
 
+    @Transactional
     public ThemeResponse create(final ThemeCreateRequest request) {
         final Theme themeWithoutId = Theme.create(
             request.name(),
@@ -57,6 +57,7 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
+    @Transactional
     public void delete(final Long themeId) {
         boolean deleted = deleteTheme(themeId);
 
