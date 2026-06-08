@@ -42,7 +42,7 @@ public class Reservation {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
-    public boolean isAtTime(ReservationTime time) {
+    public boolean isSameTime(ReservationTime time) {
         return this.time.equals(time);
     }
 
