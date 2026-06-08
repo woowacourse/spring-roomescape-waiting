@@ -384,6 +384,23 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("deleteOwnReservation - 대기 예약을 삭제하면 다른 대기를 승격하지 않는다")
+    void deleteOwnReservationOfWaitingDoesNotPromote() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        User daisy = member("데이지");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long charlesWaitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+        long daisyWaitingId = saveWaitingReservation(daisy, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteOwnReservation(Fixtures.deleteCommand(charlesWaitingId, charles));
+
+        assertThat(statusOf(daisyWaitingId)).isEqualTo("WAITING");
+    }
+
+    @Test
     @DisplayName("deletePastReservation - 과거 예약을 삭제하면 조회되지 않는다")
     void deletePastReservationMakesPastReservationUnqueryable() {
         User user = member("브라운");
