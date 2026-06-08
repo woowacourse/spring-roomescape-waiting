@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.ReservationErrorCode;
+import roomescape.exception.ReservationSlotErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.WaitingErrorCode;
 
@@ -19,7 +20,9 @@ class WaitingTest {
         Theme theme = Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png");
 
         // when & then
-        assertThatThrownBy(() -> Waiting.create("", LocalDate.parse("2026-08-05"), time, theme, 1L))
+        ReservationSlot slot = ReservationSlot.of(LocalDate.parse("2026-08-05"), time, theme);
+
+        assertThatThrownBy(() -> Waiting.create("", slot, 1L))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(ReservationErrorCode.INVALID_NAME);
@@ -32,7 +35,7 @@ class WaitingTest {
         Theme theme = Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png");
 
         // when & then
-        assertThatThrownBy(() -> Waiting.create("네오", null, time, theme, 1L))
+        assertThatThrownBy(() -> Waiting.create("네오", ReservationSlot.of(null, time, theme), 1L))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(ReservationErrorCode.INVALID_DATE);
@@ -45,7 +48,8 @@ class WaitingTest {
 
         // when & then
         assertThatThrownBy(
-                () -> Waiting.create("네오", LocalDate.parse("2026-08-05"), null, theme, 1L))
+                () -> Waiting.create("네오",
+                        ReservationSlot.of(LocalDate.parse("2026-08-05"), null, theme), 1L))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(ReservationErrorCode.INVALID_TIME);
@@ -58,7 +62,8 @@ class WaitingTest {
 
         // when & then
         assertThatThrownBy(
-                () -> Waiting.create("네오", LocalDate.parse("2026-08-05"), time, null, 1L))
+                () -> Waiting.create("네오",
+                        ReservationSlot.of(LocalDate.parse("2026-08-05"), time, null), 1L))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(ReservationErrorCode.INVALID_THEME);
@@ -72,7 +77,8 @@ class WaitingTest {
 
         // when & then
         assertThatThrownBy(
-                () -> Waiting.create("네오", LocalDate.parse("2026-08-05"), time, theme, null))
+                () -> Waiting.create("네오",
+                        ReservationSlot.of(LocalDate.parse("2026-08-05"), time, theme), null))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(WaitingErrorCode.INVALID_WAITING_NUMBER);
@@ -85,9 +91,7 @@ class WaitingTest {
         Theme theme = Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png");
         Waiting waiting = Waiting.create(
                 "브라운",
-                LocalDate.parse("2026-05-06"),
-                time,
-                theme,
+                ReservationSlot.of(LocalDate.parse("2026-05-06"), time, theme),
                 1L
         );
 
@@ -97,7 +101,7 @@ class WaitingTest {
         ))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
-                .isEqualTo(WaitingErrorCode.WAITING_PAST_TIME);
+                .isEqualTo(ReservationSlotErrorCode.SLOT_PAST_TIME);
     }
 
 }

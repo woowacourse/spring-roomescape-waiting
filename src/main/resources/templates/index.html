@@ -19,18 +19,76 @@
       --disabled: #eef1f5;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       min-height: 100vh;
       margin: 0;
-      padding: 32px;
+      padding: 92px 32px 32px;
       color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
     }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 247, 249, 0.92);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand strong {
+      font-size: 18px;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      background: var(--surface);
+    }
+
+    .nav-btn.primary {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .nav-btn.primary:hover { background: var(--accent-dark); }
 
     main {
       display: grid;
@@ -53,19 +111,9 @@
       line-height: 1.25;
     }
 
-    h1 {
-      font-size: 28px;
-      margin-bottom: 18px;
-    }
-
-    h2 {
-      font-size: 20px;
-      margin-bottom: 16px;
-    }
-
-    h3 {
-      font-size: 17px;
-    }
+    h1 { font-size: 28px; margin-bottom: 18px; }
+    h2 { font-size: 20px; margin-bottom: 16px; }
+    h3 { font-size: 17px; }
 
     p {
       margin: 6px 0;
@@ -116,9 +164,7 @@
       background: var(--accent);
     }
 
-    .primary-btn:hover {
-      background: var(--accent-dark);
-    }
+    .primary-btn:hover { background: var(--accent-dark); }
 
     .danger-btn {
       border-color: #e6b7b2;
@@ -132,13 +178,8 @@
       font-weight: 700;
     }
 
-    .message.success {
-      color: var(--success);
-    }
-
-    .message.warning {
-      color: var(--warning);
-    }
+    .message.success { color: var(--success); }
+    .message.warning { color: var(--warning); }
 
     ol {
       margin: 0;
@@ -192,7 +233,7 @@
       border: 1px solid #e8ddd8;
     }
 
-    .waiting-number {
+    .waitings-number {
       font-size: 13px;
       color: var(--muted);
       margin-top: 4px;
@@ -211,32 +252,31 @@
       margin-top: 12px;
     }
 
-    .reservation-actions button {
-      flex: 1;
-    }
+    .reservation-actions button { flex: 1; }
 
     @media (max-width: 1040px) {
-      main {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .my-reservation-section {
-        grid-column: 1 / -1;
-      }
+      main { grid-template-columns: 1fr 1fr; }
+      .my-reservation-section { grid-column: 1 / -1; }
     }
 
     @media (max-width: 720px) {
-      body {
-        padding: 18px;
-      }
-
-      main, .edit-grid {
-        grid-template-columns: 1fr;
-      }
+      body { padding: 84px 18px 18px; }
+      .topbar { padding: 14px 18px; }
+      main, .edit-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
+<header class="topbar">
+  <div class="brand">
+    <strong>방탈출 예약 시스템</strong>
+    <span>테마 선택부터 예약 조회까지 한 화면에서</span>
+  </div>
+  <nav class="topbar-actions" aria-label="페이지 이동">
+    <a class="nav-btn" href="/admin">관리자 페이지</a>
+  </nav>
+</header>
+
 <main>
   <section class="panel" aria-labelledby="reservation-start-title">
     <h1 id="reservation-start-title">방탈출 예약</h1>
@@ -336,18 +376,18 @@
 
       Promise.all([
         fetchJson(`/api/reservations?name=${encodeURIComponent(name)}`),
-        fetchJson(`/api/waiting?name=${encodeURIComponent(name)}`)
+        fetchJson(`/api/waitings?name=${encodeURIComponent(name)}`)
       ])
-      .then(([reservations, waitings]) => renderReservations({ reservations, waitings }))
+      .then(([reservations, waitingss]) => renderReservations({ reservations, waitingss }))
       .catch(error => showReservationMessage(toErrorMessage(error, '예약을 조회하지 못했습니다.')));
     }
 
     function renderReservations(data) {
       reservationList.innerHTML = '';
       const reservations = data.reservations || [];
-      const waitings = data.waitings || [];
+      const waitingss = data.waitingss || [];
 
-      if (reservations.length === 0 && waitings.length === 0) {
+      if (reservations.length === 0 && waitingss.length === 0) {
         showReservationMessage('조회된 예약이 없습니다.', false, true);
         return;
       }
@@ -356,8 +396,8 @@
         reservationList.appendChild(createReservationCard(reservation));
       });
 
-      waitings.forEach(waiting => {
-        reservationList.appendChild(createWaitingCard(waiting));
+      waitingss.forEach(waitings => {
+        reservationList.appendChild(createwaitingsCard(waitings));
       });
     }
 
@@ -426,7 +466,7 @@
       return card;
     }
 
-    function createWaitingCard(waiting) {
+    function createwaitingsCard(waitings) {
       const card = document.createElement('article');
       card.className = 'reservation-card';
 
@@ -435,20 +475,20 @@
 
       const titleBox = document.createElement('div');
       const title = document.createElement('h3');
-      title.textContent = waiting.theme.name;
+      title.textContent = waitings.theme.name;
       const summary = document.createElement('p');
-      summary.textContent = `${waiting.date} ${waiting.time.startAt} · ${waiting.theme.runningTime}분`;
+      summary.textContent = `${waitings.date} ${waitings.time.startAt} · ${waitings.theme.runningTime}분`;
       titleBox.appendChild(title);
       titleBox.appendChild(summary);
 
       const badge = document.createElement('span');
       badge.className = 'badge waiting';
       badge.textContent = '대기 신청';
-      const waitingNumberDiv = document.createElement('div');
-      waitingNumberDiv.className = 'waiting-number';
-      waitingNumberDiv.textContent = `대기 순번: ${waiting.waitingNumber}번`;
+      const waitingsNumberDiv = document.createElement('div');
+      waitingsNumberDiv.className = 'waitings-number';
+      waitingsNumberDiv.textContent = `대기 순번: ${waitings.waitingNumber}번`;
       badge.appendChild(document.createElement('br'));
-      badge.appendChild(waitingNumberDiv);
+      badge.appendChild(waitingsNumberDiv);
 
       head.appendChild(titleBox);
       head.appendChild(badge);
@@ -459,7 +499,7 @@
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'danger-btn';
       deleteBtn.textContent = '대기 취소';
-      deleteBtn.addEventListener('click', () => deleteWaiting(waiting.id));
+      deleteBtn.addEventListener('click', () => deletewaitings(waitings.id));
       actions.appendChild(deleteBtn);
 
       card.appendChild(head);
@@ -539,10 +579,10 @@
       .catch(error => showReservationMessage(toErrorMessage(error, '예약을 취소하지 못했습니다.')));
     }
 
-    function deleteWaiting(id) {
+    function deletewaitings(id) {
       clearReservationMessage();
 
-      fetch(`/api/waiting/${id}`, { method: 'DELETE' })
+      fetch(`/api/waitings/${id}`, { method: 'DELETE' })
       .then(handleResponse)
       .then(() => {
         showReservationMessage('대기 신청을 취소했습니다.', true);

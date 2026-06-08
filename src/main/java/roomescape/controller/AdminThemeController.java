@@ -30,7 +30,7 @@ public class AdminThemeController {
     public ResponseEntity<Void> add(
             @Valid @RequestBody ThemeRequestDTO request) {
         ThemeResponseDTO saved = themeService.addTheme(request);
-        return ResponseEntity.created(URI.create("/themes/" + saved.id())).build();
+        return ResponseEntity.created(URI.create("/api/themes/" + saved.id())).build();
     }
 
     @DeleteMapping("/themes/{id}")

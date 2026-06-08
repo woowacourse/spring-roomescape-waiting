@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationTimeRequestDTO;
@@ -60,7 +61,8 @@ class ReservationTimeServiceTest {
                 Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png")
         );
         reservationRepository.save(
-                Reservation.create("브라운", LocalDate.parse("2026-08-05"), time, theme)
+                Reservation.create("브라운",
+                        ReservationSlot.of(LocalDate.parse("2026-08-05"), time, theme))
         );
 
         // when & then

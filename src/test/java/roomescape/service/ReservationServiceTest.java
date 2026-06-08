@@ -11,12 +11,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.exception.ReservationErrorCode;
+import roomescape.exception.ReservationSlotErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.ThemeErrorCode;
@@ -88,7 +90,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.addReservation(request))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
-                .isEqualTo(ReservationErrorCode.RESERVATION_PAST_TIME);
+                .isEqualTo(ReservationSlotErrorCode.SLOT_PAST_TIME);
     }
 
     @Test
@@ -189,7 +191,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateReservation(saved.id(), updateRequest))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
-                .isEqualTo(ReservationErrorCode.RESERVATION_PAST_TIME);
+                .isEqualTo(ReservationSlotErrorCode.SLOT_PAST_TIME);
     }
 
     @Test
@@ -213,9 +215,7 @@ class ReservationServiceTest {
 
         Reservation pastReservation = Reservation.create(
                 "브라운",
-                LocalDate.parse("2025-08-05"),
-                time,
-                theme
+                ReservationSlot.of(LocalDate.parse("2025-08-05"), time, theme)
         );
 
         Reservation saved = reservationRepository.save(pastReservation);
@@ -224,7 +224,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteReservation(saved.getId()))
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
-                .isEqualTo(ReservationErrorCode.RESERVATION_PAST_TIME);
+                .isEqualTo(ReservationSlotErrorCode.SLOT_PAST_TIME);
     }
 
 }

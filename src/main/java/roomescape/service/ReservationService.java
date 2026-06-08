@@ -4,12 +4,15 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
@@ -21,6 +24,7 @@ import roomescape.exception.ThemeErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -29,38 +33,40 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(Clock clock, ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+            WaitingRepository waitingRepository) {
         this.clock = clock;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
     public ReservationResponseDTO addReservation(ReservationRequestDTO reservationRequestDTO) {
+        LocalDate date = reservationRequestDTO.date();
         ReservationTime time = reservationTimeRepository.findById(reservationRequestDTO.timeId())
                 .orElseThrow(() -> new RoomEscapeException(
                         ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
         Theme theme = themeRepository.findById(reservationRequestDTO.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
 
-        LocalDate date = reservationRequestDTO.date();
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+        validateDuplicateReservation(slot);
 
-        validateDuplicateReservation(date, time, theme);
-
-        Reservation reservation = Reservation.create(reservationRequestDTO.name(),
-                date, time, theme);
-        reservation.validateNotPastTime(LocalDateTime.now(clock));
+        Reservation reservation = Reservation.create(reservationRequestDTO.name(), slot);
+        slot.validateNotPastTime(LocalDateTime.now(clock));
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponseDTO.from(savedReservation);
     }
 
-    private void validateDuplicateReservation(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
+    private void validateDuplicateReservation(ReservationSlot slot) {
+        if (reservationRepository.existsBySlot(slot)) {
             throw new RoomEscapeException(ReservationErrorCode.RESERVATION_DUPLICATE);
         }
     }
@@ -89,8 +95,10 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservedTimeResponseDTO> findReservedTimes(LocalDate targetDate,
-            Long targetThemeId) {
+    public List<ReservedTimeResponseDTO> findReservedTimes(
+            LocalDate targetDate,
+            Long targetThemeId
+    ) {
         return reservationTimeRepository.findReservedTimes(targetDate, targetThemeId);
     }
 
@@ -106,17 +114,21 @@ public class ReservationService {
                 () -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND)
         );
 
-        validateUpdateAvailableTime(request.date(), time, now);
-        validateDuplicateReservation(request.date(), time, reservation.getTheme());
+        reservationRepository.findBySlotWithLock(reservation.getReservationSlot());
 
-        return ReservationResponseDTO.from(reservationRepository.update(id, request.date(), time));
-    }
+        ReservationSlot slotForUpdate = ReservationSlot.of(
+                request.date(),
+                time,
+                reservation.getReservationSlot().getTheme()
+        );
+        slotForUpdate.validateNotPastTime(now);
+        validateDuplicateReservation(slotForUpdate);
 
-    private void validateUpdateAvailableTime(LocalDate date, ReservationTime time,
-            LocalDateTime now) {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
-        }
+        Reservation updatedReservation = reservationRepository.update(id, slotForUpdate);
+
+        promoteWaitingToReservationBySlot(reservation.getReservationSlot());
+
+        return ReservationResponseDTO.from(updatedReservation);
     }
 
     @Transactional
@@ -125,8 +137,25 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(
                         ReservationErrorCode.RESERVATION_NOT_FOUND)
                 );
+
+        ReservationSlot slot = reservation.getReservationSlot();
         reservation.validateNotPastTime(LocalDateTime.now(clock));
-        // TODO: 내 예약이 아니면 예외(관리자 모드 제외)
+        reservationRepository.findBySlotWithLock(slot);
+
         reservationRepository.delete(id);
+
+        promoteWaitingToReservationBySlot(slot);
+    }
+
+    private void promoteWaitingToReservationBySlot(ReservationSlot slot) {
+        Optional<Waiting> promotableWaiting = waitingRepository.findPromotableWaitingBySlotWithLock(slot);
+        promotableWaiting.ifPresent(waiting -> {
+            Reservation promotedReservation = Reservation.create(
+                    waiting.getName(),
+                    waiting.getReservationSlot()
+            );
+            reservationRepository.save(promotedReservation);
+            waitingRepository.delete(waiting.getId());
+        });
     }
 }

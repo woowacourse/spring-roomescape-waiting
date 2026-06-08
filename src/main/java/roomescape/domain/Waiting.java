@@ -1,46 +1,39 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.ReservationErrorCode;
+import roomescape.exception.ReservationSlotErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.WaitingErrorCode;
 
 public class Waiting {
 
     private static final long NAME_MAX_LENGTH = 20L;
+
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot reservationSlot;
     private final Long waitingNumber;
 
-    private Waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
-            Long waitingNumber) {
+    private Waiting(Long id, String name, ReservationSlot reservationSlot, Long waitingNumber) {
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+        validateReservationSlot(reservationSlot);
         validateWaitingNumber(waitingNumber);
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationSlot = reservationSlot;
         this.waitingNumber = waitingNumber;
     }
 
-    public static Waiting create(String name, LocalDate date, ReservationTime time,
-            Theme theme, Long waitingNumber) {
-        return new Waiting(null, name, date, time, theme, waitingNumber);
+    public static Waiting create(String name, ReservationSlot reservationSlot, Long waitingNumber) {
+        return new Waiting(null, name, reservationSlot, waitingNumber);
     }
 
-    public static Waiting of(Long id, String name, LocalDate date, ReservationTime time,
-            Theme theme, Long waitingNumber) {
+    public static Waiting of(Long id, String name, ReservationSlot reservationSlot,
+            Long waitingNumber) {
         validateId(id);
-        return new Waiting(id, name, date, time, theme, waitingNumber);
+        return new Waiting(id, name, reservationSlot, waitingNumber);
     }
 
     private static void validateId(Long id) {
@@ -58,35 +51,15 @@ public class Waiting {
         }
     }
 
-    private static void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_DATE);
-        }
-    }
-
-    private static void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_TIME);
-        }
-    }
-
-    private static void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_THEME);
+    private static void validateReservationSlot(ReservationSlot reservationSlot) {
+        if (reservationSlot == null) {
+            throw new RoomEscapeException(ReservationSlotErrorCode.INVALID_RESERVATION_SLOT);
         }
     }
 
     private static void validateWaitingNumber(Long waitingNumber) {
         if (waitingNumber == null) {
             throw new RoomEscapeException(WaitingErrorCode.INVALID_WAITING_NUMBER);
-        }
-    }
-
-    public void validateNotPastTime(LocalDateTime now) {
-        LocalDateTime waitingDateTime = LocalDateTime.of(date, time.getStartAt());
-
-        if (waitingDateTime.isBefore(now)) {
-            throw new RoomEscapeException(WaitingErrorCode.WAITING_PAST_TIME);
         }
     }
 
@@ -98,28 +71,16 @@ public class Waiting {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
     }
 
     public Long getWaitingNumber() {
         return waitingNumber;
+    }
+
+    public void validateNotPastTime(LocalDateTime now) {
+        reservationSlot.validateNotPastTime(now);
     }
 
     @Override
@@ -144,9 +105,7 @@ public class Waiting {
         return "Waiting{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
+                ", reservationSlot=" + reservationSlot +
                 ", waitingNumber=" + waitingNumber +
                 '}';
     }

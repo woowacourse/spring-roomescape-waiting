@@ -15,11 +15,11 @@ public record ReservationResponseDTO(
         return new ReservationResponseDTO(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getDate(),
+                reservation.getReservationSlot().getDate(),
                 ReservationTimeResponseDTO.from(
-                        reservation.getTime()
+                        reservation.getReservationSlot().getTime()
                 ),
-                ThemeResponseDTO.from(reservation.getTheme())
+                ThemeResponseDTO.from(reservation.getReservationSlot().getTheme())
         );
     }
 }

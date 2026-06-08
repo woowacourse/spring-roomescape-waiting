@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public enum WaitingErrorCode implements ErrorCode {
     WAITING_DUPLICATE(HttpStatus.CONFLICT, "이미 대기가 등록되어 있습니다."),
-    WAITING_PAST_TIME(HttpStatus.UNPROCESSABLE_ENTITY, "과거 대기는 선택할 수 없습니다."),
     IMMEDIATE_RESERVATION_AVAILABLE(HttpStatus.UNPROCESSABLE_ENTITY,
             "즉시 예약이 가능하므로, 대기 등록이 불가능합니다."),
     CANNOT_WAITLIST_CONFIRMED_SLOT(HttpStatus.UNPROCESSABLE_ENTITY,

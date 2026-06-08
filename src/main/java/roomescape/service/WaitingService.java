@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -27,11 +28,9 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
 
-    public WaitingService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository, WaitingRepository waitingRepository
-    ) {
+    public WaitingService(ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+            WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -40,75 +39,69 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponseDTO addWaiting(WaitingRequestDTO request) {
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new RoomEscapeException(
-                        ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
+        ReservationTime time = reservationTimeRepository.findById(request.timeId()).orElseThrow(
+                () -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
+        ReservationSlot slot = ReservationSlot.of(request.date(), time, theme);
 
-        ensureReservationExistsForWaiting(request, time, theme);
-        validateUniqueWaiting(request, time, theme);
+        ensureReservationExistsForWaiting(request.name(), slot);
+        validateUniqueWaiting(request.name(), slot);
 
-        Long nextWaitingNumber = generateNextWaitingNumber(request, time, theme);
-        Waiting newWaiting = Waiting.create(
-                request.name(),
-                request.date(),
-                time,
-                theme,
-                nextWaitingNumber
-        );
+        Long nextWaitingNumber = generateNextWaitingNumber(slot);
+
+        Waiting newWaiting = Waiting.create(request.name(), slot, nextWaitingNumber);
         Waiting savedWaiting = waitingRepository.save(newWaiting);
 
         return WaitingResponseDTO.from(savedWaiting);
     }
 
-    private void ensureReservationExistsForWaiting(WaitingRequestDTO request, ReservationTime time,
-            Theme theme) {
-        Reservation existReservation = reservationRepository.findByDateAndTimeAndThemeWithLock(
-                request.date(),
-                time,
-                theme
-        ).orElseThrow(() ->
-                new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE)
-        );
-        existReservation.validateNotMyReservation(request.name());
+    private void ensureReservationExistsForWaiting(String name, ReservationSlot slot) {
+        Reservation existReservation = reservationRepository.findBySlotWithLock(slot).orElseThrow(
+                () -> new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE));
+        existReservation.validateNotMyReservation(name);
     }
 
-    private void validateUniqueWaiting(WaitingRequestDTO request, ReservationTime time,
-            Theme theme) {
-        boolean isDuplicateWaiting = waitingRepository.existsByNameAndDateAndTimeAndTheme(
-                request.name(), request.date(), time, theme);
+    private void validateUniqueWaiting(String name, ReservationSlot slot) {
+        boolean isDuplicateWaiting = waitingRepository.existsByNameAndSlot(name,
+                slot);
         if (isDuplicateWaiting) {
             throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
         }
     }
 
-    private Long generateNextWaitingNumber(WaitingRequestDTO request, ReservationTime time,
-            Theme theme) {
-        Long maxWaitingNumber = waitingRepository.findMaxWaitingNumberBy(request.date(), time,
-                theme).orElse(0L);
+    private Long generateNextWaitingNumber(ReservationSlot slot) {
+        Long maxWaitingNumber = waitingRepository.findMaxWaitingNumberBy(slot.getDate(),
+                slot.getTime(), slot.getTheme()).orElse(0L);
 
         return maxWaitingNumber + 1L;
-    }
-
-    public List<WaitingResponseDTO> findWaitingsByName(String name) {
-        return waitingRepository.findByName(name).stream()
-                .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
-    }
-
-    @Transactional
-    public void deleteWaiting(Long id) {
-        Waiting existWaiting = waitingRepository.findById(id).orElseThrow(
-                () -> new RoomEscapeException(WaitingErrorCode.WAITING_NOT_FOUND)
-        );
-        existWaiting.validateNotPastTime(LocalDateTime.now());
-        waitingRepository.delete(id);
     }
 
     @Transactional(readOnly = true)
     public List<WaitingResponseDTO> readAllWaiting() {
         return waitingRepository.findAll().stream()
-                .map(WaitingResponseDTO::from)
+                .map(waitingWithOrder -> WaitingResponseDTO.from(
+                        waitingWithOrder.waiting(),
+                        waitingWithOrder.waitingOrder())
+                )
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingResponseDTO> findWaitingsByName(String name) {
+        return waitingRepository.findByName(name).stream()
+                .map(waitingWithOrder -> WaitingResponseDTO.from(
+                        waitingWithOrder.waiting(),
+                        waitingWithOrder.waitingOrder())
+                )
+                .toList();
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id) {
+        Waiting existWaiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeException(WaitingErrorCode.WAITING_NOT_FOUND));
+        existWaiting.validateNotPastTime(LocalDateTime.now());
+        waitingRepository.delete(id);
     }
 }

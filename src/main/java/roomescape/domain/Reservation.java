@@ -1,9 +1,9 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.ReservationErrorCode;
+import roomescape.exception.ReservationSlotErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.WaitingErrorCode;
 
@@ -12,31 +12,24 @@ public class Reservation {
     private static final long NAME_MAX_LENGTH = 20L;
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot reservationSlot;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, String name, ReservationSlot reservationSlot) {
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+        validateReservationSlot(reservationSlot);
+
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationSlot = reservationSlot;
     }
 
-    public static Reservation create(String name, LocalDate date, ReservationTime time,
-            Theme theme) {
-        return new Reservation(null, name, date, time, theme);
+    public static Reservation create(String name, ReservationSlot reservationSlot) {
+        return new Reservation(null, name, reservationSlot);
     }
 
-    public static Reservation of(Long id, String name, LocalDate date, ReservationTime time,
-            Theme theme) {
+    public static Reservation of(Long id, String name, ReservationSlot reservationSlot) {
         validateId(id);
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(id, name, reservationSlot);
     }
 
     private static void validateId(Long id) {
@@ -54,29 +47,9 @@ public class Reservation {
         }
     }
 
-    private static void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_DATE);
-        }
-    }
-
-    private static void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_TIME);
-        }
-    }
-
-    private static void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_THEME);
-        }
-    }
-
-    public void validateNotPastTime(LocalDateTime now) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-
-        if (reservationDateTime.isBefore(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
+    private static void validateReservationSlot(ReservationSlot reservationSlot) {
+        if (reservationSlot == null) {
+            throw new RoomEscapeException(ReservationSlotErrorCode.INVALID_RESERVATION_SLOT);
         }
     }
 
@@ -84,6 +57,10 @@ public class Reservation {
         if (name.equals(inputName)) {
             throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
         }
+    }
+
+    public void validateNotPastTime(LocalDateTime now) {
+        reservationSlot.validateNotPastTime(now);
     }
 
     public Long getId() {
@@ -94,24 +71,8 @@ public class Reservation {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
     }
 
     @Override
@@ -136,9 +97,7 @@ public class Reservation {
         return "Reservation{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
+                ", reservationSlot=" + reservationSlot +
                 '}';
     }
 }
