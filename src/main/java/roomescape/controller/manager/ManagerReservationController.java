@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.ReservationAuthorizationService;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.response.AdminReservationResponseDto;
-import roomescape.service.AdminReservationService;
+import roomescape.domain.reservation.AdminReservationService;
 
 @RestController
 @RequestMapping("/manager/reservations")

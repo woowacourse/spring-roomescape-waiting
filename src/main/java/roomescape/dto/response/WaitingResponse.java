@@ -2,8 +2,8 @@ package roomescape.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Waiting;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.waiting.Waiting;
 
 public record WaitingResponse(
         Long id,

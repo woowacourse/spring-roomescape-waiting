@@ -1,10 +1,15 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.domain.vo.Slot;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
+import roomescape.domain.member.Member;
 
 public class Reservation {
     private final Long id;

@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.waiting;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -10,6 +10,9 @@ import java.util.stream.IntStream;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.vo.Slot;
 
 public class Waitings {
     private static final int MAX_WAITING_COUNT = 5;

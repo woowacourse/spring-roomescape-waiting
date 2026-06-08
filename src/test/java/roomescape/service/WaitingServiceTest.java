@@ -21,9 +21,10 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.WaitingDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.WaitingJdbcDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
-import roomescape.domain.Waiting;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingService;
 import roomescape.dto.request.WaitingRequestDto;
 
 @JdbcTest

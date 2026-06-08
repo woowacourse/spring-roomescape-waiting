@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.waiting;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,10 +10,8 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Waiting;
-import roomescape.domain.Waitings;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
 import roomescape.dto.request.WaitingRequestDto;
 
 @Service

@@ -8,9 +8,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
-import roomescape.domain.Store;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
+import roomescape.domain.store.Store;
 
 @Repository
 public class MemberJdbcDao implements MemberDao {

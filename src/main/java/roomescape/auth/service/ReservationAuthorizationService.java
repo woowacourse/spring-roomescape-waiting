@@ -6,9 +6,9 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.ReservationDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.store.Store;
 
 @Service
 @Transactional(readOnly = true)

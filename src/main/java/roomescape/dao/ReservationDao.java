@@ -4,8 +4,8 @@ package roomescape.dao;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.vo.Slot;
 
 public interface ReservationDao extends CommonDao<Reservation> {
     List<Reservation> findAll(int limit, int offset);

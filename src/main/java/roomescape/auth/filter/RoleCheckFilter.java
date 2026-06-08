@@ -14,7 +14,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.filter.OncePerRequestFilter;
 import roomescape.auth.session.SessionUtils;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 
 public abstract class RoleCheckFilter extends OncePerRequestFilter {
     protected final MemberDao memberDao;

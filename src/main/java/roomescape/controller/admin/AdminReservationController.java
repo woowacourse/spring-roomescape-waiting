@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.response.AdminReservationResponseDto;
 import roomescape.dto.response.PageResponse;
-import roomescape.service.AdminReservationService;
+import roomescape.domain.reservation.AdminReservationService;
 
 @Validated
 @RestController

@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.LoginMember;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
 import roomescape.dto.response.ReservationResponseDto;
-import roomescape.service.ReservationService;
+import roomescape.domain.reservation.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")

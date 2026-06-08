@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.domain.vo.Name;
 import roomescape.dto.response.AvailableTimeResponseDto;
 import roomescape.dto.response.TimeResponseDto;

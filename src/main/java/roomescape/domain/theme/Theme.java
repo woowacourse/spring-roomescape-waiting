@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.theme;
 
 import java.util.Objects;
 import roomescape.common.DomainAssert;

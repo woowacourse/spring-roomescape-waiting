@@ -14,8 +14,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
 
 class AuthFilterTest {
 

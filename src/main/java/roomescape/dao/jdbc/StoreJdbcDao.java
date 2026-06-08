@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.StoreDao;
-import roomescape.domain.Store;
+import roomescape.domain.store.Store;
 
 @Repository
 public class StoreJdbcDao implements StoreDao {

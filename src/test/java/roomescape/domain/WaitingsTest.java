@@ -10,7 +10,16 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
 import roomescape.domain.vo.Name;
+import roomescape.domain.vo.Slot;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.Waitings;
 
 class WaitingsTest {
 

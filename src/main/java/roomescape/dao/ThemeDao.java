@@ -2,7 +2,7 @@ package roomescape.dao;
 
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.domain.vo.Name;
 import roomescape.dto.response.AvailableTimeResponseDto;
 

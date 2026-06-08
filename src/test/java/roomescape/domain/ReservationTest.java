@@ -11,6 +11,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
 import roomescape.domain.vo.Name;
 
 class ReservationTest {

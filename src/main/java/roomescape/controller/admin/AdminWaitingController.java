@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.service.WaitingService;
+import roomescape.domain.waiting.WaitingService;
 
 @RestController
 @RequestMapping("/admin/waitings")

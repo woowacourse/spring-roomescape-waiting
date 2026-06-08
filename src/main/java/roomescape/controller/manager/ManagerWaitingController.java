@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.WaitingAuthorizationService;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.service.WaitingService;
+import roomescape.domain.waiting.WaitingService;
 
 @RestController
 @RequestMapping("/manager/waitings")

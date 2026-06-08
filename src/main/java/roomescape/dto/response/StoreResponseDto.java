@@ -1,6 +1,6 @@
 package roomescape.dto.response;
 
-import roomescape.domain.Store;
+import roomescape.domain.store.Store;
 
 public record StoreResponseDto(
         Long id,

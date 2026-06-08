@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.reservation;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
@@ -10,12 +10,11 @@ import roomescape.dao.StoreDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.dao.WaitingDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
+import roomescape.domain.member.Member;
+import roomescape.domain.vo.Slot;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationRequestDto;
 

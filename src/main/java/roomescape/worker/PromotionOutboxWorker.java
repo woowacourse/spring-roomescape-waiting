@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import roomescape.dao.PromotionOutboxDao;
 import roomescape.domain.promotion.OutboxStatus;
 import roomescape.domain.promotion.PromotionTask;
-import roomescape.service.PromotionService;
+import roomescape.domain.promotion.PromotionService;
 
 /**
  * 아웃박스 워커. 이벤트 기반(push)이 아니라 시간 기반(polling)으로,

@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.time;
 
 
 import java.util.List;
@@ -9,7 +9,6 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.TimeDao;
-import roomescape.domain.Time;
 import roomescape.dto.request.TimeRequestDto;
 
 @Service

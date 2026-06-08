@@ -5,9 +5,9 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.WaitingDao;
-import roomescape.domain.Member;
-import roomescape.domain.Store;
-import roomescape.domain.Waiting;
+import roomescape.domain.member.Member;
+import roomescape.domain.store.Store;
+import roomescape.domain.waiting.Waiting;
 
 @Service
 public class WaitingAuthorizationService {

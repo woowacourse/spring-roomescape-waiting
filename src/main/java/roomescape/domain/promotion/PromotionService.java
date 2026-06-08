@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.promotion;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,8 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.PromotionOutboxDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
-import roomescape.domain.promotion.PromotionTask;
-import roomescape.domain.Slot;
+import roomescape.domain.vo.Slot;
 
 /**
  * 대기 승격 오케스트레이션. 대기 신청/조회/취소(WaitingService)와 분리해, 승격이라는 관심사만 모은다.

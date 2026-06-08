@@ -1,10 +1,11 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.InvalidInputException;
+import roomescape.domain.store.Store;
 
 public class Member {
     private static final int NAME_MAX_LENGTH = 20;

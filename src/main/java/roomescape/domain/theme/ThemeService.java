@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,7 +11,6 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.PopularThemeRequestDto;
 import roomescape.dto.request.ThemeRequestDto;

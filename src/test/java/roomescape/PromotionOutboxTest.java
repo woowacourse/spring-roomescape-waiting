@@ -19,17 +19,17 @@ import roomescape.dao.PromotionOutboxDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.promotion.OutboxStatus;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.ReservationRequestDto;
 import roomescape.dto.request.WaitingRequestDto;
-import roomescape.service.ReservationService;
-import roomescape.service.WaitingService;
+import roomescape.domain.reservation.ReservationService;
+import roomescape.domain.waiting.WaitingService;
 import roomescape.worker.PromotionOutboxWorker;
 
 @SpringBootTest(properties = "scheduling.enabled=false")

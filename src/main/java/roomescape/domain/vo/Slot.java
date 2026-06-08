@@ -1,9 +1,12 @@
-package roomescape.domain;
+package roomescape.domain.vo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.DomainAssert;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
 
 public class Slot {
     private final LocalDate date;

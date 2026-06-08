@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.domain.Time;
+import roomescape.domain.time.Time;
 import roomescape.dto.request.TimeRequestDto;
 import roomescape.dto.response.TimeResponseDto;
-import roomescape.service.TimeService;
+import roomescape.domain.time.TimeService;
 
 @RestController
 @RequestMapping("/admin/times")

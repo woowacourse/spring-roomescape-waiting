@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.reservation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,13 +8,13 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.TimeDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Slot;
-import roomescape.domain.Time;
+import roomescape.domain.member.Member;
+import roomescape.domain.vo.Slot;
+import roomescape.domain.time.Time;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.response.PageResponse;
+import roomescape.domain.promotion.PromotionService;
 
 @Service
 @Transactional

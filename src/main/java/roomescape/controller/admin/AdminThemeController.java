@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.dto.request.ThemeRequestDto;
 import roomescape.dto.response.ThemeResponseDto;
-import roomescape.service.ThemeService;
+import roomescape.domain.theme.ThemeService;
 
 @RestController
 @RequestMapping("/admin/themes")

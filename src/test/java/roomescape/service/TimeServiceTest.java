@@ -27,11 +27,12 @@ import roomescape.dao.jdbc.MemberJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.store.Store;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.Time;
+import roomescape.domain.time.TimeService;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.TimeRequestDto;
 

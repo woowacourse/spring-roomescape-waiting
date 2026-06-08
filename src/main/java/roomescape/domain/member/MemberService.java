@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.domain.member;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,8 +8,6 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.InvalidInputException;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.request.SignupRequestDto;
 

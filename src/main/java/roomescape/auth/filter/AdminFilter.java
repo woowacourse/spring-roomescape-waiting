@@ -3,7 +3,7 @@ package roomescape.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 
 @Component
 public class AdminFilter extends RoleCheckFilter {
