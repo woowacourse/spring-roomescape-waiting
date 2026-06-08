@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,14 +20,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
+import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.ThemeLockedAction;
 import roomescape.service.dto.ReservationCreateCommand;
-import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -42,27 +45,33 @@ class ReservationServiceTest {
             "갯벌이 많은 무인도를 탈출하는 흥미진진 대탈출!",
             "https://picsum.photos/seed/roomescape1/800/600.jpg"
     );
-    private static final ReservationCreateCommand VALID_COMMAND = new ReservationCreateCommand(
-            "브라운", LocalDate.of(2026, 5, 9), 1L, 1L
-    );
+    private static final LocalDate VALID_RESERVATION_DATE = LocalDate.of(2026, 5, 9);
     private static final ReservationCreateCommand VALID_COMMAND_MOA = new ReservationCreateCommand(
-            "모아", LocalDate.of(2026, 5, 9), 1L, 1L
+            "모아", VALID_RESERVATION_DATE, 1L, 1L
     );
 
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
-    private ReservationTimeRepository reservationTimeRepository;
+    private LockedReservationWriter reservationWriter;
     @Mock
-    private ThemeRepository themeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @InjectMocks
     private AdminReservationService reservationService;
+
+    private void stubThemeLock(Optional<Theme> lockedTheme) {
+        given(reservationRepository.executeWithThemeLock(eq(1L), any()))
+                .willAnswer(invocation -> {
+                    ThemeLockedAction<Object> action = invocation.getArgument(1);
+                    return action.execute(lockedTheme, reservationWriter);
+                });
+    }
 
     @Test
     @DisplayName("같은 이름+날짜+시간+테마에 이미 예약이 있으면 ReservationConflictException이 발생한다")
     void 같은_날짜_시간_테마에_이미_예약이_있으면_예외가_발생한다() {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+        stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(true);
@@ -73,7 +82,7 @@ class ReservationServiceTest {
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
     }
@@ -82,21 +91,22 @@ class ReservationServiceTest {
     @DisplayName("충돌이 없으면 정상적으로 예약을 생성한다")
     void 충돌이_없으면_정상적으로_예약을_생성한다() {
         ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0));
+                1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED, new WaitingOrder(0));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+        stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(false);
-        given(reservationRepository.save(any(Reservation.class))).willReturn(saved);
+        given(reservationWriter.save(any(Reservation.class))).willReturn(saved);
 
         assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(reservationWriter, times(1)).save(any(Reservation.class));
     }
 
     @Test
@@ -110,14 +120,14 @@ class ReservationServiceTest {
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(themeRepository, reservationRepository);
+        verifyNoInteractions(reservationRepository);
     }
 
     @Test
     @DisplayName("존재하지 않는 themeId로 예약을 생성하면 ThemeNotFoundException이 발생한다")
     void 존재하지_않는_themeId로_예약시_예외가_발생한다() {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findById(1L)).willReturn(Optional.empty());
+        stubThemeLock(Optional.empty());
 
         assertThrows(
                 ThemeNotFoundException.class,
@@ -125,34 +135,38 @@ class ReservationServiceTest {
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationRepository);
+        verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 삭제하면 ReservationNotFoundException이 발생한다")
-    void 존재하지_않는_예약_삭제시_예외가_발생한다() {
-        given(reservationRepository.existsById(1L)).willReturn(false);
+    @DisplayName("존재하지 않는 예약을 취소하면 ReservationNotFoundException이 발생한다")
+    void 존재하지_않는_예약_취소시_예외가_발생한다() {
+        given(reservationRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationNotFoundException.class,
-                () -> reservationService.delete(1L)
+                () -> reservationService.cancel(1L)
         );
 
-        verify(reservationRepository, times(1)).existsById(1L);
-        verifyNoInteractions(reservationTimeRepository, themeRepository);
+        verify(reservationRepository, times(1)).findById(1L);
+        verifyNoInteractions(reservationTimeRepository);
     }
 
     @Test
-    @DisplayName("존재하는 예약은 정상적으로 삭제된다")
-    void 존재하는_예약은_정상_삭제된다() {
-        given(reservationRepository.existsById(1L)).willReturn(true);
+    @DisplayName("확정 예약을 취소하면 soft delete 후 첫 대기자를 승급한다")
+    void 확정_예약_취소시_취소하고_승급한다() {
+        Reservation confirmed = new Reservation(
+                1L, "브라운", VALID_RESERVATION_DATE, VALID_TIME, VALID_THEME, ReservationStatus.CONFIRMED);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(confirmed));
+        stubThemeLock(Optional.of(VALID_THEME));
 
-        assertDoesNotThrow(() -> reservationService.delete(1L));
+        assertDoesNotThrow(() -> reservationService.cancel(1L));
 
-        verify(reservationRepository, times(1)).existsById(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
-        verifyNoInteractions(reservationTimeRepository, themeRepository);
+        verify(reservationRepository, times(2)).findById(1L);
+        verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
+        verify(reservationWriter, times(1)).cancel(1L);
+        verify(reservationWriter, times(1)).promoteEarliestWaiting(VALID_RESERVATION_DATE, 1L, 1L);
+        verifyNoInteractions(reservationTimeRepository);
     }
 
     @Nested
@@ -163,21 +177,22 @@ class ReservationServiceTest {
         void 해당_타임_슬롯에_예약이_없다면_예약을_허용한다() {
 
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-            given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+            stubThemeLock(Optional.of(VALID_THEME));
             given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                     1L))
                     .willReturn(false);
-            given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0)));
+            given(reservationWriter.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
+                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
+                    ReservationStatus.CONFIRMED, new WaitingOrder(0)));
 
             assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
             verify(reservationTimeRepository, times(1)).findById(1L);
-            verify(themeRepository, times(1)).findById(1L);
+            verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
             verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId("모아",
                     VALID_COMMAND_MOA.date(), 1L,
                     1L);
-            verify(reservationRepository, times(1)).save(any(Reservation.class));
+            verify(reservationWriter, times(1)).save(any(Reservation.class));
         }
 
         @Nested
@@ -187,7 +202,7 @@ class ReservationServiceTest {
             @DisplayName("기존 예약자와 동일한 사용자의 예약 요청이라면 거부한다")
             void 사용자_이름이_같으면_ReservationConflictException을_던진다() {
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-                given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+                stubThemeLock(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                         VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                         .willReturn(true);
@@ -198,7 +213,7 @@ class ReservationServiceTest {
                 );
 
                 verify(reservationTimeRepository, times(1)).findById(1L);
-                verify(themeRepository, times(1)).findById(1L);
+                verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
                 verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                         VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
 
@@ -207,24 +222,25 @@ class ReservationServiceTest {
             @Test
             @DisplayName("기존 예약자와 다른 사용자의 예약 요청이라면 허용한다")
             void 사용자_이름이_다르면_예약_대기_순번을_부여한다() {
-                ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                        1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0));
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-                given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+                stubThemeLock(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                         1L))
                         .willReturn(false);
-                given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(1)));
+                given(reservationRepository.existsActiveConfirmed(VALID_COMMAND_MOA.date(), 1L, 1L))
+                        .willReturn(true);
+                given(reservationWriter.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
+                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
+                        ReservationStatus.WAITING, new WaitingOrder(1)));
 
                 assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
                 verify(reservationTimeRepository, times(1)).findById(1L);
-                verify(themeRepository, times(1)).findById(1L);
+                verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
                 verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId("모아",
                         VALID_COMMAND_MOA.date(), 1L,
                         1L);
-                verify(reservationRepository, times(1)).save(any(Reservation.class));
+                verify(reservationWriter, times(1)).save(any(Reservation.class));
             }
         }
     }

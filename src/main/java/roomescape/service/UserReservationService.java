@@ -7,8 +7,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
@@ -63,9 +66,10 @@ public class UserReservationService {
                 reservation.getTime().getStartAt(),
                 "과거 예약은 취소할 수 없습니다"
         );
-        reservationRepository.deleteById(id);
+        reservationService.cancel(id);
     }
 
+    @Transactional
     public ReservationResult update(ReservationUpdateCommand command) {
         Reservation reservation = findReservation(command.id());
         validateOwner(reservation, command.reserverName());
@@ -82,16 +86,49 @@ public class UserReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
-        validateNoConflict(command, reservation.getTheme().getId());
 
-        Reservation updated = new Reservation(
-                reservation.getId(),
-                reservation.getReserverName(),
-                command.date(),
-                newTime,
-                reservation.getTheme()
-        );
-        return ReservationResult.from(reservationRepository.update(updated));
+        boolean slotChanged = !(reservation.getDate().equals(command.date())
+                && reservation.getTime().getId().equals(command.timeId()));
+        if (!slotChanged) {
+            return ReservationResult.from(loadWithWaitingOrder(command.id()));
+        }
+
+        Long themeId = reservation.getTheme().getId();
+        return reservationRepository.executeWithThemeLock(themeId, (lockedTheme, writer) -> {
+            validateNoConflict(command, themeId);
+
+            LocalDate oldDate = reservation.getDate();
+            Long oldTimeId = reservation.getTime().getId();
+            boolean wasConfirmed = reservation.isConfirmed();
+
+            ReservationStatus newStatus;
+            if (reservationRepository.existsActiveConfirmed(command.date(), command.timeId(), themeId)) {
+                newStatus = ReservationStatus.WAITING;
+            } else {
+                newStatus = ReservationStatus.CONFIRMED;
+            }
+
+            Reservation updated = new Reservation(
+                    reservation.getId(),
+                    reservation.getReserverName(),
+                    command.date(),
+                    newTime,
+                    reservation.getTheme(),
+                    newStatus
+            );
+            ReservationWithWaitingOrder result = writer.updateAndRequeue(updated);
+
+            if (wasConfirmed) {
+                writer.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
+            }
+            return ReservationResult.from(result);
+        });
+    }
+
+    private ReservationWithWaitingOrder loadWithWaitingOrder(Long id) {
+        return reservationRepository.findWithWaitingOrderById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(
+                        "존재하지 않는 예약입니다: reservationId=" + id));
     }
 
     private Reservation findReservation(Long id) {

@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -20,15 +22,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
+import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeLockedAction;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
-import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -57,9 +62,19 @@ class UserReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
+    private LockedReservationWriter reservationWriter;
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @InjectMocks
     private UserReservationService userReservationService;
+
+    private void stubThemeLock(Optional<Theme> lockedTheme) {
+        given(reservationRepository.executeWithThemeLock(eq(VALID_THEME.getId()), any()))
+                .willAnswer(invocation -> {
+                    ThemeLockedAction<Object> action = invocation.getArgument(1);
+                    return action.execute(lockedTheme, reservationWriter);
+                });
+    }
 
     @Test
     @DisplayName("미래 시점에 예약하면 정상적으로 생성된다")
@@ -108,7 +123,7 @@ class UserReservationServiceTest {
     @DisplayName("이름으로 예약 목록을 조회한다")
     void 이름으로_예약_목록을_조회한다() {
         ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
-                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, new WaitingOrder(2));
+                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, ReservationStatus.WAITING, new WaitingOrder(2));
         given(reservationRepository.findByReserverName(OWNER)).willReturn(List.of(reservation));
 
         List<ReservationResult> results = userReservationService.findByReserverName(OWNER);
@@ -123,14 +138,15 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인 예약을 정상적으로 취소한다")
     void 본인_예약을_정상적으로_취소한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         userReservationService.cancel(1L, OWNER);
 
         verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
+        verify(reservationService, times(1)).cancel(1L);
+        verifyNoInteractions(reservationTimeRepository);
     }
 
     @Test
@@ -150,7 +166,8 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인이 아닌 예약을 취소하면 UnauthorizedReservationException이 발생한다")
     void 본인이_아닌_예약_취소시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThrows(
@@ -165,7 +182,8 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("과거 예약을 취소하면 PastReservationException이 발생한다")
     void 과거_예약_취소시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThrows(
@@ -180,16 +198,19 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인 예약을 정상적으로 변경한다")
     void 본인_예약을_정상적으로_변경한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
-        given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
+        given(reservationWriter.updateAndRequeue(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
-                    r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(), new WaitingOrder(0));
+                    r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(),
+                    r.getStatus(), new WaitingOrder(0));
         });
 
         ReservationResult result = userReservationService.update(command);
@@ -200,14 +221,33 @@ class UserReservationServiceTest {
         verify(reservationTimeRepository, times(1)).findById(2L);
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
-        verify(reservationRepository, times(1)).update(any(Reservation.class));
+        verify(reservationWriter, times(1)).updateAndRequeue(any(Reservation.class));
         verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    @DisplayName("같은 슬롯으로 변경하면 쓰기 없이 현재 상태를 반환한다")
+    void 같은_슬롯_변경은_쓰기없이_조회만_한다() {
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.WAITING);
+        ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, FUTURE_DATE, VALID_TIME.getId());
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeRepository.findById(VALID_TIME.getId())).willReturn(Optional.of(VALID_TIME));
+        given(reservationRepository.findWithWaitingOrderById(1L)).willReturn(Optional.of(new ReservationWithWaitingOrder(
+                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, ReservationStatus.WAITING, new WaitingOrder(3))));
+
+        ReservationResult result = userReservationService.update(command);
+
+        assertThat(result.waitingOrder()).isEqualTo(3L);
+        verify(reservationRepository, never()).executeWithThemeLock(any(), any());
+        verifyNoInteractions(reservationWriter);
     }
 
     @Test
     @DisplayName("본인이 아닌 예약을 변경하면 UnauthorizedReservationException이 발생한다")
     void 본인이_아닌_예약_변경시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OTHER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -223,7 +263,8 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 timeId로 변경하면 ReservationTimeNotFoundException이 발생한다")
     void 존재하지_않는_timeId로_변경시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 99L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(99L)).willReturn(Optional.empty());
@@ -241,7 +282,8 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("변경 시점이 과거이면 PastReservationException이 발생한다")
     void 변경_시점이_과거이면_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, PAST_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
@@ -259,7 +301,8 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("기존 예약이 과거이면 PastReservationException이 발생한다")
     void 기존_예약이_과거이면_변경할_수_없다() {
-        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -275,10 +318,12 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인이 이미 예약 또는 대기중인 시간으로 변경하면 ReservationConflictException이 발생한다")
     void 변경_시간_충돌시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(true);
 

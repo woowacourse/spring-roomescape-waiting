@@ -23,10 +23,11 @@ CREATE TABLE reservation (
                              date    DATE NOT NULL,
                              time_id BIGINT NOT NULL,
                              theme_id BIGINT NOT NULL,
+                             status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
+                             enqueued_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              PRIMARY KEY (id),
                              FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-                             FOREIGN KEY (theme_id) REFERENCES theme (id),
-                             UNIQUE (reserver_name, date, time_id, theme_id)
+                             FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

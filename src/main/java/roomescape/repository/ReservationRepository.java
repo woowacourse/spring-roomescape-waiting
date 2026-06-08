@@ -4,20 +4,20 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
-import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.domain.ReservationWithWaitingOrder;
 
 public interface ReservationRepository {
-    List<ReservationWithWaitingOrder> findAll();
+    List<ReservationWithWaitingOrder> findAllActive();
 
     List<ReservationWithWaitingOrder> findByReserverName(String reserverName);
 
     Optional<Reservation> findById(Long id);
 
-    ReservationWithWaitingOrder save(Reservation reservation);
+    Optional<ReservationWithWaitingOrder> findWithWaitingOrderById(Long id);
 
-    ReservationWithWaitingOrder update(Reservation reservation);
+    <T> T executeWithThemeLock(Long themeId, ThemeLockedAction<T> action);
 
-    void deleteById(Long id);
+    boolean existsActiveConfirmed(LocalDate date, Long timeId, Long themeId);
 
     boolean existsById(Long id);
 

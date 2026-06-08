@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -13,14 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
-import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.domain.ReservationWithWaitingOrder;
 
 @JdbcTest
 @Import(JdbcReservationRepository.class)
@@ -42,10 +41,11 @@ class JdbcReservationRepositoryTest {
         Theme theme = insertTheme("무인도 탈출");
 
         ReservationWithWaitingOrder saved = reservationRepository.save(
-                new Reservation(null, "브라운", DATE, time, theme));
+                new Reservation(null, "브라운", DATE, time, theme, ReservationStatus.CONFIRMED));
 
         assertThat(saved.id()).isNotNull();
         assertThat(saved.reserverName()).isEqualTo("브라운");
+        assertThat(saved.status()).isEqualTo(ReservationStatus.CONFIRMED);
     }
 
     @Test
@@ -56,9 +56,25 @@ class JdbcReservationRepositoryTest {
         insertReservation("브라운", DATE, time, theme);
         insertReservation("리사", DATE, time, theme);
 
-        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAll();
+        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAllActive();
 
         assertThat(reservations).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("취소된 예약은 전체 조회에서 제외된다")
+    void findAllExcludesCanceled() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        insertReservation("브라운", DATE, time, theme);
+        Reservation canceled = insertReservation("리사", DATE, time, theme,
+                ReservationStatus.CANCELED, Instant.now());
+
+        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAllActive();
+
+        assertThat(reservations)
+                .extracting(ReservationWithWaitingOrder::id)
+                .doesNotContain(canceled.getId());
     }
 
     @Test
@@ -80,34 +96,52 @@ class JdbcReservationRepositoryTest {
         Reservation saved = insertReservation("브라운", DATE, time, theme);
 
         LocalDate newDate = LocalDate.of(2099, 1, 1);
-        reservationRepository.update(
-                new Reservation(saved.getId(), "브라운", newDate, time, theme));
+        reservationRepository.updateAndRequeue(
+                new Reservation(saved.getId(), "브라운", newDate, time, theme, ReservationStatus.CONFIRMED));
 
         Reservation updated = reservationRepository.findById(saved.getId()).orElseThrow();
         assertThat(updated.getDate()).isEqualTo(newDate);
     }
 
     @Test
-    @DisplayName("id로 예약을 삭제한다")
-    void deleteById() {
+    @DisplayName("취소(soft delete)하면 행은 남고 상태가 CANCELED가 된다")
+    void cancel() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Reservation saved = insertReservation("브라운", DATE, time, theme);
 
-        reservationRepository.deleteById(saved.getId());
+        reservationRepository.cancel(saved.getId());
 
-        assertThat(reservationRepository.findById(saved.getId())).isEmpty();
+        Reservation canceled = reservationRepository.findById(saved.getId()).orElseThrow();
+        assertThat(canceled.getStatus()).isEqualTo(ReservationStatus.CANCELED);
     }
 
     @Test
-    @DisplayName("id 존재 여부를 확인한다")
-    void existsById() {
+    @DisplayName("슬롯에 활성 확정 예약이 있는지 확인한다")
+    void existsActiveConfirmed() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
-        Reservation saved = insertReservation("브라운", DATE, time, theme);
+        insertReservation("브라운", DATE, time, theme, ReservationStatus.CONFIRMED, Instant.now());
 
-        assertThat(reservationRepository.existsById(saved.getId())).isTrue();
-        assertThat(reservationRepository.existsById(999L)).isFalse();
+        assertThat(reservationRepository.existsActiveConfirmed(DATE, time.getId(), theme.getId())).isTrue();
+        assertThat(reservationRepository.existsActiveConfirmed(
+                LocalDate.of(2099, 1, 1), time.getId(), theme.getId())).isFalse();
+    }
+
+    @Test
+    @DisplayName("확정 취소 후 첫 대기자를 승급한다")
+    void promoteEarliestWaiting() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        Instant base = Instant.now();
+        insertReservation("루드비코", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(1));
+        Reservation earlier = insertReservation("모아", DATE, time, theme, ReservationStatus.WAITING, base);
+
+        boolean promoted = reservationRepository.promoteEarliestWaiting(DATE, time.getId(), theme.getId());
+
+        assertThat(promoted).isTrue();
+        assertThat(reservationRepository.findById(earlier.getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.CONFIRMED);
     }
 
     @Test
@@ -122,6 +156,17 @@ class JdbcReservationRepositoryTest {
                 .isTrue();
         assertThat(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                 "브라운", LocalDate.of(2099, 1, 1), time.getId(), theme.getId())).isFalse();
+    }
+
+    @Test
+    @DisplayName("취소된 예약은 중복 검사에서 제외된다")
+    void existsByReserverNameExcludesCanceled() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        insertReservation("브라운", DATE, time, theme, ReservationStatus.CANCELED, Instant.now());
+
+        assertThat(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
+                "브라운", DATE, time.getId(), theme.getId())).isFalse();
     }
 
     @Test
@@ -163,42 +208,29 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("앞에 존재하는 예약 수에 따라 적절한 대기 순번을 부여한다")
+    @DisplayName("확정은 0번, 대기는 앞에 있는 활성 예약 수만큼 순번을 부여한다")
     void findByReserverName() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Instant base = Instant.now();
-        Reservation first = insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base);
-        Reservation second = insertReservationWithUpdatedAt("모아", DATE, time, theme, base.plusSeconds(1));
-        Reservation third = insertReservationWithUpdatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
+        Reservation first = insertReservation("루드비코", DATE, time, theme, ReservationStatus.CONFIRMED, base);
+        Reservation second = insertReservation("모아", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(1));
+        Reservation third = insertReservation("브라운", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(2));
 
         assertThat(reservationRepository.findByReserverName("루드비코"))
                 .usingRecursiveFieldByFieldElementComparator()
-                .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(first.getId(), "루드비코", DATE, time, theme, new WaitingOrder(0)));
+                .containsExactlyInAnyOrder(new ReservationWithWaitingOrder(
+                        first.getId(), "루드비코", DATE, time, theme, ReservationStatus.CONFIRMED, new WaitingOrder(0)));
 
         assertThat(reservationRepository.findByReserverName("모아"))
                 .usingRecursiveFieldByFieldElementComparator()
-                .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(second.getId(), "모아", DATE, time, theme, new WaitingOrder(1)));
+                .containsExactlyInAnyOrder(new ReservationWithWaitingOrder(
+                        second.getId(), "모아", DATE, time, theme, ReservationStatus.WAITING, new WaitingOrder(1)));
 
         assertThat(reservationRepository.findByReserverName("브라운"))
                 .usingRecursiveFieldByFieldElementComparator()
-                .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(third.getId(), "브라운", DATE, time, theme, new WaitingOrder(2)));
-    }
-
-    @Test
-    @DisplayName("같은 사용자는 같은 슬롯에 중복 대기할 수 없다")
-    void 중복_예약을_시도하면_예외를_던진다() {
-        ReservationTime time = insertTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("무인도 탈출");
-        Instant base = Instant.now();
-        insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base);
-
-        assertThatThrownBy(() -> insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base))
-                .isExactlyInstanceOf(DuplicateKeyException.class);
-
+                .containsExactlyInAnyOrder(new ReservationWithWaitingOrder(
+                        third.getId(), "브라운", DATE, time, theme, ReservationStatus.WAITING, new WaitingOrder(2)));
     }
 
     @Test
@@ -207,21 +239,17 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Instant base = Instant.now();
-        Reservation reservation1 = insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base);
-        insertReservationWithUpdatedAt("모아", DATE, time, theme, base.plusSeconds(1));
-        insertReservationWithUpdatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
+        Reservation confirmed = insertReservation("루드비코", DATE, time, theme, ReservationStatus.CONFIRMED, base);
+        insertReservation("모아", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(1));
+        insertReservation("브라운", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(2));
 
-        List<ReservationWithWaitingOrder> list = reservationRepository.findByReserverName("브라운");
-        long waitingOrder = list.getFirst().waitingOrder().value();
-        assertThat(waitingOrder).isEqualTo(2L);
+        long before = reservationRepository.findByReserverName("브라운").getFirst().waitingOrder().value();
+        assertThat(before).isEqualTo(2L);
 
-        reservationRepository.deleteById(reservation1.getId());
-        assertThat(reservationRepository.findById(reservation1.getId())).isEmpty();
+        reservationRepository.cancel(confirmed.getId());
 
-        List<ReservationWithWaitingOrder> list2 = reservationRepository.findByReserverName("브라운");
-        long waitingOrder2 = list2.getFirst().waitingOrder().value();
-        assertThat(waitingOrder2).isEqualTo(1L);
-
+        long after = reservationRepository.findByReserverName("브라운").getFirst().waitingOrder().value();
+        assertThat(after).isEqualTo(1L);
     }
 
     @Test
@@ -232,14 +260,13 @@ class JdbcReservationRepositoryTest {
         ReservationTime time13 = insertTime(LocalTime.of(13, 0));
         Instant now = Instant.now();
 
-        // user1이 먼저 11시를, user2가 나중에 13시를 예약 (user1.updated_at < user2.updated_at, 둘 다 과거)
-        Reservation user1 = insertReservationWithUpdatedAt("user1", DATE, time11, theme, now.minusSeconds(10));
-        insertReservationWithUpdatedAt("user2", DATE, time13, theme, now.minusSeconds(5));
+        Reservation user1 = insertReservation("user1", DATE, time11, theme,
+                ReservationStatus.CONFIRMED, now.minusSeconds(10));
+        insertReservation("user2", DATE, time13, theme, ReservationStatus.CONFIRMED, now.minusSeconds(5));
 
-        // user1이 user2가 선점한 13시 슬롯으로 변경
-        reservationRepository.update(new Reservation(user1.getId(), "user1", DATE, time13, theme));
+        reservationRepository.updateAndRequeue(new Reservation(user1.getId(), "user1", DATE, time13, theme,
+                ReservationStatus.WAITING));
 
-        // user2는 확정(0번), 나중에 끼어든 user1은 대기(1번) 이어야 한다
         long user2Order = reservationRepository.findByReserverName("user2").getFirst().waitingOrder().value();
         long user1Order = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
         assertThat(user2Order).isEqualTo(0L);
@@ -247,22 +274,23 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("updated_at이 동률이면 id가 작은 예약이 확정(0번)이 된다")
-    void updated_at_동률이면_id로_순번을_가른다() {
+    @DisplayName("enqueued_at이 동률이면 id가 작은 대기가 먼저 순번을 받는다")
+    void enqueued_at_동률이면_id로_순번을_가른다() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
-        Instant sameInstant = Instant.now().minusSeconds(10);
+        Instant base = Instant.now().minusSeconds(10);
 
-        // 두 예약이 정확히 같은 updated_at을 가져도 한 슬롯에 확정은 1명이어야 한다
-        Reservation first = insertReservationWithUpdatedAt("user1", DATE, time, theme, sameInstant);
-        Reservation second = insertReservationWithUpdatedAt("user2", DATE, time, theme, sameInstant);
+        insertReservation("confirmed", DATE, time, theme, ReservationStatus.CONFIRMED, base);
+        Instant sameInstant = base.plusSeconds(1);
+        Reservation first = insertReservation("user1", DATE, time, theme, ReservationStatus.WAITING, sameInstant);
+        Reservation second = insertReservation("user2", DATE, time, theme, ReservationStatus.WAITING, sameInstant);
 
         long firstOrder = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
         long secondOrder = reservationRepository.findByReserverName("user2").getFirst().waitingOrder().value();
 
         assertThat(first.getId()).isLessThan(second.getId());
-        assertThat(firstOrder).isEqualTo(0L);
-        assertThat(secondOrder).isEqualTo(1L);
+        assertThat(firstOrder).isEqualTo(1L);
+        assertThat(secondOrder).isEqualTo(2L);
     }
 
     private ReservationTime insertTime(LocalTime startAt) {
@@ -281,22 +309,17 @@ class JdbcReservationRepositoryTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation (reserver_name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date.toString(), time.getId(), theme.getId()
-        );
-        long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-        return new Reservation(id, name, date, time, theme);
+        return insertReservation(name, date, time, theme, ReservationStatus.CONFIRMED, Instant.now());
     }
 
-    private Reservation insertReservationWithUpdatedAt(String name, LocalDate date, ReservationTime time, Theme theme,
-                                                       Instant updatedAt) {
+    private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme,
+                                          ReservationStatus status, Instant enqueuedAt) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (reserver_name, date, time_id, theme_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                name, date.toString(), time.getId(), theme.getId(),
-                Timestamp.from(updatedAt), Timestamp.from(updatedAt)
+                "INSERT INTO reservation (reserver_name, date, time_id, theme_id, status, enqueued_at) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)",
+                name, date.toString(), time.getId(), theme.getId(), status.name(), Timestamp.from(enqueuedAt)
         );
         long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(id, name, date, time, theme, status);
     }
 }

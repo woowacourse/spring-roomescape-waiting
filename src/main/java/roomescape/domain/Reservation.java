@@ -12,21 +12,32 @@ public class Reservation {
     private final ReservationTime time;
 
     private final Theme theme;
+    private final ReservationStatus status;
 
-    public Reservation(Long id, String reserverName, LocalDate date, ReservationTime time, Theme theme) {
-        validate(reserverName, date, time, theme);
+    public Reservation(Long id, String reserverName, LocalDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status) {
+        validate(reserverName, date, time, theme, status);
         this.id = id;
         this.reserverName = reserverName;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
-    private static void validate(String reserverName, LocalDate date, ReservationTime time, Theme theme) {
+    private static void validate(String reserverName, LocalDate date, ReservationTime time, Theme theme,
+                                 ReservationStatus status) {
         validateReserverName(reserverName);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
+        validateStatus(status);
+    }
+
+    private static void validateStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new DomainValidationException("예약 상태는 비어 있을 수 없습니다.");
+        }
     }
 
     private static void validateReserverName(String reserverName) {
@@ -76,5 +87,25 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public boolean isConfirmed() {
+        return status == ReservationStatus.CONFIRMED;
+    }
+
+    public boolean isWaiting() {
+        return status == ReservationStatus.WAITING;
+    }
+
+    public boolean isCanceled() {
+        return status == ReservationStatus.CANCELED;
+    }
+
+    public boolean isActive() {
+        return status != ReservationStatus.CANCELED;
     }
 }
