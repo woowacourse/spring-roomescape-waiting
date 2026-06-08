@@ -78,9 +78,8 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = getById(id);
-        if (!reservation.isCancelable(clock)) {
-            throw new BusinessException(ErrorCode.PAST_RESERVATION_CANCEL);
-        }
+        reservation.validateModifiable(clock, ErrorCode.PAST_RESERVATION_CANCEL);
+
         reservationRepository.deleteById(id);
 
         reservationWaitingService.promoteWaiting(reservation.getSlot());
@@ -89,9 +88,8 @@ public class ReservationService {
     @Transactional
     public ReservationResponse updateReservation(Long id, ReservationUpdateRequest request) {
         Reservation reservation = getById(id);
-        if (!reservation.isCancelable(clock)) {
-            throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
-        }
+        reservation.validateModifiable(clock, ErrorCode.PAST_RESERVATION_UPDATE);
+
         ReservationSlot slot = reservation.getSlot();
         ReservationTime time = reservationTimeService.getById(request.timeId());
         ReservationSlot newSlot = new ReservationSlot(request.date(), time, slot.theme());

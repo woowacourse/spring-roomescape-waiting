@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -27,8 +29,10 @@ public class ReservationWaiting {
         return Reservation.restore(null, name, slot);
     }
 
-    public boolean isPast(Clock clock) {
-        return LocalDateTime.of(getDate(), getTime().getStartAt()).isBefore(LocalDateTime.now(clock));
+    public void validateCancelable(Clock clock, ErrorCode code) {
+        if (LocalDateTime.of(getDate(), getTime().getStartAt()).isBefore(LocalDateTime.now(clock))) {
+            throw new BusinessException(code);
+        }
     }
 
     public Long getId() {

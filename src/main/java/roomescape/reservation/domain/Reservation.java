@@ -47,8 +47,10 @@ public class Reservation {
         return LocalDateTime.of(getDate(), getTime().getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
-    public boolean isCancelable(Clock clock) {
-        return LocalDateTime.now(clock).isBefore(LocalDateTime.of(getDate(), getTime().getStartAt()).minusHours(12));
+    public void validateModifiable(Clock clock, ErrorCode code) {
+        if (!LocalDateTime.now(clock).isBefore(LocalDateTime.of(getDate(), getTime().getStartAt()).minusHours(12))) {
+            throw new BusinessException(code);
+        }
     }
 
     public Long getId() {
