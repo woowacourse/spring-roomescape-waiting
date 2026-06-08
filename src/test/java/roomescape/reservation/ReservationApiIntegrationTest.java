@@ -166,10 +166,16 @@ class ReservationApiIntegrationTest {
                 .body("date", equalTo("2028-05-07"))
                 .body("time.id", equalTo(secondTimeId.intValue()));
 
-        String oldReservationOwner = jdbcTemplate.queryForObject(
-                "SELECT name FROM reservation WHERE id = ?",
+        String promotedReservationOwner = jdbcTemplate.queryForObject(
+                """
+                        SELECT name
+                        FROM reservation
+                        WHERE date = ? AND theme_id = ? AND time_id = ?
+                        """,
                 String.class,
-                reservationId
+                LocalDate.of(2028, 5, 6),
+                themeId,
+                firstTimeId
         );
         Integer waitingCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM waiting WHERE id = ?",
@@ -177,7 +183,7 @@ class ReservationApiIntegrationTest {
                 waitingId
         );
 
-        assertThat(oldReservationOwner).isEqualTo("카야");
+        assertThat(promotedReservationOwner).isEqualTo("카야");
         assertThat(waitingCount).isZero();
     }
 
@@ -211,10 +217,21 @@ class ReservationApiIntegrationTest {
                 .then().log().all()
                 .statusCode(204);
 
-        String reservationOwner = jdbcTemplate.queryForObject(
-                "SELECT name FROM reservation WHERE id = ?",
-                String.class,
+        Integer deletedReservationCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id = ?",
+                Integer.class,
                 reservationId
+        );
+        String promotedReservationOwner = jdbcTemplate.queryForObject(
+                """
+                        SELECT name
+                        FROM reservation
+                        WHERE date = ? AND theme_id = ? AND time_id = ?
+                        """,
+                String.class,
+                date,
+                themeId,
+                timeId
         );
         Integer firstWaitingCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM waiting WHERE id = ?",
@@ -227,7 +244,8 @@ class ReservationApiIntegrationTest {
                 secondWaitingId
         );
 
-        assertThat(reservationOwner).isEqualTo("카야");
+        assertThat(deletedReservationCount).isZero();
+        assertThat(promotedReservationOwner).isEqualTo("카야");
         assertThat(firstWaitingCount).isZero();
         assertThat(secondWaitingCount).isEqualTo(1);
     }

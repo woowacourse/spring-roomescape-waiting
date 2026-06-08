@@ -8,11 +8,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationTimeRepository;
+import roomescape.fake.FakeThemeRepository;
 import roomescape.fake.FakeWaitingRepository;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
 
@@ -20,11 +24,13 @@ class WaitingServiceTest {
 
     private WaitingRepository waitingRepository;
     private WaitingService waitingService;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
         waitingRepository = new FakeWaitingRepository();
-        waitingService = new WaitingService(waitingRepository);
+        reservationRepository = new FakeReservationRepository(new FakeThemeRepository(), new FakeReservationTimeRepository());
+        waitingService = new WaitingService(waitingRepository, reservationRepository);
     }
 
     @DisplayName("대기 취소를 할 수 있어야 한다.")
