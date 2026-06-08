@@ -33,11 +33,11 @@ public class ReservationAdminCommandService {
         List<ReservationWaiting> waitings = waitingDao.findAllBySlot(reservation.getSlot());
         Optional<WaitingPromotionResult> promotion = promotionService.promote(waitings);
 
+        reservationDao.delete(reservation);
+
         if (promotion.isPresent() && !promotion.get().promotedReservation().isPast(LocalDateTime.now(clock))) {
             reservationDao.create(promotion.get().promotedReservation());
             waitingDao.delete(promotion.get().targetWaiting());
         }
-
-        reservationDao.delete(reservation);
     }
 }

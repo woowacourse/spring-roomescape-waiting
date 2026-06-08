@@ -98,11 +98,11 @@ public class ReservationUserCommandService {
         List<ReservationWaiting> waitings = waitingDao.findAllBySlot(reservation.getSlot());
         Optional<WaitingPromotionResult> promotion = promotionService.promote(waitings);
 
+        reservationDao.delete(reservation);
+
         if (promotion.isPresent()) {
             reservationDao.create(promotion.get().promotedReservation());
             waitingDao.delete(promotion.get().targetWaiting());
         }
-
-        reservationDao.delete(reservation);
     }
 }
