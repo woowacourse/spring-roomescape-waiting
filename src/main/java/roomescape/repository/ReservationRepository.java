@@ -22,8 +22,6 @@ public interface ReservationRepository {
 
     Optional<Reservation> findBySlot(Slot slot);
 
-    Optional<Reservation> findBySlotForUpdate(Slot slot);
-
     List<Long> findReservedTimeIdsByDateAndTheme(LocalDate date, Theme theme);
 
     List<Reservation> findByMember(Member member);

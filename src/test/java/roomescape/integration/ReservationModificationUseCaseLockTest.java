@@ -24,12 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import roomescape.api.dto.ReservationRequest;
-import roomescape.application.ReservationApplicationService;
 import roomescape.application.ReservationModificationUseCase;
 import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.domain.Slot;
-import roomescape.domain.exception.ConflictException;
+import roomescape.domain.exception.NotFoundException;
 
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:reservation-modification-lock")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -41,9 +39,6 @@ class ReservationModificationUseCaseLockTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private ReservationApplicationService reservationApplicationService;
 
     @Autowired
     private ReservationModificationUseCase reservationModificationUseCase;
@@ -93,7 +88,7 @@ class ReservationModificationUseCaseLockTest {
     }
 
     @Test
-    void 예약_삭제_후_대기_승격_전_같은_슬롯_예약_생성은_실패하지_않고_대기한다() throws Exception {
+    void 같은_예약을_동시에_두_번_삭제하면_두_번째_삭제는_대기_후_NotFoundException을_던진다() throws Exception {
         CountDownLatch deletedBeforePromotion = new CountDownLatch(1);
         CountDownLatch resumePromotion = new CountDownLatch(1);
 
@@ -105,33 +100,28 @@ class ReservationModificationUseCaseLockTest {
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            Future<?> deleteReservation = executorService.submit(
+            Future<?> firstDelete = executorService.submit(
                     () -> reservationModificationUseCase.deleteReservation(reservationId)
             );
             assertThat(deletedBeforePromotion.await(1, TimeUnit.SECONDS)).isTrue();
 
-            ReservationRequest newReserverRequest = new ReservationRequest(
-                    "새예약자",
-                    RESERVATION_DATE,
-                    timeId,
-                    themeId
-            );
-            Future<?> saveReservation = executorService.submit(
-                    () -> reservationApplicationService.save(newReserverRequest)
+            Future<?> secondDelete = executorService.submit(
+                    () -> reservationModificationUseCase.deleteReservation(reservationId)
             );
 
             try {
-                assertThatThrownBy(() -> saveReservation.get(500, TimeUnit.MILLISECONDS))
+                assertThatThrownBy(() -> secondDelete.get(500, TimeUnit.MILLISECONDS))
                         .isInstanceOf(TimeoutException.class);
             } finally {
                 resumePromotion.countDown();
             }
 
-            deleteReservation.get(3, TimeUnit.SECONDS);
-            assertThatThrownBy(() -> saveReservation.get(3, TimeUnit.SECONDS))
+            firstDelete.get(3, TimeUnit.SECONDS);
+            assertThatThrownBy(() -> secondDelete.get(3, TimeUnit.SECONDS))
                     .isInstanceOf(ExecutionException.class)
-                    .hasCauseInstanceOf(ConflictException.class);
+                    .hasCauseInstanceOf(NotFoundException.class);
             assertThat(findReservationNamesBySlot()).containsExactly("대기자");
+            assertThat(countWaitingsBySlot()).isZero();
         } finally {
             executorService.shutdownNow();
         }
@@ -145,6 +135,16 @@ class ReservationModificationUseCaseLockTest {
         return jdbcTemplate.queryForList(
                 "SELECT name FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?",
                 String.class,
+                RESERVATION_DATE,
+                timeId,
+                themeId
+        );
+    }
+
+    private Integer countWaitingsBySlot() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation_waiting WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Integer.class,
                 RESERVATION_DATE,
                 timeId,
                 themeId

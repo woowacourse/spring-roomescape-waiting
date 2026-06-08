@@ -13,13 +13,10 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.ConflictException;
 
 @Service
 public class ReservationApplicationService {
-
-    private static final String ALREADY_EXISTS_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
-
+    
     private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
@@ -46,10 +43,6 @@ public class ReservationApplicationService {
                 reservationTime,
                 theme
         );
-        reservationCommandService.findBySlotForUpdate(slot)
-                .ifPresent(reservation -> {
-                    throw new ConflictException(ALREADY_EXISTS_RESERVATION);
-                });
 
         return reservationCommandService.save(
                 new Member(request.name()),

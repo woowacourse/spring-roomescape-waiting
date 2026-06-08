@@ -167,16 +167,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findBySlot(Slot slot) {
-        return findBySlot(slot, "");
-    }
-
-    @Override
-    public Optional<Reservation> findBySlotForUpdate(Slot slot) {
-        return findBySlot(slot, " FOR UPDATE");
-    }
-
-    private Optional<Reservation> findBySlot(Slot slot, String lockClause) {
-        String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?" + lockClause;
+        String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?";
         List<Reservation> results = jdbcTemplate.query(
                 sql,
                 reservationRowMapper,
