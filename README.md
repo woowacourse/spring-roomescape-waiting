@@ -52,7 +52,7 @@
 - [X] `Reservation` 생성 경로를 줄이고 불변식 검증 위치를 정리한다.
   - 현재 구조에서는 예약이 `slot`을 참조하므로 `ReservationSlot` 기반 생성 경로를 중심으로 남긴다. 날짜/테마/시간 조합으로 슬롯을 만드는 책임은 서비스 또는 슬롯 생성 쪽으로 이동시켜 `Reservation` 생성 경로를 줄인다.
 
-- [ ] `ReservationWaitingLine`의 `Map` 사용 이유를 검토하고 표현 계층 요구가 도메인에 들어왔는지 확인한다.
+- [X] `ReservationWaitingLine`의 `Map` 사용 이유를 검토하고 표현 계층 요구가 도메인에 들어왔는지 확인한다.
   - 대기 줄의 본질을 "정렬된 대기 목록"으로 볼 수 있는지 검토한다. 필요하다면 정렬된 `List<ReservationWaitingOrder>`를 보관하고 `sequenceOf`, `containsName`, `first` 같은 도메인 질문을 메서드로 제공하도록 바꾼다. 조회 성능보다 도메인 표현의 명확성이 더 중요한지 기준으로 결정한다.
 
 - [ ] `ReservationRepository`가 `Slot` 식별자를 중심으로 상호작용하도록 유지한다.

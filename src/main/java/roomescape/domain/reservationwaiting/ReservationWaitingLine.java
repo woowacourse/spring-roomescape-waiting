@@ -3,34 +3,17 @@ package roomescape.domain.reservationwaiting;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import roomescape.domain.reservation.ReservationName;
 
 public class ReservationWaitingLine {
-    private final Map<Long, Integer> sequencesByWaitingId;
-    private final Set<String> names;
+    private final List<ReservationWaitingOrder> orders;
 
     public ReservationWaitingLine(final List<ReservationWaitingOrder> orders) {
-        List<ReservationWaitingOrder> sortedOrders = orders.stream()
+        this.orders = orders.stream()
                 .sorted(Comparator.comparing(ReservationWaitingOrder::requestedAt)
                         .thenComparing(ReservationWaitingOrder::waitingId))
                 .toList();
-
-        this.sequencesByWaitingId = IntStream.range(0, sortedOrders.size())
-                .boxed()
-                .collect(Collectors.toMap(
-                        index -> sortedOrders.get(index).waitingId(),
-                        index -> index + 1
-                ));
-        this.names = sortedOrders.stream()
-                .map(ReservationWaitingOrder::name)
-                .filter(Objects::nonNull)
-                .map(name -> ReservationName.from(name).value())
-                .collect(Collectors.toSet());
     }
 
     public static ReservationWaitingLine fromWaitings(final List<ReservationWaiting> waitings) {
@@ -44,21 +27,25 @@ public class ReservationWaitingLine {
     }
 
     public boolean isEmpty() {
-        return sequencesByWaitingId.isEmpty();
+        return orders.isEmpty();
     }
 
     public boolean containsName(final ReservationName name) {
-        return names.contains(name.value());
+        return orders.stream()
+                .map(ReservationWaitingOrder::name)
+                .filter(Objects::nonNull)
+                .map(waitingName -> ReservationName.from(waitingName).value())
+                .anyMatch(name.value()::equals);
     }
 
     public int sequenceOf(final long waitingId) {
-        Integer sequence = sequencesByWaitingId.get(waitingId);
-
-        if (sequence == null) {
-            throw new IllegalArgumentException("대기 순번을 찾을 수 없습니다.");
+        for (int index = 0; index < orders.size(); index++) {
+            if (orders.get(index).waitingId() == waitingId) {
+                return index + 1;
+            }
         }
 
-        return sequence;
+        throw new IllegalArgumentException("대기 순번을 찾을 수 없습니다.");
     }
 
     public record ReservationWaitingOrder(
