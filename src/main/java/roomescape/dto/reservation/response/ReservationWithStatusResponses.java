@@ -8,14 +8,18 @@ public record ReservationWithStatusResponses(
         List<WaitingReservationResponse> waitingReservations,
         boolean hasNext
 ) {
-    public static ReservationWithStatusResponses of(List<ReservationWithWaitingOrder> rows, boolean hasNext) {
-        List<ReservationResponse> reservations = rows.stream()
+    public static ReservationWithStatusResponses of(
+            List<ReservationWithWaitingOrder> reservationWithWaitingOrders, boolean hasNext) {
+        List<ReservationResponse> reservations = reservationWithWaitingOrders.stream()
                 .filter(ReservationWithWaitingOrder::isReserved)
-                .map(row -> ReservationResponse.from(row.reservation()))
+                .map(reservationWithWaitingOrder ->
+                        ReservationResponse.from(reservationWithWaitingOrder.reservation()))
                 .toList();
-        List<WaitingReservationResponse> waitingReservations = rows.stream()
+        List<WaitingReservationResponse> waitingReservations = reservationWithWaitingOrders.stream()
                 .filter(ReservationWithWaitingOrder::isWaiting)
-                .map(row -> WaitingReservationResponse.from(row.reservation(), row.waitingOrder()))
+                .map(reservationWithWaitingOrder -> WaitingReservationResponse.from(
+                        reservationWithWaitingOrder.reservation(),
+                        reservationWithWaitingOrder.waitingOrder()))
                 .toList();
         return new ReservationWithStatusResponses(reservations, waitingReservations, hasNext);
     }
