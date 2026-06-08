@@ -33,35 +33,23 @@ class ReservationTransactionTest {
     @MockitoSpyBean
     private WaitingRepository waitingRepository;
 
-    private long reservationId;
-
     @BeforeEach
     void setUp() {
         jdbcTemplate.update("DELETE FROM waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-
-        String futureDate = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
-                "공포", "무서운 테마", "thumb.png");
-
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                예약자, futureDate, 1L, 1L);
-        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                대기자, futureDate, 1L, 1L);
-
-        reservationId = 1L;
     }
 
     @Test
     @DisplayName("정상 취소 시: 예약 삭제/대기 승격/대기 삭제가 모두 함께 반영된다")
     void 정상_취소시_세_변경이_원자적으로_반영된다() {
+        String futureDate = LocalDate.now().plusDays(1).toString();
+        long timeId = saveReservationTime("10:00");
+        long themeId = saveTheme("공포");
+        long reservationId = saveReservation(예약자, futureDate, timeId, themeId);
+        saveWaiting(대기자, futureDate, timeId, themeId);
+
         reservationService.deleteUserReservation(reservationId, 예약자);
 
         assertThat(countReservations()).isEqualTo(1);
@@ -73,6 +61,12 @@ class ReservationTransactionTest {
     @Test
     @DisplayName("승격 후 대기 삭제 단계에서 장애가 나면: 예약 삭제와 승격까지 모두 롤백된다")
     void 중간_실패시_전체_롤백되어_데이터_일관성이_유지된다() {
+        String futureDate = LocalDate.now().plusDays(1).toString();
+        long timeId = saveReservationTime("10:00");
+        long themeId = saveTheme("공포");
+        long reservationId = saveReservation(예약자, futureDate, timeId, themeId);
+        saveWaiting(대기자, futureDate, timeId, themeId);
+
         doThrow(new RuntimeException("DB 장애 시뮬레이션"))
                 .when(waitingRepository).delete(any(Waiting.class));
 
@@ -85,6 +79,31 @@ class ReservationTransactionTest {
         assertThat(reservationExists(대기자)).isFalse();
         assertThat(countWaitings()).isEqualTo(1);
         assertThat(waitingExists(대기자)).isTrue();
+    }
+
+    private long saveReservationTime(String startAt) {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt);
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt);
+    }
+
+    private long saveTheme(String name) {
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
+                name, "무서운 테마", "thumb.png");
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM theme WHERE name = ?", Long.class, name);
+    }
+
+    private long saveReservation(String name, String date, long timeId, long themeId) {
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, date, timeId, themeId);
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation WHERE name = ?", Long.class, name);
+    }
+
+    private void saveWaiting(String name, String date, long timeId, long themeId) {
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, date, timeId, themeId);
     }
 
     private int countReservations() {
