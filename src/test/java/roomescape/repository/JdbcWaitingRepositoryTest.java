@@ -361,7 +361,7 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void 모든_대기를_조회하면_대기와_각_대기의_현재_대기_순번을_반환한다() {
+    void 한_슬롯에_존재하는_대기가_없으면_대기_승격_가능한_대기_조회_시_빈_Optional을_반환한다() {
         // given
         LocalDate date = LocalDate.parse("2026-05-06");
         ReservationTime reservationTime = reservationTimeRepository.save(
@@ -369,27 +369,52 @@ class JdbcWaitingRepositoryTest {
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
         ReservationSlot slot = ReservationSlot.of(date, reservationTime, theme);
 
-        Waiting waiting1 = waitingRepository.save(
-                Waiting.create("루드비코", slot, 1L));
-        Waiting waiting2 = waitingRepository.save(
-                Waiting.create("코코", slot, 2L));
-        Waiting waiting3 = waitingRepository.save(
-                Waiting.create("네오", slot, 5L));
+        // when
+        Optional<Waiting> result = waitingRepository.findPromotableWaitingBySlotWithLock(slot);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 모든_대기를_조회하면_대기와_각_대기의_현재_대기_순번을_대기번호_오름차순_순서대로_반환한다() {
+        // given
+        LocalDate date1 = LocalDate.parse("2026-05-06");
+        LocalDate date2 = LocalDate.parse("2026-05-07");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        ReservationSlot slot1 = ReservationSlot.of(date1, reservationTime, theme);
+        ReservationSlot slot2 = ReservationSlot.of(date2, reservationTime, theme);
+
         Waiting waiting4 = waitingRepository.save(
-                Waiting.create("브라운", slot, 7L));
+                Waiting.create("브라운", slot1, 7L));
+        Waiting waiting3 = waitingRepository.save(
+                Waiting.create("네오", slot1, 5L));
+        Waiting waiting2 = waitingRepository.save(
+                Waiting.create("코코", slot1, 2L));
+        Waiting waiting1 = waitingRepository.save(
+                Waiting.create("루드비코", slot1, 1L));
+
+        Waiting waiting6 = waitingRepository.save(
+                Waiting.create("코코", slot2, 2L));
+        Waiting waiting5 = waitingRepository.save(
+                Waiting.create("루드비코", slot2, 1L));
 
         WaitingWithOrder waitingWithOrder1 = WaitingWithOrder.of(waiting1, 1L);
         WaitingWithOrder waitingWithOrder2 = WaitingWithOrder.of(waiting2, 2L);
         WaitingWithOrder waitingWithOrder3 = WaitingWithOrder.of(waiting3, 3L);
         WaitingWithOrder waitingWithOrder4 = WaitingWithOrder.of(waiting4, 4L);
+        WaitingWithOrder waitingWithOrder5 = WaitingWithOrder.of(waiting5, 1L);
+        WaitingWithOrder waitingWithOrder6 = WaitingWithOrder.of(waiting6, 2L);
 
         // when
         List<WaitingWithOrder> waitings = waitingRepository.findAll();
 
         // then
-        assertThat(waitings).hasSize(4)
+        assertThat(waitings).hasSize(6)
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(waitingWithOrder1, waitingWithOrder2, waitingWithOrder3,
-                        waitingWithOrder4);
+                        waitingWithOrder4, waitingWithOrder5, waitingWithOrder6);
     }
 }
