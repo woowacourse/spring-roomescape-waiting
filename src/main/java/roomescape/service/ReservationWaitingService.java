@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
@@ -37,6 +38,7 @@ public class ReservationWaitingService {
         this.themeQueryDao = themeQueryDao;
     }
 
+    @Transactional
     public ReservationWaitingResponse create(ReservationWaitingRequest reservationWaitingReq) {
         ReservationTime reservationTimeById = reservationTimeQueryDao.findReservationTimeById(reservationWaitingReq.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationWaitingReq.timeId()));
@@ -45,7 +47,8 @@ public class ReservationWaitingService {
 
         ReservationSlot reservationSlot = new ReservationSlot(reservationWaitingReq.date(), reservationTimeById, themeById);
 
-        Reservation reservation = getReservationBySlot(reservationSlot);
+        Reservation reservation = reservationQueryDao.findReservationBySlotForUpdate(reservationSlot)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
         reservation.validateWaitable(reservationWaitingReq.name());
 
         if(reservationWaitingQueryDao.isExistByNameAndSlot(reservationWaitingReq.name(), reservationSlot)) {
@@ -74,11 +77,5 @@ public class ReservationWaitingService {
                 .stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();
-    }
-
-    private Reservation getReservationBySlot(ReservationSlot reservationSlot) {
-        return reservationQueryDao.findReservationBySlot(reservationSlot).stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
     }
 }

@@ -67,7 +67,7 @@ public class ReservationWaitingServiceTest {
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
         when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(false);
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
         when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
@@ -109,7 +109,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(pastDate, reservationTime, theme))).thenReturn(Optional.of(pastReservation));
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(pastDate, reservationTime, theme))).thenReturn(Optional.of(pastReservation));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(ExpiredDateTimeException.class);
@@ -121,7 +121,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.empty()
         );
 
@@ -135,7 +135,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(now, reservationTime, theme)))
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(now, reservationTime, theme)))
                 .thenReturn(Optional.of(new Reservation("테스트", new ReservationSlot(now, reservationTime, theme))));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
@@ -173,7 +173,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
         when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(true);
