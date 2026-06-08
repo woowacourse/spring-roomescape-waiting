@@ -327,7 +327,7 @@ class ReservationControllerTest {
                 .when().put("/reservations/1")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", org.hamcrest.Matchers.is("이미 예약된 시간입니다."));
+                .body("message", org.hamcrest.Matchers.is("해당 슬롯의 예약이 이미 존재합니다."));
     }
 
     @Test

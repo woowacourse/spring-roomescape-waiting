@@ -15,7 +15,7 @@ public class WaitingPromotionService {
     private final WaitingService waitingService;
     private final ReservationService reservationService;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.NESTED)
     public void promoteBySlot(final LocalDate reservationDate, final long timeId, final long themeId) {
         waitingService.findEarliestWaitingBySlot(
             reservationDate,
