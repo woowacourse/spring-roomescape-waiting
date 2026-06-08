@@ -80,6 +80,7 @@ public class ThemeDao {
                       ON rt.id = r.time_id
                        AND r.theme_id = ?
                        AND r.date = ?
+                       AND r.status = 'CONFIRMED'
                 """;
         return jdbcTemplate.query(sql, availableReservationTimeRowMapper, themeId, date);
     }

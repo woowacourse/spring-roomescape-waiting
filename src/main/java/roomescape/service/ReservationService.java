@@ -12,6 +12,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.Page;
@@ -51,35 +52,42 @@ public class ReservationService {
 
     @Transactional
     public Reservation update(long id, LocalDate date, long timeId) {
-        Reservation reservation = reservationDao.findById(id)
+        Reservation reservation = reservationDao.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        LocalDateTime now = LocalDateTime.now(clock);
+        reservation.validateCancellable(now);
         ReservationTime time = validateReservationTime(timeId);
-        Reservation updated = reservation.withUpdated(date, time, LocalDateTime.now(clock));
+        Reservation updated = reservation.withUpdated(date, time, now);
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
-        return reservationDao.update(updated);
+        Reservation result = reservationDao.update(updated);
+        approveFirstWaitingIfExists(reservation, now);
+        return result;
     }
 
     @Transactional
     public void delete(long id) {
-        reservationDao.findById(id).ifPresent(reservation -> {
-            reservation.validateCancellable(LocalDateTime.now(clock));
-            reservationDao.delete(id);
-        });
+        Reservation reservation = reservationDao.findByIdForUpdate(id)
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        LocalDateTime now = LocalDateTime.now(clock);
+        reservation.validateCancellable(now);
+        reservationDao.delete(id);
+        approveFirstWaitingIfExists(reservation, now);
+    }
+
+    private void approveFirstWaitingIfExists(Reservation slot, LocalDateTime now) {
+        if (LocalDateTime.of(slot.getDate(), slot.getTime().getStartAt()).isBefore(now)) {
+            return;
+        }
+        reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(
+                        slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())
+                .ifPresent(waiting -> reservationDao.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED));
     }
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllByName(String username) {
         return reservationDao.findByName(username);
-    }
-
-    @Transactional
-    public Reservation saveEntry(String name, LocalDate date, long timeId, long themeId) {
-        ReservationTime time = validateReservationTime(timeId);
-        Theme theme = validateTheme(themeId);
-        Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
-        return reservationDao.save(reservation);
     }
 
     @Transactional(readOnly = true)

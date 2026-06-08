@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ReservationRequest;
-import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationWaitingResponse;
 import roomescape.controller.dto.response.ReservationWaitingsResponse;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWaiting;
 import roomescape.service.ReservationWaitingService;
 
 @RequestMapping("/reservations/waiting")
@@ -29,10 +28,10 @@ public class ReservationWaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservationWaiting(@Valid @RequestBody ReservationRequest request) {
-        Reservation reservation = reservationWaitingService.saveWaiting(
+    public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(@Valid @RequestBody ReservationRequest request) {
+        ReservationWaiting waiting = reservationWaitingService.saveWaiting(
                 request.name(), request.date(), request.timeId(), request.themeId());
-        ReservationResponse response = ReservationResponse.from(reservation, reservation.getTheme());
+        ReservationWaitingResponse response = ReservationWaitingResponse.from(waiting.reservation(), waiting.waitingNumber());
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
@@ -47,7 +46,7 @@ public class ReservationWaitingController {
     public ResponseEntity<ReservationWaitingsResponse> getReservationWaiting(@RequestParam String username) {
         List<ReservationWaitingResponse> responses = reservationWaitingService.findAllWaitingByName(username)
                 .stream()
-                .map(ReservationWaitingResponse::from)
+                .map(w -> ReservationWaitingResponse.from(w.reservation(), w.waitingNumber()))
                 .toList();
         return ResponseEntity.ok(new ReservationWaitingsResponse(responses));
     }
