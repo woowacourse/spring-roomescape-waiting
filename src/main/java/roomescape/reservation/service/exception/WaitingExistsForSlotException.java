@@ -1,4 +1,4 @@
-package roomescape.reservation.domain.exception;
+package roomescape.reservation.service.exception;
 
 import roomescape.common.exception.ConflictException;
 

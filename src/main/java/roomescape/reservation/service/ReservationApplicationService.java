@@ -13,7 +13,7 @@ import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.exception.ReservationSlotDuplicateException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
-import roomescape.reservation.domain.exception.WaitingExistsForSlotException;
+import roomescape.reservation.service.exception.WaitingExistsForSlotException;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
