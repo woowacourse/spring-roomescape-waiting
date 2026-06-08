@@ -68,4 +68,25 @@ class ThemeTest {
         assertThat(result.getDescription()).isEqualTo(description);
         assertThat(result.getThumbnail()).isEqualTo(thumbnail);
     }
+
+    @Test
+    void 아이디가_같으면_같은_테마이다() {
+        // given
+        Theme theme = new Theme(1L, "테마1", "설명1", "썸네일1");
+        Theme sameIdTheme = new Theme(1L, "테마2", "설명2", "썸네일2");
+
+        // when & then
+        assertThat(theme).isEqualTo(sameIdTheme);
+        assertThat(theme).hasSameHashCodeAs(sameIdTheme);
+    }
+
+    @Test
+    void 아이디가_없으면_내용이_같아도_같은_테마가_아니다() {
+        // given
+        Theme theme = new Theme(null, "테마", "설명", "썸네일");
+        Theme sameContentTheme = new Theme(null, "테마", "설명", "썸네일");
+
+        // when & then
+        assertThat(theme).isNotEqualTo(sameContentTheme);
+    }
 }

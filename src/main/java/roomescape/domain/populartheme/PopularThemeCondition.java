@@ -1,6 +1,7 @@
 package roomescape.domain.populartheme;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class PopularThemeCondition {
 
@@ -29,6 +30,17 @@ public class PopularThemeCondition {
 
     public int getLimit() {
         return limit;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PopularThemeCondition that)) return false;
+        return limit == that.limit && Objects.equals(startDate, that.startDate) && Objects.equals(endDate, that.endDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startDate, endDate, limit);
     }
 
     private void validateDate(LocalDate date) {
