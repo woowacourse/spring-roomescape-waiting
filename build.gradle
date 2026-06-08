@@ -13,6 +13,7 @@ java {
 }
 
 repositories {
+    maven { url 'https://jitpack.io' }
     mavenCentral()
 }
 
@@ -23,15 +24,21 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
+
+    implementation 'com.github.Uechann:my-sql-logger:v1.0.1'
 
     runtimeOnly 'com.h2database:h2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.rest-assured:rest-assured:5.3.1'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+
+    testRuntimeOnly 'com.mysql:mysql-connector-j'
 }
 
 test {
