@@ -1,4 +1,4 @@
-package roomescape.global.config;
+package roomescape.infrastructure;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Profile("!test")
+@Profile("local")
 @Component
 public class DataInitializer implements ApplicationRunner {
 
