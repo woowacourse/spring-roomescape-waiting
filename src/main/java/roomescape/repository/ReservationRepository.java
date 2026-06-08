@@ -15,6 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 
 @Repository
@@ -42,24 +43,44 @@ public class ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Reservation> findAll() {
+    @Transactional
+    public Reservation save(Reservation reservation) {
+        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, reservation.getName());
+            ps.setObject(2, reservation.getDate());
+            ps.setLong(3, reservation.getTime().getId());
+            ps.setLong(4, reservation.getTheme().getId());
+            ps.setString(5, reservation.getStatus().name());
+
+            return ps;
+        }, keyHolder);
+
+        long id = keyHolder.getKey().longValue();
+
+        return findById(id).orElseThrow(() -> new IllegalStateException("예약 데이터를 조회할 수 없습니다."));
+    }
+
+    public Reservations findAll() {
         String sql = """
                     SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
-                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
                 """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper);
+        return new Reservations(jdbcTemplate.query(sql, reservationRowMapper));
     }
 
     public Optional<Reservation> findById(Long id) {
         String sql = """
                     SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
@@ -76,10 +97,12 @@ public class ReservationRepository {
                     FROM (
                         SELECT
                             r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                            r.status,
+                            t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
                             CASE WHEN r.status = 'WAITING'
-                                 THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
+                                 THEN ROW_NUMBER() OVER (
+                                     PARTITION BY r.date, r.theme_id, r.time_id, r.status 
+                                     ORDER BY r.id
+                                  )
                             END AS waiting_order
                         FROM reservation r
                         INNER JOIN reservation_time rt ON r.time_id = rt.id
@@ -97,76 +120,37 @@ public class ReservationRepository {
         );
     }
 
-    public boolean existsByDateAndThemeAndTimeAndName(LocalDate date, long themeId, long timeId, String name) {
-        Boolean result = jdbcTemplate.queryForObject("""
-                        SELECT EXISTS(
-                            SELECT *
-                            FROM reservation
-                            WHERE date = ?
-                                AND time_id = ?
-                                AND theme_id = ?
-                                AND name = ?
-                        )
-                        """,
-                Boolean.class,
-                date,
-                timeId,
-                themeId,
-                name
-        );
-        return Boolean.TRUE.equals(result);
-    }
-
-    @Transactional
-    public Reservation save(Reservation reservation) {
+    public Reservations findByDateAndThemeId(LocalDate date, long themeId) {
         String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id, status)
-                SELECT ?, ?, ?, ?,
-                CASE WHEN EXISTS (
-                    SELECT 1 FROM reservation
-                    WHERE date = ? AND time_id = ? AND theme_id = ?  AND status = 'CONFIRMED'
-                ) THEN 'WAITING' ELSE 'CONFIRMED' END
+                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.date = ? AND r.theme_id = ?
                 """;
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
-            ps.setObject(2, reservation.getDate());
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
-
-            ps.setObject(5, reservation.getDate());
-            ps.setLong(6, reservation.getTime().getId());
-            ps.setLong(7, reservation.getTheme().getId());
-
-            return ps;
-        }, keyHolder);
-
-        long id = keyHolder.getKey().longValue();
-
-        return findById(id).orElseThrow(() -> new IllegalStateException("예약 데이터를 조회할 수 없습니다."));
+        return new Reservations(jdbcTemplate.query(sql, reservationRowMapper, date, themeId));
     }
 
     @Transactional
-    public void update(LocalDate date, long themeId, long timeId) {
-        jdbcTemplate.update(
-                """
-                         UPDATE reservation 
-                         SET status = 'CONFIRMED'
-                         WHERE id = (
-                             SELECT id FROM reservation
-                             WHERE date = ? AND theme_id = ? AND time_id = ? AND status = 'WAITING'
-                             ORDER BY id ASC LIMIT 1
-                         )
-                         AND NOT EXISTS(
-                             SELECT 1 FROM reservation
-                             WHERE date = ? AND theme_id = ? AND time_id = ? AND status = 'CONFIRMED' 
-                         )
-                        """,
-                date, themeId, timeId, date, themeId, timeId
-        );
+    public Reservations findByDateAndThemeAndTimeForUpdate(LocalDate date, long themeId, long timeId) {
+        String sql = """
+                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.date = ? AND r.theme_id = ? AND r.time_id = ?
+                    FOR UPDATE
+                """;
+
+        return new Reservations(jdbcTemplate.query(sql, reservationRowMapper, date, themeId, timeId));
+    }
+
+    @Transactional
+    public void updateStatus(Long id, ReservationStatus status) {
+        jdbcTemplate.update("UPDATE reservation SET status = ? WHERE id = ?", status.name(), id);
     }
 
     @Transactional

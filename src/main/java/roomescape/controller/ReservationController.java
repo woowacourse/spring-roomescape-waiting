@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.request.UserReservationUpdateRequest;
+import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -52,7 +52,7 @@ public class ReservationController {
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody UserReservationUpdateRequest request) {
+            @Valid @RequestBody ReservationUpdateRequest request) {
         ReservationResponse updated = reservationService.update(id, request);
         return ResponseEntity.ok(updated);
     }

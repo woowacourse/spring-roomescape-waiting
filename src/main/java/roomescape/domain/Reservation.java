@@ -29,18 +29,6 @@ public class Reservation {
         this.theme = theme;
     }
 
-
-    public boolean isSameDateTime(LocalDate date, Long timeId) {
-        return this.date.equals(date) && this.time.getId().equals(timeId);
-    }
-
-    public void validateNotPast(LocalDate date, ReservationTime time) {
-        LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (targetDateTime.isBefore(LocalDateTime.now())) {
-            throw new InvalidStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
-        }
-    }
-
     public Long getId() {
         return id;
     }
@@ -63,6 +51,32 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public boolean isSameDateTime(LocalDate date, Long timeId) {
+        return this.date.equals(date) && this.time.getId().equals(timeId);
+    }
+
+    public boolean isConfirmed() {
+        return status == ReservationStatus.CONFIRMED;
+    }
+
+    public boolean isWaiting() {
+        return status == ReservationStatus.WAITING;
+    }
+
+    public void confirm() {
+        if (!isWaiting()) {
+            throw new InvalidStateException("대기 중인 예약만 승격할 수 있습니다.");
+        }
+        this.status = ReservationStatus.CONFIRMED;
+    }
+
+    public void validateNotPast() {
+        LocalDateTime targetDateTime = LocalDateTime.of(this.date, this.time.getStartAt());
+        if (targetDateTime.isBefore(LocalDateTime.now())) {
+            throw new InvalidStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
+        }
     }
 
     private void validateName(String name) {
