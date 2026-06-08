@@ -85,7 +85,7 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
     }
 
     @Override
-    public void update(final ActiveReservation reservation) {
+    public int update(final ActiveReservation reservation) {
         String sql = "UPDATE reservation "
                 + "SET slot_id = :slotId, created_at = :createdAt "
                 + "WHERE id = :id AND is_deleted = 0";
@@ -95,7 +95,7 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
                 .addValue("createdAt", reservation.getCreatedAt())
                 .addValue("id", reservation.getId());
 
-        jdbcTemplate.update(sql, params);
+        return jdbcTemplate.update(sql, params);
     }
 
     @Override
@@ -213,8 +213,8 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
     }
 
     @Override
-    public void cancel(final ActiveReservation reservation) {
-        String sql = "UPDATE reservation SET is_deleted=:id WHERE id = :id ";
-        jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
+    public int cancel(final ActiveReservation reservation) {
+        String sql = "UPDATE reservation SET is_deleted=:id WHERE id = :id AND is_deleted = 0";
+        return jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
     }
 }

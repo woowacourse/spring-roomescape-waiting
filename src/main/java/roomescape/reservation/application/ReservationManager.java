@@ -113,13 +113,13 @@ public class ReservationManager {
         return changedInfo;
     }
 
-    private ReservationInfo fallbackToPending(Long id, ReservationChangeCommand command, TimeSlot slot) {
+    private ReservationInfo fallbackToPending(final Long id, final ReservationChangeCommand command, final TimeSlot slot) {
         Long oldSlotId = activeReservationService.cancel(id, command.name());
         promoteNextPending(oldSlotId);
         return pendingReservationService.transferReservation(id, slot, command.toCreateCommand());
     }
 
-    private void promoteNextPending(Long oldSlotId) {
+    private void promoteNextPending(final Long oldSlotId) {
         pendingReservationService.popNextPendingAndPromote(oldSlotId)
                 .ifPresent(activeReservationService::savePromoted);
     }

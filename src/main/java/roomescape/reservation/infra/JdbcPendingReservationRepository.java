@@ -103,13 +103,13 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
     }
 
     @Override
-    public void cancel(PendingReservation reservation) {
-        String sql = "UPDATE pending SET is_deleted=:id WHERE id = :id ";
-        jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
+    public int cancel(PendingReservation reservation) {
+        String sql = "UPDATE pending SET is_deleted=:id WHERE id = :id AND is_deleted = 0";
+        return jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
     }
 
     @Override
-    public void update(PendingReservation reservation) {
+    public int update(PendingReservation reservation) {
         String sql = "UPDATE pending "
                 + "SET slot_id=:slotId, created_at = :createdAt "
                 + "WHERE id = :id AND is_deleted = 0";
@@ -118,7 +118,7 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
                 .addValue("slotId", reservation.getSlot().getId())
                 .addValue("id", reservation.getId())
                 .addValue("createdAt", reservation.getCreatedAt());
-        jdbcTemplate.update(sql, params);
+        return jdbcTemplate.update(sql, params);
     }
 
     @Override
