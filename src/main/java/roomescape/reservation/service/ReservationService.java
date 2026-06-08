@@ -52,6 +52,12 @@ public class ReservationService {
         return reservationRepository.save(nonIdReservation);
     }
 
+    public void saveWith(String name, LocalDate date, Theme theme, ReservationTime reservationTime) {
+        Reservation nonIdReservation = Reservation.createNew(name, date, theme, reservationTime);
+
+        reservationRepository.save(nonIdReservation);
+    }
+
     public Reservation findByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId, final Long timeId) {
         return reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(

@@ -40,11 +40,13 @@ public class ReservationApplicationService {
                 reservation.getTheme().getId(),
                 reservation.getTime().getId()
         ).ifPresent(waiting -> {
-            reservationService.save(
+            reservationService.saveWith(
                     waiting.getName(),
                     waiting.getDate(),
-                    waiting.getThemeId(),
-                    waiting.getTimeId());
+                    reservation.getTheme(),
+                    reservation.getTime()
+            );
+
             reservationWaitingService.deleteById(waiting.getId());
         });
     }
