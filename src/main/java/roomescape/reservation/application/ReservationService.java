@@ -81,15 +81,11 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
     }
 
     private void cancelReservation(Reservation reservation) {
-        validateCancelable(reservation);
+        reservation.validateCancelable(LocalDateTime.now(clock));
 
         WaitingLine waitingLine = findWaitingLineFor(reservation);
         deleteReservationOnly(reservation);
         promoteFirstWaitingIfExists(reservation, waitingLine);
-    }
-
-    private void validateCancelable(Reservation reservation) {
-        reservation.validateNotPast(LocalDateTime.now(clock));
     }
 
     private WaitingLine findWaitingLineFor(Reservation reservation) {

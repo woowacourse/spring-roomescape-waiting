@@ -41,6 +41,10 @@ public class Reservation {
         slot.validateNotPast(now);
     }
 
+    public void validateCancelable(LocalDateTime now) {
+        validateNotPast(now);
+    }
+
     public Long getSlotId() {
         return slot.getId();
     }
