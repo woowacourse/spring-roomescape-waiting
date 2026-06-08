@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -47,6 +48,11 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
         return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
+    }
+
+    @Transactional
+    public Optional<Reservation> findBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
+        return reservationRepository.findBySlotForUpdate(date, timeId, themeId);
     }
 
     @Transactional(readOnly = true)

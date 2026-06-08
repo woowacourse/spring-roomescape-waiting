@@ -208,6 +208,30 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
 
+    @Override
+    public Optional<Reservation> findBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
+        final String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.name AS reservation_name,
+                    r.date AS reservation_date,
+                    r.theme_id AS theme_id,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme h ON r.theme_id = h.id
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(sql, this::mapToDomain, Date.valueOf(date), timeId, themeId)
+            .stream()
+            .findFirst();
+    }
+
     private long insertReservation(final ReservationEntity reservationEntity) {
         final String sql = """
                 INSERT INTO reservation (name, date, time_id, theme_id)
