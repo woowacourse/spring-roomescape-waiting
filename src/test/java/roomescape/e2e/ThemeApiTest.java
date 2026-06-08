@@ -3,10 +3,6 @@ package roomescape.e2e;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.exception.ProblemType;
 
 import java.time.LocalDate;
@@ -16,12 +12,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ThemeApiTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+class ThemeApiTest extends AbstractE2eTest {
 
     @Test
     void 테마가_없으면_빈_목록을_반환한다() {
@@ -80,13 +71,13 @@ class ThemeApiTest {
         Integer time = createTime("10:00");
 
         // 윈도우: days=7 → [오늘-7, 오늘-1]
-        createReservation("user1", LocalDate.now().minusDays(1), time, themeA);
-        createReservation("user2", LocalDate.now().minusDays(2), time, themeA); // A: 2건
-        createReservation("user3", LocalDate.now().minusDays(3), time, themeB); // B: 1건
+        insertReservation("user1", LocalDate.now().minusDays(1), time, themeA);
+        insertReservation("user2", LocalDate.now().minusDays(2), time, themeA); // A: 2건
+        insertReservation("user3", LocalDate.now().minusDays(3), time, themeB); // B: 1건
 
         // 윈도우 밖
-        createReservation("user4", LocalDate.now(), time, themeB);           // 오늘 = end 다음날
-        createReservation("user5", LocalDate.now().minusDays(8), time, themeB); // start 직전
+        insertReservation("user4", LocalDate.now(), time, themeB);           // 오늘 = end 다음날
+        insertReservation("user5", LocalDate.now().minusDays(8), time, themeB); // start 직전
 
         RestAssured.given().log().all()
                 .when().get("/themes/popular?days=7")
@@ -102,7 +93,7 @@ class ThemeApiTest {
         Integer theme = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer time = createTime("10:00");
         // 윈도우 [오늘-7, 오늘-1] 밖
-        createReservation("user1", LocalDate.now().minusDays(30), time, theme);
+        insertReservation("user1", LocalDate.now().minusDays(30), time, theme);
 
         RestAssured.given().log().all()
                 .when().get("/themes/popular?days=7")
@@ -119,11 +110,11 @@ class ThemeApiTest {
         Integer time = createTime("10:00");
         Integer time2 = createTime("11:00");
 
-        createReservation("user1", LocalDate.now().minusDays(1), time, themeA);
-        createReservation("user2", LocalDate.now().minusDays(2), time, themeA);
-        createReservation("user3", LocalDate.now().minusDays(1), time, themeB);
-        createReservation("user4", LocalDate.now().minusDays(1), time2, themeB);
-        createReservation("user5", LocalDate.now().minusDays(2), time2, themeC);
+        insertReservation("user1", LocalDate.now().minusDays(1), time, themeA);
+        insertReservation("user2", LocalDate.now().minusDays(2), time, themeA);
+        insertReservation("user3", LocalDate.now().minusDays(1), time, themeB);
+        insertReservation("user4", LocalDate.now().minusDays(1), time2, themeB);
+        insertReservation("user5", LocalDate.now().minusDays(2), time2, themeC);
 
         RestAssured.given().log().all()
                 .when().get("/themes/popular?days=7&limit=2")
@@ -187,7 +178,7 @@ class ThemeApiTest {
     void 사용중인_테마를_삭제하면_422() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer timeId = createTime("10:00");
-        createReservation("브라운", LocalDate.of(2026, 8, 5), timeId, themeId);
+        insertReservation("브라운", LocalDate.of(2026, 8, 5), timeId, themeId);
 
         RestAssured.given().log().all()
                 .when().delete("/themes/" + themeId)
@@ -195,35 +186,7 @@ class ThemeApiTest {
                 .statusCode(422);
     }
 
-    private Integer createTheme(String name, String description, String thumbnailImageUrl) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("description", description);
-        params.put("thumbnailImageUrl", thumbnailImageUrl);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTime(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private void createReservation(String name, LocalDate date, Integer timeId, Integer themeId) {
+    private void insertReservation(String name, LocalDate date, Integer timeId, Integer themeId) {
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name, date, timeId, themeId

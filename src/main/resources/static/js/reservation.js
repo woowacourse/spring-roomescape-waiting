@@ -45,7 +45,12 @@ function render(reservations) {
 
         const actions = row.insertCell();
         actions.className = 'actions';
-        actions.appendChild(createButton('삭제', 'btn-danger', () => deleteRow(reservation.id)));
+        const startAt = reservation.time ? reservation.time.startAt : null;
+        if (isPastSlot(reservation.date, startAt)) {
+            actions.appendChild(createDisabledButton('삭제', 'btn-danger', '지난 예약은 삭제할 수 없습니다.'));
+        } else {
+            actions.appendChild(createButton('삭제', 'btn-danger', () => deleteRow(reservation.id)));
+        }
     });
 }
 

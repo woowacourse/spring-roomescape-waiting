@@ -132,4 +132,17 @@ class ReservationJdbcRepositoryTest {
 
         assertThat(repository.countByName("민욱")).isEqualTo(2L);
     }
+
+    @Test
+    void changeOwner는_예약의_이름을_바꾼다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        Reservation saved = repository.save(new Reservation("브라운", LocalDate.of(2026, 8, 5), time, theme));
+
+        repository.changeOwner(saved.getId(), "민욱");
+
+        Optional<Reservation> found = repository.findById(saved.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getName()).isEqualTo("민욱");
+    }
 }

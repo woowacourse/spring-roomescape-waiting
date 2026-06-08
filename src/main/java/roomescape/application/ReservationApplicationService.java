@@ -14,6 +14,7 @@ import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.TimeWithStatusResponse;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.ConflictException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
@@ -34,6 +35,8 @@ public class ReservationApplicationService {
     private static final String PAST_RESERVATION_UPDATE_REJECTED = "지난 시각으로 예약을 변경할 수 없습니다.";
     private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String EXPIRED_RESERVATION_UPDATE_REJECTED = "이미 지난 예약은 변경할 수 없습니다.";
+    private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
+    private static final String PAST_RESERVATION_DELETE_REJECTED = "지난 예약은 삭제할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
 
     private final ReservationService reservationService;
@@ -117,13 +120,45 @@ public class ReservationApplicationService {
         }
 
         Reservations others = reservationService
-                .findByDateAndThemeId(request.date(), existing.getTheme().getId())
+                .findByDateAndThemeId(request.date(), existing.getThemeId())
                 .excluding(id);
         if (others.isOccupied(newTime)) {
             throw new ConflictException(ALREADY_EXISTS_ADD_RESERVATION);
         }
 
         return reservationService.updateReservation(updated);
+    }
+
+    @Transactional
+    public void cancelMyReservation(Long id, String name) {
+        Reservation reservation = reservationService.findMyReservation(id, name);
+        if (reservation.isPast(LocalDateTime.now())) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
+        }
+        reservationWaitingService.findEarliestByReservationId(reservation.getId())
+                .ifPresentOrElse(
+                        waiting -> promoteToReservation(reservation, waiting),
+                        () -> reservationService.deleteReservation(reservation.getId())
+                );
+    }
+
+    @Transactional
+    public void deleteReservation(Long id) {
+        Reservation reservation = reservationService.findReservation(id)
+                .orElseThrow(() -> NotFoundException.reservation(id));
+        if (reservation.isPast(LocalDateTime.now())) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_DELETE_REJECTED);
+        }
+        reservationWaitingService.findEarliestByReservationId(reservation.getId())
+                .ifPresentOrElse(
+                        waiting -> promoteToReservation(reservation, waiting),
+                        () -> reservationService.deleteReservation(reservation.getId())
+                );
+    }
+
+    private void promoteToReservation(Reservation reservation, ReservationWaiting waiting) {
+        reservationService.changeOwner(reservation.getId(), waiting.getName());
+        reservationWaitingService.deleteById(waiting.getId());
     }
 
     @Transactional

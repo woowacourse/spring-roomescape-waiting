@@ -104,12 +104,24 @@ function renderRow(tbody, item) {
     const actions = row.insertCell();
     actions.className = 'actions';
 
+    const startAt = reservation.time ? reservation.time.startAt : null;
+    const past = isPastSlot(reservation.date, startAt);
+
     if (item.type === 'reservation') {
+        if (past) {
+            actions.appendChild(createDisabledButton('변경', 'btn-primary', '지난 예약은 변경할 수 없습니다.'));
+            actions.appendChild(createDisabledButton('취소', 'btn-ghost', '지난 예약은 취소할 수 없습니다.'));
+            return;
+        }
         actions.appendChild(createButton('변경', 'btn-primary', () => startEdit(row, reservation)));
         actions.appendChild(createButton('취소', 'btn-ghost', () => cancelReservation(reservation.id)));
         return;
     }
 
+    if (past) {
+        actions.appendChild(createDisabledButton('취소', 'btn-ghost', '지난 예약 대기는 취소할 수 없습니다.'));
+        return;
+    }
     actions.appendChild(createButton('취소', 'btn-ghost', () => cancelWaiting(reservation.id)));
 }
 

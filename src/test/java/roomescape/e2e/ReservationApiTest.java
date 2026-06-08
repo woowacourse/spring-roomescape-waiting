@@ -3,10 +3,6 @@ package roomescape.e2e;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.exception.ProblemType;
 
 import java.time.LocalDate;
@@ -16,12 +12,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationApiTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+class ReservationApiTest extends AbstractE2eTest {
 
     @Test
     void 예약이_없으면_빈_목록을_반환한다() {
@@ -438,6 +429,14 @@ class ReservationApiTest {
     }
 
     @Test
+    void 존재하지_않는_예약을_관리자가_삭제하면_404() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/9999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @Test
     void 지난_예약을_취소하면_422() {
         Integer timeId = createTime("11:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
@@ -445,6 +444,18 @@ class ReservationApiTest {
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/me/" + reservationId + "?name=민욱")
+                .then().log().all()
+                .statusCode(422);
+    }
+
+    @Test
+    void 관리자가_지난_예약을_삭제하면_422() {
+        Integer timeId = createTime("11:30");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        Long reservationId = insertPastReservation("민욱", "2020-01-01", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(422);
     }
@@ -657,46 +668,4 @@ class ReservationApiTest {
         );
     }
 
-    private Integer createReservation(String name, String date, Integer timeId, Integer themeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", name);
-        params.put("date", date);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTime(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTheme(String name, String description, String thumbnailImageUrl) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("description", description);
-        params.put("thumbnailImageUrl", thumbnailImageUrl);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
-    }
 }

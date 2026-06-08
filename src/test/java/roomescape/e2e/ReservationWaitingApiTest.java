@@ -1,26 +1,19 @@
 package roomescape.e2e;
 
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Test;
+import roomescape.exception.ProblemType;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import roomescape.exception.ProblemType;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationWaitingApiTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+class ReservationWaitingApiTest extends AbstractE2eTest {
 
     @Test
     void 예약된_슬롯에_대기를_신청한다() {
@@ -153,6 +146,99 @@ class ReservationWaitingApiTest {
                 .statusCode(404);
     }
 
+    @Test
+    void 지난_슬롯의_대기를_취소하면_422() {
+        Integer timeId = createTime("17:30");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        insertPastReservation("티뉴", "2020-01-01", timeId, themeId);
+        Long reservationId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation ORDER BY id DESC LIMIT 1", Long.class);
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)",
+                "민욱", LocalDateTime.of(2020, 1, 1, 9, 0), reservationId);
+        Long waitingId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_waiting ORDER BY id DESC LIMIT 1", Long.class);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().delete("/waitings/me/" + waitingId)
+                .then().log().all()
+                .statusCode(422);
+    }
+
+    @Test
+    void 예약을_취소하면_대기_1번이_예약으로_전환된다() {
+        Integer timeId = createTime("16:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "티뉴")
+                .when().delete("/reservations/me/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("민욱"));
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/waitings/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(0));
+    }
+
+    @Test
+    void 예약을_취소하면_남은_대기_순번이_재정렬된다() {
+        Integer timeId = createTime("16:30");
+        Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
+        createWaiting("브라운", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "티뉴")
+                .when().delete("/reservations/me/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/waitings/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(1))
+                .body("waitings[0].order", is(1));
+    }
+
+    @Test
+    void 관리자가_예약을_삭제해도_대기_1번이_예약으로_전환된다() {
+        Integer timeId = createTime("17:00");
+        Integer themeId = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("민욱"));
+    }
+
     private Integer createWaiting(String name, String date, Integer timeId, Integer themeId) {
         return RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -167,47 +253,6 @@ class ReservationWaitingApiTest {
                 "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name, LocalDate.parse(date), timeId, themeId
         );
-    }
-
-    private Integer createReservation(String name, String date, Integer timeId, Integer themeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", name);
-        params.put("date", date);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTime(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
-    private Integer createTheme(String name, String description, String thumbnailImageUrl) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("description", description);
-        params.put("thumbnailImageUrl", thumbnailImageUrl);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().statusCode(201)
-                .extract().jsonPath().get("id");
     }
 
     private Map<String, Object> waitingRequest(String name, String date, Integer timeId, Integer themeId) {

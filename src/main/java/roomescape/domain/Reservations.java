@@ -1,7 +1,8 @@
 package roomescape.domain;
 
-import java.util.List;
 import roomescape.exception.BusinessRuleViolationException;
+
+import java.util.List;
 
 public class Reservations {
 
@@ -15,12 +16,12 @@ public class Reservations {
 
     public boolean isOccupied(ReservationTime time) {
         return reservations.stream()
-                .anyMatch(r -> r.getTime().equals(time));
+                .anyMatch(r -> r.isSameTime(time));
     }
 
     public Reservation findByTime(ReservationTime time) {
         return reservations.stream()
-                .filter(r -> r.getTime().equals(time))
+                .filter(r -> r.isSameTime(time))
                 .findFirst()
                 .orElseThrow(() -> new BusinessRuleViolationException(NOT_RESERVED_SLOT));
     }

@@ -6,8 +6,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
-import roomescape.domain.Reservations;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 
 import java.sql.Date;
@@ -117,6 +117,11 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 reservation.getId()
         );
         return reservation;
+    }
+
+    @Override
+    public void changeOwner(Long id, String name) {
+        jdbcTemplate.update("UPDATE reservation SET name = ? WHERE id = ?", name, id);
     }
 
     @Override

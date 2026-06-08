@@ -175,6 +175,11 @@ table.data .actions {
     margin-left: 6px;
 }
 
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 .btn-primary {
     background: var(--brand);
     color: #fff;

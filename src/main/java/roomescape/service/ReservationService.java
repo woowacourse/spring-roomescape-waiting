@@ -5,20 +5,18 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Reservations;
 import roomescape.dto.ReservationResponses;
-import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String NOT_OWNER = "본인의 예약이 아닙니다.";
 
     private final ReservationRepository reservationRepository;
@@ -43,8 +41,12 @@ public class ReservationService {
         return reservationRepository.existsByTimeId(timeId);
     }
 
+    public Optional<Reservation> findReservation(Long id) {
+        return reservationRepository.findById(id);
+    }
+
     public Reservation findMyReservation(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = findReservation(id)
                 .orElseThrow(() -> NotFoundException.reservation(id));
         if (!reservation.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);
@@ -68,14 +70,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelMyReservation(Long id, String name) {
-        Reservation reservation = findMyReservation(id, name);
-
-        if (reservation.isPast(LocalDateTime.now())) {
-            throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
-        }
-
-        reservationRepository.deleteById(id);
+    public void changeOwner(Long id, String name) {
+        reservationRepository.changeOwner(id, name);
     }
 
     public boolean hasReservationsByThemeId(Long themeId) {

@@ -1,7 +1,8 @@
 package roomescape.dto;
 
-import java.util.List;
 import roomescape.domain.WaitingWithOrder;
+
+import java.util.List;
 
 public record ReservationWaitingResponses(
         List<ReservationWaitingResponse> waitings

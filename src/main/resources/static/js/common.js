@@ -21,6 +21,23 @@ function createButton(label, variant, onClick) {
     return button;
 }
 
+function createDisabledButton(label, variant, title) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `btn ${variant}`;
+    button.textContent = label;
+    button.disabled = true;
+    if (title) button.title = title;
+    return button;
+}
+
+function isPastSlot(date, startAt) {
+    if (!date || !startAt) return false;
+    const slot = new Date(`${date}T${startAt}`);
+    if (Number.isNaN(slot.getTime())) return false;
+    return slot.getTime() < Date.now();
+}
+
 function showEmptyState(tbody, colspan, message) {
     const tr = tbody.insertRow();
     const td = tr.insertCell();

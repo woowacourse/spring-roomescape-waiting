@@ -1,9 +1,10 @@
 package roomescape.repository;
 
-import java.util.List;
-import java.util.Optional;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.WaitingWithOrder;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface ReservationWaitingRepository {
 
@@ -12,6 +13,8 @@ public interface ReservationWaitingRepository {
     boolean existBy(String name, Long reservationId);
 
     Optional<ReservationWaiting> findById(Long id);
+
+    Optional<ReservationWaiting> findEarliestByReservationId(Long reservationId);
 
     List<WaitingWithOrder> findByName(String name);
 

@@ -60,14 +60,14 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
+        reservationApplicationService.deleteReservation(id);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/me/{id}")
     public ResponseEntity<Void> cancelMine(@PathVariable Long id, @RequestParam String name) {
-        reservationService.cancelMyReservation(id, name);
+        reservationApplicationService.cancelMyReservation(id, name);
 
         return ResponseEntity.noContent().build();
     }

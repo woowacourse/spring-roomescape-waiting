@@ -1,7 +1,6 @@
 package roomescape.api;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +17,8 @@ import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.dto.ReservationWaitingResponses;
 import roomescape.service.ReservationWaitingService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/waitings")
