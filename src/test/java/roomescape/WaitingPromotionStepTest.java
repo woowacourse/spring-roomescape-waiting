@@ -48,6 +48,22 @@ public class WaitingPromotionStepTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("관리자가 예약을 삭제해도 대기 1번이 예약으로 자동 승격된다")
+    void 관리자_예약_삭제_시_자동_승격() {
+        Long reservationId = helper.insertReservationAndReturnId("브라운", FUTURE_DATE, timeId, themeId);
+        Long w1 = helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
+        Long w2 = helper.insertWaiting("모카", FUTURE_DATE, timeId, themeId, 2);
+
+        RestAssured.given()
+                .when().delete("/admin/reservations/" + reservationId)
+                .then().statusCode(204);
+
+        assertThat(helper.findReservationOwner(FUTURE_DATE, timeId, themeId)).isEqualTo("콘");
+        assertThat(helper.existsWaiting(w1)).isFalse();
+        assertThat(helper.findWaitingOrder(w2)).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("대기가 없을 때 예약 취소는 그냥 취소만 된다")
     void 대기_없을때_단순_취소() {
         Long reservationId = helper.insertReservationAndReturnId("브라운", FUTURE_DATE, timeId, themeId);

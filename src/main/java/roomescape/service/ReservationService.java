@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -70,8 +71,12 @@ public class ReservationService {
         return ReservationResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
+        Reservation reservation = findByIdOrThrow(id);
+
         reservationRepository.deleteById(id);
+        promoteFirstWaitingIfExists(reservation);
     }
 
     public List<MyReservationResult> findMyReservationsAndWaitings(String name) {
@@ -92,6 +97,7 @@ public class ReservationService {
         return results;
     }
 
+    @Transactional
     public void deleteByOwner(Long id, String name) {
         Reservation reservation = findByIdAndName(id, name);
         reservationPolicy.validateCancellable(
@@ -101,25 +107,6 @@ public class ReservationService {
 
         reservationRepository.deleteById(id);
         promoteFirstWaitingIfExists(reservation);
-    }
-
-    private void promoteFirstWaitingIfExists(Reservation canceled) {
-        Waitings waitings = new Waitings(waitingRepository.findBySlot(
-                canceled.getDate(),
-                canceled.getTime().getId(),
-                canceled.getTheme().getId()
-        ));
-
-        waitings.firstWaiting().ifPresent(first -> {
-            Reservation promoted = Reservation.promote(first);
-            reservationRepository.save(promoted);
-
-            waitingRepository.deleteById(first.getId());
-
-            for (Waiting w : waitings.reorderAfterRemoval(first.getOrderIndex())) {
-                waitingRepository.updateOrderIndex(w.getId(), w.getOrderIndex());
-            }
-        });
     }
 
     public ReservationResult updateByOwner(ReservationUpdateCommand command) {
@@ -155,6 +142,11 @@ public class ReservationService {
                 ));
     }
 
+    private Reservation findByIdOrThrow(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
+    }
+
     private Reservation findByIdAndName(Long id, String name) {
         return reservationRepository.findById(id)
                 .filter(r -> r.getName().equals(name))
@@ -178,5 +170,24 @@ public class ReservationService {
                     "해당 시간은 이미 예약되었습니다. 다른 시간을 선택해 주세요."
             );
         }
+    }
+
+    private void promoteFirstWaitingIfExists(Reservation canceled) {
+        Waitings waitings = new Waitings(waitingRepository.findBySlot(
+                canceled.getDate(),
+                canceled.getTime().getId(),
+                canceled.getTheme().getId()
+        ));
+
+        waitings.firstWaiting().ifPresent(first -> {
+            Reservation promoted = Reservation.promote(first);
+            reservationRepository.save(promoted);
+
+            waitingRepository.deleteById(first.getId());
+
+            for (Waiting w : waitings.reorderAfterRemoval(first.getOrderIndex())) {
+                waitingRepository.updateOrderIndex(w.getId(), w.getOrderIndex());
+            }
+        });
     }
 }
