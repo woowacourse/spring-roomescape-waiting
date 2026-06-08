@@ -219,4 +219,48 @@ class WaitingJdbcTemplateRepositoryTest {
                 savedTheme.getId()
         )).isEmpty();
     }
+
+    @Test
+    @DisplayName("슬롯의 1순위(가장 먼저 신청한) 예약 대기를 조회한다")
+    void findFirstBySlot_success() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting first = waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+
+        // when
+        Waiting head = waitingRepository.findFirstBySlot(date, savedTime.getId(), savedTheme.getId())
+                .orElseThrow();
+
+        // then
+        assertThat(head.getId()).isEqualTo(first.getId());
+        assertThat(head.getName()).isEqualTo("리오");
+        assertThat(head.getRank()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("대기가 없는 슬롯의 1순위를 조회하면 빈 Optional을 반환한다")
+    void findFirstBySlot_returns_empty_when_no_waiting() {
+        // when & then
+        assertThat(waitingRepository.findFirstBySlot(
+                LocalDate.now().plusDays(1),
+                savedTime.getId(),
+                savedTheme.getId()
+        )).isEmpty();
+    }
+
+    @Test
+    @DisplayName("ID로 예약 대기를 삭제한다")
+    void deleteById_success() {
+        // given
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", LocalDate.now().plusDays(1), savedTime, savedTheme)
+        );
+
+        // when
+        waitingRepository.deleteById(savedWaiting.getId());
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
 }

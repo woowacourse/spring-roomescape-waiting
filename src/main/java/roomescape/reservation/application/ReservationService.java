@@ -92,9 +92,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.findById(id)
+        Reservation targetReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id));
         reservationRepository.deleteById(id);
+        promoteFirstWaiting(targetReservation);
     }
 
     @Transactional
@@ -103,5 +104,26 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id));
         targetReservation.cancel(name);
         reservationRepository.deleteByIdAndName(id, name);
+        promoteFirstWaiting(targetReservation);
+    }
+
+    private void promoteFirstWaiting(Reservation canceledReservation) {
+        waitingRepository.findFirstBySlot(
+                        canceledReservation.getDate(),
+                        canceledReservation.getTime().getId(),
+                        canceledReservation.getTheme().getId()
+                )
+                .filter(Waiting::isPromotable)
+                .ifPresent(this::promoteWaiting);
+    }
+
+    private void promoteWaiting(Waiting waiting) {
+        reservationRepository.save(Reservation.create(
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme()
+        ));
+        waitingRepository.deleteById(waiting.getId());
     }
 }

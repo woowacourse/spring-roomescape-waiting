@@ -54,6 +54,10 @@ public class Waiting {
         return new Waiting(id, name, date, time, theme, rank, createdAt);
     }
 
+    public boolean isPromotable() {
+        return !LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now());
+    }
+
     public Long getId() {
         return id;
     }

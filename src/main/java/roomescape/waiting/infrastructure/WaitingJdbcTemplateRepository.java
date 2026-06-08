@@ -89,7 +89,34 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
           AND time_id = ?
           AND theme_id = ?
         """;
+    private static final String FIND_FIRST_BY_SLOT_QUERY = """
+        SELECT *
+        FROM (
+            SELECT w.id,
+                   w.name AS waiting_name,
+                   w.date,
+                   w.created_at,
+                   rt.id AS time_id,
+                   rt.start_at,
+                   t.id AS theme_id,
+                   t.name AS theme_name,
+                   t.description AS theme_description,
+                   t.thumbnail_url,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY w.date, w.time_id, w.theme_id
+                       ORDER BY w.created_at, w.id
+                   ) AS rank
+            FROM waiting w
+            JOIN reservation_time rt ON w.time_id = rt.id
+            JOIN theme t ON w.theme_id = t.id
+        ) ranked_waiting
+        WHERE date = ?
+          AND time_id = ?
+          AND theme_id = ?
+          AND rank = 1
+        """;
     private static final String DELETE_BY_ID_AND_NAME_QUERY = "DELETE FROM waiting WHERE id = ? AND name = ?";
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM waiting WHERE id = ?";
 
     private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> {
         ReservationTime time = ReservationTime.createRow(
@@ -166,11 +193,32 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findFirstBySlot(LocalDate date, Long timeId, Long themeId) {
+        List<Waiting> waiting = jdbcTemplate.query(
+                FIND_FIRST_BY_SLOT_QUERY,
+                ROW_MAPPER,
+                date,
+                timeId,
+                themeId
+        );
+        return waiting.stream()
+                .findFirst();
+    }
+
+    @Override
     public void deleteByIdAndName(Long id, String name) {
         jdbcTemplate.update(
                 DELETE_BY_ID_AND_NAME_QUERY,
                 id,
                 name
+        );
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update(
+                DELETE_BY_ID_QUERY,
+                id
         );
     }
 

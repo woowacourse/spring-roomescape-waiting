@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -330,6 +331,73 @@ class ReservationServiceTest {
 
         // then
         assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약을 취소하면 같은 슬롯의 1순위 대기가 예약으로 승격된다")
+    void cancelReservation_promotes_first_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create("인직", date, savedTime, savedTheme));
+        waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+
+        // when
+        reservationService.cancelReservation(savedReservation.getId(), "인직");
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        List<Reservation> promoted = reservationRepository.findByName("브라운");
+        assertThat(promoted).hasSize(1);
+        assertThat(promoted.getFirst().getDate()).isEqualTo(date);
+        assertThat(promoted.getFirst().getTime().getId()).isEqualTo(savedTime.getId());
+        assertThat(promoted.getFirst().getTheme().getId()).isEqualTo(savedTheme.getId());
+        assertThat(waitingRepository.findByName("브라운")).isEmpty();
+        assertThat(waitingRepository.findByName("리오")).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("관리자가 예약을 삭제하면 같은 슬롯의 1순위 대기가 예약으로 승격된다")
+    void deleteReservation_promotes_first_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create("인직", date, savedTime, savedTheme));
+        waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+
+        // when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findByName("브라운")).hasSize(1);
+        assertThat(waitingRepository.findByName("브라운")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("관리자가 과거 예약을 삭제해도 과거 대기는 승격되지 않는다")
+    void deleteReservation_skips_past_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        Reservation pastReservation = reservationRepository.save(
+                Reservation.createRow(null, "인직", pastDate, savedTime, savedTheme, LocalDateTime.now().minusDays(2))
+        );
+        waitingRepository.save(
+                Waiting.createRow(null, "브라운", pastDate, savedTime, savedTheme, null, LocalDateTime.now().minusDays(2))
+        );
+
+        // when
+        reservationService.deleteReservation(pastReservation.getId());
+
+        // then
+        assertThat(reservationRepository.findById(pastReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findByName("브라운")).isEmpty();
+        assertThat(waitingRepository.findByName("브라운")).hasSize(1);
     }
 
 }

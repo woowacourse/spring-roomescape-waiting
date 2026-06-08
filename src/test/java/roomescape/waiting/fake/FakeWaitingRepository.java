@@ -1,6 +1,7 @@
 package roomescape.waiting.fake;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +56,25 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findFirstBySlot(LocalDate date, Long timeId, Long themeId) {
+        return store.values().stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId().equals(timeId))
+                .filter(waiting -> waiting.getTheme().getId().equals(themeId))
+                .min(Comparator.comparing(Waiting::getCreatedAt).thenComparing(Waiting::getId));
+    }
+
+    @Override
     public void deleteByIdAndName(Long id, String name) {
         store.values().removeIf(waiting ->
                 waiting.getId().equals(id)
                         && waiting.getName().equals(name)
         );
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        store.remove(id);
     }
 
     public boolean isEmpty() {
