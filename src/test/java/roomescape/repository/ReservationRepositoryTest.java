@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -19,11 +21,6 @@ import roomescape.domain.Theme;
 @Import({ReservationRepository.class, ReservationTimeRepository.class, ThemeRepository.class})
 class ReservationRepositoryTest {
 
-    private static final int DEFAULT_RESERVATION_COUNT = 21;
-    private static final Long AVAILABLE_RESERVATION_ID = 1L;
-    private static final Long AVAILABLE_TIME_ID = 1L;
-    private static final Long AVAILABLE_THEME_ID = 1L;
-
     @Autowired
     private ReservationRepository reservationDao;
 
@@ -33,40 +30,67 @@ class ReservationRepositoryTest {
     @Autowired
     private ThemeRepository themeDao;
 
+    private Theme theme;
+
+    @BeforeEach
+    void setUp() {
+        theme = themeDao.save(new Theme(null, "테마", "설명", "/url"));
+    }
+
+    private ReservationTime saveTime(LocalTime startAt) {
+        return reservationTimeDao.save(new ReservationTime(startAt));
+    }
+
+    private Reservation saveReservation(String name, LocalDate date, ReservationTime time, LocalDateTime requestedAt) {
+        return reservationDao.save(new Reservation(name, date, time, theme, requestedAt));
+    }
+
     @Test
     void 전체_예약_조회() {
-        List<Reservation> reservations = reservationDao.findAll();
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        saveReservation("브라운", LocalDate.now().plusDays(1), time, LocalDateTime.now());
+        saveReservation("브라운", LocalDate.now().plusDays(2), time, LocalDateTime.now());
 
-        assertThat(reservations).hasSize(DEFAULT_RESERVATION_COUNT);
+        assertThat(reservationDao.findAll()).hasSize(2);
     }
 
     @Test
     void ID로_예약_조회() {
-        Reservation reservation = reservationDao.findById(AVAILABLE_RESERVATION_ID);
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        Reservation saved = saveReservation("브라운", LocalDate.now().plusDays(1), time, LocalDateTime.now());
 
-        assertThat(reservation).isNotNull();
-        assertThat(reservation.getId()).isEqualTo(AVAILABLE_RESERVATION_ID);
+        Reservation found = reservationDao.findById(saved.getId());
+
+        assertThat(found.getId()).isEqualTo(saved.getId());
+        assertThat(found.getName()).isEqualTo("브라운");
     }
 
     @Test
     void 이름으로_예약_조회() {
-        List<Reservation> reservation = reservationDao.findByName("아나키");
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        saveReservation("아나키", LocalDate.now().plusDays(1), time, LocalDateTime.now());
+        saveReservation("아나키", LocalDate.now().plusDays(2), time, LocalDateTime.now());
+        saveReservation("브라운", LocalDate.now().plusDays(3), time, LocalDateTime.now());
 
-        assertThat(reservation).hasSize(2);
+        assertThat(reservationDao.findByName("아나키")).hasSize(2);
     }
 
     @Test
     void 존재하지_않는_이름으로_조회하면_빈값_반환() {
-        List<Reservation> reservation = reservationDao.findByName("없는이름");
-
-        assertThat(reservation).isEmpty();
+        assertThat(reservationDao.findByName("없는이름")).isEmpty();
     }
 
     @Test
     void 슬롯_예약_조회_시_요청_시각_순으로_정렬() {
-        LocalDate contestedDate = LocalDate.now().minusDays(6);
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.now().plusDays(50);
+        LocalDateTime base = LocalDateTime.now();
 
-        List<Reservation> slot = reservationDao.findBySlot(contestedDate, AVAILABLE_TIME_ID, AVAILABLE_THEME_ID);
+        saveReservation("브라운", date, time, base);
+        saveReservation("그해", date, time, base.plusSeconds(1));
+        saveReservation("아나키", date, time, base.plusSeconds(2));
+
+        List<Reservation> slot = reservationDao.findBySlot(date, time.getId(), theme.getId());
 
         assertThat(slot).extracting(Reservation::getName)
                 .containsExactly("브라운", "그해", "아나키");
@@ -74,48 +98,46 @@ class ReservationRepositoryTest {
 
     @Test
     void 대기_삭제_시_후순위_대기자가_앞으로_당겨짐() {
-        LocalDate contestedDate = LocalDate.now().minusDays(6);
-        reservationDao.delete(20L);
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.now().plusDays(50);
+        LocalDateTime base = LocalDateTime.now();
+        saveReservation("브라운", date, time, base);
+        Reservation deleteReservation = saveReservation("그해", date, time, base.plusSeconds(1));
+        saveReservation("아나키", date, time, base.plusSeconds(2));
 
-        List<Reservation> slot = reservationDao.findBySlot(contestedDate, AVAILABLE_TIME_ID, AVAILABLE_THEME_ID);
+        assertThat(reservationDao.findBySlot(date, time.getId(), theme.getId()))
+                .extracting(Reservation::getName)
+                .containsExactly("브라운", "그해", "아나키");
 
-        assertThat(slot).extracting(Reservation::getName)
+        reservationDao.delete(deleteReservation.getId());
+
+        assertThat(reservationDao.findBySlot(date, time.getId(), theme.getId()))
+                .extracting(Reservation::getName)
                 .containsExactly("브라운", "아나키");
     }
 
     @Test
     void 예약_존재_여부_확인_존재하는_경우() {
-        ReservationTime time = reservationTimeDao.findTimeById(AVAILABLE_TIME_ID);
-        Theme theme = themeDao.findThemeById(AVAILABLE_THEME_ID);
-        LocalDate date = LocalDate.now().minusDays(6);
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.now().plusDays(1);
+        saveReservation("브라운", date, time, LocalDateTime.now());
 
-        boolean exists = reservationDao.existsBy(date, theme, time);
-
-        assertThat(exists).isTrue();
+        assertThat(reservationDao.existsBy(date, theme, time)).isTrue();
     }
 
     @Test
     void 예약_존재_여부_확인_존재하지_않는_경우() {
-        ReservationTime time = reservationTimeDao.findTimeById(AVAILABLE_TIME_ID);
-        Theme theme = themeDao.findThemeById(AVAILABLE_THEME_ID);
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.now().plusDays(10);
 
-        boolean exists = reservationDao.existsBy(date, theme, time);
-        assertThat(exists).isFalse();
+        assertThat(reservationDao.existsBy(date, theme, time)).isFalse();
     }
 
     @Test
     void 예약_저장() {
-        ReservationTime time = reservationTimeDao.findTimeById(AVAILABLE_TIME_ID);
-        Theme theme = themeDao.findThemeById(AVAILABLE_THEME_ID);
-        Reservation reservation = new Reservation(
-                "테스트",
-                LocalDate.now().plusDays(1),
-                time,
-                theme,
-                LocalDateTime.now());
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
 
-        Reservation saved = reservationDao.save(reservation);
+        Reservation saved = saveReservation("테스트", LocalDate.now().plusDays(1), time, LocalDateTime.now());
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo("테스트");
@@ -123,20 +145,25 @@ class ReservationRepositoryTest {
 
     @Test
     void 예약_날짜_시간_변경() {
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        ReservationTime newTime = saveTime(LocalTime.of(11, 0));
+        Reservation saved = saveReservation("브라운", LocalDate.now().plusDays(1), time, LocalDateTime.now());
         LocalDate newDate = LocalDate.now().plusDays(5);
-        Long newTimeId = 2L;
 
-        Reservation updated = reservationDao.update(AVAILABLE_RESERVATION_ID, newDate, newTimeId);
+        Reservation updated = reservationDao.update(saved.getId(), newDate, newTime.getId());
 
         assertThat(updated.getDate()).isEqualTo(newDate);
-        assertThat(updated.getTime().getId()).isEqualTo(newTimeId);
+        assertThat(updated.getTime().getId()).isEqualTo(newTime.getId());
     }
 
     @Test
     void 예약_삭제() {
-        reservationDao.delete(AVAILABLE_RESERVATION_ID);
+        ReservationTime time = saveTime(LocalTime.of(10, 0));
+        Reservation saved = saveReservation("브라운", LocalDate.now().plusDays(1), time, LocalDateTime.now());
 
-        assertThatThrownBy(() -> reservationDao.findById(AVAILABLE_RESERVATION_ID))
+        reservationDao.delete(saved.getId());
+
+        assertThatThrownBy(() -> reservationDao.findById(saved.getId()))
                 .isInstanceOf(EmptyResultDataAccessException.class);
     }
 }
