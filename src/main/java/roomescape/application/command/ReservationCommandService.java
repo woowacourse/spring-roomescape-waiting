@@ -2,12 +2,14 @@ package roomescape.application.command;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Slot;
+import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 
 @Service
@@ -52,6 +54,15 @@ public class ReservationCommandService {
         );
 
         return reservationRepository.update(updated);
+    }
+
+    public Reservation getByIdForUpdate(Long id) {
+        return reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new NotFoundException("존재하지않는 예약입니다. Id: " + id));
+    }
+
+    public Optional<Reservation> findBySlotForUpdate(Slot slot) {
+        return reservationRepository.findBySlotForUpdate(slot);
     }
 
     public void delete(Reservation reservation) {

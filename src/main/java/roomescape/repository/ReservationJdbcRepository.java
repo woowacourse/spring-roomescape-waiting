@@ -130,7 +130,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
         }
         return reservation;
     }
-    
+
     @Override
     public void deleteById(Long id) {
         String sql = "DELETE FROM reservation WHERE id = ?";
@@ -139,21 +139,17 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        String sql = SELECT_BASE + " WHERE r.id = ?";
-        List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, id);
-        return results.stream().findFirst();
+        return findById(id, "");
     }
 
     @Override
-    public Optional<Reservation> findBySlot(Slot slot) {
-        String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?";
-        List<Reservation> results = jdbcTemplate.query(
-                sql,
-                reservationRowMapper,
-                slot.date(),
-                slot.time().getId(),
-                slot.theme().getId()
-        );
+    public Optional<Reservation> findByIdForUpdate(Long id) {
+        return findById(id, " FOR UPDATE");
+    }
+
+    private Optional<Reservation> findById(Long id, String lockClause) {
+        String sql = SELECT_BASE + " WHERE r.id = ?" + lockClause;
+        List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, id);
         return results.stream().findFirst();
     }
 
@@ -167,5 +163,27 @@ public class ReservationJdbcRepository implements ReservationRepository {
     public List<Reservation> findByMember(Member member) {
         String sql = SELECT_BASE + " WHERE r.name = ? ORDER BY r.date DESC, time_value ASC";
         return jdbcTemplate.query(sql, reservationRowMapper, member.name());
+    }
+
+    @Override
+    public Optional<Reservation> findBySlot(Slot slot) {
+        return findBySlot(slot, "");
+    }
+
+    @Override
+    public Optional<Reservation> findBySlotForUpdate(Slot slot) {
+        return findBySlot(slot, " FOR UPDATE");
+    }
+
+    private Optional<Reservation> findBySlot(Slot slot, String lockClause) {
+        String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?" + lockClause;
+        List<Reservation> results = jdbcTemplate.query(
+                sql,
+                reservationRowMapper,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
+        );
+        return results.stream().findFirst();
     }
 }

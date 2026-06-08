@@ -42,7 +42,7 @@ public class ReservationModificationUseCase {
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = reservationQueryService.getById(id);
+        Reservation reservation = reservationCommandService.getByIdForUpdate(id);
         Slot slot = reservation.getSlot();
         reservationCommandService.delete(reservation);
 
@@ -51,7 +51,7 @@ public class ReservationModificationUseCase {
 
     @Transactional
     public void deleteMyReservation(Long id, String name) {
-        Reservation reservation = reservationQueryService.getById(id);
+        Reservation reservation = reservationCommandService.getByIdForUpdate(id);
         Member requester = new Member(name);
         Slot slot = reservation.getSlot();
         reservationCommandService.deleteMine(
@@ -64,7 +64,7 @@ public class ReservationModificationUseCase {
 
     @Transactional
     public Reservation updateMyReservation(Long id, String name, ReservationUpdateRequest request) {
-        Reservation existing = reservationQueryService.getById(id);
+        Reservation existing = reservationCommandService.getByIdForUpdate(id);
         Slot sourceSlot = existing.getSlot();
         ReservationTime targetTime = reservationTimeQueryService.getById(request.timeId());
         Slot targetSlot = new Slot(

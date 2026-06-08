@@ -132,6 +132,17 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
+    void findByIdForUpdate는_해당_id의_예약을_반환한다() {
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        Reservation saved = repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
+
+        Optional<Reservation> result = repository.findByIdForUpdate(saved.getId());
+
+        assertThat(result).contains(saved);
+    }
+
+    @Test
     void existsByTimeId는_예약이_없으면_false를_반환한다() {
         assertThat(repository.existsByTimeId(timeId)).isFalse();
     }
