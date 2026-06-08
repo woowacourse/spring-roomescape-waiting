@@ -5,8 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -39,9 +42,15 @@ class TimeServiceTest {
 
     private TimeService timeService;
 
+    private final Clock fixedClock = Clock.fixed(
+        Instant.parse("2026-05-08T00:00:00Z"),
+        ZoneId.of("Asia/Seoul")
+    );
+
     @BeforeEach
     void setUp() {
-        timeService = new TimeService(reservationRepository, timeRepository, themeRepository, new TimeMapper());
+        timeService = new TimeService(
+            reservationRepository, timeRepository, themeRepository, new TimeMapper(), fixedClock);
     }
 
     @Nested
@@ -91,6 +100,26 @@ class TimeServiceTest {
 
             // then
             assertThat(result).hasSize(2);
+            assertThat(result.get(0).available()).isFalse();
+            assertThat(result.get(1).available()).isTrue();
+        }
+
+        @Test
+        void 오늘_날짜라도_지난_시간이면_available이_false이다() {
+            // given
+            LocalDate today = LocalDate.now(fixedClock);
+            Long themeId = 1L;
+            Time pastTime = Time.reconstruct(1L, LocalTime.of(8, 0), null);
+            Time futureTime = Time.reconstruct(2L, LocalTime.of(10, 0), null);
+            when(themeRepository.existsThemeByIdAndDeletedAtIsNull(themeId)).thenReturn(true);
+            when(reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(today, themeId))
+                .thenReturn(List.of());
+            when(timeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(pastTime, futureTime));
+
+            // when
+            List<TimeAvailabilityResponseDto> result = timeService.getTimeAvailabilities(today, themeId);
+
+            // then
             assertThat(result.get(0).available()).isFalse();
             assertThat(result.get(1).available()).isTrue();
         }

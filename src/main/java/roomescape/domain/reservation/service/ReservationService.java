@@ -2,6 +2,7 @@ package roomescape.domain.reservation.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -65,7 +66,7 @@ public class ReservationService {
                 Reservation reservation = reservationWithWaitingNumber.reservation();
                 return reservationMapper.toResponseDto(
                     reservation,
-                    reservation.getEditableStatus(LocalDate.now(clock)),
+                    reservation.getEditableStatus(LocalDateTime.now(clock)),
                     reservationWithWaitingNumber.waitingNumber()
                 );
             })
@@ -101,7 +102,12 @@ public class ReservationService {
                 parameterErrorResponses);
         }
 
-        return Reservation.create(command.name(), command.date(), time, theme);
+        Reservation reservation = Reservation.create(command.name(), command.date(), time, theme);
+        if (reservation.isPast(LocalDateTime.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CREATE);
+        }
+
+        return reservation;
     }
 
     @Transactional
@@ -136,7 +142,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
-        if (existingReservation.isPast(LocalDate.now(clock))) {
+        if (existingReservation.isPast(LocalDateTime.now(clock))) {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_UPDATE);
         }
     }
@@ -148,8 +154,14 @@ public class ReservationService {
 
         validateReservationUpdateFieldsExist(time, theme);
 
-        return Reservation.reconstruct(existingReservation.getId(), existingReservation.getName(), date, time, theme,
+        Reservation updateReservation = Reservation.reconstruct(
+            existingReservation.getId(), existingReservation.getName(), date, time, theme,
             existingReservation.getStatus(), command.version());
+        if (updateReservation.isPast(LocalDateTime.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_UPDATE);
+        }
+
+        return updateReservation;
     }
 
     private LocalDate getUpdateDate(Reservation existingReservation, ReservationUpdateCommand command) {
@@ -215,7 +227,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
-        if (reservation.isPast(LocalDate.now(clock))) {
+        if (reservation.isPast(LocalDateTime.now(clock))) {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
         }
     }
@@ -275,7 +287,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
         }
 
-        if (reservation.isPast(LocalDate.now(clock))) {
+        if (reservation.isPast(LocalDateTime.now(clock))) {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
         }
     }

@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
@@ -55,7 +56,7 @@ public class Reservation {
         return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.ACTIVE, version);
     }
 
-    public ReservationEditableStatus getEditableStatus(LocalDate now) {
+    public ReservationEditableStatus getEditableStatus(LocalDateTime now) {
         if (status == ReservationStatus.CANCELED) {
             return ReservationEditableStatus.CANCELED;
         }
@@ -99,8 +100,8 @@ public class Reservation {
         return !getSchedule().equals(reservation.getSchedule());
     }
 
-    public boolean isPast(LocalDate date) {
-        return this.date.isBefore(date);
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
     public Long getId() {
