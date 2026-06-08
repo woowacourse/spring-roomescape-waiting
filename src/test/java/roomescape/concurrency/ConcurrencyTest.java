@@ -11,13 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.acceptance.AcceptanceTest;
+import roomescape.support.SpringTestBase;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.facade.ReceptionFacade;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
-class ConcurrencyTest extends AcceptanceTest {
+class ConcurrencyTest extends SpringTestBase {
 
     private static final LocalDate FUTURE_DATE = LocalDate.of(2026, 5, 10);
 
