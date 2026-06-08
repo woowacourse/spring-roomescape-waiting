@@ -77,9 +77,12 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id, String name) {
-        Reservation reservation = validateReservationOwner(id, name);
-        reservationRepository.deleteById(id);
-        promoteFirstWaiting(reservation);
+        reservationRepository.findById(id)
+            .ifPresent(reservation -> {
+                reservation.validateOwner(name);
+                reservationRepository.deleteById(id);
+                promoteFirstWaiting(reservation);
+            });
     }
 
     @Transactional(readOnly = true)
@@ -108,13 +111,6 @@ public class ReservationService {
         } catch (DuplicateKeyException exception) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
-    }
-
-    private Reservation validateReservationOwner(Long id, String name) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(id)
-            .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
-        reservation.validateOwner(name);
-        return reservation;
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
