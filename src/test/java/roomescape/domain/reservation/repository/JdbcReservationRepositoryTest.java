@@ -475,6 +475,23 @@ class JdbcReservationRepositoryTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
         }
+
+        @Test
+        void 취소된_예약을_수정하면_이미_취소됨_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation reservation = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+            Reservation canceled = reservationRepository.update(reservation.cancel());
+            Reservation updateReservation = Reservation.reconstruct(canceled.getId(), new ReserverName("예약자2"),
+                LocalDate.of(2026, 5, 2), time, theme, ReservationStatus.ACTIVE, canceled.getVersion());
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("이미 취소된 예약입니다.");
+        }
     }
 
     @Nested

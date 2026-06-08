@@ -332,6 +332,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 version = version + 1
             WHERE id = :id
               AND deleted_at IS NULL
+              AND status <> 'CANCELED'
               AND version = :version
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
@@ -348,11 +349,30 @@ public class JdbcReservationRepository implements ReservationRepository {
             if (!existsReservationByIdAndNotDeleted(reservation.getId())) {
                 throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
             }
+            if (isCanceledReservationById(reservation.getId())) {
+                throw new GeneralException(ReservationErrorType.ALREADY_CANCELED);
+            }
             throw new GeneralException(ReservationErrorType.RESERVATION_ALREADY_UPDATED);
         }
 
         return Reservation.reconstruct(reservation.getId(), reservation.getName(), reservation.getDate(),
             reservation.getTime(), reservation.getTheme(), reservation.getStatus(), reservation.getVersion() + 1);
+    }
+
+    private boolean isCanceledReservationById(Long id) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM reservation
+                WHERE id = :id
+                  AND status = 'CANCELED'
+                  AND deleted_at IS NULL
+            )
+            """;
+
+        SqlParameterSource parameters = new MapSqlParameterSource("id", id);
+        Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
+        return Boolean.TRUE.equals(exists);
     }
 
     @Override
