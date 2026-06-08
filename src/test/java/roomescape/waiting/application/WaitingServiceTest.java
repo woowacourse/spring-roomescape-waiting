@@ -2,12 +2,23 @@ package roomescape.waiting.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
@@ -19,13 +30,16 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
+@ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
 
     private FakeWaitingRepository waitingRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
+    @Mock
     private WaitingReference waitingReference;
     private WaitingService waitingService;
 
@@ -34,8 +48,6 @@ class WaitingServiceTest {
         waitingRepository = new FakeWaitingRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
-        waitingReference = command -> {
-        };
         waitingService = new WaitingService(
                 waitingRepository,
                 reservationTimeRepository,
@@ -110,7 +122,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("같은 슬롯에 다른 사용자의 대기가 있어도 예약 대기를 저장한다")
-    void save_success_with_other_user_waiting() {
+    void save_success_when_other_user_waiting_exists() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
@@ -155,31 +167,107 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("예약이 존재하지 않는 슬롯에 대기를 저장하면 예외가 발생한다")
-    void 예약이_존재하지_않는_슬롯에_대기를_저장하면_예외가_발생한다() {
+    void save_fail_with_not_found_reservation() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
-        WaitingService waitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                command -> {
-                    throw new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION);
-                },
-                new WaitingValidator(waitingRepository)
-        );
         WaitingCreateCommand command = new WaitingCreateCommand(
                 "브라운",
                 LocalDate.now().plusDays(1),
                 savedTime.getId(),
                 savedTheme.getId()
         );
+        willThrow(new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION))
+                .given(waitingReference)
+                .validateExistReservation(command);
 
         // when & then
         assertThatThrownBy(() -> waitingService.save(command))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("예약이 존재하지 않으면, 대기요청을 할 수 없습니다.");
         assertThat(waitingRepository.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("다음 순번의 예약 대기를 예약으로 승격한다")
+    void promoteNextWaiting_success() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", date, savedTime, savedTheme)
+        );
+
+        // when
+        waitingService.promoteNextWaiting(date, savedTime, savedTheme);
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        then(waitingReference).should().promoteToReservation(savedWaiting);
+    }
+
+    @Test
+    @DisplayName("승격할 예약 대기가 없으면 아무 대기도 승격하지 않는다")
+    void promoteNextWaiting_success_when_waiting_not_exists() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        // when
+        waitingService.promoteNextWaiting(date, savedTime, savedTheme);
+
+        // then
+        assertThat(waitingRepository.isEmpty()).isTrue();
+        then(waitingReference).should(never()).promoteToReservation(any());
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제에 실패하면 예약으로 승격하지 않는다")
+    void promoteNextWaiting_success_when_waiting_delete_fails() {
+        // given
+        ReservationTime savedTime = ReservationTime.createRow(1L, LocalTime.now().plusHours(1));
+        Theme savedTheme = Theme.createRow(1L, "공포", "무서운 테마", "https://good.com/thumb-nail/1");
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting waiting = Waiting.createRow(1L, "브라운", date, savedTime, savedTheme, 1L, LocalDateTime.now());
+        WaitingRepository waitingRepository = mock(WaitingRepository.class);
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitingReference,
+                new WaitingValidator(waitingRepository)
+        );
+        given(waitingRepository.findFirstByDateAndTimeIdAndThemeId(date, savedTime.getId(), savedTheme.getId()))
+                .willReturn(Optional.of(waiting));
+        given(waitingRepository.deleteByIdAndName(waiting.getId(), waiting.getName()))
+                .willReturn(false);
+
+        // when
+        waitingService.promoteNextWaiting(date, savedTime, savedTheme);
+
+        // then
+        then(waitingReference).should(never()).promoteToReservation(any());
+    }
+
+    @Test
+    @DisplayName("예약이 없는 슬롯의 예약 대기를 승격한다")
+    void promoteWaitingWithoutReservation_success() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", date, savedTime, savedTheme)
+        );
+
+        // when
+        waitingService.promoteWaitingWithoutReservation();
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        then(waitingReference).should().promoteToReservation(savedWaiting);
     }
 
     @Test

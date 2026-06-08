@@ -1,7 +1,11 @@
 package roomescape.global.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+@Getter
+@RequiredArgsConstructor
 public enum ThemeErrorCode implements ErrorCode {
 
     THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "테마를 찾을 수 없습니다."),
@@ -12,20 +16,4 @@ public enum ThemeErrorCode implements ErrorCode {
 
     private final HttpStatus status;
     private final String message;
-
-    ThemeErrorCode(
-            HttpStatus status,
-            String message
-    ) {
-        this.status = status;
-        this.message = message;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

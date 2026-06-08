@@ -60,7 +60,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약을 저장하면 생성된 ID를 포함한 예약 객체를 반환한다")
+    @DisplayName("예약을 저장하면 생성된 아이디를 포함한 예약 객체를 반환한다")
     void save_success() {
         // given
         Reservation reservation = Reservation.create(TEST_NAME, DATE_TODAY, savedTime1, savedTheme1);
@@ -75,7 +75,7 @@ class ReservationJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("전체 예약 목록을 조회한다")
-    void findByDateAndThemeId_findAll_when_both_null() {
+    void findByDateAndThemeId_success_when_both_null() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME + "1", DATE_TODAY, savedTime1, savedTheme1));
         reservationRepository.save(Reservation.create(TEST_NAME + "2", DATE_TOMORROW, savedTime2, savedTheme2));
@@ -88,8 +88,8 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("date만 있으면 해당 날짜의 예약만 조회한다")
-    void findByDateAndThemeId_filter_by_date_only() {
+    @DisplayName("날짜만 있으면 해당 날짜의 예약만 조회한다")
+    void findByDateAndThemeId_success_when_date_only() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME + "1", DATE_TODAY, savedTime1, savedTheme1));
         reservationRepository.save(Reservation.create(TEST_NAME + "2", DATE_TODAY, savedTime2, savedTheme2));
@@ -104,8 +104,8 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("themeId만 있으면 해당 테마의 예약만 조회한다")
-    void findByDateAndThemeId_filter_by_theme_only() {
+    @DisplayName("테마 아이디만 있으면 해당 테마의 예약만 조회한다")
+    void findByDateAndThemeId_success_when_theme_only() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME + "1", DATE_TODAY, savedTime1, savedTheme1));
         reservationRepository.save(Reservation.create(TEST_NAME + "2", DATE_TOMORROW, savedTime2, savedTheme1));
@@ -120,8 +120,8 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("date, themeId 모두 있으면 두 조건 모두 일치하는 예약만 조회한다")
-    void findByDateAndThemeId_filter_by_date_and_theme() {
+    @DisplayName("날짜와 테마 아이디가 모두 있으면 두 조건 모두 일치하는 예약만 조회한다")
+    void findByDateAndThemeId_success_when_date_and_theme_exist() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME + "1", DATE_TODAY, savedTime1, savedTheme1));
         reservationRepository.save(Reservation.create(TEST_NAME + "2", DATE_TODAY, savedTime2, savedTheme2));
@@ -139,7 +139,7 @@ class ReservationJdbcTemplateRepositoryTest {
 
     @Test
     @DisplayName("일치하는 예약이 없으면 빈 목록을 반환한다")
-    void findByDateAndThemeId_returns_empty_when_no_match() {
+    void findByDateAndThemeId_success_when_no_match() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME, DATE_TODAY, savedTime1, savedTheme1));
 
@@ -151,7 +151,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 시간 ID를 참조하는 예약이 존재하는지 확인한다")
+    @DisplayName("특정 시간 아이디를 참조하는 예약이 존재하는지 확인한다")
     void existsByReservationTimeId_success() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME, DATE_TODAY, savedTime1, savedTheme1));
@@ -166,7 +166,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("ID를 기반으로 예약을 삭제한다")
+    @DisplayName("아이디를 기반으로 예약을 삭제한다")
     void deleteById_success() {
         // given
         Reservation saved = reservationRepository.save(
@@ -187,7 +187,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("date, timeId, themeId가 모두 일치하는 예약을 조회한다")
+    @DisplayName("날짜와 시간 아이디와 테마 아이디가 모두 일치하는 예약을 조회한다")
     void findByDateAndTimeIdAndThemeId_success() {
         // given
         Reservation savedReservation = reservationRepository.save(
@@ -211,7 +211,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 테마 ID를 참조하는 예약이 존재하는지 확인한다")
+    @DisplayName("특정 테마 아이디를 참조하는 예약이 존재하는지 확인한다")
     void existsByThemeId_success() {
         // given
         reservationRepository.save(Reservation.create(TEST_NAME, DATE_TODAY, savedTime1, savedTheme1));
@@ -246,7 +246,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("이름과 예약 ID를 기반으로 예약 일정을 수정한다")
+    @DisplayName("이름과 예약 아이디를 기반으로 예약 일정을 수정한다")
     void updateSchedule_success() {
         // given
         Reservation savedReservation = reservationRepository.save(
@@ -269,7 +269,7 @@ class ReservationJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("이름과 예약 ID를 기반으로 자신의 예약을 삭제한다")
+    @DisplayName("이름과 예약 아이디를 기반으로 자신의 예약을 삭제한다")
     void deleteByIdAndName_success() {
         // given
         Reservation savedReservation = reservationRepository.save(

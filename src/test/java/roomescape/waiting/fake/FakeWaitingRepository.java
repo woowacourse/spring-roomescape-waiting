@@ -1,6 +1,7 @@
 package roomescape.waiting.fake;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +56,37 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void deleteByIdAndName(Long id, String name) {
-        store.values().removeIf(waiting ->
+    public Optional<Waiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return store.values().stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId().equals(timeId))
+                .filter(waiting -> waiting.getTheme().getId().equals(themeId))
+                .min(Comparator.comparing(Waiting::getCreatedAt)
+                        .thenComparing(Waiting::getId));
+    }
+
+    @Override
+    public List<Waiting> findFirstWaitingsWithoutReservation() {
+        return store.values().stream()
+                .collect(java.util.stream.Collectors.groupingBy(waiting ->
+                        "%s:%d:%d".formatted(
+                                waiting.getDate(),
+                                waiting.getTime().getId(),
+                                waiting.getTheme().getId()
+                        )
+                ))
+                .values()
+                .stream()
+                .map(waitings -> waitings.stream()
+                        .min(Comparator.comparing(Waiting::getCreatedAt)
+                                .thenComparing(Waiting::getId))
+                        .orElseThrow())
+                .toList();
+    }
+
+    @Override
+    public boolean deleteByIdAndName(Long id, String name) {
+        return store.values().removeIf(waiting ->
                 waiting.getId().equals(id)
                         && waiting.getName().equals(name)
         );

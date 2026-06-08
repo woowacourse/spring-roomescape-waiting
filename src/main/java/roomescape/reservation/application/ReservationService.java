@@ -2,6 +2,10 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ReservationErrorCode;
@@ -16,11 +20,14 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -28,20 +35,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
     private final ReservationValidator reservationValidator;
-
-    public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            WaitingRepository waitingRepository,
-            ReservationValidator reservationValidator
-    ) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
-        this.reservationValidator = reservationValidator;
-    }
+    private final WaitingService waitingService;
 
     @Transactional
     public Reservation saveReservation(ReservationCreateCommand createCommand) {
@@ -57,7 +51,11 @@ public class ReservationService {
                 time,
                 theme
         );
-        return reservationRepository.save(reservation);
+        try {
+            return reservationRepository.save(reservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
     }
 
     public List<Reservation> getReservations() {
@@ -87,21 +85,74 @@ public class ReservationService {
                 updateCommand.date(),
                 time
         );
-        reservationRepository.updateSchedule(updateReservation);
+        try {
+            reservationRepository.updateSchedule(updateReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
+
+        boolean scheduleChanged = !targetReservation.getDate().equals(updateCommand.date())
+                || !targetReservation.getTime().getId().equals(updateCommand.timeId());
+
+        if (scheduleChanged) {
+            try {
+                waitingService.promoteNextWaiting(
+                        targetReservation.getDate(),
+                        targetReservation.getTime(),
+                        targetReservation.getTheme()
+                );
+            } catch (BusinessException | DataAccessException e) {
+                log.warn("예약 변경 후 기존 예약 시간의 다음 대기자 승격에 실패했습니다. reservationId={}",
+                        updateCommand.id(),
+                        e);
+            }
+        }
     }
 
     @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id));
-        reservationRepository.deleteById(id);
+        Reservation targetReservation = reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ReservationErrorCode.RESERVATION_NOT_FOUND,
+                        id
+                ));
+        boolean deleted = reservationRepository.deleteById(id);
+        if (!deleted) {
+            throw new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id);
+        }
+
+        try {
+            waitingService.promoteNextWaiting(
+                    targetReservation.getDate(),
+                    targetReservation.getTime(),
+                    targetReservation.getTheme()
+            );
+        } catch (BusinessException | DataAccessException e) {
+            log.warn("예약 삭제 후 다음 대기자 승격에 실패했습니다. reservationId={}", id, e);
+        }
     }
 
     @Transactional
     public void cancelReservation(Long id, String name) {
-        Reservation targetReservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id));
+        Reservation targetReservation = reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ReservationErrorCode.RESERVATION_NOT_FOUND,
+                        id
+                ));
         targetReservation.cancel(name);
-        reservationRepository.deleteByIdAndName(id, name);
+        boolean deleted = reservationRepository.deleteByIdAndName(id, name);
+        if (!deleted) {
+            throw new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id);
+        }
+
+        try {
+            waitingService.promoteNextWaiting(
+                    targetReservation.getDate(),
+                    targetReservation.getTime(),
+                    targetReservation.getTheme()
+            );
+        } catch (BusinessException | DataAccessException e) {
+            log.warn("사용자 예약 취소 후 다음 대기자 승격에 실패했습니다. reservationId={}", id, e);
+        }
     }
 }

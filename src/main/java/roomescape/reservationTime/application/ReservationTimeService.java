@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ReservationTimeErrorCode;
@@ -13,18 +14,11 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationTimeReference reservationReference;
-
-    public ReservationTimeService(
-            ReservationTimeRepository reservationTimeRepository,
-            ReservationTimeReference reservationReference
-    ) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationReference = reservationReference;
-    }
 
     @Transactional
     public ReservationTime saveTime(ReservationTimeCreateCommand createCommand) {

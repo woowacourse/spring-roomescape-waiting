@@ -69,7 +69,7 @@ class ReservationValidatorTest {
 
     @Test
     @DisplayName("자기 자신의 예약 시간으로 수정하면 예외가 발생하지 않는다")
-    void validateAlreadyReservationExcludingSelf_success_with_self_reservation() {
+    void validateAlreadyReservationExcludingSelf_success_when_self_reservation() {
         // given
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
         Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");

@@ -38,6 +38,11 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdForUpdate(Long id) {
+        return findById(id);
+    }
+
+    @Override
     public Optional<Reservation> findByDateAndTimeIdAndThemeId(
             LocalDate date,
             Long timeId,
@@ -48,6 +53,15 @@ public class FakeReservationRepository implements ReservationRepository {
                 .filter(reservation -> reservation.getTime().getId().equals(timeId))
                 .filter(reservation -> reservation.getTheme().getId().equals(themeId))
                 .findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeIdForUpdate(
+            LocalDate date,
+            Long timeId,
+            Long themeId
+    ) {
+        return findByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override
@@ -101,13 +115,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        store.remove(id);
+    public boolean deleteById(Long id) {
+        return store.remove(id) != null;
     }
 
     @Override
-    public void deleteByIdAndName(Long id, String name) {
-        store.values().removeIf(reservation ->
+    public boolean deleteByIdAndName(Long id, String name) {
+        return store.values().removeIf(reservation ->
                 reservation.getId().equals(id)
                         && reservation.getName().equals(name)
         );

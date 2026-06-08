@@ -106,7 +106,7 @@ class ThemeServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 테마 ID로 삭제하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 테마 아이디로 삭제하면 예외가 발생한다")
     void deleteById_fail_with_not_found_theme() {
         // when & then
         assertThatThrownBy(() -> themeService.deleteById(999L))

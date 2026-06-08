@@ -58,7 +58,7 @@ class ReservationTimeControllerTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    @DisplayName("POST /times - 예약 시간 저장 요청을 서비스에 전달하고 201 응답을 반환한다")
+    @DisplayName("예약 시간 저장 요청을 서비스에 전달하고 생성 응답을 반환한다")
     void createReservationTimes_success() throws Exception {
         // given
         LocalTime startAt = LocalTime.of(10, 0);
@@ -82,7 +82,7 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    @DisplayName("GET /times - 예약 시간 전체 조회 요청을 서비스에 전달하고 200 응답을 반환한다")
+    @DisplayName("예약 시간 전체 조회 요청을 서비스에 전달하고 성공 응답을 반환한다")
     void readReservationTimes_success() throws Exception {
         // given
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
@@ -103,8 +103,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    @DisplayName("GET /times?date=...&themeId=... - 예약 여부가 포함된 시간 목록을 반환한다")
-    void readReservationTimes_with_booking_status() throws Exception {
+    @DisplayName("날짜와 테마 기준으로 예약 여부가 포함된 시간 목록을 반환한다")
+    void readReservationTimes_success_when_booking_status_exists() throws Exception {
         // given
         ReservationTime bookedTime = ReservationTime.createRow(1L, LocalTime.of(10, 0));
         ReservationTime availableTime = ReservationTime.createRow(2L, LocalTime.of(11, 0));
@@ -134,7 +134,7 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /times/{id} - 예약 시간 삭제 요청을 서비스에 전달하고 204 응답을 반환한다")
+    @DisplayName("예약 시간 삭제 요청을 서비스에 전달하고 성공 응답을 반환한다")
     void deleteReservationTime_success() throws Exception {
         // when & then
         mockMvc.perform(delete("/times/1"))

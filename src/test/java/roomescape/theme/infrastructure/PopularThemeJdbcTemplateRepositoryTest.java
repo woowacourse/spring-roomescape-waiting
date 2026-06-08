@@ -35,7 +35,7 @@ class PopularThemeJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간 내 예약 수가 많은 테마를 상위 N개 조회한다")
+    @DisplayName("기간 내 예약 수가 많은 테마를 상위 개수만큼 조회한다")
     void findTopNByPeriod_success() {
         // given
         Theme theme1 = themeRepository.save(

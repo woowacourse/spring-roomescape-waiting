@@ -50,7 +50,7 @@ class WaitingTest {
     }
 
     @Test
-    @DisplayName("생성된 예약 대기에 ID를 부여한다")
+    @DisplayName("생성된 예약 대기에 아이디를 부여한다")
     void appendId_success() {
         // given
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));

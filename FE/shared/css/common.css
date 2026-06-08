@@ -1,0 +1,178 @@
+:root {
+  /* Colors */
+  --color-pure-black: #000000;
+  --color-light-gray: #f4f5f2;
+  --color-near-black: #151412;
+  --color-apple-blue: #8f1f2f;
+  --color-link-blue: #8f1f2f;
+  --color-bright-blue: #c33a4c;
+  --color-white: #ffffff;
+  --color-secondary-text: rgba(0, 0, 0, 0.8);
+  --color-tertiary-text: rgba(0, 0, 0, 0.52);
+  --color-line: rgba(21, 20, 18, 0.12);
+  --color-paper: #fbfaf7;
+  
+  /* Dark Surface Variants */
+  --color-dark-surface-1: #272729;
+  --color-dark-surface-2: #262628;
+  
+  /* Typography */
+  --font-display: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  --font-text: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  
+  /* Spacing */
+  --spacing-base: 8px;
+  
+  /* Radius */
+  --radius-small: 5px;
+  --radius-standard: 8px;
+  --radius-comfortable: 11px;
+  --radius-large: 12px;
+  --radius-pill: 980px;
+  
+  /* Shadows */
+  --shadow-card: rgba(20, 18, 16, 0.14) 0 18px 48px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-text);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: 0;
+  color: var(--color-near-black);
+  background-color: var(--color-paper);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+a {
+  color: var(--color-link-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #d7a768;
+  outline-offset: 3px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Apple Navigation */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  height: 52px;
+  background: rgba(13, 12, 11, 0.86);
+  backdrop-filter: saturate(180%) blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-content {
+  width: 100%;
+  max-width: 1120px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  color: #f8f5ed;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.74;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  opacity: 1;
+}
+
+/* Section Rhythm */
+section {
+  padding: 88px 0;
+}
+
+section.dark {
+  background-color: var(--color-pure-black);
+  color: var(--color-white);
+}
+
+section.light {
+  background-color: var(--color-paper);
+  color: var(--color-near-black);
+}
+
+/* Pill Button */
+.btn-primary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-apple-blue);
+  color: var(--color-white);
+  padding: 10px 18px;
+  border-radius: var(--radius-standard);
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: rgba(143, 31, 47, 0.24) 0 10px 24px;
+}
+
+.btn-primary:hover {
+  background-color: #a7283b;
+  transform: translateY(-1px);
+}
+
+.btn-pill {
+  border-radius: var(--radius-pill);
+  padding: 11px 22px;
+  font-size: 15px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-apple-blue);
+  color: var(--color-apple-blue);
+}
+
+.btn-outline.dark {
+  border-color: var(--color-white);
+  color: var(--color-white);
+}

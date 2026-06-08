@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROOM ZERO 마이페이지</title>
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="../shared/css/user.css">
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-content">
+      <div class="logo">
+        <a href="index.html" style="font-weight: 600; color: white;">ROOM ZERO</a>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">테마 둘러보기</a>
+        <a href="mypage.html" style="opacity: 1;">마이페이지</a>
+        <a href="../admin/index.html">관리자</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="mypage-hero">
+      <div class="container mypage-hero-grid">
+        <div>
+          <p class="section-kicker hero-kicker">My Reservations</p>
+          <h1 class="display-hero">예약과 대기가 한 번에 열립니다.</h1>
+          <p class="subtitle white">예약한 이름으로 조회하고, 예약 변경과 대기 취소를 같은 화면에서 처리합니다.</p>
+        </div>
+        <form id="name-gate-form" class="name-gate" autocomplete="off">
+          <label for="guest-name">예약자 이름</label>
+          <div class="name-row">
+            <input id="guest-name" type="text" placeholder="예: 강민준">
+            <button class="btn-primary btn-pill" type="submit">조회</button>
+          </div>
+          <p id="name-error" class="inline-error" role="alert"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="mypage-section">
+      <div class="container">
+        <div class="my-toolbar">
+          <div>
+            <p class="section-kicker">예약 / 대기 목록</p>
+            <h2 id="reservation-owner" class="section-title">이름을 입력해주세요.</h2>
+          </div>
+          <button id="change-name-btn" class="btn-ghost mypage-ghost" type="button">이름 바꾸기</button>
+        </div>
+
+        <div id="my-reservation-list" class="my-reservation-list">
+          <div class="my-empty">
+            <strong>아직 조회한 예약이 없습니다.</strong>
+            <span>위에서 예약자 이름을 입력하면 이곳에 예약이 표시됩니다.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="../shared/js/mypage.js"></script>
+</body>
+</html>

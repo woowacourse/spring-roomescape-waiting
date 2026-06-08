@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +26,10 @@ import roomescape.reservation.presentation.dto.response.UserReservationResponse;
 
 @RestController
 @RequestMapping("/reservations")
+@RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService service;
-
-    public ReservationController(ReservationService service) {
-        this.service = service;
-    }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> saveReservation(

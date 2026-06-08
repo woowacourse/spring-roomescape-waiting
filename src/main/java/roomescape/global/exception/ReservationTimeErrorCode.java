@@ -1,7 +1,11 @@
 package roomescape.global.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+@Getter
+@RequiredArgsConstructor
 public enum ReservationTimeErrorCode implements ErrorCode {
 
     RESERVATION_TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "예약 시간을 찾을 수 없습니다."),
@@ -10,20 +14,4 @@ public enum ReservationTimeErrorCode implements ErrorCode {
 
     private final HttpStatus status;
     private final String message;
-
-    ReservationTimeErrorCode(
-            HttpStatus status,
-            String message
-    ) {
-        this.status = status;
-        this.message = message;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

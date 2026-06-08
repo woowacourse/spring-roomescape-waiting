@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,13 +23,10 @@ import roomescape.theme.presentation.dto.response.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")
+@RequiredArgsConstructor
 public class ThemeController {
 
     private final ThemeService service;
-
-    public ThemeController(ThemeService service) {
-        this.service = service;
-    }
 
     @Admin
     @PostMapping

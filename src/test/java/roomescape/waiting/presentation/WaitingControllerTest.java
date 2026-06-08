@@ -62,7 +62,7 @@ class WaitingControllerTest {
     private WaitingService waitingService;
 
     @Test
-    @DisplayName("POST /waiting - 정상 저장 시 201과 응답 본문을 반환한다")
+    @DisplayName("대기 생성 요청이 성공하면 생성 응답을 반환한다")
     void createWaiting_success() throws Exception {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
@@ -88,17 +88,15 @@ class WaitingControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("브라운"))
                 .andExpect(jsonPath("$.date").value("2026-05-05"))
-                .andExpect(jsonPath("$.time.id").value(1))
-                .andExpect(jsonPath("$.time.startAt").value("10:00"))
-                .andExpect(jsonPath("$.theme.id").value(1))
-                .andExpect(jsonPath("$.theme.name").value("테스트-테마"))
+                .andExpect(jsonPath("$.time").value("10:00:00"))
+                .andExpect(jsonPath("$.theme").value("테스트-테마"))
                 .andExpect(jsonPath("$.rank").value(1));
 
         then(waitingService).should().save(command);
     }
 
     @Test
-    @DisplayName("POST /waiting - 예약자 이름이 비어 있으면 에러 응답을 반환한다")
+    @DisplayName("대기 생성 요청에서 예약자 이름이 비어 있으면 에러 응답을 반환한다")
     void createWaiting_fail_with_empty_name() throws Exception {
         // given
         Map<String, Object> body = new HashMap<>();
@@ -116,7 +114,7 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("POST /waiting - 예약 날짜 형식이 잘못되면 에러 응답을 반환한다")
+    @DisplayName("대기 생성 요청에서 예약 날짜 형식이 잘못되면 에러 응답을 반환한다")
     void createWaiting_fail_with_invalid_date_format() throws Exception {
         // given
         Map<String, Object> body = new HashMap<>();
@@ -135,7 +133,7 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("POST /waiting - 예약 시간이 비어 있으면 에러 응답을 반환한다")
+    @DisplayName("대기 생성 요청에서 예약 시간이 비어 있으면 에러 응답을 반환한다")
     void createWaiting_fail_with_empty_time_id() throws Exception {
         // given
         Map<String, Object> body = new HashMap<>();
@@ -153,7 +151,7 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("POST /waiting - 서비스 정책 위반 시 에러 응답을 반환한다")
+    @DisplayName("대기 생성 요청에서 서비스 정책을 위반하면 에러 응답을 반환한다")
     void createWaiting_fail_with_business_exception() throws Exception {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
@@ -177,8 +175,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("POST /waiting - 예약이 없는 슬롯이면 에러 응답을 반환한다")
-    void 예약이_없는_슬롯이면_에러_응답을_반환한다() throws Exception {
+    @DisplayName("대기 생성 요청에서 예약이 없는 슬롯이면 에러 응답을 반환한다")
+    void createWaiting_fail_with_not_found_reservation() throws Exception {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
         WaitingCreateCommand command = new WaitingCreateCommand("브라운", date, 1L, 1L);
@@ -201,7 +199,7 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /waiting/me/{id} - 본인의 예약 대기를 취소하면 204를 반환한다")
+    @DisplayName("본인의 예약 대기를 취소하면 성공 응답을 반환한다")
     void deleteUserWaiting_success() throws Exception {
         // when & then
         mockMvc.perform(delete("/waiting/me/{id}", 1L)
@@ -212,7 +210,7 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /waiting/me/{id} - 존재하지 않는 예약 대기면 에러 응답을 반환한다")
+    @DisplayName("존재하지 않는 예약 대기를 취소하면 에러 응답을 반환한다")
     void deleteUserWaiting_fail_with_not_found_waiting() throws Exception {
         // given
         willThrow(new EntityNotFoundException(WaitingErrorCode.WAITING_NOT_FOUND, 999L))
@@ -227,7 +225,7 @@ class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /waiting/me/{id} - 다른 사용자의 예약 대기면 에러 응답을 반환한다")
+    @DisplayName("다른 사용자의 예약 대기를 취소하면 에러 응답을 반환한다")
     void deleteUserWaiting_fail_with_owner_mismatch() throws Exception {
         // given
         willThrow(new BusinessException(WaitingErrorCode.WAITING_OWNER_MISMATCH))

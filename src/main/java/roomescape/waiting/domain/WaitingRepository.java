@@ -8,6 +8,8 @@ public interface WaitingRepository {
     Waiting save(Waiting waiting);
     Optional<Waiting> findById(Long id);
     Optional<Waiting> findByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId);
-    void deleteByIdAndName(Long id, String name);
     List<Waiting> findByName(String name);
+    Optional<Waiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean deleteByIdAndName(Long id, String name);
+    List<Waiting> findFirstWaitingsWithoutReservation();
 }

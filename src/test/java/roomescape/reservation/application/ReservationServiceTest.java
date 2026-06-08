@@ -2,6 +2,10 @@ package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.never;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,6 +13,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
@@ -23,16 +31,20 @@ import roomescape.reservationTime.fake.FakeReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
+import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
+@ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
     private WaitingRepository waitingRepository;
+    @Mock
+    private WaitingService waitingService;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -46,7 +58,8 @@ class ReservationServiceTest {
                 reservationTimeRepository,
                 themeRepository,
                 waitingRepository,
-                new ReservationValidator(reservationRepository)
+                new ReservationValidator(reservationRepository),
+                waitingService
         );
     }
 
@@ -99,7 +112,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 테마 ID로 예약하면 잘못된 요청 예외가 전파된다")
+    @DisplayName("존재하지 않는 테마 아이디로 예약하면 잘못된 요청 예외가 전파된다")
     void saveReservation_fail_with_not_found_theme() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
@@ -143,7 +156,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("날짜와 테마를 기반으로 예약을 조회한다")
-    void getReservations_success_with_date_and_theme() {
+    void getReservations_success_when_date_and_theme_exist() {
         // given
         LocalDate date = LocalDate.now();
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
@@ -183,12 +196,70 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 ID로 삭제하면 예외가 발생한다")
+    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 다음 대기 승격을 요청한다")
+    void deleteReservation_success_when_first_waiting_exists() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+
+        // when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        then(waitingService).should().promoteNextWaiting(date, savedTime, savedTheme);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 아이디로 삭제하면 예외가 발생한다")
     void deleteReservation_fail_with_not_found_reservation() {
         // when & then
         assertThatThrownBy(() -> reservationService.deleteReservation(999L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("예약을 찾을 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("관리자 예약 삭제 시 대기 승격 실패는 예약 삭제를 막지 않는다")
+    void deleteReservation_success_when_waiting_promotion_fails() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        willThrow(new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST))
+                .given(waitingService)
+                .promoteNextWaiting(date, savedTime, savedTheme);
+
+        // when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
     }
 
     @Test
@@ -262,7 +333,131 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 ID로 수정하면 예외가 발생한다")
+    @DisplayName("예약 변경 시 기존 예약 시간의 다음 대기 승격을 요청한다")
+    void updateReservationSchedule_success_when_first_waiting_exists() {
+        // given
+        ReservationTime savedTime1 = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(1))
+        );
+        ReservationTime savedTime2 = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(2))
+        );
+        Theme savedTheme = themeRepository.save(
+                Theme.create("공포", "아니", "https://good.com/thumb-nail/1")
+        );
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(
+                Reservation.create(
+                        "인직",
+                        date,
+                        savedTime1,
+                        savedTheme
+                )
+        );
+        waitingRepository.save(
+                Waiting.create("브라운", date, savedTime1, savedTheme)
+        );
+
+        // when
+        reservationService.updateReservationSchedule(new ReservationUpdateCommand(
+                savedReservation.getId(),
+                date,
+                savedTime2.getId(),
+                "인직"
+        ));
+
+        // then
+        Reservation updatedReservation = reservationRepository.findById(savedReservation.getId())
+                .orElseThrow();
+        assertThat(updatedReservation.getTime().getId()).isEqualTo(savedTime2.getId());
+        then(waitingService).should().promoteNextWaiting(date, savedTime1, savedTheme);
+    }
+
+    @Test
+    @DisplayName("예약 변경 시 대기 승격 실패는 예약 변경을 막지 않는다")
+    void updateReservationSchedule_success_when_waiting_promotion_fails() {
+        // given
+        ReservationTime savedTime1 = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(1))
+        );
+        ReservationTime savedTime2 = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(2))
+        );
+        Theme savedTheme = themeRepository.save(
+                Theme.create("공포", "아니", "https://good.com/thumb-nail/1")
+        );
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(
+                Reservation.create(
+                        "인직",
+                        date,
+                        savedTime1,
+                        savedTheme
+                )
+        );
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime1,
+                savedTheme
+        ));
+        willThrow(new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST))
+                .given(waitingService)
+                .promoteNextWaiting(date, savedTime1, savedTheme);
+
+        // when
+        reservationService.updateReservationSchedule(new ReservationUpdateCommand(
+                savedReservation.getId(),
+                date,
+                savedTime2.getId(),
+                "인직"
+        ));
+
+        // then
+        Reservation updatedReservation = reservationRepository.findById(savedReservation.getId())
+                .orElseThrow();
+        assertThat(updatedReservation.getTime().getId()).isEqualTo(savedTime2.getId());
+    }
+
+    @Test
+    @DisplayName("예약 시간이 변경되지 않으면 대기를 승격하지 않는다")
+    void updateReservationSchedule_success_when_schedule_not_changed() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(1))
+        );
+        Theme savedTheme = themeRepository.save(
+                Theme.create("공포", "아니", "https://good.com/thumb-nail/1")
+        );
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(
+                Reservation.create(
+                        "인직",
+                        date,
+                        savedTime,
+                        savedTheme
+                )
+        );
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", date, savedTime, savedTheme)
+        );
+
+        // when
+        reservationService.updateReservationSchedule(new ReservationUpdateCommand(
+                savedReservation.getId(),
+                date,
+                savedTime.getId(),
+                "인직"
+        ));
+
+        // then
+        assertThat(reservationRepository.findAll()).containsExactly(savedReservation);
+        assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+        then(waitingService).should(never()).promoteNextWaiting(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 아이디로 수정하면 예외가 발생한다")
     void updateReservationSchedule_fail_with_not_found_reservation() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(
@@ -324,6 +519,64 @@ class ReservationServiceTest {
                 savedTime,
                 savedTheme
         ));
+
+        // when
+        reservationService.cancelReservation(savedReservation.getId(), "인직");
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약 취소 시 같은 슬롯의 다음 대기 승격을 요청한다")
+    void cancelReservation_success_when_first_waiting_exists() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+
+        // when
+        reservationService.cancelReservation(savedReservation.getId(), "인직");
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        then(waitingService).should().promoteNextWaiting(date, savedTime, savedTheme);
+    }
+
+    @Test
+    @DisplayName("대기 승격 실패는 예약 취소를 막지 않는다")
+    void cancelReservation_success_when_waiting_promotion_fails() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        willThrow(new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST))
+                .given(waitingService)
+                .promoteNextWaiting(date, savedTime, savedTheme);
 
         // when
         reservationService.cancelReservation(savedReservation.getId(), "인직");

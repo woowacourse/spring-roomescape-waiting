@@ -28,7 +28,7 @@ class WaitingValidatorTest {
 
     @Test
     @DisplayName("같은 슬롯에 다른 사용자의 대기가 있으면 예외가 발생하지 않는다")
-    void validateAlreadyMyWaiting_success_with_other_user_waiting() {
+    void validateAlreadyMyWaiting_success_when_other_user_waiting_exists() {
         // given
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
         Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
