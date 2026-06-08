@@ -9,6 +9,7 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
+import roomescape.waiting.WaitingForPromotion;
 import roomescape.waiting.dao.ReservationWaitingDao;
 
 import java.time.LocalDate;
@@ -66,7 +67,10 @@ public class ReservationService {
 
     @Transactional
     public Reservation modifyDateTimeByName(Long id, String name, Long themeId, LocalDate date, Long timeId) {
-        Reservation originReservation = reservationDao.selectByIdForUpdate(id)
+        Long originReservationId = reservationDao.lockById(id)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
+
+        Reservation originReservation = reservationDao.selectById(originReservationId)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
 
         originReservation.validateSameName(name);
@@ -96,7 +100,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(Long id) {
-        Reservation originReservation = reservationDao.selectByIdForUpdate(id)
+        Long originReservationId = reservationDao.lockById(id)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
+
+        Reservation originReservation = reservationDao.selectById(originReservationId)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
 
         reservationDao.deleteById(id);
@@ -105,7 +112,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        Reservation originReservation = reservationDao.selectByIdForUpdate(id)
+        Long originReservationId = reservationDao.lockById(id)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
+
+        Reservation originReservation = reservationDao.selectById(originReservationId)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
 
         originReservation.validateSameName(name);
@@ -116,11 +126,13 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(Long themeId, LocalDate date, ReservationTime time) {
-        reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time)
-                .ifPresent(waiting -> {
-                    reservationWaitingDao.deleteById(waiting.id());
-                    reservationDao.insert(waiting.toReservation());
-                });
+        reservationWaitingDao.lockFirstByThemeAndDateAndTime(themeId, date, time)
+                        .ifPresent(waitingId -> {
+                            WaitingForPromotion waiting = reservationWaitingDao.selectFirstByThemeAndDateAndTime(themeId, date, time)
+                                    .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
+                            reservationWaitingDao.deleteById(waiting.id());
+                            reservationDao.insert(waiting.toReservation());
+                        });
     }
 
     private void validateDateTime(LocalDate date, ReservationTime time) {

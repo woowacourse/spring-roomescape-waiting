@@ -160,7 +160,7 @@ public class ReservationWaitingServiceTest {
         Long id = 1L;
         String name = "ever";
 
-        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.empty());
+        when(reservationWaitingDao.lockById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
@@ -174,7 +174,8 @@ public class ReservationWaitingServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         WaitingForPromotion waitingForPromotion = new WaitingForPromotion(id, "other", 1L, LocalDate.now().plusDays(1), reservationTime);
 
-        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.of(waitingForPromotion));
+        when(reservationWaitingDao.lockById(id)).thenReturn(Optional.of(id));
+        when(reservationWaitingDao.selectByIdForPromotion(id)).thenReturn(Optional.of(waitingForPromotion));
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
@@ -188,7 +189,8 @@ public class ReservationWaitingServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
         WaitingForPromotion waitingForPromotion = new WaitingForPromotion(id, name, 1L, LocalDate.now().minusDays(1), reservationTime);
 
-        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.of(waitingForPromotion));
+        when(reservationWaitingDao.lockById(id)).thenReturn(Optional.of(id));
+        when(reservationWaitingDao.selectByIdForPromotion(id)).thenReturn(Optional.of(waitingForPromotion));
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
@@ -202,7 +204,8 @@ public class ReservationWaitingServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         WaitingForPromotion waitingForPromotion = new WaitingForPromotion(id, name, 1L, LocalDate.now().plusDays(1), reservationTime);
 
-        when(reservationWaitingDao.selectByIdForUpdate(id)).thenReturn(Optional.of(waitingForPromotion));
+        when(reservationWaitingDao.lockById(id)).thenReturn(Optional.of(id));
+        when(reservationWaitingDao.selectByIdForPromotion(id)).thenReturn(Optional.of(waitingForPromotion));
 
         reservationWaitingService.deleteByIdIfNameMatches(id, name);
 

@@ -63,20 +63,39 @@ public class ReservationWaitingDao {
         return results.stream().findFirst();
     }
 
-    public Optional<WaitingForPromotion> selectByIdForUpdate(Long id) {
+    public Optional<Long> lockById(Long id) {
+        String sql = "select id from reservation_waiting where id = ? for update";
+        List<Long> results = jdbcTemplate.queryForList(sql, Long.class, id);
+        return results.stream().findFirst();
+    }
+
+    public Optional<WaitingForPromotion> selectByIdForPromotion(Long id) {
         String sql = """
                 select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
                 from reservation_waiting w
                 join reservation_time t on w.time_id = t.id
                 where w.id = ?
-                for update
                 """;
 
         List<WaitingForPromotion> results = jdbcTemplate.query(sql, PROMOTION_MAPPER, id);
         return results.stream().findFirst();
     }
 
-    public Optional<WaitingForPromotion> selectFirstByThemeAndDateAndTimeForUpdate(Long themeId, LocalDate date, ReservationTime time) {
+    public Optional<Long> lockFirstByThemeAndDateAndTime(Long themeId, LocalDate date, ReservationTime time) {
+        String sql = """
+                select id
+                from reservation_waiting w
+                where w.theme_id = ? and w.date = ? and w.time_id = ?
+                order by w.id
+                limit 1
+                for update
+                """;
+
+        List<Long> results = jdbcTemplate.queryForList(sql, Long.class, themeId, date, time.getId());
+        return results.stream().findFirst();
+    }
+
+    public Optional<WaitingForPromotion> selectFirstByThemeAndDateAndTime(Long themeId, LocalDate date, ReservationTime time) {
         String sql = """
                 select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
                 from reservation_waiting w
@@ -84,7 +103,6 @@ public class ReservationWaitingDao {
                 where w.theme_id = ? and w.date = ? and w.time_id = ?
                 order by w.id
                 limit 1
-                for update
                 """;
 
         List<WaitingForPromotion> results = jdbcTemplate.query(sql, PROMOTION_MAPPER, themeId, date, time.getId());

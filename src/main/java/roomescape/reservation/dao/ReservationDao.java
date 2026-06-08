@@ -43,27 +43,19 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, MAPPER);
     }
 
-    public Optional<Reservation> selectById(Long id) {
-        String sql =
-                """
-                        select r.id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
-                        from reservation r
-                        inner join reservation_time t
-                        on r.time_id = t.id
-                        where r.id = ?
-                        """;
-        List<Reservation> reservations = jdbcTemplate.query(sql, MAPPER, id);
-        return reservations.stream().findFirst();
+    public Optional<Long> lockById(Long id) {
+        String sql = "SELECT id FROM reservation r WHERE r.id = ? FOR UPDATE";
+        List<Long> result = jdbcTemplate.queryForList(sql, Long.class, id);
+        return result.stream().findFirst();
     }
 
-    public Optional<Reservation> selectByIdForUpdate(Long id) {
+    public Optional<Reservation> selectById(Long id) {
         String sql = """
             SELECT r.id, r.name, r.theme_id, r.date, t.id as time_id, t.start_at as start_at
             FROM reservation r
             inner join reservation_time t
             on r.time_id = t.id
             WHERE r.id = ?
-            FOR UPDATE
             """;
         List<Reservation> result = jdbcTemplate.query(sql, MAPPER, id);
         return result.stream().findFirst();

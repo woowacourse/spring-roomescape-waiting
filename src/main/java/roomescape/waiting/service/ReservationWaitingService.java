@@ -60,7 +60,10 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        WaitingForPromotion originReservationWaiting = reservationWaitingDao.selectByIdForUpdate(id)
+        Long originReservationWaitingId = reservationWaitingDao.lockById(id)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
+
+        WaitingForPromotion originReservationWaiting = reservationWaitingDao.selectByIdForPromotion(originReservationWaitingId)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
 
         originReservationWaiting.validateSameName(name);
