@@ -65,4 +65,25 @@ class WaitingAdapterTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("예약이 존재하지 않으면, 대기요청을 할 수 없습니다.");
     }
+
+    @Test
+    @DisplayName("본인이 예약한 슬롯에 대기를 신청하면 예외가 발생한다")
+    void 본인이_예약한_슬롯에_대기를_신청하면_예외가_발생한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
+        reservationRepository.save(Reservation.create("브라운", date, time, theme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                time.getId(),
+                theme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingAdapter.validateExistReservation(command))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+    }
 }
