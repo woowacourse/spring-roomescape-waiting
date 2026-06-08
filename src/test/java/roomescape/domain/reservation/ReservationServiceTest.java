@@ -1,4 +1,4 @@
-package roomescape.domain.reservationslot;
+package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,16 +14,16 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationService;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlotService;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
@@ -145,7 +145,6 @@ class ReservationServiceTest {
             Reservation.createWithoutId(
                 reservationSlot,
                 user,
-                null,
                 ReservationStatus.CONFIRMED,
                 now
             )
@@ -165,6 +164,49 @@ class ReservationServiceTest {
             assertThat(responses.getFirst().theme().id()).isEqualTo(theme.getId());
             assertThat(responses.getFirst().theme().name()).isEqualTo("공포");
         });
+    }
+
+    @Test
+    @DisplayName("관리자는 취소된 예약을 포함한 예약 목록을 전체 조회한다.")
+    void getAllReservationsIncludingCanceledReservation() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationDate savedReservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(savedReservationDate, reservationTime, theme)
+        );
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User canceledUser = userRepository.save(User.createWithoutId("수민"));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            confirmedUser,
+            ReservationStatus.CONFIRMED,
+            now
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            canceledUser,
+            ReservationStatus.CANCELED,
+            now
+        ));
+        ReservationService reservationService = createReservationService(now);
+
+        // when
+        List<ReservationResponse> responses = reservationService.getAllReservations();
+
+        // then
+        assertThat(responses)
+            .extracting(ReservationResponse::userName, ReservationResponse::reservationStatus)
+            .containsExactly(
+                tuple("보예", ReservationStatus.CONFIRMED),
+                tuple("수민", ReservationStatus.CANCELED)
+            );
     }
 
     @Test
@@ -199,14 +241,12 @@ class ReservationServiceTest {
         reservationRepository.save(Reservation.createWithoutId(
             secondReservation,
             user,
-            null,
             ReservationStatus.CONFIRMED,
             now
         ));
         reservationRepository.save(Reservation.createWithoutId(
             firstReservation,
             user,
-            null,
             ReservationStatus.CONFIRMED,
             now
         ));
@@ -224,14 +264,63 @@ class ReservationServiceTest {
                     "reservationSlot.date.startWhen",
                     "reservationSlot.time.startAt",
                     "reservationSlot.theme.name",
-                    "status",
-                    "waitingNumber"
+                    "status"
                 )
                 .containsExactly(
-                    tuple(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0), "공포", "CONFIRMED", null),
-                    tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포", "CONFIRMED", null)
+                    tuple(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0), "공포", "CONFIRMED"),
+                    tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포", "CONFIRMED")
                 );
         });
+    }
+
+    @Test
+    @DisplayName("사용자는 취소된 예약을 포함한 본인의 예약 목록을 조회한다.")
+    void getUserReservationsIncludingCanceledReservation() {
+        // given
+        String name = "보예짱";
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
+        User user = userRepository.save(User.createWithoutId(name));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
+        );
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            ReservationStatus.CONFIRMED,
+            now
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            ReservationStatus.WAITING,
+            now
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            ReservationStatus.CANCELED,
+            now
+        ));
+        ReservationService reservationService = createReservationService(now);
+
+        // when
+        UserReservationsResponse userReservations = reservationService.getUserReservations(name);
+
+        // then
+        assertThat(userReservations.reservations())
+            .extracting("status", "waitingNumber")
+            .containsExactlyInAnyOrder(
+                tuple("CANCELED", null),
+                tuple("WAITING", 1L),
+                tuple("CONFIRMED", null)
+            );
     }
 
     @Test
@@ -344,7 +433,7 @@ class ReservationServiceTest {
 
         // when
         CreateReservationResponse response = reservationService.createReservation(request);
-        Reservation reservation = reservationRepository.findById(response.id()).orElseThrow();
+        Reservation reservation = reservationRepository.findActiveReservation(response.id()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
@@ -405,7 +494,7 @@ class ReservationServiceTest {
         reservationService.cancelUserReservation(savedUserReservation.getId());
 
         // then
-        assertThat(reservationRepository.findById(savedUserReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findActiveReservation(savedUserReservation.getId())).isEmpty();
     }
 
     @Test
@@ -470,6 +559,135 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("확정 예약을 취소하면 슬롯의 활성 예약은 0건이다.")
+    void cancelConfirmedReservation() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId("공포", "무서운 테마", "theme-url")
+        );
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
+        );
+        User user = userRepository.save(User.createWithoutId("boye"));
+        Reservation confirmedReservation = saveConfirmedReservation(reservationSlot, user, now);
+        ReservationService reservationService = createReservationService(now);
+
+        // when
+        reservationService.cancelUserReservation(confirmedReservation.getId());
+
+        // then
+        assertSoftly(softly -> {
+                assertThat(reservationSlotRepository.findBySchedule(
+                    reservationTime.getId(),
+                    reservationDate.getId(),
+                    theme.getId())
+                ).isNotEmpty();
+                assertThat(reservationRepository.countByReservationSlotId(reservationSlot.getId())).isZero();
+                assertThat(reservationRepository.findActiveReservation(confirmedReservation.getId())).isEmpty();
+            }
+        );
+    }
+
+    @Test
+    @DisplayName("확정 예약자가 예약을 취소하면 대기 1번 예약자만 확정으로 변경된다.")
+    void promoteFirstWaitingReservation() {
+        // given
+        Clock confirmedClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        Clock firstWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 1));
+        Clock secondWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 2));
+        Clock cancelClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 3));
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId("공포", "무섭다", "theme-url")
+        );
+        ReservationSlot reservationSlot = reservationSlotRepository.save(ReservationSlot.createWithoutId(
+            reservationDate, reservationTime, theme
+        ));
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User firstWaitingUser = userRepository.save(User.createWithoutId("수민"));
+        User secondWaitingUser = userRepository.save(User.createWithoutId("말랑"));
+        saveConfirmedReservation(reservationSlot, confirmedUser, confirmedClock);
+        saveWaitingReservation(reservationSlot, firstWaitingUser, firstWaitingClock);
+        saveWaitingReservation(reservationSlot, secondWaitingUser, secondWaitingClock);
+
+        // when
+        ReservationService reservationService = createReservationService(cancelClock);
+        reservationService.cancelUserReservation(confirmedUser.getId());
+
+        // then
+        ReservationWithWaitingNumber updatedReservation = reservationRepository.findReservations("수민").getFirst();
+        ReservationWithWaitingNumber waitingReservation = reservationRepository.findReservations("말랑").getFirst();
+        assertSoftly(softly -> {
+            assertThat(updatedReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+            assertThat(waitingReservation.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(waitingReservation.waitingNumber()).isEqualTo(1L);
+        });
+    }
+
+    @Test
+    @DisplayName("대기 예약자가 대기를 취소한다면 다른 예약이 확정으로 승격되지 않는다.")
+    void notPromoteFirstWaitingReservation() {
+        // given
+        Clock confirmedClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        Clock firstWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 1));
+        Clock secondWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 2));
+        Clock cancelClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 3));
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId("공포", "무섭다", "theme-url")
+        );
+        ReservationSlot reservationSlot = reservationSlotRepository.save(ReservationSlot.createWithoutId(
+            reservationDate, reservationTime, theme
+        ));
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User firstWaitingUser = userRepository.save(User.createWithoutId("수민"));
+        User secondWaitingUser = userRepository.save(User.createWithoutId("말랑"));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, confirmedUser, ReservationStatus.CONFIRMED, confirmedClock
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, firstWaitingUser, ReservationStatus.WAITING, firstWaitingClock
+        ));
+        reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot, secondWaitingUser, ReservationStatus.WAITING, secondWaitingClock
+        ));
+        ReservationService reservationService = createReservationService(cancelClock);
+
+        // when
+        reservationService.cancelUserReservation(firstWaitingUser.getId());
+        ReservationWithWaitingNumber confirmedReservation = reservationRepository.findReservations("보예").getFirst();
+        ReservationWithWaitingNumber cancelReservation = reservationRepository.findReservations("수민").getFirst();
+        ReservationWithWaitingNumber waitingReservation = reservationRepository.findReservations("말랑").getFirst();
+
+        // then
+        assertSoftly(softly -> {
+                assertThat(confirmedReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+                assertThat(cancelReservation.reservation().getStatus()).isEqualTo(ReservationStatus.CANCELED);
+                assertThat(waitingReservation.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+                assertThat(waitingReservation.waitingNumber()).isEqualTo(1);
+            }
+        );
+    }
+
+    @Test
     @DisplayName("예약 날짜와 시간을 수정한다.")
     void updateReservationDateAndTime() {
         // given
@@ -501,7 +719,7 @@ class ReservationServiceTest {
         reservationService.updateReservation(savedUserReservation.getId(), request);
 
         // then
-        ReservationSlot updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+        ReservationSlot updatedReservation = reservationRepository.findActiveReservation(savedUserReservation.getId())
             .orElseThrow()
             .getReservationSlot();
         assertSoftly(softly -> {
@@ -536,13 +754,11 @@ class ReservationServiceTest {
         Reservation firstWaitingReservation = saveWaitingReservation(
             savedReservation,
             firstWaitingUser,
-            1L,
             firstWaitingClock
         );
         Reservation secondWaitingReservation = saveWaitingReservation(
             savedReservation,
             secondWaitingUser,
-            2L,
             secondWaitingClock
         );
         ReservationService reservationService = createReservationService(updateClock);
@@ -555,18 +771,18 @@ class ReservationServiceTest {
         reservationService.updateReservation(confirmedReservation.getId(), request);
 
         // then
-        Reservation updatedConfirmedReservation = reservationRepository.findById(confirmedReservation.getId())
+        Reservation updatedConfirmedReservation = reservationRepository.findActiveReservation(
+                confirmedReservation.getId())
             .orElseThrow();
-        Reservation updatedFirstWaitingReservation = reservationRepository.findById(firstWaitingReservation.getId())
+        Reservation updatedFirstWaitingReservation = reservationRepository.findActiveReservation(
+                firstWaitingReservation.getId())
             .orElseThrow();
-        Reservation updatedSecondWaitingReservation = reservationRepository.findById(secondWaitingReservation.getId())
+        Reservation updatedSecondWaitingReservation = reservationRepository.findActiveReservation(
+                secondWaitingReservation.getId())
             .orElseThrow();
         assertSoftly(softly -> {
             assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-            assertThat(updatedFirstWaitingReservation.getWaitingNumber()).isNull();
-            assertThat(updatedSecondWaitingReservation.getWaitingNumber()).isEqualTo(1L);
             assertThat(updatedSecondWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(updatedConfirmedReservation.getWaitingNumber()).isEqualTo(2L);
             assertThat(updatedConfirmedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
         });
     }
@@ -595,7 +811,7 @@ class ReservationServiceTest {
 
         // when
         reservationService.updateReservation(savedUserReservation.getId(), request);
-        ReservationSlot updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+        ReservationSlot updatedReservation = reservationRepository.findActiveReservation(savedUserReservation.getId())
             .orElseThrow()
             .getReservationSlot();
 
@@ -766,7 +982,6 @@ class ReservationServiceTest {
 
     private ReservationService createReservationService(Clock clock) {
         return new ReservationService(
-            reservationSlotRepository,
             reservationRepository,
             new UserService(userRepository),
             new ReservationSlotService(
@@ -786,7 +1001,6 @@ class ReservationServiceTest {
         return reservationRepository.save(Reservation.createWithoutId(
             reservationSlot,
             user,
-            null,
             ReservationStatus.CONFIRMED,
             clock
         ));
@@ -795,13 +1009,11 @@ class ReservationServiceTest {
     private Reservation saveWaitingReservation(
         ReservationSlot reservationSlot,
         User user,
-        Long waitingNumber,
         Clock clock
     ) {
         return reservationRepository.save(Reservation.createWithoutId(
             reservationSlot,
             user,
-            waitingNumber,
             ReservationStatus.WAITING,
             clock
         ));

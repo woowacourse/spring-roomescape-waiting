@@ -9,6 +9,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationCountResult;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -29,41 +30,42 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
+    public List<ReservationWithWaitingNumber> findAll() {
         return storage.values().stream()
-            .map(this::withCalculatedWaitingOrder)
+            .map(this::withWaitingNumber)
             .toList();
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
+    public Optional<Reservation> findActiveReservation(Long id) {
         return Optional.ofNullable(storage.get(id))
-            .map(this::withCalculatedWaitingOrder);
+            .filter(this::isActive);
     }
 
     @Override
-    public List<Reservation> findReservations(String username) {
+    public List<ReservationWithWaitingNumber> findReservations(String username) {
         return storage.values().stream()
             .filter(userReservation -> username.equals(userReservation.getUser().getName()))
             .sorted(Comparator.comparing(Reservation::getId).reversed())
-            .map(this::withCalculatedWaitingOrder)
+            .map(this::withWaitingNumber)
             .toList();
     }
 
     @Override
     public Long countByReservationSlotId(Long reservationSlotId) {
         return storage.values().stream()
+            .filter(this::isActive)
             .filter(userReservation -> reservationSlotId.equals(userReservation.getReservationSlot().getId()))
             .count();
     }
 
     @Override
-    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
+    public List<Reservation> findReservationsInWaitingOrder(Long reservationSlotId) {
         return storage.values().stream()
-            .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
+            .filter(this::isActive)
+            .filter(userReservation -> reservationSlotId.equals(userReservation.getReservationSlot().getId()))
             .sorted(Comparator.comparing(Reservation::getUpdatedAt)
                 .thenComparing(Reservation::getId))
-            .map(this::withCalculatedWaitingOrder)
             .toList();
     }
 
@@ -79,6 +81,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId) {
         return storage.values().stream()
+            .filter(this::isActive)
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
             .findAny()
@@ -86,13 +89,9 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        storage.remove(id);
-    }
-
-    @Override
     public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
         return storage.values().stream()
+            .filter(this::isActive)
             .filter(reservation -> themeId.equals(reservation.getReservationSlot().getTheme().getId()))
             .filter(reservation -> dateId.equals(reservation.getReservationSlot().getDate().getId()))
             .collect(java.util.stream.Collectors.groupingBy(
@@ -114,8 +113,24 @@ public class FakeReservationRepository implements ReservationRepository {
             .toList();
     }
 
-    private Reservation withCalculatedWaitingOrder(Reservation reservation) {
+    private boolean isActive(Reservation reservation) {
+        return reservation.getStatus() != ReservationStatus.CANCELED;
+    }
+
+    private ReservationWithWaitingNumber withWaitingNumber(Reservation reservation) {
+        return new ReservationWithWaitingNumber(
+            reservation,
+            waitingNumberOf(reservation)
+        );
+    }
+
+    private Long waitingNumberOf(Reservation reservation) {
+        if (reservation.getStatus() != ReservationStatus.WAITING) {
+            return null;
+        }
         List<Reservation> orderedReservations = storage.values().stream()
+            .filter(this::isActive)
+            .filter(storedReservation -> storedReservation.getStatus() == ReservationStatus.WAITING)
             .filter(storedReservation -> reservation.getReservationSlot().getId()
                 .equals(storedReservation.getReservationSlot().getId()))
             .sorted(Comparator.comparing(Reservation::getUpdatedAt)
@@ -123,25 +138,9 @@ public class FakeReservationRepository implements ReservationRepository {
             .toList();
 
         int order = orderedReservations.indexOf(reservation);
-        if (order == 0) {
-            return Reservation.of(
-                reservation.getId(),
-                reservation.getReservationSlot(),
-                reservation.getUser(),
-                null,
-                ReservationStatus.CONFIRMED,
-                reservation.getCreatedAt(),
-                reservation.getUpdatedAt()
-            );
+        if (order < 0) {
+            return null;
         }
-        return Reservation.of(
-            reservation.getId(),
-            reservation.getReservationSlot(),
-            reservation.getUser(),
-            (long) order,
-            ReservationStatus.WAITING,
-            reservation.getCreatedAt(),
-            reservation.getUpdatedAt()
-        );
+        return (long) order + 1;
     }
 }

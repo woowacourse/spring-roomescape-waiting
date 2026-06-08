@@ -1,8 +1,14 @@
-package roomescape.domain.reservationslot;
+package roomescape.domain.reservation;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import io.restassured.RestAssured;
@@ -20,6 +26,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationIntegrationTest {
@@ -29,6 +36,9 @@ class ReservationIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @MockitoSpyBean
+    private ReservationRepository reservationRepository;
 
     @TestConfiguration
     static class TestClockConfig {
@@ -167,7 +177,50 @@ class ReservationIntegrationTest {
             .then()
             .statusCode(200)
             .body("username", is("보예"))
-            .body("reservations", hasSize(0));
+            .body("reservations", hasSize(1))
+            .body("reservations[0].status", is("CANCELED"))
+            .body("reservations[0].waitingNumber", nullValue());
+    }
+
+    @Test
+    @DisplayName("예약 취소 후 대기 전환 중 예외가 발생하면 예약 취소도 롤백된다.")
+    void checkRollback() {
+        // given
+        Long themeId = saveTheme("공포");
+        Long dateId = saveDate("2026-06-01");
+        Long timeId = saveTime("10:00");
+        Long reservationSlotId = saveReservationSlot(dateId, timeId, themeId);
+        Long confirmedReservationId = saveReservation(
+            "보예",
+            reservationSlotId,
+            ReservationStatus.CONFIRMED
+        );
+        Long waitingReservationId = saveReservation(
+            "수민",
+            reservationSlotId,
+            ReservationStatus.WAITING
+        );
+        doAnswer(invocationOnMock ->
+            {
+                if (invocationOnMock.getArgument(0).equals(waitingReservationId)) {
+                    throw new IllegalArgumentException("대기 전환에 실패했습니다.");
+                }
+                return invocationOnMock.callRealMethod();
+            }
+        ).when(reservationRepository).update(anyLong(), any(Reservation.class));
+
+        // when & then
+        given().
+            contentType(ContentType.JSON)
+            .when().delete("/reservations/{id}", confirmedReservationId)
+            .then()
+            .statusCode(500);
+
+        assertSoftly(softly -> {
+                assertThat(findReservationStatus(confirmedReservationId)).isEqualTo(ReservationStatus.CONFIRMED.toString());
+                assertThat(findReservationStatus(waitingReservationId)).isEqualTo(ReservationStatus.WAITING.toString());
+            }
+        );
     }
 
     @Test
@@ -206,6 +259,11 @@ class ReservationIntegrationTest {
         Long dateId = saveDate(date);
         Long timeId = saveTime(time);
 
+        Long reservationSlotId = saveReservationSlot(dateId, timeId, themeId);
+        return saveReservation(name, reservationSlotId, ReservationStatus.CONFIRMED);
+    }
+
+    private Long saveReservation(String name, Long reservationSlotId, ReservationStatus status) {
         jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", name);
         Long userId = jdbcTemplate.queryForObject(
             "SELECT id FROM users WHERE name = ?",
@@ -213,30 +271,40 @@ class ReservationIntegrationTest {
             name
         );
         jdbcTemplate.update(
-            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-            dateId,
-            timeId,
-            themeId
-        );
-        Long reservationId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
-            Long.class,
-            dateId,
-            timeId,
-            themeId
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
             userId,
-            reservationId,
-            null,
-            "CONFIRMED"
+            reservationSlotId,
+            status.name()
         );
 
         return jdbcTemplate.queryForObject(
             "SELECT id FROM reservation WHERE user_id = ? AND reservation_slot_id = ?",
             Long.class,
             userId,
+            reservationSlotId
+        );
+    }
+
+    private Long saveReservationSlot(Long dateId, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
+            dateId,
+            timeId,
+            themeId
+        );
+        return jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
+            Long.class,
+            dateId,
+            timeId,
+            themeId
+        );
+    }
+
+    private String findReservationStatus(Long reservationId) {
+        return jdbcTemplate.queryForObject(
+            "SELECT status FROM reservation WHERE id = ?",
+            String.class,
             reservationId
         );
     }

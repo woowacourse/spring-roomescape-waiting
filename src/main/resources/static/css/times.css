@@ -397,6 +397,10 @@ select {
     background: #fbfcff;
 }
 
+.user-reservation-card.canceled {
+    background: #f8fafc;
+}
+
 .user-reservation-main {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -433,6 +437,13 @@ select {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 14px;
+}
+
+.reservation-action-note {
+    margin: 14px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: right;
 }
 
 .danger-button {

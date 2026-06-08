@@ -42,7 +42,7 @@ class ReservationSlotIntegrationTest {
         Long firstTimeId = saveTime("10:00");
         Long secondTimeId = saveTime("11:00");
         Long reservationSlotId = saveReservationSlot(dateId, firstTimeId, themeId);
-        saveReservation("보예", reservationSlotId, null, "CONFIRMED");
+        saveReservation("보예", reservationSlotId, "CONFIRMED");
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -156,7 +156,7 @@ class ReservationSlotIntegrationTest {
         );
     }
 
-    private Long saveReservation(String name, Long reservationSlotId, Long waitingNumber, String status) {
+    private Long saveReservation(String name, Long reservationSlotId, String status) {
         jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", name);
         Long userId = jdbcTemplate.queryForObject(
             "SELECT id FROM users WHERE name = ?",
@@ -164,10 +164,9 @@ class ReservationSlotIntegrationTest {
             name
         );
         jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
             userId,
             reservationSlotId,
-            waitingNumber,
             status
         );
         return jdbcTemplate.queryForObject(

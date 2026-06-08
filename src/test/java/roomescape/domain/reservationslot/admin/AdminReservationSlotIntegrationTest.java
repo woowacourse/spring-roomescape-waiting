@@ -66,7 +66,7 @@ class AdminReservationSlotIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자의 예약 삭제를 end-to-end로 확인한다.")
+    @DisplayName("관리자의 예약 취소를 end-to-end로 확인한다.")
     void deleteReservation() {
         Long reservationId = saveThemeDateTimeAndReservation("보예");
 
@@ -77,12 +77,12 @@ class AdminReservationSlotIntegrationTest {
             .then().log().all()
             .statusCode(204);
 
-        Long reservationCount = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation WHERE id = ?",
-            Long.class,
+        String reservationStatus = jdbcTemplate.queryForObject(
+            "SELECT status FROM reservation WHERE id = ?",
+            String.class,
             reservationId
         );
-        assertThat(reservationCount).isZero();
+        assertThat(reservationStatus).isEqualTo("CANCELED");
     }
 
     private Long saveThemeDateTimeAndReservation(String name) {
@@ -141,10 +141,9 @@ class AdminReservationSlotIntegrationTest {
         );
 
         jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
             userId,
             reservationId,
-            null,
             "CONFIRMED"
         );
 
