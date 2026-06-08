@@ -1,129 +1,68 @@
 package roomescape.domain.reservation;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.user.User;
-import roomescape.support.exception.BadRequestException;
-import roomescape.support.exception.errors.ReservationSlotErrors;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Reservation {
 
     private final Long id;
-    private final ReservationSlot reservationSlot;
     private final User user;
+    private final ReservationSlot slot;
     private final Integer waitingNumber;
     private final ReservationStatus status;
     private final LocalDateTime reservedAt;
 
-    private Reservation(
-        Long id,
-        ReservationSlot reservationSlot,
-        User user,
-        Integer waitingNumber,
-        ReservationStatus status,
-        LocalDateTime reservedAt
-    ) {
-        validate(reservationSlot, user, waitingNumber, status, reservedAt);
-        this.id = id;
-        this.reservationSlot = reservationSlot;
-        this.user = user;
-        this.waitingNumber = waitingNumber;
-        this.status = status;
-        this.reservedAt = reservedAt;
-    }
-
-    public static Reservation createWithoutId(
-        ReservationSlot reservation,
-        User user,
-        Integer waitingNumber,
-        ReservationStatus status,
-        Clock clock
+    public static Reservation create(
+            User user,
+            ReservationSlot slot,
+            LocalDateTime reservedAt
     ) {
         return new Reservation(
-            null,
-            reservation,
-            user,
-            waitingNumber,
-            status,
-            LocalDateTime.now(clock)
-        );
-    }
-
-    public static Reservation createWithId(long id, Reservation userReservation) {
-        return of(
-            id,
-            userReservation.getReservationSlot(),
-            userReservation.getUser(),
-            userReservation.getWaitingNumber(),
-            userReservation.getStatus(),
-            userReservation.getReservedAt()
-        );
-    }
-
-    public Reservation update(
-        ReservationSlot updatedReservationSlot,
-        Integer waitingNumber,
-        ReservationStatus reservationStatus,
-        Clock clock
-    ) {
-        return new Reservation(
-            id,
-            updatedReservationSlot,
-            user,
-            waitingNumber,
-            reservationStatus,
-            LocalDateTime.now(clock)
-        );
-    }
-
-    public Reservation update(Clock clock) {
-        return new Reservation(
-            id,
-            reservationSlot,
-            user,
-            waitingNumber,
-            status,
-            LocalDateTime.now(clock)
+                null,
+                user,
+                slot,
+                null,
+                ReservationStatus.WAITING,
+                reservedAt
         );
     }
 
     public static Reservation of(
-        long id,
-        ReservationSlot reservation,
-        User user,
-        Integer waitingNumber,
-        ReservationStatus status,
-        LocalDateTime reservedAt
+            Long id,
+            User user,
+            ReservationSlot slot,
+            Integer waitingNumber,
+            ReservationStatus status,
+            LocalDateTime reservedAt
     ) {
-        return new Reservation(id, reservation, user, waitingNumber, status, reservedAt);
-    }
-
-    private static void validate(
-        ReservationSlot reservation,
-        User user,
-        Integer waitingNumber,
-        ReservationStatus status,
-        LocalDateTime reservedAt
-    ) {
-        if (reservation == null || user == null || status == null || reservedAt == null) {
-            throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
-        }
-        if (status == ReservationStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {
-            throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
-        }
-    }
-
-    public Reservation update(Integer waitingNumber, ReservationStatus status, Clock clock) {
         return new Reservation(
-                this.id,
-                this.reservationSlot,
-                this.user,
+                id,
+                user,
+                slot,
                 waitingNumber,
                 status,
-                LocalDateTime.now(clock)
+                reservedAt
         );
+    }
+
+    public void validateCancellable(LocalDateTime now) {
+        slot.validateIsNotInPast(now);
+    }
+
+    public Reservation updateConfirmed() {
+        return new Reservation(id, user, slot, 0, ReservationStatus.CONFIRMED, reservedAt);
+    }
+
+    public Reservation updateWaiting(int waitingNumber) {
+        return new Reservation(id, user, slot, waitingNumber, ReservationStatus.WAITING, reservedAt);
+    }
+
+    public Reservation moveTo(ReservationSlot newSlot, LocalDateTime newReservedAt) {
+        return new Reservation(id, user, newSlot, waitingNumber, status, newReservedAt);
     }
 }

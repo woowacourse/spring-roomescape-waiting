@@ -1,27 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const TOKEN_KEY = "roomescape-admin-token";
     const state = {
-        token: localStorage.getItem(TOKEN_KEY) || ""
+        themes: [],
+        slots: []
     };
 
-    const tokenInput = document.getElementById("admin-token");
-    const tokenForm = document.getElementById("admin-token-form");
-    const tokenMessage = document.getElementById("token-message");
     const themesList = document.getElementById("themes-list");
-    const datesList = document.getElementById("dates-list");
     const timesList = document.getElementById("times-list");
     const reservationsList = document.getElementById("reservations-list");
     const themeForm = document.getElementById("theme-form");
-    const dateForm = document.getElementById("date-form");
     const timeForm = document.getElementById("time-form");
+    const reservationForm = document.getElementById("reservation-form");
+    const reservationThemeSelect = document.getElementById("admin-reservation-theme");
+    const reservationDateInput = document.getElementById("admin-reservation-date");
+    const reservationSlotList = document.getElementById("admin-reservation-slot-list");
+    const reservationFormMessage = document.getElementById("reservation-form-message");
     const panels = document.querySelectorAll(".admin-panel");
     const tabButtons = document.querySelectorAll("[data-tab-target]");
     const refreshButtons = document.querySelectorAll("[data-refresh-target]");
     const adminModal = document.getElementById("admin-modal");
     const adminModalMessage = document.getElementById("admin-modal-message");
     const adminModalClosers = document.querySelectorAll("[data-admin-modal-close]");
+    const loginPanel = document.getElementById("login-panel");
+    const loginForm = document.getElementById("login-form");
+    const loginMessage = document.getElementById("login-form-message");
+    const adminNav = document.getElementById("admin-nav");
+    const logoutButton = document.getElementById("logout-button");
 
-    tokenInput.value = state.token;
+    reservationDateInput.value = localDateString(new Date());
+
+    function localDateString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
 
     function openModal(message) {
         adminModalMessage.textContent = message;
@@ -34,26 +46,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setMessage(element, message, kind = "") {
         element.textContent = message;
-        element.className = kind ? `${element.className.split(" ")[0]} ${kind}` : element.className.split(" ")[0];
-    }
-
-    adminModalClosers.forEach((closer) => {
-        closer.addEventListener("click", closeModal);
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            closeModal();
+        element.className = "form-message";
+        if (kind) {
+            element.classList.add(kind);
         }
-    });
+    }
 
     function adminFetch(url, options = {}) {
         return fetch(url, {
             ...options,
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-ADMIN-TOKEN": state.token,
+                Accept: "application/json",
+                ...(options.body ? { "Content-Type": "application/json" } : {}),
                 ...(options.headers || {})
             }
         });
@@ -67,16 +71,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return text ? JSON.parse(text) : null;
     }
 
-    async function loadThemes() {
-        const response = await adminFetch("/admin/themes", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
+    function renderThemeSelect() {
+        const selectedValue = reservationThemeSelect.value;
+        reservationThemeSelect.innerHTML = `
+            <option value="">테마를 선택하세요</option>
+            ${state.themes.map((theme) => `
+                <option value="${theme.id}" ${String(theme.id) === selectedValue ? "selected" : ""}>
+                    ${theme.name}
+                </option>
+            `).join("")}
+        `;
+        if (selectedValue) {
+            reservationThemeSelect.value = selectedValue;
         }
-        const themes = await parseResponse(response);
-        themesList.innerHTML = themes.map((theme) => `
+    }
+
+    function renderThemes() {
+        themesList.innerHTML = state.themes.map((theme) => `
             <article class="admin-item">
                 <div class="theme-item">
-                    <img class="theme-thumb" src="/images/theme-placeholder.svg" alt="${theme.name}">
+                    <img class="theme-thumb" src="${theme.url}" alt="${theme.name}">
                     <div class="item-main">
                         <h3 class="item-title">${theme.name}</h3>
                         <p class="item-subtext">${theme.content}</p>
@@ -90,30 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join("");
     }
 
-    async function loadDates() {
-        const response = await adminFetch("/admin/reservation-dates", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
-        }
-        const dates = await parseResponse(response);
-        datesList.innerHTML = dates.map((date) => `
-            <article class="admin-item">
-                <div class="item-main">
-                    <h3 class="item-title">${date.reservationDate}</h3>
-                </div>
-                <div class="item-actions">
-                    <button type="button" class="danger-button" data-delete-type="date" data-id="${date.id}">삭제</button>
-                </div>
-            </article>
-        `).join("");
-    }
-
-    async function loadTimes() {
-        const response = await adminFetch("/admin/times", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
-        }
-        const times = await parseResponse(response);
+    function renderTimes(times) {
         timesList.innerHTML = times.map((time) => `
             <article class="admin-item">
                 <div class="item-main">
@@ -126,24 +117,39 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join("");
     }
 
-    async function loadReservations() {
-        const response = await adminFetch("/admin/reservations", { method: "GET" });
-        if (response.status === 401) {
-            throw new Error("관리자 토큰이 올바르지 않습니다.");
-        }
-        const reservations = await parseResponse(response);
+    function renderReservations(reservations) {
         reservationsList.innerHTML = reservations.map((reservation) => `
             <article class="admin-item reservation-item-admin">
                 <div class="item-main">
-                    <h3 class="item-title">${reservation.userName}</h3>
-                    <p class="item-subtext">${reservation.theme.name}</p>
-                    <p class="item-subtext">${reservation.date} · ${reservation.time.startAt}</p>
-                    <p class="item-subtext">${formatReservationStatus(reservation.reservationStatus, reservation.waitingNumber)}</p>
+                    <h3 class="item-title">${reservation.username}</h3>
+                    <p class="item-subtext">${reservation.slot.theme.name}</p>
+                    <p class="item-subtext">${reservation.slot.date} · ${reservation.slot.startAt.startAt}</p>
+                    <p class="item-subtext">${formatReservationStatus(reservation.status, reservation.waitingNumber)}</p>
                 </div>
                 <div class="item-actions">
                     <button type="button" class="danger-button" data-delete-type="reservation" data-id="${reservation.id}">삭제</button>
                 </div>
             </article>
+        `).join("");
+    }
+
+    function renderSlots() {
+        if (!state.slots.length) {
+            reservationSlotList.innerHTML = `
+                <div class="empty-state">
+                    <strong>선택한 조건에 가능한 슬롯이 없습니다.</strong>
+                </div>
+            `;
+            return;
+        }
+
+        reservationSlotList.innerHTML = state.slots.map((slot, index) => `
+            <label class="slot-card${index === 0 ? " selected" : ""}">
+                <input type="radio" name="slotId" value="${slot.slotId}" form="reservation-form" ${index === 0 ? "checked" : ""}>
+                <span class="slot-pill">${slot.waitingNumber === 0 ? "CONFIRMED" : "WAITING"}</span>
+                <strong>${slot.startAt}</strong>
+                <span class="slot-status">${formatReservationStatus(slot.waitingNumber === 0 ? "CONFIRMED" : "WAITING", slot.waitingNumber)}</span>
+            </label>
         `).join("");
     }
 
@@ -157,12 +163,90 @@ document.addEventListener("DOMContentLoaded", () => {
         return status;
     }
 
-    async function refreshAll() {
-        if (!state.token) {
+    async function loadThemes() {
+        const response = await adminFetch("/admin/themes", { method: "GET" });
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("로그인이 필요하거나 관리자 권한이 없습니다.");
+        }
+        const result = await parseResponse(response);
+        state.themes = result.themes;
+        renderThemes();
+        renderThemeSelect();
+    }
+
+    async function loadTimes() {
+        const response = await adminFetch("/admin/times", { method: "GET" });
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("로그인이 필요하거나 관리자 권한이 없습니다.");
+        }
+        const result = await parseResponse(response);
+        renderTimes(result.times);
+    }
+
+    async function loadReservations() {
+        const response = await adminFetch("/admin/reservations", { method: "GET" });
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("로그인이 필요하거나 관리자 권한이 없습니다.");
+        }
+        const result = await parseResponse(response);
+        renderReservations(result.reservations);
+    }
+
+    async function loadReservationSlots() {
+        if (!reservationThemeSelect.value || !reservationDateInput.value) {
+            reservationSlotList.innerHTML = "";
+            state.slots = [];
             return;
         }
-        await Promise.all([loadThemes(), loadDates(), loadTimes(), loadReservations()]);
-        bindDeleteButtons();
+
+        const response = await fetch(
+            `/reservation-slots?themeId=${reservationThemeSelect.value}&date=${reservationDateInput.value}`,
+            { headers: { Accept: "application/json" } }
+        );
+        const result = await parseResponse(response);
+        if (!response.ok) {
+            throw new Error(result?.message || "예약 슬롯을 불러오지 못했습니다.");
+        }
+
+        state.slots = result.reservationSlots;
+        renderSlots();
+    }
+
+    function showLogin(visible) {
+        if (visible) {
+            loginPanel.hidden = false;
+            adminNav.hidden = true;
+            panels.forEach((panel) => {
+                if (panel !== loginPanel) {
+                    panel.hidden = true;
+                }
+            });
+        } else {
+            loginPanel.hidden = true;
+            adminNav.hidden = false;
+            const activeTab = document.querySelector(".admin-nav-button.active");
+            const targetId = activeTab ? activeTab.dataset.tabTarget : "themes-panel";
+            panels.forEach((panel) => {
+                panel.hidden = panel.id !== targetId;
+            });
+        }
+    }
+
+    async function refreshAll() {
+        try {
+            await Promise.all([loadThemes(), loadTimes(), loadReservations()]);
+            await loadReservationSlots().catch(() => {
+                // 선택 조건이 없거나 슬롯을 불러오지 못해도 전체 새로고침은 유지한다.
+            });
+            bindDeleteButtons();
+            showLogin(false);
+        } catch (error) {
+            if (error.message === "로그인이 필요하거나 관리자 권한이 없습니다.") {
+                showLogin(true);
+            } else {
+                openModal(error.message);
+            }
+        }
     }
 
     function bindDeleteButtons() {
@@ -172,20 +256,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 const id = button.dataset.id;
                 const endpoint = type === "theme"
                     ? `/admin/themes/${id}`
-                    : type === "date"
-                        ? `/admin/reservation-dates/${id}`
-                        : type === "time"
-                            ? `/admin/times/${id}`
-                            : `/admin/reservations/${id}`;
+                    : type === "time"
+                        ? `/admin/times/${id}`
+                        : `/admin/reservations/${id}`;
 
-                const confirmed = window.confirm("정말 삭제하시겠습니까?");
-                if (!confirmed) {
+                if (!window.confirm("정말 삭제하시겠습니까?")) {
                     return;
                 }
 
-                const response = await adminFetch(endpoint, { method: "DELETE" });
-                if (response.status === 401) {
-                    openModal("관리자 토큰이 올바르지 않습니다.");
+                 const response = await adminFetch(endpoint, { method: "DELETE" });
+                if (response.status === 401 || response.status === 403) {
+                    openModal("로그인이 필요하거나 관리자 권한이 없습니다.");
                     return;
                 }
                 if (!response.ok) {
@@ -199,16 +280,50 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    tokenForm.addEventListener("submit", async (event) => {
+    adminModalClosers.forEach((closer) => {
+        closer.addEventListener("click", closeModal);
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        state.token = tokenInput.value.trim();
-        localStorage.setItem(TOKEN_KEY, state.token);
-        setMessage(tokenMessage, "토큰을 저장했습니다.", "success");
+        const formData = new FormData(loginForm);
+        const payload = {
+            name: String(formData.get("name") || "").trim(),
+            password: String(formData.get("password") || "").trim()
+        };
+
         try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const result = await parseResponse(response);
+            if (!response.ok) {
+                throw new Error(result?.message || "로그인에 실패했습니다.");
+            }
+            if (result.role !== "ADMIN") {
+                throw new Error("관리자 권한이 없습니다.");
+            }
+            setMessage(loginMessage, "로그인 성공!", "success");
+            loginForm.reset();
             await refreshAll();
         } catch (error) {
-            setMessage(tokenMessage, error.message, "error");
+            setMessage(loginMessage, error.message, "error");
         }
+    });
+
+    logoutButton.addEventListener("click", async () => {
+        try {
+            await fetch("/logout", { method: "DELETE" });
+        } catch (e) {}
+        showLogin(true);
     });
 
     tabButtons.forEach((button) => {
@@ -229,15 +344,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (target === "themes") {
                     await loadThemes();
                 }
-                if (target === "dates") {
-                    await loadDates();
-                }
                 if (target === "times") {
                     await loadTimes();
                 }
                 if (target === "reservations") {
                     await loadReservations();
                 }
+                await loadReservationSlots().catch(() => {
+                    // refresh 대상이 아니어도 재예약 폼은 유지한다.
+                });
                 bindDeleteButtons();
             } catch (error) {
                 openModal(error.message);
@@ -251,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const payload = {
             name: formData.get("name"),
             content: formData.get("content"),
-            url: formData.get("url")
+            thumbnailUrl: formData.get("url")
         };
 
         const response = await adminFetch("/admin/themes", {
@@ -265,27 +380,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         themeForm.reset();
         setMessage(document.getElementById("theme-form-message"), "테마를 추가했습니다.", "success");
-        await refreshAll();
-    });
-
-    dateForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const formData = new FormData(dateForm);
-        const payload = {
-            reservationDate: formData.get("reservationDate")
-        };
-
-        const response = await adminFetch("/admin/reservation-dates", {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-        const result = await parseResponse(response);
-        if (!response.ok) {
-            setMessage(document.getElementById("date-form-message"), result?.message || "날짜 추가에 실패했습니다.", "error");
-            return;
-        }
-        dateForm.reset();
-        setMessage(document.getElementById("date-form-message"), "예약 날짜를 추가했습니다.", "success");
         await refreshAll();
     });
 
@@ -310,10 +404,61 @@ document.addEventListener("DOMContentLoaded", () => {
         await refreshAll();
     });
 
-    if (state.token) {
-        refreshAll().catch((error) => {
-            setMessage(tokenMessage, error.message, "error");
-            openModal(error.message);
+    reservationThemeSelect.addEventListener("change", async () => {
+        try {
+            await loadReservationSlots();
+        } catch (error) {
+            setMessage(reservationFormMessage, error.message, "error");
+        }
+    });
+
+    reservationDateInput.addEventListener("change", async () => {
+        try {
+            await loadReservationSlots();
+        } catch (error) {
+            setMessage(reservationFormMessage, error.message, "error");
+        }
+    });
+
+    reservationSlotList.addEventListener("change", (event) => {
+        if (event.target.name !== "slotId") {
+            return;
+        }
+        const cards = reservationSlotList.querySelectorAll(".slot-card");
+        cards.forEach((card) => card.classList.remove("selected"));
+        event.target.closest(".slot-card")?.classList.add("selected");
+    });
+
+    reservationForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(reservationForm);
+        const payload = {
+            username: formData.get("username"),
+            slotId: Number(formData.get("slotId"))
+        };
+
+        if (!payload.slotId) {
+            setMessage(reservationFormMessage, "예약할 슬롯을 선택해 주세요.", "error");
+            return;
+        }
+
+        const response = await adminFetch("/admin/reservations", {
+            method: "POST",
+            body: JSON.stringify(payload)
         });
-    }
+        const result = await parseResponse(response);
+        if (!response.ok) {
+            setMessage(reservationFormMessage, result?.message || "예약 추가에 실패했습니다.", "error");
+            return;
+        }
+
+        reservationForm.reset();
+        reservationDateInput.value = localDateString(new Date());
+        setMessage(reservationFormMessage, "예약을 추가했습니다.", "success");
+        await refreshAll();
+    });
+
+    refreshAll().catch((error) => {
+        console.error("Failed to load admin data: ", error.message);
+    });
 });

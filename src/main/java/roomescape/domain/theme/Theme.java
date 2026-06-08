@@ -1,48 +1,23 @@
 package roomescape.domain.theme;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import roomescape.support.exception.BadRequestException;
-import roomescape.support.exception.errors.ThemeErrors;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Theme {
-
-    private static final int MAX_NAME_LENGTH = 10;
 
     private final Long id;
     private final String name;
-    private final String content;
-    private final String url;
+    private final String description;
+    private final String thumbnailUrl;
 
-    private Theme(Long id, String name, String content, String url) {
-        validateName(name);
-        this.id = id;
-        this.name = name;
-        this.content = content;
-        this.url = url;
+    public static Theme create(String name, String description, String thumbnailUrl) {
+        return new Theme(null, name, description, thumbnailUrl);
     }
 
-    public static Theme of(long id, String name, String content, String url) {
-        return new Theme(
-            id,
-            name,
-            content,
-            url
-        );
-    }
-
-    public static Theme createWithoutId(String name, String content, String url) {
-        return new Theme(
-            null,
-            name,
-            content,
-            url
-        );
-    }
-
-    private void validateName(String name) {
-        if (name.length() > MAX_NAME_LENGTH) {
-            throw new BadRequestException(ThemeErrors.INVALID_THEME_NAME_LENGTH);
-        }
+    public static Theme of(Long id, String name, String description, String thumbnailUrl) {
+        return new Theme(id, name, description, thumbnailUrl);
     }
 }

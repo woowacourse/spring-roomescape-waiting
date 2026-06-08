@@ -2,29 +2,26 @@ package roomescape.domain.reservation;
 
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.reservation.dto.ReservationCountResult;
 
 public interface ReservationRepository {
 
-    Reservation save(Reservation userReservation);
-
     List<Reservation> findAll();
 
-    Optional<Reservation> findById(Long id);
+    List<Reservation> findAllBySlotIdOrderByReservedAt(Long slotId);
 
-    List<Reservation> findReservations(String username);
+    List<Reservation> findAllReservationsByUserId(Long userId);
 
-    Integer countByReservationSlotId(Long reservationSlotId);
+    Optional<Reservation> findByIdForUpdate(Long id);
 
-    List<Reservation> findAllBySlotIdOrderByWaitingNumber(Long reservationId);
+    Optional<Reservation> findByIdAndUsernameForUpdate(Long id, String username);
 
-    Optional<Reservation> update(Long id, Reservation updatedReservation);
+    Reservation save(Reservation userReservation);
 
-    boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId);
-
-    void deleteById(Long id);
-
-    List<ReservationCountResult> countWaitingReservationsByThemeAndDate(Long themeId, Long dateId);
+    Reservation update(Reservation reservation);
 
     void batchUpdate(List<Reservation> reservations);
+
+    int deleteById(Long id);
+
+    boolean existsBySlotIdAndUserId(Long slotId, Long userId);
 }

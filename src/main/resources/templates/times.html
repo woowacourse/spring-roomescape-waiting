@@ -32,6 +32,37 @@
     </section>
 
     <main class="content-stack">
+        <section class="panel section-panel" id="auth-section">
+            <div class="section-title">
+                <div>
+                    <span class="section-kicker">ACCOUNT</span>
+                    <h2>로그인하고 예약하세요</h2>
+                    <p id="auth-status">로그인이 필요합니다.</p>
+                </div>
+                <button type="button" id="logout-button" class="secondary-button">로그아웃</button>
+            </div>
+            <div class="auth-grid">
+                <form id="signup-form" class="reservation-form auth-card">
+                    <h3>회원가입</h3>
+                    <label for="signup-name">이름</label>
+                    <input id="signup-name" name="name" type="text" maxlength="20" placeholder="이름을 입력하세요" required>
+                    <label for="signup-password">비밀번호</label>
+                    <input id="signup-password" name="password" type="password" placeholder="비밀번호를 입력하세요" required>
+                    <button type="submit" class="primary-button full-width">회원가입</button>
+                    <p id="signup-message" class="form-message" aria-live="polite"></p>
+                </form>
+                <form id="login-form" class="reservation-form auth-card">
+                    <h3>로그인</h3>
+                    <label for="login-name">이름</label>
+                    <input id="login-name" name="name" type="text" maxlength="20" placeholder="이름을 입력하세요" required>
+                    <label for="login-password">비밀번호</label>
+                    <input id="login-password" name="password" type="password" placeholder="비밀번호를 입력하세요" required>
+                    <button type="submit" class="primary-button full-width">로그인</button>
+                    <p id="login-message" class="form-message" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
         <section class="info-strip" id="status-strip">
             <span class="badge-blue">예약 안내</span>
             <p>테마와 날짜를 먼저 선택해 주세요.</p>
@@ -55,8 +86,10 @@
                             <h2>예약 날짜를 선택하세요</h2>
                         </div>
                     </div>
-                    <div class="date-grid date-grid-refined" id="date-list">
-                    </div>
+                    <label class="date-picker">
+                        <span>예약 날짜</span>
+                        <input id="reservation-date" type="date" name="reservationDate" required>
+                    </label>
                 </section>
 
                 <div class="selection-actions selection-actions-home">
@@ -77,15 +110,12 @@
             <div class="time-layout-refined">
                 <div class="time-grid time-grid-refined" id="time-list"></div>
                 <form id="reservation-form" class="reservation-form reservation-form-refined">
-                    <input type="hidden" name="themeId" id="selected-theme-id">
-                    <input type="hidden" name="dateId" id="selected-date-id">
+                    <input type="hidden" name="slotId" id="selected-slot-id">
                     <div class="reservation-form-head">
                         <h3>예약 정보 입력</h3>
                         <p id="reservation-form-summary">테마와 날짜를 선택해 주세요.</p>
                     </div>
-                    <label for="reservation-name">예약자 이름</label>
-                    <input id="reservation-name" name="name" type="text" maxlength="20"
-                           placeholder="이름을 입력하세요" required>
+                    <p id="current-user-summary" class="helper-text">로그인 후 예약할 수 있습니다.</p>
                     <button type="submit" class="primary-button full-width">예약 확정</button>
                     <p id="reservation-message" class="form-message" aria-live="polite"></p>
                 </form>
@@ -96,19 +126,12 @@
             <div class="section-title">
                 <div>
                     <span class="section-kicker">MY RESERVATIONS</span>
-                    <h2>내 예약 조회</h2>
-                    <p>예약자 이름으로 예약 목록을 확인하고, 취소하거나 날짜와 시간을 변경할 수 있습니다.</p>
+                    <h2>내 예약</h2>
+                    <p id="user-reservation-description">로그인 후 예약 목록을 확인할 수 있습니다.</p>
                 </div>
+                <button type="button" class="secondary-button" id="refresh-reservations-button">새로고침</button>
             </div>
-            <form id="user-reservation-search-form" class="reservation-lookup-form">
-                <label for="user-reservation-name">예약자 이름</label>
-                <div class="lookup-controls">
-                    <input id="user-reservation-name" name="name" type="text" maxlength="20"
-                           placeholder="예약자 이름을 입력하세요" required>
-                    <button type="submit" class="primary-button">조회</button>
-                </div>
-                <p id="user-reservation-message" class="form-message" aria-live="polite"></p>
-            </form>
+            <p id="user-reservation-message" class="form-message" aria-live="polite"></p>
             <div id="user-reservation-list" class="user-reservation-list"></div>
         </section>
 

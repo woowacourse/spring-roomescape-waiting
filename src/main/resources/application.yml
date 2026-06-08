@@ -5,5 +5,3 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:database
-
-token: ""

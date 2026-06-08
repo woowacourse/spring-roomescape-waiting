@@ -1,41 +1,35 @@
 package roomescape.domain.user;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import roomescape.support.exception.BadRequestException;
-import roomescape.support.exception.errors.UserErrors;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
-
-    private static final int MAX_NAME_LENGTH = 10;
 
     private final Long id;
     private final String name;
+    private final String password;
+    private final UserRole role;
 
-    private User(Long id, String name) {
-        validate(name);
-        this.id = id;
-        this.name = name;
+    public static User create(String name) {
+        return new User(null, name, "", UserRole.USER);
     }
 
-    public static User createWithoutId(String name) {
-        return new User(null, name);
+    public static User of(Long id, String name) {
+        return new User(id, name, "", UserRole.USER);
     }
 
-    public static User createWithId(long id, User user) {
-        return of(id, user.getName());
+    public static User create(String name, String password, UserRole role) {
+        return new User(null, name, password, role);
     }
 
-    public static User of(long id, String name) {
-        return new User(id, name);
+    public static User of(Long id, String name, String password, UserRole role) {
+        return new User(id, name, password, role);
     }
 
-    private static void validate(String name) {
-        if (name == null || name.isBlank()) {
-            throw new BadRequestException(UserErrors.INVALID_USER_NAME);
-        }
-        if (name.length() > MAX_NAME_LENGTH) {
-            throw new BadRequestException(UserErrors.INVALID_USER_NAME_LENGTH);
-        }
+    public boolean isAdmin() {
+        return role == UserRole.ADMIN;
     }
 }

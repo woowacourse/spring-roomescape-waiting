@@ -328,13 +328,26 @@ select {
     gap: 20px;
 }
 
+.auth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
 .reservation-form {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.reservation-form input[type="text"] {
+.reservation-form h3 {
+    margin: 0 0 4px;
+    font-size: 1.05rem;
+}
+
+.reservation-form input[type="text"],
+.reservation-form input[type="password"],
+.reservation-form input[type="date"] {
     min-height: 46px;
     padding: 0 14px;
     border: 1px solid #cfd8e6;
@@ -342,8 +355,24 @@ select {
     outline: none;
 }
 
-.reservation-form input[type="text"]:focus {
+.reservation-form input[type="text"]:focus,
+.reservation-form input[type="password"]:focus,
+.reservation-form input[type="date"]:focus {
     border-color: var(--blue);
+}
+
+.date-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.date-picker span {
+    font-weight: 500;
+}
+
+.date-picker input {
+    width: 100%;
 }
 
 .form-message.success {
@@ -352,6 +381,11 @@ select {
 
 .form-message.error {
     color: #dc2626;
+}
+
+.helper-text {
+    color: var(--muted);
+    line-height: 1.6;
 }
 
 .reservation-lookup-form {
@@ -467,6 +501,17 @@ select {
     font-size: 0.9rem;
 }
 
+.reservation-edit-form input[type="date"],
+.reservation-edit-form select {
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid #cfd8e6;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+}
+
 .reservation-edit-form .reservation-card-actions {
     grid-column: 1 / -1;
 }
@@ -576,6 +621,7 @@ select {
 }
 
 @media (max-width: 980px) {
+    .auth-grid,
     .hero-home,
     .time-layout-refined {
         grid-template-columns: 1fr;
@@ -610,6 +656,7 @@ select {
         padding: 18px;
     }
 
+    .auth-grid,
     .theme-grid-refined,
     .date-grid-refined,
     .time-grid-refined {
@@ -636,4 +683,84 @@ select {
     .reservation-card-actions {
         flex-direction: column;
     }
+}
+
+/* Custom theme layouts (Added to support the new metadata markup) */
+.theme-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.theme-genre-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #3b82f6;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.theme-info-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.theme-meta-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.theme-diff {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.theme-time-tag {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.rank-thumbnail-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.rank-badge {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 0.9rem;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.rank-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rank-genre {
+    font-size: 0.85rem;
+    color: var(--muted);
 }
