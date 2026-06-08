@@ -107,7 +107,8 @@ public class ReservationService {
     @Transactional
     public ReservationCreateResponseDto updateReservation(Long id, ReserverName name,
         ReservationUpdateCommand command) {
-        Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
+        Reservation existingReservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
+            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         validateReservationCanBeUpdated(existingReservation, name);
@@ -192,7 +193,8 @@ public class ReservationService {
 
     @Transactional
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
-        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
+        Reservation reservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
+            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         validateReservationCanBeCanceled(reservation, name);
