@@ -127,7 +127,7 @@ public class ReservationDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void ID에_해당하는_예약을_조회한다() {
-        Reservation reservation = reservationDao.findReservationById(1L);
+        Reservation reservation = reservationDao.findReservationByIdForUpdate(1L);
 
         assertThat(reservation)
                 .extracting(
@@ -158,7 +158,7 @@ public class ReservationDaoTest {
     })
     void 예약을_수정한다() {
         // given: 기존 예약 조회 후 수정본 준비
-        Reservation current = reservationDao.findReservationById(1L);
+        Reservation current = reservationDao.findReservationByIdForUpdate(1L);
         Reservation modified = new Reservation(
                 current.getId(),
                 current.getMemberId(),
@@ -172,7 +172,7 @@ public class ReservationDaoTest {
         reservationDao.update(modified);
 
         // then: DB 상태가 수정본대로 변경됨
-        Reservation updatedReservation = reservationDao.findReservationById(1L);
+        Reservation updatedReservation = reservationDao.findReservationByIdForUpdate(1L);
         assertThat(updatedReservation)
                 .extracting(
                         Reservation::getId,
@@ -214,7 +214,7 @@ public class ReservationDaoTest {
         Reservation inserted = reservationDao.insert(candidate);
 
         // then: DB 에 저장된 row 검증
-        Reservation reservation = reservationDao.findReservationById(inserted.getId());
+        Reservation reservation = reservationDao.findReservationByIdForUpdate(inserted.getId());
 
         assertThat(inserted.getId()).isPositive();
         assertThat(reservation)
@@ -334,14 +334,14 @@ public class ReservationDaoTest {
     })
     void 예약한_사용자id를_수정한다() {
         // given: 기존 예약 조회 + 양도 후보 생성
-        Reservation current = reservationDao.findReservationById(1L);
+        Reservation current = reservationDao.findReservationByIdForUpdate(1L);
         Reservation promoted = current.promoteTo(2L);
 
         // when: 양도 적용
         reservationDao.update(promoted);
 
         // then: member_id 가 2 로 변경됨
-        Reservation updatedReservation = reservationDao.findReservationById(1L);
+        Reservation updatedReservation = reservationDao.findReservationByIdForUpdate(1L);
         assertThat(updatedReservation.getMemberId()).isEqualTo(2L);
     }
 }
