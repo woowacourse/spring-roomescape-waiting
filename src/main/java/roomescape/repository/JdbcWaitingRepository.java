@@ -39,6 +39,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private static final String FIND_BY_NAME_SQL = BASE_SQL + " WHERE w.name = ?";
     private static final String FIND_BY_ID_SQL = BASE_SQL + " WHERE w.id = ?";
     private static final String FIND_FIRST_BY_SESSION_SQL = BASE_SQL + " WHERE s.id = ? ORDER BY w.waiting_number ASC LIMIT 1";
+    private static final String FIND_ALL_BY_SESSION_SQL = BASE_SQL + " WHERE s.id = ? ORDER BY w.waiting_number ASC";
     private static final String EXISTS_SQL = "SELECT EXISTS (SELECT 1 FROM waiting WHERE name = ? AND session_id = ?)";
     private static final String EXISTS_BY_SESSION_SQL = "SELECT EXISTS (SELECT 1 FROM waiting WHERE session_id = ?)";
     private static final String DELETE_SQL = "DELETE FROM waiting WHERE id = ?";
@@ -114,5 +115,10 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Waiting findFirstBySessionId(long sessionId) {
         List<Waiting> waitings = jdbcTemplate.query(FIND_FIRST_BY_SESSION_SQL, rowMapper, sessionId);
         return DataAccessUtils.singleResult(waitings);
+    }
+
+    @Override
+    public List<Waiting> findAllBySessionId(long sessionId) {
+        return jdbcTemplate.query(FIND_ALL_BY_SESSION_SQL, rowMapper, sessionId);
     }
 }

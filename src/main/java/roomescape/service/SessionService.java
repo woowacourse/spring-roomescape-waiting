@@ -140,7 +140,7 @@ public class SessionService {
                         request.date(), request.timeId(), request.themeId())
                 .orElseThrow(InvalidWaitingPrerequisiteException::new);
         Reservation reservation = reservationService.findBySessionOrThrow(session);
-        if (reservation.getName().equals(request.name())) {
+        if (reservation.isReservedBy(request.name())) {
             throw new DuplicateReservationException(
                     session.getDate().toString(), session.getTimeSlot().getId(), session.getTheme().getId());
         }
@@ -163,10 +163,10 @@ public class SessionService {
     }
 
     private void promoteWaitingIfExists(Session session) {
-        if (waitingService.isExistsBySessionId(session.getId())) {
-            Waiting first = waitingService.findFirstBySessionId(session.getId());
-            waitingService.deleteById(first.getId());
-            reservationService.save(first.getName(), session);
-        }
+        List<Waiting> waitings = waitingService.findAllBySessionId(session.getId());
+        session.promoteCandidate(waitings).ifPresent(candidate -> {
+            waitingService.deleteById(candidate.getId());
+            reservationService.save(candidate.getName(), session);
+        });
     }
 }

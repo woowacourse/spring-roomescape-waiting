@@ -29,6 +29,10 @@ public class Reservation {
         return new Reservation(this.id, this.name, patchedSession);
     }
 
+    public boolean isReservedBy(String name) {
+        return this.name.equals(name);
+    }
+
     public void validateModifiable(String requesterName, LocalDateTime currentDateTime) {
         if (!this.name.equals(requesterName)) {
             throw new InvalidOwnershipException();

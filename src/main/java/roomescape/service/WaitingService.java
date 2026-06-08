@@ -35,6 +35,10 @@ public class WaitingService {
         return waitingRepository.findFirstBySessionId(sessionId);
     }
 
+    public List<Waiting> findAllBySessionId(long sessionId) {
+        return waitingRepository.findAllBySessionId(sessionId);
+    }
+
     public void validateNotDuplicate(Waiting waiting) {
         if (waitingRepository.isExists(waiting)) {
             throw new DuplicateWaitingException(waiting);

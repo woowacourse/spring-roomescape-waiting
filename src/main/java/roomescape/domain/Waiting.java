@@ -5,7 +5,7 @@ import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastSessionControlException;
 import roomescape.exception.PastTimeException;
 
-public class Waiting {
+public class Waiting implements Comparable<Waiting> {
 
     private final Long id;
     private final String name;
@@ -37,6 +37,11 @@ public class Waiting {
         if (this.session.isPast(currentDateTime)) {
             throw new PastTimeException("지난 시간/날짜로 예약 대기를 추가하실 수 없습니다.");
         }
+    }
+
+    @Override
+    public int compareTo(Waiting other) {
+        return Integer.compare(this.waitingNumber, other.waitingNumber);
     }
 
     private void validateFields(String name, Session session) {

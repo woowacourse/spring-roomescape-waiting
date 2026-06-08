@@ -62,6 +62,14 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .orElse(null);
     }
 
+    @Override
+    public List<Waiting> findAllBySessionId(long sessionId) {
+        return storage.values().stream()
+                .filter(entry -> entry.getSession().getId().equals(sessionId))
+                .sorted(Comparator.comparingInt(Waiting::getWaitingNumber))
+                .toList();
+    }
+
     private boolean isSameWaiting(Waiting first, Waiting second) {
         return first.getSession().getId().equals(second.getSession().getId())
                 && first.getName().equals(second.getName());

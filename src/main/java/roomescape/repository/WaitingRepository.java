@@ -22,4 +22,6 @@ public interface WaitingRepository {
     Optional<Waiting> findById(long id);
 
     Waiting findFirstBySessionId(long sessionId);
+
+    List<Waiting> findAllBySessionId(long sessionId);
 }
