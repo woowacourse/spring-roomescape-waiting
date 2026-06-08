@@ -9,12 +9,13 @@ import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.ResourceNotFoundException;
@@ -28,7 +29,6 @@ import roomescape.reservationwaiting.service.ReservationWaitingService;
  * 4. [롤백] 대기 조회 성공 후 대기 승격 실패 시 롤백
  */
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationApplicationTest {
 
     @Autowired
@@ -46,6 +46,11 @@ public class ReservationApplicationTest {
     @BeforeEach
     public void setup() {
         settingTables();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        Mockito.reset(reservationWaitingService, reservationService);
     }
 
     private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
@@ -126,7 +131,7 @@ public class ReservationApplicationTest {
         Long reservationId = jdbcTemplate.queryForObject("SELECT id FROM reservation WHERE name = ? LIMIT 1", Long.class, "도우너");
 
         doThrow(new RuntimeException("승격 실패"))
-                .when(reservationService).save(any(), any(), anyLong(), anyLong());
+                .when(reservationService).saveWith(any(), any(), any(), any());
 
         // when
         assertThrows(RuntimeException.class,
