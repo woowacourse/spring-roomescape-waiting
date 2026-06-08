@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.Reservation;
@@ -28,6 +29,7 @@ public class ReservationApplicationService {
         this.waitingPromotionService = waitingPromotionService;
     }
 
+    @Transactional
     public ReservationWaiting saveWaiting(String name, LocalDate date, Long themeId, Long timeId) {
 
         Reservation reservation = reservationService.findByDateAndThemeIdAndTimeId(date, themeId, timeId);

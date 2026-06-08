@@ -135,7 +135,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS rt ON r.time_id = rt.id
                 INNER JOIN theme AS t ON r.theme_id = t.id
-                WHERE r.date = ? AND theme_id = ? AND time_id = ?;
+                WHERE r.date = ? AND theme_id = ? AND time_id = ?
+                FOR UPDATE;
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, date, themeId, timeId)
