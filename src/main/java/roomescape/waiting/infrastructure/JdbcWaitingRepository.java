@@ -77,7 +77,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findByIdForPromotion(long waitingId) {
+    public Optional<Waiting> findByIdForModification(long waitingId) {
         String sql = """
                 SELECT id, member_id, schedule_id
                 FROM waiting

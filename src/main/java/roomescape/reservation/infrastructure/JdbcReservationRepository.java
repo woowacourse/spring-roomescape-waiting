@@ -185,7 +185,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByIdForPromotion(long reservationId) {
+    public Optional<Reservation> findByIdForModification(long reservationId) {
         String sql = "SELECT * FROM reservation WHERE id = :id FOR UPDATE";
 
         MapSqlParameterSource params = new MapSqlParameterSource()

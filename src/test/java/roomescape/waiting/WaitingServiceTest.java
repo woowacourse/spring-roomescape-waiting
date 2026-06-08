@@ -150,7 +150,7 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(reservationRepository.findByIdForPromotion(reservationIdToCancel))
+        when(reservationRepository.findByIdForModification(reservationIdToCancel))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
@@ -189,7 +189,7 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
                 .thenReturn(Optional.of(reservation));
-        when(reservationRepository.findByIdForPromotion(reservationIdToCancel))
+        when(reservationRepository.findByIdForModification(reservationIdToCancel))
                 .thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
@@ -242,7 +242,7 @@ class WaitingServiceTest {
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
     void cancelByIdForUser_테스트_1() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
-        when(waitingRepository.findByIdForPromotion(waiting.getId())).thenReturn(Optional.of(waiting));
+        when(waitingRepository.findByIdForModification(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatCode(() -> waitingService.cancelByIdForUser(1L, 1L))
                 .doesNotThrowAnyException();
@@ -254,7 +254,7 @@ class WaitingServiceTest {
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
     void cancelByIdForUser_테스트_2() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
-        when(waitingRepository.findByIdForPromotion(waiting.getId())).thenReturn(Optional.of(waiting));
+        when(waitingRepository.findByIdForModification(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatThrownBy(() -> waitingService.cancelByIdForUser(1L, 2L))
                 .isInstanceOf(EscapeRoomException.class);
@@ -265,7 +265,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
     void cancelByIdForUser_테스트_3() {
-        when(waitingRepository.findByIdForPromotion(999L)).thenReturn(Optional.empty());
+        when(waitingRepository.findByIdForModification(999L)).thenReturn(Optional.empty());
 
         assertThatCode(() -> waitingService.cancelByIdForUser(999L, 1L))
                 .doesNotThrowAnyException();

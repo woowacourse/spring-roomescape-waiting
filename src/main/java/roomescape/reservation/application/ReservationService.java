@@ -49,7 +49,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelByIdForUser(long reservationId, long memberId) {
-        Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
+        Reservation reservation = reservationRepository.findByIdForModification(reservationId)
                 .orElse(null);
         if (reservation == null) {
             return;
@@ -64,7 +64,7 @@ public class ReservationService {
 
     @Transactional
     public void cancelByIdForManager(long reservationId) {
-        Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
+        Reservation reservation = reservationRepository.findByIdForModification(reservationId)
                 .orElse(null);
         if (reservation == null) {
             return;
@@ -182,7 +182,7 @@ public class ReservationService {
     }
 
     private Reservation getReservationOrThrow(long reservationId) {
-        return reservationRepository.findByIdForPromotion(reservationId)
+        return reservationRepository.findByIdForModification(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
     }
 

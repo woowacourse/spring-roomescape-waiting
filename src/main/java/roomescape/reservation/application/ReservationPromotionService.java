@@ -45,6 +45,12 @@ public class ReservationPromotionService {
         return firstWaiting;
     }
 
+    private void promoteWaitingIfPresent(Waiting waiting, long oldScheduleId) {
+        if (waiting != null) {
+            reservationRepository.save(new Reservation(null, waiting.getMemberId(), oldScheduleId));
+        }
+    }
+
     private void updateReservationSchedule(long reservationId, long newScheduleId) {
         try {
             int affectedRow = reservationRepository.updateScheduleById(reservationId, newScheduleId);
@@ -57,12 +63,6 @@ public class ReservationPromotionService {
     private void validateReservationUpdated(int affectedRow) {
         if (affectedRow != 1) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
-        }
-    }
-
-    private void promoteWaitingIfPresent(Waiting waiting, long oldScheduleId) {
-        if (waiting != null) {
-            reservationRepository.save(new Reservation(null, waiting.getMemberId(), oldScheduleId));
         }
     }
 }

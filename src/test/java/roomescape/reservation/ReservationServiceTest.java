@@ -91,7 +91,7 @@ class ReservationServiceTest {
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
         assertThatCode(() -> reservationService.cancelByIdForUser(reservationId, 1L))
@@ -105,7 +105,7 @@ class ReservationServiceTest {
         long reservationId = 1L;
         Reservation reservation = reservation(reservationId, 1L, 1L);
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.cancelByIdForUser(reservationId, 2L))
                 .isInstanceOf(EscapeRoomException.class);
@@ -121,7 +121,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
         reservationService.cancelByIdForUser(reservationId, 1L);
@@ -138,7 +138,7 @@ class ReservationServiceTest {
         ReservationDetailProjection reservationDetail = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(reservationDetail));
 
         assertThatCode(() -> reservationService.cancelByIdForManager(reservationId))
@@ -156,7 +156,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
@@ -180,7 +180,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
@@ -201,7 +201,7 @@ class ReservationServiceTest {
         Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 999L))
                 .isInstanceOf(EscapeRoomException.class);
@@ -219,7 +219,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         doThrow(new EscapeRoomException(ErrorCode.PAST_SCHEDULE))
                 .when(scheduleService)
@@ -246,7 +246,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
@@ -271,7 +271,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
-        when(reservationRepository.findByIdForPromotion(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);

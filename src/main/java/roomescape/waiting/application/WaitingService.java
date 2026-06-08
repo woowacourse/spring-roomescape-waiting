@@ -45,7 +45,7 @@ public class WaitingService {
 
     @Transactional
     public void cancelByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findByIdForPromotion(waitingId)
+        Waiting waiting = waitingRepository.findByIdForModification(waitingId)
                 .orElse(null);
         if (waiting == null) {
             return;
@@ -86,7 +86,7 @@ public class WaitingService {
     }
 
     private void cancelReservationAndPromoteFirstWaiting(long reservationId, long memberId) {
-        Reservation reservation = reservationRepository.findByIdForPromotion(reservationId)
+        Reservation reservation = reservationRepository.findByIdForModification(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
 
         if (!reservation.isSameMemberId(memberId)) {
