@@ -29,20 +29,6 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public static Reservation createNew(final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return createNew(name, ReservationSlot.createNew(date, theme, time), LocalDateTime.now());
-    }
-
-    public static Reservation createNew(
-            final String name,
-            final LocalDate date,
-            final Theme theme,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return createNew(name, ReservationSlot.createNew(date, theme, time), standardDateTime);
-    }
-
     public static Reservation createNew(
             final String name,
             final ReservationSlot slot,
@@ -50,21 +36,6 @@ public class Reservation {
     ) {
         validateReservable(slot, standardDateTime);
         return new Reservation(null, name, slot, standardDateTime);
-    }
-
-    public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return of(id, name, ReservationSlot.createNew(date, theme, time), LocalDateTime.now());
-    }
-
-    public static Reservation of(
-            final Long id,
-            final String name,
-            final LocalDate date,
-            final Theme theme,
-            final ReservationTime time,
-            final LocalDateTime createdAt
-    ) {
-        return of(id, name, ReservationSlot.createNew(date, theme, time), createdAt);
     }
 
     public static Reservation of(
@@ -80,20 +51,6 @@ public class Reservation {
     public Reservation withId(final Long id) {
         validateId(id);
         return new Reservation(id, this.name, this.slot, this.createdAt);
-    }
-
-    public Reservation withDateAndTime(final LocalDate date, final ReservationTime time) {
-        return new Reservation(this.id, this.name, ReservationSlot.createNew(date, this.slot.getTheme(), time), this.createdAt);
-    }
-
-    public Reservation withDateAndTime(
-            final LocalDate date,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        ReservationSlot changedSlot = ReservationSlot.createNew(date, this.slot.getTheme(), time);
-        validateReservable(changedSlot, standardDateTime);
-        return new Reservation(this.id, this.name, changedSlot, this.createdAt);
     }
 
     public Reservation withSlot(
@@ -116,6 +73,9 @@ public class Reservation {
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯은 비어있으면 안됩니다.");
+        }
         if (slot.isPast(standardDateTime)) {
             throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
         }

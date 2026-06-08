@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
@@ -108,7 +109,8 @@ class ReservationWaitingTest {
     private Reservation createReservation(final LocalDate date, final LocalTime time) {
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime reservationTime = ReservationTime.of(1L, time);
+        ReservationSlot slot = ReservationSlot.createNew(date, theme, reservationTime);
 
-        return Reservation.of(1L, "쿠다", date, theme, reservationTime);
+        return Reservation.of(1L, "쿠다", slot, date.minusDays(1).atStartOfDay());
     }
 }

@@ -220,8 +220,9 @@ public class ReservationService {
             final LocalDate date,
             final ReservationTime reservationTime
     ) {
+        ReservationSlot changedSlot = ReservationSlot.createNew(date, reservation.getTheme(), reservationTime);
         try {
-            return reservation.withDateAndTime(date, reservationTime, LocalDateTime.now());
+            return reservation.withSlot(changedSlot, LocalDateTime.now());
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }

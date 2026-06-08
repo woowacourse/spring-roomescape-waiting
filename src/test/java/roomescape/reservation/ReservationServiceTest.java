@@ -265,12 +265,11 @@ class ReservationServiceTest {
         private Reservation savePastReservation() {
             Theme theme = saveTheme();
             ReservationTime time = saveTime("10:00");
+            ReservationSlot slot = saveSlot(LocalDate.now().minusDays(1), theme, time);
             return reservationRepository.save(Reservation.of(
                     1L,
                     "쿠다",
-                    LocalDate.now().minusDays(1),
-                    theme,
-                    time,
+                    slot,
                     LocalDateTime.now().minusDays(2)
             ));
         }

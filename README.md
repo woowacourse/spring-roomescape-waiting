@@ -49,7 +49,7 @@
 - [X] `Reservation`의 static 편의 메서드를 제거하고 필요한 객체에게 직접 물어보도록 정리한다.
   - 외부 계층에서 날짜와 시간만 가지고 판단해야 하는 경우는 `ReservationSlot` 또는 별도 정책 객체를 사용하도록 옮기고, `Reservation`은 자신이 가진 `slot`에 대해 `reservation.isPast(...)`처럼 묻는 메서드만 남긴다.
 
-- [ ] `Reservation` 생성 경로를 줄이고 불변식 검증 위치를 정리한다.
+- [X] `Reservation` 생성 경로를 줄이고 불변식 검증 위치를 정리한다.
   - 현재 구조에서는 예약이 `slot`을 참조하므로 `ReservationSlot` 기반 생성 경로를 중심으로 남긴다. 날짜/테마/시간 조합으로 슬롯을 만드는 책임은 서비스 또는 슬롯 생성 쪽으로 이동시켜 `Reservation` 생성 경로를 줄인다.
 
 - [ ] `ReservationWaitingLine`의 `Map` 사용 이유를 검토하고 표현 계층 요구가 도메인에 들어왔는지 확인한다.
