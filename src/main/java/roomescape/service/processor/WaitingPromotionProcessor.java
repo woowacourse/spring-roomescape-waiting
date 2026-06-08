@@ -1,11 +1,9 @@
-package roomescape.service.event;
+package roomescape.service.processor;
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.Reservation;
@@ -14,26 +12,19 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.infrastructure.SlotManager;
 
 @Component
-public class ReservationChangeListener {
+public class WaitingPromotionProcessor {
     private final WaitingDao waitingDao;
     private final ReservationDao reservationDao;
     private final SlotManager slotManager;
 
-    public ReservationChangeListener(
-            WaitingDao waitingDao,
-            ReservationDao reservationDao,
-            SlotManager slotManager
-    ) {
+    public WaitingPromotionProcessor(WaitingDao waitingDao, ReservationDao reservationDao, SlotManager slotManager) {
         this.waitingDao = waitingDao;
         this.reservationDao = reservationDao;
         this.slotManager = slotManager;
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void promoteWaitingUser(ReservationChangeEvent event) {
-        EventSlot slot = event.eventSlot();
-
+    public void promoteWaiting(EventSlot slot) {
         Optional<Waiting> firstWaiting = waitingDao.findByEventSlot(slot);
 
         if (firstWaiting.isEmpty()) {

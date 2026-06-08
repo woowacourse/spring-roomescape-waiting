@@ -1,4 +1,4 @@
-package roomescape.service.event;
+package roomescape.service.processor;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -16,9 +16,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.Reservation;
@@ -32,8 +30,7 @@ import roomescape.domain.slot.time.ReservationTime;
 import roomescape.domain.waiting.Waiting;
 import roomescape.infrastructure.SlotManager;
 
-@ExtendWith(MockitoExtension.class)
-class ReservationChangeListenerTest {
+class WaitingPromotionProcessorTest {
     private final UserName userName = new UserName("브라운");
 
     private final LocalDateTime today = LocalDateTime.of(LocalDate.parse(TODAY), LocalTime.parse(NOW_TIME));
@@ -45,10 +42,9 @@ class ReservationChangeListenerTest {
             ThumbnailUrl.parse("/images/thumbnail"));
 
     private final EventSlot slot = new EventSlot(futureDate, time, theme);
-    private final ReservationChangeEvent event = new ReservationChangeEvent(slot);
     private final Waiting waiting = new Waiting(1L, userName, slot, today);
 
-    private ReservationChangeListener eventListener;
+    private WaitingPromotionProcessor promotionProcessor;
 
     @Mock
     private WaitingDao waitingDao;
@@ -59,7 +55,7 @@ class ReservationChangeListenerTest {
 
     @BeforeEach
     void setUp() {
-        eventListener = new ReservationChangeListener(waitingDao, reservationDao, slotManager);
+        promotionProcessor = new WaitingPromotionProcessor(waitingDao, reservationDao, slotManager);
     }
 
     @Test
@@ -67,7 +63,7 @@ class ReservationChangeListenerTest {
     void promoteWaiting_Success() {
         given(waitingDao.findByEventSlot(slot)).willReturn(Optional.of(waiting));
 
-        eventListener.promoteWaitingUser(event);
+        promotionProcessor.promoteWaiting(slot);
 
         then(reservationDao).should(times(1)).save(any(Reservation.class));
         then(waitingDao).should(times(1)).delete(waiting.getId());
@@ -79,7 +75,7 @@ class ReservationChangeListenerTest {
     void promoteWaiting_WhenNothingWaiting_Success() {
         given(waitingDao.findByEventSlot(slot)).willReturn(Optional.empty());
 
-        eventListener.promoteWaitingUser(event);
+        promotionProcessor.promoteWaiting(slot);
 
         then(slotManager).should(times(1)).release(slot);
         then(reservationDao).should(never()).save(any(Reservation.class));
