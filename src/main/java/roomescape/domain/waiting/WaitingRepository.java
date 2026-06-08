@@ -144,7 +144,7 @@ public class WaitingRepository {
             WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
             ORDER BY w.id
             LIMIT 1
-            FOR UPDATE
+            FOR UPDATE OF w
             """;
 
         return jdbcTemplate.query(query, waitingRowMapper,

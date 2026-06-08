@@ -164,7 +164,7 @@ public class ReservationRepository {
             JOIN reservation_time t ON r.time_id = t.id
             JOIN theme th ON r.theme_id = th.id
             WHERE r.id = ?
-            FOR UPDATE
+            FOR UPDATE OF r
             """;
 
         return jdbcTemplate.query(query, rowMapper, id).stream()

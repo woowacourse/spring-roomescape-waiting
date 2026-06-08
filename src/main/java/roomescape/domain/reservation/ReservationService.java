@@ -77,7 +77,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id, String name) {
-        reservationRepository.findById(id)
+        reservationRepository.findByIdForUpdate(id)
             .ifPresent(reservation -> {
                 reservation.validateOwner(name);
                 reservationRepository.deleteById(id);
