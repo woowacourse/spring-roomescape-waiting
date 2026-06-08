@@ -111,6 +111,28 @@ public class WaitingDao {
                 .findFirst();
     }
 
+    public Optional<Waiting> findByEventSlot(EventSlot slot) {
+        String sql = """
+                SELECT w.id, w.name, w.date, w.created_at,
+                       rt.id AS time_id, rt.start_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM waiting w
+                INNER JOIN reservation_time rt ON w.time_id = rt.id
+                INNER JOIN theme t ON w.theme_id = t.id
+                WHERE w.date = ? AND rt.id = ? AND t.id = ?
+                    ORDER BY w.created_at ASC
+                LIMIT 1
+                """;
+        return jdbcTemplate.query(
+                        sql,
+                        WAITING_ROW_MAPPER,
+                        slot.date(),
+                        slot.time().getId(),
+                        slot.theme().getId()
+                ).stream()
+                .findFirst();
+    }
+
     public List<WaitingQueryResult> findByUserName(String userName) {
         String sql = """
                 SELECT id, name, date, created_at,
@@ -136,6 +158,25 @@ public class WaitingDao {
                 sql,
                 WAITING_SEQUENCE_ROW_MAPPER,
                 userName
+        );
+    }
+
+    public List<Waiting> findUnreservedWaiting() {
+        String sql = """
+                SELECT w.date,
+                       rt.id AS time_id, rt.start_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM waiting w
+                INNER JOIN reservation_time rt ON w.time_id = rt.id
+                INNER JOIN theme t ON w.theme_id = t.id
+                LEFT JOIN reservation r
+                       ON w.date = r.date AND w.time_id = r.time_id AND w.theme_id = r.theme_id
+                WHERE r.id IS NULL
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                WAITING_ROW_MAPPER
         );
     }
 

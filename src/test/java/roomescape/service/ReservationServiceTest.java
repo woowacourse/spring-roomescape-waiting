@@ -5,7 +5,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
 import java.time.Clock;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.config.FixedClockConfig;
@@ -40,6 +43,7 @@ import roomescape.infrastructure.SlotManager;
 import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
+import roomescape.service.event.ReservationChangeEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
@@ -69,11 +73,13 @@ public class ReservationServiceTest {
     private ReservationRejectLogger reservationRejectLogger;
     @Mock
     private SlotManager slotManager;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @BeforeEach
     void setUp() {
         reservationService = new ReservationService(reservationDao, reservationTimeDao, themeDao, waitingDao,
-                reservationRejectLogger, slotManager, clock);
+                reservationRejectLogger, slotManager, eventPublisher, clock);
     }
 
     @Test
@@ -164,7 +170,55 @@ public class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 삭제한다.")
+    @DisplayName("예약을 변경하고 대기 승인 이벤트를 발행한다.")
+    void changeDateTimeReservation_Success() {
+        LocalDate newDate = futureDate.plusDays(1);
+        Long reservationId = 1L;
+        Reservation originReservation = Reservation.restore(reservationId, UserName.parse(name), futureDate, time,
+                theme,
+                ReservationStatus.CONFIRMED);
+        ReservationCommand command = new ReservationCommand(name, newDate, time.getId(), theme.getId());
+        EventSlot modifiedEventSlot = new EventSlot(newDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(originReservation));
+        given(reservationTimeDao.findById(command.timeId())).willReturn(Optional.of(time));
+        given(slotManager.tryAcquire(modifiedEventSlot)).willReturn(true);
+        given(reservationDao.update(any(Reservation.class))).willReturn(true);
+
+        ReservationResult result = reservationService.changeDateTime(reservationId, command);
+
+        then(slotManager).should(times(1)).tryAcquire(modifiedEventSlot);
+        then(reservationDao).should(times(1)).update(any(Reservation.class));
+        then(eventPublisher).should(times(1)).publishEvent(any(ReservationChangeEvent.class));
+
+        assertThat(result.date()).isEqualTo(newDate);
+    }
+
+    @Test
+    @DisplayName("동시에 같은 테마로 변경하면 예외가 발생한다.")
+    void changeDateTimeReservation_WhenConflict_ThrowsConflictException() {
+        LocalDate newDate = futureDate.plusDays(1);
+        Long reservationId = 1L;
+        Reservation originReservation = Reservation.restore(reservationId, UserName.parse(name), futureDate, time,
+                theme,
+                ReservationStatus.CONFIRMED);
+        ReservationCommand command = new ReservationCommand(name, newDate, time.getId(), theme.getId());
+        EventSlot modifiedEventSlot = new EventSlot(newDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(originReservation));
+        given(reservationTimeDao.findById(command.timeId())).willReturn(Optional.of(time));
+        given(slotManager.tryAcquire(modifiedEventSlot)).willReturn(false);
+
+        assertThatThrownBy(() -> reservationService.changeDateTime(reservationId, command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+
+        then(reservationDao).should(never()).update(any());
+        then(eventPublisher).should(never()).publishEvent(any());
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하고 대기 승인 이벤트를 발행한다.")
     void deleteReservation_Success() {
         Long reservationId = 1L;
         Reservation reservation = Reservation.restore(reservationId, UserName.parse(name), futureDate, time, theme,
@@ -173,7 +227,7 @@ public class ReservationServiceTest {
 
         assertDoesNotThrow(() -> reservationService.deleteReservation(reservationId, name));
 
-        verify(slotManager).release(any(EventSlot.class));
-        verify(reservationDao).update(any(Reservation.class));
+        then(reservationDao).should(times(1)).update(any(Reservation.class));
+        then(eventPublisher).should(times(1)).publishEvent(any(ReservationChangeEvent.class));
     }
 }

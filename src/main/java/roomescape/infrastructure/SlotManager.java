@@ -37,15 +37,6 @@ public class SlotManager {
         return confirmedSlots.putIfAbsent(eventSlot, Boolean.TRUE) == null;
     }
 
-    public boolean tryChange(EventSlot originEventSlot, EventSlot modifiedEventSlot) {
-        if (confirmedSlots.putIfAbsent(modifiedEventSlot, Boolean.TRUE) == null) {
-            confirmedSlots.remove(originEventSlot);
-            return true;
-        }
-
-        return false;
-    }
-
     public void release(EventSlot eventSlot) {
         confirmedSlots.remove(eventSlot);
     }
