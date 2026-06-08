@@ -30,8 +30,7 @@ import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.ReservationSlotHasWaitingException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
-import roomescape.reservation.service.dto.PopularThemesResult;
+import roomescape.reservation.service.dto.PopularThemeResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
@@ -181,28 +180,25 @@ class ReservationServiceTest {
     void findReservationsByNameTest() {
         //given
         when(reservationRepository.findAllByName("brown"))
-                .thenReturn(List.of(new Reservation(
+                .thenReturn(List.of(
+                        new ReservationWithStatusResult(
                                 1L,
                                 "brown",
                                 LocalDate.of(2026, 5, 15),
                                 new ReservationTime(1L, LocalTime.of(10, 0)),
-                                new Theme(1L, "이름", "설명", "thumbnailUrl")
-                        ))
-                );
-
-        when(reservationWaitingRepository.findAllByName("brown"))
-                .thenReturn(List.of(new ReservationWaiting(
+                                new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                                "reserved",
+                                0L
+                        ), new ReservationWithStatusResult(
                                 1L,
                                 "brown",
                                 LocalDate.of(2026, 5, 15),
                                 new ReservationTime(2L, LocalTime.of(11, 0)),
-                                new Theme(1L, "이름", "설명", "thumbnailUrl")
-                        ))
-                );
-
-        when(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
-                any(), any(), any(), any()
-        )).thenReturn(0L);
+                                new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                                "waiting",
+                                1L
+                        )
+                ));
 
         //when
         List<ReservationWithStatusResult> result = reservationService.findReservationsByName("brown");
@@ -247,7 +243,7 @@ class ReservationServiceTest {
                 LocalDate.of(2026, 5, 1),
                 LocalDate.of(2026, 5, 7), 10
                 )).thenReturn(List.of(
-                        new PopularThemeQueryResult(
+                        new PopularThemeResult(
                                 1L,
                                 "테마",
                                 "설명",
@@ -257,12 +253,12 @@ class ReservationServiceTest {
         );
 
         //when
-        PopularThemesResult result = reservationService.findPopularThemes(7, 10);
+        List<PopularThemeResult> results = reservationService.findPopularThemes(7, 10);
 
         //then
         assertAll(
-                () -> assertThat(result.popularThemes()).containsExactly(
-                        new PopularThemeQueryResult(
+                () -> assertThat(results).containsExactly(
+                        new PopularThemeResult(
                                 1L,
                                 "테마",
                                 "설명",

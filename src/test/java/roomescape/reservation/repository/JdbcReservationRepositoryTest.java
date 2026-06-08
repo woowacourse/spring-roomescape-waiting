@@ -20,7 +20,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
+import roomescape.reservation.service.dto.PopularThemeResult;
+import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
+import roomescape.reservationWaiting.repository.JdbcReservationWaitingRepository;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -32,9 +36,12 @@ class JdbcReservationRepositoryTest {
 
     ReservationRepository reservationRepository;
 
+    ReservationWaitingRepository reservationWaitingRepository;
+
     @Autowired
     public JdbcReservationRepositoryTest(JdbcTemplate jdbcTemplate) {
         this.reservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        this.reservationWaitingRepository = new JdbcReservationWaitingRepository(jdbcTemplate);
     }
 
     @Test
@@ -104,8 +111,8 @@ class JdbcReservationRepositoryTest {
         reservationRepository.deleteById(saved.getId());
 
         // then
-        List<Reservation> reservations = reservationRepository.findAllByName("브라");
-        assertThat(reservations).isEmpty();
+        List<ReservationWithStatusResult> results = reservationRepository.findAllByName("브라");
+        assertThat(results).isEmpty();
     }
 
     @Test
@@ -266,23 +273,31 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("이름에 해당하는 모든 예약 목록을 조회한다.")
+    @DisplayName("이름에 해당하는 모든 예약과 대기 목록을 (날짜, 시간, 순번) 순서대로 조회한다.")
     void findAllByName() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved1 = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
-        Reservation saved2 = saveReservation("brown", LocalDate.of(2024, 5, 2), time, theme);
-        saveReservation("poppy", LocalDate.of(2024, 5, 3), time, theme);
+        Reservation reservation1 = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservation("poppy", LocalDate.of(2024, 5, 2), time, theme);
+        Reservation reservation2 = saveReservation("brown", LocalDate.of(2024, 5, 3), time, theme);
+
+        ReservationWaiting waiting1 = reservationWaitingRepository.save(ReservationWaiting.of(
+                "brown", LocalDate.of(2024, 5, 2), time, theme
+        ));
 
         // when
-        List<Reservation> reservations = reservationRepository.findAllByName("brown");
+        List<ReservationWithStatusResult> results = reservationRepository.findAllByName("brown");
 
         // then
         assertAll(
-                () -> assertThat(reservations).hasSize(2),
-                () -> assertThat(reservations).containsExactly(saved1, saved2)
+                () -> assertThat(results).hasSize(3),
+                () -> assertThat(results).containsExactly(
+                        new ReservationWithStatusResult(reservation1.getId(), reservation1.getName(), reservation1.getDate(), reservation1.getReservationTime(), reservation1.getTheme(), "reserved", 0L),
+                        new ReservationWithStatusResult(waiting1.getId(), waiting1.getName(), waiting1.getDate(), waiting1.getTime(), waiting1.getTheme(), "waiting", 1L),
+                        new ReservationWithStatusResult(reservation2.getId(), reservation2.getName(), reservation2.getDate(), reservation2.getReservationTime(), reservation2.getTheme(), "reserved", 0L)
+                )
         );
     }
 
@@ -314,7 +329,7 @@ class JdbcReservationRepositoryTest {
         saveReservation("outOfRangeReservation", today.minusDays(8), time, carrotTheme);
 
         // when
-        List<PopularThemeQueryResult> popularThemes = reservationRepository.findPopularThemes(
+        List<PopularThemeResult> popularThemes = reservationRepository.findPopularThemes(
                 LocalDate.of(2026, 4, 29),
                 LocalDate.of(2026, 5, 5),
                 2
@@ -322,7 +337,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(popularThemes)
-                .extracting(PopularThemeQueryResult::name)
+                .extracting(PopularThemeResult::name)
                 .containsExactly("우테코", "페어");
     }
 

@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.ReservationSlotHasWaitingException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.dto.PopularThemesResult;
+import roomescape.reservation.service.dto.PopularThemeResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
@@ -86,64 +85,20 @@ public class ReservationService {
     }
 
     public List<ReservationWithStatusResult> findReservationsByName(String name) {
-        List<ReservationWithStatusResult> reserved = reservationRepository.findAllByName(name)
-                .stream()
-                .map(
-                        reservation -> new ReservationWithStatusResult(
-                                reservation.getId(),
-                                reservation.getName(),
-                                reservation.getDate(),
-                                reservation.getReservationTime(),
-                                reservation.getTheme(),
-                                "reserved",
-                                0L
-                        )
-                )
-                .toList();
-
-        List<ReservationWithStatusResult> waiting = reservationWaitingRepository.findAllByName(name)
-                .stream()
-                .map(
-                        reservationWaiting -> new ReservationWithStatusResult(
-                                reservationWaiting.getId(),
-                                reservationWaiting.getName(),
-                                reservationWaiting.getDate(),
-                                reservationWaiting.getTime(),
-                                reservationWaiting.getTheme(),
-                                "waiting",
-                                calculateOrder(reservationWaiting)
-                        )).toList();
-
-        List<ReservationWithStatusResult> results = new ArrayList<>();
-
-        results.addAll(reserved);
-        results.addAll(waiting);
-
-        return results;
-    }
-
-    private long calculateOrder(ReservationWaiting reservationWaiting) {
-        return reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime().getId(),
-                reservationWaiting.getTheme().getId(),
-                reservationWaiting.getId()
-        ) + 1;
+        return reservationRepository.findAllByName(name);
     }
 
     public List<Reservation> findReservations() {
         return reservationRepository.findAll();
     }
 
-    public PopularThemesResult findPopularThemes(int period, int limit) {
+    public List<PopularThemeResult> findPopularThemes(int period, int limit) {
         int oneDayDifference = 1;
 
         LocalDate to = LocalDate.now(clock).minusDays(oneDayDifference);
         LocalDate from = to.minusDays(period).plusDays(oneDayDifference);
 
-        return new PopularThemesResult(
-                reservationRepository.findPopularThemes(from, to, limit)
-        );
+        return reservationRepository.findPopularThemes(from, to, limit);
     }
 
     @Transactional
