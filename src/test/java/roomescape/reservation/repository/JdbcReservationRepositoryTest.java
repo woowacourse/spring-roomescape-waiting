@@ -72,49 +72,6 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("id로 특정 예약을 락과 함께 조회한다.")
-    public void findByIdWithLock() {
-        // given
-        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        ReservationSlot reservationSlot = sqlFixtureGenerator.insertReservationSlot(LocalDate.of(2023, 8, 5), time, theme);
-        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", reservationSlot, CONFIRMED);
-
-        // when
-        Optional<Reservation> optionalReservation = reservationRepository.findByIdWithLock(reservation.getId());
-
-        // then
-        assertThat(optionalReservation).isPresent();
-        assertThat(optionalReservation.get())
-                .extracting(
-                        Reservation::getId,
-                        Reservation::getGuestName,
-                        Reservation::getDate,
-                        Reservation::getTime,
-                        Reservation::getTheme
-                ).containsExactly(
-                        reservation.getId(),
-                        reservation.getGuestName(),
-                        reservationSlot.getDate(),
-                        reservationSlot.getTime(),
-                        reservationSlot.getTheme()
-                );
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 예약은 락과 함께 조회되지 않는다.")
-    public void findByIdWithLock_notFound() {
-        // given
-        Long notFoundId = 1L;
-
-        // when
-        Optional<Reservation> optionalReservation = reservationRepository.findByIdWithLock(notFoundId);
-
-        // then
-        assertThat(optionalReservation).isEmpty();
-    }
-
-    @Test
     @DisplayName("예약의 목록 중 취소된 예약을 제외하고 페이지 단위로 조회한다")
     void findAllByStatusCanceledNotWithPaging() {
         // given

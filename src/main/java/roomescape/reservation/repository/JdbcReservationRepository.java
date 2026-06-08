@@ -76,21 +76,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByIdWithLock(Long id) {
-        List<Long> lockedIds = jdbcTemplate.queryForList("""
-                SELECT id
-                FROM reservation
-                WHERE id = :id
-                FOR UPDATE
-                """, new MapSqlParameterSource("id", id), Long.class);
-
-        if (lockedIds.isEmpty()) {
-            return Optional.empty();
-        }
-        return findById(id);
-    }
-
-    @Override
     public Optional<ReservationWaitingDto> findWaitingById(Long id) {
         return jdbcTemplate.query("""
                         SELECT *
