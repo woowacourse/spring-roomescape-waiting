@@ -72,6 +72,21 @@ public class ReservationService {
         return saveReservation(reservation);
     }
 
+    public void promote(
+        final CustomerName customerName,
+        final LocalDate reservationDate,
+        final ReservationTime time,
+        final Theme theme
+    ) {
+        final Reservation promotedReservation = Reservation.promote(
+            customerName,
+            reservationDate,
+            time,
+            theme
+        );
+        saveReservation(promotedReservation);
+    }
+
     public Reservation updateByCustomer(final Long reservationId, final LocalDate date, final ReservationTime time) {
         final Reservation originReservation = getReservation(reservationId);
         originReservation.validateModifiableByCustomer(LocalDate.now(clock));
@@ -96,11 +111,12 @@ public class ReservationService {
         deleteReservation(reservationId);
     }
 
-    private Reservation updateSchedule(final LocalDate date, final ReservationTime time, final Reservation originReservation) {
+    private Reservation updateSchedule(final LocalDate date, final ReservationTime time,
+                                       final Reservation originReservation) {
         final Reservation updatedReservation = originReservation.changeSchedule(
-                date,
-                time,
-                LocalDateTime.now(clock)
+            date,
+            time,
+            LocalDateTime.now(clock)
         );
 
         return updateReservation(updatedReservation);

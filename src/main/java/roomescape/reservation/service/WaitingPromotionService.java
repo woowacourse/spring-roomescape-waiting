@@ -23,8 +23,8 @@ public class WaitingPromotionService {
             themeId
         ).ifPresent(waiting -> {
             waitingService.deleteByIdForPromotion(waiting.getId());
-            reservationService.create(
-                waiting.getCustomerNameValue(),
+            reservationService.promote(
+                waiting.getCustomerName(),
                 waiting.getReservationDate(),
                 waiting.getTime(),
                 waiting.getTheme()
