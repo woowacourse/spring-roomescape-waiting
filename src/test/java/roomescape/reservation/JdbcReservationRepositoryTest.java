@@ -72,7 +72,7 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        reservationRepository.deleteByIdAndMemberId(savedReservation.getId(), MEMBER_ID);
+        reservationRepository.deleteById(savedReservation.getId());
 
         List<ReservationDetailProjection> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(4);
@@ -96,26 +96,6 @@ class JdbcReservationRepositoryTest {
         assertThat(result).hasSize(4);
         assertThat(result).extracting(ReservationDetailProjection::memberId)
                 .containsOnly(MEMBER_ID);
-    }
-
-    @Test
-    @DisplayName("예약 id와 회원 id가 일치하면 예약을 삭제할 수 있다.")
-    void matching_reservation_and_member_ids_delete_reservation() {
-        reservationRepository.deleteByIdAndMemberId(1L, MEMBER_ID);
-
-        assertThat(reservationRepository.findAll())
-                .extracting(ReservationDetailProjection::id)
-                .doesNotContain(1L);
-    }
-
-    @Test
-    @DisplayName("회원 id가 일치하지 않으면 예약은 삭제되지 않는다.")
-    void mismatched_member_id_does_not_delete_reservation() {
-        reservationRepository.deleteByIdAndMemberId(1L, 999L);
-
-        assertThat(reservationRepository.findAll())
-                .extracting(ReservationDetailProjection::id)
-                .contains(1L);
     }
 
 }

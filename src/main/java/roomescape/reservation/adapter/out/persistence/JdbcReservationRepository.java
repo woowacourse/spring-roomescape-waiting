@@ -157,52 +157,12 @@ public class JdbcReservationRepository implements ReservationRepository {
         return template.query(sql, params, reservationDetailFindRowMapper);
     }
 
-    public void deleteByIdAndMemberId(long reservationId, long memberId) {
-        String sql = "DELETE FROM reservation WHERE id = :reservationId AND member_id = :memberId";
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("reservationId", reservationId)
-                .addValue("memberId", memberId);
-
-        template.update(sql, params);
-    }
-
     @Override
     public void deleteById(long reservationId) {
         String sql = "DELETE FROM reservation WHERE id = :reservationId";
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("reservationId", reservationId);
         template.update(sql, params);
-    }
-
-    @Override
-    public Optional<ReservationDetailProjection> findDetailById(long reservationId) {
-        String sql = """
-                SELECT
-                    r.id AS reservation_id,
-                    m.id AS member_id,
-                    m.name AS member_name,
-                    s.date,
-                    t.id AS theme_id,
-                    t.name AS theme_name,
-                    t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url,
-                    rt.id AS time_id,
-                    rt.start_at
-                FROM reservation r
-                JOIN slot s ON r.slot_id = s.id
-                JOIN theme t ON s.theme_id = t.id
-                JOIN reservation_time rt ON s.time_id = rt.id
-                JOIN member m ON r.member_id = m.id
-                 WHERE r.id = :id
-                """;
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", reservationId);
-
-        return template.query(sql, params, reservationDetailFindRowMapper)
-                .stream()
-                .findFirst();
     }
 
     @Override

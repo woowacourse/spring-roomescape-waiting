@@ -18,8 +18,6 @@ public interface ReservationRepository {
 
     void deleteById(long reservationId);
 
-    Optional<ReservationDetailProjection> findDetailById(long reservationId);
-
     Optional<Reservation> findById(long reservationId);
 
     boolean existsBySlotId(long slotId);
