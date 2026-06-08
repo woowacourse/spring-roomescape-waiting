@@ -10,6 +10,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
+import roomescape.dto.reservationWaiting.ReservationWaitingSequence;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
@@ -58,13 +59,15 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting = reservationWaitingReq.toReservationWaiting(reservationTimeById, themeById);
         Long id = reservationWaitingUpdateDao.create(reservationWaiting);
 
-        return ReservationWaitingResponse.from(reservationWaitingQueryDao.findReservationWaitingById(id)
-                .orElseThrow(() -> new WaitingNotFoundException(id)));
+        ReservationWaitingSequence createdWaitingSequence = reservationWaitingQueryDao.findReservationWaitingById(id)
+                .orElseThrow(() -> new WaitingNotFoundException(id));
+        return ReservationWaitingResponse.from(createdWaitingSequence.reservationWaiting(), createdWaitingSequence.sequence());
     }
 
     public void delete(Long id, String name) {
-        ReservationWaiting reservationWaiting =  reservationWaitingQueryDao.findReservationWaitingById(id)
-                .orElseThrow(() -> new WaitingNotFoundException(id));
+        ReservationWaiting reservationWaiting = reservationWaitingQueryDao.findReservationWaitingById(id)
+                .orElseThrow(() -> new WaitingNotFoundException(id))
+                .reservationWaiting();
 
         reservationWaiting.validateOwner(name);
         reservationWaiting.validatePastDateTime();
@@ -75,7 +78,7 @@ public class ReservationWaitingService {
     public List<ReservationWaitingResponse> readAll() {
         return reservationWaitingQueryDao.findAllReservationWaiting()
                 .stream()
-                .map(ReservationWaitingResponse::from)
+                .map(waitingSequence -> ReservationWaitingResponse.from(waitingSequence.reservationWaiting(), waitingSequence.sequence()))
                 .toList();
     }
 }

@@ -22,6 +22,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
+import roomescape.dto.reservationWaiting.ReservationWaitingSequence;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationTimeNotFoundException;
@@ -62,7 +63,7 @@ public class ReservationWaitingServiceTest {
     @Test
     void 예약_대기열이_정상_생성된다() {
         ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", now, 1L, 1L);
-        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), 1L, LocalDateTime.now());
+        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), LocalDateTime.now());
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
@@ -71,7 +72,7 @@ public class ReservationWaitingServiceTest {
                 Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
         when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(createdWaiting));
+        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(new ReservationWaitingSequence(createdWaiting, 1L)));
 
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingRequest);
 
@@ -144,16 +145,16 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기열이_정상_삭제된다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), 1L, LocalDateTime.now());
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), LocalDateTime.now());
+        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(new ReservationWaitingSequence(reservationWaiting, 1L)));
 
         assertThatCode(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트")).doesNotThrowAnyException();
     }
 
     @Test
     void 과거_예약_대기열_삭제를_시도하면_예외가_발생한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), 1L, LocalDateTime.now());
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), LocalDateTime.now());
+        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(new ReservationWaitingSequence(reservationWaiting, 1L)));
 
         assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트"))
                 .isInstanceOf(ExpiredDateTimeException.class);

@@ -12,6 +12,7 @@ import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.dto.reservationWaiting.ReservationWaitingSequence;
 
 @Repository
 public class ReservationWaitingQueryDao {
@@ -49,7 +50,7 @@ public class ReservationWaitingQueryDao {
                 ) as ranked ON w.id = ranked.id
                 """;
 
-    private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (resultSet, rowNum) -> {
+    private final RowMapper<ReservationWaitingSequence> reservationWaitingRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
                 resultSet.getObject("time_start_at", LocalTime.class)
@@ -68,13 +69,14 @@ public class ReservationWaitingQueryDao {
                 theme
         );
 
-        return new ReservationWaiting(
+        ReservationWaiting reservationWaiting = new ReservationWaiting(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 slot,
-                resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );
+
+        return new ReservationWaitingSequence(reservationWaiting, resultSet.getLong("sequence"));
     };
 
     public boolean isExistByNameAndSlot(String name, ReservationSlot slot) {
@@ -91,18 +93,18 @@ public class ReservationWaitingQueryDao {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId()));
     }
 
-    public Optional<ReservationWaiting> findReservationWaitingById(long id) {
+    public Optional<ReservationWaitingSequence> findReservationWaitingById(long id) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.id = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, id)
                 .stream()
                 .findFirst();
     }
 
-    public List<ReservationWaiting> findAllReservationWaiting() {
+    public List<ReservationWaitingSequence> findAllReservationWaiting() {
         return jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL, reservationWaitingRowMapper);
     }
 
-    public List<ReservationWaiting> findAllByName(String name) {
+    public List<ReservationWaitingSequence> findAllByName(String name) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.name = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, name);
     }
@@ -110,6 +112,8 @@ public class ReservationWaitingQueryDao {
     public Optional<ReservationWaiting> findFirstWaitingBySlot(ReservationSlot slot) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.date = ? and w.time_id = ? and w.theme_id = ? and ranked.sequence = 1";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, slot.getDate(), slot.getTimeId(), slot.getThemeId())
-                .stream().findFirst();
+                .stream()
+                .findFirst()
+                .map(ReservationWaitingSequence::reservationWaiting);
     }
 }

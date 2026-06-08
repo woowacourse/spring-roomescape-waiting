@@ -186,7 +186,7 @@ class ReservationServiceTest {
     @Test
     void 대기_있는_예약_취소_시_대기_1번이_예약으로_전환된다() {
         Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(future, time, theme), LocalDateTime.now());
-        ReservationWaiting waiting = new ReservationWaiting(1L, "네오", new ReservationSlot(future, time, theme), 1L, LocalDateTime.now());
+        ReservationWaiting waiting = new ReservationWaiting(1L, "네오", new ReservationSlot(future, time, theme), LocalDateTime.now());
         when(reservationQueryingDao.findReservationById(1L)).thenReturn(Optional.of(reservation));
         when(reservationWaitingQueryDao.findFirstWaitingBySlot(any())).thenReturn(Optional.of(waiting));
 

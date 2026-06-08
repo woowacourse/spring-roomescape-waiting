@@ -27,11 +27,11 @@ public class ReservationWaitingResponse {
         this.createdAt = createdAt;
     }
 
-    public static ReservationWaitingResponse from(ReservationWaiting reservationWaiting) {
+    public static ReservationWaitingResponse from(ReservationWaiting reservationWaiting, Long sequence) {
         ReservationTimeResponse reservationTimeResponse = ReservationTimeResponse.from(reservationWaiting.getTime());
         ThemeResponse themeResponse = ThemeResponse.from(reservationWaiting.getTheme());
         return new ReservationWaitingResponse(reservationWaiting.getId(), reservationWaiting.getName(), reservationWaiting.getDate(), reservationTimeResponse, themeResponse,
-                reservationWaiting.getSequence(), reservationWaiting.getCreatedAt());
+                sequence, reservationWaiting.getCreatedAt());
     }
 
     public Long getId() {

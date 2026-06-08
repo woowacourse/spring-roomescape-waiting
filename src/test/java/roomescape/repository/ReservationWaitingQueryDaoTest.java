@@ -50,7 +50,7 @@ public class ReservationWaitingQueryDaoTest {
     @Test
     void 예약_대기가_id로_정상_조회한다() {
         assertThat(reservationWaitingQueryingDao.findReservationWaitingById(1).isPresent()).isTrue();
-        assertThat(reservationWaitingQueryingDao.findReservationWaitingById(1).get().getName()).isEqualTo("테스트");
+        assertThat(reservationWaitingQueryingDao.findReservationWaitingById(1).get().reservationWaiting().getName()).isEqualTo("테스트");
     }
 
     @Test
@@ -61,7 +61,7 @@ public class ReservationWaitingQueryDaoTest {
     @Test
     void 예약_대기가_이름으로_정상_조회한다() {
         assertThat(reservationWaitingQueryingDao.findAllByName("테스트").size()).isEqualTo(1);
-        assertThat(reservationWaitingQueryingDao.findAllByName("테스트").getFirst().getCreatedAt())
+        assertThat(reservationWaitingQueryingDao.findAllByName("테스트").getFirst().reservationWaiting().getCreatedAt())
                 .isEqualTo(LocalDateTime.parse("2026-05-15T10:30:00"));
     }
 

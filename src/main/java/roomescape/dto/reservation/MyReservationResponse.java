@@ -38,7 +38,7 @@ public class MyReservationResponse {
         );
     }
 
-    public static MyReservationResponse fromWaiting(ReservationWaiting reservationWaiting) {
+    public static MyReservationResponse fromWaiting(ReservationWaiting reservationWaiting, Long sequence) {
         return new MyReservationResponse(
                 null,
                 reservationWaiting.getId(),
@@ -46,7 +46,7 @@ public class MyReservationResponse {
                 ReservationTimeResponse.from(reservationWaiting.getTime()),
                 ThemeResponse.from(reservationWaiting.getTheme()),
                 ReservationStatus.WAITING,
-                reservationWaiting.getSequence()
+                sequence
         );
     }
 

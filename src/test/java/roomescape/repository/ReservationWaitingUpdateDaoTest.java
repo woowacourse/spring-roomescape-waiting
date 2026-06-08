@@ -73,7 +73,6 @@ public class ReservationWaitingUpdateDaoTest {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 slot,
-                resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );
     };

@@ -14,7 +14,6 @@ public class ReservationWaiting {
     private Long id;
     private final String name;
     private final ReservationSlot slot;
-    private Long sequence;
     private final LocalDateTime createdAt;
 
     public ReservationWaiting(String name, ReservationSlot slot) {
@@ -23,11 +22,10 @@ public class ReservationWaiting {
         this.createdAt = LocalDateTime.now();
     }
 
-    public ReservationWaiting(Long id, String name, ReservationSlot slot, Long sequence, LocalDateTime createdAt) {
+    public ReservationWaiting(Long id, String name, ReservationSlot slot, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.slot = slot;
-        this.sequence = sequence;
         this.createdAt = createdAt;
     }
 
@@ -49,10 +47,6 @@ public class ReservationWaiting {
 
     public Theme getTheme() {
         return slot.getTheme();
-    }
-
-    public Long getSequence() {
-        return sequence;
     }
 
     public LocalDateTime getCreatedAt() {

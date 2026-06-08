@@ -64,7 +64,7 @@ public class ReservationService {
 
         List<MyReservationResponse> waitings = reservationWaitingQueryDao.findAllByName(name)
                 .stream()
-                .map(MyReservationResponse::fromWaiting)
+                .map(waitingSequence -> MyReservationResponse.fromWaiting(waitingSequence.reservationWaiting(), waitingSequence.sequence()))
                 .toList();
 
         return Stream.concat(reservations.stream(), waitings.stream())
