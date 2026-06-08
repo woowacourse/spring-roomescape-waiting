@@ -35,7 +35,7 @@ CREATE TABLE reservation
     slot_id           BIGINT      NOT NULL,
     name              VARCHAR(20) NOT NULL,
     status            VARCHAR(20) NOT NULL,
-    created_at        TIMESTAMP   NOT NULL,
+    created_at        DATETIME    NOT NULL,
     confirmed_slot_id BIGINT GENERATED ALWAYS AS (CASE WHEN status = 'CONFIRMED' THEN slot_id END),
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id),
