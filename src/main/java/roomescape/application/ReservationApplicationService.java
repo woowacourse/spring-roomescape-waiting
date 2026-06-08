@@ -135,7 +135,11 @@ public class ReservationApplicationService {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
         }
-        promoteNextWaitingOrDelete(reservation);
+        reservationWaitingService.findEarliestByReservationId(reservation.getId())
+                .ifPresentOrElse(
+                        waiting -> promoteToReservation(reservation, waiting),
+                        () -> reservationService.deleteReservation(reservation.getId())
+                );
     }
 
     @Transactional
@@ -145,10 +149,6 @@ public class ReservationApplicationService {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_DELETE_REJECTED);
         }
-        promoteNextWaitingOrDelete(reservation);
-    }
-
-    private void promoteNextWaitingOrDelete(Reservation reservation) {
         reservationWaitingService.findEarliestByReservationId(reservation.getId())
                 .ifPresentOrElse(
                         waiting -> promoteToReservation(reservation, waiting),
