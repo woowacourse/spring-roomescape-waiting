@@ -16,7 +16,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.Reservation;
@@ -30,6 +32,7 @@ import roomescape.domain.slot.time.ReservationTime;
 import roomescape.domain.waiting.Waiting;
 import roomescape.infrastructure.SlotManager;
 
+@ExtendWith(MockitoExtension.class)
 class WaitingPromotionProcessorTest {
     private final UserName userName = new UserName("브라운");
 
