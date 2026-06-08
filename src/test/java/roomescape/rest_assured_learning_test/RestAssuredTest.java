@@ -9,11 +9,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 @Disabled
-public class RestAssuredTest {
+class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured Get 요청 기본")
-    public void get_default() {
+    void get_default() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .when()
@@ -26,33 +26,33 @@ public class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured Get 요청 심화1- queryParam")
-    public void get_deep1() {
+    void get_deep1() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .queryParam("userId", 1)
-        .when()
+                .when()
                 .get("/posts")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("JSON_PATH", notNullValue());
     }
 
     @Test
     @DisplayName("RestAssured Get 요청 심화2- pathParam")
-    public void get_deep2() {
+    void get_deep2() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .pathParam("id", 1)
-        .when()
+                .when()
                 .get("/posts/{id}")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("id", equalTo(1));
     }
 
     @Test
     @DisplayName("RestAssured Post 요청")
-    public void post() {
+    void post() {
         String requestBody = """
         {
             "title": "hello",
@@ -65,17 +65,16 @@ public class RestAssuredTest {
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .header("Content-Type", "application/json")
                 .body(requestBody)
-        .when()
+                .when()
                 .post("/posts")
-        .then()
+                .then()
                 .statusCode(201)
                 .body("title", equalTo("hello"));
-
     }
-    
+
     @Test
     @DisplayName("RestAssured Put 요청")
-    public void put() {
+    void put() {
         String requestBody = """
             {
               "id": 1,
@@ -89,9 +88,9 @@ public class RestAssuredTest {
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .header("Content-Type", "application/json")
                 .body(requestBody)
-        .when()
+                .when()
                 .put("/posts/1")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("id", equalTo(1))
                 .body("title", equalTo("updated title"))
@@ -101,12 +100,12 @@ public class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured DELETE 요청")
-    public void delete() {
+    void delete() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
-        .when()
+                .when()
                 .delete("/posts/1")
-        .then()
+                .then()
                 .statusCode(200);
     }
 }

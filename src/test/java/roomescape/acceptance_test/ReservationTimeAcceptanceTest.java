@@ -10,11 +10,11 @@ import java.time.LocalTime;
 
 import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.*;
 
-public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
+class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("예약 시간 목록 조회")
-    public void scenario1() {
+    void scenario1() {
         // given
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(10, 30));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(request);
@@ -28,7 +28,7 @@ public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("중복 예약 시간 생성")
-    public void scenario2() {
+    void scenario2() {
         // given
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(10, 30));
         예약_시간_생성을_요청하고(request);

@@ -18,19 +18,32 @@ CREATE TABLE reservation_time
     UNIQUE (start_at, delete_token)
 );
 
+CREATE TABLE reservation_slot
+(
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    date     DATE   NOT NULL,
+    time_id  BIGINT NOT NULL,
+    theme_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (date, time_id, theme_id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
 CREATE TABLE reservation
 (
     id               BIGINT       NOT NULL AUTO_INCREMENT,
     guest_name       VARCHAR(255) NOT NULL,
-    date             DATE         NOT NULL,
-    time_id          BIGINT       NOT NULL,
-    theme_id         BIGINT       NOT NULL,
-    cancel_token     BIGINT       NOT NULL DEFAULT 0,
+    slot_id          BIGINT       NOT NULL,
     status           VARCHAR(50)  NOT NULL,
     last_modified_at TIMESTAMP    NOT NULL,
+    confirm_token    varchar(36)  NOT NULL DEFAULT '0',
+    waiting_token    varchar(36)  NOT NULL DEFAULT '0',
 
     PRIMARY KEY (id),
-    UNIQUE (guest_name, date, time_id, theme_id, cancel_token),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    CONSTRAINT uk_reservation_confirmed_slot
+        UNIQUE (slot_id, confirm_token),
+    CONSTRAINT uk_reservation_waiting_guest_slot
+        UNIQUE (guest_name, slot_id, waiting_token),
+    FOREIGN KEY (slot_id) REFERENCES reservation_slot (id)
 );

@@ -50,9 +50,7 @@ public class ReservationValidator {
 
     private void validateNotDuplicated(Reservation reservation) {
         if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
-                reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getThemeId(),
+                reservation.getReservationSlot(),
                 reservation.getGuestName()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
@@ -60,13 +58,13 @@ public class ReservationValidator {
     }
 
     private static void validateIsSameDateTime(Reservation original, LocalDate changedDate, Long changedTimeId) {
-        if(original.isSameDateTime(changedDate, changedTimeId)) {
+        if (original.isSameDateTime(changedDate, changedTimeId)) {
             throw new DomainException(ReservationErrorCode.CANNOT_EDIT_SAME_DATE_TIME);
         }
     }
 
     /**
-     *  변경된 예약 시간이 과거 시간일 때
+     * 변경된 예약 시간이 과거 시간일 때
      */
     private void validateNotPast(Reservation reservation) {
         if (reservation.isPassed(LocalDateTime.now(clock))) {
@@ -75,7 +73,7 @@ public class ReservationValidator {
     }
 
     /**
-     *  이미 시작된 예약을 변경하려고 할 때
+     * 이미 시작된 예약을 변경하려고 할 때
      */
     private void validateAlreadyStarted(Reservation reservation) {
         if (reservation.isPassed(LocalDateTime.now(clock))) {
@@ -84,7 +82,7 @@ public class ReservationValidator {
     }
 
     private static void validateAlreadyCanceled(Reservation canceled) {
-        if(canceled.isCanceled()) {
+        if (canceled.isCanceled()) {
             throw new DomainException(CANNOT_CHANGE_ALREADY_CANCELED);
         }
     }

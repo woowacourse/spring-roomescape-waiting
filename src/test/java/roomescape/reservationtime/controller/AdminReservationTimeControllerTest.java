@@ -39,7 +39,7 @@ class AdminReservationTimeControllerTest {
 
     @Test
     @DisplayName("예약 시간을 생성하는 요청을 하면 생성된 예약 시간 정보가 응답으로 반환된다.")
-    public void create_success_response() throws Exception {
+    void create_success_response() throws Exception {
         // given
         ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.of(10, 0));
 
@@ -76,7 +76,7 @@ class AdminReservationTimeControllerTest {
 
     @Test
     @DisplayName("예약 시간을 생성하는 요청을 할 때 요청값이 비어있으면 에러가 발생한다.")
-    public void create_fail_emptyStartAt() throws Exception {
+    void create_fail_emptyStartAt() throws Exception {
         // given
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(null);
 
@@ -91,7 +91,7 @@ class AdminReservationTimeControllerTest {
 
     @Test
     @DisplayName("예약 시간을 생성하는 요청을 할 때 시간의 형식이 HH:mm이 아니면 에러가 발생한다.")
-    public void create_fail_invalidTimeFormat() throws Exception {
+    void create_fail_invalidTimeFormat() throws Exception {
         // given
         String request = """
                 {
@@ -110,7 +110,7 @@ class AdminReservationTimeControllerTest {
 
     @Test
     @DisplayName("특정 예약 시간을 삭제하는 요청을 한다.")
-    public void delete_success_noContent() throws Exception {
+    void delete_success_noContent() throws Exception {
         // when then
         long id = 1L;
         mockMvc.perform(

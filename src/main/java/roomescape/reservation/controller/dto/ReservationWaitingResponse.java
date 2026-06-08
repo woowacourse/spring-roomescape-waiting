@@ -1,12 +1,10 @@
 package roomescape.reservation.controller.dto;
 
-
 import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
-public sealed interface ReservationWaitingResponse permits ConfirmedReservationResponse, WaitingReservationResponse, CanceledReservationResponse
-{
+public sealed interface ReservationWaitingResponse permits ConfirmedReservationResponse, WaitingReservationResponse, CanceledReservationResponse {
     Long id();
     String guestName();
     String date();

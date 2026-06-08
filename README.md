@@ -73,7 +73,7 @@
 **Request**
 
 ```http
-GET /admin/reservations HTTP/1.1
+GET /admin/reservations?page=1&size=20 HTTP/1.1
 ```
 
 **Response**
@@ -83,7 +83,7 @@ HTTP/1.1 200
 Content-Type: application/json
 
 {
-  "reservations": [
+  "contents": [
     {
       "id": 1,
       "guestName": "브라운",
@@ -99,7 +99,14 @@ Content-Type: application/json
         "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
       }
     }
-  ]
+  ],
+  "page": 1,
+  "size": 20,
+  "numberOfElements": 1,
+  "totalElements": 1,
+  "totalPages": 1,
+  "hasPrevious": false,
+  "hasNext": false
 }
 ```
 
@@ -281,7 +288,7 @@ Content-Type: application/json
     "description": "우테코 레벨2를 탈출하는 내용입니다.",
     "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
   },
-  "status": "WAITED",
+  "status": "WAITING",
   "waitNumber": 5
 }
 ```
@@ -293,7 +300,7 @@ Content-Type: application/json
 | 유효하지 않는 입력값                      | `400` | ✅ |
 | 시간이 존재하지 않을 때                    | `404` | ✅ |
 | 테마가 존재하지 않을 때                    | `404` | ✅ |
-| 이미 해당 날짜, 시간, 테마에 이미 대기를 걸어놓은 경우 | `409` | ✅|
+| 해당 날짜, 시간, 테마에 본인 예약이 이미 있는 경우       | `409` | ✅|
 | 이미 지난 시간에 예약하려는 경우               | `422` | ✅ |
 
 ##### 사용자의 예약 목록 조회 API
@@ -301,7 +308,8 @@ Content-Type: application/json
 **Request**
 
 ```http
-GET /reservations?guestName=브라운 HTTP/1.1
+GET /reservations/me HTTP/1.1
+X-Guest-Name: 브라운
 ```
 
 **Response**
@@ -326,19 +334,18 @@ Content-Type: application/json
         "description": "우테코 레벨2를 탈출하는 내용입니다.",
         "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
       },
-        "status": 'WAITED',
-        "waitNumber": 5
+      "status": "WAITING",
+      "waitNumber": 5
     }
   ]
-  
 }
 ```
 
 에러 상황:
 
-| 에러 상황                     | 상태코드  | 구현여부 |
-|---------------------------|-------|------|
-| 유효하지 않는 입력값(guestName 누락) | `400` | ✅    |
+| 에러 상황                            | 상태코드  | 구현여부 |
+|----------------------------------|-------|------|
+| 예약자 이름 헤더가 없거나 유효하지 않은 경우       | `400` | ✅    |
 
 ##### 예약 수정 API
 
@@ -349,6 +356,7 @@ Content-Type: application/json
 ```http
 PATCH /reservations/1 HTTP/1.1
 Content-Type: application/json
+X-Guest-Name: 브라운
 
 {
   "date": "2023-08-05",
@@ -359,40 +367,23 @@ Content-Type: application/json
 **Response**
 
 ```http
-HTTP/1.1 200
-Content-Type: application/json
-
-{
-  "id": 1,
-  "guestName": "브라운",
-  "date": "2023-08-05",
-  "time": {
-    "id": 1,
-    "startAt": "10:00"
-  },
-  "theme": {
-    "id": 1,
-    "name": "레벨2 탈출",
-    "description": "우테코 레벨2를 탈출하는 내용입니다.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  },
-    "isWaited": true,
-    "waitNumber": 5
-}
+HTTP/1.1 204
 ```
 
 에러 상황:
 
-| 에러 상황               | 상태코드  | 구현여부 |
-|---------------------|-------|------|
-| 유효하지 않는 입력값         | `400` | ✅    |
-| 본인의 예약이 아닌 경우       | `403` | ✅    |
-| 예약 시간이 존재하지 않을 때    | `404` | ✅    |
-| 예약이 존재하지 않을 때       | `404` | ✅    |
-| 이미 취소된 예약인 경우       | `409` |  ✅    |
-| 해당 시간에 이미 예약이 있는 경우 | `409` | ✅    |
-| 이미 지난 시간에 예약하려는 경우  | `422` | ✅    |
-| 이미 시작된 예약을 수정하려는 경우 | `422` | ✅    |
+| 에러 상황                            | 상태코드  | 구현여부 |
+|----------------------------------|-------|------|
+| 유효하지 않는 입력값                      | `400` | ✅    |
+| 예약자 이름 헤더가 없거나 유효하지 않은 경우       | `400` | ✅    |
+| 기존 날짜, 시간과 동일한 값으로 수정하려는 경우     | `400` | ✅    |
+| 본인의 예약이 아닌 경우                    | `403` | ✅    |
+| 예약 시간이 존재하지 않을 때                 | `404` | ✅    |
+| 예약이 존재하지 않을 때                    | `404` | ✅    |
+| 이미 취소된 예약인 경우                    | `409` |  ✅    |
+| 해당 날짜, 시간, 테마에 본인 예약이 이미 있는 경우 | `409` | ✅    |
+| 이미 지난 시간에 예약하려는 경우               | `422` | ✅    |
+| 이미 시작된 예약을 수정하려는 경우              | `422` | ✅    |
 
 ##### 예약 삭제 API ✅
 
@@ -400,6 +391,7 @@ Content-Type: application/json
 
 ```http
 DELETE /reservations/1 HTTP/1.1
+X-Guest-Name: 브라운
 ```
 
 **Response**
@@ -410,13 +402,14 @@ HTTP/1.1 204
 
 에러 상황:
 
-| 에러 상황               | 상태코드  | 구현여부 |
-|---------------------|-------|------|
-| 유효하지 않는 입력값         | `400` | ✅    |
-| 본인의 예약이 아닌 경우       | `403` | ✅    |
-| 예약이 존재하지 않을 때       | `404` | ✅    |
-| 이미 취소된 예약인 경우       | `409` | ✅     |
-| 이미 시작된 예약을 취소하려는 경우 | `422` | ✅    |
+| 에러 상황                            | 상태코드  | 구현여부 |
+|----------------------------------|-------|------|
+| 유효하지 않는 입력값                      | `400` | ✅    |
+| 예약자 이름 헤더가 없거나 유효하지 않은 경우       | `400` | ✅    |
+| 본인의 예약이 아닌 경우                    | `403` | ✅    |
+| 예약이 존재하지 않을 때                    | `404` | ✅    |
+| 이미 취소된 예약인 경우                    | `409` | ✅     |
+| 이미 시작된 예약을 취소하려는 경우              | `422` | ✅    |
 
 #### 예약 시간
 
@@ -502,7 +495,7 @@ Content-Type: application/json
 
 | 에러 상황         | 상태코드  | 구현여부 |
 |---------------|-------|------|
-| 유효하지 않는 입력값 ㅋ | `400` | ✅    |
+| 유효하지 않는 입력값  | `400` | ✅    |
 
 ## 🖥️ 프론트엔드 페이지
 
@@ -540,11 +533,9 @@ Content-Type: application/json
 - 테마 목록에서 등록된 테마 정보를 확인하고 삭제할 수 있다.
 - 시작 시간을 입력해 예약 시간을 등록할 수 있다.
 - 예약 시간 목록에서 등록된 시간을 확인하고 삭제할 수 있다.
-
-
 ## 📋 테스트 의사결정
 ### 도메인
-- 도메인 테스트는 Spring Context 없이 순수 단위 테스트로 진행  
+- 도메인 테스트는 Spring Context 없이 순수 단위 테스트로 진행
 - 각 도메인 객체가 스스로 보장해야 하는 기본 불변식과 상태 판단 로직을 검증
 
 ### 리포지토리 계층
@@ -552,7 +543,7 @@ Content-Type: application/json
 - 조회 결과나 DB에 저장된 값을 직접 확인
 
 ### 서비스
-- 서비스 테스트는 실제 Repository를  사용하여 비즈니스 흐름을 검증.
+- 서비스 테스트는 실제 Repository를 사용하여 비즈니스 흐름을 검증.
 - Repository를 모킹하거나 Fake 객체를 쓰지 않고 실제 객체로 검증한 이유는 여러 데이터베이스 쿼리들이 하나의 트랜잭션 내부에서 제대로 동작하는지도 서비스의 책임으로 보았기 때문이다.
 
 ### 컨트롤러
@@ -560,5 +551,5 @@ Content-Type: application/json
 - Service는 mock으로 대체하여 HTTP 요청/응답, 요청 검증, 서비스 호출 여부에 집중
 
 ### 인수테스트
-- 인수테스트는 무겁기 때문에 핵심이 되는 사용자 시나리오만 선별해서 진행하였습니다. 
-- 인수테스트는 `@SpringBootTest(webEnvironment = RANDOM_PORT)`와 RestAssured를 사용하여 실제 애플리케이션 흐름에 가깝게 검증  
+- 인수테스트는 무겁기 때문에 핵심이 되는 사용자 시나리오만 선별해서 진행하였습니다.
+- 인수테스트는 `@SpringBootTest(webEnvironment = RANDOM_PORT)`와 RestAssured를 사용하여 실제 애플리케이션 흐름에 가깝게 검증

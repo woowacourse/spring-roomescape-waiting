@@ -81,7 +81,7 @@ class ThemeControllerTest {
 
     @Test
     @DisplayName("인기 테마 목록을 조회한다.")
-    public void popularThemes() throws Exception {
+    void popularThemes() throws Exception {
         // given
         List<Theme> themes = List.of(
                 Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
@@ -124,7 +124,7 @@ class ThemeControllerTest {
 
     @Test
     @DisplayName("인기 테마 목록을 조회할 때 요청 파라미터가 없으면 기본값으로 조회한다.")
-    public void popularThemes_default() throws Exception {
+    void popularThemes_default() throws Exception {
         // given
         given(themeService.findPopularThemes(anyInt(), anyInt()))
                 .willReturn(List.of());
@@ -140,7 +140,7 @@ class ThemeControllerTest {
 
     @Test
     @DisplayName("인기 테마 목록을 조회할 때 요청 파라미터가 비어있으면 기본값으로 조회한다.")
-    public void popularThemes_default_when_blank() throws Exception {
+    void popularThemes_default_when_blank() throws Exception {
         // given
         given(themeService.findPopularThemes(anyInt(), anyInt()))
                 .willReturn(List.of());
@@ -163,7 +163,7 @@ class ThemeControllerTest {
             "7, 11, 최대 10개까지 인기테마를 조회할 수 있습니다."
     })
     @DisplayName("인기 테마 목록을 조회할 때 요청 파라미터 검증에 실패하면 에러가 발생한다.")
-    public void popularThemes_fail_when_invalid_request(String days, String size, String message) throws Exception {
+    void popularThemes_fail_when_invalid_request(String days, String size, String message) throws Exception {
         // when then
         mockMvc.perform(get("/themes/popularity")
                         .param("days", days)

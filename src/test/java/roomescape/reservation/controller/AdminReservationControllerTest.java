@@ -50,7 +50,7 @@ class AdminReservationControllerTest {
 
     @Test
     @DisplayName("예약 목록을 조회한다.")
-    public void getReservationList() throws Exception {
+    void getReservationList() throws Exception {
         // given
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
@@ -84,7 +84,7 @@ class AdminReservationControllerTest {
 
     @Test
     @DisplayName("예약 목록을 요청한 페이지와 크기로 조회한다.")
-    public void getReservationList_withPaging() throws Exception {
+    void getReservationList_withPaging() throws Exception {
         // given
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
@@ -127,7 +127,7 @@ class AdminReservationControllerTest {
             "1, 21"
     })
     @DisplayName("예약 목록을 조회할 때 페이지 요청 검증에 실패하면 에러가 발생한다.")
-    public void getReservationList_fail_when_invalid_page_request(
+    void getReservationList_fail_when_invalid_page_request(
             String page, String size
     ) throws Exception {
         // when then
@@ -158,7 +158,7 @@ class AdminReservationControllerTest {
 
     @Test
     @DisplayName("특정 예약을 취소하는 요청을 한다.")
-    public void cancel_success_noContent() throws Exception {
+    void cancel_success_noContent() throws Exception {
         // when then
         long id = 1L;
         mockMvc.perform(

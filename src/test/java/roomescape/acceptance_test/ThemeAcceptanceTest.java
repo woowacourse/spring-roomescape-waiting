@@ -12,7 +12,7 @@ import java.util.List;
 
 import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.*;
 
-public class ThemeAcceptanceTest extends AcceptanceTestSupport {
+class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     private static final LocalDate 인기_테마_조회_기준일 = LocalDate.of(2026, 5, 11);
     private static final LocalDate 기간_내_예약일 = 인기_테마_조회_기준일.minusDays(1);
@@ -20,7 +20,7 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("테마 목록 조회")
-    public void scenario1() {
+    void scenario1() {
         // given
         ThemeCreateRequest request = new ThemeCreateRequest("brown", "설명", "섬네일");
         Integer themeId = 테마_생성을_요청하고(request);
@@ -34,7 +34,7 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("테마 삭제")
-    public void scenario2() {
+    void scenario2() {
         // given
         ThemeCreateRequest request = new ThemeCreateRequest("테마1", "설명", "섬네일");
         Integer themeId = 테마_생성을_요청하고(request);
@@ -50,7 +50,7 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("인기 테마 목록 조회")
-    public void scenario3() {
+    void scenario3() {
         // given
         mutableClock.setFixed(LocalDate.of(2026, 4, 1));
 

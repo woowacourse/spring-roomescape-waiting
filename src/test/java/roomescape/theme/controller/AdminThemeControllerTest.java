@@ -39,7 +39,7 @@ class AdminThemeControllerTest {
 
     @Test
     @DisplayName("테마를 생성하는 요청을 하면 생성된 테마 정보가 응답으로 반환된다.")
-    public void create_success_response() throws Exception {
+    void create_success_response() throws Exception {
         // given
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
 
@@ -79,7 +79,7 @@ class AdminThemeControllerTest {
             "이름,설명,",
     })
     @DisplayName("테마를 생성하는 요청을 할 때 특정 요청값이 비어있으면 에러가 발생한다.")
-    public void create_fail_emptyField(String name, String description, String thumbnail) throws Exception {
+    void create_fail_emptyField(String name, String description, String thumbnail) throws Exception {
         // given
         ThemeCreateRequest request = new ThemeCreateRequest(name, description, thumbnail);
 
@@ -95,7 +95,7 @@ class AdminThemeControllerTest {
 
     @Test
     @DisplayName("특정 테마를 삭제하는 요청을 한다.")
-    public void delete_success_noContent() throws Exception {
+    void delete_success_noContent() throws Exception {
         // when then
         long id = 1L;
         mockMvc.perform(

@@ -210,10 +210,7 @@ public final class ReservationAcceptanceSteps {
                 Map.of(GUEST_NAME_HEADER, reservation.guestName()));
     }
 
-    public static void 예약_수정이_성공한다(
-            ExtractableResponse<Response> response,
-            ReservationInfo reservation
-    ) {
+    public static void 예약_수정이_성공한다(ExtractableResponse<Response> response) {
         assertThat(response.statusCode()).isEqualTo(204);
     }
 
