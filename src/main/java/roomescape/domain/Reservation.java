@@ -69,4 +69,8 @@ public class Reservation {
     public LocalDateTime getRequestedAt() {
         return requestedAt;
     }
+
+    public boolean isRequestedBefore(Reservation other) {
+        return requestedAt.isBefore(other.requestedAt);
+    }
 }

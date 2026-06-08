@@ -110,7 +110,7 @@ public class ReservationService {
                 reservation.getTheme().getId());
 
         return sameSlot.stream()
-                .filter(other -> other.getRequestedAt().isBefore(reservation.getRequestedAt()))
+                .filter(other -> other.isRequestedBefore(reservation))
                 .count();
     }
 
