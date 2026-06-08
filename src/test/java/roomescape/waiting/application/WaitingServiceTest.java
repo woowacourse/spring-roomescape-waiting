@@ -2,12 +2,19 @@ package roomescape.waiting.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.never;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
@@ -21,11 +28,13 @@ import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
+@ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
 
     private FakeWaitingRepository waitingRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
+    @Mock
     private WaitingReference waitingReference;
     private WaitingService waitingService;
 
@@ -34,15 +43,6 @@ class WaitingServiceTest {
         waitingRepository = new FakeWaitingRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
-        waitingReference = new WaitingReference() {
-            @Override
-            public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-            }
-
-            @Override
-            public void promoteToReservation(Waiting waiting) {
-            }
-        };
         waitingService = new WaitingService(
                 waitingRepository,
                 reservationTimeRepository,
@@ -166,28 +166,15 @@ class WaitingServiceTest {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
-        WaitingService waitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                        throw new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION);
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
         WaitingCreateCommand command = new WaitingCreateCommand(
                 "브라운",
                 LocalDate.now().plusDays(1),
                 savedTime.getId(),
                 savedTheme.getId()
         );
+        willThrow(new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION))
+                .given(waitingReference)
+                .validateExistReservation(command);
 
         // when & then
         assertThatThrownBy(() -> waitingService.save(command))
@@ -206,30 +193,13 @@ class WaitingServiceTest {
         Waiting savedWaiting = waitingRepository.save(
                 Waiting.create("브라운", date, savedTime, savedTheme)
         );
-        Waiting[] promotedWaiting = new Waiting[1];
-        WaitingService waitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                        promotedWaiting[0] = waiting;
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
 
         // when
         waitingService.promoteNextWaiting(date, savedTime, savedTheme);
 
         // then
         assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
-        assertThat(promotedWaiting[0]).isEqualTo(savedWaiting);
+        then(waitingReference).should().promoteToReservation(savedWaiting);
     }
 
     @Test
@@ -239,30 +209,13 @@ class WaitingServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
         LocalDate date = LocalDate.now().plusDays(1);
-        Waiting[] promotedWaiting = new Waiting[1];
-        WaitingService waitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                        promotedWaiting[0] = waiting;
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
 
         // when
         waitingService.promoteNextWaiting(date, savedTime, savedTheme);
 
         // then
         assertThat(waitingRepository.isEmpty()).isTrue();
-        assertThat(promotedWaiting[0]).isNull();
+        then(waitingReference).should(never()).promoteToReservation(any());
     }
 
     @Test
