@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS reservation_time (
 CREATE TABLE IF NOT EXISTS reservation (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    date VARCHAR(255) NOT NULL,
+    date DATE NOT NULL,
     time_id BIGINT,
     theme_id BIGINT,
     PRIMARY KEY (id),
@@ -29,7 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_reservation_name ON reservation (name);
 CREATE TABLE IF NOT EXISTS waiting (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    date VARCHAR(255) NOT NULL,
+    date DATE NOT NULL,
     time_id BIGINT,
     theme_id BIGINT,
     PRIMARY KEY (id),
