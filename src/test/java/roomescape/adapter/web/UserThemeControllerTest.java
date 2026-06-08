@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.ReservationTimeService;
 import roomescape.application.ThemeService;
@@ -26,7 +26,7 @@ import roomescape.application.ThemeService;
  * date 타입 오류(abc) → MethodArgumentTypeMismatchException → 400.
  * 이 흐름은 HTTP 파라미터 바인딩 단계라 서비스 직접 호출로는 검증되지 않는, 이 슬라이스의 고유 가치다.
  *
- * <p>이 컨트롤러는 ThemeService와 ReservationTimeService 둘 다 의존하므로 @MockBean 2개가 필요하다.
+ * <p>이 컨트롤러는 ThemeService와 ReservationTimeService 둘 다 의존하므로 @MockitoBean 2개가 필요하다.
  */
 @WebMvcTest(UserThemeController.class)
 class UserThemeControllerTest {
@@ -34,10 +34,10 @@ class UserThemeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ThemeService themeService;
 
-    @MockBean
+    @MockitoBean
     private ReservationTimeService reservationTimeService;
 
     @Nested

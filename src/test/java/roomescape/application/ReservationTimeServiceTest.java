@@ -1,29 +1,32 @@
 package roomescape.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.application.dto.result.ReservationTimeResult;
 import roomescape.exception.client.BusinessRuleViolationException;
 import roomescape.support.ServiceIntegrationTest;
 
 /**
  * ReservationTimeService 통합 테스트.
  *
- * <p>검증 대상:
+ * <p>검증 대상: 삭제 거부 정책 — 예약이 존재하는 시간은 삭제할 수 없다.
+ * 이건 서비스만의 협력이다: Repository가 준 existsByTimeId(boolean)를 보고 서비스가 예외로 전환하는 의사결정. 슬라이스는 existsByTimeId의 참/거짓만 보고, 인수는 HTTP
+ * 상태만 본다. "boolean → 예외 전환"이라는 결정 자체는 이 자리에서만 검증된다.
+ *
+ * <p>여기서 검증하지 않는 것(의식적 제외):
  * <ul>
- *   <li>삭제 거부: 예약이 존재하는 시간은 삭제할 수 없다 (existsByTimeId 상태에 의존)</li>
- *   <li>예약 가능 시간 조회: 특정 날짜·테마에 이미 예약된 시간은 목록에서 빠진다 (findAvailable의 NOT IN)</li>
+ *   <li>findAvailable — NOT IN의 정확성·테마/날짜 경계·빈 상태는 JdbcReservationTimeRepositoryTest가
+ *       더 싸게(@JdbcTest) 그리고 더 넓게(날짜 경계까지) 검증한다. 서비스가 더하는 건 DTO 매핑
+ *       (stream.map) 한 줄뿐이라, 같은 회귀를 두 자리에서 사는 잉여였다 → 슬라이스에 일임하고 뺐다.</li>
+ *   <li>create·findAll — 도메인 생성 + Repository 호출 + DTO 변환의 단순 위임이라 서비스만의 협력
+ *       책임이 없다. 객체 검증은 ReservationTimeTest가, SQL·응답 형태는 슬라이스·인수가 잡는다.</li>
  * </ul>
- * 둘 다 "이미 저장된 예약" 상태에 의존하므로 실제 H2로 검증한다.
  *
  * <p>시간 규칙은 미래/과거와 무관한 순수 상태 의존이라 FixedClockConfig가 필요 없다.
  * (시점 판정은 ReservationService의 책임이고, 여기서는 시간 슬롯의 가용성만 본다.)
@@ -61,55 +64,4 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
         }
     }
 
-    @Nested
-    @DisplayName("예약 가능 시간 조회 (findAvailable)")
-    class Available {
-
-        @Test
-        @DisplayName("해당 날짜·테마에 이미 예약된 시간은 가능 목록에서 빠진다")
-        void 예약된_시간_제외() {
-            Long time10 = fixture.insertTime(LocalTime.of(10, 0));
-            Long time11 = fixture.insertTime(LocalTime.of(11, 0));
-            Long themeId = fixture.insertTheme("테마A");
-            // 10:00은 이미 예약됨 → 11:00만 가능해야 함
-            fixture.insertReservation("브라운", DATE, time10, themeId);
-
-            List<ReservationTimeResult> available =
-                    reservationTimeService.findAvailable(DATE, themeId);
-
-            // 10:00은 예약되어 빠지고 11:00만 남는다 (정렬 비의존으로 검증)
-            assertThat(available).extracting(ReservationTimeResult::getStartAt)
-                    .containsExactlyInAnyOrder(LocalTime.of(11, 0));
-        }
-
-        @Test
-        @DisplayName("같은 시간이라도 다른 테마에는 여전히 예약 가능하다")
-        void 다른_테마는_가능() {
-            Long time10 = fixture.insertTime(LocalTime.of(10, 0));
-            Long themeA = fixture.insertTheme("테마A");
-            Long themeB = fixture.insertTheme("테마B");
-            // 테마A의 10:00만 예약
-            fixture.insertReservation("브라운", DATE, time10, themeA);
-
-            // 테마B는 10:00이 여전히 가능
-            List<ReservationTimeResult> availableB =
-                    reservationTimeService.findAvailable(DATE, themeB);
-
-            assertThat(availableB).extracting(ReservationTimeResult::getStartAt)
-                    .contains(LocalTime.of(10, 0));
-        }
-
-        @Test
-        @DisplayName("예약이 하나도 없으면 등록된 모든 시간이 가능하다")
-        void 예약_없으면_전부_가능() {
-            fixture.insertTime(LocalTime.of(10, 0));
-            fixture.insertTime(LocalTime.of(11, 0));
-            Long themeId = fixture.insertTheme("테마A");
-
-            List<ReservationTimeResult> available =
-                    reservationTimeService.findAvailable(DATE, themeId);
-
-            assertThat(available).hasSize(2);
-        }
-    }
 }

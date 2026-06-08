@@ -17,20 +17,18 @@ import roomescape.exception.client.ResourceNotFoundException;
 import roomescape.support.ServiceIntegrationTest;
 
 /**
- * WaitingService 통합 테스트 — "분기 흡수본".
+ * WaitingService 통합 테스트 — create/cancel 분기의 메인 검증.
  *
- * <p>이 파일은 마찰 2의 (B) 선택을 구현한다: WaitingService.create()의 분기들
- * (이미 본인이 예약한 슬롯 거부 / 예약 없는 슬롯 거부 / 중복 대기 거부)을
- * <b>Mock 없이 실제 H2 통합 테스트로</b> 검증한다.
+ * <p>WaitingService.create()와 cancelByOwner()의 분기들(예약 없는 슬롯 거부 / 본인 예약 슬롯 거부 /
+ * 중복 대기 거부 / 시간·테마 부재 / 대기 취소·재정렬)을 Mock 없이 실제 H2 통합으로 검증한다. 이 분기들은 "이미 저장된 예약/대기" 상태에 의존하는 비즈니스 규칙이라, 실제 DB로 검증하면 분기
+ * 로직과 그 상태 의존이 한 흐름에서 함께 동작함을 보장받는다. (모드 A: 분기가 서비스 안의 if-throw 로직이고 분기마다 다른 사용자 경험을 주므로 분기 전부를 본다.)
  *
- * <p>커밋 9의 WaitingServiceMockTest(같은 분기를 Mock 단위로)와 대조하기 위한 기준선이다.
- * 이 파일을 먼저 작성해 "통합으로 흡수했을 때 무엇이 들고, 무엇이 무거운가"를 체감한 뒤, Mock 버전과 diff로 비교하며 "Mock 서비스 단위 테스트가 정말 필요한가"를 판단한다.
+ * <p>이 자리가 "메인"인 이유(마찰 2의 (B) 결론): 같은 분기를 Mock 단위로 짠 WaitingServiceMockTest와
+ * 직접 비교한 결과, 분기 5개는 아직 셋업이 폭발하지 않고 fixture가 한 줄 셋업이라 통합 준비 비용이 작으며, 다른 세 서비스가 모두 통합이라 일관성 가치가 크다. 그래서 통합을 메인으로 둔다. Mock
+ * 비교본은 학습 기록으로 park했다(@Disabled). 자세한 4축 판단 근거는 그 파일 주석에 있다. (사이클 2에서 트랜잭션이 들어와 "결과로 안 보이는 협력"이 생기면 Mock 필요성을 다시 본다.)
  *
- * <p>검증 시선: 이 분기들은 "시스템 상태(이미 저장된 예약/대기)에 의존하는 비즈니스 규칙"이다.
- * Mock으로 existsBy...의 결과를 흉내 내면 "그 SQL이 진짜 그렇게 동작한다"는 보장이 없다. 실제 DB로 검증하면 그 보장까지 함께 얻는다. (토론 규칙 3)
- *
- * <p>관찰 포인트(학습용): create의 한 분기를 검증하려면 given에서 매번
- * 시간·테마·예약을 깔아야 한다. 이 "준비 비용"이 분기 수만큼 반복되는 게 통합 흡수본의 특징이다.
+ * <p>관찰 포인트(학습용): create 한 분기를 검증하려면 매번 시간·테마·예약을 깔아야 한다. 이 "준비
+ * 비용"이 분기 수만큼 반복되는 게 통합의 특징이고, 분기가 폭발하면 그때 Mock의 셋업 이점이 커진다.
  */
 class WaitingServiceTest extends ServiceIntegrationTest {
 

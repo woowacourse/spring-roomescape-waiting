@@ -3,6 +3,7 @@ package roomescape.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.domain.policy.PopularThemePolicy;
 import roomescape.exception.client.BusinessRuleViolationException;
@@ -36,12 +37,14 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResult create(ThemeCreateCommand command) {
         Theme theme = Theme.create(command.getName(), command.getDescription(), command.getThumbnail());
         Theme saved = themeRepository.save(theme);
         return ThemeResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
         validateNotInUse(id);
         themeRepository.deleteById(id);

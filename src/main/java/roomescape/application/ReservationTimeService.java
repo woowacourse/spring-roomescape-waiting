@@ -3,6 +3,7 @@ package roomescape.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.client.BusinessRuleViolationException;
 import roomescape.domain.repository.ReservationRepository;
@@ -28,12 +29,14 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResult create(ReservationTimeCreateCommand command) {
         ReservationTime time = ReservationTime.create(command.getStartAt());
         ReservationTime saved = reservationTimeRepository.save(time);
         return ReservationTimeResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
         validateNotInUse(id);
         reservationTimeRepository.deleteById(id);

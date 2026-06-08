@@ -1,14 +1,13 @@
 package roomescape.domain.policy;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import roomescape.domain.ReservationDateTime;
 
 public interface ReservationPolicy {
-    void validateCreatable(LocalDate date, LocalTime time);
+    void validateCreatable(ReservationDateTime when);
 
-    void validateCancellable(LocalDate date, LocalTime time);
+    void validateCancellable(ReservationDateTime when);
 
-    void validateUpdatable(LocalDate date, LocalTime time);  // 기존 예약이 과거인지
+    void validateUpdatable(ReservationDateTime when);   // 기존 예약 시점이 과거인지
 
-    void validateUpdateTarget(LocalDate date, LocalTime time);// 새 날짜, 시간이 과거인지
+    void validateUpdateTarget(ReservationDateTime when); // 변경하려는 새 시점이 과거인지
 }

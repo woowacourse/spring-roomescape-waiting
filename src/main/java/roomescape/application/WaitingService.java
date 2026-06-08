@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.command.WaitingCreateCommand;
 import roomescape.application.dto.result.WaitingResult;
 import roomescape.domain.ReservationTime;
@@ -32,6 +33,7 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public WaitingResult create(WaitingCreateCommand command) {
         ReservationTime time = findTimeOrThrow(command.getTimeId());
         Theme theme = findThemeOrThrow(command.getThemeId());
@@ -51,7 +53,7 @@ public class WaitingService {
         return WaitingResult.from(saved);
     }
 
-    //TODO @Transactional은 사이클 2에서 다루는 내용이므로 사이클 1에서는 다루지 않음.
+    @Transactional
     public void cancelByOwner(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
                 .filter(w -> w.isOwnedBy(name))
@@ -100,4 +102,3 @@ public class WaitingService {
 
 
 }
-

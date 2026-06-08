@@ -31,12 +31,28 @@ import roomescape.support.ServiceIntegrationTest;
  *   <li>여러 repository가 협력하는 시나리오(예약 취소 → 첫 대기 자동 승격) — 결과를 DB로 확인한다.</li>
  * </ul>
  *
+ * <p>검증 대상: "서비스만의 협력 책임" — 슬라이스(SQL)나 도메인 단위로 내려갈 수 없는 것.
+ * 예외 전환, 여러 Repository 조율, 다중 도메인 협력(자동 승격), 병합 및 정렬.
+ *
+ * <p>이 파일은 두 가지 검증 모드를 의식적으로 섞어 쓴다. 각 블록·테스트에 어떤 모드인지 표시한다:
+ * <ul>
+ *   <li><b>모드 A (분기 전부)</b> — 회귀가 서비스 안의 로직(if-throw·조율·다중 도메인)이라 다른 자리로
+ *       내려가지 않고, 분기 결과가 서로 의미 있게 다를 때. 의미 있는 분기를 모두 검증한다.
+ *       (CancelAndPromote, MyReservationsAndWaitings, Update, 그리고 Create의 사전 조회 실패 두 분기)</li>
+ *   <li><b>모드 B (대표 한 케이스)</b> — 같은 회귀를 슬라이스가 더 싸게 이미 사주고 있고, 서비스가 하는
+ *       일이 "그 검증을 흐름에서 호출하는 협력" 자체일 때. 대표 한 케이스로 연결만 확인한다.
+ *       (Create의 중복 검사·정책 연결)</li>
+ * </ul>
+ * "빠짐없이 다 짠다"가 목표가 아니라 "각 회귀를 어디서 가장 싸게 보호할지 정하고 그 결정을
+ * 드러낸다"가 목표다.
+ *
  * <p>시간 결정성: 과거/미래의 의미가 흔들리지 않도록 @Import(FixedClockConfig)로
  * 고정 시계(2026-05-13 12:00) 기반 정책을 @Primary 주입한다.
  * (과거 거부 "규칙 자체"는 FutureOnlyPolicyTest가 단위로 검증했으므로, 여기서는 그 규칙이
  * 서비스 흐름에 연결됐는지만 본다.)
  *
  * <p>자동 승격의 "원자성"(중간 실패 시 전체 롤백)은 이 사이클에서 검증하지 않는다.
+ *
  * @Transactional이 코드에 들어오는 사이클 2의 검증 대상이다. 여기서는 정상 흐름의 "결과"만 본다.
  */
 @Import(FixedClockConfig.class)
@@ -61,15 +77,33 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     class Create {
 
         @Test
-        @DisplayName("미래 슬롯에 정상 예약이 생성된다")
-        void 정상_생성() {
-            assertThatCode(() -> reservationService.create(
-                    new ReservationCreateCommand("브라운", FUTURE, timeId, themeId)))
-                    .doesNotThrowAnyException();
+        @DisplayName("[모드 B·정책 통과] 미래 시점 예약은 생성되고 입력한 날짜·시간이 반영된다")
+        void 미래_예약_생성() {
+            ReservationResult created = reservationService.create(
+                    new ReservationCreateCommand("브라운", FUTURE, timeId, themeId));
+
+            // 정책 연결의 "통과 측" — FUTURE는 FixedClock 기준 미래라 정책이 통과시켜야 한다.
+            // (거부 측은 과거_거부가 본다. 규칙의 5개 경계 자체는 FutureOnlyPolicyTest가 단위로 본다.)
+            assertThat(created.getDate()).isEqualTo(FUTURE);
+            assertThat(created.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        }
+
+
+        @Test
+        @DisplayName("[모드 B·정책 거부] 과거 날짜는 정책에 의해 거부된다")
+        void 과거_거부() {
+            // 정책 연결의 "거부 측". 과거 거부 규칙 자체의 경계는 FutureOnlyPolicyTest가 단위로 검증했으므로,
+            // 여기서는 그 규칙이 서비스 흐름에 연결됐는지만 본다.
+            LocalDate yesterday = FixedClockConfig.TODAY.minusDays(1);
+
+            assertThatThrownBy(() -> reservationService.create(
+                    new ReservationCreateCommand("브라운", yesterday, timeId, themeId)))
+                    .isInstanceOf(BusinessRuleViolationException.class)
+                    .hasMessage("지나간 날짜, 시간으로는 예약할 수 없습니다.");
         }
 
         @Test
-        @DisplayName("[상태 의존] 같은 날짜+시간+테마에 이미 예약이 있으면 거부된다")
+        @DisplayName("[모드 B·상태 의존] 같은 날짜+시간+테마에 이미 예약이 있으면 거부된다")
         void 중복_예약_거부() {
             reservationService.create(new ReservationCreateCommand("브라운", FUTURE, timeId, themeId));
 
@@ -80,8 +114,11 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         }
 
         @Test
-        @DisplayName("같은 날짜+시간이라도 테마가 다르면 각각 허용된다")
+        @DisplayName("[모드 B·대표] 같은 날짜+시간이라도 테마가 다르면 허용된다")
         void 다른_테마_허용() {
+            // 중복 검사가 (날짜·시간·테마) 세 축을 본다는 SQL 정확성은 JdbcReservationRepositoryTest가
+            // 더 싸게 검증한다. 여기서는 "서비스가 슬롯 전체로 중복 검사를 호출한다"는 협력만 테마 축을
+            // 대표로 확인한다. 날짜·시간 축을 따로 두지 않는 건 같은 회귀를 슬라이스가 사주기 때문(의식적 생략).
             Long themeB = fixture.insertTheme("테마B");
             reservationService.create(new ReservationCreateCommand("브라운", FUTURE, timeId, themeId));
 
@@ -90,31 +127,37 @@ class ReservationServiceTest extends ServiceIntegrationTest {
                     .doesNotThrowAnyException();
         }
 
-        @Test
-        @DisplayName("[시간 규칙 연결] 과거 날짜는 정책에 의해 거부된다")
-        void 과거_거부() {
-            LocalDate yesterday = FixedClockConfig.TODAY.minusDays(1);
+        // [모드 A] 사전 조회 실패는 시간/테마 두 분기가 서로 다른 Repository 조회이고 서로 다른 메시지를
+        // 주므로(다른 사용자 경험) 각각 명시한다. 둘 다 서비스의 if-throw 전환이라 슬라이스로 못 내려온다.
 
+        @Test
+        @DisplayName("[모드 A·분기] 존재하지 않는 시간 ID → 404성 예외")
+        void 존재하지_않는_시간() {
             assertThatThrownBy(() -> reservationService.create(
-                    new ReservationCreateCommand("브라운", yesterday, timeId, themeId)))
-                    .isInstanceOf(BusinessRuleViolationException.class)
-                    .hasMessage("지나간 날짜, 시간으로는 예약할 수 없습니다.");
+                    new ReservationCreateCommand("브라운", FUTURE, 9999L, themeId)))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage("존재하지 않는 시간입니다.");
         }
 
         @Test
-        @DisplayName("존재하지 않는 테마 ID → 404성 예외")
+        @DisplayName("[모드 A·분기] 존재하지 않는 테마 ID → 404성 예외")
         void 존재하지_않는_테마() {
             assertThatThrownBy(() -> reservationService.create(
                     new ReservationCreateCommand("브라운", FUTURE, timeId, 9999L)))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage("존재하지 않는 테마입니다.");
         }
+
+
     }
 
     @Nested
     @DisplayName("예약 취소 → 첫 대기 자동 승격")
     class CancelAndPromote {
 
+        // [모드 A] 자동 승격은 여러 Repository·여러 도메인이 한 흐름에서 협력한다(예약 DELETE → 대기
+        // DELETE → 예약 INSERT 승격 → 대기 순번 UPDATE). 슬라이스로 절대 못 내려오는 서비스 고유 협력이라
+        // 각 협력 결과를 결과 단언별로 검증한다.
         @Test
         @DisplayName("예약 취소 시 첫 대기가 예약으로 승격되고 나머지 순번이 당겨진다")
         void 자동_승격() {
@@ -158,8 +201,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     @DisplayName("내 예약+대기 조회 (findMyReservationsAndWaitings)")
     class MyReservationsAndWaitings {
 
-        // 이 메서드는 단순 위임이 아니다. 예약 목록과 대기 목록을 각각 조회해 한 리스트로 합치고,
-        // 날짜·시간으로 다시 정렬하는 로직(results.sort)이 서비스 안에 있다. 그 병합·정렬을 검증한다.
+        // [모드 A] 단순 위임이 아니다. 예약 목록과 대기 목록을 각각 조회해 한 리스트로 합치고,
+        // 날짜·시간으로 다시 정렬하는 로직(results.sort)이 서비스 안에 있다. 슬라이스로 못 내려오는
+        // 병합·정렬 협력이라 의미 있는 분기(구분/정렬/순번/빈 목록)를 각각 검증한다.
 
         @Test
         @DisplayName("예약과 대기가 status로 구분되어 함께 조회된다")
@@ -236,8 +280,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     @DisplayName("예약 변경 (updateByOwner)")
     class Update {
 
-        // 변경은 분기가 많은 유스케이스다. 각 분기가 "시스템 상태(이미 저장된 예약/시간)"에 의존하므로
-        // 도메인 단위가 아니라 서비스 통합으로 검증한다. (시간 과거 판정만 정책이 담당)
+        // [모드 A] 변경은 분기가 많은 유스케이스다. 각 분기가 "시스템 상태(이미 저장된 예약/시간)"에 의존하며
+        // 서비스 안의 if-throw·조율(정책·충돌·조회)이라 슬라이스로 못 내려오고 도메인 단위테스트도 못내려오니
+        // 서비스 통합에서 분기마다 다른 예외/결과를 주므로(다른 사용자 경험) 일곱 분기를 각각 검증한다.
 
         @Test
         @DisplayName("본인의 미래 예약을 다른 날짜·시간으로 변경할 수 있다")
@@ -301,7 +346,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         }
 
         @Test
-        @DisplayName("[시간 규칙 연결] 이미 지난 예약은 변경할 수 없다")
+        @DisplayName("[분기, 시간 규칙 연결] 이미 지난 예약은 변경할 수 없다")
         void 지난_예약_변경_거부() {
             // 고정 시계(TODAY) 기준 과거에 직접 예약을 심는다
             LocalDate past = FixedClockConfig.TODAY.minusDays(1);
@@ -314,7 +359,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         }
 
         @Test
-        @DisplayName("[시간 규칙 연결] 변경하려는 시간이 과거면 거부된다")
+        @DisplayName("[분기,시간 규칙 연결] 변경하려는 시간이 과거면 거부된다")
         void 변경_대상이_과거_거부() {
             Long reservationId = fixture.insertReservation("브라운", FUTURE, timeId, themeId);
             LocalDate past = FixedClockConfig.TODAY.minusDays(1);
@@ -322,7 +367,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
             assertThatThrownBy(() -> reservationService.updateByOwner(
                     new ReservationUpdateCommand(reservationId, "브라운", past, timeId)))
                     .isInstanceOf(BusinessRuleViolationException.class)
-                    .hasMessage("지나간 날짜·시간으로는 변경할 수 없습니다.");
+                    .hasMessage("지나간 날짜, 시간으로는 변경할 수 없습니다.");
         }
     }
 }
