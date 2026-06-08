@@ -56,15 +56,23 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation update(long id, LocalDate date, long timeId) {
+    public Reservation update(long id, String username, LocalDate date, long timeId) {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        validateOwned(reservation, username);
         ReservationTime time = validateReservationTime(timeId);
         Reservation updated = reservation.withUpdated(date, time, LocalDateTime.now(clock));
+        validateNotSameSlot(reservation, date, timeId);
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
-        return reservationDao.update(updated);
+        try {
+            Reservation resultReservation = reservationDao.update(updated);
+            convertFirstWaitingToReservation(reservation);
+            return resultReservation;
+        } catch (DataConflictException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
     }
 
     @Transactional
@@ -74,6 +82,7 @@ public class ReservationService {
         validateOwned(reservation, username);
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationDao.delete(reservation.getId());
+        convertFirstWaitingToReservation(reservation);
     }
 
     @Transactional
@@ -81,6 +90,7 @@ public class ReservationService {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
         reservationDao.delete(reservation.getId());
+        convertFirstWaitingToReservationIfReservable(reservation);
     }
 
     public List<Reservation> findAllByName(String username) {
@@ -142,9 +152,40 @@ public class ReservationService {
                 .toList();
     }
 
+    private void convertFirstWaitingToReservationIfReservable(Reservation reservation) {
+        if (reservation.isPast(LocalDateTime.now(clock))) {
+            return;
+        }
+        convertFirstWaitingToReservation(reservation);
+    }
+
+    private void convertFirstWaitingToReservation(Reservation canceledReservation) {
+        reservationDao.findFirstWaitingBySlot(
+                canceledReservation.getDate(),
+                canceledReservation.getTime().getId(),
+                canceledReservation.getTheme().getId()
+        ).ifPresent(this::convertWaitingToReservation);
+    }
+
+    private void convertWaitingToReservation(ReservationWaiting waiting) {
+        Reservation reservation = waiting.promoteToReservation(LocalDateTime.now(clock));
+        try {
+            reservationDao.save(reservation);
+        } catch (DataConflictException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+        reservationDao.deleteWaiting(waiting.reservation().getId());
+    }
+
     private void validateOwned(Reservation reservation, String username) {
         if (!reservation.isOwnedBy(username)) {
-            throw new ForbiddenException("본인의 예약 또는 대기만 취소할 수 있습니다.");
+            throw new ForbiddenException("본인의 예약 또는 대기만 관리할 수 있습니다.");
+        }
+    }
+
+    private void validateNotSameSlot(Reservation reservation, LocalDate date, long timeId) {
+        if (reservation.isSameSlot(date, timeId)) {
+            throw new ReservationConflictException("기존 예약과 변경할 예약이 동일한 날짜와 시간입니다.");
         }
     }
 

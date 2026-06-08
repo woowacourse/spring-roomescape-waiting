@@ -147,9 +147,13 @@ public class ReservationDao {
     }
 
     public Reservation update(Reservation reservation) {
-        jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
-                reservation.getDate(), reservation.getTime().getId(), reservation.getId());
-        return findById(reservation.getId()).orElseThrow();
+        try {
+            jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getId());
+            return findById(reservation.getId()).orElseThrow();
+        } catch (DuplicateKeyException e) {
+            throw new DataConflictException(e);
+        }
     }
 
     public void delete(long id) {
@@ -224,6 +228,24 @@ public class ReservationDao {
                 WHERE sub.name = ?;
                 """;
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, username);
+    }
+
+    public Optional<ReservationWaiting> findFirstWaitingBySlot(LocalDate date, long timeId, long themeId) {
+        String sql = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.created_at,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail,
+                       1 AS waiting_order
+                FROM reservation_waiting AS r
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
+                ORDER BY r.created_at ASC, r.id ASC
+                LIMIT 1;
+                """;
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, date, timeId, themeId).stream().findFirst();
     }
 
     public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, long timeId, long themeId, String username) {

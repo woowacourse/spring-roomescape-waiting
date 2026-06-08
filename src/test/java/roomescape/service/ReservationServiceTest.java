@@ -3,8 +3,10 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -29,6 +31,7 @@ import roomescape.domain.ReservationType;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ForbiddenException;
+import roomescape.domain.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -116,6 +119,105 @@ class ReservationServiceTest {
     }
 
     @Test
+    void update_예약_변경_시_기존_슬롯의_첫번째_대기를_예약으로_전환한다() {
+        fixClock();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
+        LocalDate originalDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);
+        Reservation reservation = new Reservation(
+                1L, "브라운", originalDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation updated = new Reservation(
+                1L, "브라운", updateDate, fixedNow.minusHours(1), newTime, sampleTheme);
+        Reservation waiting = new Reservation(
+                10L, "이든", originalDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(updateDate, 2L, 1L)).willReturn(false);
+        given(reservationDao.update(any(Reservation.class))).willReturn(updated);
+        given(reservationDao.findFirstWaitingBySlot(originalDate, 1L, 1L))
+                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
+
+        Reservation result = reservationService.update(1L, "브라운", updateDate, 2L);
+
+        assertThat(result).isEqualTo(updated);
+        then(reservationDao).should().update(any(Reservation.class));
+        then(reservationDao).should().save(promotedReservationOf(waiting));
+        then(reservationDao).should().deleteWaiting(10L);
+    }
+
+    @Test
+    void update_지난_예약이면_변경할_수_없다() {
+        fixClock();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
+        LocalDate pastDate = fixedNow.toLocalDate().minusDays(1);
+        LocalDate updateDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(
+                1L, "브라운", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
+                .isInstanceOf(PastReservationException.class)
+                .hasMessage("과거 예약은 변경할 수 없습니다.");
+
+        then(reservationDao).should(never()).update(any(Reservation.class));
+        then(reservationDao).should(never()).findFirstWaitingBySlot(pastDate, 1L, 1L);
+    }
+
+    @Test
+    void update_같은_날짜와_시간이면_예외() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(
+                1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", futureDate, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("기존 예약과 변경할 예약이 동일한 날짜와 시간입니다.");
+
+        then(reservationDao).should(never()).existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L);
+        then(reservationDao).should(never()).update(any(Reservation.class));
+    }
+
+    @Test
+    void update_예약_변경_중_저장이_충돌하면_예약_충돌_예외() {
+        fixClock();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(11, 0));
+        LocalDate originalDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);
+        Reservation reservation = new Reservation(
+                1L, "브라운", originalDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(updateDate, 2L, 1L)).willReturn(false);
+        given(reservationDao.update(any(Reservation.class))).willThrow(new DataConflictException(new RuntimeException()));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "브라운", updateDate, 2L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
+
+        then(reservationDao).should(never()).findFirstWaitingBySlot(originalDate, 1L, 1L);
+    }
+
+    @Test
+    void update_본인_예약이_아니면_예외() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        LocalDate updateDate = fixedNow.toLocalDate().plusDays(2);
+        Reservation reservation = new Reservation(
+                1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.update(1L, "이든", updateDate, 2L))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인의 예약 또는 대기만 관리할 수 있습니다.");
+
+        then(reservationTimeDao).should(never()).findById(2L);
+        then(reservationDao).should(never()).update(any(Reservation.class));
+    }
+
+    @Test
     void delete_정상_삭제() {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
@@ -129,6 +231,7 @@ class ReservationServiceTest {
 
     @Test
     void delete_지난_예약도_삭제() {
+        fixClock();
         LocalDate pastDate = fixedNow.toLocalDate().minusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme);
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
@@ -136,6 +239,43 @@ class ReservationServiceTest {
         reservationService.delete(1L);
 
         then(reservationDao).should().delete(1L);
+        then(reservationDao).should(never()).findFirstWaitingBySlot(pastDate, 1L, 1L);
+        then(reservationDao).should(never()).save(any(Reservation.class));
+        then(reservationDao).should(never()).deleteWaiting(10L);
+    }
+
+    @Test
+    void delete_사용자_예약_취소_시_첫번째_대기를_예약으로_전환한다() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
+                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
+
+        reservationService.delete(1L, "브라운");
+
+        then(reservationDao).should().delete(1L);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
+        then(reservationDao).should().deleteWaiting(10L);
+    }
+
+    @Test
+    void delete_관리자_예약_삭제_시_첫번째_대기를_예약으로_전환한다() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
+                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
+
+        reservationService.delete(1L);
+
+        then(reservationDao).should().delete(1L);
+        then(reservationDao).should().save(promotedReservationOf(waiting));
+        then(reservationDao).should().deleteWaiting(10L);
     }
 
     @Test
@@ -146,7 +286,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.delete(1L, "이든"))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessage("본인의 예약 또는 대기만 취소할 수 있습니다.");
+                .hasMessage("본인의 예약 또는 대기만 관리할 수 있습니다.");
     }
 
     @Test
@@ -245,7 +385,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.deleteWaiting(1L, "이든"))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessage("본인의 예약 또는 대기만 취소할 수 있습니다.");
+                .hasMessage("본인의 예약 또는 대기만 관리할 수 있습니다.");
     }
 
     @Test
@@ -276,5 +416,14 @@ class ReservationServiceTest {
                 .containsExactly(ReservationType.WAITING, ReservationType.RESERVED);
         assertThat(myReservations.getFirst().waitingNumber()).isEqualTo(1);
         assertThat(myReservations.getLast().waitingNumber()).isNull();
+    }
+
+    private Reservation promotedReservationOf(Reservation waiting) {
+        return argThat(reservation -> reservation.getId() == null
+                && reservation.getName().equals(waiting.getName())
+                && reservation.getDate().equals(waiting.getDate())
+                && reservation.getCreatedAt().equals(fixedNow)
+                && reservation.getTime().equals(waiting.getTime())
+                && reservation.getTheme().equals(waiting.getTheme()));
     }
 }

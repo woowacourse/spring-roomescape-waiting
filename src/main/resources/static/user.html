@@ -441,6 +441,11 @@
       flex-shrink: 0;
     }
 
+    .reservation-item.converted {
+      border-color: rgba(16,185,129,0.6);
+      background: rgba(16,185,129,0.08);
+    }
+
     .reservation-info { flex: 1; }
 
     .reservation-theme {
@@ -505,6 +510,11 @@
       color: var(--text);
       padding: 10px 14px;
       font-size: 14px;
+    }
+    .modal-help {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
     }
     .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
 
@@ -750,9 +760,10 @@
       <select id="edit-time">
         <option value="">날짜를 먼저 선택하세요</option>
       </select>
+      <p class="modal-help" id="edit-time-help">예약 변경은 예약 가능한 시간으로만 가능합니다.</p>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent" onclick="confirmUpdate()" style="flex:1">변경 확정</button>
+      <button class="btn btn-accent" onclick="confirmUpdate()" id="edit-confirm-btn" style="flex:1">변경 확정</button>
       <button class="btn btn-ghost" onclick="closeEditModal()" style="flex:1">취소</button>
     </div>
   </div>
@@ -764,6 +775,8 @@
   let selectedTheme = null;
   let selectedDate = null;
   let selectedTime = null;
+  let lastMyReservations = null;
+  let themesByName = new Map();
 
   function init() {
     username = localStorage.getItem('username');
@@ -847,6 +860,7 @@
     try {
       const res = await fetch(`${API}/themes`);
       const { themes } = await res.json();
+      themesByName = new Map(themes.map(theme => [theme.name, theme]));
 
       document.getElementById('booking-themes-loading').style.display = 'none';
       const grid = document.getElementById('booking-themes-grid');
@@ -1007,10 +1021,12 @@
         throw new Error('Failed to load reservations');
       }
       const { reservations: all = [] } = await res.json();
+      const convertedSlots = findConvertedSlots(lastMyReservations, all);
 
       document.getElementById('my-loading').style.display = 'none';
 
       if (!all.length) {
+        lastMyReservations = all;
         document.getElementById('my-empty').style.display = 'block';
         return;
       }
@@ -1019,9 +1035,10 @@
       list.innerHTML = all.map(item => {
         const isWaiting = item.reservationStatus === 'WAITING';
         const type = isWaiting ? 'waiting' : 'reservation';
+        const isConverted = convertedSlots.has(reservationSlotKey(item));
         const badge = isWaiting
           ? `<span class="status-badge badge-waiting">${item.waitingNumber}번째 대기</span>`
-          : `<span class="status-badge badge-reserved">예약</span>`;
+          : `<span class="status-badge badge-reserved">${isConverted ? '예약 전환됨' : '예약'}</span>`;
         const actions = isWaiting
           ? `<button class="btn btn-danger" onclick="deleteItem(${item.id}, 'waiting')">취소</button>`
           : `
@@ -1029,7 +1046,7 @@
             <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
           `;
         return `
-          <div class="reservation-item" id="item-${type}-${item.id}">
+          <div class="reservation-item ${isConverted ? 'converted' : ''}" id="item-${type}-${item.id}">
             <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
             <div class="reservation-info">
               <div class="reservation-theme">${item.themeName}</div>
@@ -1041,10 +1058,35 @@
         `;
       }).join('');
       list.style.display = 'flex';
+      if (convertedSlots.size > 0) {
+        showToast('대기 중이던 예약이 확정되었습니다.');
+      }
+      lastMyReservations = all;
     } catch (e) {
       document.getElementById('my-loading').style.display = 'none';
       showToast('예약 목록을 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function findConvertedSlots(previous, current) {
+    if (!previous) {
+      return new Set();
+    }
+    const previousWaitingSlots = new Set(
+      previous
+        .filter(item => item.reservationStatus === 'WAITING')
+        .map(reservationSlotKey)
+    );
+    return new Set(
+      current
+        .filter(item => item.reservationStatus === 'RESERVED')
+        .map(reservationSlotKey)
+        .filter(key => previousWaitingSlots.has(key))
+    );
+  }
+
+  function reservationSlotKey(item) {
+    return `${item.date}|${item.time}|${item.themeName}`;
   }
 
   async function deleteItem(id, type) {
@@ -1060,7 +1102,10 @@
         showToast(message || '취소에 실패했습니다.', 'error');
         return;
       }
-      showToast(`${label}가 취소되었습니다.`);
+      const message = type === 'reservation'
+        ? '예약이 취소되었습니다. 첫 번째 대기가 있으면 자동으로 예약됩니다.'
+        : '대기가 취소되었습니다. 남은 대기 순번이 다시 정렬됩니다.';
+      showToast(message);
       await loadMyReservations();
     } catch (e) {
       showToast('취소에 실패했습니다.', 'error');
@@ -1068,16 +1113,21 @@
   }
 
   let editingReservationId = null;
+  let editingReservation = null;
 
   function openEditModal(id) {
     editingReservationId = id;
+    editingReservation = lastMyReservations?.find(item => item.id === id && item.reservationStatus === 'RESERVED');
     document.getElementById('edit-date').value = '';
     document.getElementById('edit-time').innerHTML = '<option value="">날짜를 먼저 선택하세요</option>';
+    document.getElementById('edit-time-help').textContent = '예약 변경은 예약 가능한 시간으로만 가능합니다.';
+    document.getElementById('edit-confirm-btn').disabled = true;
     document.getElementById('edit-modal').classList.add('open');
   }
 
   function closeEditModal() {
     editingReservationId = null;
+    editingReservation = null;
     document.getElementById('edit-modal').classList.remove('open');
   }
 
@@ -1085,10 +1135,64 @@
     const date = document.getElementById('edit-date').value;
     if (!date) return;
 
-    const res = await fetch(`${API}/times`);
-    const { times } = await res.json();
     const select = document.getElementById('edit-time');
-    select.innerHTML = times.map(t => `<option value="${t.id}">${t.startAt}</option>`).join('');
+    const help = document.getElementById('edit-time-help');
+    const confirmButton = document.getElementById('edit-confirm-btn');
+    select.innerHTML = '<option value="">시간을 불러오는 중입니다</option>';
+    confirmButton.disabled = true;
+
+    try {
+      const theme = await findThemeByName(editingReservation?.themeName);
+      if (!theme) {
+        select.innerHTML = '<option value="">테마 정보를 찾을 수 없습니다</option>';
+        help.textContent = '예약 정보를 다시 불러온 뒤 변경해주세요.';
+        return;
+      }
+
+      const res = await fetch(`${API}/themes/${theme.id}/times?date=${date}`);
+      if (!res.ok) {
+        throw new Error('Failed to load available times');
+      }
+      const { times } = await res.json();
+      select.innerHTML = '<option value="">시간을 선택하세요</option>' + times.map(timeOptionHtml).join('');
+      const availableCount = times.filter(t => t.isAvailable !== undefined ? t.isAvailable : t.available).length;
+      help.textContent = availableCount
+        ? '예약된 시간은 변경할 수 없습니다. 대기는 예약하기 화면에서 신청해주세요.'
+        : '변경 가능한 시간이 없습니다. 예약된 시간에는 대기 신청만 가능합니다.';
+      confirmButton.disabled = availableCount === 0;
+    } catch (e) {
+      select.innerHTML = '<option value="">시간 정보를 불러올 수 없습니다</option>';
+      help.textContent = '시간 정보를 다시 조회해주세요.';
+    }
+  }
+
+  async function findThemeByName(themeName) {
+    if (!themeName) {
+      return null;
+    }
+    if (!themesByName.size) {
+      const res = await fetch(`${API}/themes`);
+      if (!res.ok) {
+        return null;
+      }
+      const { themes } = await res.json();
+      themesByName = new Map(themes.map(theme => [theme.name, theme]));
+    }
+    return themesByName.get(themeName) || null;
+  }
+
+  function timeOptionHtml(t) {
+    const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
+    const isCurrent = editingReservation
+      && editingReservation.date === document.getElementById('edit-date').value
+      && editingReservation.time === t.startAt;
+    if (isCurrent) {
+      return `<option value="" disabled>${t.startAt} - 현재 예약</option>`;
+    }
+    if (!available) {
+      return `<option value="" disabled>${t.startAt} - 예약됨</option>`;
+    }
+    return `<option value="${t.id}">${t.startAt} - 변경 가능</option>`;
   }
 
   async function confirmUpdate() {
@@ -1100,7 +1204,7 @@
     }
 
     try {
-      const res = await fetch(`${API}/reservations/${editingReservationId}`, {
+      const res = await fetch(`${API}/reservations/${editingReservationId}?username=${encodeURIComponent(username)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date, timeId: Number(timeId) })

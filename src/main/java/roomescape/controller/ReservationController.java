@@ -53,9 +53,9 @@ public class ReservationController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
-            @PathVariable long id,
+            @PathVariable long id, @RequestParam String username,
             @Valid @RequestBody ReservationUpdateRequest request) {
-        Reservation reservation = reservationService.update(id, request.date(), request.timeId());
+        Reservation reservation = reservationService.update(id, username, request.date(), request.timeId());
         return ResponseEntity.ok(ReservationResponse.fromReserved(reservation, reservation.getTheme()));
     }
 
