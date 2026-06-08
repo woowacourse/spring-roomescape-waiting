@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @JdbcTest
@@ -60,7 +61,8 @@ public class JdbcReservationRepositoryTest {
 
     @Test
     void saveTest() {
-        Reservation reservationWithoutId = new Reservation("fizz", LocalDate.of(2026, 5, 2), reservationTime, theme);
+        Reservation reservationWithoutId = new Reservation("fizz",
+                new Slot(LocalDate.of(2026, 5, 2), reservationTime, theme));
 
         Reservation reservation = reservationRepository.save(reservationWithoutId);
 

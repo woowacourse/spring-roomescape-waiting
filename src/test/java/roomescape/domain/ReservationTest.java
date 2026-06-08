@@ -16,7 +16,7 @@ public class ReservationTest {
     void nameBlankExceptionTest(String name) {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme("피즈의 모험", "모험 이야기", "url.jpg");
-        assertThatThrownBy(() -> new Reservation(1L, name, LocalDate.of(2026, 5, 2), reservationTime, theme))
+        assertThatThrownBy(() -> new Reservation(1L, name, new Slot(LocalDate.of(2026, 5, 2), reservationTime, theme)))
                 .isInstanceOf(InvalidDomainValueException.class);
     }
 
@@ -24,21 +24,21 @@ public class ReservationTest {
     void dateNullExceptionTest() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme("피즈의 모험", "모험 이야기", "url.jpg");
-        assertThatThrownBy(() -> new Reservation(1L, "fizz", null, reservationTime, theme))
+        assertThatThrownBy(() -> new Reservation(1L, "fizz", new Slot(null, reservationTime, theme)))
                 .isInstanceOf(InvalidDomainValueException.class);
     }
 
     @Test
     void reservationTimeNullExceptionTest() {
         Theme theme = new Theme("피즈의 모험", "모험 이야기", "url.jpg");
-        assertThatThrownBy(() -> new Reservation(1L, "fizz", LocalDate.of(2026, 5, 2), null, theme))
+        assertThatThrownBy(() -> new Reservation(1L, "fizz", new Slot(LocalDate.of(2026, 5, 2), null, theme)))
                 .isInstanceOf(InvalidDomainValueException.class);
     }
 
     @Test
     void themeNullExceptionTest() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
-        assertThatThrownBy(() -> new Reservation(1L, "fizz", LocalDate.of(2026, 5, 2), reservationTime, null))
+        assertThatThrownBy(() -> new Reservation(1L, "fizz", new Slot(LocalDate.of(2026, 5, 2), reservationTime, null)))
                 .isInstanceOf(InvalidDomainValueException.class);
     }
 }

@@ -1,6 +1,8 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -10,19 +12,25 @@ import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
 import roomescape.exception.custom.CannotDeleteThemeInUseException;
 import roomescape.exception.custom.ReservationNotExistsException;
 import roomescape.repository.ReservationRepository;
+import roomescape.validator.ReservationValidator;
+import roomescape.validator.ReservationValidatorFactory;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final Clock clock;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, Clock clock) {
         this.reservationRepository = reservationRepository;
+        this.clock = clock;
     }
 
     @Transactional
-    public Reservation save(Reservation reservationWithoutId) {
+    public Reservation save(Reservation reservationWithoutId, boolean isAdmin) {
+        ReservationValidator reservationValidator = ReservationValidatorFactory.getValidator(isAdmin);
+        reservationValidator.validateCreate(reservationWithoutId, LocalDateTime.now(clock));
         return reservationRepository.save(reservationWithoutId);
     }
 
@@ -40,8 +48,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        reservationRepository.delete(id);
+    public void delete(Reservation reservation, boolean isAdmin) {
+        ReservationValidator reservationValidator = ReservationValidatorFactory.getValidator(isAdmin);
+        reservationValidator.validateDelete(reservation, LocalDateTime.now(clock));
+        reservationRepository.delete(reservation.getId());
     }
 
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {

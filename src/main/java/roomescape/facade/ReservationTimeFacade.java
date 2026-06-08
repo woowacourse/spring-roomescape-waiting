@@ -1,7 +1,5 @@
 package roomescape.facade;
 
-import static roomescape.service.WaitService.MAX_WAITING_COUNT;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +71,7 @@ public class ReservationTimeFacade {
         if (!reservedTimes.contains(reservationTime)) {
             return ReservationAvailability.RESERVATION_AVAILABLE;
         }
-        if (waitService.findBySlot(date, reservationTime.getId(), themeId).size() >= MAX_WAITING_COUNT) {
+        if (waitService.findBySlot(date, reservationTime.getId(), themeId).isFullWait()) {
             return ReservationAvailability.NOTHING_AVAILABLE;
         }
         return ReservationAvailability.WAITING_AVAILABLE;

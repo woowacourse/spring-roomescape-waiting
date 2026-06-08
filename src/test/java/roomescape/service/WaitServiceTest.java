@@ -6,23 +6,26 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 import roomescape.exception.custom.AlreadyWaitingException;
 import roomescape.exception.custom.WaitIsFullException;
 import roomescape.exception.custom.WaitNotExistsException;
 import roomescape.repository.WaitRepository;
-import roomescape.repository.dto.WaitDetailDto;
-import roomescape.service.dto.WaitInfo;
 
 public class WaitServiceTest {
     private WaitService waitService;
@@ -31,43 +34,46 @@ public class WaitServiceTest {
     private ReservationTime reservationTime;
     private Theme theme;
     private LocalDate reservationDate;
+    private Slot slot;
+    private Slot otherSlot;
+
+    private Clock fixedClock;
 
     @BeforeEach
     void beforeEach() {
+        fixedClock = Clock.fixed(Instant.parse("2026-05-02T00:00:00Z"), ZoneId.of("Asia/Seoul"));
+
         waitRepository = Mockito.mock(WaitRepository.class);
-        waitService = new WaitService(waitRepository);
+        waitService = new WaitService(waitRepository, fixedClock);
 
         reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         theme = new Theme(1L, "피즈의 모험", "모험 이야기", "url.jpg");
         reservationDate = LocalDate.of(2026, 5, 2);
+        slot = new Slot(reservationDate, reservationTime, theme);
+        otherSlot = new Slot(LocalDate.of(2026, 5, 3), reservationTime, theme);
     }
 
     @Test
     void saveTest() {
-        List<WaitDetailDto> waits = List.of();
-        Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate, reservationTime,
-                theme);
-        Wait wait = Wait.withId(1L, waitWithoutId);
-        WaitInfo waitInfo = WaitInfo.of(wait, 1L);
+        Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
+        Wait wait = waitWithoutId.withId(1L);
+        Waits waits = new Waits(List.of());
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);
         when(waitRepository.findOrderByWait(wait)).thenReturn(1L);
 
-        assertThat(waitService.save(waitWithoutId)).isEqualTo(waitInfo);
+        assertThat(waitService.save(waitWithoutId)).isEqualTo(wait);
     }
 
     @Test
     void saveDuplicatedExceptionTest() {
-        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 11, 0), "fizz", reservationDate,
-                reservationTime, theme);
-        Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 11, 0), "luke", reservationDate,
-                reservationTime, theme);
+        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 11, 0), "fizz", slot);
+        Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 11, 0), "luke", slot);
 
-        Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate,
-                reservationTime, theme);
+        Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
 
-        List<WaitDetailDto> waits = List.of(WaitDetailDto.of(wait1, 1L), WaitDetailDto.of(wait2, 2L));
+        Waits waits = new Waits(List.of(wait1, wait2));
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
@@ -77,18 +83,13 @@ public class WaitServiceTest {
 
     @Test
     void saveSizeFullExceptionTest() {
-        Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 14, 0), "fizz", reservationDate,
-                reservationTime, theme);
+        Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 14, 0), "fizz", slot);
 
-        Wait otherWait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 11, 0), "luke", reservationDate,
-                reservationTime, theme);
-        Wait otherWait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "neo", reservationDate,
-                reservationTime, theme);
-        Wait otherWait3 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 13, 0), "lucky", reservationDate,
-                reservationTime, theme);
+        Wait otherWait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 11, 0), "luke", slot);
+        Wait otherWait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "neo", slot);
+        Wait otherWait3 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 13, 0), "lucky", slot);
 
-        List<WaitDetailDto> waits = List.of(WaitDetailDto.of(otherWait1, 1L), WaitDetailDto.of(otherWait2, 2L),
-                WaitDetailDto.of(otherWait3, 3L));
+        Waits waits = new Waits(List.of(otherWait1, otherWait2, otherWait3));
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
@@ -98,40 +99,30 @@ public class WaitServiceTest {
 
     @Test
     void findByNameTest() {
-        LocalDate otherReservationDate = LocalDate.of(2026, 5, 3);
+        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
+        Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "fizz", otherSlot);
 
-        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate,
-                reservationTime, theme);
-        Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "fizz", otherReservationDate,
-                reservationTime, theme);
-
-        List<WaitDetailDto> fizzWaits = List.of(WaitDetailDto.of(wait1, 1L), WaitDetailDto.of(wait2, 1L));
-        List<WaitInfo> fizzWaitInfos = List.of(WaitInfo.of(wait1, 1L), WaitInfo.of(wait2, 1L));
+        Waits fizzWaits = new Waits(List.of(wait1, wait2));
 
         when(waitRepository.findByName("fizz")).thenReturn(fizzWaits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
 
-        assertThat(waitService.findByName("fizz")).isEqualTo(fizzWaitInfos);
+        assertThat(waitService.findByName("fizz")).isEqualTo(fizzWaits);
     }
 
     @Test
     void findAllTest() {
-        LocalDate otherReservationDate = LocalDate.of(2026, 5, 3);
+        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
+        Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", otherSlot);
 
-        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate,
-                reservationTime, theme);
-        Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", otherReservationDate,
-                reservationTime, theme);
-
-        List<WaitDetailDto> waits = List.of(WaitDetailDto.of(wait1, 1L), WaitDetailDto.of(wait2, 1L));
-        List<WaitInfo> fizzWaitInfos = List.of(WaitInfo.of(wait1, 1L), WaitInfo.of(wait2, 1L));
+        Waits waits = new Waits(List.of(wait1, wait2));
 
         when(waitRepository.findAll()).thenReturn(waits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
 
-        assertThat(waitService.findAll()).isEqualTo(fizzWaitInfos);
+        assertThat(waitService.findAll()).isEqualTo(waits);
     }
 
     @Test
@@ -143,29 +134,24 @@ public class WaitServiceTest {
 
     @Test
     void findBySlotTest() {
-        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate,
-                reservationTime, theme);
-        Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", reservationDate,
-                reservationTime, theme);
+        Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
+        Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", slot);
 
-        List<WaitDetailDto> waits = List.of(WaitDetailDto.of(wait1, 1L), WaitDetailDto.of(wait2, 2L));
-        List<WaitInfo> fizzWaitInfos = List.of(WaitInfo.of(wait1, 1L), WaitInfo.of(wait2, 2L));
+        Waits waits = new Waits(List.of(wait1, wait2));
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(2L);
 
-        assertThat(waitService.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).isEqualTo(
-                fizzWaitInfos);
+        assertThat(waitService.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).isEqualTo(waits);
     }
 
     @Test
     void findWaitTest() {
-        Wait wait = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate, reservationTime, theme);
-        when(waitRepository.findById(1L)).thenReturn(Optional.of(WaitDetailDto.of(wait, 1L)));
-        WaitInfo waitInfo = WaitInfo.of(wait, 1L);
+        Wait wait = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
+        when(waitRepository.findById(1L)).thenReturn(Optional.of(wait));
 
-        assertThat(waitService.findWait(1L)).isEqualTo(waitInfo);
+        assertThat(waitService.findWait(1L)).isEqualTo(wait);
     }
 
     @Test

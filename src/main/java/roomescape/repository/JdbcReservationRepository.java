@@ -14,6 +14,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @Primary
@@ -42,7 +43,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return Reservation.withId(id, reservationWithoutId);
+        return reservationWithoutId.withId(id);
     }
 
     @Override
@@ -114,7 +115,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
             ReservationTime reservationTime = new ReservationTime(timeId, timeValue);
             Theme theme = new Theme(themeId, themeName, themeDescription, themeThumbnailUrl);
-            return new Reservation(id, name, date, reservationTime, theme);
+            Slot slot = new Slot(date, reservationTime, theme);
+            return new Reservation(id, name, slot);
         };
     }
 

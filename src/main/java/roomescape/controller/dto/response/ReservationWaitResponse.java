@@ -2,7 +2,7 @@ package roomescape.controller.dto.response;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.service.dto.WaitInfo;
+import roomescape.domain.Wait;
 
 public sealed interface ReservationWaitResponse permits ReservationResponse, WaitResponse {
 
@@ -10,8 +10,8 @@ public sealed interface ReservationWaitResponse permits ReservationResponse, Wai
         return ReservationResponse.from(reservation);
     }
 
-    static ReservationWaitResponse from(WaitInfo waitInfo) {
-        return WaitResponse.from(waitInfo);
+    static ReservationWaitResponse from(Wait wait, Long order) {
+        return WaitResponse.of(wait, order);
     }
 
     ReservationStatus status();

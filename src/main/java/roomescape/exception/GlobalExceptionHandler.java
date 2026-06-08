@@ -13,9 +13,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.exception.custom.AlreadyReservedException;
 import roomescape.exception.custom.AlreadyWaitingException;
 import roomescape.exception.custom.CannotCreatePastReservationException;
+import roomescape.exception.custom.CannotDeletePastReservationException;
+import roomescape.exception.custom.CannotDeletePastWaitException;
 import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
 import roomescape.exception.custom.CannotDeleteThemeInUseException;
-import roomescape.exception.custom.CannotModifyPastReservationException;
 import roomescape.exception.custom.InvalidDomainValueException;
 import roomescape.exception.custom.InvalidRequestArgumentException;
 import roomescape.exception.custom.RankingPeriodEndDateBeforeStartDateException;
@@ -74,10 +75,10 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ErrorResponse handleDataIntegrityViolationExceptionException(DataIntegrityViolationException exception) {
+    public ErrorResponse handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
         log.info("[Data Integrity Violation Error]", exception);
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.METHOD_NOT_ALLOWED.name(),
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
                 "이미 존재하는 데이터이거나 유효하지 않은 값이 포함되어 있습니다.");
     }
 
@@ -119,12 +120,21 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(CannotModifyPastReservationException.class)
-    public ErrorResponse handleCannotModifyPastReservationException(CannotModifyPastReservationException exception) {
+    @ExceptionHandler(CannotDeletePastReservationException.class)
+    public ErrorResponse handleCannotModifyPastReservationException(CannotDeletePastReservationException exception) {
         log.info("[Invalid Request Error]", exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
-                "지나간 시간의 예약은 수정, 삭제할 수 없습니다.");
+                "지나간 시간의 예약은 삭제할 수 없습니다.");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CannotDeletePastWaitException.class)
+    public ErrorResponse handleCannotDeletePastWaitException(CannotDeletePastWaitException exception) {
+        log.info("[Invalid Request Error]", exception);
+
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
+                "지나간 시간의 대기는 삭제할 수 없습니다.");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

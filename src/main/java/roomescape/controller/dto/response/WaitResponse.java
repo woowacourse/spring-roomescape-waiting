@@ -3,7 +3,7 @@ package roomescape.controller.dto.response;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.ReservationStatus;
-import roomescape.service.dto.WaitInfo;
+import roomescape.domain.Wait;
 
 public record WaitResponse(
         Long id,
@@ -16,16 +16,16 @@ public record WaitResponse(
         LocalDateTime createdAt
 ) implements ReservationWaitResponse {
 
-    public static WaitResponse from(WaitInfo waitInfo) {
+    public static WaitResponse of(Wait wait, Long order) {
         return new WaitResponse(
-                waitInfo.id(),
-                waitInfo.name(),
-                waitInfo.date(),
-                ReservationTimeResponse.from(waitInfo.time()),
-                ThemeResponse.from(waitInfo.theme()),
-                waitInfo.status(),
-                waitInfo.order(),
-                waitInfo.createdAt()
+                wait.getId(),
+                wait.getName(),
+                wait.getReservationDate(),
+                ReservationTimeResponse.from(wait.getTime()),
+                ThemeResponse.from(wait.getTheme()),
+                ReservationStatus.WAITING,
+                order,
+                wait.getCreatedAt()
         );
     }
 }

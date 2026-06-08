@@ -18,16 +18,15 @@ import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
 import roomescape.controller.dto.response.ReservationTimeListResponse;
 import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.domain.ReservationAvailability;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
-import roomescape.service.dto.ReservationTimeInfo;
-import roomescape.service.dto.ThemeInfo;
-import roomescape.service.dto.WaitInfo;
 
 public class ReservationTimeFacadeTest {
 
@@ -92,14 +91,12 @@ public class ReservationTimeFacadeTest {
         List<ReservationTime> allReservationTimes = List.of(firstTime, secondTime, thirdTime);
         List<ReservationTime> reservedTimes = List.of(secondTime, thirdTime);
 
-        List<WaitInfo> thirdTimeWaits = List.of(
-                new WaitInfo(1L, "fizz", reservationDate, ReservationTimeInfo.from(thirdTime), ThemeInfo.from(theme),
-                        ReservationStatus.WAITING, 1L, LocalDateTime.now()),
-                new WaitInfo(2L, "luke", reservationDate, ReservationTimeInfo.from(thirdTime), ThemeInfo.from(theme),
-                        ReservationStatus.WAITING, 2L, LocalDateTime.now()),
-                new WaitInfo(3L, "neo", reservationDate, ReservationTimeInfo.from(thirdTime), ThemeInfo.from(theme),
-                        ReservationStatus.WAITING, 3L, LocalDateTime.now())
-        );
+        Slot thirdSlot = new Slot(reservationDate, thirdTime, theme);
+        Waits thirdTimeWaits = new Waits(List.of(
+                new Wait(1L, LocalDateTime.of(2026, 5, 3, 10, 0), "fizz", thirdSlot),
+                new Wait(2L, LocalDateTime.of(2026, 5, 3, 10, 1), "luke", thirdSlot),
+                new Wait(3L, LocalDateTime.of(2026, 5, 3, 10, 2), "neo", thirdSlot)
+        ));
 
         List<ReservationTimeAvailabilityResponse> availabilityResponses = List.of(
                 ReservationTimeAvailabilityResponse.from(firstTime,
@@ -114,6 +111,8 @@ public class ReservationTimeFacadeTest {
         when(reservationTimeService.findReservedTimesByDateAndTheme(reservationDate, theme.getId())).thenReturn(
                 reservedTimes);
         when(reservationTimeService.findAll()).thenReturn(allReservationTimes);
+        when(waitService.findBySlot(reservationDate, secondTime.getId(), theme.getId()))
+                .thenReturn(new Waits(List.of()));
         when(waitService.findBySlot(reservationDate, thirdTime.getId(), theme.getId())).thenReturn(thirdTimeWaits);
 
         assertThat(reservationTimeFacade.findAvailabilityByDateAndTheme(reservationDate, theme.getId())).isEqualTo(

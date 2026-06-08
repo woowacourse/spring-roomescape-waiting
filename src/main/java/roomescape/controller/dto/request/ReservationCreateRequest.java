@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.exception.custom.InvalidRequestArgumentException;
@@ -20,11 +21,11 @@ public record ReservationCreateRequest(
     }
 
     public Reservation toReservation(ReservationTime reservationTime, Theme theme) {
-        return new Reservation(name, date, reservationTime, theme);
+        return new Reservation(name, new Slot(date, reservationTime, theme));
     }
 
     public Wait toWait(LocalDateTime createdAt, ReservationTime reservationTime, Theme theme) {
-        return new Wait(createdAt, name, date, reservationTime, theme);
+        return new Wait(createdAt, name, new Slot(date, reservationTime, theme));
     }
 
     private void validate(String name, LocalDate date, Long timeId, Long themeId) {

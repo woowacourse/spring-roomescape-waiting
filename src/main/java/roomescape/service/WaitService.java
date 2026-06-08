@@ -1,80 +1,64 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Wait;
-import roomescape.exception.custom.AlreadyWaitingException;
+import roomescape.domain.Waits;
 import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
 import roomescape.exception.custom.CannotDeleteThemeInUseException;
-import roomescape.exception.custom.WaitIsFullException;
 import roomescape.exception.custom.WaitNotExistsException;
 import roomescape.repository.WaitRepository;
-import roomescape.repository.dto.WaitDetailDto;
-import roomescape.service.dto.WaitInfo;
+import roomescape.validator.WaitValidator;
+import roomescape.validator.WaitValidatorFactory;
 
 @Service
 @Transactional(readOnly = true)
 public class WaitService {
 
-    public static final int MAX_WAITING_COUNT = 3;
-
     private final WaitRepository waitRepository;
+    private final Clock clock;
 
-    public WaitService(WaitRepository waitRepository) {
+    public WaitService(WaitRepository waitRepository, Clock clock) {
         this.waitRepository = waitRepository;
+        this.clock = clock;
     }
 
     @Transactional
-    public WaitInfo save(Wait waitWithoutId) {
-        List<WaitDetailDto> waits = waitRepository.findBySlot(
-                waitWithoutId.getReservationDate(),
-                waitWithoutId.getTime().getId(),
+    public Wait save(Wait waitWithoutId) {
+        Waits waits = waitRepository.findBySlot(waitWithoutId.getReservationDate(), waitWithoutId.getTime().getId(),
                 waitWithoutId.getTheme().getId());
+        waits.validateCreate(waitWithoutId.getName());
 
-        for (WaitDetailDto waitDetailDto : waits) {
-            if (waitWithoutId.isSameUser(waitDetailDto.name())) {
-                throw new AlreadyWaitingException();
-            }
-        }
-
-        if (waits.size() >= MAX_WAITING_COUNT) {
-            throw new WaitIsFullException();
-        }
-
-        Wait newWait = waitRepository.save(waitWithoutId);
-        Long order = calculateOrder(newWait);
-        return WaitInfo.of(newWait, order);
+        return waitRepository.save(waitWithoutId);
     }
 
-    public List<WaitInfo> findByName(String name) {
-        return waitRepository.findByName(name).stream()
-                .map(WaitInfo::from)
-                .toList();
+    public Waits findByName(String name) {
+        return waitRepository.findByName(name);
     }
 
-    public List<WaitInfo> findAll() {
-        return waitRepository.findAll().stream()
-                .map(WaitInfo::from)
-                .toList();
+    public Waits findAll() {
+        return waitRepository.findAll();
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, boolean isAdmin) {
+        Wait wait = waitRepository.findById(id)
+                .orElseThrow(WaitNotExistsException::new);
+        WaitValidator waitValidator = WaitValidatorFactory.getValidator(isAdmin);
+        waitValidator.validateDelete(wait, LocalDateTime.now(clock));
         waitRepository.deleteById(id);
     }
 
-    public List<WaitInfo> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
-        return waitRepository.findBySlot(reservationDate, timeId, themeId).stream()
-                .map(WaitInfo::from)
-                .toList();
+    public Waits findBySlot(LocalDate localDate, Long timeId, Long themeId) {
+        return waitRepository.findBySlot(localDate, timeId, themeId);
     }
 
-    public WaitInfo findWait(Long waitId) {
-        WaitDetailDto waitDetailDto = waitRepository.findById(waitId)
+    public Wait findWait(Long waitId) {
+        return waitRepository.findById(waitId)
                 .orElseThrow(WaitNotExistsException::new);
-        return WaitInfo.from(waitDetailDto);
     }
 
     public Long calculateOrder(Wait wait) {
