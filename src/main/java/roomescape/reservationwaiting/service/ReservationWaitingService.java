@@ -3,11 +3,13 @@ package roomescape.reservationwaiting.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
+import org.springframework.context.event.EventListener;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.common.event.ReservationEvent;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
@@ -76,8 +78,9 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void promoteWaiting(ReservationSlot slot) {
-        reservationWaitingRepository.findOldestBySlot(slot)
+    @EventListener
+    public void promoteWaiting(ReservationEvent event) {
+        reservationWaitingRepository.findOldestBySlot(event.getSlot())
                 .ifPresent(waiting -> {
                     try {
                         reservationRepository.save(waiting.toReservation());

@@ -4,11 +4,13 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.common.event.ReservationEvent;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
@@ -20,7 +22,6 @@ import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
-import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
@@ -32,21 +33,20 @@ public class ReservationService {
     private final ThemeService themeService;
     private final ReservationFactory reservationFactory;
     private final Clock clock;
-    private final ReservationWaitingService reservationWaitingService;
+    private final ApplicationEventPublisher publisher;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
             ReservationFactory reservationFactory,
-            Clock clock,
-            ReservationWaitingService reservationWaitingService) {
+            Clock clock, ApplicationEventPublisher publisher) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationFactory = reservationFactory;
         this.clock = clock;
-        this.reservationWaitingService = reservationWaitingService;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -82,7 +82,7 @@ public class ReservationService {
 
         reservationRepository.deleteById(id);
 
-        reservationWaitingService.promoteWaiting(reservation.getSlot());
+        publisher.publishEvent(new ReservationEvent(reservation.getSlot()));
     }
 
     @Transactional
@@ -101,7 +101,7 @@ public class ReservationService {
         Reservation validReservation = reservation.reschedule(request.date(), time, clock);
         reservationRepository.update(id, validReservation.getSlot());
 
-        reservationWaitingService.promoteWaiting(slot);
+        publisher.publishEvent(new ReservationEvent(slot));
         return ReservationResponse.from(getById(id));
     }
 
