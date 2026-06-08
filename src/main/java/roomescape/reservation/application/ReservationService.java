@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReservationService {
@@ -108,8 +110,8 @@ public class ReservationService {
                     targetReservation.getTime(),
                     targetReservation.getTheme()
             );
-        } catch (BusinessException | DataAccessException ignored) {
-            // 대기자 승격 실패는 예약 취소를 막지 않음.
+        } catch (BusinessException | DataAccessException e) {
+            log.warn("예약 삭제 후 다음 대기자 승격에 슬패했습니다. reservationId = {}", id, e);
         }
     }
 
@@ -132,8 +134,8 @@ public class ReservationService {
                     targetReservation.getTime(),
                     targetReservation.getTheme()
             );
-        } catch (BusinessException | DataAccessException ignored) {
-            // 대기자 승격 실패는 예약 취소를 막지 않음.
+        } catch (BusinessException | DataAccessException e) {
+            log.warn("사용자 예약 취소 후 다음 대기자 승격에 슬패했습니다. reservationId = {}", id, e);
         }
     }
 }
