@@ -67,14 +67,6 @@ public class ReservationService {
 
     @Transactional
     public Reservation modifyDateTimeByName(Long id, String name, Long themeId, LocalDate date, Long timeId) {
-        Long originReservationId = reservationDao.lockById(id)
-                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
-
-        Reservation originReservation = reservationDao.selectById(originReservationId)
-                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
-
-        originReservation.validateSameName(name);
-
         ReservationTime time = timeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_TIME_NOT_FOUND));
 
@@ -84,6 +76,14 @@ public class ReservationService {
         if (reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)) {
             throw new RoomescapeException(RESERVATION_ALREADY_EXISTS);
         }
+
+        Long originReservationId = reservationDao.lockById(id)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
+
+        Reservation originReservation = reservationDao.selectById(originReservationId)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
+
+        originReservation.validateSameName(name);
 
         Reservation updated;
         try {
