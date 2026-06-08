@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.config.UploadProperties;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
@@ -18,9 +18,9 @@ import roomescape.dto.response.ThemeResponse;
 @Transactional(readOnly = true)
 public class ThemeService {
     private final String uploadDir;
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeDao;
 
-    public ThemeService(ThemeDao themeDao, UploadProperties uploadProperties) {
+    public ThemeService(ThemeRepository themeDao, UploadProperties uploadProperties) {
         this.themeDao = themeDao;
         this.uploadDir = uploadProperties.imagesDir();
     }

@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -8,17 +8,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @Repository
-public class ReservationDao {
+public class ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
-    public ReservationDao(JdbcTemplate jdbcTemplate) {
+    public ReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("reservation")
                 .usingGeneratedKeyColumns("id");

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.UserReservationUpdateRequest;
@@ -22,13 +22,13 @@ import roomescape.dto.request.UserReservationUpdateRequest;
 class ReservationServiceMockTest {
 
     @Mock
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationDao;
 
     @Mock
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeDao;
 
     @Mock
-    private ThemeDao themeDao;
+    private ThemeRepository themeDao;
 
     @InjectMocks
     private ReservationService reservationService;

@@ -7,9 +7,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -25,11 +25,11 @@ import roomescape.exception.IdNotFoundException;
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
+    private final ReservationRepository reservationDao;
+    private final ReservationTimeRepository reservationTimeDao;
+    private final ThemeRepository themeDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao) {
+    public ReservationService(ReservationRepository reservationDao, ReservationTimeRepository reservationTimeDao, ThemeRepository themeDao) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;

@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,14 +12,14 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import roomescape.domain.Theme;
 
 @JdbcTest
-@Import(ThemeDao.class)
-class ThemeDaoTest {
+@Import(ThemeRepository.class)
+class ThemeRepositoryTest {
 
     private static final int DEFAULT_THEME_COUNT = 15;
     private static final Long AVAILABLE_THEME_ID = 1L;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeDao;
 
     @Test
     void 전체_테마_조회() {
