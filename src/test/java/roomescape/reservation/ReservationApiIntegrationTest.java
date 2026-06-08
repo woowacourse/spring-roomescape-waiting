@@ -187,6 +187,39 @@ class ReservationApiIntegrationTest {
         assertThat(waitingCount).isZero();
     }
 
+    @DisplayName("예약 변경 시 첫 번째 대기자가 예약으로 전환되면 다음 대기자의 순번이 1번이 됩니다.")
+    @Test
+    void update_reservation_with_waiting_reorders_remaining_waitings() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long firstTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long secondTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2028, 5, 6);
+        Long reservationId = testHelper.insertReservation("스타크", date, themeId, firstTimeId);
+        testHelper.insertWaiting("카야", date, themeId, firstTimeId);
+        testHelper.insertWaiting("타스", date, themeId, firstTimeId);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "스타크");
+        params.put("date", "2028-05-07");
+        params.put("timeId", String.valueOf(secondTimeId));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", equalTo("타스"))
+                .body("[0].order", equalTo(1));
+    }
+
     @DisplayName("본인 예약 취소 API를 테스트합니다.")
     @Test
     void cancel_my_reservation() {
