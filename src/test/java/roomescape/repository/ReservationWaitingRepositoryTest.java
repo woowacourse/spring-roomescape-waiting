@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.repository.result.ReservationWaitingOrderResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -138,6 +139,62 @@ class ReservationWaitingRepositoryTest {
         assertAll(
                 () -> assertThat(actualTurn1 + 1).isEqualTo(1),
                 () -> assertThat(actualTurn2 + 1).isEqualTo(2));
+    }
+
+    @Test
+    void 예약_대기들이_속한_슬롯의_순번_계산용_데이터를_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        ReservationTime otherTime = findTimeByStartAt("12:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+
+        Long waitingId1 = waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
+        Long waitingId2 = waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme));
+        Long waitingId3 = waitingRepository.insert(new ReservationWaiting(null, "브라운", date, otherTime, theme));
+        waitingRepository.insert(new ReservationWaiting(null, "포비", date.plusDays(1), time, theme));
+
+        List<ReservationWaiting> waitings = waitingRepository.findByName("브라운");
+
+        // when
+        List<ReservationWaitingOrderResult> result = waitingRepository.findOrderResultsBy(waitings);
+
+        // then
+        assertAll(
+                () -> assertThat(result).extracting(ReservationWaitingOrderResult::id)
+                        .containsExactly(waitingId3, waitingId1, waitingId2),
+                () -> assertThat(result).extracting(ReservationWaitingOrderResult::createdAt)
+                        .doesNotContainNull());
+    }
+
+    @Test
+    void 같은_슬롯의_첫번째_예약_대기를_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        ReservationTime otherTime = findTimeByStartAt("12:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        Theme otherTheme = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
+
+        Long firstId = waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
+        waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme));
+        waitingRepository.insert(new ReservationWaiting(null, "포비", date, otherTime, theme));
+        waitingRepository.insert(new ReservationWaiting(null, "제이슨", date, time, otherTheme));
+
+        // when
+        ReservationWaiting result = waitingRepository.findFirstWaiting(date, time.getId(), theme.getId()).get();
+
+        // then
+        assertThat(result.getId()).isEqualTo(firstId);
+    }
+
+    @Test
+    void 같은_슬롯의_예약_대기가_없으면_빈_값을_반환한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", date.plusDays(1), time, theme));
+
+        // when & then
+        assertThat(waitingRepository.findFirstWaiting(date, time.getId(), theme.getId())).isEmpty();
     }
 
     private ReservationTime findTimeByStartAt(String startAt) {

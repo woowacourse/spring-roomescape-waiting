@@ -12,10 +12,15 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.result.ReservationWaitingOrderResult;
 import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,14 +43,17 @@ public class ReservationWaitingService {
     }
 
     public List<WaitingResult> findByName(String name) {
-        return reservationWaitingRepository.findByName(name).stream()
+        List<ReservationWaiting> waitings = reservationWaitingRepository.findByName(name);
+        Map<Long, Long> turns = calculateTurns(reservationWaitingRepository.findOrderResultsBy(waitings));
+
+        return waitings.stream()
                 .map(waiting -> new WaitingResult(
                         waiting.getId(),
                         waiting.getName(),
                         waiting.getDate(),
                         waiting.getTime(),
                         waiting.getTheme(),
-                        calculateTurn(waiting)))
+                        turns.get(waiting.getId())))
                 .toList();
     }
 
@@ -76,6 +84,26 @@ public class ReservationWaitingService {
 
     private long calculateTurn(ReservationWaiting waiting) {
         return reservationWaitingRepository.countEarlierWaitings(waiting.getId()) + 1;
+    }
+
+    private Map<Long, Long> calculateTurns(List<ReservationWaitingOrderResult> orderResults) {
+        Map<WaitingSlot, List<ReservationWaitingOrderResult>> grouped = orderResults.stream()
+                .collect(Collectors.groupingBy(result ->
+                        new WaitingSlot(result.date(), result.timeId(), result.themeId())));
+
+        Map<Long, Long> turns = new HashMap<>();
+        grouped.values().forEach(group -> putTurns(turns, group));
+        return turns;
+    }
+
+    private void putTurns(Map<Long, Long> turns, List<ReservationWaitingOrderResult> group) {
+        group.sort(Comparator
+                .comparing(ReservationWaitingOrderResult::createdAt)
+                .thenComparing(ReservationWaitingOrderResult::id));
+
+        for (int index = 0; index < group.size(); index++) {
+            turns.put(group.get(index).id(), (long) index + 1);
+        }
     }
 
     @NonNull

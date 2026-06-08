@@ -1,19 +1,20 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,16 +22,19 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ThemeRepository themeRepository;
     private final ReservationValidator reservationValidator;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
+            ReservationWaitingRepository reservationWaitingRepository,
             ThemeRepository themeRepository,
             ReservationValidator reservationValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.themeRepository = themeRepository;
         this.reservationValidator = reservationValidator;
     }
@@ -61,11 +65,16 @@ public class ReservationService {
         Reservation reservation = findReservation(id);
         reservationValidator.validateUpdatableReservation(reservation, name);
         reservationRepository.delete(id);
+        promoteFirstWaiting(reservation);
     }
 
     @Transactional
     public void deleteByAdmin(Long id) {
+        Reservation reservation = findReservation(id);
         reservationRepository.delete(id);
+        if (!reservation.isPast()) {
+            promoteFirstWaiting(reservation);
+        }
     }
 
     @Transactional
@@ -81,7 +90,7 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
-
+        promoteFirstWaiting(reservation);
         return findUpdatedReservation(id);
     }
 
@@ -93,7 +102,30 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
+    }
 
+    private void promoteFirstWaiting(Reservation canceledReservation) {
+        try {
+            reservationWaitingRepository.findFirstWaiting(
+                            canceledReservation.getDate(),
+                            canceledReservation.getTime().getId(),
+                            canceledReservation.getTheme().getId())
+                    .ifPresent(this::promote);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+        }
+    }
+
+    private void promote(ReservationWaiting waiting) {
+        Reservation reservation = new Reservation(
+                null,
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme());
+
+        reservationRepository.insert(reservation);
+        reservationWaitingRepository.delete(waiting.getId());
     }
 
     private Reservation findReservation(Long id) {

@@ -11,9 +11,11 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.result.ReservationWaitingOrderResult;
 import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,10 +56,26 @@ class ReservationWaitingServiceTest {
 
         when(reservationWaitingRepository.findByName(name))
                 .thenReturn(waitings);
-        when(reservationWaitingRepository.countEarlierWaitings(1L))
-                .thenReturn(0L);
-        when(reservationWaitingRepository.countEarlierWaitings(2L))
-                .thenReturn(1L);
+        when(reservationWaitingRepository.findOrderResultsBy(waitings))
+                .thenReturn(List.of(
+                        new ReservationWaitingOrderResult(
+                                3L,
+                                date,
+                                time.getId(),
+                                theme.getId(),
+                                LocalDateTime.of(date, LocalTime.parse("07:50"))),
+                        new ReservationWaitingOrderResult(
+                                1L,
+                                date,
+                                time.getId(),
+                                theme.getId(),
+                                LocalDateTime.of(date, LocalTime.parse("08:00"))),
+                        new ReservationWaitingOrderResult(
+                                2L,
+                                date.plusDays(1),
+                                time.getId(),
+                                theme.getId(),
+                                LocalDateTime.of(date.plusDays(1), LocalTime.parse("08:00")))));
 
         // when
         List<WaitingResult> result = service.findByName(name);
@@ -72,7 +90,7 @@ class ReservationWaitingServiceTest {
                 () -> assertThat(result).extracting(WaitingResult::date)
                         .containsExactly(date, date.plusDays(1)),
                 () -> assertThat(result).extracting(WaitingResult::turn)
-                        .containsExactly(1L, 2L));
+                        .containsExactly(2L, 1L));
     }
 
     @Test
