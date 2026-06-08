@@ -1,10 +1,11 @@
 package roomescape.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.member.AuthenticatedMember;
+import roomescape.member.domain.AuthenticatedMember;
 
 @Component
 public class TokenLoginMemberProvider {
@@ -20,23 +21,23 @@ public class TokenLoginMemberProvider {
     }
 
     public AuthenticatedMember resolveAndCacheAuthenticatedMember(HttpServletRequest request) {
-        AuthenticatedMember cachedMember = findAuthenticatedMemberFromRequestAttribute(request);
-        if (cachedMember != null) {
-            return cachedMember;
-        }
+        return findAuthenticatedMemberFromRequestAttribute(request)
+                .orElseGet(() -> extractAndCacheAuthenticatedMember(request));
+    }
 
+    private AuthenticatedMember extractAndCacheAuthenticatedMember(HttpServletRequest request) {
         String token = extractAccessToken(request);
         AuthenticatedMember member = jwtTokenProvider.extractMember(token);
         request.setAttribute(LOGIN_MEMBER_ATTRIBUTE, member);
         return member;
     }
 
-    public AuthenticatedMember getRequiredAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
-        AuthenticatedMember member = findAuthenticatedMemberFromRequestAttribute(request);
-        if (member == null) {
-            throw new EscapeRoomException(ErrorCode.UNAUTHORIZED);
+    private Optional<AuthenticatedMember> findAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
+        Object member = request.getAttribute(LOGIN_MEMBER_ATTRIBUTE);
+        if (member instanceof AuthenticatedMember authenticatedMember) {
+            return Optional.of(authenticatedMember);
         }
-        return member;
+        return Optional.empty();
     }
 
     private String extractAccessToken(HttpServletRequest request) {
@@ -52,11 +53,9 @@ public class TokenLoginMemberProvider {
         return token;
     }
 
-    private AuthenticatedMember findAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
-        Object member = request.getAttribute(LOGIN_MEMBER_ATTRIBUTE);
-        if (member instanceof AuthenticatedMember authenticatedMember) {
-            return authenticatedMember;
-        }
-        return null;
+    public AuthenticatedMember getRequiredAuthenticatedMemberFromRequestAttribute(HttpServletRequest request) {
+        return findAuthenticatedMemberFromRequestAttribute(request)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.UNAUTHORIZED));
     }
+
 }

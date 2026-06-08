@@ -76,21 +76,13 @@
 
         <article class="admin-card">
           <h3>예약 삭제</h3>
+          <p class="section-caption">예약 삭제 시 같은 슬롯의 첫 번째 대기가 자동으로 예약 전환됩니다.</p>
           <form id="reservation-delete-form" class="row-form inline-form">
             <label>예약 ID <input type="number" id="reservation-delete-id" min="1" required></label>
             <button type="submit" class="danger-button">예약 삭제</button>
           </form>
         </article>
 
-        <article class="admin-card">
-          <h3>예약 수정</h3>
-          <form id="reservation-update-form" class="row-form admin-form">
-            <label>예약 ID <input type="number" id="reservation-update-id" min="1" required></label>
-            <label>변경 날짜 <input type="date" id="reservation-update-date"></label>
-            <label>변경 시간 ID <input type="number" id="reservation-update-time-id" min="1"></label>
-            <button type="submit" class="search-button">예약 수정</button>
-          </form>
-        </article>
       </div>
 
       <div class="reservation-toolbar">
@@ -158,7 +150,7 @@
     </details>
     </div>
 
-<!--    <p id="status" class="status-bar"></p>-->
+    <p id="status" class="status-bar">관리자 계정으로 로그인하세요.</p>
   </main>
 
   <div id="confirm-modal" class="modal-backdrop hidden">

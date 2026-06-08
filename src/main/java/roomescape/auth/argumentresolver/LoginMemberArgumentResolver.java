@@ -11,8 +11,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.TokenLoginMemberProvider;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.member.AuthenticatedMember;
-import roomescape.member.LoginMember;
+import roomescape.member.domain.AuthenticatedMember;
+import roomescape.member.domain.LoginMember;
 
 @Component
 @RequiredArgsConstructor

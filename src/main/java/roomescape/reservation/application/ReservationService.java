@@ -1,162 +1,161 @@
 package roomescape.reservation.application;
 
-import java.time.LocalDate;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.reservation.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
-import roomescape.reservation.dto.response.ReservationSaveResponse;
-import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
-import roomescape.slot.application.SlotService;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.reservation.application.dto.request.ReservationSaveRequest;
+import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.application.dto.response.ReservationSaveResponse;
+import roomescape.reservation.application.port.in.CancelReservationUseCase;
+import roomescape.reservation.application.port.in.CreateReservationUseCase;
+import roomescape.reservation.application.port.in.FindReservationUseCase;
+import roomescape.reservation.application.port.out.ReservationRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.slot.application.SlotAssembler;
+import roomescape.slot.domain.Slot;
+import roomescape.slot.domain.SlotOccupancy;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingLine;
+import roomescape.waiting.domain.WaitingLines;
+import roomescape.waiting.domain.WaitingPromotionPolicy;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationService {
+public class ReservationService implements CreateReservationUseCase, FindReservationUseCase, CancelReservationUseCase {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final SlotService slotService;
+    private final SlotAssembler slotAssembler;
+    private final WaitingPromotionPolicy waitingPromotionPolicy;
+    private final Clock clock;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
-        slotService.validateSlot(body.date(), body.timeId(), body.themeId());
-        long slotId = slotService.resolveSlotId(body.date(), body.timeId(),
-                body.themeId());
-        throwIfSlotUnavailableForReservation(slotId);
-        Reservation reservation = reservationRepository.save(body.toDomain(memberId, slotId));
+        Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
+        throwIfSlotUnavailableForReservation(slot.getId());
+        Reservation reservation = reservationRepository.save(Reservation.create(memberId, slot));
 
         return ReservationSaveResponse.from(reservation);
+    }
+
+    private void throwIfSlotUnavailableForReservation(long slotId) {
+        boolean hasReservation = reservationRepository.existsBySlotId(slotId);
+        boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
+        SlotOccupancy slotOccupancy = SlotOccupancy.of(hasReservation, hasWaiting);
+
+        if (!slotOccupancy.isReservable()) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
+        }
     }
 
     public List<ReservationDetailFindResponse> findReservationDetails() {
         return ReservationDetailFindResponse.from(reservationRepository.findAll());
     }
 
+    @Transactional
     public void deleteById(long reservationId) {
-        deleteInternal(reservationId, oldReservation -> {
-        });
+        findReservationIfExists(reservationId)
+                .ifPresent(this::cancelReservation);
     }
 
+    private Optional<Reservation> findReservationIfExists(long reservationId) {
+        return reservationRepository.findById(reservationId);
+    }
+
+    @Transactional
     public void deleteByIdForUser(long reservationId, long memberId) {
-        deleteInternal(
-                reservationId,
-                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
-        );
+        findReservationIfExists(reservationId)
+                .ifPresent(reservation -> cancelReservationByUser(reservation, memberId));
+    }
+
+    private void cancelReservationByUser(Reservation reservation, long memberId) {
+        reservation.validateOwnedBy(memberId);
+        cancelReservation(reservation);
+    }
+
+    private void cancelReservation(Reservation reservation) {
+        reservation.validateCancelable(LocalDateTime.now(clock));
+
+        WaitingLine waitingLine = findWaitingLineFor(reservation);
+        deleteReservationOnly(reservation);
+        promoteFirstWaitingIfExists(reservation, waitingLine);
+    }
+
+    private WaitingLine findWaitingLineFor(Reservation reservation) {
+        return WaitingLine.of(waitingRepository.findAllBySlotIdOrderByIdForUpdate(reservation.getSlotId()));
+    }
+
+    private void deleteReservationOnly(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+    }
+
+    private void promoteFirstWaitingIfExists(Reservation canceledReservation, WaitingLine waitingLine) {
+        waitingLine.first()
+                .ifPresent(waiting -> {
+                    Reservation promotedReservation = waitingPromotionPolicy.promote(waiting,
+                            canceledReservation.getSlot());
+                    reservationRepository.save(promotedReservation);
+                    waitingRepository.deleteById(waiting.getId());
+                });
     }
 
     public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
-        return ReservationDetailFindResponse.merge(
-                reservationRepository.findAllReservationDetailsByMemberId(memberId),
-                waitingRepository.findAllWaitingDetailsByMemberId(memberId)
-        );
+        List<ReservationDetailFindResponse> reservations = findMyReservationResponses(memberId);
+        List<ReservationDetailFindResponse> waitings = findMyWaitingResponses(memberId);
+
+        return mergeMyReservations(reservations, waitings);
     }
 
-    public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
-        return updateInternal(
-                body,
-                reservationId,
-                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
-        );
+    private List<ReservationDetailFindResponse> findMyReservationResponses(long memberId) {
+        return reservationRepository.findAllReservationDetailsByMemberId(memberId)
+                .stream()
+                .map(ReservationDetailFindResponse::from)
+                .toList();
     }
 
-    public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        return updateInternal(body, reservationId, oldReservation -> {
-        });
+    private List<ReservationDetailFindResponse> findMyWaitingResponses(long memberId) {
+        List<WaitingDetailProjection> waitingDetails = waitingRepository.findAllWaitingDetailsByMemberId(memberId);
+        WaitingLines waitingLines = findWaitingLines(waitingDetails);
+
+        return waitingDetails.stream()
+                .map(waitingDetail -> ReservationDetailFindResponse.from(
+                        waitingDetail,
+                        waitingOrderOf(memberId, waitingDetail, waitingLines)
+                ))
+                .toList();
     }
 
-    private static void validateReservationOwner(
-            long reservationId,
-            ReservationDetailProjection reservationDetail,
-            long memberId
+    private WaitingLines findWaitingLines(List<WaitingDetailProjection> waitingDetails) {
+        List<Long> slotIds = waitingDetails.stream()
+                .map(WaitingDetailProjection::slotId)
+                .distinct()
+                .toList();
+
+        return WaitingLines.of(waitingRepository.findAllBySlotIds(slotIds));
+    }
+
+    private long waitingOrderOf(
+            long memberId,
+            WaitingDetailProjection waitingDetail,
+            WaitingLines waitingLines
     ) {
-        if (!Objects.equals(reservationDetail.memberId(), memberId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
-        }
+        Waiting waiting = Waiting.of(waitingDetail.id(), memberId, waitingDetail.slotId());
+        return waitingLines.orderOf(waiting);
     }
 
-    private static void validateReservationUpdated(int affectedRow) {
-        if (affectedRow != 1) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
-        }
-    }
-
-    private static void validateNotEmptyUpdateRequest(ReservationUpdateRequest body) {
-        if (body.date() == null && body.timeId() == null) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_EMPTY);
-        }
-    }
-
-    private void deleteInternal(
-            long reservationId,
-            Consumer<ReservationDetailProjection> accessValidator
+    private List<ReservationDetailFindResponse> mergeMyReservations(
+            List<ReservationDetailFindResponse> reservations,
+            List<ReservationDetailFindResponse> waitings
     ) {
-        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
-                .orElse(null);
-        if (reservationDetail == null) {
-            return;
-        }
-        accessValidator.accept(reservationDetail);
-        validateNotPast(reservationDetail);
-        reservationRepository.deleteById(reservationId);
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .toList();
     }
 
-    private ReservationSaveResponse updateInternal(
-            ReservationUpdateRequest body,
-            long reservationId,
-            Consumer<ReservationDetailProjection> accessValidator
-    ) {
-        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
-        accessValidator.accept(oldReservation);
-        validateNotPast(oldReservation);
-        validateNotEmptyUpdateRequest(body);
-
-        LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
-        long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
-        long slotId = slotService.resolveSlotId(newDate, newTimeId,
-                oldReservation.getThemeId());
-        slotService.validateSlot(newDate, newTimeId, oldReservation.getThemeId());
-        throwIfSlotUnavailableForUpdate(reservationId, slotId);
-
-        int affectedRow = reservationRepository.updateSlotById(oldReservation.id(), slotId);
-        validateReservationUpdated(affectedRow);
-
-        return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
-    }
-
-    private Reservation getNewReservationOrThrow(long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(
-                        () -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
-    }
-
-    private ReservationDetailProjection getOldReservationDetailOrThrow(long reservationId) {
-        return reservationRepository.findDetailById(reservationId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
-    }
-
-    private void throwIfSlotUnavailableForUpdate(long reservationId, long slotId) {
-        if (reservationRepository.existsBySlotIdAndIdNot(slotId, reservationId)
-                || waitingRepository.existsBySlotId(slotId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
-        }
-    }
-
-    private void throwIfSlotUnavailableForReservation(long slotId) {
-        if (reservationRepository.existsBySlotId(slotId)
-                || waitingRepository.existsBySlotId(slotId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
-        }
-    }
-
-    private void validateNotPast(ReservationDetailProjection reservationDetail) {
-        slotService.validateNotPastDate(reservationDetail.date());
-        slotService.validateNotPastTime(reservationDetail.date(), reservationDetail.getTime());
-    }
 }

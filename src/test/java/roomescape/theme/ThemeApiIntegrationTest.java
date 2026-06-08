@@ -1,19 +1,19 @@
 package roomescape.theme;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import roomescape.support.ControllerTestSupport;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import roomescape.support.ControllerTestSupport;
 
 public class ThemeApiIntegrationTest extends ControllerTestSupport {
 
@@ -21,7 +21,8 @@ public class ThemeApiIntegrationTest extends ControllerTestSupport {
     private Clock clock;
 
     @Test
-    void 각_날짜에_존재하는_모든_테마_조회_API_테스트() {
+    @DisplayName("각 날짜에 존재하는 모든 테마를 조회할 수 있다.")
+    void finds_themes_available_on_each_date() {
         String accessToken = loginUserToken();
 
         RestAssured.given().log().all()
@@ -39,7 +40,8 @@ public class ThemeApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 최근_7일_예약_개수에_따른_인기_테마_조회_API_테스트() {
+    @DisplayName("최근 7일 예약 개수에 따른 인기 테마를 조회할 수 있다.")
+    void finds_popular_themes_by_reservations_in_last_seven_days() {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
                 LocalDate.of(2026, 5, 7)
@@ -59,7 +61,8 @@ public class ThemeApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 매니저_테마_저장_API_테스트() {
+    @DisplayName("매니저는 테마를 저장할 수 있다.")
+    void manager_saves_theme_successfully() {
         String accessToken = loginManagerToken();
         Map<String, String> params = new HashMap<>();
         params.put("name", "무서운게 딱 좋아");
@@ -77,7 +80,8 @@ public class ThemeApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 매니저_테마_전체_조회_API_테스트() {
+    @DisplayName("매니저는 전체 테마를 조회할 수 있다.")
+    void manager_finds_all_themes_successfully() {
         String accessToken = loginManagerToken();
 
         RestAssured.given().log().all()
@@ -94,7 +98,8 @@ public class ThemeApiIntegrationTest extends ControllerTestSupport {
     }
 
     @Test
-    void 매니저_테마_추가_및_삭제_API_테스트() {
+    @DisplayName("매니저는 테마를 추가하고 삭제할 수 있다.")
+    void manager_creates_and_deletes_theme_successfully() {
         String accessToken = loginManagerToken();
         Map<String, String> params = new HashMap<>();
         params.put("name", "무서운게 딱 좋아");

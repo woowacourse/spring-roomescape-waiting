@@ -8,7 +8,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.TokenLoginMemberProvider;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.member.AuthenticatedMember;
+import roomescape.member.domain.AuthenticatedMember;
 
 @Component
 @RequiredArgsConstructor

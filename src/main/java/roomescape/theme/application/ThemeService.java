@@ -1,34 +1,44 @@
 package roomescape.theme.application;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.slot.application.SlotService;
-import roomescape.theme.Theme;
-import roomescape.theme.dto.request.ThemeSaveRequest;
-import roomescape.theme.dto.response.ThemeFindResponse;
-import roomescape.theme.dto.response.ThemeSaveResponse;
-import roomescape.theme.infrastructure.ThemeRepository;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.util.List;
+import roomescape.slot.application.SlotUsageValidator;
+import roomescape.theme.application.dto.request.ThemeSaveRequest;
+import roomescape.theme.application.dto.response.ThemeFindResponse;
+import roomescape.theme.application.dto.response.ThemeSaveResponse;
+import roomescape.theme.application.port.in.CreateThemeUseCase;
+import roomescape.theme.application.port.in.DeleteThemeUseCase;
+import roomescape.theme.application.port.in.FindThemeUseCase;
+import roomescape.theme.application.port.out.ThemeRepository;
+import roomescape.theme.domain.Theme;
 
 @Service
 @RequiredArgsConstructor
-public class ThemeService {
+public class ThemeService implements CreateThemeUseCase, FindThemeUseCase, DeleteThemeUseCase {
     private final ThemeRepository themeRepository;
-    private final SlotService slotService;
+    private final ThemeAssembler themeAssembler;
+    private final SlotUsageValidator slotUsageValidator;
     private final Clock clock;
 
     public ThemeSaveResponse save(ThemeSaveRequest body) {
         validateAlreadyThemeNot(body.name());
-        return ThemeSaveResponse.from(themeRepository.save(body.toDomain()));
+        Theme theme = themeAssembler.assemble(body.name(), body.description(), body.thumbnailUrl());
+        return ThemeSaveResponse.from(themeRepository.save(theme));
+    }
+
+    private void validateAlreadyThemeNot(String themeName) {
+        if (themeRepository.existsAlreadyTheme(themeName)) {
+            throw new EscapeRoomException(ErrorCode.THEME_ALREADY_EXIST);
+        }
     }
 
     public void delete(long id) {
-        slotService.validateThemeDeletable(id);
+        slotUsageValidator.validateThemeDeletable(id);
         themeRepository.deleteById(id);
     }
 
@@ -48,9 +58,4 @@ public class ThemeService {
         return ThemeFindResponse.from(themes);
     }
 
-    private void validateAlreadyThemeNot(String themeName) {
-        if (themeRepository.existsAlreadyTheme(themeName)) {
-            throw new EscapeRoomException(ErrorCode.THEME_ALREADY_EXIST);
-        }
-    }
 }

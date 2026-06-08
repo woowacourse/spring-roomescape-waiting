@@ -1,17 +1,18 @@
 package roomescape.waiting;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.waiting.infrastructure.JdbcWaitingRepository;
-
-import java.time.LocalDate;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import roomescape.waiting.adapter.out.persistence.JdbcWaitingRepository;
+import roomescape.waiting.domain.Waiting;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -26,8 +27,8 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("대기 저장에 성공한다.")
-    void save_테스트() {
-        Waiting waiting = new Waiting(null, MEMBER_ID, SLOT_ID);
+    void saves_waiting_successfully() {
+        Waiting waiting = Waiting.create(MEMBER_ID, SLOT_ID);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
 
@@ -38,8 +39,8 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("회원과 슬롯로 대기 존재 여부를 확인할 수 있다.")
-    void existsBySlotIdAndMemberId_true_테스트() {
-        waitingRepository.save(new Waiting(null, MEMBER_ID, SLOT_ID));
+    void checks_waiting_existence_by_member_and_slot() {
+        waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
 
         boolean result = waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, SLOT_ID);
 
@@ -48,7 +49,7 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("회원과 슬롯로 대기가 없으면 false를 반환한다.")
-    void existsBySlotIdAndMemberId_false_테스트() {
+    void missing_waiting_by_member_and_slot_returns_false() {
         boolean result = waitingRepository.existsBySlotIdAndMemberId(999L, 999L);
 
         assertThat(result).isFalse();
@@ -56,8 +57,8 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("대기 id로 대기를 조회할 수 있다.")
-    void findById_테스트() {
-        Waiting savedWaiting = waitingRepository.save(new Waiting(null, MEMBER_ID, SLOT_ID));
+    void finds_waiting_by_id_successfully() {
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
 
         Waiting result = waitingRepository.findById(savedWaiting.getId())
                 .orElseThrow();
@@ -68,9 +69,22 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
+    @DisplayName("대기 id로 락을 걸고 대기를 조회할 수 있다.")
+    void finds_waiting_by_id_with_lock_successfully() {
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
+
+        Waiting result = waitingRepository.findByIdForUpdate(savedWaiting.getId())
+                .orElseThrow();
+
+        assertThat(result.getId()).isEqualTo(savedWaiting.getId());
+        assertThat(result.getMemberId()).isEqualTo(MEMBER_ID);
+        assertThat(result.getSlotId()).isEqualTo(SLOT_ID);
+    }
+
+    @Test
     @DisplayName("대기 id로 대기를 삭제할 수 있다.")
-    void deleteById_테스트() {
-        Waiting savedWaiting = waitingRepository.save(new Waiting(null, MEMBER_ID, SLOT_ID));
+    void deletes_waiting_by_id_successfully() {
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
 
         waitingRepository.deleteById(savedWaiting.getId());
 
@@ -78,22 +92,60 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 대기 id까지의 순번을 조회할 수 있다.")
-    void countBySlotIdAndIdLessThanEqual_테스트() {
-        waitingRepository.save(new Waiting(null, 3L, SLOT_ID));
-        waitingRepository.save(new Waiting(null, 2L, SLOT_ID));
-        Waiting myWaiting = waitingRepository.save(new Waiting(null, MEMBER_ID, SLOT_ID));
-        waitingRepository.save(new Waiting(null, 4L, SLOT_ID));
+    @DisplayName("특정 슬롯의 대기 목록을 신청 순서대로 조회할 수 있다.")
+    void finds_waitings_by_slot_id_in_request_order() {
+        Waiting first = waitingRepository.save(Waiting.create(3L, SLOT_ID));
+        Waiting second = waitingRepository.save(Waiting.create(2L, SLOT_ID));
+        Waiting otherSlotWaiting = waitingRepository.save(Waiting.create(4L, 2L));
+        Waiting third = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
 
-        long count = waitingRepository.countBySlotIdAndIdLessThanEqual(SLOT_ID, myWaiting.getId());
+        List<Waiting> result = waitingRepository.findAllBySlotIdOrderById(SLOT_ID);
 
-        assertThat(count).isEqualTo(3L);
+        assertThat(result).extracting(Waiting::getId)
+                .containsExactly(first.getId(), second.getId(), third.getId());
+        assertThat(result).extracting(Waiting::getId)
+                .doesNotContain(otherSlotWaiting.getId());
+    }
+
+    @Test
+    @DisplayName("특정 슬롯의 대기 목록을 락을 걸고 신청 순서대로 조회할 수 있다.")
+    void finds_waitings_by_slot_id_with_lock_in_request_order() {
+        Waiting first = waitingRepository.save(Waiting.create(3L, SLOT_ID));
+        Waiting second = waitingRepository.save(Waiting.create(2L, SLOT_ID));
+        Waiting otherSlotWaiting = waitingRepository.save(Waiting.create(4L, 2L));
+        Waiting third = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
+
+        List<Waiting> result = waitingRepository.findAllBySlotIdOrderByIdForUpdate(SLOT_ID);
+
+        assertThat(result).extracting(Waiting::getId)
+                .containsExactly(first.getId(), second.getId(), third.getId());
+        assertThat(result).extracting(Waiting::getId)
+                .doesNotContain(otherSlotWaiting.getId());
+    }
+
+    @Test
+    @DisplayName("여러 슬롯의 대기 목록을 한 번에 조회할 수 있다.")
+    void finds_waitings_for_multiple_slots_at_once() {
+        Waiting firstSlotFirst = waitingRepository.save(Waiting.create(3L, SLOT_ID));
+        Waiting firstSlotSecond = waitingRepository.save(Waiting.create(2L, SLOT_ID));
+        Waiting secondSlotFirst = waitingRepository.save(Waiting.create(4L, 2L));
+        Waiting firstSlotThird = waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
+
+        List<Waiting> result = waitingRepository.findAllBySlotIds(List.of(2L, SLOT_ID));
+
+        assertThat(result).extracting(Waiting::getId)
+                .containsExactlyInAnyOrder(
+                        firstSlotFirst.getId(),
+                        firstSlotSecond.getId(),
+                        firstSlotThird.getId(),
+                        secondSlotFirst.getId()
+                );
     }
 
     @Test
     @DisplayName("날짜와 테마로 대기가 있는 시간 id를 조회할 수 있다.")
-    void findTimeIdByDateAndThemeId_테스트() {
-        waitingRepository.save(new Waiting(null, MEMBER_ID, SLOT_ID));
+    void finds_waiting_time_ids_by_date_and_theme() {
+        waitingRepository.save(Waiting.create(MEMBER_ID, SLOT_ID));
 
         Set<Long> result = waitingRepository.findTimeIdByDateAndThemeId(LocalDate.parse("2026-05-05"), 1L);
 

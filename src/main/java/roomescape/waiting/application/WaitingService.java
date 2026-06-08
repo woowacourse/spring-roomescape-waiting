@@ -1,53 +1,44 @@
 package roomescape.waiting.application;
 
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.slot.application.SlotService;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.infrastructure.WaitingRepository;
-import roomescape.waiting.dto.request.WaitingRequest;
-import roomescape.waiting.dto.response.WaitingResponse;
+import roomescape.reservation.application.port.out.ReservationRepository;
+import roomescape.slot.application.SlotAssembler;
+import roomescape.slot.domain.Slot;
+import roomescape.slot.domain.SlotOccupancy;
+import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingResponse;
+import roomescape.waiting.application.port.in.CancelWaitingUseCase;
+import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingLine;
 
 @Service
 @RequiredArgsConstructor
-public class WaitingService {
+public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCase {
 
-    private final SlotService slotService;
+    private final SlotAssembler slotAssembler;
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
 
     @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
-        slotService.validateSlot(body.date(), body.timeId(), body.themeId());
-        long slotId = slotService.resolveSlotId(body.date(), body.timeId(), body.themeId());
+        Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
+        long slotId = slot.getId();
 
         validateReservedByMemberNotExists(memberId, slotId);
         validateWaitingByMemberNotExists(memberId, slotId);
         validateWaitingTargetExists(slotId);
 
-        Waiting waiting = waitingRepository.save(body.toDomain(memberId, slotId));
-        long waitingOrder = waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, waiting.getId());
+        Waiting waiting = waitingRepository.save(Waiting.create(memberId, slotId));
+        WaitingLine waitingLine = WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(slotId));
+        long waitingOrder = waitingLine.orderOf(waiting);
 
         return WaitingResponse.of(waiting, waitingOrder);
-    }
-
-    public void deleteByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findById(waitingId)
-                .orElse(null);
-        if(waiting == null) {
-            return;
-        }
-
-        if (!Objects.equals(waiting.getMemberId(), memberId)) {
-            throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, waitingId);
-        }
-
-        waitingRepository.deleteById(waitingId);
     }
 
     private void validateReservedByMemberNotExists(long memberId, long slotId) {
@@ -63,9 +54,24 @@ public class WaitingService {
     }
 
     private void validateWaitingTargetExists(long slotId) {
-        if (!reservationRepository.existsBySlotId(slotId)
-                && !waitingRepository.existsBySlotId(slotId)) {
+        SlotOccupancy slotOccupancy = SlotOccupancy.of(
+                reservationRepository.existsBySlotId(slotId),
+                waitingRepository.existsBySlotId(slotId)
+        );
+
+        if (!slotOccupancy.isWaitable()) {
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }
     }
+
+    @Transactional
+    public void deleteByIdForUser(long waitingId, long memberId) {
+        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.WAITING_NOT_FOUND, waitingId));
+
+        waiting.validateOwnedBy(memberId);
+
+        waitingRepository.deleteById(waitingId);
+    }
+
 }

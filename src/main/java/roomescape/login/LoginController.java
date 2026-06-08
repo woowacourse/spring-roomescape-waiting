@@ -11,21 +11,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.common.api.ApiResponse;
+import roomescape.login.application.port.in.LoginUseCase;
 import roomescape.login.dto.request.LoginRequest;
 import roomescape.login.dto.response.LoginResponse;
-import roomescape.member.AuthenticatedMember;
+import roomescape.member.domain.AuthenticatedMember;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class LoginController {
 
-    private final LoginService loginService;
+    private final LoginUseCase loginUseCase;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest body) {
-        AuthenticatedMember member = loginService.login(body.name(), body.password());
+        AuthenticatedMember member = loginUseCase.login(body.name(), body.password());
         String accessToken = jwtTokenProvider.generateAccessToken(member);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(LoginResponse.bearer(accessToken)));

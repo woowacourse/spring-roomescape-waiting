@@ -1,18 +1,18 @@
 package roomescape;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
-
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -26,7 +26,8 @@ public class MissionStepTest {
     }
 
     @Test
-    void 예약_조회() {
+    @DisplayName("예약을 조회할 수 있다.")
+    void finds_reservations_successfully() {
         String accessToken = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("name", "a", "password", "test1"))

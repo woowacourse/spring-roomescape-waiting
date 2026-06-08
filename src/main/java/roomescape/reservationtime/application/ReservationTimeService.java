@@ -9,29 +9,41 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
-import roomescape.reservationtime.dto.response.AvailableTimeFindResponse;
-import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
-import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
-import roomescape.reservationtime.dto.response.TimeInformation;
-import roomescape.reservationtime.dto.response.TimeSlotStatus;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.slot.application.SlotService;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.reservation.application.port.out.ReservationRepository;
+import roomescape.reservationtime.application.dto.request.ReservationTimeSaveRequest;
+import roomescape.reservationtime.application.dto.response.AvailableTimeFindResponse;
+import roomescape.reservationtime.application.dto.response.ReservationTimeFindResponse;
+import roomescape.reservationtime.application.dto.response.ReservationTimeSaveResponse;
+import roomescape.reservationtime.application.dto.response.TimeInformation;
+import roomescape.reservationtime.application.dto.response.TimeSlotStatus;
+import roomescape.reservationtime.application.port.in.CreateReservationTimeUseCase;
+import roomescape.reservationtime.application.port.in.DeleteReservationTimeUseCase;
+import roomescape.reservationtime.application.port.in.FindReservationTimeUseCase;
+import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.slot.application.SlotUsageValidator;
+import roomescape.waiting.application.port.out.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationTimeService {
-    private final SlotService slotService;
+public class ReservationTimeService implements CreateReservationTimeUseCase, FindReservationTimeUseCase,
+        DeleteReservationTimeUseCase {
+    private final SlotUsageValidator slotUsageValidator;
+    private final ReservationTimeAssembler reservationTimeAssembler;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
     public ReservationTimeSaveResponse save(ReservationTimeSaveRequest body) {
         validateAlreadyTimeNot(body.startAt());
-        return ReservationTimeSaveResponse.from(reservationTimeRepository.save(body.toDomain()));
+        ReservationTime reservationTime = reservationTimeAssembler.assemble(body.startAt());
+        return ReservationTimeSaveResponse.from(reservationTimeRepository.save(reservationTime));
+    }
+
+    private void validateAlreadyTimeNot(LocalTime startAt) {
+        if (reservationTimeRepository.existsAlreadyTime(startAt)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATIONTIME_ALREADY_EXIST);
+        }
     }
 
     public List<ReservationTimeFindResponse> findAll() {
@@ -39,7 +51,7 @@ public class ReservationTimeService {
     }
 
     public void delete(long id) {
-        slotService.validateTimeDeletable(id);
+        slotUsageValidator.validateTimeDeletable(id);
         reservationTimeRepository.deleteById(id);
     }
 
@@ -67,9 +79,4 @@ public class ReservationTimeService {
         return TimeSlotStatus.RESERVABLE;
     }
 
-    private void validateAlreadyTimeNot(LocalTime startAt) {
-        if (reservationTimeRepository.existsAlreadyTime(startAt)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATIONTIME_ALREADY_EXIST);
-        }
-    }
 }

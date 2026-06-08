@@ -1,16 +1,15 @@
 package roomescape.config;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.auth.interceptor.AuthenticationInterceptor;
 import roomescape.auth.argumentresolver.LoginMemberArgumentResolver;
+import roomescape.auth.interceptor.AuthenticationInterceptor;
 import roomescape.auth.interceptor.ManagerInterceptor;
-
-import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://127.0.0.1:*"
                 )
                 .allowCredentials(true)
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
 
