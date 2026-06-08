@@ -128,7 +128,7 @@ public class ReservationService {
                     targetReservation.getTheme()
             );
         } catch (BusinessException | DataAccessException e) {
-            log.warn("예약 삭제 후 다음 대기자 승격에 슬패했습니다. reservationId = {}", id, e);
+            log.warn("예약 삭제 후 다음 대기자 승격에 실패했습니다. reservationId={}", id, e);
         }
     }
 
@@ -152,7 +152,7 @@ public class ReservationService {
                     targetReservation.getTheme()
             );
         } catch (BusinessException | DataAccessException e) {
-            log.warn("사용자 예약 취소 후 다음 대기자 승격에 슬패했습니다. reservationId = {}", id, e);
+            log.warn("사용자 예약 취소 후 다음 대기자 승격에 실패했습니다. reservationId={}", id, e);
         }
     }
 }
