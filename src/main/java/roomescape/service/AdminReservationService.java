@@ -52,7 +52,7 @@ public class AdminReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
 
-        return reservationRepository.executeWithThemeLock(command.themeId(), lockedTheme -> {
+        return reservationRepository.executeWithThemeLock(command.themeId(), (lockedTheme, writer) -> {
             Theme theme = lockedTheme.orElseThrow(() -> {
                 log.warn("존재하지 않는 테마로 예약 생성 시도: themeId={}", command.themeId());
                 return new ThemeNotFoundException(
@@ -63,7 +63,7 @@ public class AdminReservationService {
 
             ReservationStatus status = decideStatus(command.date(), command.timeId(), command.themeId());
             Reservation reservation = new Reservation(null, command.reserverName(), command.date(), time, theme, status);
-            ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
+            ReservationWithWaitingOrder saved = writer.save(reservation);
             log.info("예약 생성 완료: reservationId={}, reserverName={}, date={}, timeId={}, themeId={}, status={}",
                     saved.id(), saved.reserverName(), saved.date(), command.timeId(), command.themeId(), saved.status());
             return ReservationResult.from(saved);
@@ -93,16 +93,16 @@ public class AdminReservationService {
                     log.warn("존재하지 않는 예약 취소 시도: reservationId={}", id);
                     return new ReservationNotFoundException("존재하지 않는 예약입니다: reservationId=" + id);
                 });
-        reservationRepository.executeWithThemeLock(reservation.getTheme().getId(), lockedTheme -> {
+        reservationRepository.executeWithThemeLock(reservation.getTheme().getId(), (lockedTheme, writer) -> {
             Reservation current = reservationRepository.findById(id)
                     .orElseThrow(() -> new ReservationNotFoundException(
                             "존재하지 않는 예약입니다: reservationId=" + id));
             if (current.isCanceled()) {
                 return null;
             }
-            reservationRepository.cancel(current.getId());
+            writer.cancel(current.getId());
             if (current.isConfirmed()) {
-                boolean promoted = reservationRepository.promoteEarliestWaiting(
+                boolean promoted = writer.promoteEarliestWaiting(
                         current.getDate(),
                         current.getTime().getId(),
                         current.getTheme().getId()

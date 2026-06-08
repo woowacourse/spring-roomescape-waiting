@@ -87,7 +87,7 @@ public class UserReservationService {
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
         Long themeId = reservation.getTheme().getId();
 
-        return reservationRepository.executeWithThemeLock(themeId, lockedTheme -> {
+        return reservationRepository.executeWithThemeLock(themeId, (lockedTheme, writer) -> {
             validateNoConflict(command, themeId);
 
             LocalDate oldDate = reservation.getDate();
@@ -110,10 +110,10 @@ public class UserReservationService {
                     reservation.getTheme(),
                     newStatus
             );
-            var result = reservationRepository.update(updated);
+            var result = writer.update(updated);
 
             if (slotChanged && wasConfirmed) {
-                reservationRepository.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
+                writer.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
             }
             return ReservationResult.from(result);
         });

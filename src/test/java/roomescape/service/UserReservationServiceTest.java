@@ -25,6 +25,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
+import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeLockedAction;
@@ -60,6 +61,8 @@ class UserReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
+    private LockedReservationWriter reservationWriter;
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @InjectMocks
     private UserReservationService userReservationService;
@@ -68,7 +71,7 @@ class UserReservationServiceTest {
         given(reservationRepository.executeWithThemeLock(eq(VALID_THEME.getId()), any()))
                 .willAnswer(invocation -> {
                     ThemeLockedAction<Object> action = invocation.getArgument(1);
-                    return action.execute(lockedTheme);
+                    return action.execute(lockedTheme, reservationWriter);
                 });
     }
 
@@ -202,7 +205,7 @@ class UserReservationServiceTest {
         stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
-        given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
+        given(reservationWriter.update(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
                     r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(),
@@ -217,7 +220,7 @@ class UserReservationServiceTest {
         verify(reservationTimeRepository, times(1)).findById(2L);
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
-        verify(reservationRepository, times(1)).update(any(Reservation.class));
+        verify(reservationWriter, times(1)).update(any(Reservation.class));
         verifyNoInteractions(reservationService);
     }
 

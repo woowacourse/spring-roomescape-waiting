@@ -25,6 +25,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
+import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeLockedAction;
@@ -45,15 +46,14 @@ class ReservationServiceTest {
             "https://picsum.photos/seed/roomescape1/800/600.jpg"
     );
     private static final LocalDate VALID_RESERVATION_DATE = LocalDate.of(2026, 5, 9);
-    private static final ReservationCreateCommand VALID_COMMAND = new ReservationCreateCommand(
-            "브라운", VALID_RESERVATION_DATE, 1L, 1L
-    );
     private static final ReservationCreateCommand VALID_COMMAND_MOA = new ReservationCreateCommand(
             "모아", VALID_RESERVATION_DATE, 1L, 1L
     );
 
     @Mock
     private ReservationRepository reservationRepository;
+    @Mock
+    private LockedReservationWriter reservationWriter;
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @InjectMocks
@@ -63,7 +63,7 @@ class ReservationServiceTest {
         given(reservationRepository.executeWithThemeLock(eq(1L), any()))
                 .willAnswer(invocation -> {
                     ThemeLockedAction<Object> action = invocation.getArgument(1);
-                    return action.execute(lockedTheme);
+                    return action.execute(lockedTheme, reservationWriter);
                 });
     }
 
@@ -98,7 +98,7 @@ class ReservationServiceTest {
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(false);
-        given(reservationRepository.save(any(Reservation.class))).willReturn(saved);
+        given(reservationWriter.save(any(Reservation.class))).willReturn(saved);
 
         assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
@@ -106,7 +106,7 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), 1L, 1L);
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(reservationWriter, times(1)).save(any(Reservation.class));
     }
 
     @Test
@@ -164,8 +164,8 @@ class ReservationServiceTest {
 
         verify(reservationRepository, times(2)).findById(1L);
         verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
-        verify(reservationRepository, times(1)).cancel(1L);
-        verify(reservationRepository, times(1)).promoteEarliestWaiting(VALID_RESERVATION_DATE, 1L, 1L);
+        verify(reservationWriter, times(1)).cancel(1L);
+        verify(reservationWriter, times(1)).promoteEarliestWaiting(VALID_RESERVATION_DATE, 1L, 1L);
         verifyNoInteractions(reservationTimeRepository);
     }
 
@@ -181,7 +181,7 @@ class ReservationServiceTest {
             given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                     1L))
                     .willReturn(false);
-            given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
+            given(reservationWriter.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
                     1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
                     ReservationStatus.CONFIRMED, new WaitingOrder(0)));
 
@@ -192,7 +192,7 @@ class ReservationServiceTest {
             verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId("모아",
                     VALID_COMMAND_MOA.date(), 1L,
                     1L);
-            verify(reservationRepository, times(1)).save(any(Reservation.class));
+            verify(reservationWriter, times(1)).save(any(Reservation.class));
         }
 
         @Nested
@@ -229,7 +229,7 @@ class ReservationServiceTest {
                         .willReturn(false);
                 given(reservationRepository.existsActiveConfirmed(VALID_COMMAND_MOA.date(), 1L, 1L))
                         .willReturn(true);
-                given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
+                given(reservationWriter.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
                         1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
                         ReservationStatus.WAITING, new WaitingOrder(1)));
 
@@ -240,7 +240,7 @@ class ReservationServiceTest {
                 verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeId("모아",
                         VALID_COMMAND_MOA.date(), 1L,
                         1L);
-                verify(reservationRepository, times(1)).save(any(Reservation.class));
+                verify(reservationWriter, times(1)).save(any(Reservation.class));
             }
         }
     }

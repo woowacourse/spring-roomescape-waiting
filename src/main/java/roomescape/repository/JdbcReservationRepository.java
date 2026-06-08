@@ -20,7 +20,7 @@ import roomescape.domain.WaitingOrder;
 import roomescape.domain.ReservationWithWaitingOrder;
 
 @Repository
-public class JdbcReservationRepository implements ReservationRepository {
+public class JdbcReservationRepository implements ReservationRepository, LockedReservationWriter {
 
     private static final String CANCELED = ReservationStatus.CANCELED.name();
     private static final String WAITING = ReservationStatus.WAITING.name();
@@ -185,11 +185,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     "테마 락은 트랜잭션 안에서만 획득할 수 있습니다: themeId=" + themeId);
         }
         Optional<Theme> lockedTheme = lockTheme(themeId);
-        return action.execute(lockedTheme);
+        return action.execute(lockedTheme, this);
     }
 
-    @Override
-    public Optional<Theme> lockTheme(Long themeId) {
+    private Optional<Theme> lockTheme(Long themeId) {
         String sql = "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? FOR UPDATE";
         try {
             Theme theme = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Theme(

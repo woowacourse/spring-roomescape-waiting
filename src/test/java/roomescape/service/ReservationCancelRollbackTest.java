@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.JdbcReservationRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 
 @SpringBootTest
@@ -25,7 +25,7 @@ class ReservationCancelRollbackTest {
     private AdminReservationService reservationService;
 
     @MockitoSpyBean
-    private ReservationRepository reservationRepository;
+    private JdbcReservationRepository reservationRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
