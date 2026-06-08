@@ -58,7 +58,7 @@
 - [X] `ReservationRepository`가 `Slot` 식별자를 중심으로 상호작용하도록 유지한다.
   - 추가 기능에서도 `date/theme/time` 조합을 여러 Repository 메서드에 흩뿌리기보다 `ReservationSlot`을 기준으로 조회하고 판단한다.
 
-- [ ] `ReservationSlot`의 static 메서드를 객체에게 묻는 방식으로 바꿀 수 있는지 검토한다.
+- [X] `ReservationSlot`의 static 메서드를 객체에게 묻는 방식으로 바꿀 수 있는지 검토한다.
   - 슬롯 객체가 존재하는 흐름에서는 `slot.isPast(...)`를 사용하도록 정리한다. 슬롯 객체 없이 날짜와 시간만 있는 화면 상태 계산에서는 `ReservationSlot` static 메서드가 적절한지, 별도 정책 객체가 더 나은지 비교한 뒤 제거 여부를 결정한다.
 
 

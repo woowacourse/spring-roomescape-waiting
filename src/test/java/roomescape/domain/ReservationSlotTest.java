@@ -1,8 +1,10 @@
 package roomescape.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,20 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 class ReservationSlotTest {
+
+    @DisplayName("슬롯 시간이 기준 시각보다 이전이면 과거 슬롯이다")
+    @Test
+    void isPast() {
+        ReservationSlot slot = ReservationSlot.createNew(
+                LocalDate.parse("2026-03-08"),
+                createTheme(),
+                ReservationTime.createNew(LocalTime.parse("10:00"))
+        );
+
+        boolean past = slot.isPast(LocalDateTime.parse("2026-03-08T10:01:00"));
+
+        assertThat(past).isTrue();
+    }
 
     @DisplayName("예약 날짜 null 예외")
     @Test
