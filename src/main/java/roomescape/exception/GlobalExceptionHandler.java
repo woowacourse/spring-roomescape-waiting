@@ -2,6 +2,7 @@ package roomescape.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -34,49 +35,37 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail handleNotFound(NotFoundException ex, WebRequest request) {
-        return buildProblem(HttpStatus.NOT_FOUND, ProblemType.NOT_FOUND, ex, request);
+        return buildProblem(HttpStatus.NOT_FOUND, ProblemType.NOT_FOUND, Level.INFO, ex, request);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ProblemDetail handleUnauthorized(UnauthorizedException ex, WebRequest request) {
-        return buildProblem(HttpStatus.UNAUTHORIZED, ProblemType.UNAUTHORIZED, ex, request);
+        return buildProblem(HttpStatus.UNAUTHORIZED, ProblemType.UNAUTHORIZED, Level.WARN, ex, request);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ProblemDetail handleConflict(ConflictException ex, WebRequest request) {
-        return buildProblem(HttpStatus.CONFLICT, ProblemType.CONFLICT, ex, request);
+        return buildProblem(HttpStatus.CONFLICT, ProblemType.CONFLICT, Level.INFO, ex, request);
     }
 
     @ExceptionHandler(DuplicateKeyException.class)
     public ProblemDetail handleDuplicateKey(DuplicateKeyException ex, WebRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, DETAIL_DUPLICATE_KEY);
-        applyType(problem, ProblemType.CONFLICT, request);
-        logException(ex, status, request);
-        return problem;
+        return buildProblem(HttpStatus.CONFLICT, ProblemType.CONFLICT, DETAIL_DUPLICATE_KEY, Level.INFO, ex, request);
     }
 
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ProblemDetail handleBusinessRuleViolation(BusinessRuleViolationException ex, WebRequest request) {
-        return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ProblemType.BUSINESS_RULE_VIOLATION, ex, request);
+        return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ProblemType.BUSINESS_RULE_VIOLATION, Level.INFO, ex, request);
     }
 
     @ExceptionHandler(TransientDataAccessException.class)
     public ProblemDetail handleTransient(TransientDataAccessException ex, WebRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, DETAIL_TRANSIENT);
-        applyType(problem, ProblemType.CONCURRENCY_CONFLICT, request);
-        logException(ex, status, request);
-        return problem;
+        return buildProblem(HttpStatus.CONFLICT, ProblemType.CONCURRENCY_CONFLICT, DETAIL_TRANSIENT, Level.WARN, ex, request);
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception ex, WebRequest request) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, DETAIL_INTERNAL_ERROR);
-        applyType(problem, ProblemType.INTERNAL_ERROR, request);
-        logException(ex, status, request);
-        return problem;
+        return buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, ProblemType.INTERNAL_ERROR, DETAIL_INTERNAL_ERROR, Level.ERROR, ex, request);
     }
 
     @Override
@@ -106,19 +95,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (response != null && response.getBody() instanceof ProblemDetail problem) {
             applyType(problem, mappingFor(ex, status), request);
         }
-        logException(ex, status, request);
+        logException(levelFor(status), ex, status, request);
         return response;
     }
 
     private ProblemDetail buildProblem(
             HttpStatus status,
             ProblemType type,
+            Level level,
             Exception ex,
             WebRequest request
     ) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
+        return buildProblem(status, type, ex.getMessage(), level, ex, request);
+    }
+
+    private ProblemDetail buildProblem(
+            HttpStatus status,
+            ProblemType type,
+            String detail,
+            Level level,
+            Exception ex,
+            WebRequest request
+    ) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         applyType(problem, type, request);
-        logException(ex, status, request);
+        logException(level, ex, status, request);
         return problem;
     }
 
@@ -142,15 +143,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         };
     }
 
-    private void logException(Exception ex, HttpStatusCode status, WebRequest request) {
+    private Level levelFor(HttpStatusCode status) {
+        if (status.is5xxServerError()) {
+            return Level.ERROR;
+        }
+        return Level.INFO;
+    }
+
+    private void logException(Level level, Exception ex, HttpStatusCode status, WebRequest request) {
         String method = extractMethod(request);
         String uri = extractUri(request);
         int code = status.value();
-        if (status.is5xxServerError()) {
-            log.error("{} {} → {}", method, uri, code, ex);
-            return;
+        switch (level) {
+            case ERROR -> log.error("{} {} → {}", method, uri, code, ex);
+            case WARN -> log.warn("{} {} → {} {}", method, uri, code, ex.getMessage());
+            default -> log.info("{} {} → {} {}", method, uri, code, ex.getMessage());
         }
-        log.warn("{} {} → {} {}", method, uri, code, ex.getMessage());
     }
 
     private String extractUri(WebRequest request) {
