@@ -26,7 +26,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query(
-                "SELECT id, start_at FROM reservation_time",
+                "SELECT id, start_at FROM reservation_time WHERE is_deleted = FALSE",
                 reservationTimeRowMapper
         );
     }
@@ -34,7 +34,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public Optional<ReservationTime> findById(Long id) {
         List<ReservationTime> result = jdbcTemplate.query(
-                "SELECT id, start_at FROM reservation_time WHERE id = ?",
+                "SELECT id, start_at FROM reservation_time WHERE id = ? AND is_deleted = FALSE",
                 reservationTimeRowMapper,
                 id
         );
@@ -58,13 +58,13 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
+        jdbcTemplate.update("UPDATE reservation_time SET is_deleted = TRUE WHERE id = ?", id);
     }
 
     @Override
     public boolean existsById(Long id) {
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE id = ?)",
+                "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE id = ? AND is_deleted = FALSE)",
                 Boolean.class,
                 id
         );
@@ -74,7 +74,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE start_at = ?)",
+                "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE start_at = ? AND is_deleted = FALSE)",
                 Boolean.class,
                 Time.valueOf(startAt)
         );

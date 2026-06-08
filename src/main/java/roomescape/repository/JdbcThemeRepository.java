@@ -35,7 +35,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme",
+                "SELECT id, name, description, thumbnail_url FROM theme WHERE is_deleted = FALSE",
                 themeRowMapper
         );
     }
@@ -43,7 +43,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(Long id) {
         List<Theme> result = jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ?",
+                "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? AND is_deleted = FALSE",
                 themeRowMapper,
                 id
         );
@@ -69,13 +69,13 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+        jdbcTemplate.update("UPDATE theme SET is_deleted = TRUE WHERE id = ?", id);
     }
 
     @Override
     public boolean existsById(Long id) {
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM theme WHERE id = ?)",
+                "SELECT EXISTS (SELECT 1 FROM theme WHERE id = ? AND is_deleted = FALSE)",
                 Boolean.class,
                 id
         );
@@ -85,7 +85,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public boolean existsByName(String name) {
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM theme WHERE name = ?)",
+                "SELECT EXISTS (SELECT 1 FROM theme WHERE name = ? AND is_deleted = FALSE)",
                 Boolean.class,
                 name
         );
@@ -103,6 +103,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 INNER JOIN reservation_date d ON s.date_id = d.id
                 WHERE d.date >= DATEADD('DAY', -7, CURRENT_DATE)
                   AND d.date <  CURRENT_DATE
+                  AND t.is_deleted = FALSE
                 GROUP BY t.id, t.name, t.description, t.thumbnail_url
                 ORDER BY reservation_count DESC
                 LIMIT 10
