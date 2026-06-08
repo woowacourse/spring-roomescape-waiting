@@ -10,6 +10,8 @@ import roomescape.repository.ScheduleDao;
 
 import java.time.LocalDate;
 
+import static org.springframework.transaction.annotation.Propagation.MANDATORY;
+
 @Service
 @Transactional(readOnly = true)
 public class ScheduleService {
@@ -20,14 +22,19 @@ public class ScheduleService {
         this.scheduleDao = scheduleDao;
     }
 
-    @Transactional
-    public Schedule getOrCreateSchedule(
-            LocalDate date,
-            Long timeId,
-            Long themeId
-    ) {
-        return scheduleDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+    @Transactional(propagation = MANDATORY)
+    public Schedule getOrCreateScheduleForUpdate(LocalDate date, Long timeId, Long themeId) {
+        Schedule schedule = scheduleDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
                 .orElseGet(() -> createAndFind(date, timeId, themeId));
+        lockById(schedule.getId());
+        return schedule;
+    }
+
+    @Transactional(propagation = MANDATORY)
+    public void lockById(Long id) {
+        if (!scheduleDao.lockById(id)) {
+            throw new RoomescapeException(DomainErrorCode.NOT_FOUND_SCHEDULE, "해당 ID의 스케줄이 존재하지 않습니다. ID: " + id);
+        }
     }
 
     private Schedule createAndFind(

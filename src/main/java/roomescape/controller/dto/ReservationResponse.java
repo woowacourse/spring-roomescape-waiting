@@ -42,7 +42,7 @@ public record ReservationResponse(
 
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getReserver().getName(),
+                reservation.getMember().getName(),
                 displayStatus,
                 schedule.getDate(),
                 theme.getName(),

@@ -623,7 +623,7 @@
   <div class="logo">Room<span>Escape</span></div>
   <div class="header-right">
     <span class="username-badge">안녕하세요, <strong id="headerName">-</strong> 님</span>
-    <button class="btn-logout" onclick="logout()">나가기</button>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
   </div>
 </header>
 
@@ -742,7 +742,7 @@
     <!-- My reservations -->
     <div class="section" id="section-my">
       <h2 class="section-title">📋 내 예약</h2>
-      <p class="section-desc">나의 예약 내역을 확인하고 관리하세요.</p>
+      <p class="section-desc">나의 예약 내역을 확인하고 취소할 수 있습니다.</p>
       <div class="loading-center" id="my-loading"><div class="spinner"></div></div>
       <div class="reservationSlot-list" id="my-list" style="display:none"></div>
       <div class="empty-state" id="my-empty" style="display:none">
@@ -756,29 +756,36 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+  <script>
   const API = '';
   let username = '';
+  let loginMember = null;
   let selectedTheme = null;
   let selectedDate = null;
   let selectedTime = null;
   let selectedWaitingTarget = null;
-  let editingReservationId = null;
   let cachedThemes = null;
-  let cachedAdminReservations = null;
 
-  function init() {
-    username = localStorage.getItem('username');
-    if (!username) {
+  async function init() {
+    try {
+      loginMember = await fetchJson(`${API}/auth/me`, {}, '로그인이 필요합니다.');
+    } catch (e) {
       window.location.href = '/index.html';
       return;
     }
+
+    if (loginMember.role === 'ADMIN') {
+      window.location.href = '/admin.html';
+      return;
+    }
+
+    username = loginMember.name;
     document.getElementById('headerName').textContent = username;
     switchSection('popular');
   }
 
-  function logout() {
-    localStorage.removeItem('username');
+  async function logout() {
+    await fetch(`${API}/auth/logout`, { method: 'DELETE' }).catch(() => {});
     window.location.href = '/index.html';
   }
 
@@ -804,6 +811,10 @@
 
   async function fetchJson(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
     const res = await fetch(url, options);
+    if (res.status === 401) {
+      window.location.href = '/index.html';
+      throw new Error('로그인이 필요합니다.');
+    }
     if (!res.ok) {
       const error = await readErrorMessage(res, fallback);
       throw Object.assign(new Error(error.message), error);
@@ -814,6 +825,10 @@
 
   async function fetchEmpty(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
     const res = await fetch(url, options);
+    if (res.status === 401) {
+      window.location.href = '/index.html';
+      throw new Error('로그인이 필요합니다.');
+    }
     if (!res.ok) {
       const error = await readErrorMessage(res, fallback);
       throw Object.assign(new Error(error.message), error);
@@ -873,26 +888,14 @@
   }
 
   async function buildPopularThemesFromReservations() {
-    const [themes, reservations] = await Promise.all([
-      getThemes(),
-      getAdminReservationsSafely()
-    ]);
-    const counts = reservations.reduce((acc, reservationSlot) => {
-      acc[reservationSlot.themeName] = (acc[reservationSlot.themeName] || 0) + 1;
-      return acc;
-    }, {});
-
-    return themes
-      .map(theme => ({ ...theme, reservationCount: counts[theme.name] || 0 }))
-      .filter(theme => theme.reservationCount > 0)
-      .sort((a, b) => b.reservationCount - a.reservationCount)
-      .slice(0, 10);
+    const themes = await getThemes();
+    return themes.slice(0, 10);
   }
 
   // Booking themes
   async function loadBookingThemes() {
     resetBookingState();
-    setBookingMode('create');
+    setBookingMode();
     goToStep(1);
     document.getElementById('booking-themes-loading').style.display = 'flex';
     document.getElementById('booking-themes-grid').style.display = 'none';
@@ -918,16 +921,13 @@
     }
   }
 
-  function setBookingMode(mode) {
-    const editing = mode === 'edit';
-    document.getElementById('booking-title').textContent = editing ? '📋 예약 수정' : '🎭 예약하기';
-    document.getElementById('booking-desc').textContent = editing
-      ? '예약할 날짜와 시간을 다시 선택하세요.'
-      : '테마를 선택하고 원하는 날짜와 시간을 예약하세요.';
-    document.getElementById('confirm-box-title').textContent = editing ? '수정 확인' : '예약 확인';
+  function setBookingMode() {
+    document.getElementById('booking-title').textContent = '🎭 예약하기';
+    document.getElementById('booking-desc').textContent = '테마를 선택하고 원하는 날짜와 시간을 예약하세요.';
+    document.getElementById('confirm-box-title').textContent = '예약 확인';
     document.getElementById('confirm-id-row').style.display = 'none';
     document.getElementById('confirm-actions').innerHTML = `
-      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">${editing ? '수정 완료' : '예약 확정'}</button>
+      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
       <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
     `;
   }
@@ -967,6 +967,10 @@
   async function goToStep3() {
     const dateInput = document.getElementById('booking-date');
     selectedDate = dateInput.value;
+    if (!selectedDate) {
+      showToast('날짜를 선택해주세요.', 'error');
+      return;
+    }
     document.getElementById('selected-date-label').textContent = `📅 ${formatDate(selectedDate)}`;
     selectedTime = null;
 
@@ -1030,24 +1034,7 @@
     document.getElementById('wait-reservationTime-btn').style.display = 'inline-flex';
   }
 
-  async function getAdminReservationsSafely() {
-    if (cachedAdminReservations) return cachedAdminReservations;
-
-    try {
-      cachedAdminReservations = await fetchJson(`${API}/admin/reservations`, {}, '예약 목록을 불러올 수 없습니다.');
-      return cachedAdminReservations;
-    } catch (e) {
-      return [];
-    }
-  }
-
   function backFromDateStep() {
-    if (editingReservationId !== null) {
-      resetBookingState();
-      switchSection('my');
-      return;
-    }
-
     goToStep(1);
   }
 
@@ -1084,44 +1071,34 @@
 
   async function submitReservation() {
     try {
-      const isEditing = editingReservationId !== null;
       const request = {
-        method: isEditing ? 'PATCH' : 'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: username,
           date: selectedDate || null,
           timeId: selectedTime?.id || null,
           themeId: selectedTheme.id
         })
       };
 
-      if (isEditing) {
-        await fetchEmpty(`${API}/reservations/${editingReservationId}`, request, '예약 수정에 실패했습니다.');
-        showToast('예약이 수정되었습니다!');
-        resetBookingState();
-        switchSection('my');
+      await fetchEmpty(`${API}/reservations`, request, '예약에 실패했습니다.');
+      if (selectedWaitingTarget) {
+        showWaitingComplete({
+          themeName: selectedTheme.name,
+          date: selectedDate,
+          time: selectedTime?.startAt || '-',
+          name: username,
+          order: Number(selectedWaitingTarget.waitNumber ?? 0) + 1
+        });
       } else {
-        await fetchEmpty(`${API}/reservations`, request, '예약에 실패했습니다.');
-        cachedAdminReservations = null;
-        if (selectedWaitingTarget) {
-          showWaitingComplete({
-            themeName: selectedTheme.name,
-            date: selectedDate,
-            time: selectedTime?.startAt || '-',
-            name: username,
-            order: Number(selectedWaitingTarget.waitNumber ?? 0) + 1
-          });
-        } else {
-          showToast('예약이 완료되었습니다!');
-          showReservationComplete({
-            themeName: selectedTheme.name,
-            date: selectedDate,
-            time: selectedTime?.startAt || '-',
-            name: username
-          });
-          resetBookingState();
-        }
+        showToast('예약이 완료되었습니다!');
+        showReservationComplete({
+          themeName: selectedTheme.name,
+          date: selectedDate,
+          time: selectedTime?.startAt || '-',
+          name: username
+        });
+        resetBookingState();
       }
     } catch (e) {
       showToast(e.message, 'error');
@@ -1186,7 +1163,6 @@
     selectedDate = null;
     selectedTime = null;
     selectedWaitingTarget = null;
-    editingReservationId = null;
   }
 
   async function submitWaiting() {
@@ -1225,7 +1201,7 @@
 
     try {
       const reservations = await fetchJson(
-        `${API}/reservations?name=${encodeURIComponent(username)}`,
+        `${API}/reservations`,
         {},
         '예약 목록을 불러올 수 없습니다.'
       );
@@ -1251,41 +1227,6 @@
       list.style.display = 'flex';
     } catch (e) {
       document.getElementById('my-loading').style.display = 'none';
-      showToast(e.message, 'error');
-    }
-  }
-
-  async function startReservationEdit(reservationSlot) {
-    try {
-      const themes = await getThemes();
-      const theme = themes.find(t => t.name === reservationSlot.themeName);
-
-      if (!theme) {
-        showToast('수정할 예약의 테마 정보를 찾을 수 없습니다.', 'error');
-        return;
-      }
-
-      editingReservationId = reservationSlot.reservationId;
-      selectedTheme = theme;
-      selectedDate = reservationSlot.date;
-      selectedTime = null;
-
-      const themeInfoHtml = `
-        <img src="${reservationSlot.themeThumbnailUrl}" alt="${reservationSlot.themeName}" onerror="this.style.background='#1f2937'">
-        <div>
-          <h3>${reservationSlot.themeName}</h3>
-          <p>${reservationSlot.themeDescription}</p>
-        </div>
-      `;
-      document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
-      document.getElementById('selected-theme-info-2').innerHTML = themeInfoHtml;
-      document.getElementById('booking-date').removeAttribute('min');
-      document.getElementById('booking-date').value = reservationSlot.date;
-
-      setBookingMode('edit');
-      showBookingSection();
-      goToStep(2);
-    } catch (e) {
       showToast(e.message, 'error');
     }
   }
@@ -1335,7 +1276,6 @@
 
     return `
       ${reservationStatusBadge(r)}
-      <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
       <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
     `;
   }
@@ -1344,7 +1284,7 @@
     if (!confirm('예약을 삭제하시겠습니까?')) return;
     try {
       await fetchEmpty(
-        `${API}/reservations/${id}?name=${encodeURIComponent(username)}`,
+        `${API}/reservations/${id}`,
         { method: 'DELETE' },
         '삭제에 실패했습니다.'
       );

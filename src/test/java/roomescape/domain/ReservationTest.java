@@ -15,33 +15,33 @@ import roomescape.domain.exception.RoomescapeException;
 
 class ReservationTest {
 
-    private final Reserver reserver = new Reserver("러로");
+    private final Member member = new Member(1L, "roro", "러로", "password", Role.USER);
 
-    @DisplayName("예약은 예약자, 스케줄, 상태, 기준 일시를 저장한다.")
+    @DisplayName("예약은 회원, 스케줄, 상태, 기준 일시를 저장한다.")
     @Test
     void create() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         LocalDateTime now = LocalDateTime.of(2026, 6, 1, 10, 0);
 
-        Reservation reservation = Reservation.createBy(reserver, schedule, ReservationStatus.RESERVED, now);
+        Reservation reservation = Reservation.createBy(member, schedule, ReservationStatus.RESERVED, now);
 
         assertThat(reservation.getId()).isNull();
-        assertThat(reservation.getReserver()).isEqualTo(reserver);
+        assertThat(reservation.getMember()).isEqualTo(member);
         assertThat(reservation.getSchedule()).isEqualTo(schedule);
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
         assertThat(reservation.getUpdateAt()).isEqualTo(now);
     }
 
-    @DisplayName("예약 생성 시 예약자, 스케줄, 상태, 기준 일시는 null일 수 없다.")
+    @DisplayName("예약 생성 시 회원, 스케줄, 상태, 기준 일시는 null일 수 없다.")
     @Test
     void createRequiredFields() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         LocalDateTime now = LocalDateTime.of(2026, 6, 1, 10, 0);
 
         assertInvalidInput(() -> Reservation.createBy(null, schedule, ReservationStatus.RESERVED, now));
-        assertInvalidInput(() -> Reservation.createBy(reserver, null, ReservationStatus.RESERVED, now));
-        assertInvalidInput(() -> Reservation.createBy(reserver, schedule, null, now));
-        assertInvalidInput(() -> Reservation.createBy(reserver, schedule, ReservationStatus.RESERVED, null));
+        assertInvalidInput(() -> Reservation.createBy(member, null, ReservationStatus.RESERVED, now));
+        assertInvalidInput(() -> Reservation.createBy(member, schedule, null, now));
+        assertInvalidInput(() -> Reservation.createBy(member, schedule, ReservationStatus.RESERVED, null));
     }
 
     @DisplayName("예약 시각이 현재보다 미래이면 예약할 수 있다.")
@@ -50,7 +50,7 @@ class ReservationTest {
         LocalDateTime now = LocalDateTime.of(2026, 7, 1, 9, 59);
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
 
-        Reservation reservation = Reservation.createBy(reserver, schedule, ReservationStatus.RESERVED, now);
+        Reservation reservation = Reservation.createBy(member, schedule, ReservationStatus.RESERVED, now);
 
         assertThat(reservation.getSchedule()).isEqualTo(schedule);
     }
@@ -61,83 +61,13 @@ class ReservationTest {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
 
         assertRoomescapeException(
-                () -> Reservation.createBy(reserver, schedule, ReservationStatus.RESERVED,
+                () -> Reservation.createBy(member, schedule, ReservationStatus.RESERVED,
                         LocalDateTime.of(2026, 7, 1, 10, 0)),
                 DomainErrorCode.PAST_RESERVATION
         );
         assertRoomescapeException(
-                () -> Reservation.createBy(reserver, schedule, ReservationStatus.RESERVED,
+                () -> Reservation.createBy(member, schedule, ReservationStatus.RESERVED,
                         LocalDateTime.of(2026, 7, 1, 10, 1)),
-                DomainErrorCode.PAST_RESERVATION
-        );
-    }
-
-    @DisplayName("예약 수정은 같은 예약자만 가능하며 ID와 예약자는 유지하고 스케줄과 상태를 바꾼다.")
-    @Test
-    void updateBy() {
-        Schedule origin = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
-        Schedule target = scheduleAt(LocalDate.of(2026, 7, 2), LocalTime.of(11, 0));
-        Reservation reservation = new Reservation(
-                1L,
-                reserver,
-                origin,
-                ReservationStatus.RESERVED,
-                LocalDateTime.of(2026, 6, 1, 10, 0)
-        );
-        LocalDateTime now = LocalDateTime.of(2026, 6, 1, 11, 0);
-
-        Reservation updated = reservation.updateBy(reserver, target, ReservationStatus.WAITING, now);
-
-        assertThat(updated.getId()).isEqualTo(1L);
-        assertThat(updated.getReserver()).isEqualTo(reserver);
-        assertThat(updated.getSchedule()).isEqualTo(target);
-        assertThat(updated.getStatus()).isEqualTo(ReservationStatus.WAITING);
-        assertThat(updated.getUpdateAt()).isEqualTo(now);
-    }
-
-    @DisplayName("다른 예약자는 예약을 수정할 수 없다.")
-    @Test
-    void updateByOtherReserver() {
-        Schedule origin = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
-        Schedule target = scheduleAt(LocalDate.of(2026, 7, 2), LocalTime.of(11, 0));
-        Reservation reservation = new Reservation(
-                1L,
-                reserver,
-                origin,
-                ReservationStatus.RESERVED,
-                LocalDateTime.of(2026, 6, 1, 10, 0)
-        );
-
-        assertRoomescapeException(
-                () -> reservation.updateBy(
-                        new Reserver("다른사람"),
-                        target,
-                        ReservationStatus.WAITING,
-                        LocalDateTime.of(2026, 6, 1, 11, 0)
-                ),
-                DomainErrorCode.UNAUTHORIZED_RESERVATION
-        );
-    }
-
-    @DisplayName("수정 대상 스케줄이 현재와 같거나 과거이면 수정할 수 없다.")
-    @Test
-    void updateByPastSchedule() {
-        Reservation reservation = new Reservation(
-                1L,
-                reserver,
-                scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0)),
-                ReservationStatus.RESERVED,
-                LocalDateTime.of(2026, 6, 1, 10, 0)
-        );
-        Schedule target = scheduleAt(LocalDate.of(2026, 7, 2), LocalTime.of(11, 0));
-
-        assertRoomescapeException(
-                () -> reservation.updateBy(
-                        reserver,
-                        target,
-                        ReservationStatus.RESERVED,
-                        LocalDateTime.of(2026, 7, 2, 11, 0)
-                ),
                 DomainErrorCode.PAST_RESERVATION
         );
     }
@@ -148,17 +78,17 @@ class ReservationTest {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(
                 1L,
-                reserver,
+                member,
                 schedule,
                 ReservationStatus.RESERVED,
                 LocalDateTime.of(2026, 6, 1, 10, 0)
         );
         LocalDateTime now = LocalDateTime.of(2026, 7, 1, 9, 59);
 
-        Reservation changed = reservation.cancelBy(reserver, now);
+        Reservation changed = reservation.cancelBy(member, now);
 
         assertThat(changed.getId()).isEqualTo(1L);
-        assertThat(changed.getReserver()).isEqualTo(reserver);
+        assertThat(changed.getMember()).isEqualTo(member);
         assertThat(changed.getSchedule()).isEqualTo(schedule);
         assertThat(changed.getStatus()).isEqualTo(ReservationStatus.CANCELED);
         assertThat(changed.getUpdateAt()).isEqualTo(now);
@@ -170,29 +100,29 @@ class ReservationTest {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(
                 1L,
-                reserver,
+                member,
                 schedule,
                 ReservationStatus.RESERVED,
                 LocalDateTime.of(2026, 6, 1, 10, 0)
         );
 
         assertRoomescapeException(
-                () -> reservation.cancelBy(reserver, LocalDateTime.of(2026, 7, 1, 10, 0)),
+                () -> reservation.cancelBy(member, LocalDateTime.of(2026, 7, 1, 10, 0)),
                 DomainErrorCode.PAST_RESERVATION
         );
         assertRoomescapeException(
-                () -> reservation.cancelBy(reserver, LocalDateTime.of(2026, 7, 1, 10, 1)),
+                () -> reservation.cancelBy(member, LocalDateTime.of(2026, 7, 1, 10, 1)),
                 DomainErrorCode.PAST_RESERVATION
         );
     }
 
     @DisplayName("본인 예약이 아니면 취소할 수 없다.")
     @Test
-    void cancelByOtherReserver() {
+    void cancelByOtherMember() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(
                 1L,
-                reserver,
+                member,
                 schedule,
                 ReservationStatus.RESERVED,
                 LocalDateTime.of(2026, 6, 1, 10, 0)
@@ -200,7 +130,7 @@ class ReservationTest {
 
         assertRoomescapeException(
                 () -> reservation.cancelBy(
-                        new Reserver("다른사람"),
+                        new Member(2L, "other", "다른사람", "password", Role.USER),
                         LocalDateTime.of(2026, 7, 1, 9, 59)
                 ),
                 DomainErrorCode.UNAUTHORIZED_RESERVATION
@@ -212,9 +142,9 @@ class ReservationTest {
     void statusHelpers() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
 
-        Reservation reserved = new Reservation(1L, reserver, schedule, ReservationStatus.RESERVED, LocalDateTime.now());
-        Reservation waiting = new Reservation(2L, reserver, schedule, ReservationStatus.WAITING, LocalDateTime.now());
-        Reservation canceled = new Reservation(3L, reserver, schedule, ReservationStatus.CANCELED, LocalDateTime.now());
+        Reservation reserved = new Reservation(1L, member, schedule, ReservationStatus.RESERVED, LocalDateTime.now());
+        Reservation waiting = new Reservation(2L, member, schedule, ReservationStatus.WAITING, LocalDateTime.now());
+        Reservation canceled = new Reservation(3L, member, schedule, ReservationStatus.CANCELED, LocalDateTime.now());
 
         assertThat(reserved.isReserved()).isTrue();
         assertThat(waiting.isReserved()).isFalse();

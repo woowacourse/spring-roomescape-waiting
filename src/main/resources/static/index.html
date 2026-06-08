@@ -110,7 +110,7 @@
       margin-bottom: 8px;
     }
 
-    input[type="text"] {
+    input[type="text"], input[type="password"] {
       width: 100%;
       padding: 14px 16px;
       background: rgba(255,255,255,0.04);
@@ -123,12 +123,12 @@
       margin-bottom: 24px;
     }
 
-    input[type="text"]:focus {
+    input[type="text"]:focus, input[type="password"]:focus {
       border-color: #f59e0b;
       box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
     }
 
-    input[type="text"]::placeholder { color: #4b5563; }
+    input[type="text"]::placeholder, input[type="password"]::placeholder { color: #4b5563; }
 
     .btn-primary {
       width: 100%;
@@ -151,16 +151,83 @@
 
     .btn-primary:active { transform: translateY(0); }
 
-    .admin-link {
-      display: block;
+    .btn-secondary {
+      width: 100%;
       margin-top: 20px;
-      font-size: 12px;
-      color: #4b5563;
-      text-decoration: none;
-      transition: color 0.2s;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 8px;
+      color: #f59e0b;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .admin-link:hover { color: #9ca3af; }
+    .btn-secondary:hover {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 24px;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 420px;
+      background: #111827;
+      border: 1px solid rgba(245, 158, 11, 0.22);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: #f3f4f6; }
+
+    .modal .btn-primary { margin-top: 6px; }
+
+    .field-error {
+      display: none;
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      color: #fca5a5;
+      font-size: 13px;
+    }
 
     .error {
       display: none;
@@ -181,22 +248,56 @@
 <div class="card">
   <div class="logo">Mystery Experience</div>
   <h1 class="title">Room<span>Escape</span></h1>
-  <p class="subtitle">당신의 탈출을 기다리고 있습니다.<br>이름을 입력하고 방탈출을 시작하세요.</p>
+  <p class="subtitle">당신의 탈출을 기다리고 있습니다.<br>로그인 후 예약을 시작하세요.</p>
   <div class="divider"></div>
 
-  <div class="error" id="error">이름을 입력해주세요.</div>
+  <div class="error" id="error">로그인 ID와 비밀번호를 입력해주세요.</div>
 
-  <label for="username">이름</label>
+  <label for="loginId">로그인 ID</label>
   <input
     type="text"
-    id="username"
-    placeholder="홍길동"
-    maxlength="20"
+    id="loginId"
+    placeholder="id"
+    maxlength="255"
     autocomplete="off"
   />
 
-  <button class="btn-primary" onclick="enter()">입장하기</button>
-  <a href="/admin.html" class="admin-link">관리자 페이지로 이동 →</a>
+  <label for="password">비밀번호</label>
+  <input
+    type="password"
+    id="password"
+    placeholder="password"
+    maxlength="255"
+    autocomplete="current-password"
+  />
+
+  <button class="btn-primary" onclick="login()">로그인</button>
+  <button class="btn-secondary" onclick="openSignup()">회원 가입</button>
+</div>
+
+<div class="modal-backdrop" id="signupModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">회원 가입</div>
+      <button class="modal-close" onclick="closeSignup()" aria-label="닫기">×</button>
+    </div>
+
+    <div class="field-error" id="signupError">회원가입에 실패했습니다.</div>
+
+    <label for="signupName">이름</label>
+    <input type="text" id="signupName" placeholder="러로" maxlength="10" autocomplete="off" />
+
+    <label for="signupLoginId">로그인 ID</label>
+    <input type="text" id="signupLoginId" placeholder="new-user" maxlength="255" autocomplete="off" />
+
+    <label for="signupPassword">비밀번호</label>
+    <input type="password" id="signupPassword" placeholder="password" maxlength="255" autocomplete="new-password" />
+
+    <label for="signupPasswordConfirm">비밀번호 확인</label>
+    <input type="password" id="signupPasswordConfirm" placeholder="password" maxlength="255" autocomplete="new-password" />
+
+    <button class="btn-primary" onclick="signup()">가입하기</button>
+  </div>
 </div>
 
 <script>
@@ -218,20 +319,97 @@
     starsEl.appendChild(s);
   }
 
-  document.getElementById('username').addEventListener('keydown', e => {
-    if (e.key === 'Enter') enter();
+  document.getElementById('loginId').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+  ['signupName', 'signupLoginId', 'signupPassword', 'signupPasswordConfirm'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') signup();
+    });
   });
 
-  function enter() {
-    const name = document.getElementById('username').value.trim();
+  async function login() {
+    const loginId = document.getElementById('loginId').value.trim();
+    const password = document.getElementById('password').value.trim();
     const err = document.getElementById('error');
-    if (!name) {
+    if (!loginId || !password) {
+      err.textContent = '로그인 ID와 비밀번호를 입력해주세요.';
       err.style.display = 'block';
       return;
     }
-    err.style.display = 'none';
-    localStorage.setItem('username', name);
-    window.location.href = '/user.html';
+
+    try {
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId, password })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        err.textContent = data.message || '로그인에 실패했습니다.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const member = await res.json();
+      err.style.display = 'none';
+      window.location.href = member.role === 'ADMIN' ? '/admin.html' : '/user.html';
+    } catch (e) {
+      err.textContent = '로그인에 실패했습니다.';
+      err.style.display = 'block';
+    }
+  }
+
+  function openSignup() {
+    document.getElementById('signupError').style.display = 'none';
+    document.getElementById('signupModal').classList.add('show');
+  }
+
+  function closeSignup() {
+    document.getElementById('signupModal').classList.remove('show');
+  }
+
+  async function signup() {
+    const name = document.getElementById('signupName').value.trim();
+    const loginId = document.getElementById('signupLoginId').value.trim();
+    const password = document.getElementById('signupPassword').value.trim();
+    const passwordConfirm = document.getElementById('signupPasswordConfirm').value.trim();
+    const err = document.getElementById('signupError');
+
+    if (!name || !loginId || !password || !passwordConfirm) {
+      err.textContent = '모든 항목을 입력해주세요.';
+      err.style.display = 'block';
+      return;
+    }
+    if (password !== passwordConfirm) {
+      err.textContent = '비밀번호가 일치하지 않습니다.';
+      err.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch('/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, loginId, password, passwordConfirm })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        err.textContent = data.message || '회원가입에 실패했습니다.';
+        err.style.display = 'block';
+        return;
+      }
+
+      window.location.href = '/user.html';
+    } catch (e) {
+      err.textContent = '회원가입에 실패했습니다.';
+      err.style.display = 'block';
+    }
   }
 </script>
 </body>

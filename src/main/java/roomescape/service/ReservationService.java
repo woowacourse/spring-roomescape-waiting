@@ -8,11 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.*;
-import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
+import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
+import roomescape.repository.MemberDao;
 import roomescape.repository.ReservationDao;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,25 +24,27 @@ public class ReservationService {
     private static final int EMPTY_RESERVATION_COUNT = 0;
 
     private final ReservationDao reservationDao;
+    private final MemberDao memberDao;
     private final ScheduleService scheduleService;
 
-    public ReservationService(ReservationDao reservationDao, ScheduleService scheduleService) {
+    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, ScheduleService scheduleService) {
         this.reservationDao = reservationDao;
+        this.memberDao = memberDao;
         this.scheduleService = scheduleService;
     }
 
     @Transactional
-    public Long saveReservation(ReservationRequest request) {
+    public Long saveReservationByAdmin(AdminReservationRequest request) {
+        Member member = getMemberById(request.memberId());
         LocalDateTime now = LocalDateTime.now();
-        Reserver reserver = new Reserver(request.name());
-        Schedule schedule = scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId());
+        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
 
-        if (reservationDao.existByNameAndScheduleId(reserver.getName(), schedule.getId())) {
+        if (reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())) {
             throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");
         }
 
         Reservation reservation = Reservation.createBy(
-                reserver,
+                member,
                 schedule,
                 calculateReservationStatus(schedule.getId()),
                 now
@@ -49,31 +54,46 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(long reservationId, ReservationRequest request) {
+    public Long saveReservationByMember(UserReservationRequest request, Member member) {
         LocalDateTime now = LocalDateTime.now();
-        Reserver reserver = new Reserver(request.name());
-        Schedule targetSchedule = scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId());
+        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
 
-        if (reservationDao.existByNameAndScheduleId(reserver.getName(), targetSchedule.getId())) {
-            throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "변경하려는 스케줄에 본인의 예약이 존재합니다.");
+        if (reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())) {
+            throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");
         }
 
-        Reservation previous = getById(reservationId);
-        Reservation updated = previous.updateBy(
-                reserver,
-                targetSchedule,
-                calculateReservationStatus(targetSchedule.getId()),
+        Reservation reservation = Reservation.createBy(
+                member,
+                schedule,
+                calculateReservationStatus(schedule.getId()),
                 now
         );
 
-        reservationDao.update(updated);
-        promoteWaitingReservation(previous, previous.getSchedule().getId());
+        return reservationDao.save(reservation);
     }
 
     @Transactional
-    public void cancelReservation(long reservationId, String name) {
+    public void cancelReservationByAdmin(long reservationId) {
         LocalDateTime now = LocalDateTime.now();
-        Reserver reserver = new Reserver(name);
+        long scheduleId = getScheduleIdByReservationId(reservationId);
+        scheduleService.lockById(scheduleId);
+        Reservation reservation = getById(reservationId);
+
+        if (reservation.isAlreadyCanceled()) {
+            return;
+        }
+
+        Reservation canceled = reservation.cancelByAdmin(now);
+
+        reservationDao.changeStatusWithUpdateAt(canceled);
+        promoteWaitingReservation(reservation, scheduleId);
+    }
+
+    @Transactional
+    public void cancelReservation(long reservationId, Member member) {
+        LocalDateTime now = LocalDateTime.now();
+        long scheduleId = getScheduleIdByReservationId(reservationId);
+        scheduleService.lockById(scheduleId);
         Reservation reservation = getById(reservationId);
 
         if (reservation.isAlreadyCanceled()) {
@@ -81,7 +101,7 @@ public class ReservationService {
         }
 
         Reservation changed = reservation.cancelBy(
-                reserver,
+                member,
                 now
         );
 
@@ -93,32 +113,31 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now();
         return reservationDao.findAll()
                 .stream()
-                .map(reservation -> toReservationResponse(reservation, now))
+                .map(result -> toReservationResponse(result, now))
                 .toList();
     }
 
-    public List<ReservationResponse> findByName(String name) {
+    public List<ReservationResponse> findByMember(Member member) {
         LocalDateTime now = LocalDateTime.now();
-        return reservationDao.findByName(name)
+        return reservationDao.findByMemberId(member.getId())
                 .stream()
-                .map(reservation -> toReservationResponse(reservation, now))
+                .map(result -> toReservationResponse(result, now))
                 .toList();
     }
 
-    private ReservationResponse toReservationResponse(Reservation reservation, LocalDateTime now) {
+    private ReservationResponse toReservationResponse(ReservationWithWaitingOrder result, LocalDateTime now) {
         return ReservationResponse.from(
-                reservation,
-                reservationDao.findOrderByReservationId(reservation.getId()),
+                result.reservation(),
+                result.order(),
                 now
         );
     }
 
-    private void promoteWaitingReservation(Reservation changed, long scheduleId) {
-        if (changed.isReserved()) {
+    private void promoteWaitingReservation(Reservation reserved, long scheduleId) {
+        if (reserved.isReserved()) {
             Optional<Reservation> reservations = reservationDao.findFirstByScheduleIdAndStatus(scheduleId, ReservationStatus.WAITING);
-
             reservations.ifPresent(reservation
-                    -> reservationDao.changeStatusOnly(reservation.getId(), ReservationStatus.RESERVED)
+                    -> reservationDao.promoteToReserved(reservation.getId())
             );
         }
     }
@@ -138,6 +157,18 @@ public class ReservationService {
     private Reservation getById(long id) {
         return reservationDao.findById(id).orElseThrow(()
                 -> new RoomescapeException(DomainErrorCode.NOT_FOUND_RESERVATION, "해당 ID의 예약이 존재하지 않습니다. ID: " + id)
+        );
+    }
+
+    private long getScheduleIdByReservationId(long id) {
+        return reservationDao.findScheduleIdById(id).orElseThrow(()
+                -> new RoomescapeException(DomainErrorCode.NOT_FOUND_RESERVATION, "해당 ID의 예약이 존재하지 않습니다. ID: " + id)
+        );
+    }
+
+    private Member getMemberById(Long id) {
+        return memberDao.findById(id).orElseThrow(()
+                -> new RoomescapeException(DomainErrorCode.INVALID_INPUT, "해당 ID의 회원이 존재하지 않습니다. ID: " + id)
         );
     }
 }

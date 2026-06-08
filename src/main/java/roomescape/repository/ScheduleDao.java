@@ -66,6 +66,18 @@ public class ScheduleDao {
         return results.stream().findFirst();
     }
 
+    public boolean lockById(Long id) {
+        String sql = """
+            SELECT id
+            FROM schedule
+            WHERE id = ?
+            FOR UPDATE
+            """;
+
+        List<Long> results = jdbcTemplate.queryForList(sql, Long.class, id);
+        return !results.isEmpty();
+    }
+
     public Optional<Schedule> findByDateAndTimeIdAndThemeId(
             LocalDate date,
             Long timeId,

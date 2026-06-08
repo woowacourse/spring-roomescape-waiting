@@ -1,12 +1,10 @@
 package roomescape.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,18 +21,25 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.controller.dto.DisplayStatus;
 import roomescape.controller.dto.ReservationResponse;
+import roomescape.controller.dto.UserReservationRequest;
+import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
-import roomescape.global.DomainErrorHttpMapper;
+import roomescape.global.exception.DomainErrorHttpMapper;
+import roomescape.global.auth.LoginMemberArgumentResolver;
+import roomescape.global.config.WebConfig;
+import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
 
-@WebMvcTest(ReservationController.class)
-@Import(DomainErrorHttpMapper.class)
-class ReservationControllerTest {
+@WebMvcTest(UserReservationController.class)
+@Import({DomainErrorHttpMapper.class, LoginMemberArgumentResolver.class, WebConfig.class})
+class UserReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,16 +47,21 @@ class ReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
+    @MockitoBean
+    private AuthService authService;
+
     @DisplayName("사용자 예약 생성 요청은 201과 Location 헤더를 반환한다.")
     @Test
     void create() throws Exception {
-        given(reservationService.saveReservation(any())).willReturn(1L);
+        Member member = member();
+        given(authService.getLoginMember(1L)).willReturn(member);
+        given(reservationService.saveReservationByMember(any(UserReservationRequest.class), any(Member.class))).willReturn(1L);
 
         mockMvc.perform(post("/reservations")
+                        .session(loginSession())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "러로",
                                   "date": "2026-07-01",
                                   "timeId": 1,
                                   "themeId": 1
@@ -65,12 +75,12 @@ class ReservationControllerTest {
     @Test
     void createInvalidRequest() throws Exception {
         mockMvc.perform(post("/reservations")
+                        .session(loginSession())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "",
                                   "date": "2026-07-01",
-                                  "timeId": 1,
+                                  "timeId": null,
                                   "themeId": 1
                                 }
                                 """))
@@ -80,8 +90,10 @@ class ReservationControllerTest {
 
     @DisplayName("사용자 예약 목록을 JSON으로 반환한다.")
     @Test
-    void findByName() throws Exception {
-        given(reservationService.findByName("러로")).willReturn(List.of(
+    void findMine() throws Exception {
+        Member member = member();
+        given(authService.getLoginMember(1L)).willReturn(member);
+        given(reservationService.findByMember(member)).willReturn(List.of(
                 new ReservationResponse(
                         1L,
                         "러로",
@@ -95,7 +107,7 @@ class ReservationControllerTest {
                 )
         ));
 
-        mockMvc.perform(get("/reservations").param("name", "러로"))
+        mockMvc.perform(get("/reservations").session(loginSession()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].reservationId").value(1))
                 .andExpect(jsonPath("$[0].name").value("러로"))
@@ -106,45 +118,50 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$[0].order").value(1));
     }
 
-    @DisplayName("사용자는 이름을 함께 보내 예약을 취소한다.")
+    @DisplayName("사용자는 로그인 세션으로 본인 예약을 취소한다.")
     @Test
     void cancel() throws Exception {
-        mockMvc.perform(delete("/reservations/1").param("name", "러로"))
+        Member member = member();
+        given(authService.getLoginMember(1L)).willReturn(member);
+
+        mockMvc.perform(delete("/reservations/1").session(loginSession()))
                 .andExpect(status().isNoContent());
 
-        verify(reservationService).cancelReservation(1L, "러로");
+        verify(reservationService).cancelReservation(1L, member);
     }
 
     @DisplayName("본인 예약이 아니면 403을 반환한다.")
     @Test
     void cancelUnauthorized() throws Exception {
+        Member member = member();
+        given(authService.getLoginMember(1L)).willReturn(member);
         org.mockito.Mockito.doThrow(new RoomescapeException(
                         DomainErrorCode.UNAUTHORIZED_RESERVATION,
                         "본인의 예약만 변경할 수 있습니다."
                 ))
                 .when(reservationService)
-                .cancelReservation(1L, "다른사람");
+                .cancelReservation(1L, member);
 
-        mockMvc.perform(delete("/reservations/1").param("name", "다른사람"))
+        mockMvc.perform(delete("/reservations/1").session(loginSession()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED_RESERVATION"));
     }
 
-    @DisplayName("예약 수정 요청은 서비스에 위임하고 200을 반환한다.")
+    @DisplayName("로그인하지 않으면 사용자 예약 목록을 조회할 수 없다.")
     @Test
-    void update() throws Exception {
-        mockMvc.perform(patch("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "name": "러로",
-                                  "date": "2026-07-02",
-                                  "timeId": 1,
-                                  "themeId": 1
-                                }
-                                """))
-                .andExpect(status().isOk());
+    void unauthenticated() throws Exception {
+        mockMvc.perform(get("/reservations"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+    }
 
-        verify(reservationService).updateReservation(eq(1L), any());
+    private MockHttpSession loginSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(AuthService.LOGIN_MEMBER_ID, 1L);
+        return session;
+    }
+
+    private Member member() {
+        return new Member(1L, "roro", "러로", "password", Role.USER);
     }
 }

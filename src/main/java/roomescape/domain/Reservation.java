@@ -12,48 +12,41 @@ import static roomescape.domain.exception.DomainPreconditions.requireNonNull;
 public class Reservation {
 
     private final Long id;
-    private final Reserver reserver;
+    private final Member member;
     private final Schedule schedule;
     private final ReservationStatus status;
     private final LocalDateTime updateAt;
 
-    public Reservation(Long id, Reserver reserver, Schedule schedule, ReservationStatus status, LocalDateTime updateAt) {
+    public Reservation(Long id, Member member, Schedule schedule, ReservationStatus status, LocalDateTime updateAt) {
         this.id = id;
-        this.reserver = requireNonNull(reserver, INVALID_INPUT, "예약자는 비어있을 수 없습니다.");
+        this.member = requireNonNull(member, INVALID_INPUT, "예약 회원은 비어있을 수 없습니다.");
         this.schedule = requireNonNull(schedule, INVALID_INPUT, "예약 스케줄은 비어있을 수 없습니다.");
         this.status = requireNonNull(status, INVALID_INPUT, "예약 상태는 비어있을 수 없습니다.");
         this.updateAt = requireNonNull(updateAt, INVALID_INPUT, "기준 일시는 비어있을 수 없습니다.");
     }
 
     public static Reservation createBy(
-            Reserver reserver,
+            Member member,
             Schedule schedule,
             ReservationStatus status,
             LocalDateTime now
     ) {
         validateNotPastSchedule(schedule, now);
-        return new Reservation(null, reserver, schedule, status, now);
-    }
-
-    public Reservation updateBy(
-            Reserver reserver,
-            Schedule targetSchedule,
-            ReservationStatus status,
-            LocalDateTime now
-    ) {
-        reserver.validateSameReserver(this.reserver);
-        validateCanModify(now);
-        validateNotPastSchedule(targetSchedule, now);
-        return new Reservation(this.id, this.reserver, targetSchedule, status, now);
+        return new Reservation(null, member, schedule, status, now);
     }
 
     public Reservation cancelBy(
-            Reserver reserver,
+            Member member,
             LocalDateTime now
     ) {
-        reserver.validateSameReserver(this.reserver);
+        this.member.validateSameMember(member);
         validateCanModify(now);
-        return new Reservation(this.id, this.reserver, schedule, ReservationStatus.CANCELED, now);
+        return new Reservation(this.id, this.member, schedule, ReservationStatus.CANCELED, now);
+    }
+
+    public Reservation cancelByAdmin(LocalDateTime now) {
+        validateCanModify(now);
+        return new Reservation(this.id, this.member, schedule, ReservationStatus.CANCELED, now);
     }
 
     public boolean isReserved() {
@@ -89,8 +82,8 @@ public class Reservation {
         return id;
     }
 
-    public Reserver getReserver() {
-        return reserver;
+    public Member getMember() {
+        return member;
     }
 
     public Schedule getSchedule() {
