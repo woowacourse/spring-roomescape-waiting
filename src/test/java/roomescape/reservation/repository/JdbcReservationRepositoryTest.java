@@ -33,8 +33,8 @@ class JdbcReservationRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    @DisplayName("전체 예약 조회 시 신청 순서 기준으로 활성 예약을 조회한다.")
-    void findAll_success_returnsActiveReservationsByRequestOrder() {
+    @DisplayName("전체 활성 예약을 조회한다.")
+    void findAll_success_returnsActiveReservations() {
         // given
         Long themeId = insertTheme("레벨2 탈출");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
@@ -47,7 +47,7 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(reservations)
                 .extracting(Reservation::getId, Reservation::getName)
-                .containsExactly(
+                .containsExactlyInAnyOrder(
                         tuple(earlierReservationId, "레아"),
                         tuple(laterReservationId, "브라운")
                 );
@@ -78,7 +78,7 @@ class JdbcReservationRepositoryTest {
                         Reservation::getName,
                         reservation -> reservation.getSlot().time().getId()
                 )
-                .containsExactly(
+                .containsExactlyInAnyOrder(
                         tuple("브라운", tenId),
                         tuple("레아", tenId),
                         tuple("포비", tenId),
@@ -102,8 +102,8 @@ class JdbcReservationRepositoryTest {
         assertThat(foundReservation)
                 .isPresent()
                 .get()
-                .extracting(Reservation::getId, Reservation::getName)
-                .containsExactly(waitingReservationId, "레아");
+                .extracting(Reservation::getId, Reservation::getName, Reservation::getRequestOrder)
+                .containsExactly(waitingReservationId, "레아", 2L);
     }
 
     @Test
@@ -136,7 +136,7 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(reservations)
                 .extracting(Reservation::getId, Reservation::getName)
-                .containsExactly(
+                .containsExactlyInAnyOrder(
                         tuple(relatedReservationId, "브라운"),
                         tuple(activeWaitingReservationId, "레아")
                 );
@@ -177,7 +177,7 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(reservations)
                 .extracting(Reservation::getId)
-                .containsExactly(
+                .containsExactlyInAnyOrder(
                         reservedReservationId,
                         waitingReservationId
                 );

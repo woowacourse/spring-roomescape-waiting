@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import roomescape.global.exception.InvalidRequestException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -68,19 +69,19 @@ public record Slot(LocalDate date,
 
     private static void validateDate(LocalDate date) {
         if (date == null) {
-            throw new IllegalArgumentException("예약 날짜는 비어 있을 수 없습니다.");
+            throw new InvalidRequestException("예약 날짜는 비어 있을 수 없습니다.");
         }
     }
 
     private static void validateTime(ReservationTime time) {
         if (time == null) {
-            throw new IllegalArgumentException("예약 시간은 비어 있을 수 없습니다.");
+            throw new InvalidRequestException("예약 시간은 비어 있을 수 없습니다.");
         }
     }
 
     private static void validateTheme(Theme theme) {
         if (theme == null) {
-            throw new IllegalArgumentException("테마 정보는 비어 있을 수 없습니다.");
+            throw new InvalidRequestException("테마 정보는 비어 있을 수 없습니다.");
         }
     }
 }

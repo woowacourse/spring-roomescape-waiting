@@ -14,36 +14,42 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final Slot slot;
+    private final Long requestOrder;
 
     public static Reservation create(String name,
                                      LocalDate date,
                                      ReservationTime time,
                                      Theme theme,
                                      LocalDateTime now) {
-        return create(name, createSlot(date, time, theme), now);
+        return create(name, new Slot(date, time, theme), now);
     }
 
     private static Reservation create(String name, Slot slot, LocalDateTime now) {
         validateNewReservation(now, name, slot);
-        return new Reservation(null, name, slot);
+        return new Reservation(null, name, slot, null);
     }
 
     public static Reservation reconstruct(Long id, String name, Slot slot) {
-        validateSavedReservation(name, slot);
-        return new Reservation(id, name, slot);
+        return reconstruct(id, name, slot, null);
     }
 
-    private Reservation(Long id, String name, Slot slot) {
+    public static Reservation reconstruct(Long id, String name, Slot slot, Long requestOrder) {
+        validateSavedReservation(name, slot);
+        return new Reservation(id, name, slot, requestOrder);
+    }
+
+    private Reservation(Long id, String name, Slot slot, Long requestOrder) {
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.requestOrder = requestOrder;
     }
 
     public Reservation updateDateTime(LocalDate date, ReservationTime time, LocalDateTime now) {
-        Slot updatedSlot = createSlot(date, time, slot.theme());
+        Slot updatedSlot = new Slot(date, time, slot.theme());
         validatePastDateTime(now, updatedSlot);
 
-        return reconstruct(id, name, updatedSlot);
+        return reconstruct(id, name, updatedSlot, requestOrder);
     }
 
     public Reservation withId(Long id) {
@@ -53,7 +59,7 @@ public class Reservation {
             throw new InvalidRequestException("이미 식별자가 존재하는 예약입니다.");
         }
 
-        return reconstruct(id, name, slot);
+        return reconstruct(id, name, slot, requestOrder);
     }
 
     private static void validateNewReservation(
@@ -73,32 +79,6 @@ public class Reservation {
     private static void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new InvalidRequestException("예약자 이름은 비어 있을 수 없습니다.");
-        }
-    }
-
-    private static Slot createSlot(LocalDate date, ReservationTime time, Theme theme) {
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
-
-        return new Slot(date, time, theme);
-    }
-
-    private static void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new InvalidRequestException("예약 날짜는 비어 있을 수 없습니다.");
-        }
-    }
-
-    private static void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new InvalidRequestException("예약 시간은 비어 있을 수 없습니다.");
-        }
-    }
-
-    private static void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new InvalidRequestException("테마 정보는 비어 있을 수 없습니다.");
         }
     }
 

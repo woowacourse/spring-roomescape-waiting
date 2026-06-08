@@ -22,7 +22,8 @@ public record ReservationHistory(
         return Reservation.reconstruct(
                 reservationId,
                 name,
-                slot
+                slot,
+                requestOrder
         );
     }
 

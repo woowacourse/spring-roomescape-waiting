@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +19,8 @@ public class Reservations {
     }
 
     public List<ReservationEntry> entries() {
-        return reservations.stream()
+        return orderedReservations()
+                .stream()
                 .collect(Collectors.groupingBy(
                         Reservation::getSlot,
                         LinkedHashMap::new,
@@ -27,6 +29,15 @@ public class Reservations {
                 .values()
                 .stream()
                 .flatMap(sameSlotReservations -> entriesInSameSlot(sameSlotReservations).stream())
+                .toList();
+    }
+
+    private List<Reservation> orderedReservations() {
+        return reservations.stream()
+                .sorted(Comparator
+                        .comparing((Reservation reservation) -> reservation.getSlot().date())
+                        .thenComparing(reservation -> reservation.getSlot().time().getStartAt())
+                        .thenComparing(Reservation::getRequestOrder))
                 .toList();
     }
 
@@ -50,6 +61,9 @@ public class Reservations {
         }
         if (reservations.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("예약 목록에는 빈 예약이 포함될 수 없습니다.");
+        }
+        if (reservations.stream().anyMatch(reservation -> reservation.getRequestOrder() == null)) {
+            throw new IllegalArgumentException("예약 목록에는 신청 순서가 없는 예약이 포함될 수 없습니다.");
         }
     }
 }

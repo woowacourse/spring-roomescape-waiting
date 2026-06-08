@@ -43,7 +43,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Reservation.reconstruct(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("name"),
-                reservationSlot
+                reservationSlot,
+                resultSet.getLong("request_order")
         );
     };
 
@@ -69,10 +70,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                ORDER BY r.date ASC,
-                         rt.start_at ASC,
-                         r.request_order ASC,
-                         r.id ASC
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper);
@@ -103,10 +100,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                    AND target.theme_id = r.theme_id
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                ORDER BY r.date ASC,
-                         rt.start_at ASC,
-                         r.request_order ASC,
-                         r.id ASC
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, name);
@@ -153,10 +146,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
                 WHERE r.date = ? AND r.theme_id = ?
-                ORDER BY r.date ASC,
-                         rt.start_at ASC,
-                         r.request_order ASC,
-                         r.id ASC
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, date, themeId);

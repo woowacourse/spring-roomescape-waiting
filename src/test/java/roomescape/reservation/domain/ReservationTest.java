@@ -29,30 +29,6 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("예약 날짜가 null이면 도메인 예외가 발생한다.")
-    void create_fail_whenDateIsNull() {
-        assertInvalidRequestException(
-                () -> Reservation.create("브라운", null, time, theme, beforeReservation)
-        );
-    }
-
-    @Test
-    @DisplayName("예약 시간이 null이면 도메인 예외가 발생한다.")
-    void create_fail_whenTimeIsNull() {
-        assertInvalidRequestException(
-                () -> Reservation.create("브라운", date, null, theme, beforeReservation)
-        );
-    }
-
-    @Test
-    @DisplayName("예약 테마가 null이면 도메인 예외가 발생한다.")
-    void create_fail_whenThemeIsNull() {
-        assertInvalidRequestException(
-                () -> Reservation.create("브라운", date, time, null, beforeReservation)
-        );
-    }
-
-    @Test
     @DisplayName("예약 id가 null이면 도메인 예외가 발생한다.")
     void withId_fail_whenIdIsNull() {
         Reservation reservation = reservation(null);
