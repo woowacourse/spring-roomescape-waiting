@@ -740,8 +740,6 @@ class ReservationServiceTest {
             Reservation canceledWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
             when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(1L));
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceledWaiting);
 
@@ -774,8 +772,6 @@ class ReservationServiceTest {
             Reservation waiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
             when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(1L));
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
 
             // when & then
@@ -793,8 +789,6 @@ class ReservationServiceTest {
             Reservation active = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
             when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(1L));
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(active));
 
             // when & then
@@ -812,8 +806,6 @@ class ReservationServiceTest {
             Reservation pastWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.WAITING);
             when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(1L));
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(pastWaiting));
 
             // when & then
@@ -831,8 +823,6 @@ class ReservationServiceTest {
             Reservation pastWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), today, pastTime, theme, ReservationStatus.WAITING);
             when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(1L));
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(pastWaiting));
 
             // when & then
@@ -875,8 +865,6 @@ class ReservationServiceTest {
 
     private void givenLockedReservation(Long id, Reservation reservation) {
         when(reservationRepository.lockReservationByIdAndNotDeleted(id))
-            .thenReturn(Optional.of(id));
-        when(reservationRepository.findReservationByIdAndNotDeleted(id))
             .thenReturn(Optional.of(reservation));
     }
 

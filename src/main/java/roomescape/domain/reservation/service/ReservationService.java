@@ -205,7 +205,6 @@ public class ReservationService {
     @Transactional
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
-            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         validateReservationCanBeCanceled(reservation, name);
@@ -270,7 +269,6 @@ public class ReservationService {
     @Transactional
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
-            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         validateWaitingReservationCanBeCanceled(reservation, name);
@@ -293,12 +291,11 @@ public class ReservationService {
     }
 
     private void approveNextWaitingReservationIfVacant(Reservation reservation) {
-        if (reservationRepository.existsActiveReservationBySchedule(reservation.getSchedule())) {
+        if (reservationRepository.lockActiveReservationBySchedule(reservation.getSchedule()).isPresent()) {
             return;
         }
 
         reservationRepository.lockFirstWaitingReservationBySchedule(reservation.getSchedule())
-            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .ifPresent(waiting -> reservationRepository.update(waiting.toActive()));
     }
 }

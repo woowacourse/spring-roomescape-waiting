@@ -15,7 +15,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);
 
-    Optional<Long> lockReservationByIdAndNotDeleted(Long id);
+    Optional<Reservation> lockReservationByIdAndNotDeleted(Long id);
 
     List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate localDate, Long themeId);
 
@@ -23,7 +23,7 @@ public interface ReservationRepository {
 
     Optional<Long> lockActiveReservationBySchedule(ReservationSchedule schedule);
 
-    Optional<Long> lockFirstWaitingReservationBySchedule(ReservationSchedule schedule);
+    Optional<Reservation> lockFirstWaitingReservationBySchedule(ReservationSchedule schedule);
 
     Reservation save(Reservation reservation);
 

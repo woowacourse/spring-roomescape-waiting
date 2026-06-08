@@ -673,12 +673,12 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme).toWaiting());
 
             // when
-            Optional<Long> actual =
+            Optional<Reservation> actual =
                 reservationRepository.lockFirstWaitingReservationBySchedule(
                     new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
 
             // then
-            assertThat(actual).contains(firstWaiting.getId());
+            assertThat(actual).map(Reservation::getId).contains(firstWaiting.getId());
         }
 
         @Test
@@ -692,7 +692,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(deletedReservation.getId());
 
             // when
-            Optional<Long> actual =
+            Optional<Reservation> actual =
                 reservationRepository.lockFirstWaitingReservationBySchedule(
                     new ReservationSchedule(date, theme.getId(), time.getId()));
 
