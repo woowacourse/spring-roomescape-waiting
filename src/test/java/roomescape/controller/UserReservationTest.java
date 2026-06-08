@@ -333,6 +333,38 @@ public class UserReservationTest {
                 .body("[0].name", is("네오"));
     }
 
+    @Test
+    void 대기_있는_예약_취소시_예약삭제_예약생성_대기삭제가_함께_진행된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/1").then().statusCode(204);
+
+        RestAssured.given()
+                .when().get("/reservations/1")
+                .then().statusCode(404);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
+
+        RestAssured.given()
+                .when().get("reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(0));
+    }
+
     private void createTheme() {
         Map<String, String> theme = new HashMap<>();
         theme.put("name", "무서운 이야기");
