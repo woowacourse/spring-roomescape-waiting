@@ -39,9 +39,10 @@ public class ReservationControllerMockTest {
 
     @Test
     void 예약과_시간_연결() throws Exception {
-        ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2027, 1, 1), 1L, 1L);
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationRequest request = new ReservationRequest("브라운", date, 1L, 1L);
         ReservationResponse response = new ReservationResponse(
-                22L, "브라운", LocalDate.of(2027, 1, 1),
+                22L, "브라운", date,
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(1L, "테마1", "설명", "썸네일")
         );
@@ -61,7 +62,7 @@ public class ReservationControllerMockTest {
         ReservationOrderResponse response = new ReservationOrderResponse(
                 1L,
                 name,
-                LocalDate.of(2026, 6, 1),
+                LocalDate.now().plusDays(1),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(1L, "테마1", "설명", "썸네일"),
                 1L
