@@ -6,9 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
@@ -29,6 +29,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -108,7 +109,10 @@ class ReservationServiceTest {
         when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.cancelByIdForUser(reservationId, 2L))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER)
+                );
+
         verify(reservationRepository, never()).deleteById(anyLong());
     }
 
@@ -204,7 +208,8 @@ class ReservationServiceTest {
         when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 999L))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class,  exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER));
         verify(reservationRepository, never()).findDetailById(reservationId);
         verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
@@ -226,7 +231,8 @@ class ReservationServiceTest {
                 .validateNotPastTime(oldReservation.date(), oldReservation.startAt());
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PAST_SCHEDULE));
         verify(scheduleService).validateNotPastDate(oldReservation.date());
         verify(scheduleService).validateNotPastTime(oldReservation.date(), oldReservation.startAt());
         verify(scheduleService, never()).findScheduleIdByDateAndTimeIdAndThemeId(any(LocalDate.class), anyLong(), anyLong());
@@ -277,7 +283,9 @@ class ReservationServiceTest {
                 .thenReturn(newScheduleId);
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception -> {
+                    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_SAME_SCHEDULE);
+                });
 
         verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }

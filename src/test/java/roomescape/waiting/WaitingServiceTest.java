@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationRepository;
@@ -89,7 +90,8 @@ class WaitingServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ALREADY_EXIST));
 
         verify(scheduleService).findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         verify(waitingRepository, never()).save(any(Waiting.class));
@@ -107,7 +109,9 @@ class WaitingServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ON_OWN_RESERVATION_NOT_ALLOWED)
+                );
 
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
@@ -130,7 +134,9 @@ class WaitingServiceTest {
                 .thenReturn(false);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_TARGET_BAD_REQUEST)
+                );
 
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
@@ -193,7 +199,8 @@ class WaitingServiceTest {
                 .thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER));
 
         verify(waitingRepository, never()).save(any(Waiting.class));
         verify(reservationRepository, never()).deleteById(anyLong());
@@ -257,7 +264,8 @@ class WaitingServiceTest {
         when(waitingRepository.findByIdForModification(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatThrownBy(() -> waitingService.cancelByIdForUser(1L, 2L))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER));
 
         verify(waitingRepository, never()).deleteById(1L);
     }
