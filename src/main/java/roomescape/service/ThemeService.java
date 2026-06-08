@@ -45,7 +45,7 @@ public class ThemeService {
         themeRepository.deleteById(themeId);
     }
 
-    public List<Theme> findPopularThemes(Long limit, Long days) {
+    public List<Theme> findPopularThemes(long limit, long days) {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = LocalDate.now().minusDays(days);
         return themeRepository.findPopularThemes(limit, startDate, endDate);

@@ -150,7 +150,7 @@ public class ReservationService {
         Reservation nowReservation = getReservationById(id);
         validateReservationOwner(nowReservation, requestName);
 
-        Long themeId = nowReservation.getTheme().getId();
+        long themeId = nowReservation.getTheme().getId();
         ReservationSlot updateSlot = findOrCreateReservationSlot(date, timeId, themeId);
         Reservation updateReservation = nowReservation.updateSlot(updateSlot, requestTime);
 
