@@ -52,21 +52,22 @@ public class AdminReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
 
-        Theme theme = reservationRepository.lockTheme(command.themeId())
-                .orElseThrow(() -> {
-                    log.warn("존재하지 않는 테마로 예약 생성 시도: themeId={}", command.themeId());
-                    return new ThemeNotFoundException(
-                            "존재하지 않는 테마입니다: themeId=" + command.themeId());
-                });
+        return reservationRepository.executeWithThemeLock(command.themeId(), lockedTheme -> {
+            Theme theme = lockedTheme.orElseThrow(() -> {
+                log.warn("존재하지 않는 테마로 예약 생성 시도: themeId={}", command.themeId());
+                return new ThemeNotFoundException(
+                        "존재하지 않는 테마입니다: themeId=" + command.themeId());
+            });
 
-        validateNoConflict(command);
+            validateNoConflict(command);
 
-        ReservationStatus status = decideStatus(command.date(), command.timeId(), command.themeId());
-        Reservation reservation = new Reservation(null, command.reserverName(), command.date(), time, theme, status);
-        ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
-        log.info("예약 생성 완료: reservationId={}, reserverName={}, date={}, timeId={}, themeId={}, status={}",
-                saved.id(), saved.reserverName(), saved.date(), command.timeId(), command.themeId(), saved.status());
-        return ReservationResult.from(saved);
+            ReservationStatus status = decideStatus(command.date(), command.timeId(), command.themeId());
+            Reservation reservation = new Reservation(null, command.reserverName(), command.date(), time, theme, status);
+            ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
+            log.info("예약 생성 완료: reservationId={}, reserverName={}, date={}, timeId={}, themeId={}, status={}",
+                    saved.id(), saved.reserverName(), saved.date(), command.timeId(), command.themeId(), saved.status());
+            return ReservationResult.from(saved);
+        });
     }
 
     private ReservationStatus decideStatus(LocalDate date, Long timeId, Long themeId) {
@@ -92,21 +93,23 @@ public class AdminReservationService {
                     log.warn("존재하지 않는 예약 취소 시도: reservationId={}", id);
                     return new ReservationNotFoundException("존재하지 않는 예약입니다: reservationId=" + id);
                 });
-        reservationRepository.lockTheme(reservation.getTheme().getId());
-        Reservation current = reservationRepository.findById(id)
-                .orElseThrow(() -> new ReservationNotFoundException(
-                        "존재하지 않는 예약입니다: reservationId=" + id));
-        if (current.isCanceled()) {
-            return;
-        }
-        reservationRepository.cancel(current.getId());
-        if (current.isConfirmed()) {
-            boolean promoted = reservationRepository.promoteEarliestWaiting(
-                    current.getDate(),
-                    current.getTime().getId(),
-                    current.getTheme().getId()
-            );
-            log.info("예약 취소 후 승급 처리: reservationId={}, promoted={}", current.getId(), promoted);
-        }
+        reservationRepository.executeWithThemeLock(reservation.getTheme().getId(), lockedTheme -> {
+            Reservation current = reservationRepository.findById(id)
+                    .orElseThrow(() -> new ReservationNotFoundException(
+                            "존재하지 않는 예약입니다: reservationId=" + id));
+            if (current.isCanceled()) {
+                return null;
+            }
+            reservationRepository.cancel(current.getId());
+            if (current.isConfirmed()) {
+                boolean promoted = reservationRepository.promoteEarliestWaiting(
+                        current.getDate(),
+                        current.getTime().getId(),
+                        current.getTheme().getId()
+                );
+                log.info("예약 취소 후 승급 처리: reservationId={}, promoted={}", current.getId(), promoted);
+            }
+            return null;
+        });
     }
 }

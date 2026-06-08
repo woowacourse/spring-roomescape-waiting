@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeLockedAction;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -61,6 +63,14 @@ class UserReservationServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @InjectMocks
     private UserReservationService userReservationService;
+
+    private void stubThemeLock(Optional<Theme> lockedTheme) {
+        given(reservationRepository.executeWithThemeLock(eq(VALID_THEME.getId()), any()))
+                .willAnswer(invocation -> {
+                    ThemeLockedAction<Object> action = invocation.getArgument(1);
+                    return action.execute(lockedTheme);
+                });
+    }
 
     @Test
     @DisplayName("미래 시점에 예약하면 정상적으로 생성된다")
@@ -189,6 +199,7 @@ class UserReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
         given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
@@ -290,6 +301,7 @@ class UserReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(true);
 

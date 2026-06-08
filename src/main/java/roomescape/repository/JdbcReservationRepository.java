@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -175,6 +176,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     private ReservationWithWaitingOrder findWithWaitingOrderById(Long id) {
         String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.id = ?";
         return jdbcTemplate.queryForObject(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, id);
+    }
+
+    @Override
+    public <T> T executeWithThemeLock(Long themeId, ThemeLockedAction<T> action) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            throw new IllegalStateException(
+                    "테마 락은 트랜잭션 안에서만 획득할 수 있습니다: themeId=" + themeId);
+        }
+        Optional<Theme> lockedTheme = lockTheme(themeId);
+        return action.execute(lockedTheme);
     }
 
     @Override

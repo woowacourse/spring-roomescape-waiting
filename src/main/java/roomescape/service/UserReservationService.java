@@ -86,35 +86,37 @@ public class UserReservationService {
                 });
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
         Long themeId = reservation.getTheme().getId();
-        reservationRepository.lockTheme(themeId);
-        validateNoConflict(command, themeId);
 
-        LocalDate oldDate = reservation.getDate();
-        Long oldTimeId = reservation.getTime().getId();
-        boolean slotChanged = !(oldDate.equals(command.date()) && oldTimeId.equals(command.timeId()));
-        boolean wasConfirmed = reservation.isConfirmed();
+        return reservationRepository.executeWithThemeLock(themeId, lockedTheme -> {
+            validateNoConflict(command, themeId);
 
-        ReservationStatus newStatus = reservation.getStatus();
-        if (slotChanged) {
-            newStatus = reservationRepository.existsActiveConfirmed(command.date(), command.timeId(), themeId)
-                    ? ReservationStatus.WAITING
-                    : ReservationStatus.CONFIRMED;
-        }
+            LocalDate oldDate = reservation.getDate();
+            Long oldTimeId = reservation.getTime().getId();
+            boolean slotChanged = !(oldDate.equals(command.date()) && oldTimeId.equals(command.timeId()));
+            boolean wasConfirmed = reservation.isConfirmed();
 
-        Reservation updated = new Reservation(
-                reservation.getId(),
-                reservation.getReserverName(),
-                command.date(),
-                newTime,
-                reservation.getTheme(),
-                newStatus
-        );
-        var result = reservationRepository.update(updated);
+            ReservationStatus newStatus = reservation.getStatus();
+            if (slotChanged) {
+                newStatus = reservationRepository.existsActiveConfirmed(command.date(), command.timeId(), themeId)
+                        ? ReservationStatus.WAITING
+                        : ReservationStatus.CONFIRMED;
+            }
 
-        if (slotChanged && wasConfirmed) {
-            reservationRepository.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
-        }
-        return ReservationResult.from(result);
+            Reservation updated = new Reservation(
+                    reservation.getId(),
+                    reservation.getReserverName(),
+                    command.date(),
+                    newTime,
+                    reservation.getTheme(),
+                    newStatus
+            );
+            var result = reservationRepository.update(updated);
+
+            if (slotChanged && wasConfirmed) {
+                reservationRepository.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
+            }
+            return ReservationResult.from(result);
+        });
     }
 
     private Reservation findReservation(Long id) {

@@ -22,6 +22,8 @@ public interface ReservationRepository {
 
     Optional<Theme> lockTheme(Long themeId);
 
+    <T> T executeWithThemeLock(Long themeId, ThemeLockedAction<T> action);
+
     boolean promoteEarliestWaiting(LocalDate date, Long timeId, Long themeId);
 
     boolean existsActiveConfirmed(LocalDate date, Long timeId, Long themeId);
