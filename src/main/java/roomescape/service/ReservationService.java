@@ -18,9 +18,11 @@ public class ReservationService {
     private final ReservationAssembler assembler;
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(Clock clock,
-                              ReservationAssembler assembler,
-                              ReservationRepository reservationRepository) {
+    public ReservationService(
+            Clock clock,
+            ReservationAssembler assembler,
+            ReservationRepository reservationRepository
+    ) {
         this.clock = clock;
         this.assembler = assembler;
         this.reservationRepository = reservationRepository;

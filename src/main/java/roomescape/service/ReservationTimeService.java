@@ -20,8 +20,10 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final SlotRepository slotRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  SlotRepository slotRepository) {
+    public ReservationTimeService(
+            ReservationTimeRepository reservationTimeRepository,
+            SlotRepository slotRepository
+    ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.slotRepository = slotRepository;
     }

@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.controller.dto.request.ThemeCreateRequest;
-import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -24,15 +23,22 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final SlotRepository slotRepository;
 
-    public ThemeService(ThemeRepository themeRepository, SlotRepository slotRepository) {
+    public ThemeService(
+            ThemeRepository themeRepository,
+            SlotRepository slotRepository
+    ) {
         this.themeRepository = themeRepository;
         this.slotRepository = slotRepository;
     }
 
     @Transactional
     public Theme create(ThemeCreateRequest request) {
-        Theme theme = Theme.create(new ThemeName(request.getName()), request.getDescription(),
-                new ThumbnailUrl(request.getThumbnailUrl()));
+        Theme theme = Theme.create(
+                new ThemeName(request.getName()),
+                request.getDescription(),
+                new ThumbnailUrl(request.getThumbnailUrl())
+        );
+
         return themeRepository.save(theme);
     }
 
@@ -44,20 +50,7 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
-    public List<Theme> findFamous(ThemeFamousFindRequest request, LocalDate now) {
-        Long days = request.getDays();
-        LocalDate date = request.getDate();
-        Long limit = request.getLimit();
-
-        if (days == null) {
-            days = DEFAULT_DAYS;
-        }
-        if (limit == null) {
-            limit = DEFAULT_LIMIT;
-        }
-        if (date == null) {
-            date = now;
-        }
+    public List<Theme> findFamous(int limit, int days, LocalDate date) {
         return themeRepository.findFamous(days, date, limit);
     }
 

@@ -22,7 +22,12 @@ public class ReservationAssembler {
     private final ThemeRepository themes;
     private final SlotRepository slots;
 
-    public ReservationAssembler(Clock clock, ReservationTimeRepository reservationTimes, ThemeRepository themes, SlotRepository slots) {
+    public ReservationAssembler(
+            Clock clock,
+            ReservationTimeRepository reservationTimes,
+            ThemeRepository themes,
+            SlotRepository slots
+    ) {
         this.clock = clock;
         this.reservationTimes = reservationTimes;
         this.themes = themes;

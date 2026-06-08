@@ -1,17 +1,18 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.controller.dto.request.ThemeCreateRequest;
-import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.controller.dto.response.ThemeResponses;
 import roomescape.domain.theme.Theme;
@@ -31,7 +32,9 @@ public class ThemeController {
     }
 
     @PostMapping("/admin/themes")
-    public ResponseEntity<ThemeResponse> create(@Valid @RequestBody ThemeCreateRequest request) {
+    public ResponseEntity<ThemeResponse> create(
+            @Valid @RequestBody ThemeCreateRequest request
+    ) {
         Theme theme = themeService.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -48,8 +51,12 @@ public class ThemeController {
     }
 
     @GetMapping("/themes/famous")
-    public ResponseEntity<ThemeResponses> findFamous(@Valid @ModelAttribute ThemeFamousFindRequest request) {
-        List<Theme> themes = themeService.findFamous(request, LocalDate.now());
+    public ResponseEntity<ThemeResponses> findFamous(
+            @RequestParam(defaultValue = "10") @Min(1) @Max(15) int limit,
+            @RequestParam(defaultValue = "7") @Min(1) @Max(10) int days,
+            @RequestParam(required = false) LocalDate date
+    ) {
+        List<Theme> themes = themeService.findFamous(limit, days, date);
         return ResponseEntity.ok(ThemeResponses.toDto(themes));
     }
 

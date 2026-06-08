@@ -30,7 +30,9 @@ public class ReservationTimeController {
     }
 
     @PostMapping("/admin/times")
-    public ResponseEntity<ReservationTimeResponse> create(@Valid @RequestBody ReservationTimeCreateRequest request) {
+    public ResponseEntity<ReservationTimeResponse> create(
+            @Valid @RequestBody ReservationTimeCreateRequest request
+    ) {
         ReservationTime time = reservationTimeService.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -47,7 +49,9 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<ReservationTimeResponses> findAvailable(@Valid @ModelAttribute AvailableTimeFindRequest request) {
+    public ResponseEntity<ReservationTimeResponses> findAvailable(
+            @Valid @ModelAttribute AvailableTimeFindRequest request
+    ) {
         List<ReservationTime> reservationTimes = reservationTimeService.findAvailable(request, LocalDate.now());
         return ResponseEntity.ok(ReservationTimeResponses.toDto(reservationTimes));
     }
