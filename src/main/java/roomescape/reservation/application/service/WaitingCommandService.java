@@ -1,0 +1,105 @@
+package roomescape.reservation.application.service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.BadRequestException;
+import roomescape.global.ConflictException;
+import roomescape.global.ForbiddenException;
+import roomescape.global.NotFoundException;
+import roomescape.reservation.application.dto.BookingCreateCommand;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
+import roomescape.reservation.event.schema.WaitingSaved;
+import roomescape.reservation.exception.ReservationErrorMessage;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationtime.exception.ReservationTimeErrorMessage;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.exception.ThemeErrorMessage;
+
+@RequiredArgsConstructor
+@Service
+public class WaitingCommandService {
+
+    private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationTimeRepository timeRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Transactional
+    public void save(BookingCreateCommand request, LocalDateTime requested) {
+        ReservationTime time = findTimeById(request.timeId());
+        validateReservationDateTime(request.date(), time.getStartAt(), requested);
+
+        Theme theme = findThemeById(request.themeId());
+
+        Waiting pending = Waiting.of(null, request.name(), request.date(), theme.getId(), time.getId());
+
+        if (reservationRepository.existsByNameAndDateAndThemeAndTime(
+                pending.getName(),
+                pending.getDate(),
+                pending.getThemeId(),
+                pending.getTimeId())) {
+            throw new ConflictException(ReservationErrorMessage.ALREADY_RESERVED_CANNOT_WAIT);
+        }
+
+        if (waitingRepository.existsByNameAndDateAndThemeIdAndTimeId(
+                pending.getName(),
+                pending.getDate(),
+                pending.getThemeId(),
+                pending.getTimeId())) {
+            throw new ConflictException(ReservationErrorMessage.DUPLICATE_WAITING);
+        }
+
+        Waiting saved = waitingRepository.save(pending);
+        eventPublisher.publishEvent(new WaitingSaved(
+                saved.getDate(),
+                saved.getThemeId(),
+                saved.getTimeId())
+        );
+    }
+
+    @Transactional
+    public void deleteOldestBySlot(LocalDate date, Long themeId, Long timeId) {
+        waitingRepository.deleteOldestBySlot(date, themeId, timeId);
+    }
+
+    @Transactional
+    public void delete(Long id, String name) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ReservationErrorMessage.WAITING_NOT_FOUND, id));
+
+        if (!waiting.isOwner(name)) {
+            throw new ForbiddenException(ReservationErrorMessage.FORBIDDEN_WAITING_ACCESS);
+        }
+
+        waitingRepository.delete(id);
+    }
+
+    private Theme findThemeById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException(ThemeErrorMessage.THEME_NOT_FOUND, id));
+    }
+
+    private ReservationTime findTimeById(Long id) {
+        return timeRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException(ReservationTimeErrorMessage.TIME_NOT_FOUND, id));
+    }
+
+    private void validateReservationDateTime(LocalDate date, LocalTime startAt, LocalDateTime currentDateTime) {
+        LocalDateTime triedDateTime = LocalDateTime.of(date, startAt);
+
+        if (triedDateTime.isBefore(currentDateTime)) {
+            throw new BadRequestException(ReservationErrorMessage.CANNOT_SELECT_PAST_DATETIME);
+        }
+    }
+}

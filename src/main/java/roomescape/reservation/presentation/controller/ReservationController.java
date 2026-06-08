@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.BookingCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.presentation.dto.ReservationCreateRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationUpdateRequest;
@@ -28,24 +29,21 @@ import roomescape.reservation.presentation.dto.ReservationUpdateRequest;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingCommandService waitingCommandService;
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAll(@RequestParam String name) {
-        List<ReservationResponse> responses = reservationService.findAllByName(name).stream()
-                .map(ReservationResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(reservationService.findAllByName(name));
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> save(
+    public ResponseEntity<Void> save(
             @Valid @RequestBody ReservationCreateRequest request
     ) {
-        ReservationCreateCommand createCommand = request.toCommand();
+        BookingCreateCommand createCommand = request.toCommand();
+        waitingCommandService.save(createCommand, LocalDateTime.now());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationResponse.from(reservationService.save(createCommand, LocalDateTime.now())));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PatchMapping("/{id}")
@@ -55,9 +53,7 @@ public class ReservationController {
     ) {
         ReservationUpdateCommand command = request.toCommand(id);
 
-        return ResponseEntity.ok(
-                ReservationResponse.from(reservationService.update(command, LocalDateTime.now()))
-        );
+        return ResponseEntity.ok(reservationService.update(command, LocalDateTime.now()));
     }
 
     @DeleteMapping("/{id}")
@@ -65,12 +61,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        int deletedCount = reservationService.delete(id, name, LocalDateTime.now());
-
-        if (deletedCount == 0) {
-            return ResponseEntity.notFound().build();
-        }
-
+        reservationService.delete(id, name, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }

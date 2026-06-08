@@ -1,22 +1,14 @@
 package roomescape.reservation;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,14 +49,7 @@ class ReservationApiIntegrationTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201)
-                .body("id", greaterThan(0))
-                .body("name", equalTo("스타크"))
-                .body("date", equalTo("2028-05-06"))
-                .body("time.id", equalTo(timeId.intValue()))
-                .body("time.startAt", equalTo("09:00"))
-                .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("theme name"));
+                .statusCode(201);
     }
 
     @DisplayName("이름으로 본인 예약 목록 조회 API를 테스트합니다.")
@@ -125,7 +110,7 @@ class ReservationApiIntegrationTest {
                 .statusCode(204);
     }
 
-    @DisplayName("과거 날짜로 예약 시도 시 422를 반환한다.")
+    @DisplayName("과거 날짜로 예약 시도 시 400을 반환한다.")
     @Test
     void save_reservation_with_past_date() {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
@@ -142,7 +127,7 @@ class ReservationApiIntegrationTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @DisplayName("타인 예약 변경 시 403을 반환한다.")
@@ -165,7 +150,7 @@ class ReservationApiIntegrationTest {
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
-    @DisplayName("지난 예약 변경 시 422를 반환한다.")
+    @DisplayName("지난 예약 변경 시 400을 반환한다.")
     @Test
     void update_past_reservation() {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
@@ -182,7 +167,7 @@ class ReservationApiIntegrationTest {
                 .body(params)
                 .when().patch("/reservations/{id}", reservationId)
                 .then().log().all()
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @DisplayName("존재하지 않는 예약 변경 시 404를 반환한다.")
@@ -238,7 +223,7 @@ class ReservationApiIntegrationTest {
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
-    @DisplayName("지난 예약 취소 시 422를 반환한다.")
+    @DisplayName("지난 예약 취소 시 400을 반환한다.")
     @Test
     void cancel_past_reservation() {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
@@ -249,7 +234,7 @@ class ReservationApiIntegrationTest {
                 .queryParam("name", "타스")
                 .when().delete("/reservations/{id}", reservationId)
                 .then().log().all()
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @DisplayName("존재하지 않는 예약 취소 시 404를 반환한다.")

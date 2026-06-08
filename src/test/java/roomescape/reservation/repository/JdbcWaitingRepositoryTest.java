@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
-import roomescape.reservation.domain.repository.dto.WaitingOrderDetail;
 import roomescape.reservation.infra.JdbcWaitingRepository;
 import roomescape.support.RepositoryTestHelper;
 
@@ -57,9 +56,9 @@ public class JdbcWaitingRepositoryTest {
         });
     }
 
-    @DisplayName("대기 id로 대기 디테일 정보 가져오기를 테스트합니다.")
+    @DisplayName("대기 id로 대기 정보 가져오기를 테스트합니다.")
     @Test
-    void find_detail_by_id() {
+    void find_by_id() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
 
@@ -71,24 +70,20 @@ public class JdbcWaitingRepositoryTest {
                 .build();
 
         Waiting savedWaiting = waitingRepository.save(waiting);
-        WaitingDetail waitingDetail = waitingRepository.findDetailById(savedWaiting.getId()).get();
+        Waiting found = waitingRepository.findById(savedWaiting.getId()).get();
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(waitingDetail.waitingId()).isEqualTo(savedWaiting.getId());
-            assertSoftly.assertThat(waitingDetail.username()).isEqualTo("name");
-            assertSoftly.assertThat(waitingDetail.date()).isEqualTo(LocalDate.of(2026, 5, 4));
-            assertSoftly.assertThat(waitingDetail.themeId()).isEqualTo(themeId);
-            assertSoftly.assertThat(waitingDetail.themeName()).isEqualTo("theme name");
-            assertSoftly.assertThat(waitingDetail.themeDescription()).isEqualTo("theme description");
-            assertSoftly.assertThat(waitingDetail.thumbnailImgUrl()).isEqualTo("theme img url");
-            assertSoftly.assertThat(waitingDetail.timeId()).isEqualTo(timeId);
-            assertSoftly.assertThat(waitingDetail.startAt()).isEqualTo(LocalTime.of(9, 0));
+            assertSoftly.assertThat(found.getId()).isEqualTo(savedWaiting.getId());
+            assertSoftly.assertThat(found.getName()).isEqualTo("name");
+            assertSoftly.assertThat(found.getDate()).isEqualTo(LocalDate.of(2026, 5, 4));
+            assertSoftly.assertThat(found.getThemeId()).isEqualTo(themeId);
+            assertSoftly.assertThat(found.getTimeId()).isEqualTo(timeId);
         });
     }
 
-    @DisplayName("같은 날짜, 테마, 시간의 가장 오래된 대기 조회를 테스트합니다.")
+    @DisplayName("같은 슬롯의 대기가 여러 개일 때 가장 오래된 대기만 삭제됩니다.")
     @Test
-    void find_oldest_by_date_and_theme_id_and_time_id() {
+    void delete_oldest_by_slot() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
         LocalDate date = LocalDate.of(2026, 5, 4);
@@ -99,16 +94,17 @@ public class JdbcWaitingRepositoryTest {
                 .themeId(themeId)
                 .timeId(timeId)
                 .build());
-        waitingRepository.save(Waiting.builder()
+        Waiting secondWaiting = waitingRepository.save(Waiting.builder()
                 .name("second")
                 .date(date)
                 .themeId(themeId)
                 .timeId(timeId)
                 .build());
 
-        Waiting oldestWaiting = waitingRepository.findOldestByDateAndThemeIdAndTimeId(date, themeId, timeId).get();
+        waitingRepository.deleteOldestBySlot(date, themeId, timeId);
 
-        assertThat(oldestWaiting.getId()).isEqualTo(firstWaiting.getId());
+        assertThat(waitingRepository.findById(firstWaiting.getId())).isEmpty();
+        assertThat(waitingRepository.findById(secondWaiting.getId())).isPresent();
     }
 
     @DisplayName("대기 삭제를 테스트합니다.")
@@ -123,12 +119,9 @@ public class JdbcWaitingRepositoryTest {
                 .timeId(timeId)
                 .build());
 
-        Integer deletedCount = waitingRepository.delete(savedWaiting.getId());
+        waitingRepository.delete(savedWaiting.getId());
 
-        SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(deletedCount).isEqualTo(1);
-            assertSoftly.assertThat(waitingRepository.findDetailById(savedWaiting.getId())).isEmpty();
-        });
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
     }
 
     @DisplayName("이름으로 대기 목록과 대기 순번 조회를 테스트합니다.")
@@ -151,7 +144,7 @@ public class JdbcWaitingRepositoryTest {
                 .timeId(timeId)
                 .build());
 
-        List<WaitingOrderDetail> waitingOrderDetails = waitingRepository.findByName("name");
+        List<WaitingDetail> waitingOrderDetails = waitingRepository.findByName("name");
 
         SoftAssertions.assertSoftly(assertSoftly -> {
             assertSoftly.assertThat(waitingOrderDetails).hasSize(1);

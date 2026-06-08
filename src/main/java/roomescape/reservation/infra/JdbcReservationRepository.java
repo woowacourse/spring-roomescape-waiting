@@ -9,11 +9,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.global.ConflictException;
+import roomescape.global.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
+import roomescape.reservation.exception.ReservationErrorMessage;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -38,16 +39,16 @@ public class JdbcReservationRepository implements ReservationRepository {
                         JOIN reservation_time rt ON r.time_id = rt.id
                         ORDER BY r.date ASC
                         """,
-                (rs, rowNum) ->
-                        new ReservationDetail(rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getDate("date").toLocalDate(),
-                                rs.getLong("theme_id"),
-                                rs.getString("theme_name"),
-                                rs.getString("description"),
-                                rs.getString("thumbnail_img_url"),
-                                rs.getLong("time_id"),
-                                rs.getTime("start_at").toLocalTime())
+                (rs, rowNum) -> new ReservationDetail(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getDate("date").toLocalDate(),
+                        rs.getLong("theme_id"),
+                        rs.getString("theme_name"),
+                        rs.getString("description"),
+                        rs.getString("thumbnail_img_url"),
+                        rs.getLong("time_id"),
+                        rs.getTime("start_at").toLocalTime())
         );
     }
 
@@ -55,7 +56,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findByName(String name) {
         return jdbcTemplate.query(
                 "SELECT id, name, date, theme_id, time_id FROM reservation WHERE name = ? ORDER BY date ASC",
-                (rs, rowNum) -> mapReservation(rs.getLong("id"),
+                (rs, rowNum) -> mapReservation(
+                        rs.getLong("id"),
                         rs.getString("name"),
                         rs.getDate("date").toLocalDate(),
                         rs.getLong("theme_id"),
@@ -68,7 +70,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findById(Long id) {
         return jdbcTemplate.query(
                 "SELECT id, name, date, theme_id, time_id FROM reservation WHERE id = ?",
-                (rs, rowNum) -> mapReservation(rs.getLong("id"),
+                (rs, rowNum) -> mapReservation(
+                        rs.getLong("id"),
                         rs.getString("name"),
                         rs.getDate("date").toLocalDate(),
                         rs.getLong("theme_id"),
@@ -87,16 +90,16 @@ public class JdbcReservationRepository implements ReservationRepository {
                         JOIN reservation_time rt ON r.time_id = rt.id
                         WHERE r.id = ?
                         """,
-                (rs, rowNum) ->
-                        new ReservationDetail(rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getDate("date").toLocalDate(),
-                                rs.getLong("theme_id"),
-                                rs.getString("theme_name"),
-                                rs.getString("description"),
-                                rs.getString("thumbnail_img_url"),
-                                rs.getLong("time_id"),
-                                rs.getTime("start_at").toLocalTime()),
+                (rs, rowNum) -> new ReservationDetail(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getDate("date").toLocalDate(),
+                        rs.getLong("theme_id"),
+                        rs.getString("theme_name"),
+                        rs.getString("description"),
+                        rs.getString("thumbnail_img_url"),
+                        rs.getLong("time_id"),
+                        rs.getTime("start_at").toLocalTime()),
                 id
         ).stream().findFirst();
     }
@@ -113,7 +116,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
             return reservation.withId(id);
         } catch (DuplicateKeyException e) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
+            throw new ConflictException(ReservationErrorMessage.DUPLICATE_RESERVATION);
         }
     }
 
@@ -127,7 +130,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
 
         if (updatedRowCount == 0) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
+            throw new NotFoundException(ReservationErrorMessage.RESERVATION_NOT_FOUND, reservation.getId());
         }
 
         return reservation;
@@ -139,13 +142,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId) {
+    public Boolean existsByNameAndDateAndThemeAndTime(String name, LocalDate date, Long themeId, Long timeId) {
         return jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?)",
+                "SELECT EXISTS(SELECT 1 FROM reservation WHERE name = ? AND date = ? AND theme_id = ? AND time_id = ?)",
                 Boolean.class,
-                date,
-                themeId,
-                timeId);
+                name, date, themeId, timeId);
     }
 
     @Override
@@ -153,29 +154,30 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.queryForObject(
                 """
                         SELECT EXISTS(
-                            SELECT 1
-                            FROM reservation
+                            SELECT 1 FROM reservation
                             WHERE date = ? AND theme_id = ? AND time_id = ? AND id <> ?
                         )
                         """,
                 Boolean.class,
-                date,
-                themeId,
-                timeId,
-                id
+                date, themeId, timeId, id
         );
     }
 
     @Override
-    public void updateWaitingOwner(Long id, String name) {
-        int updatedRowCount = jdbcTemplate.update(
-                "UPDATE reservation SET name = ? WHERE id = ?",
-                name,
-                id
-        );
-
-        if (updatedRowCount == 0) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
+    public boolean insertFromOldestWaiting(LocalDate date, Long themeId, Long timeId) {
+        try {
+            int rows = jdbcTemplate.update(
+                    """
+                            INSERT INTO reservation (name, date, theme_id, time_id)
+                            SELECT name, date, theme_id, time_id FROM waiting
+                            WHERE date = ? AND theme_id = ? AND time_id = ?
+                            ORDER BY id ASC LIMIT 1
+                            """,
+                    date, themeId, timeId
+            );
+            return rows > 0;
+        } catch (DuplicateKeyException e) {
+            return false;
         }
     }
 

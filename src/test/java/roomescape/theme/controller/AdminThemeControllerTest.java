@@ -2,6 +2,8 @@ package roomescape.theme.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -14,9 +16,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.theme.application.dto.ThemeQueryResult;
+import roomescape.global.NotFoundException;
 import roomescape.theme.application.service.ThemeService;
+import roomescape.theme.exception.ThemeErrorMessage;
 import roomescape.theme.presentation.controller.AdminThemeController;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @WebMvcTest(AdminThemeController.class)
 class AdminThemeControllerTest {
@@ -30,7 +34,7 @@ class AdminThemeControllerTest {
     @Test
     void create_theme() throws Exception {
         given(themeService.save(any()))
-                .willReturn(ThemeQueryResult.from(1L, "theme", "description", "img"));
+                .willReturn(new ThemeResponse(1L, "theme", "description", "img"));
 
         mockMvc.perform(post("/admin/themes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -64,7 +68,7 @@ class AdminThemeControllerTest {
 
     @Test
     void delete_theme() throws Exception {
-        given(themeService.delete(1L)).willReturn(1);
+        doNothing().when(themeService).delete(1L);
 
         mockMvc.perform(delete("/admin/themes/1"))
                 .andExpect(status().isNoContent());
@@ -72,7 +76,7 @@ class AdminThemeControllerTest {
 
     @Test
     void delete_theme_not_found() throws Exception {
-        given(themeService.delete(1L)).willReturn(0);
+        doThrow(new NotFoundException(ThemeErrorMessage.THEME_NOT_FOUND, 1L)).when(themeService).delete(1L);
 
         mockMvc.perform(delete("/admin/themes/1"))
                 .andExpect(status().isNotFound());
