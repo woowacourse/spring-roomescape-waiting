@@ -11,7 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.FixedClockConfig;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.dto.WaitingWithRank;
+import roomescape.domain.service.WaitingWithRank;
 import roomescape.domain.common.UserName;
 import roomescape.domain.reservation.Reservation;
 import roomescape.exception.InvalidDomainStateException;
