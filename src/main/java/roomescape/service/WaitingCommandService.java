@@ -13,6 +13,7 @@ import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.TemporaryConflictException;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -89,5 +90,22 @@ public class WaitingCommandService {
     private Theme findThemeReference(long themeId) {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
+    }
+
+    public void promoteNextWaitingIn(Slot slot) {
+        if (slot.isPast(LocalDateTime.now(clock))) {
+            return;
+        }
+        waitingDao.findNextInLineForUpdate(slot)
+                .ifPresent(this::promoteWaiting);
+    }
+
+    private void promoteWaiting(Waiting waiting) {
+        waitingDao.deleteById(waiting.id());
+        try {
+            reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
+        } catch (DataIntegrityViolationException e) {
+            throw new TemporaryConflictException("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
     }
 }

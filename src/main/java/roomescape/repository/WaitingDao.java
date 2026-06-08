@@ -107,10 +107,6 @@ public class WaitingDao {
                 .findFirst();
     }
 
-    public List<Waiting> findAll() {
-        return jdbcTemplate.query(SELECT_BASE, Map.of(), rowMapper);
-    }
-
     public List<Waiting> findAllSharingSlotWith(Member member) {
         String sql = SELECT_BASE + """
                  WHERE EXISTS (
@@ -122,6 +118,21 @@ public class WaitingDao {
                  )
                 """;
         return jdbcTemplate.query(sql, Map.of("name", member.name()), rowMapper);
+    }
+
+    public Optional<Waiting> findNextInLineForUpdate(Slot slot) {
+        String sql = SELECT_BASE + """
+                 WHERE waiting.date = :date
+                    AND waiting.time_id = :timeId
+                    AND waiting.theme_id = :themeId
+                 ORDER BY waiting.created_at, waiting.id
+                 LIMIT 1
+                 FOR UPDATE
+                """;
+        SqlParameterSource params = slotParams(slot);
+        return jdbcTemplate.query(sql, params, rowMapper)
+                .stream()
+                .findFirst();
     }
 
     public boolean existsBySlotAndOwner(Slot slot, Member member) {
@@ -139,6 +150,13 @@ public class WaitingDao {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, params, Boolean.class)
         );
+    }
+
+    private SqlParameterSource slotParams(Slot slot) {
+        return new MapSqlParameterSource()
+                .addValue("date", slot.date())
+                .addValue("timeId", slot.time().id())
+                .addValue("themeId", slot.theme().id());
     }
 
 }

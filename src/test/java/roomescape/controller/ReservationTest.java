@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/reservation-fixture.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -68,11 +69,11 @@ public class ReservationTest {
     }
 
     @Test
-    @DisplayName("예약이 성공적으로 삭제되는지 확인한다.")
+    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 대기가 예약으로 전환된다.")
     void deleteReservationTest() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().delete("/admin/reservations/1")
+                .when().delete("/admin/reservations/3")
                 .then().log().all()
                 .statusCode(204);
 
@@ -81,6 +82,8 @@ public class ReservationTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(3))
+                .body("find { it.id == 3 }", nullValue())
+                .body("find { it.name == 'user_e' && it.date == '2026-06-05' }.status", is("예약"));
     }
 }
