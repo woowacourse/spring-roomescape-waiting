@@ -92,20 +92,22 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation saveReservation(String name, LocalDate date, Long timeId, Long themeId) {
-        Reservation reservation = createReservation(name, date, timeId, themeId);
+    public Reservation saveReservation(String name, LocalDate date, long timeId, long themeId) {
+        LocalDateTime requestTime = LocalDateTime.now();
+        Reservation reservation = createReservation(name, date, timeId, themeId, requestTime);
         return reservationRepository.save(reservation);
     }
 
-    private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId) {
+    private Reservation createReservation(String name, LocalDate date, long timeId, long themeId,
+                                          LocalDateTime requestTime) {
         ReservationSlot reservationSlot = findOrCreateReservationSlot(date, timeId, themeId);
         ReservationSlot lockedSlot = findLockedReservationSlot(reservationSlot);
         ReservationLine reservationLine = new ReservationLine(lockedSlot, reservationRepository.findBySlotId(lockedSlot.getId()));
 
-        return reservationLine.add(name, LocalDateTime.now());
+        return reservationLine.add(name, requestTime);
     }
 
-    private ReservationSlot createReservationSlot(LocalDate date, Long timeId, Long themeId) {
+    private ReservationSlot createReservationSlot(LocalDate date, long timeId, long themeId) {
         TimeSlot timeSlot = findTimeSlot(timeId);
         Theme theme = findTheme(themeId);
         return reservationSlotRepository.save(new ReservationSlot(date, timeSlot, theme));
@@ -113,13 +115,16 @@ public class ReservationService {
 
     @Transactional
     public void removeReservation(long id, String requestName) {
+        LocalDateTime requestTime = LocalDateTime.now();
         reservationRepository.findById(id)
-                .ifPresent(reservation -> deleteReservationAndPromoteWaiting(reservation, requestName));
+                .ifPresent(reservation ->
+                        deleteReservationAndPromoteWaiting(reservation, requestName, requestTime));
     }
 
-    private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName) {
+    private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,
+                                                    LocalDateTime requestTime) {
         validateReservationOwner(reservation, requestName);
-        reservation.validateCancelable(LocalDateTime.now());
+        reservation.validateCancelable(requestTime);
 
         ReservationSlot lockedSlot = findLockedReservationSlot(reservation.getSlot());
 
@@ -140,13 +145,14 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(long id, String requestName, LocalDate date, Long timeId) {
+    public void updateReservation(long id, String requestName, LocalDate date, long timeId) {
+        LocalDateTime requestTime = LocalDateTime.now();
         Reservation nowReservation = findReservationById(id);
         validateReservationOwner(nowReservation, requestName);
 
         Long themeId = nowReservation.getTheme().getId();
         ReservationSlot updateSlot = findOrCreateReservationSlot(date, timeId, themeId);
-        Reservation updateReservation = nowReservation.updateSlot(updateSlot, LocalDateTime.now());
+        Reservation updateReservation = nowReservation.updateSlot(updateSlot, requestTime);
 
         if (nowReservation.hasSameDateAndTime(updateReservation)) {
             return;
@@ -161,7 +167,7 @@ public class ReservationService {
         }
     }
 
-    private ReservationSlot findOrCreateReservationSlot(LocalDate date, Long timeId, Long themeId) {
+    private ReservationSlot findOrCreateReservationSlot(LocalDate date, long timeId, long themeId) {
         return reservationSlotRepository.findByDateAndTimeIdAndThemeId(date, timeId,
                 themeId).orElseGet(() -> createReservationSlot(date, timeId, themeId));
     }
@@ -202,12 +208,12 @@ public class ReservationService {
         return new WaitingWithNumber(waiting, reservationLine.findWaitingNumber(waiting));
     }
 
-    private TimeSlot findTimeSlot(Long id) {
+    private TimeSlot findTimeSlot(long id) {
         return timeSlotRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 시간대를 찾을 수 없습니다."));
     }
 
-    private Theme findTheme(Long id) {
+    private Theme findTheme(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
