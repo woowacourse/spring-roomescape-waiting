@@ -55,7 +55,7 @@
 - [X] `ReservationWaitingLine`의 `Map` 사용 이유를 검토하고 표현 계층 요구가 도메인에 들어왔는지 확인한다.
   - 대기 줄의 본질을 "정렬된 대기 목록"으로 볼 수 있는지 검토한다. 필요하다면 정렬된 `List<ReservationWaitingOrder>`를 보관하고 `sequenceOf`, `containsName`, `first` 같은 도메인 질문을 메서드로 제공하도록 바꾼다. 조회 성능보다 도메인 표현의 명확성이 더 중요한지 기준으로 결정한다.
 
-- [ ] `ReservationRepository`가 `Slot` 식별자를 중심으로 상호작용하도록 유지한다.
+- [X] `ReservationRepository`가 `Slot` 식별자를 중심으로 상호작용하도록 유지한다.
   - 추가 기능에서도 `date/theme/time` 조합을 여러 Repository 메서드에 흩뿌리기보다 `ReservationSlot`을 기준으로 조회하고 판단한다.
 
 - [ ] `ReservationSlot`의 static 메서드를 객체에게 묻는 방식으로 바꿀 수 있는지 검토한다.

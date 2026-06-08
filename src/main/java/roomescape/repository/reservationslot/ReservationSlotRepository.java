@@ -8,8 +8,6 @@ import roomescape.domain.theme.Theme;
 
 public interface ReservationSlotRepository {
 
-
-
     List<ReservationSlot> findAll();
 
     Optional<ReservationSlot> findById(long slotId);
@@ -19,5 +17,4 @@ public interface ReservationSlotRepository {
     List<ReservationSlot> findByDateAndTheme(LocalDate date, Theme theme);
 
     ReservationSlot save(ReservationSlot reservationSlot);
-
 }
