@@ -16,11 +16,13 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -219,6 +221,55 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 예약_삭제_후_대기_승격이_충돌하면_요청이_완료되지_않았음을_안내한다() {
+        // given
+        Long id = 1L;
+        String name = "브라운";
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createReservation(id, name, date, time);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, time, reservation.getTheme());
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenThrow(new DuplicateKeyException("duplicate reservation"));
+
+        // when & then
+        assertThatThrownBy(() -> service.delete(id, name))
+                .isInstanceOfSatisfying(BusinessException.class, exception -> {
+                    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+                    assertThat(exception).hasMessage(
+                            "일시적인 문제로 예약 작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+                });
+
+        verify(reservationWaitingRepository, never()).delete(waiting.getId());
+    }
+
+    @Test
+    void 관리자_예약_삭제_후_대기_승격이_충돌하면_예약_삭제가_완료되지_않았음을_안내한다() {
+        // given
+        Long id = 1L;
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createReservation(id, "브라운", date, time);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, time, reservation.getTheme());
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenThrow(new DuplicateKeyException("duplicate reservation"));
+
+        // when & then
+        assertThatThrownBy(() -> service.deleteByAdmin(id))
+                .isInstanceOfSatisfying(BusinessException.class, exception -> {
+                    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+                    assertThat(exception).hasMessage(
+                            "일시적인 문제로 예약 작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+                });
+    }
+
+    @Test
     void 관리자_예약을_삭제한다() {
         // given
         Long id = 1L;
@@ -348,6 +399,40 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).update(any(Reservation.class));
         verify(reservationRepository, never()).insert(any(Reservation.class));
         verify(reservationWaitingRepository, never()).delete(any());
+    }
+
+    @Test
+    void 예약_변경_후_대기_승격이_충돌하면_예약_변경이_완료되지_않았음을_안내한다() {
+        // given
+        Long id = 1L;
+        String name = "브라운";
+        Long timeId = 2L;
+        LocalDate updateDate = date.plusDays(1);
+        ReservationTime originalTime = new ReservationTime(1L, LocalTime.parse("08:00"));
+        ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
+        Reservation reservation = createReservation(id, name, date, originalTime);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, originalTime, reservation.getTheme());
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationTimeRepository.findBy(timeId))
+                .thenReturn(Optional.of(updateTime));
+        when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
+                .thenReturn(false);
+        when(reservationWaitingRepository.findFirstWaiting(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenThrow(new DuplicateKeyException("duplicate reservation"));
+
+        // when & then
+        assertThatThrownBy(() -> service.update(id, name, updateDate, timeId))
+                .isInstanceOfSatisfying(BusinessException.class, exception -> {
+                    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+                    assertThat(exception).hasMessage(
+                            "일시적인 문제로 예약 작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+                });
     }
 
     @Test

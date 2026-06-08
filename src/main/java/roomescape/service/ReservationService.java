@@ -102,15 +102,18 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
-
     }
 
     private void promoteFirstWaiting(Reservation canceledReservation) {
-        reservationWaitingRepository.findFirstWaiting(
-                        canceledReservation.getDate(),
-                        canceledReservation.getTime().getId(),
-                        canceledReservation.getTheme().getId())
-                .ifPresent(this::promote);
+        try {
+            reservationWaitingRepository.findFirstWaiting(
+                            canceledReservation.getDate(),
+                            canceledReservation.getTime().getId(),
+                            canceledReservation.getTheme().getId())
+                    .ifPresent(this::promote);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+        }
     }
 
     private void promote(ReservationWaiting waiting) {
@@ -121,7 +124,7 @@ public class ReservationService {
                 waiting.getTime(),
                 waiting.getTheme());
 
-        save(reservation);
+        reservationRepository.insert(reservation);
         reservationWaitingRepository.delete(waiting.getId());
     }
 
