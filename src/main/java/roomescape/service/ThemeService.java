@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
@@ -23,6 +24,7 @@ import roomescape.service.dto.result.ReservationTimeDetailResult;
 import roomescape.service.dto.result.ThemeResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
     private static final String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
 
@@ -53,6 +55,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResult createTheme(ThemeCommand command) {
         if (themeDao.existsByName(command.name())) {
             throw new ConflictException("이미 존재하는 테마입니다.");
@@ -87,9 +90,9 @@ public class ThemeService {
         return ThemeResult.from(saved);
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
-        themeDao.findThemeById(id).orElseThrow(
-                () -> new NotFoundException("존재하지 않는 테마입니다."));
+        Theme origin = getThemeOrThrow(id);
 
         if (reservationDao.existsByThemeId(id)) {
             throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다.");
@@ -108,5 +111,10 @@ public class ThemeService {
         return availableTimes.stream()
                 .map(ReservationTimeDetailResult::from)
                 .toList();
+    }
+
+    private Theme getThemeOrThrow(Long id) {
+        return themeDao.findThemeById(id).orElseThrow(
+                () -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 }

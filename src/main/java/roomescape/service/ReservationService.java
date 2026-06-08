@@ -5,7 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
@@ -24,6 +27,7 @@ import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -53,6 +57,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ReservationDetailResults findReservationDetailsByUserName(String userName) {
         List<Reservation> reservations = reservationDao.findAllByUserName(userName);
         List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
@@ -65,38 +70,60 @@ public class ReservationService {
         return new ReservationDetailResults(details);
     }
 
+    @Transactional
     public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
         validateNoWaiting(command);
-        Reservation reserved = reservationDao.save(reservation);
-        return ReservationResult.from(reserved);
+        try {
+            Reservation reserved = reservationDao.save(reservation);
+            return ReservationResult.from(reserved);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException("이미 예약된 시간입니다. 다시 시도해주세요.");
+        }
     }
 
+    @Transactional
     public ReservationResult changeReservationSlot(Long id, ReservationCommand command) {
         Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(command.name());
         validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
         validateNoWaiting(command);
-
-        boolean isSuccessful = reservationDao.update(modified);
-
-        if (!isSuccessful) {
-            throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+        boolean updated;
+        try {
+            updated = reservationDao.update(modified);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException("이미 예약된 시간입니다. 다시 시도해주세요.");
+        }
+        if (!updated) {
+            throw new NotFoundException("변경하고자 하는 예약이 존재하지 않습니다.");
         }
 
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
         return ReservationResult.from(modified);
     }
 
+    @Transactional
     public void removeReservation(Long id) {
-        reservationDao.delete(id);
+        Reservation origin = getReservationOrThrow(id);
+        if (!reservationDao.delete(id)) {
+            return;
+        }
+        if (isPast(origin.getDate(), origin.getTime())) {
+            return;
+        }
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
     }
 
+    @Transactional
     public void cancelReservation(Long id, String userName) {
         Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(userName);
         validatePastTime(origin.getDate(), origin.getTime());
-        reservationDao.delete(id);
+        if (!reservationDao.delete(id)) {
+            return;
+        }
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
     }
 
     private Reservation convertToReservation(Long id, ReservationCommand command) {
@@ -113,15 +140,28 @@ public class ReservationService {
         );
     }
 
+    private void promoteFirstWaiting(LocalDate date, ReservationTime time, Theme theme) {
+        waitingDao.findFirstBySlot(date, time.getId(), theme.getId()).ifPresent(
+                waiting -> {
+                    reservationDao.save(new Reservation(waiting.getName(), date, time, theme));
+                    waitingDao.delete(waiting.getId());
+                }
+        );
+    }
+
     private void validateAvailability(LocalDate date, ReservationTime time, Theme theme) {
         validatePastTime(date, time);
         validateDuplicate(date, time, theme);
     }
 
-    private void validatePastTime(LocalDate date, ReservationTime time) {
+    private boolean isPast(LocalDate date, ReservationTime time) {
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime requestDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (requestDateTime.isBefore(now)) {
+        return requestDateTime.isBefore(now);
+    }
+
+    private void validatePastTime(LocalDate date, ReservationTime time) {
+        if (isPast(date, time)) {
             throw new UnprocessableEntityException("이미 지난 시간입니다.");
         }
     }

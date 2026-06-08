@@ -110,14 +110,23 @@ public class ThemeDao {
                 """
                           SELECT t.id AS time_id,
                                  t.start_at,
-                                 CASE WHEN r.id IS NULL THEN FALSE ELSE TRUE END AS reserved
+                                 CASE
+                                     WHEN EXISTS (
+                                         SELECT 1 FROM reservation r
+                                         WHERE r.time_id = t.id AND r.theme_id = ? AND r.date = ?
+                                     )
+                                     OR EXISTS (
+                                         SELECT 1 FROM waiting w
+                                         WHERE w.time_id = t.id AND w.theme_id = ? AND w.date = ?
+                                     )
+                                     THEN FALSE ELSE TRUE
+                                 END AS reservable
                           FROM reservation_time t
-                          LEFT JOIN reservation r ON t.id = r.time_id
-                              AND r.theme_id = ?
-                              AND r.date = ?
                           ORDER BY t.start_at
                         """,
                 RESERVATION_TIME_STATUS_ROW_MAPPER,
+                id,
+                date,
                 id,
                 date
         );

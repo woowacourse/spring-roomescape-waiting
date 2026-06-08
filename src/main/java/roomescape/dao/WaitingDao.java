@@ -216,4 +216,26 @@ public class WaitingDao {
         Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
         return Boolean.TRUE.equals(result);
     }
+
+    public Optional<Waiting> findFirstBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT w.id, w.name, w.date, w.created_at,
+                       rt.id AS time_id, rt.start_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM waiting w
+                INNER JOIN reservation_time rt ON w.time_id = rt.id
+                INNER JOIN theme t ON w.theme_id = t.id
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.created_at, w.id ASC
+                LIMIT 1
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(
+                        sql,
+                        WAITING_ROW_MAPPER,
+                        date, timeId, themeId
+                ).stream()
+                .findFirst();
+    }
+
 }

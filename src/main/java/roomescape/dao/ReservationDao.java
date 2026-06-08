@@ -64,7 +64,7 @@ public class ReservationDao {
                             WHERE date = ?
                                 AND time_id = ?
                                 AND theme_id = ?
-                        ) 
+                        )
                         """,
                 Boolean.class,
                 date,
@@ -72,6 +72,22 @@ public class ReservationDao {
                 theme.getId()
         );
         return Boolean.TRUE.equals(result);
+    }
+
+    public boolean existsForUpdate(LocalDate date, Theme theme, ReservationTime time) {
+        String sql = """
+                SELECT 1
+                FROM reservation
+                WHERE date = ?
+                    AND time_id = ?
+                    AND theme_id = ?
+                FOR UPDATE
+                """;
+        return !jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> 1,
+                date, time.getId(), theme.getId()
+        ).isEmpty();
     }
 
     public Reservation save(Reservation reservation) {
@@ -109,8 +125,9 @@ public class ReservationDao {
         return affectedRows > 0;
     }
 
-    public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
+    public boolean delete(Long id) {
+        int affected = jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
+        return affected > 0;
     }
 
     public boolean existsById(Long id) {

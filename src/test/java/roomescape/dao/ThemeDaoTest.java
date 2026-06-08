@@ -23,18 +23,18 @@ class ThemeDaoTest {
     private ThemeDao themeDao;
 
     @Test
-    @DisplayName("특정 테마와 날짜에 대해 예약되지 않은 시간 목록만 조회한다.")
-    void 예약되지_않은_시간_조회_테스트() {
+    @DisplayName("특정 테마와 날짜에 대해 예약 가능한 시간 목록을 조회한다.")
+    void 예약_가능한_시간_조회_테스트() {
         // given
         Long themeId = 1L;
         LocalDate date = LocalDate.parse(TODAY).minusDays(7);
-        boolean expected = false;
+        boolean expected = true;
 
         // when
         List<TimeQueryResult> availableTimes = themeDao.findTimeStatusBy(themeId, date);
 
         // then
-        assertThat(availableTimes.get(5).isReserved()).isEqualTo(expected);
+        assertThat(availableTimes.get(5).isReservable()).isEqualTo(expected);
     }
 
     @Test

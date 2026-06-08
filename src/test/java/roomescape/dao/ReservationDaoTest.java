@@ -173,6 +173,16 @@ class ReservationDaoTest {
     }
 
     @Test
+    @DisplayName("같은 값으로 수정해도 true값을 반환한다.")
+    void updateResultTrueWhenValuesIdentical() {
+        Reservation existing = reservationDao.findById(1L).orElseThrow();
+
+        boolean result = reservationDao.update(existing);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
     @DisplayName("예약을 삭제할 수 있다.")
     void deleteReservation() {
         reservationDao.delete(1L);

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dao.ReservationDao;
@@ -12,6 +13,7 @@ import roomescape.service.dto.command.ReservationTimeCommand;
 import roomescape.service.dto.result.ReservationTimeResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeDao reservationTimeDao;
     private final ReservationDao reservationDao;
@@ -32,6 +34,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResult createReservationTime(ReservationTimeCommand command) {
         if (reservationTimeDao.existsByStartAt(command.startAt())) {
             throw new ConflictException("이미 존재하는 예약 시간입니다.");
@@ -46,6 +49,7 @@ public class ReservationTimeService {
         return ReservationTimeResult.from(saved);
     }
 
+    @Transactional
     public void deleteReservationTime(Long id) {
         if (!reservationTimeDao.existsById(id)) {
             throw new NotFoundException("존재하지 않는 시간입니다.");
