@@ -46,6 +46,7 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
         where wr.date_id = ? and wr.time_id = ? and wr.theme_id = ?
         order by wr.created_at asc, wr.id asc
         limit 1
+        for update
         """;
 
     private static final String FIND_BY_NAME_SQL = """
