@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import roomescape.reservationtime.application.service.ReservationTimeService;
 import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.application.service.ThemeService;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -59,6 +61,8 @@ public class ReservationService {
 
         if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
             validateDuplicateReservationWaiting(request);
+            log.info("이미 예약된 일정이므로 대기로 저장합니다. date={}, themeId={}, timeId={}",
+                    request.date(), request.themeId(), request.timeId());
 
             Waiting savedWaitingResult = waitingService.save(Waiting.of(
                     null,
@@ -87,11 +91,7 @@ public class ReservationService {
         }
 
         ReservationQueryResult updatedReservation = updateReservation(request, reservation);
-        eventPublisher.publishEvent(new ReservationScheduleVacatedEvent(
-                reservation.getDate(),
-                reservation.getThemeId(),
-                reservation.getTimeId()
-        ));
+        publishScheduleVacated(reservation, "update");
 
         return updatedReservation;
     }
@@ -105,11 +105,7 @@ public class ReservationService {
         int deletedCount = reservationRepository.delete(id);
 
         if (deletedCount > 0) {
-            eventPublisher.publishEvent(new ReservationScheduleVacatedEvent(
-                    reservation.getDate(),
-                    reservation.getThemeId(),
-                    reservation.getTimeId()
-            ));
+            publishScheduleVacated(reservation, "delete");
         }
 
         return deletedCount;
@@ -132,6 +128,21 @@ public class ReservationService {
         Reservation updatedReservation = reservation.update(request.date(), request.timeId());
         Reservation savedReservation = reservationRepository.update(updatedReservation);
         return toQueryResult(savedReservation);
+    }
+
+    private void publishScheduleVacated(Reservation reservation, String reason) {
+        log.info("예약 일정이 비어 대기 승격 이벤트를 발행합니다. reason={}, reservationId={}, date={}, themeId={}, timeId={}",
+                reason,
+                reservation.getId(),
+                reservation.getDate(),
+                reservation.getThemeId(),
+                reservation.getTimeId());
+
+        eventPublisher.publishEvent(new ReservationScheduleVacatedEvent(
+                reservation.getDate(),
+                reservation.getThemeId(),
+                reservation.getTimeId()
+        ));
     }
 
     private boolean isSameSchedule(ReservationUpdateCommand request, Reservation reservation) {

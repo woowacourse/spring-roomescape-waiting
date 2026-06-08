@@ -1,16 +1,15 @@
 package roomescape.reservation.application.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.WaitingQueryResult;
 import roomescape.reservation.application.event.ReservationScheduleVacatedEvent;
 import roomescape.reservation.application.exception.ReservationErrorCode;
@@ -20,6 +19,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -51,15 +51,25 @@ public class WaitingService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void promoteOldestWaiting(ReservationScheduleVacatedEvent event) {
+        log.info("대기 승격 이벤트를 수신했습니다. date={}, themeId={}, timeId={}",
+                event.date(), event.themeId(), event.timeId());
+
         waitingRepository.findOldestByDateAndThemeIdAndTimeId(
                         event.date(),
                         event.themeId(),
                         event.timeId()
                 )
-                .ifPresent(this::promote);
+                .ifPresentOrElse(
+                        this::promote,
+                        () -> log.info("대기가 존재하지 않아 승격을 진행하지 않습니다. date={}, themeId={}, timeId={}",
+                                event.date(), event.themeId(), event.timeId())
+                );
     }
 
     private void promote(Waiting waiting) {
+        log.info("대기를 예약으로 전환합니다. waitingId={}, date={}, themeId={}, timeId={}",
+                waiting.getId(), waiting.getDate(), waiting.getThemeId(), waiting.getTimeId());
+
         Reservation reservation = Reservation.builder()
                 .name(waiting.getName())
                 .date(waiting.getDate())
