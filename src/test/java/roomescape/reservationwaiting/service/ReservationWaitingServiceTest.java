@@ -16,9 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -36,10 +36,14 @@ class ReservationWaitingServiceTest {
             ZoneId.systemDefault()
     );
 
-    @Mock private ReservationWaitingRepository reservationWaitingRepository;
-    @Mock private ReservationRepository reservationRepository;
-    @Mock private ReservationWaitingFactory reservationWaitingFactory;
-    @Mock private Clock clock;
+    @Mock
+    private ReservationWaitingRepository reservationWaitingRepository;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ReservationWaitingFactory reservationWaitingFactory;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
@@ -52,7 +56,8 @@ class ReservationWaitingServiceTest {
     void setUp() {
         time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
-        futureReservation = Reservation.restore(1L, "user1", new ReservationSlot(LocalDate.of(2099, 12, 1), time, theme));
+        futureReservation = Reservation.restore(1L, "user1",
+                new ReservationSlot(LocalDate.of(2099, 12, 1), time, theme));
     }
 
     @Test
@@ -63,7 +68,8 @@ class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.createWaiting(new ReservationWaitingRequest("현미밥", 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING))
+                .satisfies(
+                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING))
                 .hasMessage(ErrorCode.DUPLICATE_WAITING.getMessage());
     }
 
@@ -89,7 +95,8 @@ class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(Long.MAX_VALUE))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_FOUND))
+                .satisfies(
+                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_FOUND))
                 .hasMessage(ErrorCode.WAITING_NOT_FOUND.getMessage());
     }
 }
