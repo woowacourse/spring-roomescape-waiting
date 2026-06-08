@@ -63,20 +63,17 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        t.thumbnail_url,
                        rt.id AS time_id,
                        rt.start_at,
-                       (
-                           SELECT COUNT(*)
-                           FROM reservation_waiting AS earlier
-                           WHERE earlier.date = rw.date
-                             AND earlier.theme_id = rw.theme_id
-                             AND earlier.time_id = rw.time_id
-                             AND (
-                                 earlier.requested_at < rw.requested_at
-                                 OR (earlier.requested_at = rw.requested_at AND earlier.id <= rw.id)
-                             )
-                       ) AS sequence
-                FROM reservation_waiting AS rw
-                INNER JOIN theme AS t ON rw.theme_id = t.id
-                INNER JOIN reservation_time AS rt ON rw.time_id = rt.id
+                       rw.sequence
+                FROM (
+                    SELECT id, date, theme_id, time_id, name,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY date, theme_id, time_id
+                            ORDER BY requested_at ASC, id ASC
+                        ) AS sequence
+                    FROM reservation_waiting
+                ) AS rw
+                    INNER JOIN theme AS t ON rw.theme_id = t.id
+                    INNER JOIN reservation_time AS rt ON rw.time_id = rt.id
                 WHERE rw.name = ?
                 ORDER BY date, start_at, status
                 """;
