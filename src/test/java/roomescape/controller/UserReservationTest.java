@@ -365,6 +365,65 @@ public class UserReservationTest {
                 .body("size()", is(0));
     }
 
+    @Test
+    void 존재하지_않는_예약_취소시_데이터가_그대로_유지된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/999")
+                .then().statusCode(404);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
+
+        RestAssured.given()
+                .when().get("/reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(1));
+    }
+
+    @Test
+    void 본인이_아닌_사람이_대기_취소하면_데이터가_그대로_유지된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/waitings/1?name=다른사람")
+                .then().statusCode(400);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
+
+        RestAssured.given()
+                .when().get("/reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
+    }
+
     private void createTheme() {
         Map<String, String> theme = new HashMap<>();
         theme.put("name", "무서운 이야기");
