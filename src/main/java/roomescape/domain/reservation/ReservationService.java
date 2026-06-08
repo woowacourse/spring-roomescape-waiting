@@ -47,7 +47,10 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAll().stream().map(ReservationResponse::from).toList();
+        return reservationRepository.findAll()
+            .stream()
+            .map(ReservationResponse::from)
+            .toList();
     }
 
     public void deleteReservation(Long id) {
@@ -58,7 +61,10 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream().map(ReservationResponse::from).toList();
+        return reservationRepository.findByName(name)
+            .stream()
+            .map(ReservationResponse::from)
+            .toList();
     }
 
     @Transactional
@@ -79,7 +85,8 @@ public class ReservationService {
         ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
 
         validateNotPast(newReservationDate, newReservationTime);
-        validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme().getId());
+        validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme()
+            .getId());
 
         int updatedCount = reservationRepository.updateReservation(id, request.dateId(), request.timeId());
         if (updatedCount == 0) {
@@ -119,7 +126,10 @@ public class ReservationService {
 
     private void promoteWaitingReservation(Reservation reservation) {
         Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
-            reservation.getDate().getId(), reservation.getTime().getId(), reservation.getTheme().getId());
+            reservation.getDate()
+                .getId(), reservation.getTime()
+                .getId(), reservation.getTheme()
+                .getId());
         if (waitingReservationOpt.isPresent()) {
             WaitingReservation waitingReservation = waitingReservationOpt.get();
             reservationRepository.save(
