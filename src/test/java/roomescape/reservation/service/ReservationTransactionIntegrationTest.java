@@ -21,7 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.domain.exception.ReservationSlotDuplicateException;
+import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 
 @Sql("/clear.sql")
 @SpringBootTest
@@ -90,7 +90,7 @@ class ReservationTransactionIntegrationTest {
             insertReservation("customer", DATE, TIME_ID, THEME_ID);
             insertWaiting("코로구", DATE, TIME_ID, THEME_ID);
 
-            doThrow(new ReservationSlotDuplicateException())
+            doThrow(new ReservationAlreadyExistsException())
                 .when(reservationService).promote(any(), any(), any(), any());
 
             // when
@@ -132,7 +132,7 @@ class ReservationTransactionIntegrationTest {
             insertReservation("customer", DATE, TIME_ID, THEME_ID);
             insertWaiting("코로구", DATE, TIME_ID, THEME_ID);
 
-            doThrow(new ReservationSlotDuplicateException())
+            doThrow(new ReservationAlreadyExistsException())
                 .when(reservationService).promote(any(), any(), any(), any());
 
             // when
@@ -199,7 +199,7 @@ class ReservationTransactionIntegrationTest {
             insertReservation("customer", DATE, TIME_ID, THEME_ID);
             insertWaiting("코로구", DATE, TIME_ID, THEME_ID);
 
-            doThrow(new ReservationSlotDuplicateException())
+            doThrow(new ReservationAlreadyExistsException())
                 .when(reservationService).promote(any(), any(), any(), any());
 
             // when
@@ -221,7 +221,7 @@ class ReservationTransactionIntegrationTest {
             insertReservation("customer", DATE, TIME_ID, THEME_ID);
             insertWaiting("코로구", DATE, TIME_ID, THEME_ID);
 
-            doThrow(new ReservationSlotDuplicateException())
+            doThrow(new ReservationAlreadyExistsException())
                 .when(reservationService).promote(any(), any(), any(), any());
 
             // when

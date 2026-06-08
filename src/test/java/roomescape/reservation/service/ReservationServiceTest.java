@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationSlotDuplicateException;
+import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
 import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
@@ -151,7 +151,7 @@ class ReservationServiceTest {
             1L,
             LocalDate.of(2026, 8, 6),
             ReservationTime.of(2L, LocalTime.of(11, 0)))
-        ).isInstanceOf(ReservationSlotDuplicateException.class);
+        ).isInstanceOf(ReservationAlreadyExistsException.class);
     }
 
     @Test

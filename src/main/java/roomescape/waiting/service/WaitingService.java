@@ -14,7 +14,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
-import roomescape.waiting.domain.exception.WaitingSlotDuplicateException;
+import roomescape.waiting.domain.exception.WaitingAlreadyExistsException;
 import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 
@@ -103,7 +103,7 @@ public class WaitingService {
         try {
             return waitingRepository.save(waiting);
         } catch (DuplicateKeyException exception) {
-            throw new WaitingSlotDuplicateException();
+            throw new WaitingAlreadyExistsException();
         }
     }
 

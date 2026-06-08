@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationSlotDuplicateException;
+import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -137,7 +137,7 @@ public class ReservationService {
         try {
             return reservationRepository.save(reservation);
         } catch (DuplicateKeyException exception) {
-            throw new ReservationSlotDuplicateException();
+            throw new ReservationAlreadyExistsException();
         } catch (DataIntegrityViolationException exception) {
             throw new ReservationOptionChangedException(exception);
         }
@@ -152,7 +152,7 @@ public class ReservationService {
             }
             return reservation;
         } catch (DuplicateKeyException exception) {
-            throw new ReservationSlotDuplicateException();
+            throw new ReservationAlreadyExistsException();
         } catch (DataIntegrityViolationException exception) {
             throw new ReservationOptionChangedException(exception);
         }
