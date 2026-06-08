@@ -47,19 +47,19 @@
 ### 사이클1 머지 당시 리뷰 반영 사항 리스트
 
 - [X] `Reservation`의 static 편의 메서드를 제거하고 필요한 객체에게 직접 물어보도록 정리한다.
-  - 외부 계층에서 날짜와 시간만 가지고 판단해야 하는 경우는 `ReservationSlot` 또는 별도 정책 객체를 사용하도록 옮기고, `Reservation`은 자신이 가진 `slot`에 대해 `reservation.isPast(...)`처럼 묻는 메서드만 남긴다.
+  - `ReservationSlot` 객체가 있는 흐름에서는 `slot.isPast(...)`로 묻는다. 슬롯 객체 없이 화면에 표시할 날짜와 시간만 있는 흐름에서는 화면 조립 코드에서 `LocalDateTime`으로 조합해 과거 여부를 판단, `Reservation`은 자신이 가진 `slot`에 대해 `reservation.isPast(...)`처럼 묻는 메서드만 남긴다.
 
 - [X] `Reservation` 생성 경로를 줄이고 불변식 검증 위치를 정리한다.
-  - 현재 구조에서는 예약이 `slot`을 참조하므로 `ReservationSlot` 기반 생성 경로를 중심으로 남긴다. 날짜/테마/시간 조합으로 슬롯을 만드는 책임은 서비스 또는 슬롯 생성 쪽으로 이동시켜 `Reservation` 생성 경로를 줄인다.
+  - 예약은 `ReservationSlot`을 받아 생성하도록 정리, 날짜/테마/시간 조합으로 슬롯을 만드는 책임은 서비스나 테스트 fixture 쪽에서 처리하고, `Reservation`은 이름, 슬롯, 생성 시각을 기준으로 자신의 불변식만 검증
 
 - [X] `ReservationWaitingLine`의 `Map` 사용 이유를 검토하고 표현 계층 요구가 도메인에 들어왔는지 확인한다.
-  - 대기 줄의 본질을 "정렬된 대기 목록"으로 볼 수 있는지 검토한다. 필요하다면 정렬된 `List<ReservationWaitingOrder>`를 보관하고 `sequenceOf`, `containsName`, `first` 같은 도메인 질문을 메서드로 제공하도록 바꾼다. 조회 성능보다 도메인 표현의 명확성이 더 중요한지 기준으로 결정한다.
+  - 대기 줄은 요청 시각과 대기 ID 기준으로 정렬된 `List<ReservationWaitingOrder>`를 보관하도록 정리, `waitingId -> sequence` 형태의 `Map`은 제거하고, `sequenceOf`, `containsName`, `isEmpty`는 정렬된 목록에 질문하는 메서드로 제공
 
 - [X] `ReservationRepository`가 `Slot` 식별자를 중심으로 상호작용하도록 유지한다.
-  - 추가 기능에서도 `date/theme/time` 조합을 여러 Repository 메서드에 흩뿌리기보다 `ReservationSlot`을 기준으로 조회하고 판단한다.
+  - 예약과 대기는 `date/theme/time` 조합이 아니라 `ReservationSlot`을 기준으로 조회, 슬롯 식별자를 중심으로 상호작용하도록 유지
 
 - [X] `ReservationSlot`의 static 메서드를 객체에게 묻는 방식으로 바꿀 수 있는지 검토한다.
-  - 슬롯 객체가 존재하는 흐름에서는 `slot.isPast(...)`를 사용하도록 정리한다. 슬롯 객체 없이 날짜와 시간만 있는 화면 상태 계산에서는 `ReservationSlot` static 메서드가 적절한지, 별도 정책 객체가 더 나은지 비교한 뒤 제거 여부를 결정한다.
+  - `ReservationSlot`의 static 상태 판단 메서드는 제거, 슬롯 객체가 있는 흐름에서는 `slot.isPast(...)`로 묻고, 슬롯 객체 없이 화면에 표시할 날짜와 시간만 있는 흐름에서는 화면 조립 코드에서 `LocalDateTime`으로 조합해 과거 여부를 판단
 
 
 ## API 명세
