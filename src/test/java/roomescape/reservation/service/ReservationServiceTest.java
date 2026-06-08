@@ -47,7 +47,7 @@ class ReservationServiceTest {
       ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
-      when(reservationDao.findByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(false);
+      when(reservationDao.existsReservedReservationByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(false);
       when(reservationDao.insert(NAME, LocalDate.parse(DATE), DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED))
           .thenReturn(
               Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED));
@@ -65,7 +65,7 @@ class ReservationServiceTest {
       ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
-      when(reservationDao.findByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(true);
+      when(reservationDao.existsReservedReservationByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(true);
       when(reservationDao.insert(NAME, LocalDate.parse(DATE), DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING))
           .thenReturn(Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING));
 
@@ -82,7 +82,7 @@ class ReservationServiceTest {
       ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
-      when(reservationDao.findByNameAndDateAndTimeAndTheme(NAME, DATE, TIME_ID, THEME_ID)).thenReturn(true);
+      when(reservationDao.existsByNameAndDateAndTimeAndTheme(NAME, DATE, TIME_ID, THEME_ID)).thenReturn(true);
 
       // when // then
       assertThatThrownBy(() -> reservationService.create(request, DEFAULT_TIME, DEFAULT_THEME))

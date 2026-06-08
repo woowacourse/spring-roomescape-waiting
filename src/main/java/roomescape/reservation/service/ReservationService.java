@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -24,13 +25,16 @@ public class ReservationService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional
     public ReservationCreateResponse create(ReservationRequest request, ReservationTime time, Theme theme) {
-        boolean isExistSlot = reservationDao.findByDateTimeTheme(request.date(), time.getId(), theme.getId());
+        reservationDao.lockByDateTimeTheme(request.date(), time.getId(), theme.getId());
 
-        boolean isAlreadyExist = reservationDao.findByNameAndDateAndTimeAndTheme(request.name(), request.date(), time.getId(), theme.getId());
+        boolean isAlreadyExist = reservationDao.existsByNameAndDateAndTimeAndTheme(request.name(), request.date(), time.getId(), theme.getId());
         if (isAlreadyExist) {
             throw new IllegalStateException("[ERROR] 이미 예약된 예약을 중복 예약할 수 없습니다.");
         }
+
+        boolean isExistSlot = reservationDao.existsReservedReservationByDateTimeTheme(request.date(), time.getId(), theme.getId());
 
         ReservationStatus status = ReservationStatus.RESERVED;
         if (isExistSlot) {
@@ -55,17 +59,31 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
-    public boolean existsByTimeId(Long timeId) {
-        return reservationDao.existsByTimeId(timeId);
+    @Transactional
+    public void cancelReservationByNameAndId(String name, Long id) {
+        Reservation reservation = reservationDao.findById(id);
+        validateReservationAuthority(name, reservation);
+
+        reservationDao.lockByDateTimeTheme(
+                reservation.getDate().toString(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+
+        reservationDao.cancelByNameAndId(name, id);
+
+        if (reservation.getStatus() == ReservationStatus.RESERVED) {
+            reservationDao.promoteFirstWaiting(
+                    reservation.getDate(),
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId()
+            );
+        }
     }
 
-    public void deleteByNameAndReservationId(String name, Long reservationId) {
-        boolean isExistReservation = reservationDao.existsByNameAndReservationId(name, reservationId);
-        if (!isExistReservation) {
-            throw new IllegalStateException("해당 예약이 이미 존재하지 않습니다.");
-        }
 
-        reservationDao.deleteByNameAndReservationId(name, reservationId);
+    public boolean existsByTimeId(Long timeId) {
+        return reservationDao.existsByTimeId(timeId);
     }
 
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {

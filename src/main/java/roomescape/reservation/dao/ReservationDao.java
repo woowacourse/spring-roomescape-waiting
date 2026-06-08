@@ -90,7 +90,33 @@ public class ReservationDao {
     jdbcTemplate.update(sql, id);
   }
 
-public boolean existsByTimeId(Long timeId) {
+  public void cancelByNameAndId(String name, Long id) {
+    String sql = """
+        update reservation
+        set status = 'CANCELED'
+        where name = ? and id = ? and status in ('RESERVED', 'WAITING')
+        """;
+
+    jdbcTemplate.update(sql, name, id);
+  }
+
+  public void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId) {
+    String sql = """
+        update reservation
+        set status = 'RESERVED'
+        where id = (
+            select id
+            from reservation
+            where date = ? and time_id = ? and theme_id = ? and status = 'WAITING'
+            order by id
+            limit 1
+        )
+        """;
+
+    jdbcTemplate.update(sql, date, timeId, themeId);
+  }
+
+  public boolean existsByTimeId(Long timeId) {
     String sql = """
         select count(*)
         from reservation
@@ -137,45 +163,37 @@ public boolean existsByTimeId(Long timeId) {
     return jdbcTemplate.queryForObject(sql, rowMapper, id);
   }
 
-  public boolean findByDateTimeTheme(String date, Long timeId, Long themeId) {
+  public boolean existsReservedReservationByDateTimeTheme(String date, Long timeId, Long themeId) {
     String sql = """
         select count(*)
         from reservation
-        where date = ? and time_id = ? and theme_id = ?
+        where date = ? and time_id = ? and theme_id = ? and status = 'RESERVED'
         """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
 
     return count != null && count > 0;
   }
 
-  public boolean findByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
+  public void lockByDateTimeTheme(String date, Long timeId, Long themeId) {
+    String sql = """
+        select id
+        from reservation
+        where date = ? and time_id = ? and theme_id = ?
+        for update
+        """;
+
+    jdbcTemplate.query(sql, (resultSet, rowNum) -> resultSet.getLong("id"), date, timeId, themeId);
+  }
+
+  public boolean existsByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
     String sql = """
         select count(*)
         from reservation
-        where name = ? and date = ? and time_id = ? and theme_id = ?
+        where name = ? and date = ? and time_id = ? and theme_id = ? and status in ('RESERVED', 'WAITING')
         """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
 
     return count != null && count > 0;
-  }
-
-  public boolean existsByNameAndReservationId(String name, Long reservationId) {
-    String sql = """
-        select count(*)
-        from reservation
-        where name = ? and id = ?
-        """;
-    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, reservationId);
-
-    return count != null && count > 0;
-  }
-
-  public void deleteByNameAndReservationId(String name, Long reservationId) {
-    String sql = """
-        delete from reservation
-        where name = ? and id = ?
-        """;
-    jdbcTemplate.update(sql, name, reservationId);
   }
 
   public void updateReservation(LocalDate date, Long timeId, String name, Long reservationId) {

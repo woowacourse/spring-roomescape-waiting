@@ -81,6 +81,24 @@ class ReservationDaoTest {
             List<Reservation> all = reservationDao.findAll();
             assertThat(all).hasSize(1);
         }
+
+        @Test
+        void 같은_슬롯에_대기는_여러_명_저장할_수_있다() {
+            // given
+            ReservationTime time = createTime();
+            Theme theme = createTheme();
+            LocalDate date = LocalDate.of(9999, 8, 5);
+            reservationDao.insert("브라운", date, time, theme, ReservationStatus.RESERVED);
+
+            // when
+            reservationDao.insert("이안", date, time, theme, ReservationStatus.WAITING);
+            reservationDao.insert("누누", date, time, theme, ReservationStatus.WAITING);
+
+            // then
+            List<Reservation> all = reservationDao.findAll();
+            assertThat(all).hasSize(3);
+        }
+
     }
 
     @Nested
