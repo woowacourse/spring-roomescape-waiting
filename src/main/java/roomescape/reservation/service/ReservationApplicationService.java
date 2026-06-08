@@ -125,7 +125,7 @@ public class ReservationApplicationService {
     @Transactional
     public void cancelReservationByIdAndPromoteWaiting(final long reservationId) {
         final Reservation reservation = reservationService.getReservation(reservationId);
-        reservationService.cancel(reservation.getId());
+        reservationService.cancel(reservation);
 
         promoteIfFutureSlot(reservation);
     }

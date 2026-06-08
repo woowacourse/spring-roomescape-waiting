@@ -112,8 +112,12 @@ public class ReservationService {
     @Transactional
     public void cancel(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
-        reservation.validateCancelableByCustomer(LocalDate.now(clock));
+        cancel(reservation);
+    }
 
+    @Transactional
+    public void cancel(final Reservation reservation) {
+        reservation.validateCancelableByCustomer(LocalDate.now(clock));
         deleteReservation(reservation.getId());
     }
 
