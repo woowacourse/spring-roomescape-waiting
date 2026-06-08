@@ -1,15 +1,15 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDateTime;
 import roomescape.exception.DuplicateException;
 
-public class ReservationLine {
+    public class ReservationLine {
 
     private final ReservationSlot slot;
-    private final List<Reservation> reservations;
+    private final Reservation reservedReservation;
     private final List<Reservation> waitings;
 
     public ReservationLine(ReservationSlot slot, List<Reservation> reservations) {
@@ -17,12 +17,8 @@ public class ReservationLine {
         validateReservations(reservations);
         this.slot = slot;
         validateSameSlot(reservations);
-        this.reservations = List.copyOf(reservations);
-        this.waitings = reservations.stream()
-                .filter(Reservation::isWaiting)
-                .sorted(Comparator.comparing(Reservation::getCreatedAt)
-                        .thenComparing(Reservation::getId))
-                .toList();
+        this.reservedReservation = findReservedReservation(reservations);
+        this.waitings = findWaitings(reservations);
     }
 
     public Reservation add(String name, LocalDateTime now) {
@@ -54,21 +50,47 @@ public class ReservationLine {
     }
 
     private void validateDuplicated(String name) {
-        boolean isDuplicated = reservations.stream()
-                .anyMatch(reservation -> reservation.isOwner(name));
-        if (isDuplicated) {
+        if (hasSameReservationOwner(name) || hasSameWaitingOwner(name)) {
             throw new DuplicateException("이미 예약 또는 대기 중인 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
         }
     }
 
     private ReservationStatus decideReservationStatus() {
-        boolean hasReserved = reservations.stream()
-                .anyMatch(Reservation::isReserved);
-
-        if (hasReserved) {
+        if (reservedReservation != null) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;
+    }
+
+    private Reservation findReservedReservation(List<Reservation> reservations) {
+        List<Reservation> reservedReservations = reservations.stream()
+                .filter(Reservation::isReserved)
+                .toList();
+
+        if (reservedReservations.size() > 1) {
+            throw new IllegalArgumentException("하나의 예약 슬롯에는 확정 예약이 하나만 존재할 수 있습니다.");
+        }
+
+        return reservedReservations.stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<Reservation> findWaitings(List<Reservation> reservations) {
+        return reservations.stream()
+                .filter(Reservation::isWaiting)
+                .sorted(Comparator.comparing(Reservation::getCreatedAt)
+                        .thenComparing(Reservation::getId))
+                .toList();
+    }
+
+    private boolean hasSameReservationOwner(String name) {
+        return reservedReservation != null && reservedReservation.isOwner(name);
+    }
+
+    private boolean hasSameWaitingOwner(String name) {
+        return waitings.stream()
+                .anyMatch(waiting -> waiting.isOwner(name));
     }
 
     private void validateSlot(ReservationSlot slot) {
