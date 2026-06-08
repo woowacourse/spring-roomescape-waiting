@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ReservationRepository {
     List<Reservation> findAll();
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findAllForName(String name);
 
     Optional<Reservation> findById(Long id);
 
@@ -17,15 +17,11 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    Reservation updateDateTime(Reservation reservation);
-
-    Reservation moveToHistory(Reservation reservation);
+    Optional<Reservation> updateDateTime(Reservation reservation);
 
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
-
-    boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id);
 
     void deleteById(Long id);
 }

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Slot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -79,7 +80,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png"));
-        reservationRepository.save(new Reservation("브라운", LocalDate.of(2026, 5, 14), reservationTime, theme));
+        reservationRepository.save(reservation("브라운", LocalDate.of(2026, 5, 14), reservationTime, theme));
 
         // when, then
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTime.getId()))
@@ -109,9 +110,9 @@ class ReservationTimeServiceTest {
 
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
 
-        reservationRepository.save(new Reservation("브라운", targetDate, time, targetTheme));
-        reservationRepository.save(new Reservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme));
-        reservationRepository.save(new Reservation("브라운", targetDate, time, nonTargetTheme));
+        reservationRepository.save(reservation("브라운", targetDate, time, targetTheme));
+        reservationRepository.save(reservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme));
+        reservationRepository.save(reservation("브라운", targetDate, time, nonTargetTheme));
 
         // when
         List<ReservationTimeAvailability> availableTimes = reservationTimeService.findAvailableTimes(targetDate, targetTheme.getId());
@@ -133,5 +134,9 @@ class ReservationTimeServiceTest {
         // when, then
         assertThatThrownBy(() -> reservationTimeService.findAvailableTimes(date, notFoundThemeId))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return Reservation.reconstruct(null, name, new Slot(date, time, theme));
     }
 }

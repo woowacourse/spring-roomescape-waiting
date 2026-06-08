@@ -1,6 +1,7 @@
 package roomescape.reservationtime.service;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -50,7 +51,7 @@ public class ReservationTimeService {
         if (reservationRepository.existsByTimeId(id)) {
             throw new ConflictException("예약이 존재하는 시간은 삭제할 수 없습니다. 먼저 해당 예약들을 삭제해주세요.");
         }
-        reservationTimeRepository.deleteById(id);
+        deleteReservationTime(id);
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +62,7 @@ public class ReservationTimeService {
 
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         Set<ReservationTime> reservedTimes = reservations.stream()
-                .map(Reservation::getTime)
+                .map(reservation -> reservation.getSlot().time())
                 .collect(Collectors.toCollection(HashSet::new));
 
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -79,6 +80,14 @@ public class ReservationTimeService {
             return reservationTimeRepository.save(reservationTime);
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 등록된 예약 시간입니다. 다른 시간을 입력해주세요.");
+        }
+    }
+
+    private void deleteReservationTime(Long id) {
+        try {
+            reservationTimeRepository.deleteById(id);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ConflictException("예약이 존재하는 시간은 삭제할 수 없습니다. 먼저 해당 예약들을 삭제해주세요.");
         }
     }
 }

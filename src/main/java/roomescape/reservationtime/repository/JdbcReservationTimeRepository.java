@@ -114,4 +114,16 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 .findFirst();
     }
 
+    @Override
+    public boolean existsById(Long id) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation_time
+                    WHERE id = ?
+                )
+                """;
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, id));
+    }
 }
