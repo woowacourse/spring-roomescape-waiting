@@ -4,12 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.domain.fixture.ReservationFixture.createDefaultReservationWithName;
 import static roomescape.domain.fixture.ReservationFixture.createWithNameAndDate;
+import static roomescape.support.TestDateTimes.FIXED;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -33,6 +30,7 @@ import roomescape.service.fake.FakeThemeRepository;
 import roomescape.service.fixture.ReservationServiceFixture;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationTimeResult;
+import roomescape.support.TestDateTimes;
 
 class ReservationServiceTest {
 
@@ -46,19 +44,23 @@ class ReservationServiceTest {
         this.reservationRepository = new FakeReservationRepository();
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
-        Clock clock = Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.systemDefault());
-        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
+        this.reservationService = new ReservationService(
+                reservationRepository,
+                reservationTimeRepository,
                 themeRepository,
-                Mockito.mock(ReservationQueryRepository.class), clock);
+                Mockito.mock(ReservationQueryRepository.class),
+                TestDateTimes.fixedClock()
+        );
     }
 
     @Test
     void 새로운_예약을_정상적으로_등록한다() {
         // given: 예약 시간이 먼저 등록되어 있음
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(TestDateTimes.defaultTime()));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
-        LocalDate reservationDate = LocalDate.now().plusDays(1);
-        ReservationCommand command = new ReservationCommand("이프", reservationDate, theme.getId(), time.getId());
+        LocalDate reservationDate = FIXED.toLocalDate().plusDays(1);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", reservationDate,
+                theme.getId(), time.getId());
 
         // when: 예약 진행
         ReservationResult result = reservationService.reserve(command);
@@ -89,7 +91,7 @@ class ReservationServiceTest {
     void 존재하지_않는_시간_정보로_예약_변경_시_예외가_발생한다() {
         // given
         Reservation saved = reservationRepository.save(createDefaultReservationWithName("이프"));
-        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(LocalDate.now(), 1L);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(FIXED.toLocalDate(), 1L);
 
         // when & then
         assertThatThrownBy(() -> reservationService.change(reservedEntryId(saved), command))
@@ -158,7 +160,8 @@ class ReservationServiceTest {
     void 비활성화된_테마_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID가 등록되지 않음
         themeRepository.save(ThemeFixture.createdInactive());
-        ReservationCommand command = new ReservationCommand("이프", LocalDate.now().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
 
         // when & then: EntityNotFoundException 발생 확인
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -169,7 +172,8 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_테마_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID가 등록되지 않음
-        ReservationCommand command = new ReservationCommand("이프", LocalDate.now().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
 
         // when & then: EntityNotFoundException 발생 확인
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -180,7 +184,8 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_시간_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID는 등록되고 시간 ID가 등록되지 않음
-        ReservationCommand command = new ReservationCommand("이프", LocalDate.now().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
         themeRepository.save(ThemeFixture.createDefaultTheme());
 
         // when & then: EntityNotFoundException 발생 확인
@@ -192,7 +197,8 @@ class ReservationServiceTest {
     @Test
     void 비활성화_된_시간_정보로_등록_했을_떄_예약하면_예외가_발생한다() {
         // given: 테마 ID는 등록되고 시간 ID가 등록되지 않음
-        ReservationCommand command = new ReservationCommand("이프", LocalDate.now().plusDays(1), 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프",
+                FIXED.toLocalDate().plusDays(1));
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createInactive());
 
@@ -205,14 +211,13 @@ class ReservationServiceTest {
     @Test
     void 같은_날짜와_같은_시간에_예약을_시도하면_중복_예외가_발생한다() {
         // given: 이미 10시 예약이 존재함
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        saveDefaultThemeAndTime();
 
         Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
-        ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("새예약자", date);
 
         // when & then
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -223,14 +228,13 @@ class ReservationServiceTest {
     @Test
     void 대기_신청_시_같은_슬롯에_다른_이름으로_신청하면_대기로_등록된다() {
         // given
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        saveDefaultThemeAndTime();
 
         Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
-        ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("새예약자", date);
 
         // when
         ReservationResult result = reservationService.addWaiting(command);
@@ -243,11 +247,10 @@ class ReservationServiceTest {
     @Test
     void 대기_신청_시_슬롯이_비어있으면_예약으로_승격된다() {
         // given
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        saveDefaultThemeAndTime();
 
-        LocalDate date = LocalDate.now().plusDays(1);
-        ReservationCommand command = new ReservationCommand("이프", date, 1L, 1L);
+        LocalDate date = FIXED.toLocalDate().plusDays(1);
+        ReservationCommand command = ReservationServiceFixture.createReserveCommand("이프", date);
 
         // when
         ReservationResult result = reservationService.addWaiting(command);
@@ -270,6 +273,11 @@ class ReservationServiceTest {
                 .singleElement()
                 .extracting(ReservationEntry::getStatus)
                 .isEqualTo(ReservationStatus.DELETED);
+    }
+
+    private void saveDefaultThemeAndTime() {
+        themeRepository.save(ThemeFixture.createDefaultTheme());
+        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
     }
 
     private long reservedEntryId(Reservation reservation) {

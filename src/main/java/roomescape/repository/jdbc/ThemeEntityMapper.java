@@ -5,7 +5,7 @@ import roomescape.domain.Theme;
 
 public final class ThemeEntityMapper {
 
-    public static final RowMapper<Theme> THEME_MAPPER = (rs, rowNum) -> new Theme(
+    public static final RowMapper<Theme> THEME_MAPPER = (rs, rowNum) -> Theme.restore(
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("description"),

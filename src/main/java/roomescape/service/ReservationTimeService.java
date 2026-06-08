@@ -23,7 +23,7 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTimeResult register(ReservationTimeCommand command) {
         validateAlreadyTime(command.startAt());
-        ReservationTime reservationTime = new ReservationTime(command.startAt());
+        ReservationTime reservationTime = ReservationTime.create(command.startAt());
         ReservationTime saved = reservationTimeRepository.save(reservationTime);
 
         return ReservationTimeResult.from(saved);

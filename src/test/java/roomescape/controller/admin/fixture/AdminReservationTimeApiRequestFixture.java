@@ -1,9 +1,9 @@
 package roomescape.controller.admin.fixture;
 
-import java.time.LocalTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import roomescape.service.command.ReservationTimeCommand;
+import roomescape.support.TestDateTimes;
 
 public class AdminReservationTimeApiRequestFixture {
 
@@ -17,6 +17,6 @@ public class AdminReservationTimeApiRequestFixture {
     }
 
     public static ReservationTimeCommand registerSuccessRequestFixture() {
-        return new ReservationTimeCommand(LocalTime.of(10, 0));
+        return new ReservationTimeCommand(TestDateTimes.defaultTime());
     }
 }

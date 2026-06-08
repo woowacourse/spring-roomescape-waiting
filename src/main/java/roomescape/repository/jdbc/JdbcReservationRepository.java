@@ -21,7 +21,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         Long reservationId = saveReservationSlot(reservation);
         List<ReservationEntry> savedEntries = reservationEntryDao.saveAll(reservationId, reservation.getEntries());
         return findById(reservationId)
-                .orElseGet(() -> new Reservation(
+                .orElseGet(() -> Reservation.restore(
                         reservationId,
                         reservation.getDate(),
                         reservation.getTheme(),
@@ -68,7 +68,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private Reservation withEntries(Reservation reservation) {
-        return new Reservation(
+        return Reservation.restore(
                 reservation.getId(),
                 reservation.getDate(),
                 reservation.getTheme(),

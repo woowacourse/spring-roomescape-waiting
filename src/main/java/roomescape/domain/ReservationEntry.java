@@ -1,34 +1,41 @@
 package roomescape.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
 public abstract class ReservationEntry {
 
     private final Long id;
-    private final String name;
+    private final String reserverName;
     private final LocalDateTime createdAt;
 
-    protected ReservationEntry(Long id, String name, LocalDateTime createdAt) {
+    protected ReservationEntry(Long id, String reserverName, LocalDateTime createdAt) {
         this.id = id;
-        this.name = name;
+        this.reserverName = reserverName;
         this.createdAt = createdAt;
     }
 
-    public static ReservationEntry reserve(String name, LocalDateTime createdAt) {
-        return new ReservedEntry(null, name, createdAt);
+    public static ReservationEntry reserve(String reserverName, LocalDateTime createdAt) {
+        return of(null, reserverName, ReservationStatus.RESERVED, createdAt);
     }
 
-    public static ReservationEntry waiting(String name, LocalDateTime createdAt) {
-        return new WaitingEntry(null, name, createdAt);
+    public static ReservationEntry waiting(String reserverName, LocalDateTime createdAt) {
+        return of(null, reserverName, ReservationStatus.WAITING, createdAt);
     }
 
-    public static ReservationEntry from(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+    public static ReservationEntry restore(Long id, String reserverName, ReservationStatus status,
+                                           LocalDateTime createdAt) {
+        return of(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), reserverName, status, createdAt);
+    }
+
+    private static ReservationEntry of(Long id, String reserverName, ReservationStatus status,
+                                       LocalDateTime createdAt) {
         return switch (status) {
-            case RESERVED -> new ReservedEntry(id, name, createdAt);
-            case WAITING -> new WaitingEntry(id, name, createdAt);
-            case DELETED -> new DeletedEntry(id, name, createdAt);
+            case RESERVED -> ReservedEntry.restore(id, reserverName, createdAt);
+            case WAITING -> WaitingEntry.restore(id, reserverName, createdAt);
+            case DELETED -> DeletedEntry.restore(id, reserverName, createdAt);
         };
     }
 
@@ -49,10 +56,10 @@ public abstract class ReservationEntry {
     }
 
     public boolean hasSameName(String name) {
-        return this.name.equals(name);
+        return this.reserverName.equals(name);
     }
 
     public boolean matches(String name, ReservationStatus status) {
-        return this.name.equals(name) && this.getStatus() == status;
+        return this.reserverName.equals(name) && this.getStatus() == status;
     }
 }

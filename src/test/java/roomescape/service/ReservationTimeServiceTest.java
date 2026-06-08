@@ -14,6 +14,7 @@ import roomescape.query.ReservationTimeQueryRepository;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.fake.FakeReservationTimeRepository;
 import roomescape.service.result.ReservationTimeResult;
+import roomescape.support.TestDateTimes;
 
 class ReservationTimeServiceTest {
 
@@ -30,7 +31,7 @@ class ReservationTimeServiceTest {
     @Test
     void 새로운_예약_시간을_정상적으로_등록한다() {
         // given: 새로운 예약 시간 정보가 주어짐
-        LocalTime startAt = LocalTime.of(10, 0);
+        LocalTime startAt = TestDateTimes.defaultTime();
         ReservationTimeCommand command = new ReservationTimeCommand(startAt);
 
         // when: 시간을 등록함
@@ -45,8 +46,8 @@ class ReservationTimeServiceTest {
     @Test
     void 이미_등록된_시간으로_등록을_시도하면_예외가_발생한다() {
         // given: 10시 예약 시간이 이미 등록되어 있음
-        LocalTime startAt = LocalTime.of(10, 0);
-        reservationTimeRepository.save(new ReservationTime(startAt));
+        LocalTime startAt = TestDateTimes.defaultTime();
+        reservationTimeRepository.save(ReservationTime.create(startAt));
 
         ReservationTimeCommand command = new ReservationTimeCommand(startAt);
 
@@ -59,7 +60,7 @@ class ReservationTimeServiceTest {
     @Test
     void 식별자를_이용해_예약_시간을_비활성화_한다() {
         // given: 삭제할 예약 시간이 저장되어 있음
-        ReservationTime saved = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime saved = reservationTimeRepository.save(ReservationTime.create(TestDateTimes.defaultTime()));
         Long id = saved.getId();
 
         // when: 해당 ID로 비활성화를 요청함
@@ -73,7 +74,7 @@ class ReservationTimeServiceTest {
     @Test
     void 식별자를_이용해_예약_시간을_다시_활성화한다() {
         // given: 삭제할 예약 시간이 저장되어 있음
-        ReservationTime saved = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime saved = reservationTimeRepository.save(ReservationTime.create(TestDateTimes.defaultTime()));
         Long id = saved.getId();
         reservationTimeService.deactivate(id);
 

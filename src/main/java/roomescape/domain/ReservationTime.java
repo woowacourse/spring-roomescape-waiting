@@ -1,8 +1,7 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -17,7 +16,7 @@ public class ReservationTime {
     private final LocalTime startAt;
     private TimeStatus status;
 
-    public ReservationTime(Long id, LocalTime startAt, TimeStatus status) {
+    private ReservationTime(Long id, LocalTime startAt, TimeStatus status) {
         if (startAt == null) {
             throw new RoomEscapeException("추가 할 예약 시작 시간 정보가 누락되었습니다.");
         }
@@ -26,23 +25,16 @@ public class ReservationTime {
         this.status = status;
     }
 
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt, TimeStatus.ACTIVE);
+    public static ReservationTime create(LocalTime startAt) {
+        return new ReservationTime(null, startAt, TimeStatus.ACTIVE);
     }
 
-    public boolean isPast(LocalDate date) {
-        return LocalDateTime.of(date, this.startAt).isBefore(LocalDateTime.now());
-    }
-
-    public void deactivate() {
-        if (this.status == TimeStatus.INACTIVE) {
-            throw new RoomEscapeException("이미 비활성화 된 시간 정보입니다.");
-        }
-        this.status = TimeStatus.INACTIVE;
+    public static ReservationTime restore(Long id, LocalTime startAt, TimeStatus status) {
+        return new ReservationTime(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), startAt, status);
     }
 
     public void activate() {
-        if (this.status == TimeStatus.ACTIVE) {
+        if (isActive()) {
             throw new RoomEscapeException("이미 활성화 된 시간 정보입니다.");
         }
         this.status = TimeStatus.ACTIVE;
@@ -50,5 +42,16 @@ public class ReservationTime {
 
     public boolean isActive() {
         return this.status == TimeStatus.ACTIVE;
+    }
+
+    public void deactivate() {
+        if (isInActive()) {
+            throw new RoomEscapeException("이미 비활성화 된 시간 정보입니다.");
+        }
+        this.status = TimeStatus.INACTIVE;
+    }
+
+    public boolean isInActive() {
+        return this.status == TimeStatus.INACTIVE;
     }
 }

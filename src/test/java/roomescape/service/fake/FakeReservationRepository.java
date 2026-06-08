@@ -19,7 +19,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         Long id = reservation.getId() == null ? reservationCounter.getAndIncrement() : reservation.getId();
-        Reservation saved = new Reservation(
+        Reservation saved = Reservation.restore(
                 id,
                 reservation.getDate(),
                 reservation.getTheme(),
@@ -33,9 +33,9 @@ public class FakeReservationRepository implements ReservationRepository {
     private List<ReservationEntry> copyEntriesWithId(Reservation reservation) {
         return reservation.getEntries()
                 .stream()
-                .map(entry -> ReservationEntry.from(
+                .map(entry -> ReservationEntry.restore(
                         entry.getId() == null ? entryCounter.getAndIncrement() : entry.getId(),
-                        entry.getName(),
+                        entry.getReserverName(),
                         entry.getStatus(),
                         entry.getCreatedAt()
                 ))

@@ -13,7 +13,7 @@ public record ReservationEntryResult(
     public static ReservationEntryResult from(ReservationEntry entry) {
         return new ReservationEntryResult(
                 entry.getId(),
-                entry.getName(),
+                entry.getReserverName(),
                 entry.getStatus().name(),
                 entry.getCreatedAt()
         );

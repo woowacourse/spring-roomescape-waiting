@@ -41,16 +41,16 @@ public class ReservationEntryDao {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, entry.getName());
+            ps.setString(1, entry.getReserverName());
             ps.setLong(2, reservationId);
             ps.setString(3, entry.getStatus().name());
             ps.setTimestamp(4, Timestamp.valueOf(entry.getCreatedAt()));
             return ps;
         }, keyHolder);
 
-        return ReservationEntry.from(
+        return ReservationEntry.restore(
                 keyHolder.getKey().longValue(),
-                entry.getName(),
+                entry.getReserverName(),
                 entry.getStatus(),
                 entry.getCreatedAt()
         );
@@ -65,7 +65,7 @@ public class ReservationEntryDao {
 
         jdbcTemplate.update(
                 sql,
-                entry.getName(),
+                entry.getReserverName(),
                 entry.getStatus().name(),
                 Timestamp.valueOf(entry.getCreatedAt()),
                 entry.getId()

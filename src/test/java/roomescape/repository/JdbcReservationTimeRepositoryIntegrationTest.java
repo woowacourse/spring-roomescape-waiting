@@ -5,33 +5,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.support.BaseIntegrationTest;
-import roomescape.support.ReservationTimeDataSource;
+import roomescape.support.IntegrationTest;
+import roomescape.support.TestDateTimes;
 
-class ReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
+@IntegrationTest
+class JdbcReservationTimeRepositoryIntegrationTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
-    @Autowired
-    private ReservationTimeDataSource dataSource;
-
-    @BeforeEach
-    void setUp() {
-        dataSource.clearTable();
-        dataSource.clearId();
-    }
-
     @Test
     void 시간을_저장하고_ID로_조회한다() {
         // given
-        LocalTime reservationStartTime = LocalTime.of(10, 0);
-        ReservationTime time = new ReservationTime(reservationStartTime);
+        LocalTime reservationStartTime = TestDateTimes.defaultTime();
+        ReservationTime time = ReservationTime.create(reservationStartTime);
 
         // when
         ReservationTime saved = reservationTimeRepository.save(time);
@@ -45,8 +36,8 @@ class ReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 같은_시간으로_저장하면_참조_무결성_예외가_발생한다() {
         // given
-        LocalTime reservationStartTime = LocalTime.of(10, 0);
-        ReservationTime time = new ReservationTime(reservationStartTime);
+        LocalTime reservationStartTime = TestDateTimes.defaultTime();
+        ReservationTime time = ReservationTime.create(reservationStartTime);
         reservationTimeRepository.save(time);
 
         // when & then: 무결성 위반 예외를 비즈니스 예외로 변경
@@ -58,11 +49,11 @@ class ReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 특정_시간이_존재하는지_확인한다() {
         // given
-        LocalTime targetTime = LocalTime.of(10, 0);
-        reservationTimeRepository.save(new ReservationTime(targetTime));
+        LocalTime targetTime = TestDateTimes.defaultTime();
+        reservationTimeRepository.save(ReservationTime.create(targetTime));
 
         // when & then
-        LocalTime otherTime = LocalTime.of(11, 0);
+        LocalTime otherTime = TestDateTimes.hour(11);
         assertThat(reservationTimeRepository.existsByStartAt(targetTime)).isTrue();
         assertThat(reservationTimeRepository.existsByStartAt(otherTime)).isFalse();
     }

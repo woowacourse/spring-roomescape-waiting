@@ -21,7 +21,7 @@ class ThemeTest {
         String thumbnailImageUrl = "https://image.com/horror.png";
 
         // when
-        Theme theme = new Theme(name, description, thumbnailImageUrl);
+        Theme theme = Theme.create(name, description, thumbnailImageUrl);
 
         // then: 기본 생성 시 삭제되지 않은 상태이다.
         assertThat(theme)
@@ -38,7 +38,7 @@ class ThemeTest {
         String thumbnailImageUrl = "https://image.com/test.png";
 
         // when & then
-        assertThatThrownBy(() -> new Theme(invalidName, description, thumbnailImageUrl))
+        assertThatThrownBy(() -> Theme.create(invalidName, description, thumbnailImageUrl))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이름은 필수 값입니다.");
     }
@@ -52,7 +52,7 @@ class ThemeTest {
         String thumbnailImageUrl = "https://image.com/test.png";
 
         // when & then
-        assertThatThrownBy(() -> new Theme(name, invalidDescription, thumbnailImageUrl))
+        assertThatThrownBy(() -> Theme.create(name, invalidDescription, thumbnailImageUrl))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("설명은 필수 값입니다.");
     }
@@ -72,7 +72,7 @@ class ThemeTest {
         String description = "설명";
 
         // when & then
-        assertThatThrownBy(() -> new Theme(name, description, invalidUrl))
+        assertThatThrownBy(() -> Theme.create(name, description, invalidUrl))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage(expectedMessage);
     }

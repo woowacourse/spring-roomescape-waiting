@@ -4,8 +4,16 @@ import java.time.LocalDateTime;
 
 public class DeletedEntry extends ReservationEntry {
 
-    public DeletedEntry(Long id, String name, LocalDateTime createdAt) {
+    private DeletedEntry(Long id, String name, LocalDateTime createdAt) {
         super(id, name, createdAt);
+    }
+
+    public static DeletedEntry restore(Long id, String name, LocalDateTime createdAt) {
+        return new DeletedEntry(id, name, createdAt);
+    }
+
+    public static DeletedEntry of(String name, LocalDateTime createdAt) {
+        return new DeletedEntry(null, name, createdAt);
     }
 
     @Override

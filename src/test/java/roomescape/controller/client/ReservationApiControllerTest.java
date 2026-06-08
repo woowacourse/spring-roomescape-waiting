@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,16 +26,16 @@ import org.springframework.web.context.WebApplicationContext;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.BaseControllerUnitTest;
-import roomescape.controller.client.ReservationApiController;
-import roomescape.controller.client.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.dto.request.ReservationRequest;
 import roomescape.controller.client.dto.response.ReservationResponse;
 import roomescape.controller.client.dto.response.ReservationSearchResponse;
 import roomescape.controller.client.fixture.ReservationApiRequestFixture;
+import roomescape.exception.EntityNotFoundException;
 import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
+import roomescape.service.command.ReservationSearchCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationSearchResult;
@@ -88,7 +89,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
         ReservationSearchResult searchResult =
                 new ReservationSearchResult(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명", "RESERVED", null);
         Page<ReservationSearchResult> serviceResult = Page.of(10, 10, List.of(searchResult));
-        when(reservationService.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(
+        when(reservationService.search(any(ReservationSearchCommand.class), any(Pageable.class))).thenReturn(
                 serviceResult);
 
         // when
@@ -133,6 +134,19 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
                 .body(containsString("예약 엔트리 식별자는 양수입니다."));
+    }
+
+    @Test
+    void 존재하지_않는_엔트리_취소_요청시_404를_반환한다() {
+        // given
+        doThrow(new EntityNotFoundException("존재하지 않는 예약입니다."))
+                .when(reservationService).cancelReservation(anyLong());
+
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .when().delete("/api/reservations/entries/{entryId}", 1L)
+                .then().log().all()
+                .status(HttpStatus.NOT_FOUND);
     }
 
     @Test

@@ -34,7 +34,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
             return ps;
         }, keyHolder), "이미 존재하는 시간 정보입니다.");
 
-        return new ReservationTime(
+        return ReservationTime.restore(
                 keyHolder.getKey().longValue(),
                 reservationTime.getStartAt(),
                 reservationTime.getStatus()
