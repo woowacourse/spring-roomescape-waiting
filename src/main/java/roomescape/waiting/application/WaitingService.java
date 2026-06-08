@@ -1,6 +1,7 @@
 package roomescape.waiting.application;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +87,18 @@ public class WaitingService {
         boolean deleted = waitingRepository.deleteByIdAndName(id, name);
         if (!deleted) {
             throw new EntityNotFoundException(WaitingErrorCode.WAITING_NOT_FOUND, id);
+        }
+    }
+
+    public void promoteWaitingWithoutReservation() {
+        List<Waiting> waitings = waitingRepository.findFirstWaitingsWithoutReservation();
+
+        for (Waiting waiting : waitings) {
+            promoteNextWaiting(
+                    waiting.getDate(),
+                    waiting.getTime(),
+                    waiting.getTheme()
+            );
         }
     }
 }
