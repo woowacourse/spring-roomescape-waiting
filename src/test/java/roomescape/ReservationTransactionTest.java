@@ -34,7 +34,6 @@ class ReservationTransactionTest {
     private WaitingRepository waitingRepository;
 
     private long reservationId;
-    private long waitingId;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +57,6 @@ class ReservationTransactionTest {
                 대기자, futureDate, 1L, 1L);
 
         reservationId = 1L;
-        waitingId = 1L;
     }
 
     @Test
@@ -79,7 +77,8 @@ class ReservationTransactionTest {
                 .when(waitingRepository).delete(any(Waiting.class));
 
         assertThatThrownBy(() -> reservationService.deleteUserReservation(reservationId, 예약자))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("DB 장애 시뮬레이션");
 
         assertThat(countReservations()).isEqualTo(1);
         assertThat(reservationExists(예약자)).isTrue();

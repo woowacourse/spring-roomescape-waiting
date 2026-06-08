@@ -28,31 +28,36 @@ class WaitingTest {
     @Test
     void 예약대기자_이름이_빈_문자열이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Waiting(1L, "", new Schedule(LocalDate.of(2026, 5, 1), TIME, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약자 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약대기자_이름이_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Waiting(1L, null, new Schedule(LocalDate.of(2026, 5, 1), TIME, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약자 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약대기_날짜가_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Waiting(1L, "브라운", new Schedule(null, TIME, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약 날짜는 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약대기_시간이_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Waiting(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 1), null, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약 시간은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약대기_테마가_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Waiting(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 1), TIME, null)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약 테마는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -65,7 +70,8 @@ class WaitingTest {
     void 과거_시간으로_예약대기를_생성하면_도메인_충돌_예외가_발생한다() {
         assertThatThrownBy(
                 () -> Waiting.create("브라운", new Schedule(LocalDate.of(2026, 4, 1), TIME, THEME), NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("지난 시간으로는 예약할 수 없습니다.");
     }
 
     @Test
@@ -74,6 +80,7 @@ class WaitingTest {
                 7L, "브라운", new Schedule(LocalDate.of(2026, 5, 10), TIME, THEME));
 
         assertThatThrownBy(() -> waiting.validateCancelableBy("어셔"))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("본인의 예약대기만 취소할 수 있습니다.");
     }
 }

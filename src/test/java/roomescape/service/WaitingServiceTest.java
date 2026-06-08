@@ -63,14 +63,16 @@ class WaitingServiceTest {
     @Test
     void 존재하지_않는_시간_id로_예약_대기를_생성하면_예외가_발생한다() {
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 999L, 1L))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("존재하지 않는 예약 시간입니다.");
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 존재하지_않는_테마_id로_예약_대기를_생성하면_예외가_발생한다() {
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 999L))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("존재하지 않는 테마입니다.");
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 
@@ -79,7 +81,8 @@ class WaitingServiceTest {
         LocalDate pastDate = LocalDate.of(2026, 4, 1);
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", pastDate, 1L, 1L))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("지난 시간으로는 예약할 수 없습니다.");
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 
@@ -88,14 +91,16 @@ class WaitingServiceTest {
         waitingRepository.save(new Waiting(null, "레서", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
-                .isInstanceOf(BusinessConflictException.class);
+                .isInstanceOf(BusinessConflictException.class)
+                .hasMessage("이미 대기 중인 시간입니다");
         assertThat(waitingRepository.findAll()).hasSize(1);
     }
 
     @Test
     void 예약이_존재하지_않는_일정에_예약_대기를_생성하면_예외가_발생한다() {
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
-                .isInstanceOf(BusinessConflictException.class);
+                .isInstanceOf(BusinessConflictException.class)
+                .hasMessage("예약이 존재하지 않아 예약대기를 할 수 없습니다.");
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 
@@ -104,14 +109,16 @@ class WaitingServiceTest {
         reservationRepository.save(new Reservation(null, "레서", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
-                .isInstanceOf(BusinessConflictException.class);
+                .isInstanceOf(BusinessConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 존재하지_않는_예약_대기_id인_경우_예외가_발생한다() {
         assertThatThrownBy(() -> waitingService.deleteWaiting(999L, "레서"))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다.");
     }
 
     @Test
@@ -119,7 +126,8 @@ class WaitingServiceTest {
         Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> waitingService.deleteWaiting(saved.getId(), "밍구"))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("본인의 예약대기만 취소할 수 있습니다.");
         assertThat(waitingRepository.findAll()).hasSize(1);
     }
 

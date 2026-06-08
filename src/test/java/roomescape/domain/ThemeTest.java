@@ -20,12 +20,14 @@ class ThemeTest {
     @Test
     void 이름이_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Theme(1L, null, "무서운방입니다.", "image-url"))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("테마 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 이름이_공백이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Theme(1L, " ", "무서운방입니다.", "image-url"))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("테마 이름은 비어 있을 수 없습니다.");
     }
 }

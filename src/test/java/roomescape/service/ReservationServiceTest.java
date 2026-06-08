@@ -55,7 +55,8 @@ class ReservationServiceTest {
     @Test
     void 예약_날짜가_과거인_경우_도메인_충돌_예외가_발생한다() {
         assertThatThrownBy(() -> reservationService.createReservation("레서", pastDate, 1L, 1L))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("지난 시간으로는 예약할 수 없습니다.");
 
         assertThat(reservationRepository.findAll()).isEmpty();
     }
@@ -118,7 +119,8 @@ class ReservationServiceTest {
                 new Reservation(null, "브라운", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> reservationService.updateReservation(saved.getId(), "어셔", anotherFutureDate, 2L))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("본인의 예약만 수정할 수 있습니다.");
 
         Reservation unchanged = reservationRepository.findById(saved.getId()).orElseThrow();
         assertThat(unchanged.getSchedule().getDate()).isEqualTo(futureDate);
@@ -170,7 +172,8 @@ class ReservationServiceTest {
                 new Reservation(null, "브라운", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> reservationService.deleteUserReservation(saved.getId(), "레서"))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("본인의 예약만 수정할 수 있습니다.");
 
         assertThat(reservationRepository.findAll()).hasSize(1);
     }
