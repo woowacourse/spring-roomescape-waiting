@@ -21,10 +21,10 @@ class ThemeApiTest {
     @Test
     void 테마_조회_빈목록() {
         RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .when().get("/themes")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @Test
@@ -35,22 +35,22 @@ class ThemeApiTest {
         params.put("thumbnailImageUrl", "https://example.com/mystery.jpg");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("name", is("추리"))
-                .body("description", is("단서를 찾아라"))
-                .body("thumbnailImageUrl", is("https://example.com/mystery.jpg"));
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201)
+            .body("id", notNullValue())
+            .body("name", is("추리"))
+            .body("description", is("단서를 찾아라"))
+            .body("thumbnailImageUrl", is("https://example.com/mystery.jpg"));
 
         RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].name", is("추리"));
+            .when().get("/themes")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].name", is("추리"));
     }
 
     @Test
@@ -61,23 +61,23 @@ class ThemeApiTest {
         params.put("thumbnailImageUrl", "https://example.com/sf.jpg");
 
         Integer id = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
 
         RestAssured.given().log().all()
-                .when().delete("/themes/" + id)
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/themes/" + id)
+            .then().log().all()
+            .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .when().get("/themes")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @Test
@@ -87,17 +87,17 @@ class ThemeApiTest {
         createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/themes/" + themeId)
-                .then().log().all()
-                .statusCode(409);
+            .when().delete("/themes/" + themeId)
+            .then().log().all()
+            .statusCode(409);
     }
 
     @Test
     void 없는_테마는_삭제할_수_없다() {
         RestAssured.given().log().all()
-                .when().delete("/themes/" + 1)
-                .then().log().all()
-                .statusCode(404);
+            .when().delete("/themes/" + 1)
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -108,34 +108,34 @@ class ThemeApiTest {
         params.put("thumbnailImageUrl", "https://example.com/sf.jpg");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(400);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(400);
     }
 
     @Test
     @Sql("/data_relative_dates.sql")
     void 인기_테마_탑10_조회() {
         RestAssured.given().log().all()
-                .queryParam("days", 7)
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(10))
-                .body("name", contains(
-                        "미스터리 저택",
-                        "해적선의 보물",
-                        "마법사의 탑",
-                        "좀비 아포칼립스",
-                        "고대 이집트",
-                        "우주 정거장",
-                        "시간 여행자의 실험실",
-                        "폐쇄 병동",
-                        "침몰하는 잠수함",
-                        "은행 금고"
-                ));
+            .queryParam("days", 7)
+            .when().get("/themes")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(10))
+            .body("name", contains(
+                "미스터리 저택",
+                "해적선의 보물",
+                "마법사의 탑",
+                "좀비 아포칼립스",
+                "고대 이집트",
+                "우주 정거장",
+                "시간 여행자의 실험실",
+                "폐쇄 병동",
+                "침몰하는 잠수함",
+                "은행 금고"
+            ));
     }
 
     private Integer createTime(String startAt) {
@@ -143,12 +143,12 @@ class ThemeApiTest {
         params.put("startAt", startAt);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
     }
 
     private Integer createTheme(String name, String description, String thumbnailImageUrl) {
@@ -158,12 +158,12 @@ class ThemeApiTest {
         params.put("thumbnailImageUrl", thumbnailImageUrl);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
     }
 
     private void createReservation(String name, String date, Integer timeId, Integer themeId) {
@@ -174,10 +174,10 @@ class ThemeApiTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201);
     }
 }

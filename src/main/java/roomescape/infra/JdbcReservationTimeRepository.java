@@ -21,8 +21,8 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
-            rs.getLong("id"),
-            rs.getTime("start_at").toLocalTime()
+        rs.getLong("id"),
+        rs.getTime("start_at").toLocalTime()
     );
 
     @Override

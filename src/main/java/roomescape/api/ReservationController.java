@@ -30,24 +30,25 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> responses = reservationService.getReservations().stream()
-                .map(ReservationResponse::from)
-                .toList();
+    public ResponseEntity<List<ReservationWithStatusResponse>> findAll() {
+        List<ReservationWithStatusResponse> responses = reservationService.getReservationsWithStatus().stream()
+            .map(ReservationWithStatusResponse::from)
+            .toList();
         return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping(params = "name")
     public ResponseEntity<List<ReservationWithStatusResponse>> findByName(@RequestParam String name) {
         List<ReservationWithStatusResponse> responses = reservationService.getMyReservations(name).stream()
-                .map(ReservationWithStatusResponse::from)
-                .toList();
+            .map(ReservationWithStatusResponse::from)
+            .toList();
         return ResponseEntity.ok().body(responses);
     }
 
     @PostMapping
     public ResponseEntity<ReservationWithStatusResponse> add(@Valid @RequestBody ReservationRequest request) {
-        ReservationWithStatusResponse response = ReservationWithStatusResponse.from(reservationService.reserveOrWait(request));
+        ReservationWithStatusResponse response = ReservationWithStatusResponse.from(
+            reservationService.reserveOrWait(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -65,9 +66,9 @@ public class ReservationController {
 
     @PatchMapping(value = "/{id}", params = "name")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id, @RequestParam String name,
-                                                      @Valid @RequestBody ReservationUpdateRequest request) {
+        @Valid @RequestBody ReservationUpdateRequest request) {
         ReservationResponse response = ReservationResponse.from(
-                reservationService.updateReservation(id, name, request));
+            reservationService.updateReservation(id, name, request));
         return ResponseEntity.ok().body(response);
     }
 }

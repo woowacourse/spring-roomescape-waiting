@@ -24,10 +24,10 @@ class ReservationTimeApiTest {
     @Test
     void 시간_조회_빈목록() {
         RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .when().get("/times")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @Test
@@ -36,20 +36,20 @@ class ReservationTimeApiTest {
         params.put("startAt", "13:30");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("startAt", is("13:30"));
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .body("id", notNullValue())
+            .body("startAt", is("13:30"));
 
         RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].startAt", is("13:30"));
+            .when().get("/times")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].startAt", is("13:30"));
     }
 
     @Test
@@ -58,23 +58,23 @@ class ReservationTimeApiTest {
         params.put("startAt", "20:00");
 
         Integer id = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
 
         RestAssured.given().log().all()
-                .when().delete("/times/" + id)
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/times/" + id)
+            .then().log().all()
+            .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .when().get("/times")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @Test
@@ -84,17 +84,17 @@ class ReservationTimeApiTest {
         createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/times/" + timeId)
-                .then().log().all()
-                .statusCode(409);
+            .when().delete("/times/" + timeId)
+            .then().log().all()
+            .statusCode(409);
     }
 
     @Test
     void 없는_시간은_삭제할_수_없다() {
         RestAssured.given().log().all()
-                .when().delete("/times/" + 1)
-                .then().log().all()
-                .statusCode(404);
+            .when().delete("/times/" + 1)
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -103,11 +103,11 @@ class ReservationTimeApiTest {
         params.put("startAt", "25:00");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(400);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(400);
     }
 
     @Test
@@ -115,10 +115,10 @@ class ReservationTimeApiTest {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
 
         RestAssured.given().log().all()
-                .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @Test
@@ -128,11 +128,11 @@ class ReservationTimeApiTest {
         createTime("11:00");
 
         RestAssured.given().log().all()
-                .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2))
-                .body("reserved", contains(false, false));
+            .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(2))
+            .body("reserved", contains(false, false));
     }
 
     @Test
@@ -143,12 +143,12 @@ class ReservationTimeApiTest {
         createReservation("브라운", FUTURE_FIRST_DATE, reservedTimeId, themeId);
 
         RestAssured.given().log().all()
-                .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2))
-                .body("find { it.id == " + reservedTimeId + " }.reserved", is(true))
-                .body("findAll { it.id != " + reservedTimeId + " }.reserved", hasItems(false));
+            .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(2))
+            .body("find { it.id == " + reservedTimeId + " }.reserved", is(true))
+            .body("findAll { it.id != " + reservedTimeId + " }.reserved", hasItems(false));
     }
 
     @Test
@@ -159,11 +159,11 @@ class ReservationTimeApiTest {
         createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeB);
 
         RestAssured.given().log().all()
-                .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeA)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].reserved", is(false));
+            .when().get("/times?date=" + FUTURE_FIRST_DATE + "&themeId=" + themeA)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].reserved", is(false));
     }
 
     @Test
@@ -173,11 +173,11 @@ class ReservationTimeApiTest {
         createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().get("/times?date=" + FUTURE_SECOND_DATE + "&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].reserved", is(false));
+            .when().get("/times?date=" + FUTURE_SECOND_DATE + "&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].reserved", is(false));
     }
 
     private Integer createTime(String startAt) {
@@ -185,12 +185,12 @@ class ReservationTimeApiTest {
         params.put("startAt", startAt);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
     }
 
     private Integer createTheme(String name, String description, String thumbnailImageUrl) {
@@ -200,12 +200,12 @@ class ReservationTimeApiTest {
         params.put("thumbnailImageUrl", thumbnailImageUrl);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
     }
 
     private void createReservation(String name, String date, Integer timeId, Integer themeId) {
@@ -216,10 +216,10 @@ class ReservationTimeApiTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201);
     }
 }

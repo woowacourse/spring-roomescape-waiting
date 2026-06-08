@@ -8,33 +8,19 @@ import java.time.LocalDateTime;
 import roomescape.domain.exception.RoomEscapeException;
 
 public class Reservation {
+
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Slot slot;
 
-    public Reservation(
-            Long id,
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
+    public Reservation(Long id, String name, Slot slot) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
-    public Reservation(
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        this(null, name, date, time, theme);
+    public Reservation(String name, Slot slot) {
+        this(null, name, slot);
     }
 
     public void verifyReservable(LocalDateTime now) {
@@ -44,7 +30,7 @@ public class Reservation {
     }
 
     public boolean isPast(LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+        return slot.isPast(now);
     }
 
     public void verifyCancelableBy(String name, LocalDateTime now) {
@@ -59,10 +45,14 @@ public class Reservation {
         if (isPast(now)) {
             throw new RoomEscapeException(PAST_RESERVATION, "이미 지난 예약은 변경할 수 없습니다.");
         }
-        if (LocalDateTime.of(newDate, newTime.getStartAt()).isBefore(now)) {
+
+        Slot newSlot = Slot.of(newDate, newTime, slot.getTheme());
+
+        if (newSlot.isPast(now)) {
             throw new RoomEscapeException(PAST_RESERVATION, "과거 시점으로 변경할 수 없습니다.");
         }
-        return new Reservation(id, this.name, newDate, newTime, theme);
+
+        return new Reservation(id, this.name, newSlot);
     }
 
     private void verifyReservedBy(String other, String message) {
@@ -79,15 +69,19 @@ public class Reservation {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 }

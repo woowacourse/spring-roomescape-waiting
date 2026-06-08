@@ -13,10 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
@@ -33,6 +35,9 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private SlotRepository slotRepository;
 
     @Test
     void 예약시간을_추가한다() {
@@ -74,7 +79,7 @@ class ReservationTimeServiceTest {
         reservationTimeService.deleteReservationTime(saveId);
 
         assertThatThrownBy(() -> reservationTimeService.getReservationTime(saveId))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -85,20 +90,25 @@ class ReservationTimeServiceTest {
         Long themeId = themeRepository.save(new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png"));
         Optional<Theme> theme = themeRepository.findById(themeId);
 
-        reservationRepository.save(new Reservation(
-                "브라운",
-                LocalDate.now().plusDays(1),
-                reservationTime,
-                theme.get()
+        reservationRepository.save(createReservation(
+            "브라운",
+            LocalDate.now().plusDays(1),
+            reservationTime,
+            theme.get()
         ));
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(reservationTime.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 없는_예약시간을_삭제할_수_없다() {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
+    }
+
+    private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(Slot.of(date, time, theme));
+        return new Reservation(name, slot);
     }
 }

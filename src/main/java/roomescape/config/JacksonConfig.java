@@ -14,15 +14,15 @@ import org.springframework.context.annotation.Configuration;
 public class JacksonConfig {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd")
-            .withResolverStyle(ResolverStyle.STRICT);
+        .withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
         return builder -> builder
-                .deserializers(new LocalDateDeserializer(DATE_FORMATTER))
-                .deserializers(new LocalTimeDeserializer(TIME_FORMATTER))
-                .serializers(new LocalDateSerializer(DATE_FORMATTER))
-                .serializers(new LocalTimeSerializer(TIME_FORMATTER));
+            .deserializers(new LocalDateDeserializer(DATE_FORMATTER))
+            .deserializers(new LocalTimeDeserializer(TIME_FORMATTER))
+            .serializers(new LocalDateSerializer(DATE_FORMATTER))
+            .serializers(new LocalTimeSerializer(TIME_FORMATTER));
     }
 }

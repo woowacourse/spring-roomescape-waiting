@@ -25,13 +25,13 @@ class AvailabilityFlowTest {
 
         // 1) 가용 시간 조회 - 모두 reserved=false
         RestAssured.given().log().all()
-                .when().get("/times?date=" + date + "&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3))
-                .body("find { it.id == " + time10 + " }.reserved", is(false))
-                .body("find { it.id == " + time11 + " }.reserved", is(false))
-                .body("find { it.id == " + time12 + " }.reserved", is(false));
+            .when().get("/times?date=" + date + "&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(3))
+            .body("find { it.id == " + time10 + " }.reserved", is(false))
+            .body("find { it.id == " + time11 + " }.reserved", is(false))
+            .body("find { it.id == " + time12 + " }.reserved", is(false));
 
         // 2) 11시로 예약 생성
         Map<String, Object> reservation = new HashMap<>();
@@ -41,21 +41,21 @@ class AvailabilityFlowTest {
         reservation.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(reservation)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201);
 
         // 3) 가용 시간 재조회 - 11시만 reserved=true
         RestAssured.given().log().all()
-                .when().get("/times?date=" + date + "&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3))
-                .body("find { it.id == " + time10 + " }.reserved", is(false))
-                .body("find { it.id == " + time11 + " }.reserved", is(true))
-                .body("find { it.id == " + time12 + " }.reserved", is(false));
+            .when().get("/times?date=" + date + "&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(3))
+            .body("find { it.id == " + time10 + " }.reserved", is(false))
+            .body("find { it.id == " + time11 + " }.reserved", is(true))
+            .body("find { it.id == " + time12 + " }.reserved", is(false));
     }
 
     private Integer createTime(String startAt) {
@@ -63,12 +63,12 @@ class AvailabilityFlowTest {
         params.put("startAt", startAt);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
     }
 
     private Integer createTheme(String name, String description, String thumbnailImageUrl) {
@@ -78,11 +78,11 @@ class AvailabilityFlowTest {
         params.put("thumbnailImageUrl", thumbnailImageUrl);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
     }
 }

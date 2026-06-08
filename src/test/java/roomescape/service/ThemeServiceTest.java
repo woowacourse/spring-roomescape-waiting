@@ -14,11 +14,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ThemeRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -37,12 +39,15 @@ class ThemeServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
+    @Autowired
+    private SlotRepository slotRepository;
+
     @Test
     void 테마를_추가한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
 
         Theme theme = themeService.addTheme(request);
@@ -56,9 +61,9 @@ class ThemeServiceTest {
     @Test
     void 모든_테마를_조회한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
         themeService.addTheme(request);
 
@@ -76,9 +81,9 @@ class ThemeServiceTest {
     @Test
     void id에_맞는_테마를_조회한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
         Long saveId = themeService.addTheme(request).getId();
 
@@ -93,22 +98,22 @@ class ThemeServiceTest {
     @Test
     void 테마를_삭제한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
         Long saveId = themeService.addTheme(request).getId();
 
         themeService.deleteTheme(saveId);
 
         assertThatThrownBy(() -> themeService.getTheme(saveId))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 없는_테마를_삭제할_수_없다() {
         assertThatThrownBy(() -> themeService.deleteTheme(1L))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -116,20 +121,20 @@ class ThemeServiceTest {
         Long timeSaveId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Optional<ReservationTime> reservationTime = reservationTimeRepository.findById(timeSaveId);
         Theme theme = themeService.addTheme(new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         ));
 
-        reservationRepository.save(new Reservation(
-                "브라운",
-                LocalDate.now().plusDays(1),
-                reservationTime.orElseThrow(),
-                theme
+        reservationRepository.save(createReservation(
+            "브라운",
+            LocalDate.now().plusDays(1),
+            reservationTime.orElseThrow(),
+            theme
         ));
 
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -138,19 +143,24 @@ class ThemeServiceTest {
         List<Theme> popularTop10Themes = themeService.getPopularTop10Themes(LocalDate.now(), 7);
 
         assertThat(popularTop10Themes)
-                .hasSize(10)
-                .extracting(Theme::getName)
-                .containsExactly(
-                        "미스터리 저택",
-                        "해적선의 보물",
-                        "마법사의 탑",
-                        "좀비 아포칼립스",
-                        "고대 이집트",
-                        "우주 정거장",
-                        "시간 여행자의 실험실",
-                        "폐쇄 병동",
-                        "침몰하는 잠수함",
-                        "은행 금고"
-                );
+            .hasSize(10)
+            .extracting(Theme::getName)
+            .containsExactly(
+                "미스터리 저택",
+                "해적선의 보물",
+                "마법사의 탑",
+                "좀비 아포칼립스",
+                "고대 이집트",
+                "우주 정거장",
+                "시간 여행자의 실험실",
+                "폐쇄 병동",
+                "침몰하는 잠수함",
+                "은행 금고"
+            );
+    }
+
+    private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        Slot slot = slotRepository.getOrCreate(Slot.of(date, time, theme));
+        return new Reservation(name, slot);
     }
 }

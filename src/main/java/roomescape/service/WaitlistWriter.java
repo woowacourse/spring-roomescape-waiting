@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -9,45 +10,56 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWithStatus;
+import roomescape.domain.Slot;
 import roomescape.domain.Waitlist;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.WaitlistRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class WaitlistWriter {
+
     private final ReservationRepository reservationRepository;
     private final WaitlistRepository waitlistRepository;
+    private final SlotRepository slotRepository;
     private final WaitlistOrderPolicy waitlistOrderPolicy;
+    private final Clock clock;
 
     public WaitlistWriter(
-            ReservationRepository reservationRepository,
-            WaitlistRepository waitlistRepository,
-            WaitlistOrderPolicy waitlistOrderPolicy
+        ReservationRepository reservationRepository,
+        WaitlistRepository waitlistRepository,
+        SlotRepository slotRepository,
+        WaitlistOrderPolicy waitlistOrderPolicy,
+        Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
+        this.slotRepository = slotRepository;
         this.waitlistOrderPolicy = waitlistOrderPolicy;
+        this.clock = clock;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ReservationWithStatus save(Reservation reservation, LocalDateTime createdAt) {
-        verifyNoDuplicateReservation(reservation);
+    public ReservationWithStatus save(Reservation reservation) {
+        Slot slot = slotRepository.getOrCreate(reservation.getSlot());
+        slotRepository.lockById(slot.getId());
 
-        Long savedId = waitlistRepository.save(reservation, createdAt);
+        Reservation reservationWithSlot = new Reservation(reservation.getName(), slot);
+        verifyNoDuplicateReservation(reservationWithSlot);
+
+        LocalDateTime createdAt = LocalDateTime.now(clock);
+        Long savedId = waitlistRepository.save(reservationWithSlot, createdAt);
+        
         Waitlist waitlist = waitlistRepository.getById(savedId, "존재하지 않는 예약 대기입니다.");
-        int waitOrder = calculateWaitingOrder(waitlist);
+        int waitingOrder = calculateWaitingOrder(waitlist);
 
-        return ReservationWithStatus.waiting(waitlist, waitOrder);
+        return ReservationWithStatus.waiting(waitlist, waitingOrder);
     }
 
     private int calculateWaitingOrder(Waitlist waitlist) {
-        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(
-                waitlist.getDate(),
-                waitlist.getTime().getId(),
-                waitlist.getTheme().getId()
-        );
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(waitlist.getSlot().getId());
 
         return waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
     }

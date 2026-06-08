@@ -43,6 +43,14 @@ Content-Type: application/json
 }
 
 ### 생성, 대기 응답
+#### status, waitingOrder 해석 규칙
+status는 예약 신청 결과를 나타낸다.
+
+- RESERVED: 예약이 확정된 상태이며, 대기 순번이 없으므로 waitingOrder는 null이다.
+- WAITING: 예약 대기 상태이다.
+- POST /reservations 생성 응답에서는 WAITING 상태여도 waitingOrder가 null일 수 있다. 이 값은 대기 순번이 없다가 아니라 생성 응답에서 대기 순번을 제공하지 않는다라는 의미이다.
+- 클라이언트가 대기 순번이 필요한 경우 GET /reservations?name={name} 조회 응답에서 확인한다.
+
 HTTP/1.1 201 Created
 Content-Type: application/json
 
@@ -157,11 +165,13 @@ Content-Type: application/json
 
 ```http request
 ### 삭제 요청
-DELETE /waitlists/{id} HTTP/1.1
+DELETE /waitlists/{id}?name=브라운 HTTP/1.1
 
 ### 삭제 응답
 HTTP/1.1 204 No Content
 ```
+
+- 대기 취소 후 같은 슬롯에 남은 대기 순번은 생성 시각과 ID 기준으로 재계산된다.
 
 ### 테마 API
 
@@ -316,6 +326,9 @@ DELETE /reservations/{id}?name=브라운 HTTP/1.1
 ### 응답
 HTTP/1.1 204 No Content
 ```
+
+- 예약 취소 시 같은 슬롯의 대기 1번이 자동으로 예약 승격된다.
+- 승격된 대기는 대기 목록에서 제거되고, 같은 슬롯에 남은 대기 순번은 생성 시각과 ID 기준으로 재계산된다.
 
 ### 에러 응답 명세
 

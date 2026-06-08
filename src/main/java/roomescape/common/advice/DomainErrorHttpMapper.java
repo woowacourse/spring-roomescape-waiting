@@ -13,7 +13,7 @@ public class DomainErrorHttpMapper {
             case DUPLICATE_RESERVATION, REFERENTIAL_INTEGRITY -> HttpStatus.CONFLICT;
             case UNAUTHORIZED_RESERVATION -> HttpStatus.FORBIDDEN;
             case RESERVATION_NOT_FOUND, WAITLIST_NOT_FOUND, RESERVATION_TIME_NOT_FOUND, THEME_NOT_FOUND ->
-                    HttpStatus.NOT_FOUND;
+                HttpStatus.NOT_FOUND;
         };
     }
 }

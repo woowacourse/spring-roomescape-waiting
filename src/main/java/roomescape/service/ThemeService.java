@@ -41,10 +41,10 @@ public class ThemeService {
     @Transactional
     public Theme addTheme(ThemeRequest request) {
         Long id = themeRepository.save(
-                new Theme(
-                        request.name(),
-                        request.description(),
-                        request.thumbnailImageUrl()));
+            new Theme(
+                request.name(),
+                request.description(),
+                request.thumbnailImageUrl()));
         return getTheme(id);
     }
 

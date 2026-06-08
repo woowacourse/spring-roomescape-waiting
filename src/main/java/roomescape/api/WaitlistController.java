@@ -11,6 +11,7 @@ import roomescape.service.WaitlistService;
 @RestController
 @RequestMapping("/waitlists")
 public class WaitlistController {
+
     private final WaitlistService waitlistService;
 
     public WaitlistController(WaitlistService waitlistService) {

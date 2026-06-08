@@ -22,7 +22,7 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationtimeRepository,
-                                  ReservationRepository reservationRepository) {
+        ReservationRepository reservationRepository) {
         this.reservationtimeRepository = reservationtimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -40,8 +40,8 @@ public class ReservationTimeService {
         Set<Long> reservedTimeIds = reservationRepository.findReservedTimeIdsByDateAndThemeId(date, themeId);
 
         return times.stream()
-                .map(time -> new ReservationTimeStatus(time, reservedTimeIds.contains(time.getId())))
-                .toList();
+            .map(time -> new ReservationTimeStatus(time, reservedTimeIds.contains(time.getId())))
+            .toList();
     }
 
     @Transactional

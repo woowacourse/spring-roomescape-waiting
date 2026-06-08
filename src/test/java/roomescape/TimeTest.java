@@ -23,22 +23,22 @@ public class TimeTest {
         params.put("startAt", "10:00");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+            .when().get("/times")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/times/1")
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/times/1")
+            .then().log().all()
+            .statusCode(204);
     }
 
     @Test
@@ -46,22 +46,22 @@ public class TimeTest {
         Map<String, String> timeParams = new HashMap<>();
         timeParams.put("startAt", "10:00");
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(timeParams)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201);
 
         Map<String, String> themeParams = new HashMap<>();
         themeParams.put("name", "공포");
         themeParams.put("description", "무서운 테마");
         themeParams.put("thumbnailImageUrl", "https://example.com/horror.jpg");
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(themeParams)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201);
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -70,16 +70,16 @@ public class TimeTest {
         reservation.put("themeId", 1);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(reservation)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1));
     }
 }

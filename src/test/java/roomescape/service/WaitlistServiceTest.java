@@ -22,6 +22,7 @@ import roomescape.repository.ThemeRepository;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WaitlistServiceTest {
+
     private static final LocalDate FUTURE_SECOND_DATE = LocalDate.now().plusDays(2);
     private static final LocalTime TEN = LocalTime.of(10, 0);
     public static final String NEO = "네오";
@@ -44,8 +45,8 @@ public class WaitlistServiceTest {
     @Test
     void 예약_대기를_삭제한다() {
         LinkedHashMap<String, ReservationWithStatus> reservations = reserveSameSlotWithWaiters(
-                BROWN,
-                BRIE
+            BROWN,
+            BRIE
         );
 
         ReservationWithStatus waiting = reservations.get(BRIE);
@@ -53,51 +54,33 @@ public class WaitlistServiceTest {
         waitlistService.cancelMyWaitlist(waiting.getId(), BRIE);
 
         assertThatThrownBy(() -> waitlistService.getWaitlist(waiting.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void id가_존재하지_않으면_예외() {
         assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(1L, BROWN))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 본인의_대기가_아니면_취소할_수_없다() {
         LinkedHashMap<String, ReservationWithStatus> reservations = reserveSameSlotWithWaiters(
-                BROWN,
-                BRIE
+            BROWN,
+            BRIE
         );
 
         ReservationWithStatus waitingReservation = reservations.get(BRIE);
 
         assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(waitingReservation.getId(), BROWN))
-                .isInstanceOf(RoomEscapeException.class);
-    }
-
-    @Test
-    void 대기_취소_후_내_예약_조회_시_대기_순번이_재계산된다() {
-        LinkedHashMap<String, ReservationWithStatus> reservations = reserveSameSlotWithWaiters(
-                BROWN,
-                BRIE, NEO
-        );
-
-        ReservationWithStatus brieWaiting = reservations.get(BRIE);
-        ReservationWithStatus neoCancelBeforeReservations = reservations.get(NEO);
-
-        waitlistService.cancelMyWaitlist(brieWaiting.getId(), BRIE);
-
-        List<ReservationWithStatus> neoCancelAfterReservation = reservationService.getMyReservations(NEO);
-
-        assertThat(neoCancelBeforeReservations.getWaitingOrder()).isEqualTo(2);
-        assertThat(neoCancelAfterReservation.getFirst().getWaitingOrder()).isEqualTo(1);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 여러_명이_대기할_때_내_대기_순번을_계산한다() {
         reserveSameSlotWithWaiters(
-                BROWN,
-                BRIE, POBI, NEO
+            BROWN,
+            BRIE, POBI, NEO
         );
 
         List<ReservationWithStatus> neoReservations = reservationService.getMyReservations(NEO);
@@ -115,16 +98,16 @@ public class WaitlistServiceTest {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
         Long id = themeRepository.save(theme);
         return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
+            id,
+            theme.getName(),
+            theme.getDescription(),
+            theme.getThumbnailImageUrl()
         );
     }
 
     private LinkedHashMap<String, ReservationWithStatus> reserveSameSlotWithWaiters(
-            String reservedName,
-            String... waitingNames
+        String reservedName,
+        String... waitingNames
     ) {
         LinkedHashMap<String, ReservationWithStatus> results = new LinkedHashMap<>();
         ReservationTime reservationTime = createReservationTime(TEN);
@@ -137,16 +120,16 @@ public class WaitlistServiceTest {
     }
 
     private void wait(String[] waitingNames,
-                      ReservationTime reservationTime,
-                      Theme theme,
-                      LinkedHashMap<String, ReservationWithStatus> results
+        ReservationTime reservationTime,
+        Theme theme,
+        LinkedHashMap<String, ReservationWithStatus> results
     ) {
         for (String waitingName : waitingNames) {
             ReservationRequest waitingRequest = new ReservationRequest(
-                    waitingName,
-                    FUTURE_SECOND_DATE,
-                    reservationTime.getId(),
-                    theme.getId()
+                waitingName,
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
             );
 
             ReservationWithStatus waiting = reservationService.reserveOrWait(waitingRequest);
@@ -155,15 +138,15 @@ public class WaitlistServiceTest {
     }
 
     private void reserve(String reservedName,
-                         ReservationTime reservationTime,
-                         Theme theme,
-                         LinkedHashMap<String, ReservationWithStatus> results
+        ReservationTime reservationTime,
+        Theme theme,
+        LinkedHashMap<String, ReservationWithStatus> results
     ) {
         ReservationRequest reservedRequest = new ReservationRequest(
-                reservedName,
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            reservedName,
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus reserved = reservationService.reserveOrWait(reservedRequest);

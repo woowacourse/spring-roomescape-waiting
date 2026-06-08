@@ -12,18 +12,21 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
 @JdbcTest
 @Import({
-        JdbcReservationRepository.class,
-        JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class,
-        JdbcWaitlistRepository.class
+    JdbcReservationRepository.class,
+    JdbcSlotRepository.class,
+    JdbcReservationTimeRepository.class,
+    JdbcThemeRepository.class,
+    JdbcWaitlistRepository.class
 })
 class JdbcWaitlistRepositoryTest {
 
@@ -40,27 +43,42 @@ class JdbcWaitlistRepositoryTest {
     @Autowired
     private WaitlistRepository waitlistRepository;
 
+    @Autowired
+    private SlotRepository slotRepository;
+
     @Test
     void 같은_슬롯의_대기_목록을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
+        Slot slot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE, reservationTime, theme));
 
-        Long brieId = waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme),
-                CREATED_AT);
-        Long pobiId = waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme),
-                CREATED_AT);
-        Long neoId = waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme),
-                CREATED_AT);
+        Long brieId = waitlistRepository.save(new Reservation("브리", slot), CREATED_AT);
+        Long pobiId = waitlistRepository.save(new Reservation("포비", slot), CREATED_AT);
+        Long neoId = waitlistRepository.save(new Reservation("네오", slot), CREATED_AT);
 
-        List<Waitlist> waitlists = waitlistRepository.findBySlot(
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
-        );
+        List<Waitlist> waitlists = waitlistRepository.findBySlotId(slot.getId());
 
         assertThat(waitlists)
-                .extracting(Waitlist::getId)
-                .containsExactly(brieId, pobiId, neoId);
+            .extracting(Waitlist::getId)
+            .containsExactly(brieId, pobiId, neoId);
+    }
+
+    @Test
+    void 여러_슬롯의_대기_목록을_한_번에_조회한다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+        Slot firstSlot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE, reservationTime, theme));
+        Slot secondSlot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE.plusDays(1), reservationTime, theme));
+
+        Long brieId = waitlistRepository.save(new Reservation("브리", firstSlot), CREATED_AT);
+        Long pobiId = waitlistRepository.save(new Reservation("포비", firstSlot), CREATED_AT.plusMinutes(1));
+        Long neoId = waitlistRepository.save(new Reservation("네오", secondSlot), CREATED_AT);
+
+        List<Waitlist> waitlists = waitlistRepository.findBySlotIds(List.of(firstSlot.getId(), secondSlot.getId()));
+
+        assertThat(waitlists)
+            .extracting(Waitlist::getId)
+            .containsExactly(brieId, pobiId, neoId);
     }
 
     private ReservationTime createReservationTime(LocalTime time) {
@@ -73,10 +91,11 @@ class JdbcWaitlistRepositoryTest {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
         Long id = themeRepository.save(theme);
         return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
+            id,
+            theme.getName(),
+            theme.getDescription(),
+            theme.getThumbnailImageUrl()
         );
     }
+
 }
