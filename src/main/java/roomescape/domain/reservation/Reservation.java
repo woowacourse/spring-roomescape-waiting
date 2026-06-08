@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -111,30 +110,6 @@ public class Reservation {
 
     public boolean isPast(final LocalDateTime standardDateTime) {
         return slot.isPast(standardDateTime);
-    }
-
-    public static boolean isReservable(
-            final LocalDate date,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return ReservationSlot.isReservable(date, time, standardDateTime);
-    }
-
-    public static boolean isPast(
-            final LocalDate date,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return ReservationSlot.isPast(date, time, standardDateTime);
-    }
-
-    public static boolean isPast(
-            final LocalDate date,
-            final LocalTime startAt,
-            final LocalDateTime standardDateTime
-    ) {
-        return ReservationSlot.isPast(date, startAt, standardDateTime);
     }
 
     private static void validateReservable(

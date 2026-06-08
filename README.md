@@ -46,7 +46,7 @@
 
 ### 사이클1 머지 당시 리뷰 반영 사항 리스트
 
-- [ ] `Reservation`의 static 편의 메서드를 제거하고 필요한 객체에게 직접 물어보도록 정리한다.
+- [X] `Reservation`의 static 편의 메서드를 제거하고 필요한 객체에게 직접 물어보도록 정리한다.
   - 외부 계층에서 날짜와 시간만 가지고 판단해야 하는 경우는 `ReservationSlot` 또는 별도 정책 객체를 사용하도록 옮기고, `Reservation`은 자신이 가진 `slot`에 대해 `reservation.isPast(...)`처럼 묻는 메서드만 남긴다.
 
 - [ ] `Reservation` 생성 경로를 줄이고 불변식 검증 위치를 정리한다.

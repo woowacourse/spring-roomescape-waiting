@@ -13,7 +13,6 @@ import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
-import roomescape.domain.reservation.Reservation;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -110,7 +109,7 @@ public class ReservationPageModelAssembler {
             final LocalTime startAt,
             final boolean reservable
     ) {
-        if (Reservation.isPast(selectedDate, startAt, LocalDateTime.now())) {
+        if (LocalDateTime.of(selectedDate, startAt).isBefore(LocalDateTime.now())) {
             return ReservationTimeSlotStatus.PAST;
         }
 

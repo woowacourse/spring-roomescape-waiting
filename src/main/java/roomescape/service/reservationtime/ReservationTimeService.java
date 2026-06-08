@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.exception.ConflictException;
@@ -61,7 +60,7 @@ public class ReservationTimeService {
         return reservationSlotRepository.findByDateAndTheme(date, themeService.getById(themeId))
                 .stream()
                 .filter(slot -> reservationRepository.findBySlot(slot).isEmpty())
-                .filter(slot -> Reservation.isReservable(date, slot.getTime(), LocalDateTime.now()))
+                .filter(slot -> !slot.isPast(LocalDateTime.now()))
                 .map(ReservationSlot::getTime)
                 .toList();
     }
