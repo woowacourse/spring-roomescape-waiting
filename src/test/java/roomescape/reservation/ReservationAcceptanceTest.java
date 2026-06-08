@@ -129,6 +129,36 @@ public class ReservationAcceptanceTest {
   @Sql(statements = {
       "INSERT INTO theme (name, description, image_url) VALUES ('테마', '설명', 'url')",
       "INSERT INTO reservation_time (start_at) VALUES ('10:00')",
+      "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('이안', '9999-01-01', 1, 1, 'RESERVED')"
+  })
+  void 취소한_예약과_같은_슬롯을_다시_예약할_수_있다() {
+    int reservationId = RestAssured.given()
+        .when().get("/reservations/my?name=이안")
+        .then().statusCode(200)
+        .extract().path("[0].id");
+
+    RestAssured.given()
+        .when().delete("/reservations/my/" + reservationId + "?name=이안")
+        .then().statusCode(200);
+
+    Map<String, Object> params = new HashMap<>();
+    params.put("name", "이안");
+    params.put("date", "9999-01-01");
+    params.put("timeId", 1);
+    params.put("themeId", 1);
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(params)
+        .when().post("/reservations")
+        .then().statusCode(201)
+        .body("status", is("RESERVED"));
+  }
+
+  @Test
+  @Sql(statements = {
+      "INSERT INTO theme (name, description, image_url) VALUES ('테마', '설명', 'url')",
+      "INSERT INTO reservation_time (start_at) VALUES ('10:00')",
       "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('선점자', '9999-01-01', 1, 1, 'RESERVED')",
       "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('일번대기', '9999-01-01', 1, 1, 'WAITING')",
       "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('이번대기', '9999-01-01', 1, 1, 'WAITING')"
