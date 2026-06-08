@@ -97,7 +97,7 @@ class ReservationTest {
                 ReservationStatus.RESERVED
         );
 
-        assertThatCode(() -> reservation.validateCancelable(LocalDateTime.of(2026, 6, 9, 9, 59)))
+        assertThatCode(() -> reservation.cancel(LocalDateTime.of(2026, 6, 9, 9, 59)))
                 .doesNotThrowAnyException();
     }
 
@@ -113,7 +113,7 @@ class ReservationTest {
                 ReservationStatus.RESERVED
         );
 
-        assertThatThrownBy(() -> reservation.validateCancelable(LocalDateTime.of(2026, 6, 9, 10, 0)))
+        assertThatThrownBy(() -> reservation.cancel(LocalDateTime.of(2026, 6, 9, 10, 0)))
                 .isInstanceOf(PastTimeException.class)
                 .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
     }
