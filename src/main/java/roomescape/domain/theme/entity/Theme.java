@@ -27,6 +27,10 @@ public class Theme {
         return new Theme(id, name, description, imageUrl, deletedAt);
     }
 
+    public boolean isSameId(Theme theme) {
+        return id.equals(theme.id);
+    }
+
     public Long getId() {
         return id;
     }

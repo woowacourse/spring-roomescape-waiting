@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.entity;
 
 import java.time.LocalDate;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
@@ -42,6 +43,50 @@ public class Reservation {
 
     public Reservation toActive() {
         return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.ACTIVE);
+    }
+
+    public ReservationEditableStatus getEditableStatus(LocalDate now) {
+        if (status == ReservationStatus.CANCELED) {
+            return ReservationEditableStatus.CANCELED;
+        }
+
+        if (isPast(now)) {
+            return ReservationEditableStatus.LOCKED;
+        }
+
+        if (status == ReservationStatus.WAITING) {
+            return ReservationEditableStatus.WAITING;
+        }
+
+        if (time.isDeleted() || theme.isDeleted()) {
+            return ReservationEditableStatus.EDIT_RECOMMENDED;
+        }
+
+        return ReservationEditableStatus.EDITABLE;
+    }
+
+    public ReservationSchedule getSchedule() {
+        return new ReservationSchedule(date, theme.getId(), time.getId());
+    }
+
+    public boolean isReservedBy(ReserverName name) {
+        return this.name.equals(name);
+    }
+
+    public boolean isActive() {
+        return status == ReservationStatus.ACTIVE;
+    }
+
+    public boolean isWaiting() {
+        return status == ReservationStatus.WAITING;
+    }
+
+    public boolean isScheduleChanged(Reservation reservation) {
+        return !getSchedule().equals(reservation.getSchedule());
+    }
+
+    public boolean isPast(LocalDate date) {
+        return this.date.isBefore(date);
     }
 
     public Long getId() {

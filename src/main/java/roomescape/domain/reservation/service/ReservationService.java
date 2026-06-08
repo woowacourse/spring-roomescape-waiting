@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +12,6 @@ import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
 import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
@@ -53,43 +53,23 @@ public class ReservationService {
         return convertReservationsToDto(reservationsWithWaitingNumbers);
     }
 
+    public List<ReservationResponseDto> getReservationsByName(String name) {
+        List<ReservationWithWaitingNumber> reservationsWithWaitingNumber =
+            reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber(name);
+        return convertReservationsToDto(reservationsWithWaitingNumber);
+    }
+
     private List<ReservationResponseDto> convertReservationsToDto(List<ReservationWithWaitingNumber> reservations) {
         return reservations.stream()
             .map(reservationWithWaitingNumber -> {
                 Reservation reservation = reservationWithWaitingNumber.reservation();
                 return reservationMapper.toResponseDto(
                     reservation,
-                    getEditableStatus(reservation),
+                    reservation.getEditableStatus(LocalDate.now(clock)),
                     reservationWithWaitingNumber.waitingNumber()
                 );
             })
             .toList();
-    }
-
-    private ReservationEditableStatus getEditableStatus(Reservation reservation) {
-        if (reservation.getStatus() == ReservationStatus.CANCELED) {
-            return ReservationEditableStatus.CANCELED;
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            return ReservationEditableStatus.LOCKED;
-        }
-
-        if (reservation.getStatus() == ReservationStatus.WAITING) {
-            return ReservationEditableStatus.WAITING;
-        }
-
-        if (reservation.getTime().isDeleted() || reservation.getTheme().isDeleted()) {
-            return ReservationEditableStatus.EDIT_RECOMMENDED;
-        }
-
-        return ReservationEditableStatus.EDITABLE;
-    }
-
-    public List<ReservationResponseDto> getReservationsByName(String name) {
-        List<ReservationWithWaitingNumber> reservationsWithWaitingNumber =
-            reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber(name);
-        return convertReservationsToDto(reservationsWithWaitingNumber);
     }
 
     @Transactional
@@ -130,24 +110,14 @@ public class ReservationService {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!existingReservation.getName().equals(name)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
-        }
-
-        if (existingReservation.getStatus() != ReservationStatus.ACTIVE) {
-            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
-        }
-
-        if (existingReservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_UPDATE);
-        }
+        validateReservationCanBeUpdated(existingReservation, name);
 
         Reservation updateReservation = createUpdateReservation(existingReservation, command);
         try {
             ReservationCreateResponseDto responseDto = reservationMapper.toCreateResponseDto(
                 reservationRepository.update(updateReservation));
 
-            if (isScheduleChanged(existingReservation, updateReservation)) {
+            if (existingReservation.isScheduleChanged(updateReservation)) {
                 approveNextWaitingReservationIfVacant(existingReservation);
             }
 
@@ -157,12 +127,26 @@ public class ReservationService {
         }
     }
 
+    private void validateReservationCanBeUpdated(Reservation existingReservation, ReserverName name) {
+        if (!existingReservation.isReservedBy(name)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
+        }
+
+        if (!existingReservation.isActive()) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+
+        if (existingReservation.isPast(LocalDate.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_UPDATE);
+        }
+    }
+
     private Reservation createUpdateReservation(Reservation existingReservation, ReservationUpdateCommand command) {
         LocalDate date = getUpdateDate(existingReservation, command);
         Time time = getUpdateTime(existingReservation, command);
         Theme theme = getUpdateTheme(existingReservation, command);
 
-        validateUpdateResources(time, theme);
+        validateReservationUpdateFieldsExist(time, theme);
 
         return Reservation.reconstruct(existingReservation.getId(), existingReservation.getName(), date, time, theme,
             existingReservation.getStatus());
@@ -189,7 +173,7 @@ public class ReservationService {
         return themeRepository.findThemeByIdAndDeletedAtIsNull(command.themeId()).orElse(null);
     }
 
-    private void validateUpdateResources(Time time, Theme theme) {
+    private void validateReservationUpdateFieldsExist(Time time, Theme theme) {
         List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
 
         if (time == null || time.isDeleted()) {
@@ -206,29 +190,12 @@ public class ReservationService {
         }
     }
 
-    private boolean isScheduleChanged(Reservation existingReservation, Reservation updateReservation) {
-        return !existingReservation.getDate().equals(updateReservation.getDate())
-            || !existingReservation.getTheme().getId().equals(updateReservation.getTheme().getId())
-            || !existingReservation.getTime().getId().equals(updateReservation.getTime().getId());
-    }
-
-
     @Transactional
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().equals(name)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
-        }
-
-        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
-        }
+        validateReservationCanBeCanceled(reservation, name);
 
         ReservationCancelResponseDto cancelResponseDto = reservationMapper.toCancelResponseDto(
             reservationRepository.update(reservation.cancel()));
@@ -236,6 +203,20 @@ public class ReservationService {
         approveNextWaitingReservationIfVacant(reservation);
 
         return cancelResponseDto;
+    }
+
+    private void validateReservationCanBeCanceled(Reservation reservation, ReserverName name) {
+        if (!reservation.isReservedBy(name)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
+        }
+
+        if (!reservation.isActive()) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+
+        if (reservation.isPast(LocalDate.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
+        }
     }
 
     @Transactional
@@ -250,10 +231,9 @@ public class ReservationService {
 
     @Transactional
     public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateCommand command) {
-        Reservation reservation = createReservation(command);
-        Reservation waitingReservation = reservation.toWaiting();
+        Reservation waitingReservation = createReservation(command).toWaiting();
 
-        validateWaitingReservationCanBeCreated(reservation);
+        validateWaitingReservationCreationAllowed(waitingReservation);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
@@ -262,16 +242,14 @@ public class ReservationService {
         }
     }
 
-    private void validateWaitingReservationCanBeCreated(Reservation reservation) {
+    private void validateWaitingReservationCreationAllowed(Reservation reservation) {
         if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
 
-        if (reservationRepository.lockActiveReservationBySchedule(
-            reservation.getDate(),
-            reservation.getTheme().getId(),
-            reservation.getTime().getId()
-        ).isEmpty()) {
+        Optional<Long> reservationId = reservationRepository.lockActiveReservationBySchedule(reservation.getSchedule());
+
+        if (reservationId.isEmpty()) {
             throw new GeneralException(ReservationErrorType.WAITING_RESERVATION_NOT_AVAILABLE);
         }
     }
@@ -282,39 +260,32 @@ public class ReservationService {
             .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().equals(name)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
-        }
-
-        if (reservation.getStatus() != ReservationStatus.WAITING) {
-            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
-        }
+        validateWaitingReservationCanBeCanceled(reservation, name);
 
         return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
     }
 
+    private void validateWaitingReservationCanBeCanceled(Reservation reservation, ReserverName name) {
+        if (!reservation.isReservedBy(name)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
+        }
+
+        if (!reservation.isWaiting()) {
+            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
+        }
+
+        if (reservation.isPast(LocalDate.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
+        }
+    }
+
     private void approveNextWaitingReservationIfVacant(Reservation reservation) {
-        if (existsActiveReservationBySchedule(reservation)) {
+        if (reservationRepository.existsActiveReservationBySchedule(reservation.getSchedule())) {
             return;
         }
 
-        reservationRepository.lockFirstWaitingReservationBySchedule(
-            reservation.getDate(),
-            reservation.getTheme().getId(),
-            reservation.getTime().getId()
-        ).flatMap(reservationRepository::findReservationByIdAndNotDeleted)
+        reservationRepository.lockFirstWaitingReservationBySchedule(reservation.getSchedule())
+            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
             .ifPresent(waiting -> reservationRepository.update(waiting.toActive()));
-    }
-
-    private boolean existsActiveReservationBySchedule(Reservation reservation) {
-        return reservationRepository.existsActiveReservationByDateAndThemeIdAndTimeId(
-            reservation.getDate(),
-            reservation.getTheme().getId(),
-            reservation.getTime().getId()
-        );
     }
 }

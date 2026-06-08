@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.dto.response;
+package roomescape.domain.reservation.entity;
 
 public enum ReservationEditableStatus {
 

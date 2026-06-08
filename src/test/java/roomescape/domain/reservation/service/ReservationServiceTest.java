@@ -24,14 +24,15 @@ import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
 import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.ReservationEditableStatus;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
 import roomescape.domain.reservation.vo.ReserverName;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.mapper.ThemeMapper;
 import roomescape.domain.theme.repository.ThemeRepository;
@@ -290,7 +291,7 @@ class ReservationServiceTest {
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.lockActiveReservationBySchedule(date, 1L, 1L))
+            when(reservationRepository.lockActiveReservationBySchedule(new ReservationSchedule(date, 1L, 1L)))
                 .thenReturn(Optional.of(2L));
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -315,7 +316,7 @@ class ReservationServiceTest {
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
                 .thenReturn(false);
-            when(reservationRepository.lockActiveReservationBySchedule(date, 1L, 1L))
+            when(reservationRepository.lockActiveReservationBySchedule(new ReservationSchedule(date, 1L, 1L)))
                 .thenReturn(Optional.of(2L));
             when(reservationRepository.save(any(Reservation.class))).thenThrow(new DuplicateKeyException("duplicate"));
 
@@ -338,7 +339,7 @@ class ReservationServiceTest {
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
                 .thenReturn(false);
-            when(reservationRepository.lockActiveReservationBySchedule(date, 1L, 1L))
+            when(reservationRepository.lockActiveReservationBySchedule(new ReservationSchedule(date, 1L, 1L)))
                 .thenReturn(Optional.empty());
 
             // when & then

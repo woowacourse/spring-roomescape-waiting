@@ -26,6 +26,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.vo.ReserverName;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.JdbcThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -555,10 +556,10 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme));
 
             // when
-            boolean actual = reservationRepository.existsActiveReservationByDateAndThemeIdAndTimeId(
-                date, targetTheme.getId(), targetTime.getId());
-            boolean notFound = reservationRepository.existsActiveReservationByDateAndThemeIdAndTimeId(
-                date.minusDays(1), targetTheme.getId(), targetTime.getId());
+            boolean actual = reservationRepository.existsActiveReservationBySchedule(
+                new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
+            boolean notFound = reservationRepository.existsActiveReservationBySchedule(
+                new ReservationSchedule(date.minusDays(1), targetTheme.getId(), targetTime.getId()));
 
             // then
             assertThat(actual).isTrue();
@@ -586,10 +587,10 @@ class JdbcReservationRepositoryTest {
             // when
             Optional<Long> actual =
                 reservationRepository.lockActiveReservationBySchedule(
-                    date, targetTheme.getId(), targetTime.getId());
+                    new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
             Optional<Long> notFound =
                 reservationRepository.lockActiveReservationBySchedule(
-                    date.minusDays(1), targetTheme.getId(), targetTime.getId());
+                    new ReservationSchedule(date.minusDays(1), targetTheme.getId(), targetTime.getId()));
 
             // then
             assertThat(actual).contains(active.getId());
@@ -621,7 +622,7 @@ class JdbcReservationRepositoryTest {
             // when
             Optional<Long> actual =
                 reservationRepository.lockFirstWaitingReservationBySchedule(
-                    date, targetTheme.getId(), targetTime.getId());
+                    new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
 
             // then
             assertThat(actual).contains(firstWaiting.getId());
@@ -640,7 +641,7 @@ class JdbcReservationRepositoryTest {
             // when
             Optional<Long> actual =
                 reservationRepository.lockFirstWaitingReservationBySchedule(
-                    date, theme.getId(), time.getId());
+                    new ReservationSchedule(date, theme.getId(), time.getId()));
 
             // then
             assertThat(actual).isEmpty();

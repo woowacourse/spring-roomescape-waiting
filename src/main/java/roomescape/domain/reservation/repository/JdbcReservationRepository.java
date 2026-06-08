@@ -17,6 +17,7 @@ import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.vo.ReserverName;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
@@ -201,7 +202,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsActiveReservationByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId) {
+    public boolean existsActiveReservationBySchedule(ReservationSchedule schedule) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
@@ -217,19 +218,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                   AND t.deleted_at IS NULL
             )
             """;
-        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-            "date", date,
-            "themeId", themeId,
-            "timeId", timeId
-        ));
+        SqlParameterSource parameters = toScheduleParameterSource(schedule);
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
         return Boolean.TRUE.equals(exists);
     }
 
     @Override
-    public Optional<Long> lockActiveReservationBySchedule(
-        LocalDate date, Long themeId, Long timeId) {
+    public Optional<Long> lockActiveReservationBySchedule(ReservationSchedule schedule) {
         String sql = """
             SELECT r.id
             FROM reservation r
@@ -252,11 +248,7 @@ public class JdbcReservationRepository implements ReservationRepository {
               )
             FOR UPDATE
             """;
-        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-            "date", date,
-            "themeId", themeId,
-            "timeId", timeId
-        ));
+        SqlParameterSource parameters = toScheduleParameterSource(schedule);
 
         List<Long> reservationIds = jdbcTemplate.query(
             sql,
@@ -268,8 +260,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Long> lockFirstWaitingReservationBySchedule(
-        LocalDate date, Long themeId, Long timeId) {
+    public Optional<Long> lockFirstWaitingReservationBySchedule(ReservationSchedule schedule) {
         String sql = """
             SELECT r.id
             FROM reservation r
@@ -294,11 +285,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             LIMIT 1
             FOR UPDATE
             """;
-        SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-            "date", date,
-            "themeId", themeId,
-            "timeId", timeId
-        ));
+        SqlParameterSource parameters = toScheduleParameterSource(schedule);
 
         List<Long> reservationIds = jdbcTemplate.query(
             sql,
@@ -307,6 +294,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
 
         return reservationIds.stream().findFirst();
+    }
+
+    private SqlParameterSource toScheduleParameterSource(ReservationSchedule schedule) {
+        return new MapSqlParameterSource(Map.of(
+            "date", schedule.date(),
+            "themeId", schedule.themeId(),
+            "timeId", schedule.timeId()
+        ));
     }
 
     @Override

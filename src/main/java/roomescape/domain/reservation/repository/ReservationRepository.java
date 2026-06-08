@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 
 public interface ReservationRepository {
 
@@ -18,13 +19,11 @@ public interface ReservationRepository {
 
     List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate localDate, Long themeId);
 
-    boolean existsActiveReservationByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
+    boolean existsActiveReservationBySchedule(ReservationSchedule schedule);
 
-    Optional<Long> lockActiveReservationBySchedule(
-        LocalDate date, Long themeId, Long timeId);
+    Optional<Long> lockActiveReservationBySchedule(ReservationSchedule schedule);
 
-    Optional<Long> lockFirstWaitingReservationBySchedule(
-        LocalDate date, Long themeId, Long timeId);
+    Optional<Long> lockFirstWaitingReservationBySchedule(ReservationSchedule schedule);
 
     Reservation save(Reservation reservation);
 
