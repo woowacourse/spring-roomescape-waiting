@@ -14,12 +14,12 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.infrastructure.SlotManager;
 
 @Component
-public class WaitingPromotionEventListener {
+public class ReservationChangeListener {
     private final WaitingDao waitingDao;
     private final ReservationDao reservationDao;
     private final SlotManager slotManager;
 
-    public WaitingPromotionEventListener(
+    public ReservationChangeListener(
             WaitingDao waitingDao,
             ReservationDao reservationDao,
             SlotManager slotManager

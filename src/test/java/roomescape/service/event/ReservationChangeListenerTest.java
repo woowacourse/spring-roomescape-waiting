@@ -33,7 +33,7 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.infrastructure.SlotManager;
 
 @ExtendWith(MockitoExtension.class)
-class WaitingPromotionEventListenerTest {
+class ReservationChangeListenerTest {
     private final UserName userName = new UserName("브라운");
 
     private final LocalDateTime today = LocalDateTime.of(LocalDate.parse(TODAY), LocalTime.parse(NOW_TIME));
@@ -48,7 +48,7 @@ class WaitingPromotionEventListenerTest {
     private final ReservationChangeEvent event = new ReservationChangeEvent(slot);
     private final Waiting waiting = new Waiting(1L, userName, slot, today);
 
-    private WaitingPromotionEventListener eventListener;
+    private ReservationChangeListener eventListener;
 
     @Mock
     private WaitingDao waitingDao;
@@ -59,7 +59,7 @@ class WaitingPromotionEventListenerTest {
 
     @BeforeEach
     void setUp() {
-        eventListener = new WaitingPromotionEventListener(waitingDao, reservationDao, slotManager);
+        eventListener = new ReservationChangeListener(waitingDao, reservationDao, slotManager);
     }
 
     @Test
