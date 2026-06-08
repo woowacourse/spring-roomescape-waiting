@@ -13,7 +13,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.test_config.MutableClock;
 import roomescape.test_config.TestClockConfig;
-import roomescape.test_config.fixture.SQLFixtureGenerator;
+import roomescape.test_config.fixture.SqlFixtureGenerator;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Import({TestClockConfig.class, SQLFixtureGenerator.class})
+@Import({TestClockConfig.class, SqlFixtureGenerator.class})
 @Sql(value = "/acceptance-cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationConcurrencyTest {
 
@@ -36,7 +36,7 @@ class ReservationConcurrencyTest {
     private ReservationService reservationService;
 
     @Autowired
-    private SQLFixtureGenerator sqlFixtureGenerator;
+    private SqlFixtureGenerator sqlFixtureGenerator;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;

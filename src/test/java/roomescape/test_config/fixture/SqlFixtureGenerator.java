@@ -20,11 +20,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Component
-public class SQLFixtureGenerator {
+public class SqlFixtureGenerator {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public SQLFixtureGenerator(NamedParameterJdbcTemplate jdbcTemplate) {
+    public SqlFixtureGenerator(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

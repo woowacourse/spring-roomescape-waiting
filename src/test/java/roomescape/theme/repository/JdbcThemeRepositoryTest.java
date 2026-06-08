@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.test_config.fixture.SQLFixtureGenerator;
+import roomescape.test_config.fixture.SqlFixtureGenerator;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Timestamp;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @JdbcTest
-@Import({JdbcThemeRepository.class, SQLFixtureGenerator.class})
+@Import({JdbcThemeRepository.class, SqlFixtureGenerator.class})
 class JdbcThemeRepositoryTest {
 
     @Autowired
@@ -35,7 +35,7 @@ class JdbcThemeRepositoryTest {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
-    private SQLFixtureGenerator sqlFixtureGenerator;
+    private SqlFixtureGenerator sqlFixtureGenerator;
 
     @Test
     @DisplayName("Theme를 저장하고 조회한다.")

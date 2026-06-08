@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.test_config.fixture.SQLFixtureGenerator;
+import roomescape.test_config.fixture.SqlFixtureGenerator;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
@@ -17,14 +17,14 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import({JdbcReservationSlotRepository.class, SQLFixtureGenerator.class})
+@Import({JdbcReservationSlotRepository.class, SqlFixtureGenerator.class})
 class JdbcReservationSlotRepositoryTest {
 
     @Autowired
     private ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
-    private SQLFixtureGenerator sqlFixtureGenerator;
+    private SqlFixtureGenerator sqlFixtureGenerator;
 
     @Test
     @DisplayName("예약 슬롯이 없으면 생성하고 반환한다.")

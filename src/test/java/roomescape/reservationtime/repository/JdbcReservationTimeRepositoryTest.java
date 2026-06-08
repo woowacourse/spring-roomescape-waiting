@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.test_config.fixture.SQLFixtureGenerator;
+import roomescape.test_config.fixture.SqlFixtureGenerator;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import({JdbcReservationTimeRepository.class, SQLFixtureGenerator.class})
+@Import({JdbcReservationTimeRepository.class, SqlFixtureGenerator.class})
 class JdbcReservationTimeRepositoryTest {
 
     @Autowired
@@ -31,7 +31,7 @@ class JdbcReservationTimeRepositoryTest {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
-    private SQLFixtureGenerator sqlFixtureGenerator;
+    private SqlFixtureGenerator sqlFixtureGenerator;
 
 
 

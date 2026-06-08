@@ -15,7 +15,7 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.test_config.fixture.SQLFixtureGenerator;
+import roomescape.test_config.fixture.SqlFixtureGenerator;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
@@ -33,7 +33,7 @@ import static roomescape.reservation.domain.Status.CONFIRMED;
 import static roomescape.reservation.domain.Status.WAITING;
 
 @JdbcTest
-@Import({JdbcReservationRepository.class, SQLFixtureGenerator.class})
+@Import({JdbcReservationRepository.class, SqlFixtureGenerator.class})
 class JdbcReservationRepositoryTest {
 
     @Autowired
@@ -43,7 +43,7 @@ class JdbcReservationRepositoryTest {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
-    private SQLFixtureGenerator sqlFixtureGenerator;
+    private SqlFixtureGenerator sqlFixtureGenerator;
 
 
     @Test
