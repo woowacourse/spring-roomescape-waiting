@@ -3,11 +3,13 @@ package roomescape.service;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeLockedAction;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ThemeCreateCommand;
 import roomescape.service.exception.ThemeConflictException;
@@ -37,6 +40,14 @@ class ThemeServiceTest {
     private ReservationRepository reservationRepository;
     @InjectMocks
     private ThemeService themeService;
+
+    private void stubThemeLock() {
+        given(reservationRepository.executeWithThemeLock(eq(1L), any()))
+                .willAnswer(invocation -> {
+                    ThemeLockedAction<Object> action = invocation.getArgument(1);
+                    return action.execute(Optional.empty(), null);
+                });
+    }
 
     @Test
     @DisplayName("같은 이름의 테마가 이미 있으면 ThemeConflictException이 발생한다")
@@ -85,6 +96,7 @@ class ThemeServiceTest {
     @DisplayName("예약이 존재하는 테마를 삭제하면 ThemeInUseException이 발생한다")
     void 예약이_존재하는_테마_삭제시_예외가_발생한다() {
         given(themeRepository.existsById(1L)).willReturn(true);
+        stubThemeLock();
         given(reservationRepository.existsByThemeId(1L)).willReturn(true);
 
         assertThrows(
@@ -93,6 +105,7 @@ class ThemeServiceTest {
         );
 
         verify(themeRepository, times(1)).existsById(1L);
+        verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
         verify(reservationRepository, times(1)).existsByThemeId(1L);
     }
 
@@ -100,11 +113,13 @@ class ThemeServiceTest {
     @DisplayName("예약이 없는 테마는 정상적으로 삭제된다")
     void 예약이_없는_테마는_정상_삭제된다() {
         given(themeRepository.existsById(1L)).willReturn(true);
+        stubThemeLock();
         given(reservationRepository.existsByThemeId(1L)).willReturn(false);
 
         assertDoesNotThrow(() -> themeService.delete(1L));
 
         verify(themeRepository, times(1)).existsById(1L);
+        verify(reservationRepository, times(1)).executeWithThemeLock(eq(1L), any());
         verify(reservationRepository, times(1)).existsByThemeId(1L);
         verify(themeRepository, times(1)).deleteById(1L);
     }
