@@ -47,7 +47,6 @@ public class ReservationService {
         return reservationDao.findAllByMemberId(memberId);
     }
 
-    @Transactional(readOnly = true)
     public Reservation findActiveById(Long id) {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
