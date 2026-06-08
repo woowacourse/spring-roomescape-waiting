@@ -2,11 +2,13 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
 import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
+import static roomescape.domain.exception.DomainErrorCode.WAITLIST_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,7 +48,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
 
     @Test
-    void 빈_슬롯이면_예약으_등록된다() {
+    void 빈_슬롯이면_예약은_등록된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
@@ -208,31 +210,54 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 내_예약을_취소한다() {
+    void 사용자_예약을_취소하면_첫번째_대기가_예약으로_승격되고_대기에서_삭제된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
-        String name = "브라운";
+        String canceledReservationName = "브라운";
+        String waitingFirstName = "브리";
+        String waitingSecondName = "워니";
 
-        ReservationRequest request = new ReservationRequest(
-                name,
+        ReservationWithStatus reservation = reservationService.applyReservation(createReservationRequest(
+                canceledReservationName,
                 FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
-        );
-        ReservationWithStatus reservation = reservationService.applyReservation(request);
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingFirst = reservationService.applyReservation(createReservationRequest(
+                waitingFirstName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingSecond = reservationService.applyReservation(createReservationRequest(
+                waitingSecondName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
 
-        reservationService.cancelMyReservation(reservation.getId(), name);
+        reservationService.cancelMyReservationAndPromoteWaitlist(reservation.getId(), canceledReservationName);
 
         assertThatRoomEscapeExceptionCode(
                 () -> reservationService.getReservation(reservation.getId()),
                 RESERVATION_NOT_FOUND
         );
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.getWaitlist(waitingFirst.getId()),
+                WAITLIST_NOT_FOUND
+        );
+        assertThat(reservationService.getWaitlist(waitingSecond.getId()).getName())
+                .isEqualTo(waitingSecondName);
+        assertThat(reservationService.getReservations())
+                .extracting(Reservation::getName)
+                .contains(waitingFirstName)
+                .doesNotContain(canceledReservationName);
     }
 
     @Test
     void 사용자_예약을_취소할_때_존재하지_않는_예약이면_예외() {
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.cancelMyReservation(1L, "브라운"),
+                () -> reservationService.cancelMyReservationAndPromoteWaitlist(1L, "브라운"),
                 RESERVATION_NOT_FOUND
         );
     }
@@ -250,23 +275,37 @@ class ReservationServiceTest {
 
         assertThat(dateTime.isBefore(LocalDateTime.now())).isTrue();
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.cancelMyReservation(pastReservation.getId(), name),
+                () -> reservationService.cancelMyReservationAndPromoteWaitlist(pastReservation.getId(), name),
                 PAST_RESERVATION
         );
     }
 
     @Test
-    void 선택한_예약에_내_이름이_일치하면_예약의_날짜와_시간을_수정할_수_있다() {
+    void 사용자가_예약의_날짜와_시간을_수정하면_기존_자리의_첫번째_대기가_예약으로_승격된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
-        String name = "브라운";
-        ReservationRequest request = new ReservationRequest(
-                name,
+        String originalReservationName = "브라운";
+        String waitingFirstName = "브리";
+        String waitingSecondName = "워니";
+
+        ReservationWithStatus originalReservation = reservationService.applyReservation(createReservationRequest(
+                originalReservationName,
                 FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
-        );
-        ReservationWithStatus reservation = reservationService.applyReservation(request);
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingFirst = reservationService.applyReservation(createReservationRequest(
+                waitingFirstName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingSecond = reservationService.applyReservation(createReservationRequest(
+                waitingSecondName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
 
         ReservationTime updateTime = createReservationTime(LocalTime.of(12, 0));
         LocalDate updateDate = FUTURE_SECOND_DATE.plusDays(1);
@@ -275,15 +314,29 @@ class ReservationServiceTest {
                 updateTime.getId()
         );
 
-        Reservation updatedReservation = reservationService.updateReservation(reservation.getId(), name, updateRequest);
+        reservationService.updateMyReservationAndPromoteWaitlist(originalReservation.getId(), originalReservationName,
+                updateRequest);
 
-        assertThat(updatedReservation.getId()).isNotNull();
-        assertThat(updatedReservation.getName()).isEqualTo(name);
-        assertThat(updatedReservation.getDate()).isEqualTo(updateDate);
-        assertThat(updatedReservation.getTime().getId()).isEqualTo(updateTime.getId());
-        assertThat(updatedReservation.getTime().getStartAt()).isEqualTo(updateTime.getStartAt());
-        assertThat(updatedReservation.getTheme().getId()).isEqualTo(theme.getId());
-        assertThat(updatedReservation.getTheme().getName()).isEqualTo(theme.getName());
+        assertThat(reservationService.getReservations())
+                .extracting(
+                        Reservation::getName,
+                        Reservation::getDate,
+                        reservation -> reservation.getTime().getId(),
+                        reservation -> reservation.getTheme().getId()
+                )
+                .contains(
+                        tuple(originalReservationName, updateDate, updateTime.getId(), theme.getId()),
+                        tuple(waitingFirstName, FUTURE_SECOND_DATE, reservationTime.getId(), theme.getId())
+                )
+                .doesNotContain(
+                        tuple(originalReservationName, FUTURE_SECOND_DATE, reservationTime.getId(), theme.getId())
+                );
+        assertThat(reservationService.getWaitlist(waitingSecond.getId()).getName())
+                .isEqualTo(waitingSecondName);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.getWaitlist(waitingFirst.getId()),
+                WAITLIST_NOT_FOUND
+        );
     }
 
     @Test
@@ -295,7 +348,7 @@ class ReservationServiceTest {
         );
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.updateReservation(1L, "브라운", updateRequest),
+                () -> reservationService.updateMyReservationAndPromoteWaitlist(1L, "브라운", updateRequest),
                 RESERVATION_NOT_FOUND
         );
     }
@@ -319,7 +372,8 @@ class ReservationServiceTest {
         );
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.updateReservation(reservation.getId(), name, updateRequest),
+                () -> reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name,
+                        updateRequest),
                 RESERVATION_TIME_NOT_FOUND
         );
     }
@@ -353,7 +407,8 @@ class ReservationServiceTest {
         );
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservationService.updateReservation(reservation.getId(), name, updateRequest),
+                () -> reservationService.updateMyReservationAndPromoteWaitlist(reservation.getId(), name,
+                        updateRequest),
                 DUPLICATE_RESERVATION
         );
     }

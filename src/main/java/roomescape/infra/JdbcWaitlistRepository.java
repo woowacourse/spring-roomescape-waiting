@@ -128,6 +128,31 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     }
 
     @Override
+    public Optional<Waitlist> findFirstWaitlistByReservationSlot(Reservation reservation) {
+        String sql = """
+                SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
+                       t.id as time_id, t.start_at as time_value,
+                       th.id as theme_id, th.name as theme_name,
+                       th.description as theme_description,
+                       th.thumbnail_image_url as theme_thumbnail
+                FROM waitlist as w
+                INNER JOIN reservation_time as t ON w.time_id = t.id
+                INNER JOIN theme as th ON w.theme_id = th.id
+                WHERE date = ? AND time_id = ? AND theme_id = ?
+                ORDER BY created_at ASC, w.id ASC
+                LIMit 1;
+                """;
+        List<Waitlist> waitlists = jdbcTemplate.query(
+                sql,
+                wailtListRowMapper,
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+        return waitlists.stream().findFirst();
+    }
+
+    @Override
     public Long save(Reservation reservation) {
         String sql = "INSERT INTO waitlist (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();

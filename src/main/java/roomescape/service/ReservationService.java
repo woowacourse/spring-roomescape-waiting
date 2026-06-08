@@ -19,6 +19,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
+import roomescape.repository.exception.ReservationSlotAlreadyOccupiedException;
 
 @Service
 @Transactional(readOnly = true)
@@ -64,17 +65,21 @@ public class ReservationService {
                 getTheme(request.themeId()));
 
         reservation.verifyReservable(LocalDateTime.now());
+        verifyNoDuplicateReservation(reservation);
 
-        if (reservationRepository.existsBy(reservation)) {
-            verifyNoDuplicateReservation(reservation);
-            Long savedId = waitlistRepository.save(reservation);
-            Waitlist waitlist = getWaitlist(savedId);
-            int waitOrder = waitlistRepository.countBefore(waitlist) + 1;
-            return ReservationWithStatus.waiting(waitlist, waitOrder);
+        try {
+            Reservation saved = getReservation(reservationRepository.save(reservation));
+            return ReservationWithStatus.reserved(saved);
+        } catch (ReservationSlotAlreadyOccupiedException e) {
+            return registerWaitlist(reservation);
         }
+    }
 
-        Reservation saved = getReservation(reservationRepository.save(reservation));
-        return ReservationWithStatus.reserved(saved);
+    private ReservationWithStatus registerWaitlist(Reservation reservation) {
+        Long savedId = waitlistRepository.save(reservation);
+        Waitlist waitlist = getWaitlist(savedId);
+        int waitOrder = waitlistRepository.countBefore(waitlist) + 1;
+        return ReservationWithStatus.waiting(waitlist, waitOrder);
     }
 
     private void verifyNoDuplicateReservation(Reservation reservation) {
@@ -112,29 +117,43 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelMyReservation(Long id, String name) {
+    public void cancelMyReservationAndPromoteWaitlist(Long id, String name) {
         Reservation reservation = getReservation(id);
         reservation.verifyCancelableBy(name, LocalDateTime.now());
         reservationRepository.deleteById(id);
+
+        promoteFirstWaitlistToReservation(reservation);
+    }
+
+    private void promoteFirstWaitlistToReservation(Reservation reservation) {
+        waitlistRepository.findFirstWaitlistByReservationSlot(reservation)
+                .ifPresent(firstWaitlist -> {
+                    reservationRepository.save(firstWaitlist.toReservation());
+                    waitlistRepository.deleteById(firstWaitlist.getId());
+                });
     }
 
     @Transactional
-    public Reservation updateReservation(Long id, String name, ReservationUpdateRequest request) {
+    public Reservation updateMyReservationAndPromoteWaitlist(Long id, String name, ReservationUpdateRequest request) {
         Reservation original = getReservation(id);
+        updateMyReservation(name, request, original);
+
+        promoteFirstWaitlistToReservation(original);
+        return getReservation(id);
+    }
+
+    private void updateMyReservation(String name, ReservationUpdateRequest request, Reservation original) {
         Reservation updated = original.changeBy(
                 name,
                 LocalDateTime.now(),
                 request.date(),
                 getReservationTime(request.timeId())
         );
-        verifyNoConflict(updated);
-        reservationRepository.updateDateTime(updated);
-        return getReservation(id);
-    }
-
-    private void verifyNoConflict(Reservation reservation) {
-        if (reservationRepository.existsBy(reservation)) {
+        try {
+            reservationRepository.updateDateTime(updated);
+        } catch (ReservationSlotAlreadyOccupiedException e) {
             throw new RoomEscapeException(DUPLICATE_RESERVATION, "이미 같은 시점·테마에 예약이 존재합니다.");
         }
     }
+
 }

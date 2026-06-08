@@ -19,6 +19,8 @@ public interface WaitlistRepository {
 
     boolean existsBySameUser(Reservation reservation);
 
+    Optional<Waitlist> findFirstWaitlistByReservationSlot(Reservation reservation);
+
     Long save(Reservation reservation);
 
     void deleteById(Long id);

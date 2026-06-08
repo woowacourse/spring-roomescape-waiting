@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.acceptance;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItems;
@@ -11,12 +11,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationTimeApiTest {
+class ReservationTimeApiTest extends AcceptanceTest {
 
     public static final String FUTURE_FIRST_DATE = LocalDate.now().plusDays(1).toString();
     public static final String FUTURE_SECOND_DATE = LocalDate.now().plusDays(2).toString();

@@ -66,6 +66,11 @@ Content-Type: application/json
    "createdAt": "2026-05-26T12:30:00"
 }
 
+#### 대기 순번 정책
+- 예약 신청 결과가 대기 상태인 경우 `waitingOrder`는 등록 직후 계산된 안내용 순번이다.
+- 동시 요청 상황에서는 아직 반영되지 않은 다른 대기 데이터로 인해 생성 응답의 `waitingOrder`가 최종 순번과 일시적으로 다를 수 있다.
+- 확정 대기 순번은 내 예약 조회 API 응답의 `waitingOrder`를 기준으로 한다.
+
 ---
 
 ### 삭제 요청
@@ -305,6 +310,11 @@ Content-Type: application/json
     "thumbnailImageUrl": "썸네일이미지url"
   }
 }
+
+#### 정책
+- 변경으로 인해 대기자가 예약으로 자동 승격될 수 있지만, 승격 결과는 변경 응답에 포함하지 않는다.
+- 사용자는 내 예약 조회 API(`GET /reservations?name={name}`)를 통해 변경된 예약/대기 상태를 확인한다.
+
 ```
 
 ### 내 예약 취소 API
@@ -315,6 +325,10 @@ DELETE /reservations/{id}?name=브라운 HTTP/1.1
 
 ### 응답
 HTTP/1.1 204 No Content
+
+#### 정책
+- 취소로 인해 대기자가 예약으로 자동 승격될 수 있지만, 승격 결과는 취소 응답에 포함하지 않는다.
+- 사용자는 내 예약 조회 API(`GET /reservations?name={name}`)를 통해 변경된 예약/대기 상태를 확인한다.
 ```
 
 ### 에러 응답 명세
