@@ -135,22 +135,4 @@ public class ReservationWaitingDao {
         String sql = "delete from reservation_waiting where id = ?";
         jdbcTemplate.update(sql, id);
     }
-
-    public Optional<ReservationWaiting> selectFirstByThemeAndDateAndTime(Long themeId, LocalDate date, ReservationTime time) {
-        String sql = """
-                    select id, name, theme_id, date, time_id, start_at, waiting_number
-                    from (
-                        select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
-                            ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
-                        from reservation_waiting w
-                        join reservation_time t on w.time_id = t.id
-                        where w.theme_id = ? and w.date = ? and w.time_id = ?
-                    ) ranked
-                    order by waiting_number
-                    limit 1
-                """;
-
-        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER, themeId, date, time.getId());
-        return results.stream().findFirst();
-    }
 }
