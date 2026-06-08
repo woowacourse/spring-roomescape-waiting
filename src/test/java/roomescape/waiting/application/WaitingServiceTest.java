@@ -3,12 +3,16 @@ package roomescape.waiting.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +30,7 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -215,6 +220,34 @@ class WaitingServiceTest {
 
         // then
         assertThat(waitingRepository.isEmpty()).isTrue();
+        then(waitingReference).should(never()).promoteToReservation(any());
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제에 실패하면 예약으로 승격하지 않는다")
+    void promoteNextWaiting_success_when_waiting_delete_fails() {
+        // given
+        ReservationTime savedTime = ReservationTime.createRow(1L, LocalTime.now().plusHours(1));
+        Theme savedTheme = Theme.createRow(1L, "공포", "무서운 테마", "https://good.com/thumb-nail/1");
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting waiting = Waiting.createRow(1L, "브라운", date, savedTime, savedTheme, 1L, LocalDateTime.now());
+        WaitingRepository waitingRepository = mock(WaitingRepository.class);
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitingReference,
+                new WaitingValidator(waitingRepository)
+        );
+        given(waitingRepository.findFirstByDateAndTimeIdAndThemeId(date, savedTime.getId(), savedTheme.getId()))
+                .willReturn(Optional.of(waiting));
+        given(waitingRepository.deleteByIdAndName(waiting.getId(), waiting.getName()))
+                .willReturn(false);
+
+        // when
+        waitingService.promoteNextWaiting(date, savedTime, savedTheme);
+
+        // then
         then(waitingReference).should(never()).promoteToReservation(any());
     }
 
