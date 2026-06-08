@@ -23,6 +23,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
 
+    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
     private final UserReservationRepository userReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -30,12 +31,14 @@ public class ReservationService {
     private final Clock clock;
 
     public ReservationService(
+            WaitingService waitingService,
             ReservationRepository reservationRepository,
             UserReservationRepository userReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             Clock clock
     ) {
+        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
         this.userReservationRepository = userReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -85,6 +88,15 @@ public class ReservationService {
 
         reservation.checkCancellable(name, LocalDateTime.now(clock));
         reservationRepository.delete(reservation);
+
+        waitingService.findFirstWaiting(reservation.getDate(), reservation.getTime().getId(),
+                        reservation.getTheme().getId())
+                .ifPresent(waiting -> {
+                    waitingService.promoteWaiting(waiting);
+                    reservationRepository.save(
+                            Reservation.create(waiting.getName(), waiting.getDate(), waiting.getTime(),
+                                    waiting.getTheme(), LocalDateTime.now(clock)));
+                });
     }
 
     private void checkDuplicated(Reservation reservation) {

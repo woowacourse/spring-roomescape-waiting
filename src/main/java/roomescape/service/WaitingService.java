@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -66,6 +67,11 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    @Transactional
+    public void promoteWaiting(Waiting waiting) {
+        waitingRepository.delete(waiting);
+    }
+
     private void checkDuplicatedWaiting(LocalDate date, long timeId, long themeId, String name) {
         boolean duplicated = waitingRepository.existsByScheduleAndName(date, timeId, themeId, name);
 
@@ -82,5 +88,9 @@ public class WaitingService {
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    public Optional<Waiting> findFirstWaiting(LocalDate date, Long timeId, Long themeId) {
+        return waitingRepository.findFirstBySchedule(date, timeId, themeId);
     }
 }
