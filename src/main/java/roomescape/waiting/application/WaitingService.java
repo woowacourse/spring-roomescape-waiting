@@ -3,6 +3,7 @@ package roomescape.waiting.application;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,6 +20,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class WaitingService {
@@ -67,6 +69,11 @@ public class WaitingService {
                         return;
                     }
                     waitingReference.promoteToReservation(waiting);
+                    log.info("대기 예약 승격이 완료되었습니다. waitingId={}, date={}, timeId={}, themeId={}",
+                            waiting.getId(),
+                            date,
+                            time.getId(),
+                            theme.getId());
                 }
         );
     }
