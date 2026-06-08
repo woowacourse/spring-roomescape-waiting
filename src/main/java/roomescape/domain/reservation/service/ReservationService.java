@@ -107,8 +107,7 @@ public class ReservationService {
     @Transactional
     public ReservationCreateResponseDto updateReservation(Long id, ReserverName name,
         ReservationUpdateCommand command) {
-        Reservation existingReservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
-            .flatMap(reservationRepository::findReservationByIdAndNotDeleted)
+        Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         validateReservationCanBeUpdated(existingReservation, name);
@@ -150,7 +149,7 @@ public class ReservationService {
         validateReservationUpdateFieldsExist(time, theme);
 
         return Reservation.reconstruct(existingReservation.getId(), existingReservation.getName(), date, time, theme,
-            existingReservation.getStatus());
+            existingReservation.getStatus(), command.version());
     }
 
     private LocalDate getUpdateDate(Reservation existingReservation, ReservationUpdateCommand command) {

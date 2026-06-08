@@ -16,8 +16,8 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.reservation.vo.ReservationSchedule;
+import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
@@ -51,7 +51,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<ReservationWithWaitingNumber> findReservationsByNotDeletedWithWaitingNumber() {
         String sql = """
-            SELECT r.id, r.name, r.date, r.status,
+            SELECT r.id, r.name, r.date, r.status, r.version,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
                    t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                    t.deleted_at AS theme_deleted_at,
@@ -87,7 +87,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString("image_url"),
                 getNullableLocalDateTime(rs, "theme_deleted_at")
             ),
-            ReservationStatus.valueOf(rs.getString("status"))
+            ReservationStatus.valueOf(rs.getString("status")),
+            rs.getLong("version")
         );
     }
 
@@ -111,12 +112,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<ReservationWithWaitingNumber> findReservationsByNameAndNotDeletedWithWaitingNumber(String name) {
         String sql = """
-            SELECT ranked.id, ranked.name, ranked.date, ranked.status,
+            SELECT ranked.id, ranked.name, ranked.date, ranked.status, ranked.version,
                    ranked.time_id, ranked.start_at, ranked.time_deleted_at,
                    ranked.theme_id, ranked.theme_name, ranked.description, ranked.image_url,
                    ranked.theme_deleted_at, ranked.waiting_number
             FROM (
-                SELECT r.id, r.name, r.date, r.status,
+                SELECT r.id, r.name, r.date, r.status, r.version,
                        rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.deleted_at AS theme_deleted_at,
@@ -137,7 +138,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
         String sql = """
-            SELECT r.id, r.name, r.date, r.status,
+            SELECT r.id, r.name, r.date, r.status, r.version,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
                    t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                    t.deleted_at AS theme_deleted_at
@@ -327,9 +328,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                 date = :date,
                 time_id = :timeId,
                 theme_id = :themeId,
-                status = :status
+                status = :status,
+                version = version + 1
             WHERE id = :id
               AND deleted_at IS NULL
+              AND version = :version
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
@@ -337,15 +340,19 @@ public class JdbcReservationRepository implements ReservationRepository {
             .addValue("date", reservation.getDate())
             .addValue("timeId", reservation.getTime().getId())
             .addValue("themeId", reservation.getTheme().getId())
-            .addValue("status", reservation.getStatus().name());
+            .addValue("status", reservation.getStatus().name())
+            .addValue("version", reservation.getVersion());
 
         int updatedRowCount = jdbcTemplate.update(sql, parameters);
         if (updatedRowCount == 0) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
+            if (!existsReservationByIdAndNotDeleted(reservation.getId())) {
+                throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
+            }
+            throw new GeneralException(ReservationErrorType.RESERVATION_ALREADY_UPDATED);
         }
 
         return Reservation.reconstruct(reservation.getId(), reservation.getName(), reservation.getDate(),
-            reservation.getTime(), reservation.getTheme(), reservation.getStatus());
+            reservation.getTime(), reservation.getTheme(), reservation.getStatus(), reservation.getVersion() + 1);
     }
 
     @Override

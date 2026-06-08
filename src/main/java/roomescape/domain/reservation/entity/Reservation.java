@@ -14,35 +14,45 @@ public class Reservation {
     private final Time time;
     private final Theme theme;
     private final ReservationStatus status;
+    private final Long version;
 
-    private Reservation(Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
+    private Reservation(Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status,
+        Long version) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.status = status;
+        this.version = version;
     }
 
     public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme) {
-        return new Reservation(null, name, date, time, theme, ReservationStatus.ACTIVE);
+        return new Reservation(null, name, date, time, theme, ReservationStatus.ACTIVE, 0L);
+    }
+
+    public static Reservation reconstruct(
+        Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status, Long version) {
+        return new Reservation(id, name, date, time, theme, status, version);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
-        return new Reservation(id, name, date, time, theme, status);
+        return reconstruct(id, name, date, time, theme, status, 0L);
     }
 
     public Reservation cancel() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.CANCELED);
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.CANCELED,
+            version);
     }
 
     public Reservation toWaiting() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.WAITING);
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.WAITING,
+            version);
     }
 
     public Reservation toActive() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.ACTIVE);
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.ACTIVE, version);
     }
 
     public ReservationEditableStatus getEditableStatus(LocalDate now) {
@@ -111,5 +121,9 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

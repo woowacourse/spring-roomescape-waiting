@@ -1,7 +1,9 @@
 package roomescape.domain.reservation.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 
 public record ReservationUpdateRequestDto(
@@ -12,6 +14,10 @@ public record ReservationUpdateRequestDto(
     Long timeId,
 
     @Positive(message = "themeId의 값이 양수가 아닙니다.")
-    Long themeId) {
+    Long themeId,
+
+    @NotNull(message = "version은 필수입니다.")
+    @PositiveOrZero(message = "version의 값이 음수입니다.")
+    Long version) {
 
 }

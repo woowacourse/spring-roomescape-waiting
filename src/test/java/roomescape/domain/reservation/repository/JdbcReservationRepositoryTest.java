@@ -439,6 +439,42 @@ class JdbcReservationRepositoryTest {
                 )
                 .containsExactly("예약자2", LocalDate.of(2026, 5, 2), updateTime.getId(), updateTheme.getId());
         }
+
+        @Test
+        void 이미_수정된_예약을_이전_버전으로_수정하면_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time updateTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme updateTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Reservation reservation = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+            Reservation updateReservation = Reservation.reconstruct(reservation.getId(), new ReserverName("예약자2"),
+                LocalDate.of(2026, 5, 2), updateTime, updateTheme, ReservationStatus.ACTIVE);
+            reservationRepository.update(updateReservation);
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("예약 정보가 이미 수정되었습니다. 다시 조회 후 시도해주세요.");
+        }
+
+        @Test
+        void 삭제된_예약을_수정하면_예약_없음_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation reservation = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+            Reservation updateReservation = Reservation.reconstruct(reservation.getId(), new ReserverName("예약자2"),
+                LocalDate.of(2026, 5, 2), time, theme, ReservationStatus.ACTIVE);
+            reservationRepository.deleteReservationById(reservation.getId());
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("예약을 찾을 수 없습니다.");
+        }
     }
 
     @Nested

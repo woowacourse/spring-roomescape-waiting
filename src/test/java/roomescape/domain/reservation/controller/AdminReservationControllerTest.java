@@ -43,7 +43,7 @@ class AdminReservationControllerTest {
             new ReservationTimeResponseDto(1L, TimeFixture.VALID_10_00.getStartAt(), false),
             new ReservationThemeResponseDto(1L, ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(), ThemeFixture.VALID.getImageUrl(), false),
-            ReservationEditableStatus.EDITABLE, "", null
+            ReservationEditableStatus.EDITABLE, "", null, 0L
         );
     }
 

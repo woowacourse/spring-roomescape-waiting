@@ -31,7 +31,8 @@ public final class ReservationMapper {
     }
 
     public ReservationUpdateCommand toUpdateCommand(ReservationUpdateRequestDto requestDto) {
-        return new ReservationUpdateCommand(requestDto.date(), requestDto.timeId(), requestDto.themeId());
+        return new ReservationUpdateCommand(requestDto.date(), requestDto.timeId(), requestDto.themeId(),
+            requestDto.version());
     }
 
     public ReservationResponseDto toResponseDto(
@@ -41,7 +42,8 @@ public final class ReservationMapper {
     ) {
         return new ReservationResponseDto(reservation.getId(), reservation.getName().value(), reservation.getDate(),
             timeMapper.toReservationResponseDto(reservation.getTime()),
-            themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber);
+            themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber,
+            reservation.getVersion());
     }
 
     public ReservationCreateResponseDto toCreateResponseDto(Reservation reservation) {

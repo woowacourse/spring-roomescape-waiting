@@ -27,6 +27,7 @@ CREATE TABLE reservation (
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     status ENUM('ACTIVE', 'CANCELED', 'WAITING') DEFAULT 'ACTIVE',
+    version BIGINT NOT NULL DEFAULT 0,
     deleted_at DATETIME DEFAULT NULL,
     active_date DATE GENERATED ALWAYS AS (
         CASE WHEN status = 'ACTIVE' AND deleted_at IS NULL THEN date ELSE NULL END

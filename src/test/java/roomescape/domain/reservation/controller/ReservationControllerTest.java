@@ -75,7 +75,7 @@ class ReservationControllerTest {
             new ReservationTimeResponseDto(1L, TimeFixture.VALID_10_00.getStartAt(), false),
             new ReservationThemeResponseDto(1L, ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(), ThemeFixture.VALID.getImageUrl(), false),
-            ReservationEditableStatus.EDITABLE, "", null
+            ReservationEditableStatus.EDITABLE, "", null, 0L
         );
     }
 
@@ -221,7 +221,7 @@ class ReservationControllerTest {
         @Test
         void 예약을_수정한다() throws Exception {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
-                new ReservationUpdateCommand(null, 2L, null)
+                new ReservationUpdateCommand(null, 2L, null, 0L)
             );
             when(reservationService.updateReservation(eq(1L), eq(new ReserverName("예약자")), any())).thenReturn(
                 new ReservationCreateResponseDto(1L, "예약자", ReservationFixture.FUTURE.getDate(), 2L, 1L)
@@ -230,7 +230,7 @@ class ReservationControllerTest {
             mockMvc.perform(patch("/api/reservations/1")
                     .queryParam("name", "예약자")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"timeId\": 2}"))
+                    .content("{\"timeId\": 2, \"version\": 0}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.timeId", equalTo(2)));
         }
@@ -239,14 +239,14 @@ class ReservationControllerTest {
         void name_파라미터가_없으면_4xx를_반환한다() throws Exception {
             mockMvc.perform(patch("/api/reservations/1")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"timeId\": 2}"))
+                    .content("{\"timeId\": 2, \"version\": 0}"))
                 .andExpect(status().is4xxClientError());
         }
 
         @Test
         void 존재하지_않는_예약_ID이면_4xx를_반환한다() throws Exception {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
-                new ReservationUpdateCommand(null, null, null)
+                new ReservationUpdateCommand(null, null, null, 0L)
             );
             when(reservationService.updateReservation(eq(999L), eq(new ReserverName("예약자")), any()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
@@ -254,14 +254,14 @@ class ReservationControllerTest {
             mockMvc.perform(patch("/api/reservations/999")
                     .queryParam("name", "예약자")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{}"))
+                    .content("{\"version\": 0}"))
                 .andExpect(status().is4xxClientError());
         }
 
         @Test
         void 예약자명이_일치하지_않으면_4xx를_반환한다() throws Exception {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
-                new ReservationUpdateCommand(null, null, null)
+                new ReservationUpdateCommand(null, null, null, 0L)
             );
             when(reservationService.updateReservation(eq(1L), eq(new ReserverName("다른예약자")), any()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN));
@@ -269,7 +269,16 @@ class ReservationControllerTest {
             mockMvc.perform(patch("/api/reservations/1")
                     .queryParam("name", "다른예약자")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{}"))
+                    .content("{\"version\": 0}"))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void version이_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .queryParam("name", "예약자")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"timeId\": 2}"))
                 .andExpect(status().is4xxClientError());
         }
     }

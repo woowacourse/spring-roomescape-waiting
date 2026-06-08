@@ -402,8 +402,8 @@ class ReservationServiceTest {
             LocalDate newDate = futureDate.plusDays(1);
             Reservation updated = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), newDate, newTime, newTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(newDate, 2L, 2L);
-            givenLockedReservation(1L, existing);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(newDate, 2L, 2L, 0L);
+            givenReservation(1L, existing);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTheme));
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
@@ -426,10 +426,10 @@ class ReservationServiceTest {
             Theme existingTheme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(null, null, null);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(null, null, null, 0L);
             Reservation updated = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            givenLockedReservation(1L, existing);
+            givenReservation(1L, existing);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -446,8 +446,8 @@ class ReservationServiceTest {
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                LocalDate.now(fixedClock).plusDays(1), null, null);
-            givenReservationLockNotFound(999L);
+                LocalDate.now(fixedClock).plusDays(1), null, null, 0L);
+            givenReservationNotFound(999L);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(999L, new ReserverName("예약자"), command))
@@ -463,8 +463,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null);
-            givenLockedReservation(1L, existing);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null, 0L);
+            givenReservation(1L, existing);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("다른사람"), command))
@@ -480,8 +480,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null);
-            givenLockedReservation(1L, canceled);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null, 0L);
+            givenReservation(1L, canceled);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("예약자"), command))
@@ -497,8 +497,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(pastDate, null, null);
-            givenLockedReservation(1L, past);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(pastDate, null, null, 0L);
+            givenReservation(1L, past);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("예약자"), command))
@@ -514,8 +514,8 @@ class ReservationServiceTest {
             Theme existingTheme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(null, 999L, 999L);
-            givenLockedReservation(1L, existing);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(null, 999L, 999L, 0L);
+            givenReservation(1L, existing);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
 
@@ -537,8 +537,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate.plusDays(1), time, theme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null);
-            givenLockedReservation(1L, existing);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null, 0L);
+            givenReservation(1L, existing);
             when(reservationRepository.update(any(Reservation.class))).thenThrow(
                 new DuplicateKeyException("duplicate"));
 
@@ -770,6 +770,16 @@ class ReservationServiceTest {
 
     private void givenReservationLockNotFound(Long id) {
         when(reservationRepository.lockReservationByIdAndNotDeleted(id))
+            .thenReturn(Optional.empty());
+    }
+
+    private void givenReservation(Long id, Reservation reservation) {
+        when(reservationRepository.findReservationByIdAndNotDeleted(id))
+            .thenReturn(Optional.of(reservation));
+    }
+
+    private void givenReservationNotFound(Long id) {
+        when(reservationRepository.findReservationByIdAndNotDeleted(id))
             .thenReturn(Optional.empty());
     }
 }

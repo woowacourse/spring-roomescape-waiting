@@ -230,7 +230,7 @@ class ReservationTransactionIntegrationTest {
         reservationService.updateReservation(
             active.id(),
             new ReserverName("예약자"),
-            new ReservationUpdateCommand(date, newTime.getId(), theme.getId())
+            new ReservationUpdateCommand(date, newTime.getId(), theme.getId(), versionOf(active.id()))
         );
 
         // then
@@ -320,6 +320,14 @@ class ReservationTransactionIntegrationTest {
     private Long timeIdOf(Long reservationId) {
         return jdbcTemplate.queryForObject(
             "SELECT time_id FROM reservation WHERE id = ?",
+            Long.class,
+            reservationId
+        );
+    }
+
+    private Long versionOf(Long reservationId) {
+        return jdbcTemplate.queryForObject(
+            "SELECT version FROM reservation WHERE id = ?",
             Long.class,
             reservationId
         );
