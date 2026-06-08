@@ -49,7 +49,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public Reservation findReservationById(long id) {
+    public Reservation getReservationById(long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 예약을 찾을 수 없습니다."));
     }
@@ -101,15 +101,15 @@ public class ReservationService {
     private Reservation createReservation(String name, LocalDate date, long timeId, long themeId,
                                           LocalDateTime requestTime) {
         ReservationSlot reservationSlot = findOrCreateReservationSlot(date, timeId, themeId);
-        ReservationSlot lockedSlot = findLockedReservationSlot(reservationSlot);
+        ReservationSlot lockedSlot = getLockedReservationSlot(reservationSlot);
         ReservationLine reservationLine = new ReservationLine(lockedSlot, reservationRepository.findBySlotId(lockedSlot.getId()));
 
         return reservationLine.add(name, requestTime);
     }
 
     private ReservationSlot createReservationSlot(LocalDate date, long timeId, long themeId) {
-        TimeSlot timeSlot = findTimeSlot(timeId);
-        Theme theme = findTheme(themeId);
+        TimeSlot timeSlot = getTimeSlot(timeId);
+        Theme theme = getTheme(themeId);
         return reservationSlotRepository.save(new ReservationSlot(date, timeSlot, theme));
     }
 
@@ -126,7 +126,7 @@ public class ReservationService {
         validateReservationOwner(reservation, requestName);
         reservation.cancel(requestTime);
 
-        ReservationSlot lockedSlot = findLockedReservationSlot(reservation.getSlot());
+        ReservationSlot lockedSlot = getLockedReservationSlot(reservation.getSlot());
 
         deleteReservation(reservation);
         if (reservation.isReserved()) {
@@ -147,7 +147,7 @@ public class ReservationService {
     @Transactional
     public void updateReservation(long id, String requestName, LocalDate date, long timeId) {
         LocalDateTime requestTime = LocalDateTime.now();
-        Reservation nowReservation = findReservationById(id);
+        Reservation nowReservation = getReservationById(id);
         validateReservationOwner(nowReservation, requestName);
 
         Long themeId = nowReservation.getTheme().getId();
@@ -186,16 +186,16 @@ public class ReservationService {
 
     private void lockReservationSlots(ReservationSlot nowSlot, ReservationSlot updateSlot) {
         if (nowSlot.getId() < updateSlot.getId()) {
-            findLockedReservationSlot(nowSlot);
-            findLockedReservationSlot(updateSlot);
+            getLockedReservationSlot(nowSlot);
+            getLockedReservationSlot(updateSlot);
             return;
         }
 
-        findLockedReservationSlot(updateSlot);
-        findLockedReservationSlot(nowSlot);
+        getLockedReservationSlot(updateSlot);
+        getLockedReservationSlot(nowSlot);
     }
 
-    private ReservationSlot findLockedReservationSlot(ReservationSlot reservationSlot) {
+    private ReservationSlot getLockedReservationSlot(ReservationSlot reservationSlot) {
         return reservationSlotRepository.findByIdWithLock(reservationSlot.getId())
                 .orElseThrow(() -> new NotFoundException("해당 예약 슬롯을 찾을 수 없습니다."));
     }
@@ -208,12 +208,12 @@ public class ReservationService {
         return new WaitingWithNumber(waiting, reservationLine.findWaitingNumber(waiting));
     }
 
-    private TimeSlot findTimeSlot(long id) {
+    private TimeSlot getTimeSlot(long id) {
         return timeSlotRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 시간대를 찾을 수 없습니다."));
     }
 
-    private Theme findTheme(long id) {
+    private Theme getTheme(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }

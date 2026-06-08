@@ -30,12 +30,12 @@ public class TimeController {
 
     @GetMapping
     public ResponseEntity<TimeResponses> getTimes() {
-        return ResponseEntity.ok(TimeResponses.from(reservationTimeSlotService.allTimes()));
+        return ResponseEntity.ok(TimeResponses.from(reservationTimeSlotService.findAllTimes()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TimeResponse> getTime(@PathVariable long id) {
-        TimeSlot timeSlot = reservationTimeSlotService.findTimeSlotById(id);
+        TimeSlot timeSlot = reservationTimeSlotService.getTimeSlotById(id);
         return ResponseEntity.ok(TimeResponse.from(timeSlot));
     }
 
@@ -46,7 +46,7 @@ public class TimeController {
     ) {
 
         return ResponseEntity.ok(
-                TimeResponses.fromAvailable(reservationTimeSlotService.findAvailableTimes(themeId, date)));
+                TimeResponses.fromAvailable(reservationTimeSlotService.getAvailableTimes(themeId, date)));
     }
 
     @PostMapping

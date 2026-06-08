@@ -23,11 +23,11 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<Theme> allTheme() {
+    public List<Theme> findAllThemes() {
         return themeRepository.findAll();
     }
 
-    public Theme findThemeById(long id) {
+    public Theme getThemeById(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
@@ -40,7 +40,7 @@ public class ThemeService {
 
     @Transactional
     public void removeTheme(long themeId) {
-        findThemeById(themeId);
+        getThemeById(themeId);
         validateThemeDeletable(themeId);
         themeRepository.deleteById(themeId);
     }

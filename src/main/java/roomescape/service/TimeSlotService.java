@@ -29,11 +29,11 @@ public class TimeSlotService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<TimeSlot> allTimes() {
+    public List<TimeSlot> findAllTimes() {
         return timeSlotRepository.findAll();
     }
 
-    public TimeSlot findTimeSlotById(long id) {
+    public TimeSlot getTimeSlotById(long id) {
         return timeSlotRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 시간대를 찾을 수 없습니다."));
     }
@@ -47,12 +47,12 @@ public class TimeSlotService {
 
     @Transactional
     public void removeTime(long timeId) {
-        findTimeSlotById(timeId);
+        getTimeSlotById(timeId);
         validateTimeSlotDeletable(timeId);
         timeSlotRepository.deleteById(timeId);
     }
 
-    public List<AvailableTimeSlot> findAvailableTimes(long themeId, LocalDate date) {
+    public List<AvailableTimeSlot> getAvailableTimes(long themeId, LocalDate date) {
         themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
         return timeSlotRepository.findAvailableTimeSlots(themeId, date);

@@ -32,12 +32,12 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<ThemeResponses> getThemes() {
-        return ResponseEntity.ok(ThemeResponses.from(themeService.allTheme()));
+        return ResponseEntity.ok(ThemeResponses.from(themeService.findAllThemes()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ThemeResponse> getTheme(@PathVariable long id) {
-        Theme theme = themeService.findThemeById(id);
+        Theme theme = themeService.getThemeById(id);
         return ResponseEntity.ok(ThemeResponse.from(theme));
     }
 

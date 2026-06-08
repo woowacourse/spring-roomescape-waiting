@@ -29,7 +29,7 @@ public class ReservationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponse> getReservationById(@PathVariable long id) {
-        Reservation reservation = reservationService.findReservationById(id);
+        Reservation reservation = reservationService.getReservationById(id);
         return ResponseEntity.ok(ReservationResponse.from(reservation));
     }
 
@@ -74,6 +74,6 @@ public class ReservationController {
                 request.date(),
                 request.timeId()
         );
-        return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
+        return ResponseEntity.ok(ReservationResponse.from(reservationService.getReservationById(id)));
     }
 }
