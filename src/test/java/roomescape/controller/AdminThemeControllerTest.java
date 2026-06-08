@@ -1,4 +1,4 @@
-package roomescape.controller.controller;
+package roomescape.controller;
 
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -15,11 +15,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.DatabaseInitializer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AdminThemeControllerTest {
 
     @Autowired
