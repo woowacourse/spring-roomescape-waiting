@@ -26,16 +26,7 @@ CREATE TABLE reservation
     time_id           BIGINT       NOT NULL,
     theme_id          BIGINT       NOT NULL,
     status            VARCHAR(255) NOT NULL,
-    reserved_slot_key VARCHAR(255) AS (
-        CASE
-            WHEN status = 'RESERVED'
-            THEN CONCAT(date, ':', time_id, ':', theme_id)
-            ELSE NULL
-        END
-    ),
     PRIMARY KEY (id),
-    UNIQUE (reserved_slot_key),
-    UNIQUE (name, date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
