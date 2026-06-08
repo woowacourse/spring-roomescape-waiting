@@ -26,7 +26,7 @@ import roomescape.domain.WaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
-import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;

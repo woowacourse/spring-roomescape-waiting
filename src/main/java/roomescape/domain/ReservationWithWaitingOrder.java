@@ -1,10 +1,6 @@
-package roomescape.service.dto;
+package roomescape.domain;
 
 import java.time.LocalDate;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.WaitingOrder;
 
 public record ReservationWithWaitingOrder(Long id,
                                           String reserverName,

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
-import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.domain.ReservationWithWaitingOrder;
 
 public interface ReservationRepository {
     List<ReservationWithWaitingOrder> findAll();

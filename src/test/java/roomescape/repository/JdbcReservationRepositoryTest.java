@@ -19,7 +19,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
-import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.domain.ReservationWithWaitingOrder;
 
 @JdbcTest
 @Import(JdbcReservationRepository.class)
