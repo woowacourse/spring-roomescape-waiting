@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.dto.request.AdminReservationRequestDto;
@@ -72,15 +72,13 @@ public class AdminReservationService {
     public Reservation update(Long id, ReservationPatchDto request) {
         LocalDateTime now = LocalDateTime.now();
         Reservation reservation = findById(id);
-        LocalDate previousDate = reservation.getDate();
-        Time previousTime = reservation.getTime();
+        Slot previousSlot = reservation.getSlot();
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time);
         Reservation updated = reservationDao.update(reservation);
-        if (!previousDate.equals(updated.getDate()) || !previousTime.equals(updated.getTime())) {
-            waitingService.promoteFirstWaitingBySlot(previousDate, previousTime.getId(),
-                    updated.getTheme().getId(), updated.getStoreId(), now);
+        if (updated.isDifferentSlot(previousSlot)) {
+            waitingService.promoteFirstWaiting(previousSlot, now);
         }
         return updated;
     }
@@ -90,7 +88,7 @@ public class AdminReservationService {
         Reservation reservation = findById(id);
         reservation.cancelByAdmin(now);
         reservationDao.update(reservation);
-        waitingService.promoteFirstWaiting(reservation, now);
+        waitingService.promoteFirstWaiting(reservation.getSlot(), now);
     }
 
     public void delete(Long id) {

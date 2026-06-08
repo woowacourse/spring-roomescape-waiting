@@ -131,6 +131,10 @@ public class Reservation {
         return new Slot(date, time, theme, storeId);
     }
 
+    public boolean isDifferentSlot(Slot other) {
+        return !getSlot().equals(other);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Reservation that)) {
