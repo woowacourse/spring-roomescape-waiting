@@ -227,7 +227,7 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
                 + "JOIN time_slot ts ON p.slot_id = ts.id "
                 + "JOIN theme t ON ts.theme_id = t.id "
                 + "JOIN reservation_time rt ON ts.time_id = rt.id "
-                + "WHERE p.id = :id";
+                + "WHERE p.id = :id AND p.is_deleted = 0";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findAny();
     }
 }
