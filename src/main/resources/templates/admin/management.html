@@ -474,6 +474,10 @@
       const suffix = waitingNumber != null ? ` (${waitingNumber}번째)` : '';
       return `<span class="badge bg-info text-dark">대기 중${escapeHtml(suffix)}</span>`;
     }
+    if (status === 'WAITING_LOCKED') {
+      const suffix = waitingNumber != null ? ` (${waitingNumber}번째)` : '';
+      return `<span class="badge bg-secondary">지난 대기${escapeHtml(suffix)}</span>`;
+    }
     if (status === 'LOCKED') {
       return '<span class="badge bg-secondary">지난 예약</span>';
     }

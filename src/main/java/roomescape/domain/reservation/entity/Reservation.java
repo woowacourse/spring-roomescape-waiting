@@ -60,6 +60,10 @@ public class Reservation {
             return ReservationEditableStatus.CANCELED;
         }
 
+        if (isPast(now) && isWaiting()) {
+            return ReservationEditableStatus.WAITING_LOCKED;
+        }
+
         if (isPast(now)) {
             return ReservationEditableStatus.LOCKED;
         }
