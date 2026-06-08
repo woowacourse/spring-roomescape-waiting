@@ -51,7 +51,7 @@ class ReservationTest {
             "2025-05-11T10:00:01,true",
     })
     @DisplayName("예약의 날짜 및 시간이 이미 지났는지 여부를 반환한다.")
-    public void isPassed(LocalDateTime now, boolean expected) {
+    void isPassed(LocalDateTime now, boolean expected) {
         // given
         // 2025-05-11T10:00:00
         LocalDate date = LocalDate.of(2025, 5, 11);
@@ -72,7 +72,7 @@ class ReservationTest {
             "포비,false"
     })
     @DisplayName("같은 사람의 예약인지 확인한다.")
-    public void isSameGuest(String targetName, boolean expected) {
+    void isSameGuest(String targetName, boolean expected) {
         // given
         Reservation reservation = Reservation.of(
                 1L, "브라운", LocalDate.of(2025, 5, 11), time, theme, Status.CONFIRMED, LocalDateTime.now());

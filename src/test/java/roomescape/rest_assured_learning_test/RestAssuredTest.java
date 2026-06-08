@@ -9,11 +9,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 @Disabled
-public class RestAssuredTest {
+class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured Get 요청 기본")
-    public void get_default() {
+    void get_default() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .when()
@@ -26,7 +26,7 @@ public class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured Get 요청 심화1- queryParam")
-    public void get_deep1() {
+    void get_deep1() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .queryParam("userId", 1)
@@ -39,7 +39,7 @@ public class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured Get 요청 심화2- pathParam")
-    public void get_deep2() {
+    void get_deep2() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .pathParam("id", 1)
@@ -52,7 +52,7 @@ public class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured Post 요청")
-    public void post() {
+    void post() {
         String requestBody = """
         {
             "title": "hello",
@@ -75,7 +75,7 @@ public class RestAssuredTest {
     
     @Test
     @DisplayName("RestAssured Put 요청")
-    public void put() {
+    void put() {
         String requestBody = """
             {
               "id": 1,
@@ -101,7 +101,7 @@ public class RestAssuredTest {
 
     @Test
     @DisplayName("RestAssured DELETE 요청")
-    public void delete() {
+    void delete() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
         .when()

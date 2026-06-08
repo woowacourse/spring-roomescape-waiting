@@ -38,7 +38,7 @@ class ReservationTimeControllerTest {
 
     @Test
     @DisplayName("예약 시간 목록을 조회한다.")
-    public void getReservationTimeList() throws Exception {
+    void getReservationTimeList() throws Exception {
         // given
         List<ReservationTime> times = List.of(
                 ReservationTime.of(1L, LocalTime.of(10, 0)),

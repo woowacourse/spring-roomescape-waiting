@@ -49,7 +49,7 @@ import static roomescape.reservation.domain.Status.*;
         ReservationCreator.class
 })
 @Sql(value = "/acceptance-cleanup.sql", executionPhase = BEFORE_TEST_METHOD)
-public class ReservationServiceTxTest {
+class ReservationServiceTxTest {
     @Autowired ReservationService reservationService;
     @MockitoSpyBean ReservationRepository reservationRepository;
     @Autowired ReservationSlotRepository reservationSlotRepository;
@@ -61,7 +61,7 @@ public class ReservationServiceTxTest {
     @Test
     @DisplayName("예약 날짜/시간을 수정할 때 승격이 실패하면 예약 수정도 이루어지지 않는다.")
     @Transactional(propagation = Propagation.NOT_SUPPORTED) // @JdbcTest에 @Transactional이 있기 때문에 서비스 내부에서 롤백이 되지 않는다. 롤백이 되게 하기 위해 추가
-    public void editDateTime_fail_when_promotion_fail() {
+    void editDateTime_fail_when_promotion_fail() {
         // given
         stubtoPromoteFail();
         clock.setFixed(LocalDate.of(2023, 7, 6));
@@ -85,7 +85,7 @@ public class ReservationServiceTxTest {
     @Test
     @DisplayName("예약을 취소할 때 승격이 실패하면 예약 취소도 이루어지지 않는다.")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void cancel_fail_when_promote_fail() {
+    void cancel_fail_when_promote_fail() {
         // given
         stubtoPromoteFail();
         clock.setFixed(LocalDate.of(2023, 8, 6));
@@ -107,7 +107,7 @@ public class ReservationServiceTxTest {
     @Test
     @DisplayName("본인의 예약을 취소할 때 승격이 실패하면 본인의 예약도 취소되지 않는다.")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void cancelMine_fail_when_promote_fail() {
+    void cancelMine_fail_when_promote_fail() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
         stubtoPromoteFail();

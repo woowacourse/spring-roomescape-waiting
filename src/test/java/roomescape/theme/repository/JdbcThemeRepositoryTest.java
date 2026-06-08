@@ -39,7 +39,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("Theme를 저장하고 조회한다.")
-    public void saveAndFindById() {
+    void saveAndFindById() {
         Theme theme = jdbcThemeRepository.save(Theme.create("kim", "desc1", "thumb1"));
 
         Optional<Theme> found = jdbcThemeRepository.findById(theme.getId());
@@ -54,7 +54,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("삭제된 Theme는 id로 조회되지 않는다.")
-    public void findById_softDelete() {
+    void findById_softDelete() {
         // given
         Theme theme = sqlFixtureGenerator.insertDeletedTheme("kim", "desc1", "thumb1");
 
@@ -67,7 +67,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("모든 Theme를 불러온다.")
-    public void findAll() {
+    void findAll() {
         sqlFixtureGenerator.insertTheme("kim", "desc1", "thumb1");
         sqlFixtureGenerator.insertTheme("lee", "desc2", "thumb2");
         sqlFixtureGenerator.insertTheme("park", "desc3", "thumb3");
@@ -88,7 +88,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("Theme 목록은 삭제되지 않은 Theme만 조회한다.")
-    public void findAll_softDelete() {
+    void findAll_softDelete() {
         // given
         sqlFixtureGenerator.insertDeletedTheme("kim", "desc1", "thumb1");
         Theme activeTheme = sqlFixtureGenerator.insertTheme("lee", "desc2", "thumb2");
@@ -104,7 +104,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("Theme 존재 여부를 조회한다.")
-    public void existsById() {
+    void existsById() {
         Theme theme = sqlFixtureGenerator.insertTheme("kim", "desc1", "thumb1");
 
         boolean exists = jdbcThemeRepository.existsById(theme.getId());
@@ -116,7 +116,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("삭제된 Theme는 존재하지 않는 것으로 조회한다.")
-    public void existsById_softDelete() {
+    void existsById_softDelete() {
         // given
         Theme theme = sqlFixtureGenerator.insertDeletedTheme("kim", "desc1", "thumb1");
 
@@ -130,7 +130,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("지정된 날짜 기간의 지정된 갯수 만큼의 테마정보를 예약 수를 순서대로 불러온다.")
     @Sql(scripts = "/popular-theme-data.sql")
-    public void findTopThemesByReservationCount() {
+    void findTopThemesByReservationCount() {
         // given - @/popular-theme-data.sql
 
         // when
@@ -148,7 +148,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("인기 테마 조회는 삭제된 예약을 집계에서 제외한다.")
-    public void findTopThemesByReservationCount_softDelete() {
+    void findTopThemesByReservationCount_softDelete() {
         // given
         Theme activeTheme = sqlFixtureGenerator.insertTheme(
                 "레벨2 탈출",
@@ -188,7 +188,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("인기 테마 조회는 삭제된 Theme를 집계에서 제외한다.")
-    public void findTopThemesByReservationCount_deletedTheme() {
+    void findTopThemesByReservationCount_deletedTheme() {
         // given
         Theme activeTheme = sqlFixtureGenerator.insertTheme(
                 "레벨2 탈출",
@@ -225,7 +225,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("Theme를 삭제한다.")
-    public void cancelById_success_softDelete() {
+    void cancelById_success_softDelete() {
         Theme theme = sqlFixtureGenerator.insertTheme("kim", "desc1", "thumb1");
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
 
@@ -240,7 +240,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 Theme는 삭제되지 않는다.")
-    public void cancelById_fail_notFound() {
+    void cancelById_fail_notFound() {
         // given
         Long id = 1L;
 

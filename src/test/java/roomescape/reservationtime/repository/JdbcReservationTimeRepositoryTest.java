@@ -52,7 +52,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("삭제된 예약 시간은 id로 조회되지 않는다.")
-    public void findById_softDelete() {
+    void findById_softDelete() {
         // given
         ReservationTime reservationTime = sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
 
@@ -76,7 +76,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("예약 시간 목록은 삭제되지 않은 예약 시간만 조회한다.")
-    public void findAll_softDelete() {
+    void findAll_softDelete() {
         // given
         sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
         ReservationTime activeTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
@@ -101,7 +101,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("삭제된 예약 시간은 존재하지 않는 것으로 조회한다.")
-    public void existsByStartAt_softDelete() {
+    void existsByStartAt_softDelete() {
         // given
         sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
 
@@ -133,7 +133,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 예약 시간은 삭제되지 않는다.")
-    public void cancelById_fail_notFound() {
+    void cancelById_fail_notFound() {
         // given
         Long id = 1L;
 

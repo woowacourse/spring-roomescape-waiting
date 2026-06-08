@@ -48,7 +48,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("id로 특정 예약을 조회한다.")
-    public void findById() {
+    void findById() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -106,7 +106,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약자 이름으로 예약 정보를 조회한다.")
-    public void findByGuest() {
+    void findByGuest() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -139,7 +139,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약자 이름으로 예약 정보를 조회할 때 전체 대기열 기준 순번을 반환한다.")
-    public void findByGuest_waitNumber() {
+    void findByGuest_waitNumber() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -164,7 +164,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 날짜/시간/테마의 대기 중인 예약 중 가장 우선순위가 높은 컬럼을 반환한다.")
-    public void findBySlotAndStatusWaitingAndWaitingNumberIsOne() {
+    void findBySlotAndStatusWaitingAndWaitingNumberIsOne() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -186,7 +186,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약을 저장한다.")
-    public void save() {
+    void save() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -211,7 +211,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약의 슬롯, 상태를 수정한다.")
-    public void updateSlotAndStatus() {
+    void updateSlotAndStatus() {
         // given
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
 
@@ -249,7 +249,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약의 상태를 수정한다.")
-    public void updateStatus() {
+    void updateStatus() {
         // given
         Status beforeStatus = WAITING;
         Status updatedStatus = CONFIRMED;
@@ -275,7 +275,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마를 가진 예약이 존재하는지 확인한다.")
-    public void existsByDateAndTimeIdAndThemeIdAndGuestName() {
+    void existsByDateAndTimeIdAndThemeIdAndGuestName() {
         // given
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
         ReservationSlot reservationSlot1 = sqlFixtureGenerator.insertReservationSlot(
@@ -299,7 +299,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existsByDateAndTimeIdAndThemeId_AndGuestName_softDelete() {
+    void existsByDateAndTimeIdAndThemeId_AndGuestName_softDelete() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -320,7 +320,7 @@ class JdbcReservationRepositoryTest {
             "target, target, true"
     })
     @DisplayName("해당 예약을 제외하고 동일 슬롯에 활성 예약이 존재하는지 확인한다.")
-    public void existsActiveReservationBySlotExceptGuestName(
+    void existsActiveReservationBySlotExceptGuestName(
             String target1,
             String target2,
             boolean expected
@@ -352,7 +352,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 예약이 아닌 예약 중에서 겹치는 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existsByDateAndTimeIdAndThemeIdAndIdNot_AndStatusCanceled_softDeleteAndGuestName() {
+    void existsByDateAndTimeIdAndThemeIdAndIdNot_AndStatusCanceled_softDeleteAndGuestName() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -370,7 +370,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 예약은 취소되지 않는다.")
-    public void cancelById_fail_notFound() {
+    void cancelById_fail_notFound() {
         // given
         Long id = 1L;
 
@@ -383,7 +383,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 예약 시간 id를 가진 예약이 존재하는지 확인한다.")
-    public void existByTimeId() {
+    void existByTimeId() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
@@ -404,7 +404,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 예약 시간 id를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existByTimeId_softDelete() {
+    void existByTimeId_softDelete() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -421,7 +421,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 테마 id를 가진 예약이 존재하는지 확인한다.")
-    public void existByThemeId() {
+    void existByThemeId() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -442,7 +442,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 테마 id를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existByThemeId_softDelete() {
+    void existByThemeId_softDelete() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -457,7 +457,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 테마 id를 가진 조회 시 순번을 반환해야한다.")
-    public void findWaitingById() {
+    void findWaitingById() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -474,7 +474,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약 조회에서 날짜, 시간, 테마가 같고 Confiremd인 것만 조회한다.")
-    public void existsBySlotAndStatusConfirmed() {
+    void existsBySlotAndStatusConfirmed() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
