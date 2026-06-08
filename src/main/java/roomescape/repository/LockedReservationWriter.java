@@ -10,6 +10,8 @@ public interface LockedReservationWriter {
 
     ReservationWithWaitingOrder update(Reservation reservation);
 
+    ReservationWithWaitingOrder updateAndRequeue(Reservation reservation);
+
     void cancel(Long id);
 
     boolean promoteEarliestWaiting(LocalDate date, Long timeId, Long themeId);

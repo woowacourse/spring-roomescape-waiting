@@ -264,13 +264,33 @@ class JdbcReservationRepositoryTest {
                 ReservationStatus.CONFIRMED, now.minusSeconds(10));
         insertReservation("user2", DATE, time13, theme, ReservationStatus.CONFIRMED, now.minusSeconds(5));
 
-        reservationRepository.update(new Reservation(user1.getId(), "user1", DATE, time13, theme,
+        reservationRepository.updateAndRequeue(new Reservation(user1.getId(), "user1", DATE, time13, theme,
                 ReservationStatus.WAITING));
 
         long user2Order = reservationRepository.findByReserverName("user2").getFirst().waitingOrder().value();
         long user1Order = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
         assertThat(user2Order).isEqualTo(0L);
         assertThat(user1Order).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("update는 enqueued_at을 보존하여 대기 순번이 유지된다")
+    void update는_대기_순번을_유지한다() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        Instant base = Instant.now().minusSeconds(10);
+        insertReservation("confirmed", DATE, time, theme, ReservationStatus.CONFIRMED, base);
+        Reservation user1 = insertReservation("user1", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(1));
+        insertReservation("user2", DATE, time, theme, ReservationStatus.WAITING, base.plusSeconds(2));
+
+        long before = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
+        assertThat(before).isEqualTo(1L);
+
+        reservationRepository.update(new Reservation(user1.getId(), "user1", DATE, time, theme,
+                ReservationStatus.WAITING));
+
+        long after = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
+        assertThat(after).isEqualTo(1L);
     }
 
     @Test

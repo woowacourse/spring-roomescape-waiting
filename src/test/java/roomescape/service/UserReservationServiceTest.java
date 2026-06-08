@@ -205,7 +205,7 @@ class UserReservationServiceTest {
         stubThemeLock(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
-        given(reservationWriter.update(any(Reservation.class))).willAnswer(inv -> {
+        given(reservationWriter.updateAndRequeue(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
                     r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(),
@@ -220,7 +220,7 @@ class UserReservationServiceTest {
         verify(reservationTimeRepository, times(1)).findById(2L);
         verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
-        verify(reservationWriter, times(1)).update(any(Reservation.class));
+        verify(reservationWriter, times(1)).updateAndRequeue(any(Reservation.class));
         verifyNoInteractions(reservationService);
     }
 

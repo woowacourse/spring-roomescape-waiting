@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
@@ -110,7 +111,12 @@ public class UserReservationService {
                     reservation.getTheme(),
                     newStatus
             );
-            var result = writer.update(updated);
+            ReservationWithWaitingOrder result;
+            if (slotChanged) {
+                result = writer.updateAndRequeue(updated);
+            } else {
+                result = writer.update(updated);
+            }
 
             if (slotChanged && wasConfirmed) {
                 writer.promoteEarliestWaiting(oldDate, oldTimeId, themeId);

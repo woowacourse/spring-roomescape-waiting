@@ -157,9 +157,23 @@ public class JdbcReservationRepository implements ReservationRepository, LockedR
 
     @Override
     public ReservationWithWaitingOrder update(Reservation reservation) {
+        return updateInternal(reservation, false);
+    }
+
+    @Override
+    public ReservationWithWaitingOrder updateAndRequeue(Reservation reservation) {
+        return updateInternal(reservation, true);
+    }
+
+    private ReservationWithWaitingOrder updateInternal(Reservation reservation, boolean renewQueueOrder) {
+        String enqueuedAtClause = "";
+        if (renewQueueOrder) {
+            enqueuedAtClause = "enqueued_at = CURRENT_TIMESTAMP, ";
+        }
         String sql = "UPDATE reservation "
                 + "SET reserver_name = ?, date = ?, time_id = ?, theme_id = ?, status = ?, "
-                + "enqueued_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP "
+                + enqueuedAtClause
+                + "updated_at = CURRENT_TIMESTAMP "
                 + "WHERE id = ?";
         jdbcTemplate.update(
                 sql,
