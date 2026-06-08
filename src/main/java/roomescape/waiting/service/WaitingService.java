@@ -13,7 +13,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.exception.PastReservationWaitingCancellationException;
-import roomescape.waiting.domain.exception.WaitingAlreadyExistsException;
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
 import roomescape.waiting.domain.exception.WaitingSlotDuplicateException;
 import roomescape.waiting.repository.WaitingRepository;
@@ -41,11 +40,7 @@ public class WaitingService {
             LocalDateTime.now(clock)
         );
 
-        try {
-            return saveWaiting(waiting);
-        } catch (DuplicateKeyException exception) {
-            throw new WaitingSlotDuplicateException();
-        }
+        return saveWaiting(waiting);
     }
 
     public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
@@ -106,7 +101,7 @@ public class WaitingService {
         try {
             return waitingRepository.save(waiting);
         } catch (DuplicateKeyException exception) {
-            throw new WaitingAlreadyExistsException(exception);
+            throw new WaitingSlotDuplicateException();
         }
     }
 
