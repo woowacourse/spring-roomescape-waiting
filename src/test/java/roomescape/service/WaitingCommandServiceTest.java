@@ -11,10 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.FixedClockConfig;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.ReservationDao;
+import roomescape.repository.WaitingDao;
 
 @SpringBootTest
 @Import(FixedClockConfig.class)
@@ -27,6 +32,10 @@ class WaitingCommandServiceTest {
 
     @Autowired
     private WaitingCommandService waitingCommandService;
+    @Autowired
+    private ReservationDao reservationDao;
+    @Autowired
+    private WaitingDao waitingDao;
 
     @Test
     @DisplayName("기존 예약이 없는 슬롯에는 대기를 생성할 수 없다.")
@@ -66,5 +75,32 @@ class WaitingCommandServiceTest {
     void cancel_nonExistent() {
         assertThatThrownBy(() -> waitingCommandService.cancel(999L, "user_d"))
                 .isInstanceOf(InvalidReferenceException.class);
+    }
+
+    @Test
+    @DisplayName("빈 슬롯의 다음 대기 1번을 예약으로 전환한다.")
+    void promoteNextWaitingIn_promotesFirstWaiting() {
+        Reservation reservation = reservationDao.findById(3L).orElseThrow();
+        Slot slot = reservation.slot();
+        reservationDao.deleteById(reservation.id());
+
+        waitingCommandService.promoteNextWaitingIn(slot);
+
+        assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
+        assertThat(waitingDao.findById(3L)).isEmpty();
+        assertThat(waitingDao.findById(4L)).isPresent();
+    }
+
+    @Test
+    @DisplayName("과거 슬롯의 대기는 예약으로 전환하지 않는다.")
+    void promoteNextWaitingIn_pastSlot() {
+        Reservation reservation = reservationDao.findById(1L).orElseThrow();
+        Slot slot = reservation.slot();
+        reservationDao.deleteById(reservation.id());
+
+        waitingCommandService.promoteNextWaitingIn(slot);
+
+        assertThat(reservationDao.findBySlot(slot)).isEmpty();
+        assertThat(waitingDao.findById(1L)).isPresent();
     }
 }

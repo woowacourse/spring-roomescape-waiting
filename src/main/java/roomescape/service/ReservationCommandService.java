@@ -9,15 +9,12 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.exception.TemporaryConflictException;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
-import roomescape.repository.WaitingDao;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -28,8 +25,9 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ReservationCommandService {
 
+    private final WaitingCommandService waitingCommandService;
+
     private final ReservationDao reservationDao;
-    private final WaitingDao waitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final Clock clock;
@@ -55,7 +53,7 @@ public class ReservationCommandService {
         Reservation reservation = findReservation(reservationId);
 
         reservationDao.deleteById(reservationId);
-        promoteNextWaitingIn(reservation.slot());
+        waitingCommandService.promoteNextWaitingIn(reservation.slot());
     }
 
     public void cancel(long reservationId, String name) {
@@ -66,7 +64,7 @@ public class ReservationCommandService {
         reservation.validateNotStarted(LocalDateTime.now(clock));
 
         reservationDao.deleteById(reservationId);
-        promoteNextWaitingIn(reservation.slot());
+        waitingCommandService.promoteNextWaitingIn(reservation.slot());
     }
 
     public Reservation update(long reservationId, String name, LocalDate newDate, long newTimeId) {
@@ -88,7 +86,7 @@ public class ReservationCommandService {
         }
 
         if (!oldReservation.slot().isSameSlot(newSlot)) {
-            promoteNextWaitingIn(oldReservation.slot());
+            waitingCommandService.promoteNextWaitingIn(oldReservation.slot());
         }
         return updated;
     }
@@ -119,23 +117,6 @@ public class ReservationCommandService {
     private Theme findThemeReference(long themeId) {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
-    }
-
-    private void promoteNextWaitingIn(Slot slot) {
-        if (slot.isPast(LocalDateTime.now(clock))) {
-            return;
-        }
-        waitingDao.findNextInLineForUpdate(slot)
-                .ifPresent(this::promoteWaiting);
-    }
-
-    private void promoteWaiting(Waiting waiting) {
-        waitingDao.deleteById(waiting.id());
-        try {
-            reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
-        } catch (DataIntegrityViolationException e) {
-            throw new TemporaryConflictException("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-        }
     }
 
     private Reservation findReservation(long reservationId) {
