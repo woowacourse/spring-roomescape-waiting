@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +11,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeStatus;
-import roomescape.domain.TimeSlot;
 
 @Repository
 @Transactional(readOnly = true)
@@ -80,37 +77,16 @@ public class ReservationTimeRepository {
         return new ReservationTime(id, reservationTime.getStartAt());
     }
 
-    @Transactional
-    public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
-    }
-
     public Optional<ReservationTime> findTimeById(Long timeId) {
-        List<ReservationTime> reservationTimes = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "SELECT id, start_at FROM reservation_time WHERE id = ?",
                 reservationTimeRowMapper,
                 timeId
-        );
-
-        return reservationTimes.stream().findFirst();
+        ).stream().findFirst();
     }
 
-    public List<TimeSlot> findAvailableTime(Long id, LocalDate date) {
-        return jdbcTemplate.query("""
-                               SELECT t.id AS time_id, t.start_at,
-                                      CASE WHEN EXISTS (
-                                          SELECT 1 FROM reservation r
-                                          WHERE r.time_id = t.id
-                                            AND r.theme_id = ?
-                                            AND r.date = ?
-                                      ) THEN 'RESERVED' ELSE 'AVAILABLE' END AS status
-                               FROM reservation_time t
-                               ORDER BY t.start_at
-                        """,
-                (rs, rowNum) -> {
-                    ReservationTime time = reservationTimeRowMapper.mapRow(rs, rowNum);
-                    return new TimeSlot(time, ReservationTimeStatus.valueOf(rs.getString("status")));
-                }, id, date
-        );
+    @Transactional
+    public void delete(Long id) {
+        jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
     }
 }
