@@ -43,3 +43,8 @@ VALUES ('user_e', '2026-06-05', 1, 1, '2026-06-01 09:00:00');
 -- user_b: 2026-06-05/time1/theme1 대기 2번 (id=4) → 예약(id=2) + 대기 동시 보유
 INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
 VALUES ('user_b', '2026-06-05', 1, 1, '2026-06-01 10:00:00');
+
+-- 정렬 테스트용 대기 3번 유저 (2026-06-05/time1/theme1)
+-- user_f: 대기 3번 (id=5)
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
+VALUES ('user_f', '2026-06-05', 1, 1, '2026-06-01 11:00:00');

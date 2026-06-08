@@ -15,6 +15,8 @@ import roomescape.common.FixedClockConfig;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/reservation-waiting-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import(FixedClockConfig.class)
@@ -149,6 +151,36 @@ public class ReservationWaitingAcceptanceTest {
                     .when().delete("/reservations/waitings/2")
                     .then().log().all()
                     .statusCode(403);
+        }
+
+        @Test
+        @DisplayName("중간 순번의 대기자가 취소하면, 뒤에 남은 대기자들의 순번이 자동으로 하나씩 당겨진다.")
+        void reorderWaitingRankAfterCancellation() {
+            // Given
+            // 대기 3번인 user_f
+            RestAssured.given().log().all()
+                    .queryParam("name", "user_f")
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("[0].rank", is(3));
+
+            // When
+            // 대기 2번인 user_b가 본인의 대기 취소
+            RestAssured.given().log().all()
+                    .queryParam("name", "user_b")
+                    .when().delete("/reservations/waitings/4")
+                    .then().log().all()
+                    .statusCode(204);
+
+            // Then
+            // user_f의 대기 순번이 2등으로 당겨짐
+            RestAssured.given().log().all()
+                    .queryParam("name", "user_f")
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("[0].rank", is(2));
         }
     }
 }
