@@ -2,7 +2,6 @@ package roomescape.reservation.domain;
 
 import lombok.Getter;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
-import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -139,12 +138,6 @@ public class Reservation {
     public void validateCancelableByCustomer(final LocalDate today) {
         if (!isBeforeReservationDate(today)) {
             throw new ReservationCancellationException();
-        }
-    }
-
-    public void validateModifiableByCustomer(final LocalDate today) {
-        if (!isBeforeReservationDate(today)) {
-            throw new ReservationModificationException();
         }
     }
 

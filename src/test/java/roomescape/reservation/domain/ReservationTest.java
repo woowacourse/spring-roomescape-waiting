@@ -3,7 +3,6 @@ package roomescape.reservation.domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
-import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -139,38 +138,6 @@ class ReservationTest {
         );
 
         assertThatCode(() -> reservation.validateCancelableByCustomer(LocalDate.of(2026, 5, 8)))
-                .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 변경할 수 없다")
-    void customerCannotChangeReservationOnReservationDateBeforeStartTime() {
-        Reservation reservation = Reservation.of(
-                1L,
-                "브라운",
-                "customer@example.com",
-                LocalDate.of(2026, 5, 8),
-                FUTURE_TIME,
-                THEME
-        );
-
-        assertThatThrownBy(() -> reservation.validateModifiableByCustomer(LocalDate.of(2026, 5, 8)))
-                .isInstanceOf(ReservationModificationException.class);
-    }
-
-    @Test
-    @DisplayName("예약일 하루 전에는 사용자가 예약을 변경할 수 있다")
-    void customerCanChangeReservationOneDayBeforeReservationDate() {
-        Reservation reservation = Reservation.of(
-                1L,
-                "브라운",
-                "customer@example.com",
-                LocalDate.of(2026, 5, 9),
-                FUTURE_TIME,
-                THEME
-        );
-
-        assertThatCode(() -> reservation.validateModifiableByCustomer(LocalDate.of(2026, 5, 8)))
                 .doesNotThrowAnyException();
     }
 }

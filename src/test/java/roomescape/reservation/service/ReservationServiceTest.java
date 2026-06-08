@@ -10,7 +10,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
-import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
@@ -199,7 +198,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 일정을 수정한다")
+    @DisplayName("관리자가 예약 일정을 수정한다")
     void updateReservationSchedule() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -215,10 +214,8 @@ class ReservationServiceTest {
         reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(11, 0)));
 
         // when
-        ReservationResponse response = reservationService.updateByCustomer(
+        ReservationResponse response = reservationService.updateByAdmin(
                 1L,
-                "브라운",
-                "customer@example.com",
                 new ReservationUpdateRequest(changedFutureDate, 2L)
         );
 
@@ -232,23 +229,21 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 수정하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 예약을 관리자가 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingNonExistingReservation() {
         // given
         reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(11, 0)));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
                 1L,
-                "브라운",
-                "customer@example.com",
                 new ReservationUpdateRequest(LocalDate.now().plusDays(1), 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 시간으로 수정하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 예약 시간으로 관리자가 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingWithNonExistingReservationTime() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -262,17 +257,15 @@ class ReservationServiceTest {
         ));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
                 1L,
-                "브라운",
-                "customer@example.com",
                 new ReservationUpdateRequest(futureDate, 999L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    @DisplayName("현재 이전 시간으로 예약 일정을 수정하면 예외가 발생한다")
+    @DisplayName("현재 이전 시간으로 관리자가 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleBeforeNow() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -288,39 +281,11 @@ class ReservationServiceTest {
         reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(10, 0)));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
                 1L,
-                "브라운",
-                "customer@example.com",
                 new ReservationUpdateRequest(yesterday, 1L)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약 일정을 수정할 수 없다")
-    void customerCannotUpdateReservationScheduleOnReservationDateBeforeStartTime() {
-        // given
-        final LocalDate today = LocalDate.now();
-        final LocalDate tomorrow = today.plusDays(1);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                "customer@example.com",
-                today,
-                ReservationTime.of(1L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(12, 0)));
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
-                1L,
-                "브라운",
-                "customer@example.com",
-                new ReservationUpdateRequest(tomorrow, 2L)
-        ))
-                .isInstanceOf(ReservationModificationException.class);
     }
 
     @Test
@@ -351,7 +316,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 시간으로 예약 일정을 수정하면 예외가 발생한다")
+    @DisplayName("이미 예약된 시간으로 관리자가 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleToAlreadyReservedTime() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -368,17 +333,15 @@ class ReservationServiceTest {
         reservationRepository.failToUpdateByDuplicatedReservation();
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
                 1L,
-                "브라운",
-                "customer@example.com",
                 new ReservationUpdateRequest(changedFutureDate, 2L)
         ))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
     }
 
     @Test
-    @DisplayName("예약 옵션이 변경된 상태로 예약 일정을 수정하면 예외가 발생한다")
+    @DisplayName("예약 옵션이 변경된 상태로 관리자가 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleAfterOptionChanged() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -395,10 +358,8 @@ class ReservationServiceTest {
         reservationRepository.failToUpdateByChangedOption();
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
                 1L,
-                "브라운",
-                "customer@example.com",
                 new ReservationUpdateRequest(changedFutureDate, 2L)
         ))
                 .isInstanceOf(ReservationOptionChangedException.class);

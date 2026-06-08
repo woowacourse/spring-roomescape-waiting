@@ -96,19 +96,6 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public ReservationResponse updateByCustomer(
-            final Long reservationId,
-            final String customerName,
-            final String customerEmail,
-            final ReservationUpdateRequest data
-    ) {
-        final Reservation originReservation = getReservation(reservationId);
-        validateOwnedByCustomer(originReservation, customerName, customerEmail);
-        originReservation.validateModifiableByCustomer(LocalDate.now());
-
-        return updateSchedule(data, originReservation);
-    }
-
     public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest data) {
         final Reservation originReservation = getReservation(reservationId);
 

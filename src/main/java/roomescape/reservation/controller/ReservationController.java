@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
-import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
@@ -54,22 +53,6 @@ public class ReservationController {
         final ReservationResponse result = reservationService.create(request);
         return ResponseEntity.created(URI.create("/reservations"))
                 .body(result);
-    }
-
-    @PutMapping("/{reservation-id}")
-    public ResponseEntity<ReservationResponse> update(
-            @PathVariable("reservation-id") Long reservationId,
-            @RequestParam("customer-name") String customerName,
-            @RequestParam("customer-email") String customerEmail,
-            @Valid @RequestBody ReservationUpdateRequest request
-    ) {
-        final ReservationResponse result = reservationService.updateByCustomer(
-                reservationId,
-                customerName,
-                customerEmail,
-                request
-        );
-        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{reservation-id}")

@@ -104,62 +104,6 @@
   </div>
 </main>
 
-<!-- ── 예약 변경 모달 ─────────────────────────────────────── -->
-<div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
-  <div class="modal modal-edit">
-    <div class="modal-header">
-      <h2 class="modal-title" id="edit-modal-title">예약 변경</h2>
-      <button class="modal-close" id="edit-modal-close-btn" aria-label="닫기">&times;</button>
-    </div>
-    <div class="modal-body">
-
-      <!-- 변경 불가 정보 -->
-      <div class="edit-fixed-info">
-        <div class="edit-fixed-item">
-          <span class="summary-item-label">예약자</span>
-          <span class="summary-item-value" id="edit-modal-name">—</span>
-        </div>
-        <div class="edit-fixed-item">
-          <span class="summary-item-label">테마</span>
-          <span class="summary-item-value" id="edit-modal-theme">—</span>
-        </div>
-      </div>
-
-      <div class="edit-section-label">변경할 날짜 선택</div>
-
-      <!-- 달력 -->
-      <div class="edit-calendar-wrap">
-        <div class="calendar-nav">
-          <button class="calendar-nav-btn" id="edit-cal-prev" aria-label="이전 달">&#8249;</button>
-          <span class="calendar-month-label" id="edit-cal-month-label"></span>
-          <button class="calendar-nav-btn" id="edit-cal-next" aria-label="다음 달">&#8250;</button>
-        </div>
-        <div class="calendar-grid edit-calendar-grid" id="edit-calendar-grid">
-          <div class="calendar-day-label">일</div>
-          <div class="calendar-day-label">월</div>
-          <div class="calendar-day-label">화</div>
-          <div class="calendar-day-label">수</div>
-          <div class="calendar-day-label">목</div>
-          <div class="calendar-day-label">금</div>
-          <div class="calendar-day-label">토</div>
-        </div>
-      </div>
-
-      <div class="edit-section-label" style="margin-top:18px">변경할 시간 선택</div>
-
-      <!-- 시간 슬롯 -->
-      <div id="edit-time-slots-wrap">
-        <div class="empty-state edit-empty-state">날짜를 먼저 선택하세요.</div>
-      </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" id="edit-modal-cancel-btn">취소</button>
-      <button class="btn-primary" id="confirm-edit-btn" disabled>변경하기</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── 대기 취소 모달 ─────────────────────────────────────── -->
 <div class="modal-overlay" id="cancel-waiting-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-waiting-modal-title">
   <div class="modal">
