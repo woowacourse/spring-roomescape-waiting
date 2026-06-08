@@ -35,4 +35,6 @@ public interface ReservationRepository {
     boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId);
 
     Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId);
+
+    Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId);
 }

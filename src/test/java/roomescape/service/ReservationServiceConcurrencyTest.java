@@ -75,6 +75,52 @@ class ReservationServiceConcurrencyTest {
         assertThat(findStatus(secondReservationId)).isEqualTo("PENDING");
     }
 
+    @Test
+    @DisplayName("확정 예약 취소와 첫 번째 대기 예약 변경이 동시에 실행되어도 제한 시간 안에 완료된다.")
+    void cancelConfirmedReservationAndModifyFirstPendingReservationConcurrently() throws Exception {
+        long firstThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(30), 1L);
+        long secondThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(31), 2L);
+        long confirmedReservationId = insertReservation("확정", "CONFIRMED", firstThemeSlotId);
+        long firstPendingReservationId = insertReservation("첫대기", "PENDING", firstThemeSlotId);
+
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        Future<Void> cancelFuture = cancelReservationAsync(
+                ready,
+                start,
+                confirmedReservationId,
+                "확정"
+        );
+        Future<Reservation> modifyFuture = modifyReservationAsync(
+                ready,
+                start,
+                firstPendingReservationId,
+                secondThemeSlotId
+        );
+
+        assertThat(ready.await(1, TimeUnit.SECONDS)).isTrue();
+        start.countDown();
+        cancelFuture.get(5, TimeUnit.SECONDS);
+        modifyFuture.get(5, TimeUnit.SECONDS);
+
+        assertThat(findStatus(confirmedReservationId)).isEqualTo("CANCELLED");
+        assertThat(findThemeSlotId(firstPendingReservationId)).isEqualTo(secondThemeSlotId);
+    }
+
+    private Future<Void> cancelReservationAsync(
+            CountDownLatch ready,
+            CountDownLatch start,
+            long reservationId,
+            String name
+    ) {
+        return executorService.submit(() -> {
+            ready.countDown();
+            start.await();
+            reservationService.cancelReservation(reservationId, name);
+            return null;
+        });
+    }
+
     private Future<Reservation> modifyReservationAsync(
             CountDownLatch ready,
             CountDownLatch start,

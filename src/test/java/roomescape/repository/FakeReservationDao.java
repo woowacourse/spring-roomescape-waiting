@@ -170,6 +170,11 @@ public class FakeReservationDao implements ReservationRepository {
                 .findFirst();
     }
 
+    @Override
+    public Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId) {
+        return findFirstPendingByThemeSlotId(themeSlotId);
+    }
+
     private Reservation copy(Reservation reservation) {
         return new Reservation(
                 reservation.getId(),

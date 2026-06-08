@@ -64,8 +64,7 @@ public class ReservationService {
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+            lockFirstPendingReservationThenThemeSlot(reservation);
         }
 
         reservationRepository.deleteById(reservationId);
@@ -106,8 +105,7 @@ public class ReservationService {
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+            lockFirstPendingReservationThenThemeSlot(reservation);
         }
 
         reservation.cancel();
@@ -180,6 +178,12 @@ public class ReservationService {
         if (!reservation.isModifiableStatus()) {
             throw new CustomException(ErrorCode.INVALID_MODIFY_COMMAND);
         }
+    }
+
+    private void lockFirstPendingReservationThenThemeSlot(Reservation reservation) {
+        reservationRepository.findFirstPendingByThemeSlotIdForUpdate(reservation.getThemeSlotId());
+        themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
+                .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
