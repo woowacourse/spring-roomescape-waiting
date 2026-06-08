@@ -41,7 +41,6 @@ CREATE TABLE reservation_slot
     UNIQUE (date_id, time_id, theme_id)
 );
 
-CREATE INDEX id_slot_date ON reservation_slot (date_id);
 CREATE INDEX id_slot_time ON reservation_slot (time_id);
 CREATE INDEX id_slot_theme ON reservation_slot (theme_id);
 
@@ -54,5 +53,4 @@ CREATE TABLE reservation
     UNIQUE (slot_id, name)
 );
 
-CREATE INDEX idx_reservation_slot ON reservation (slot_id);
 CREATE INDEX idx_reservation_name ON reservation (name);
