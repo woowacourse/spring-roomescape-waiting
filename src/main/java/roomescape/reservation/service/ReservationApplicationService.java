@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.domain.exception.WaitingExistsForSlotException;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
@@ -21,6 +23,7 @@ import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.waiting.domain.exception.WaitingNotFoundException;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 import roomescape.waiting.service.WaitingService;
 import roomescape.waiting.service.dto.response.WaitingResponse;
@@ -142,9 +145,12 @@ public class ReservationApplicationService {
                 reservation.getTimeId(),
                 reservation.getThemeId()
             );
-        } catch (RuntimeException e) {
-            log.error("대기 승격 실패 - slot=[{} time={} theme={}]",
-                reservation.getDate(), reservation.getTimeId(), reservation.getThemeId(), e);
+        } catch (WaitingNotFoundException | ReservationAlreadyExistsException | ReservationOptionChangedException e) {
+            log.warn("대기 승격 실패 - reservationId={} slot=[date={} time={} theme={}]",
+                reservation.getId(), reservation.getDate(), reservation.getTimeId(), reservation.getThemeId(), e);
+        } catch (Exception e) {
+            log.error("대기 승격 중 예상치 못한 오류 - reservationId={} slot=[date={} time={} theme={}]",
+                reservation.getId(), reservation.getDate(), reservation.getTimeId(), reservation.getThemeId(), e);
         }
     }
 }

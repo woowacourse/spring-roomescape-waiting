@@ -13,6 +13,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.exception.PastReservationWaitingCancellationException;
+import roomescape.waiting.domain.exception.WaitingAlreadyExistsException;
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
 import roomescape.waiting.domain.exception.WaitingSlotDuplicateException;
 import roomescape.waiting.repository.WaitingRepository;
@@ -41,7 +42,7 @@ public class WaitingService {
         );
 
         try {
-            return waitingRepository.save(waiting);
+            return saveWaiting(waiting);
         } catch (DuplicateKeyException exception) {
             throw new WaitingSlotDuplicateException();
         }
@@ -57,12 +58,11 @@ public class WaitingService {
             throw new PastReservationWaitingCancellationException();
         }
 
-        waitingRepository.deleteById(waitingId);
+        deleteWaiting(waitingId);
     }
 
     public void deleteByIdForPromotion(final long waitingId) {
-        final Waiting waiting = getWaitingById(waitingId);
-        waitingRepository.deleteById(waiting.getId());
+        deleteWaiting(waitingId);
     }
 
     @Transactional(readOnly = true)
@@ -100,5 +100,20 @@ public class WaitingService {
         final long themeId
     ) {
         return waitingRepository.existsBySlot(reservationDate, timeId, themeId);
+    }
+
+    private Waiting saveWaiting(final Waiting waiting) {
+        try {
+            return waitingRepository.save(waiting);
+        } catch (DuplicateKeyException exception) {
+            throw new WaitingAlreadyExistsException(exception);
+        }
+    }
+
+    private void deleteWaiting(final long waitingId) {
+        final boolean deleted = waitingRepository.deleteById(waitingId);
+        if (!deleted) {
+            throw new WaitingNotFoundException();
+        }
     }
 }
