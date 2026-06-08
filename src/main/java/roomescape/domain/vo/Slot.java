@@ -26,7 +26,7 @@ public class Slot {
     }
 
     public boolean isPast(LocalDateTime now) {
-        return time.isReservationBefore(now, date);
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
     public boolean isInStore(Store store) {
