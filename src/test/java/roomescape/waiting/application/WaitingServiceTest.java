@@ -252,6 +252,25 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("예약이 없는 슬롯의 예약 대기를 승격한다")
+    void promoteWaitingWithoutReservation_success() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", date, savedTime, savedTheme)
+        );
+
+        // when
+        waitingService.promoteWaitingWithoutReservation();
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        then(waitingReference).should().promoteToReservation(savedWaiting);
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기를 취소한다")
     void cancelWaiting_success() {
         // given
