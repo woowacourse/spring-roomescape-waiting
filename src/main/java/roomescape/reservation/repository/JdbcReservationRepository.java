@@ -178,13 +178,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                 UPDATE reservation
                 SET 
                     slot_id = :slotId,
-                    status = :status
+                    status = :status,
+                    reserved_at = :reserved_at
                 WHERE id = :id
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("slotId", reservation.getSlotId())
                 .addValue("status", reservation.getStatus().name())
-                .addValue("id", reservation.getId());
+                .addValue("id", reservation.getId())
+                .addValue("reserved_at", reservation.getReservedAt());
         return jdbcTemplate.update(sql, params) > 0;
     }
 

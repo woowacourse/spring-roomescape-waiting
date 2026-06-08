@@ -45,12 +45,14 @@ public class Reservation {
         validateNotCanceled();
         this.slotId = newSlotId;
         this.status = status;
+        this.reservedAt = LocalDateTime.now();
     }
 
     public void rescheduleByManager(Long newSlotId, ReservationStatus status) {
         validateNotCanceled();
         this.slotId = newSlotId;
         this.status = status;
+        this.reservedAt = LocalDateTime.now();
     }
 
     private static void validateName(String name) {

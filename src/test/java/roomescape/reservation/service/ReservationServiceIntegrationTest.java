@@ -21,8 +21,7 @@ import roomescape.time.fixture.ReservationTimeFixture;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
@@ -272,6 +271,48 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
                     .isEqualTo(RESERVED);
         }
 
+    }
+
+    @Test
+    @DisplayName("예약 변경 시, 가장 뒤 대기열로 이동한다.")
+    void reschedule() {
+        // when
+        saveReservation(name, slot1);
+        saveReservation("Slot2 예약자", slot2);
+        saveWaitReservation("Slot2 대기자 순번1", slot2);
+
+        // when
+        reservationService.reschedule(slot1.getId(), slot2.getId(), name);
+
+        // then
+        ReservationWithSlotInformation actual = reservationService.readAllByName(name).stream()
+                .filter(r -> r.name().equals(name))
+                .findFirst()
+                .get();
+
+        Assertions.assertThat(actual.waitingTurn())
+                .isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("관리자가 예약을 변경해도, 가장 뒤 대기열로 이동한다.")
+    void rescheduleByManger() {
+        // when
+        saveReservation(name, slot1);
+        saveReservation("Slot2 예약자", slot2);
+        saveWaitReservation("Slot2 대기자 순번1", slot2);
+
+        // when
+        reservationService.rescheduleByManager(slot1.getId(), slot2.getId(), name);
+
+        // then
+        ReservationWithSlotInformation actual = reservationService.readAllByName(name).stream()
+                .filter(r -> r.name().equals(name))
+                .findFirst()
+                .get();
+
+        Assertions.assertThat(actual.waitingTurn())
+                .isEqualTo(2);
     }
 
 }
