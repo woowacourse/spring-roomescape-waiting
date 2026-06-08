@@ -161,6 +161,25 @@ public class WaitingDao {
         );
     }
 
+    public List<Waiting> findUnreservedWaiting() {
+        String sql = """
+                SELECT w.date,
+                       rt.id AS time_id, rt.start_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM waiting w
+                INNER JOIN reservation_time rt ON w.time_id = rt.id
+                INNER JOIN theme t ON w.theme_id = t.id
+                LEFT JOIN reservation r
+                       ON w.date = r.date AND w.time_id = r.time_id AND w.theme_id = r.theme_id
+                WHERE r.id IS NULL
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                WAITING_ROW_MAPPER
+        );
+    }
+
     public boolean existsByUserNameAndSlot(String userName, EventSlot eventSlot) {
         String sql = """
                 SELECT EXISTS(
