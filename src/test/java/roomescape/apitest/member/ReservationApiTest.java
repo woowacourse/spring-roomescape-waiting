@@ -156,6 +156,27 @@ class ReservationApiTest {
     }
 
     @Test
+    @DisplayName("사용자가 예약을 취소하면 다른 대기자의 순번이 줄어든다.")
+    void deleteReservationAndPromoteWaiting_Success() {
+        int expectedSequence = 1;
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + initialReservationSize + "?userName=" + userName)
+                .then().log().all()
+                .statusCode(204);
+
+        JsonPath jsonPath = RestAssured.given().log().all()
+                .when().get("/reservations?userName=" + "로운")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath();
+
+        int sequence = jsonPath.getInt("waitingDetailResponses[0].sequence");
+
+        assertThat(sequence).isEqualTo(expectedSequence);
+    }
+
+    @Test
     @DisplayName("예약 등록 시, 사용자 이름이 null 이면 400 에러를 반환한다.")
     void registerReservation_WhenUserNameIsNull_Return400() {
         Map<String, Object> params = new HashMap<>();
