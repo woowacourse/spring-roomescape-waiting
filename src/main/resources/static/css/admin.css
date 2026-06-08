@@ -166,6 +166,12 @@ body {
     border-color: var(--danger-hover);
 }
 
+.btn--sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+}
+
 .btn--ghost {
     margin-top: 0.75rem;
 }

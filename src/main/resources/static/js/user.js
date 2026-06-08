@@ -65,11 +65,19 @@
     async function fetchJson(url, options) {
         const res = await fetch(url, options);
         if (!res.ok) {
-            const t = await res.text();
-            throw new Error(t || res.statusText);
+            const body = await res.text();
+            let msg = body || res.statusText;
+            try {
+                const json = JSON.parse(body);
+                if (json.message) msg = json.message;
+            } catch (e) {
+            }
+            throw new Error(msg);
         }
         if (res.status === 204) return null;
-        return res.json();
+        const ct = res.headers.get("content-type") || "";
+        if (ct.includes("application/json")) return res.json();
+        return null;
     }
 
     // 백엔드: GET /times/available-times?themeId=&date=
@@ -586,6 +594,7 @@
         editingReservation = r;
         myEditPanel.classList.remove("is-hidden");
         myEditDate.value = r.date || "";
+        myEditDate.min = formatYmd(new Date()); // 과거 날짜 선택 방지
         setMyMsg(myEditMsg, "", true);
         myEditTime.innerHTML = '<option value="">로딩 중…</option>';
         try {

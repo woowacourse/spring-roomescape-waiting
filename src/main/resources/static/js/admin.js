@@ -35,8 +35,14 @@
     async function fetchJson(url, options) {
         const res = await fetch(url, options);
         if (!res.ok) {
-            const t = await res.text();
-            throw new Error(t || res.statusText);
+            const body = await res.text();
+            let msg = body || res.statusText;
+            try {
+                const json = JSON.parse(body);
+                if (json.message) msg = json.message;
+            } catch (e) {
+            }
+            throw new Error(msg);
         }
         if (res.status === 204) return null;
         const ct = res.headers.get("content-type") || "";
@@ -50,7 +56,7 @@
         return `${parts[0]}:${parts[1] || "00"}`;
     }
 
-    // --- 테마 관리 로직 (서버 데이터만 사용)[cite: 14] ---
+    // --- 테마 관리 로직 (서버 데이터만 사용) ---
     async function loadThemesIntoDeleteSelect() {
         themeDeleteSelect.innerHTML = "";
         try {
@@ -89,7 +95,15 @@
             formData.append("file", file);
 
             const res = await fetch("/admin/themes", {method: "POST", body: formData});
-            if (!res.ok) throw new Error(await res.text() || "등록 실패");
+            if (!res.ok) {
+                const body = await res.text();
+                let msg = body || "등록 실패";
+                try {
+                    const json = JSON.parse(body);
+                    if (json.message) msg = json.message;
+                } catch (e) {}
+                throw new Error(msg);
+            }
 
             setMsg(themeCreateMsg, "테마가 등록되었습니다.", true);
             themeCreateForm.reset();
@@ -107,11 +121,11 @@
             setMsg(themeDeleteMsg, "삭제되었습니다.", true);
             await loadThemesIntoDeleteSelect(); // 삭제 후 목록 갱신
         } catch (e) {
-            setMsg(themeDeleteMsg, "삭제 실패", false);
+            setMsg(themeDeleteMsg, e.message || "삭제 실패", false);
         }
     });
 
-    // --- 시간 및 예약 관리 로직 (기존 유지)[cite: 14] ---
+    // --- 시간 및 예약 관리 로직 ---
     async function loadTimesIntoDeleteSelect() {
         if (!timeDeleteSelect) return;
         timeDeleteSelect.innerHTML = "";
@@ -162,13 +176,7 @@
             setMsg(timeDeleteMsg, "삭제되었습니다.", true);
             await loadTimesIntoDeleteSelect();
         } catch (e) {
-            // 서버가 JSON 에러 응답을 반환하는 경우 메시지 파싱
-            try {
-                const parsed = JSON.parse(e.message);
-                setMsg(timeDeleteMsg, parsed.message || "삭제 실패", false);
-            } catch {
-                setMsg(timeDeleteMsg, e.message || "삭제 실패", false);
-            }
+            setMsg(timeDeleteMsg, e.message || "삭제 실패", false);
         }
     });
 
@@ -178,7 +186,7 @@
         try {
             const list = await fetchJson("/reservations");
             if (!list || !list.length) {
-                reservationsBody.innerHTML = '<tr><td colspan="5">예약이 없습니다.</td></tr>';
+                reservationsBody.innerHTML = '<tr><td colspan="7">예약이 없습니다.</td></tr>';
                 return;
             }
             list.forEach((r) => {
@@ -191,10 +199,32 @@
                     td.textContent = text;
                     tr.appendChild(td);
                 });
+
+                // 관리 컬럼: 삭제 버튼 추가
+                const actionTd = document.createElement("td");
+                const deleteBtn = document.createElement("button");
+                deleteBtn.type = "button";
+                deleteBtn.className = "btn btn--danger btn--sm";
+                deleteBtn.textContent = "삭제";
+                deleteBtn.onclick = () => onDeleteReservation(r.id);
+                actionTd.appendChild(deleteBtn);
+                tr.appendChild(actionTd);
+
                 reservationsBody.appendChild(tr);
             });
         } catch (e) {
             setMsg(reservationsMsg, "로드 실패", false);
+        }
+    }
+
+    async function onDeleteReservation(id) {
+        if (!id || !confirm("예약을 삭제하시겠습니까?")) return;
+        try {
+            await fetchJson(`/reservations/${id}`, {method: "DELETE"});
+            setMsg(reservationsMsg, "삭제되었습니다.", true);
+            await loadReservations();
+        } catch (e) {
+            setMsg(reservationsMsg, e.message || "삭제 실패", false);
         }
     }
 
