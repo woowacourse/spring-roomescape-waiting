@@ -65,12 +65,11 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaiting(Long id, String name) {
-        Waiting waiting = waitingRepository.findById(id).orElse(null);
-        if (waiting == null) {
-            return;
-        }
-        waiting.validateOwner(name);
-        waitingRepository.deleteById(id);
+        waitingRepository.findById(id)
+            .ifPresent(waiting -> {
+                waiting.validateOwner(name);
+                waitingRepository.deleteById(id);
+            });
     }
 
     @Transactional(readOnly = true)
