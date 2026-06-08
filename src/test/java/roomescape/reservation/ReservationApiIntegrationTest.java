@@ -166,10 +166,16 @@ class ReservationApiIntegrationTest {
                 .body("date", equalTo("2028-05-07"))
                 .body("time.id", equalTo(secondTimeId.intValue()));
 
-        String oldReservationOwner = jdbcTemplate.queryForObject(
-                "SELECT name FROM reservation WHERE id = ?",
+        String promotedReservationOwner = jdbcTemplate.queryForObject(
+                """
+                        SELECT name
+                        FROM reservation
+                        WHERE date = ? AND theme_id = ? AND time_id = ?
+                        """,
                 String.class,
-                reservationId
+                LocalDate.of(2028, 5, 6),
+                themeId,
+                firstTimeId
         );
         Integer waitingCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM waiting WHERE id = ?",
@@ -177,8 +183,41 @@ class ReservationApiIntegrationTest {
                 waitingId
         );
 
-        assertThat(oldReservationOwner).isEqualTo("카야");
+        assertThat(promotedReservationOwner).isEqualTo("카야");
         assertThat(waitingCount).isZero();
+    }
+
+    @DisplayName("예약 변경 시 첫 번째 대기자가 예약으로 전환되면 다음 대기자의 순번이 1번이 됩니다.")
+    @Test
+    void update_reservation_with_waiting_reorders_remaining_waitings() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long firstTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long secondTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2028, 5, 6);
+        Long reservationId = testHelper.insertReservation("스타크", date, themeId, firstTimeId);
+        testHelper.insertWaiting("카야", date, themeId, firstTimeId);
+        testHelper.insertWaiting("타스", date, themeId, firstTimeId);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "스타크");
+        params.put("date", "2028-05-07");
+        params.put("timeId", String.valueOf(secondTimeId));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", equalTo("타스"))
+                .body("[0].order", equalTo(1));
     }
 
     @DisplayName("본인 예약 취소 API를 테스트합니다.")
@@ -193,6 +232,81 @@ class ReservationApiIntegrationTest {
                 .when().delete("/reservations/{id}", reservationId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("예약 취소 시 첫 번째 대기자가 예약자로 전환됩니다.")
+    @Test
+    void cancel_reservation_promotes_first_waiting() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2028, 5, 6);
+        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        Long firstWaitingId = testHelper.insertWaiting("카야", date, themeId, timeId);
+        Long secondWaitingId = testHelper.insertWaiting("타스", date, themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "스타크")
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        Integer deletedReservationCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id = ?",
+                Integer.class,
+                reservationId
+        );
+        String promotedReservationOwner = jdbcTemplate.queryForObject(
+                """
+                        SELECT name
+                        FROM reservation
+                        WHERE date = ? AND theme_id = ? AND time_id = ?
+                        """,
+                String.class,
+                date,
+                themeId,
+                timeId
+        );
+        Integer firstWaitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE id = ?",
+                Integer.class,
+                firstWaitingId
+        );
+        Integer secondWaitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE id = ?",
+                Integer.class,
+                secondWaitingId
+        );
+
+        assertThat(deletedReservationCount).isZero();
+        assertThat(promotedReservationOwner).isEqualTo("카야");
+        assertThat(firstWaitingCount).isZero();
+        assertThat(secondWaitingCount).isEqualTo(1);
+    }
+
+    @DisplayName("첫 번째 대기자가 예약으로 전환되면 다음 대기자의 순번이 1번이 됩니다.")
+    @Test
+    void promotion_reorders_remaining_waitings() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2028, 5, 6);
+        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        testHelper.insertWaiting("카야", date, themeId, timeId);
+        testHelper.insertWaiting("타스", date, themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "스타크")
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", equalTo("타스"))
+                .body("[0].order", equalTo(1));
     }
 
     @DisplayName("동일한 예약 요청이 동시에 들어오면 1건만 성공하고 나머지는 409를 반환한다.")

@@ -21,6 +21,7 @@ import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
+import roomescape.reservation.application.validator.ReservationValidator;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
 import roomescape.reservationtime.application.service.ReservationTimeService;
@@ -53,9 +54,16 @@ class ReservationServiceTest {
                 new FakeAvailableReservationTimeRepository(timeRepository, reservationRepository);
         timeService = new ReservationTimeService(timeRepository, availableReservationTimeRepository,
                 reservationQueryService);
-        waitingService = new WaitingService(fakeWaitingRepository);
-        reservationService = new ReservationService(reservationRepository, waitingService, themeService,
-                timeService);
+        waitingService = new WaitingService(fakeWaitingRepository, reservationRepository);
+        ReservationValidator reservationValidator = new ReservationValidator(reservationRepository);
+        reservationService = new ReservationService(
+                reservationRepository,
+                waitingService,
+                themeService,
+                timeService,
+                event -> {
+                },
+                reservationValidator);
     }
 
     @DisplayName("사용자의 방탈출 예약 시간 추가를 테스트합니다.")

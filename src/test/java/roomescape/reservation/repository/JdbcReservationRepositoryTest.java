@@ -1,5 +1,7 @@
 package roomescape.reservation.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.assertj.core.api.SoftAssertions;
@@ -49,5 +51,35 @@ class JdbcReservationRepositoryTest {
             assertSoftly.assertThat(savedReservation.getThemeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedReservation.getTimeId()).isEqualTo(timeId);
         });
+    }
+
+    @DisplayName("이름과 예약 슬롯이 모두 일치하는 예약의 존재 여부를 조회합니다.")
+    @Test
+    void exists_by_name_and_schedule() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        LocalDate date = LocalDate.of(2026, 5, 4);
+        reservationRepository.save(Reservation.builder()
+                .name("카야")
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .build());
+
+        Boolean exists = reservationRepository.existsByNameAndDateAndThemeAndTime(
+                "카야",
+                date,
+                themeId,
+                timeId
+        );
+        Boolean existsWithOtherName = reservationRepository.existsByNameAndDateAndThemeAndTime(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
+
+        assertThat(exists).isTrue();
+        assertThat(existsWithOtherName).isFalse();
     }
 }

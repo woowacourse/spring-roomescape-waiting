@@ -23,6 +23,8 @@ public interface ReservationRepository {
 
     Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId);
 
+    Boolean existsByNameAndDateAndThemeAndTime(String name, LocalDate date, Long themeId, Long timeId);
+
     Boolean existsByDateAndThemeAndTimeExcludingId(LocalDate date, Long themeId, Long timeId, Long id);
 
     void updateWaitingOwner(Long id, String name);
