@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.domain.Reservation;
 
 import java.sql.PreparedStatement;
@@ -32,6 +34,9 @@ class ReservationServiceConcurrencyTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     private final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     @AfterEach
@@ -49,23 +54,18 @@ class ReservationServiceConcurrencyTest {
         long firstReservationId = insertReservation("브라운", "PENDING", firstThemeSlotId);
         long secondReservationId = insertReservation("네오", "PENDING", secondThemeSlotId);
 
-        CountDownLatch ready = new CountDownLatch(2);
-        CountDownLatch start = new CountDownLatch(1);
-        Future<Reservation> firstFuture = modifyReservationAsync(
-                ready,
-                start,
+        CountDownLatch lockedReservations = new CountDownLatch(2);
+        Future<Reservation> firstFuture = modifyReservationAfterLockAsync(
+                lockedReservations,
                 firstReservationId,
                 secondThemeSlotId
         );
-        Future<Reservation> secondFuture = modifyReservationAsync(
-                ready,
-                start,
+        Future<Reservation> secondFuture = modifyReservationAfterLockAsync(
+                lockedReservations,
                 secondReservationId,
                 firstThemeSlotId
         );
 
-        assertThat(ready.await(1, TimeUnit.SECONDS)).isTrue();
-        start.countDown();
         firstFuture.get(5, TimeUnit.SECONDS);
         secondFuture.get(5, TimeUnit.SECONDS);
 
@@ -83,23 +83,18 @@ class ReservationServiceConcurrencyTest {
         long confirmedReservationId = insertReservation("확정", "CONFIRMED", firstThemeSlotId);
         long firstPendingReservationId = insertReservation("첫대기", "PENDING", firstThemeSlotId);
 
-        CountDownLatch ready = new CountDownLatch(2);
-        CountDownLatch start = new CountDownLatch(1);
-        Future<Void> cancelFuture = cancelReservationAsync(
-                ready,
-                start,
+        CountDownLatch lockedReservations = new CountDownLatch(2);
+        Future<Void> cancelFuture = cancelReservationAfterLockAsync(
+                lockedReservations,
                 confirmedReservationId,
                 "확정"
         );
-        Future<Reservation> modifyFuture = modifyReservationAsync(
-                ready,
-                start,
+        Future<Reservation> modifyFuture = modifyReservationAfterLockAsync(
+                lockedReservations,
                 firstPendingReservationId,
                 secondThemeSlotId
         );
 
-        assertThat(ready.await(1, TimeUnit.SECONDS)).isTrue();
-        start.countDown();
         cancelFuture.get(5, TimeUnit.SECONDS);
         modifyFuture.get(5, TimeUnit.SECONDS);
 
@@ -107,31 +102,57 @@ class ReservationServiceConcurrencyTest {
         assertThat(findThemeSlotId(firstPendingReservationId)).isEqualTo(secondThemeSlotId);
     }
 
-    private Future<Void> cancelReservationAsync(
-            CountDownLatch ready,
-            CountDownLatch start,
+    private Future<Void> cancelReservationAfterLockAsync(
+            CountDownLatch lockedReservations,
             long reservationId,
             String name
     ) {
         return executorService.submit(() -> {
-            ready.countDown();
-            start.await();
-            reservationService.cancelReservation(reservationId, name);
+            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+            transactionTemplate.executeWithoutResult(status -> {
+                lockReservationForUpdate(reservationId);
+                waitUntilAllReservationsLocked(lockedReservations);
+                reservationService.cancelReservation(reservationId, name);
+            });
             return null;
         });
     }
 
-    private Future<Reservation> modifyReservationAsync(
-            CountDownLatch ready,
-            CountDownLatch start,
+    private Future<Reservation> modifyReservationAfterLockAsync(
+            CountDownLatch lockedReservations,
             long reservationId,
             long targetThemeSlotId
     ) {
         return executorService.submit(() -> {
-            ready.countDown();
-            start.await();
-            return reservationService.modifyReservation(reservationId, targetThemeSlotId);
+            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+            return transactionTemplate.execute(status -> {
+                lockReservationForUpdate(reservationId);
+                waitUntilAllReservationsLocked(lockedReservations);
+                return reservationService.modifyReservation(reservationId, targetThemeSlotId);
+            });
         });
+    }
+
+    private void lockReservationForUpdate(long reservationId) {
+        jdbcTemplate.queryForObject("""
+                        SELECT id
+                        FROM reservation
+                        WHERE id = ?
+                        FOR UPDATE
+                        """,
+                Long.class,
+                reservationId
+        );
+    }
+
+    private void waitUntilAllReservationsLocked(CountDownLatch lockedReservations) {
+        lockedReservations.countDown();
+        try {
+            assertThat(lockedReservations.await(1, TimeUnit.SECONDS)).isTrue();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 
     private long insertThemeSlot(LocalDate date, long timeId) {
