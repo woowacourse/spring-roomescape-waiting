@@ -43,6 +43,10 @@ public class Waiting {
         return time.isReservationBefore(now, date);
     }
 
+    public Slot getSlot() {
+        return new Slot(date, time, theme, storeId);
+    }
+
     public Long getId() {
         return id;
     }

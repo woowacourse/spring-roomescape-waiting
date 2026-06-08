@@ -127,6 +127,10 @@ public class Reservation {
         return Objects.equals(this.member.getId(), memberId);
     }
 
+    public Slot getSlot() {
+        return new Slot(date, time, theme, storeId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Reservation that)) {
