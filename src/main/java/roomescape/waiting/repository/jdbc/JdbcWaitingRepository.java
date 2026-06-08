@@ -117,7 +117,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findEarliestBySlot(final LocalDate date, final long timeId, final long themeId) {
+    public Optional<Waiting> findEarliestBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
         final String sql = """
             SELECT w.id, w.customer_name, w.reservation_date, w.created_at,
                    t.id AS t_id, t.start_at AS t_time,
@@ -128,6 +128,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
             WHERE w.reservation_date = ? AND w.time_id = ? AND w.theme_id = ?
             ORDER BY w.created_at ASC
             LIMIT 1
+            FOR UPDATE
             """;
         return jdbcTemplate.query(sql, WAITING_ROW_MAPPER, Date.valueOf(date), timeId, themeId)
             .stream()

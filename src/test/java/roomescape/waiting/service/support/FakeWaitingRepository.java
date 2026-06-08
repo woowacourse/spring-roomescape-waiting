@@ -42,7 +42,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findEarliestBySlot(final LocalDate date, final long timeId, final long themeId) {
+    public Optional<Waiting> findEarliestBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
         return waitings.stream()
             .filter(w -> w.getReservationDate().equals(date))
             .filter(w -> w.getTime().getId().equals(timeId))

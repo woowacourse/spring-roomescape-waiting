@@ -66,13 +66,12 @@ public class WaitingService {
             .orElseThrow(WaitingNotFoundException::new);
     }
 
-    @Transactional(readOnly = true)
     public Optional<Waiting> findEarliestWaitingBySlot(
         final LocalDate reservationDate,
         final long timeId,
         final long themeId
     ) {
-        return waitingRepository.findEarliestBySlot(reservationDate, timeId, themeId);
+        return waitingRepository.findEarliestBySlotForUpdate(reservationDate, timeId, themeId);
     }
 
     @Transactional(readOnly = true)
