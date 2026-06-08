@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.SlotDao;
@@ -32,13 +33,15 @@ public class ReservationService {
     private final ThemeDao themeDao;
     private final SlotDao slotDao;
     private final Clock clock;
+    private final WaitingPromotionService waitingPromotionService;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, Clock clock) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, Clock clock, WaitingPromotionService waitingPromotionService) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.slotDao = slotDao;
         this.clock = clock;
+        this.waitingPromotionService = waitingPromotionService;
     }
 
     public ReservationResponse create(ReservationRequest request) {
@@ -46,7 +49,7 @@ public class ReservationService {
         Theme theme = getTheme(request.themeId());
         LocalDateTime currentDateTime = LocalDateTime.now(clock);
 
-        Slot slot = createSlot(request.date(),reservationTime,theme);
+        Slot slot = createSlot(request.date(), reservationTime, theme);
         Reservation reservation = request.toReservation(slot, currentDateTime);
         validateUniqueReservation(theme.getId(), reservation.getDate(), reservationTime.getId());
 
@@ -56,7 +59,7 @@ public class ReservationService {
 
     private Slot createSlot(LocalDate date, ReservationTime reservationTime, Theme theme) {
         Optional<Slot> dateAndTimeAndTheme = slotDao.findByDateAndTimeAndTheme(date, reservationTime.getId(), theme.getId());
-        return dateAndTimeAndTheme.orElseGet(() -> slotDao.save(new Slot(date,reservationTime,theme)));
+        return dateAndTimeAndTheme.orElseGet(() -> slotDao.save(new Slot(date, reservationTime, theme)));
     }
 
     private void validateUniqueReservation(long themeId, LocalDate date, long timeId) {
@@ -130,10 +133,13 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(long reservationId) {
         Reservation reservation = getReservation(reservationId);
         validateModifiable(reservation);
         reservationDao.delete(reservationId);
+
+        waitingPromotionService.promoteWaiting(reservation.getSlot().getId());
     }
 
     private Reservation getReservation(long reservationId) {

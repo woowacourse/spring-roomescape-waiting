@@ -1,19 +1,16 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
+import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
@@ -25,6 +22,16 @@ import roomescape.exception.domain.ReservationException;
 import roomescape.exception.domain.ReservationTimeException;
 import roomescape.exception.domain.ThemeException;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 class ReservationServiceTest extends ServiceTest {
 
     @Autowired
@@ -35,6 +42,15 @@ class ReservationServiceTest extends ServiceTest {
 
     @Autowired
     private ThemeDao themeDao;
+    @Autowired
+    private WaitingDao waitingDao;
+
+    @Autowired
+    private Clock clock;
+    @Autowired
+    private ReservationDao reservationDao;
+    @Autowired
+    private WaitingService waitingService;
 
     @Test
     void 예약을_생성할_수_있다() {
@@ -228,27 +244,61 @@ class ReservationServiceTest extends ServiceTest {
     }
 
     @Test
-    void 예약을_삭제할_수_있다() {
+    void 예약_취소_시_해당_슬롯의_대기자만_승격된다() {
+        // given
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
+        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+
+        // 예약 1 (슬롯 1)
+        ReservationRequest request1 = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
+        ReservationResponse response1 = reservationService.create(request1);
+        Slot slot1 = reservationDao.findById(response1.id()).orElseThrow().getSlot();
+
+        // 예약 2 (슬롯 2)
+        ReservationRequest request2 = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 9));
+        ReservationResponse response2 = reservationService.create(request2);
+        Slot slot2 = reservationDao.findById(response2.id()).orElseThrow().getSlot();
+
+        saveWaiting("대기자1", slot1);
+        saveWaiting("대기자2", slot2);
+
+        // when
+        reservationService.delete(response1.id());
+
+        // then
+        assertAll(
+                () -> assertThat(reservationService.getReservationsByName("대기자1")).hasSize(1),
+                () -> assertThat(reservationService.getReservationsByName("대기자2")).isEmpty(),
+                () -> assertThat(waitingService.getWaitingsByName("대기자2")).hasSize(1)
+        );
+    }
+
+    @Test
+    void 예약_취소_시_동일한_슬롯의_대기자가_2명_이상일_경우_첫_번째_대기자만_승격된다() {
         // given
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
         Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
         ReservationResponse response = reservationService.create(request);
+        Slot slot = reservationDao.findById(response.id()).orElseThrow().getSlot();
 
-        int beforeSize = reservationService.getReservations().size();
+        saveWaiting("대기자1", slot);
+        saveWaiting("대기자2", slot);
 
         // when
         reservationService.delete(response.id());
 
         // then
-        List<ReservationResponse> reservations = reservationService.getReservations();
         assertAll(
-                () -> assertThat(reservations).hasSize(beforeSize - 1),
-                () -> assertThat(reservations)
-                        .extracting(ReservationResponse::id)
-                        .doesNotContain(response.id())
+                () -> assertThat(reservationService.getReservationsByName("대기자1")).hasSize(1),
+                () -> assertThat(waitingService.getWaitingsByName("대기자2")).hasSize(1),
+                () -> assertThat(waitingDao.findAllWithRankByName("대기자2").getFirst().rank()).isEqualTo(1)
         );
+    }
+
+    private void saveWaiting(String userName, Slot slot) {
+        waitingDao.save(new Waiting(LocalDateTime.now(clock), slot.getId(), userName));
     }
 
     @Test

@@ -1,16 +1,14 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import roomescape.AcceptanceTest;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.*;
 
 public class ReservationControllerTest extends AcceptanceTest {
 
@@ -136,6 +134,37 @@ public class ReservationControllerTest extends AcceptanceTest {
                 .statusCode(204);
     }
 
+    @Test
+    void 예약_취소시_대기자가_있으면_자동으로_승격된다() {
+        long timeId = createTime("10:00");
+        long themeId = createTheme("방탈출2", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
+        String date = "2026-05-06";
+        String promotedUserName = "첫번째대기자";
+
+        long reservationId = createReservation("브라운", date, timeId, themeId);
+        createWaiting(promotedUserName, date, timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", promotedUserName)
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", equalTo(promotedUserName));
+
+        RestAssured.given().log().all()
+                .queryParam("name", promotedUserName)
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("$", empty());
+    }
+
     private long createTime(String startAt) {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", startAt);
@@ -179,6 +208,25 @@ public class ReservationControllerTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .extract()
+                .jsonPath()
+                .getLong("id");
+    }
+
+    private long createWaiting(String name, String date, long timeId, long themeId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", name);
+        params.put("date", date);
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)
                 .body("id", notNullValue())
