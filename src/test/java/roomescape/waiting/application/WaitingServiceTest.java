@@ -197,6 +197,42 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("다음 순번의 예약 대기를 예약으로 승격한다")
+    void promoteNextWaiting_success() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", date, savedTime, savedTheme)
+        );
+        Waiting[] promotedWaiting = new Waiting[1];
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                        promotedWaiting[0] = waiting;
+                    }
+                },
+                new WaitingValidator(waitingRepository)
+        );
+
+        // when
+        waitingService.promoteNextWaiting(date, savedTime, savedTheme);
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        assertThat(promotedWaiting[0]).isEqualTo(savedWaiting);
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기를 취소한다")
     void cancelWaiting_success() {
         // given
