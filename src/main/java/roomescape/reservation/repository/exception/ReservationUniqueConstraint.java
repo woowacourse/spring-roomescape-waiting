@@ -16,7 +16,7 @@ public enum ReservationUniqueConstraint {
     }
 
     public static Optional<ReservationUniqueConstraint> from(DuplicateKeyException exception) {
-        if(exception == null) {
+        if (exception == null) {
             return Optional.empty();
         }
         String message = exception.getMessage().toUpperCase();
@@ -24,5 +24,4 @@ public enum ReservationUniqueConstraint {
                 .filter(constraint -> message.contains(constraint.constraintName.toUpperCase()))
                 .findFirst();
     }
-
 }

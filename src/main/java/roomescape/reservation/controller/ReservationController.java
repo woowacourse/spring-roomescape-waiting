@@ -9,8 +9,6 @@ import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
 
-
-
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
@@ -34,7 +32,6 @@ public class ReservationController {
 
     @GetMapping("/me")
     public ResponseEntity<ReservationWaitingListResponse> getListByGuestName(@CurrentUser String guestName) {
-
         return ResponseEntity.ok(
                 ReservationWaitingListResponse.from(reservationService.findByGuestName(guestName).stream()
                         .map(ReservationWaitingResponse::from)
@@ -59,5 +56,4 @@ public class ReservationController {
         reservationService.cancelMine(id, guestName);
         return ResponseEntity.noContent().build();
     }
-
 }

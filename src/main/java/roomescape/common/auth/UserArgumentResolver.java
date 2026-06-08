@@ -33,7 +33,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     private static String getAuthorizationHeader(NativeWebRequest webRequest) {
         String authorization = webRequest.getHeader(GUEST_NAME_HEADER);
 
-        if(authorization == null || authorization.isBlank()) {
+        if (authorization == null || authorization.isBlank()) {
             throw new DomainException(INVALID_GUEST_NAME_HEADER);
         }
         return authorization;
@@ -46,7 +46,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         } catch (Exception e) {
             throw new DomainException(INVALID_GUEST_NAME_HEADER);
         }
-        if(decode.isBlank()) {
+        if (decode.isBlank()) {
             throw new DomainException(INVALID_GUEST_NAME_HEADER);
         }
         return decode;

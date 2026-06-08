@@ -3,7 +3,7 @@ package roomescape.common.dto;
 import java.util.List;
 import java.util.function.Function;
 
-public record PageResult<T> (
+public record PageResult<T>(
         List<T> contents,
         long page,
         long size,

@@ -1,6 +1,5 @@
 package roomescape.reservation.service.dto;
 
-
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
 import roomescape.reservationtime.domain.ReservationTime;
