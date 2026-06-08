@@ -5,7 +5,6 @@ import roomescape.exception.RoomescapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -21,7 +20,6 @@ import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
-import roomescape.service.event.ReservationCanceledEvent;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
@@ -36,20 +34,17 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final StoreRepository storeRepository;
     private final SlotRepository slotRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ThemeRepository themeRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               StoreRepository storeRepository,
-                              SlotRepository slotRepository,
-                              ApplicationEventPublisher eventPublisher) {
+                              SlotRepository slotRepository) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.storeRepository = storeRepository;
         this.slotRepository = slotRepository;
-        this.eventPublisher = eventPublisher;
     }
 
     public ReservationResponses getReservations(int page, int size, String name, User manager) {
@@ -122,7 +117,7 @@ public class ReservationService {
 
         reservationRepository.update(updated);
         if (!existing.hasSameSlot(updated)) {
-            eventPublisher.publishEvent(ReservationCanceledEvent.from(existing));
+            promoteFirstWaiting(existing.getSlot().getId());
         }
         return updated;
     }
@@ -134,7 +129,7 @@ public class ReservationService {
         validateManagesStore(manager.getId(), reservation.getStore().getId());
         validateExistingNotInPast(reservation);
         reservationRepository.deleteById(reservationId);
-        eventPublisher.publishEvent(ReservationCanceledEvent.from(reservation));
+        promoteFirstWaiting(reservation.getSlot().getId());
     }
 
     @Transactional
@@ -154,7 +149,7 @@ public class ReservationService {
         validateExistingNotInPast(reservation);
 
         reservationRepository.deleteById(command.reservationId());
-        eventPublisher.publishEvent(ReservationCanceledEvent.from(reservation));
+        promoteFirstWaiting(reservation.getSlot().getId());
     }
 
     private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
@@ -171,6 +166,14 @@ public class ReservationService {
     private Slot resolveSlot(LocalDate date, Theme theme, ReservationTime time, Store store) {
         return slotRepository.findByDateAndThemeAndTimeAndStore(date, theme.getId(), time.getId(), store.getId())
                 .orElseGet(() -> slotRepository.save(new Slot(null, date, theme, time, store)));
+    }
+
+    private void promoteFirstWaiting(Long slotId) {
+        if (reservationRepository.existsBySlotIdAndStatus(slotId, ReservationStatus.RESERVED)) {
+            return;
+        }
+        reservationRepository.findFirstWaitingBySlotId(slotId)
+                .ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), ReservationStatus.RESERVED));
     }
 
     private void validateIsReserved(Reservation existing) {

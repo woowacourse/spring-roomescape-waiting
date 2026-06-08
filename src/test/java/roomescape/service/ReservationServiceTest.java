@@ -11,8 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.event.ApplicationEvents;
-import org.springframework.test.context.event.RecordApplicationEvents;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.User;
@@ -21,9 +19,7 @@ import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.event.ReservationCanceledEvent;
 
-@RecordApplicationEvents
 class ReservationServiceTest extends ServiceIntegrationTest {
 
     private static final long OTHER_STORE_ID = 2L;
@@ -33,9 +29,6 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-
-    @Autowired
-    private ApplicationEvents events;
 
     private User manager;
 
@@ -343,37 +336,51 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("deleteReservation - 삭제 시 해당 슬롯의 ReservationCanceledEvent를 발행한다")
-    void deleteReservationPublishesReservationCanceledEvent() {
-        User user = member("브라운");
-        long themeId = theme("공포");
-        long timeId = time("10:00");
-        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(1));
-        long slotId = DbFixtures.slotId(jdbcTemplate, themeId, Fixtures.daysFromNow(1).toString(), timeId,
-                DEFAULT_STORE_ID);
-
-        service.deleteReservation(reservationId, manager);
-
-        assertThat(events.stream(ReservationCanceledEvent.class))
-                .extracting(ReservationCanceledEvent::slotId)
-                .containsExactly(slotId);
-    }
-
-    @Test
-    @DisplayName("deleteOwnReservation - 삭제 시 해당 슬롯의 ReservationCanceledEvent를 발행한다")
-    void deleteOwnReservationPublishesReservationCanceledEvent() {
+    @DisplayName("deleteReservation - 삭제 시 같은 슬롯의 첫 대기를 같은 트랜잭션에서 승격한다")
+    void deleteReservationPromotesFirstWaitingInSlot() {
         User brown = member("브라운");
+        User charles = member("샤를");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
-        long slotId = DbFixtures.slotId(jdbcTemplate, themeId, Fixtures.daysFromNow(1).toString(), timeId,
-                DEFAULT_STORE_ID);
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteReservation(reservationId, manager);
+
+        assertThat(statusOf(waitingId)).isEqualTo("RESERVED");
+    }
+
+    @Test
+    @DisplayName("deleteReservation - 대기가 여러 개면 가장 먼저 등록된 대기만 승격한다")
+    void deleteReservationPromotesOnlyEarliestWaiting() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        User daisy = member("데이지");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long firstWaitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+        long secondWaitingId = saveWaitingReservation(daisy, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteReservation(reservationId, manager);
+
+        assertThat(statusOf(firstWaitingId)).isEqualTo("RESERVED");
+        assertThat(statusOf(secondWaitingId)).isEqualTo("WAITING");
+    }
+
+    @Test
+    @DisplayName("deleteOwnReservation - 삭제 시 같은 슬롯의 첫 대기를 같은 트랜잭션에서 승격한다")
+    void deleteOwnReservationPromotesFirstWaitingInSlot() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
 
         service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, brown));
 
-        assertThat(events.stream(ReservationCanceledEvent.class))
-                .extracting(ReservationCanceledEvent::slotId)
-                .containsExactly(slotId);
+        assertThat(statusOf(waitingId)).isEqualTo("RESERVED");
     }
 
     @Test
@@ -511,37 +518,37 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("updateOwnReservation - 다른 슬롯으로 수정하면 기존 슬롯의 ReservationCanceledEvent를 발행한다")
-    void updateOwnReservationPublishesCanceledEventForOldSlot() {
+    @DisplayName("updateOwnReservation - 다른 슬롯으로 수정하면 기존 슬롯의 첫 대기를 같은 트랜잭션에서 승격한다")
+    void updateOwnReservationPromotesFirstWaitingInOldSlot() {
         User brown = member("브라운");
+        User charles = member("샤를");
         long themeId = theme("공포");
         long themeId2 = theme("추리");
         long timeId = time("10:00");
         long timeId2 = time("11:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
-        long oldSlotId = DbFixtures.slotId(jdbcTemplate, themeId, Fixtures.daysFromNow(25).toString(), timeId,
-                DEFAULT_STORE_ID);
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(25));
 
         service.updateOwnReservation(
                 Fixtures.updateCommand(reservationId, brown, themeId2, Fixtures.daysFromNow(26), timeId2));
 
-        assertThat(events.stream(ReservationCanceledEvent.class))
-                .extracting(ReservationCanceledEvent::slotId)
-                .containsExactly(oldSlotId);
+        assertThat(statusOf(waitingId)).isEqualTo("RESERVED");
     }
 
     @Test
-    @DisplayName("updateOwnReservation - 동일 슬롯으로 수정하면 ReservationCanceledEvent를 발행하지 않는다")
-    void updateOwnReservationDoesNotPublishEventWhenSlotUnchanged() {
+    @DisplayName("updateOwnReservation - 동일 슬롯으로 수정하면 대기를 승격하지 않는다")
+    void updateOwnReservationDoesNotPromoteWhenSlotUnchanged() {
         User brown = member("브라운");
+        User charles = member("샤를");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(25));
 
         service.updateOwnReservation(
                 Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(25), timeId));
 
-        assertThat(events.stream(ReservationCanceledEvent.class)).isEmpty();
+        assertThat(statusOf(waitingId)).isEqualTo("WAITING");
     }
 
     @Test
@@ -735,5 +742,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
     private void insertOtherStore() {
         jdbcTemplate.update("INSERT INTO store(id, name) VALUES (?, ?)", OTHER_STORE_ID, "다른매장");
+    }
+
+    private String statusOf(long reservationId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM reservation WHERE id = ?", String.class, reservationId);
     }
 }
