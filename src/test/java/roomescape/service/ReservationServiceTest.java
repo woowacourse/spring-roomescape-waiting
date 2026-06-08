@@ -4,6 +4,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
@@ -16,7 +17,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
-import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.BusinessException;
@@ -36,10 +36,10 @@ import static org.mockito.Mockito.*;
 class ReservationServiceTest {
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private WaitingService waitingService;
 
     @Mock
-    private WaitingRepository waitingRepository;
+    private ReservationRepository reservationRepository;
 
     @Mock
     private UserReservationRepository userReservationRepository;
@@ -57,7 +57,8 @@ class ReservationServiceTest {
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, userReservationRepository, reservationTimeRepository, themeRepository, fixedClock
+                waitingService, reservationRepository, userReservationRepository, reservationTimeRepository,
+                themeRepository, fixedClock
         );
     }
 
@@ -234,8 +235,8 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
 
         List<UserReservation> userReservations = List.of(
-                UserReservation.reserved(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme),
-                UserReservation.waiting(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme, 2L)
+                UserReservation.reserved(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme)),
+                UserReservation.waiting(new Waiting(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme), 2L)
         );
 
         when(userReservationRepository.findByName("브라운", 0, 10)).thenReturn(userReservations);
@@ -254,5 +255,119 @@ class ReservationServiceTest {
                 .orElseThrow();
         assertThat(waitingResult.name()).isEqualTo("브라운");
         assertThat(waitingResult.rank()).isEqualTo(2L);
+    }
+
+    @Test
+    void 예약_취소_시_대기_1번이_자동으로_예약으로_전환된다() {
+        //given
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        Waiting waiting = new Waiting(
+                1L,
+                "어셔",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(waitingService.findFirstWaiting(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+
+        //when
+        reservationService.deleteUserReservation(1L, "브라운");
+
+        //then
+        verify(reservationRepository).delete(reservation);
+        verify(waitingService).promoteWaiting(waiting);
+
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationRepository).save(captor.capture());
+        Reservation saved = captor.getValue();
+
+        assertThat(saved.getName()).isEqualTo(waiting.getName());
+        assertThat(saved.getDate()).isEqualTo(waiting.getDate());
+        assertThat(saved.getTime()).isEqualTo(waiting.getTime());
+        assertThat(saved.getTheme()).isEqualTo(waiting.getTheme());
+    }
+
+    @Test
+    void 대기가_없는_예약을_취소하면_예약만_삭제된다() {
+        //given
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(waitingService.findFirstWaiting(any(), any(), any())).thenReturn(Optional.empty());
+
+        //when
+        reservationService.deleteUserReservation(1L, "브라운");
+
+        //then
+        verify(reservationRepository).delete(reservation);
+        verify(waitingService, never()).promoteWaiting(any(Waiting.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void 대기가_여러_개일_때_대기_1번만_예약으로_전환되고_나머지는_그대로다() {
+        //given
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        Waiting waiting1 = new Waiting(
+                1L,
+                "레서",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        Waiting waiting2 = new Waiting(
+                2L,
+                "밍구",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(waitingService.findFirstWaiting(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting1));
+
+        //when
+        reservationService.deleteUserReservation(1L, "브라운");
+
+        //then
+        verify(reservationRepository).delete(reservation);
+        verify(waitingService).promoteWaiting(waiting1);
+        verify(waitingService, never()).promoteWaiting(waiting2);
+
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationRepository).save(captor.capture());
+        Reservation saved = captor.getValue();
+
+        assertThat(saved.getName()).isEqualTo(waiting1.getName());
+        assertThat(saved.getDate()).isEqualTo(waiting1.getDate());
+        assertThat(saved.getTime()).isEqualTo(waiting1.getTime());
+        assertThat(saved.getTheme()).isEqualTo(waiting1.getTheme());
     }
 }
