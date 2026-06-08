@@ -46,7 +46,6 @@ public class ReservationService {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
         ReservationSlot reservationSlot = reservationSlotRepository.upsert(ReservationSlot.create(date, time, theme));
-        lockSlot(reservationSlot.getId());
 
         Reservation saved = reservationCreator.createReservation(guestName, reservationSlot);
         return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
