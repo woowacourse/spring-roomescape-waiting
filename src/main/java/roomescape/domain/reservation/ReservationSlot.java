@@ -39,6 +39,10 @@ public class ReservationSlot {
         return theme.getId();
     }
 
+    public ReservationSlot withDateAndTime(LocalDate date, ReservationTime time) {
+        return new ReservationSlot(date, time, this.theme);
+    }
+
     public void validateNoPast() {
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();

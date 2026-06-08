@@ -32,8 +32,7 @@ public class Reservation {
     }
 
     public Reservation withUpdatedDateAndTime(LocalDate date, ReservationTime time) {
-        ReservationSlot updatedSlot = new ReservationSlot(date, time, slot.getTheme());
-        return new Reservation(id, this.name, updatedSlot, this.createdAt);
+        return new Reservation(id, this.name, slot.withDateAndTime(date, time), this.createdAt);
     }
 
     public Long getId() {
