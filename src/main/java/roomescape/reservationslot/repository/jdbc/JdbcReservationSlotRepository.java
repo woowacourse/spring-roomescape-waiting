@@ -193,7 +193,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         );
     }
 
-    private Optional<ReservationSlot> findByIdForUpdate(final Long slotId) {
+    @Override
+    public Optional<ReservationSlot> findByIdForUpdate(final Long slotId) {
         final String sql = """
                 SELECT
                     s.id AS slot_id,

@@ -62,6 +62,13 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
+    public Optional<ReservationSlot> findByIdForUpdate(final Long slotId) {
+        return slots.stream()
+                .filter(slot -> slot.getId().equals(slotId))
+                .findFirst();
+    }
+
+    @Override
     public void deleteReservationAndPromoteWaiting(final Reservation reservation) {
         if (!reservationRepository.removeById(reservation.getId())) {
             throw new ReservationNotFoundException();

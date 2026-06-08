@@ -56,17 +56,33 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void deleteByIdAndCustomer(final long waitingId, final String customerName, final String customerEmail) {
         final Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(WaitingNotFoundException::new);
 
+        reservationSlotRepository.findByIdForUpdate(waiting.getSlotId())
+                .orElseThrow(WaitingNotFoundException::new);
+
+        final Waiting lockedWaiting = waitingRepository.findById(waitingId)
+                .orElseThrow(WaitingNotFoundException::new);
+        validateCancelableByCustomer(lockedWaiting, customerName, customerEmail);
+
+        if (!waitingRepository.deleteById(waitingId)) {
+            throw new WaitingNotFoundException();
+        }
+    }
+
+    private void validateCancelableByCustomer(
+            final Waiting waiting,
+            final String customerName,
+            final String customerEmail
+    ) {
         if (!waiting.isOwnedBy(customerName, customerEmail)) {
             throw new WaitingNotFoundException();
         }
         if (!waiting.isCancelable(LocalDateTime.now())) {
             throw new PastReservationWaitingCancellationException();
         }
-
-        waitingRepository.deleteById(waitingId);
     }
 }
