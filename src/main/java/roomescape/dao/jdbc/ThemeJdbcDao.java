@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeReservationCount;
 import roomescape.domain.vo.Name;
 import roomescape.dto.response.AvailableTimeResponseDto;
 import roomescape.dto.response.TimeResponseDto;
@@ -25,6 +26,12 @@ public class ThemeJdbcDao implements ThemeDao {
                     new Name(rs.getString("name")),
                     rs.getString("thumbnail_url"),
                     rs.getString("description")
+            );
+
+    private static final RowMapper<ThemeReservationCount> THEME_COUNT_ROW_MAPPER = (rs, rowNum) ->
+            new ThemeReservationCount(
+                    THEME_ROW_MAPPER.mapRow(rs, rowNum),
+                    rs.getLong("reservation_count")
             );
 
     private static final RowMapper<AvailableTimeResponseDto> AVAILABLE_TIME_MAPPER = (rs, rowNum) ->
@@ -164,7 +171,7 @@ public class ThemeJdbcDao implements ThemeDao {
     }
 
     @Override
-    public List<Theme> findPopulars(LocalDate from, LocalDate to, int limit) {
+    public List<ThemeReservationCount> findReservationCounts(LocalDate from, LocalDate to) {
         String sql = """
                     SELECT
                         th.id,
@@ -179,15 +186,12 @@ public class ThemeJdbcDao implements ThemeDao {
                         WHERE date BETWEEN :from AND :to
                         GROUP BY theme_id
                     ) r ON th.id = r.theme_id
-                    ORDER BY reservation_count DESC
-                    LIMIT :limit;
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("from", from)
-                .addValue("to", to)
-                .addValue("limit", limit);
+                .addValue("to", to);
 
-        return jdbcTemplate.query(sql, params, THEME_ROW_MAPPER);
+        return jdbcTemplate.query(sql, params, THEME_COUNT_ROW_MAPPER);
     }
 }

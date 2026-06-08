@@ -76,8 +76,9 @@ public class ThemeService {
     public List<Theme> findPopulars(PopularThemeRequestDto popularThemeRequestDto) {
         LocalDate to = LocalDate.now();
         int minusDays = popularThemeRequestDto.days() - 1;
-        
         LocalDate from = to.minusDays(minusDays);
-        return themeDao.findPopulars(from, to, popularThemeRequestDto.limit());
+
+        PopularThemes populars = new PopularThemes(themeDao.findReservationCounts(from, to));
+        return populars.topN(popularThemeRequestDto.limit());
     }
 }
