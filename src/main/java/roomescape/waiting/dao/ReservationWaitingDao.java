@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.WaitingForPromotion;
 
 @Repository
 public class ReservationWaitingDao {
@@ -25,15 +26,14 @@ public class ReservationWaitingDao {
             );
 
     // 대기 번호(waiting_number) 계산이 필요 없는 락 조회 전용 매퍼
-    private static final RowMapper<ReservationWaiting> MAPPER_WITHOUT_NUMBER = (rs, rowNum) ->
-            new ReservationWaiting(
+    private static final RowMapper<WaitingForPromotion> PROMOTION_MAPPER = (rs, rowNum) ->
+            new WaitingForPromotion(
                     rs.getLong("id"),
                     rs.getString("name"),
                     rs.getLong("theme_id"),
                     rs.getDate("date").toLocalDate(),
                     new ReservationTime(rs.getLong("time_id"),
-                            rs.getTime("start_at").toLocalTime()),
-                    null
+                            rs.getTime("start_at").toLocalTime())
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -63,7 +63,7 @@ public class ReservationWaitingDao {
         return results.stream().findFirst();
     }
 
-    public Optional<ReservationWaiting> selectByIdForUpdate(Long id) {
+    public Optional<WaitingForPromotion> selectByIdForUpdate(Long id) {
         String sql = """
                 select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
                 from reservation_waiting w
@@ -72,11 +72,11 @@ public class ReservationWaitingDao {
                 for update
                 """;
 
-        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER_WITHOUT_NUMBER, id);
+        List<WaitingForPromotion> results = jdbcTemplate.query(sql, PROMOTION_MAPPER, id);
         return results.stream().findFirst();
     }
 
-    public Optional<ReservationWaiting> selectFirstByThemeAndDateAndTimeForUpdate(Long themeId, LocalDate date, ReservationTime time) {
+    public Optional<WaitingForPromotion> selectFirstByThemeAndDateAndTimeForUpdate(Long themeId, LocalDate date, ReservationTime time) {
         String sql = """
                 select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
                 from reservation_waiting w
@@ -87,7 +87,7 @@ public class ReservationWaitingDao {
                 for update
                 """;
 
-        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER_WITHOUT_NUMBER, themeId, date, time.getId());
+        List<WaitingForPromotion> results = jdbcTemplate.query(sql, PROMOTION_MAPPER, themeId, date, time.getId());
         return results.stream().findFirst();
     }
 

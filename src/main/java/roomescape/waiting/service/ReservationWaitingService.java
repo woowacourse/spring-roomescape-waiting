@@ -9,6 +9,7 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
 import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.WaitingForPromotion;
 import roomescape.waiting.dao.ReservationWaitingDao;
 
 import java.time.LocalDate;
@@ -59,11 +60,11 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        ReservationWaiting originReservationWaiting = reservationWaitingDao.selectByIdForUpdate(id)
+        WaitingForPromotion originReservationWaiting = reservationWaitingDao.selectByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
 
         originReservationWaiting.validateSameName(name);
-        validateDateTime(originReservationWaiting.getDate(), originReservationWaiting.getTime());
+        validateDateTime(originReservationWaiting.date(), originReservationWaiting.time());
         reservationWaitingDao.deleteById(id);
     }
 

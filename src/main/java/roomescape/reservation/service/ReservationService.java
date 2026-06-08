@@ -118,12 +118,8 @@ public class ReservationService {
     private void promoteFirstWaiting(Long themeId, LocalDate date, ReservationTime time) {
         reservationWaitingDao.selectFirstByThemeAndDateAndTimeForUpdate(themeId, date, time)
                 .ifPresent(waiting -> {
-                    reservationWaitingDao.deleteById(waiting.getId());
-                    reservationDao.insert(new Reservation(
-                            waiting.getName(),
-                            waiting.getThemeId(),
-                            waiting.getDate(),
-                            waiting.getTime()));
+                    reservationWaitingDao.deleteById(waiting.id());
+                    reservationDao.insert(waiting.toReservation());
                 });
     }
 
