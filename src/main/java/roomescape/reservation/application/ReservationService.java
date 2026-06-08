@@ -114,14 +114,16 @@ public class ReservationService {
                         canceledReservation.getTheme().getId()
                 )
                 .filter(Waiting::isPromotable)
-                .ifPresent(head -> {
-                    reservationRepository.save(Reservation.create(
-                            head.getName(),
-                            head.getDate(),
-                            head.getTime(),
-                            head.getTheme()
-                    ));
-                    waitingRepository.deleteById(head.getId());
-                });
+                .ifPresent(this::promoteWaiting);
+    }
+
+    private void promoteWaiting(Waiting waiting) {
+        reservationRepository.save(Reservation.create(
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme()
+        ));
+        waitingRepository.deleteById(waiting.getId());
     }
 }
