@@ -2,9 +2,12 @@ package roomescape.reservation.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.exception.ReservationErrorCode;
 
 @Repository
 public class ReservationRepository {
@@ -16,11 +19,15 @@ public class ReservationRepository {
     }
 
     public Reservation save(Reservation reservation) {
-        if (reservation.getId() == null) {
-            return reservationDao.save(reservation);
+        try {
+            if (reservation.getId() == null) {
+                return reservationDao.save(reservation);
+            }
+            reservationDao.update(reservation);
+            return reservation;
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
-        reservationDao.update(reservation);
-        return reservation;
     }
 
     public List<Reservation> findAll() {

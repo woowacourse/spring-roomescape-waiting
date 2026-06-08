@@ -12,9 +12,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.global.exception.ConflictException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.exception.ThemeErrorCode;
 
 @JdbcTest
 class ThemeRepositoryTest {
@@ -45,13 +46,14 @@ class ThemeRepositoryTest {
 
     @Test
     @DisplayName("기존에 이미 테마 이름이 겹치는 테마가 있으면 예외가 발생한다.")
-    void save_duplicateThemeName_throwsDataIntegrityViolation() {
+    void save_duplicateThemeName_throwsConflictException() {
         // given
         themeRepository.save(Theme.of("테마", "설명", "thumbnailUrl"));
 
         // when & then
         assertThatThrownBy(() -> themeRepository.save(Theme.of("테마", "other", "otherThumbnailUrl")))
-                .isInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage(ThemeErrorCode.DUPLICATE_THEME.getMessage());
     }
 
     @Test
@@ -102,7 +104,7 @@ class ThemeRepositoryTest {
 
     @Test
     @DisplayName("테마가 사용되고 있는데 삭제를 시도하면 예외가 발생한다.")
-    void delete_themeInUse_throwsDataIntegrityViolation() {
+    void delete_themeInUse_throwsConflictException() {
         //given
         Time testTime = Time.valueOf(LocalTime.of(10, 0));
         Theme testTheme = Theme.of("테마", "테마 설명", "썸네일_url");
@@ -117,7 +119,8 @@ class ThemeRepositoryTest {
         //when & then
         assertThatThrownBy(
                 () -> themeRepository.delete(savedTheme)
-        ).isInstanceOf(DataIntegrityViolationException.class);
+        ).isInstanceOf(ConflictException.class)
+                .hasMessage(ThemeErrorCode.THEME_IN_USE.getMessage());
     }
 
     private void insertTestReservation(long timeId, Long themeId) {

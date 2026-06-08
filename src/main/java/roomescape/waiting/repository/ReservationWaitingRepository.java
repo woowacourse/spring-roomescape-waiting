@@ -2,9 +2,12 @@ package roomescape.waiting.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.waiting.exception.ReservationWaitingErrorCode;
 import roomescape.waiting.domain.ReservationWaiting;
 
 @Repository
@@ -17,7 +20,11 @@ public class ReservationWaitingRepository {
     }
 
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
-        return reservationWaitingDao.save(reservationWaiting);
+        try {
+            return reservationWaitingDao.save(reservationWaiting);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING);
+        }
     }
 
     public Optional<ReservationWaiting> findById(long id) {

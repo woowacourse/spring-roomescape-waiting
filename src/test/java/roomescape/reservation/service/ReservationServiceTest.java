@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
@@ -73,7 +72,7 @@ class ReservationServiceTest {
         given(reservationTimeService.getById(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
         given(reservationRepository.save(any()))
-                .willThrow(new DataIntegrityViolationException("duplicate"));
+                .willThrow(new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION));
 
         // when & then
         assertThatThrownBy(() -> reservationService.save(command, now()))

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
@@ -63,7 +62,7 @@ class ThemeServiceTest {
             ThemeCommand command = new ThemeCommand("브라운", "설명", "url");
 
             given(themeRepository.save(any(Theme.class)))
-                    .willThrow(new DataIntegrityViolationException("duplicate"));
+                    .willThrow(new ConflictException(ThemeErrorCode.DUPLICATE_THEME));
 
             // when & then
             assertThatThrownBy(() -> themeService.save(command))
@@ -147,7 +146,7 @@ class ThemeServiceTest {
         // given
         Theme theme = new Theme(1L, "테마1", "설명1", "url1");
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        willThrow(new DataIntegrityViolationException("외래키 오류")).given(themeRepository).delete(any(Theme.class));
+        willThrow(new ConflictException(ThemeErrorCode.THEME_IN_USE)).given(themeRepository).delete(any(Theme.class));
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(1L))

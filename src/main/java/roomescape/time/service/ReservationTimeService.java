@@ -1,7 +1,6 @@
 package roomescape.time.service;
 
 import java.time.LocalTime;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -26,13 +25,8 @@ public class ReservationTimeService {
     public ReservationTimeResult save(ReservationTimeCommand command) {
         validateReservationTimeUniqueness(command.startAt());
         ReservationTime reservationTime = new ReservationTime(command.startAt());
-
-        try {
-            ReservationTime saved = reservationTimeRepository.save(reservationTime);
-            return ReservationTimeResult.from(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME);
-        }
+        ReservationTime saved = reservationTimeRepository.save(reservationTime);
+        return ReservationTimeResult.from(saved);
     }
 
     private void validateReservationTimeUniqueness(LocalTime startAt) {
@@ -49,11 +43,6 @@ public class ReservationTimeService {
     @Transactional
     public void deleteById(long id) {
         ReservationTime deleteTarget = getById(id);
-
-        try {
-            reservationTimeRepository.delete(deleteTarget);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(TimeErrorCode.TIME_IN_USE);
-        }
+        reservationTimeRepository.delete(deleteTarget);
     }
 }

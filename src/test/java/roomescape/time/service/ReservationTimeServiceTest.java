@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
@@ -74,7 +73,7 @@ class ReservationTimeServiceTest {
 
         given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(false);
         given(reservationTimeRepository.save(any(ReservationTime.class)))
-                .willThrow(new DataIntegrityViolationException("duplicate"));
+                .willThrow(new ConflictException(TimeErrorCode.DUPLICATE_TIME));
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.save(command))
@@ -142,7 +141,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
-        willThrow(new DataIntegrityViolationException("foreign key"))
+        willThrow(new ConflictException(TimeErrorCode.TIME_IN_USE))
                 .given(reservationTimeRepository).delete(time);
 
         // when & then

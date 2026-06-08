@@ -2,10 +2,8 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
@@ -49,13 +47,8 @@ public class ReservationService {
         ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
         validateSlotAvailable(null, command.name(), slot);
         Reservation newReservation = new Reservation(command.name(), slot, requestTime);
-
-        try {
-            Reservation result = reservationRepository.save(newReservation);
-            return ReservationResult.from(result);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
-        }
+        Reservation result = reservationRepository.save(newReservation);
+        return ReservationResult.from(result);
     }
 
     @Transactional
@@ -71,12 +64,7 @@ public class ReservationService {
         ReservationSlot temporalSlot = reservation.generateTemporalSlot(command.date(), newTime);
         validateSlotAvailable(command.id(), command.name(), temporalSlot);
         Reservation updated = reservation.update(command.date(), newTime, command.name(), requestTime);
-
-        try {
-            reservationRepository.save(updated);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
-        }
+        reservationRepository.save(updated);
     }
 
     private void validateSlotAvailable(Long id, String name, ReservationSlot slot) {

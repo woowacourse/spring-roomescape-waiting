@@ -12,11 +12,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 @JdbcTest
@@ -50,8 +51,8 @@ class ReservationTimeRepositoryImplTest {
         }
 
         @Test
-        @DisplayName("save throws DataIntegrityViolationException when the time already exists.")
-        void save_duplicateTime_throwsDataIntegrityViolation() {
+        @DisplayName("save throws ConflictException when the time already exists.")
+        void save_duplicateTime_throwsConflictException() {
             // given
             LocalTime startTime = LocalTime.of(10, 0);
             ReservationTime time = new ReservationTime(startTime);
@@ -60,7 +61,8 @@ class ReservationTimeRepositoryImplTest {
 
             // when & then
             assertThatThrownBy(() -> reservationTimeRepository.save(time))
-                    .isInstanceOf(DataIntegrityViolationException.class);
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessage(TimeErrorCode.DUPLICATE_TIME.getMessage());
         }
     }
 
@@ -158,8 +160,8 @@ class ReservationTimeRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("delete throws DataIntegrityViolationException when the time is in use.")
-    void deleteById_timeInUse_throwsDataIntegrityViolation() {
+    @DisplayName("delete throws ConflictException when the time is in use.")
+    void deleteById_timeInUse_throwsConflictException() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
 
@@ -168,7 +170,8 @@ class ReservationTimeRepositoryImplTest {
 
         // when & then
         assertThatThrownBy(() -> reservationTimeRepository.delete(time))
-                .isInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage(TimeErrorCode.TIME_IN_USE.getMessage());
     }
 
     private ReservationTime createTime(LocalTime time) {

@@ -12,9 +12,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -39,12 +40,20 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("동일 예약이 있으면 저장 시 DataIntegrityViolationException이 발생한다.")
-    void save_duplicateReservation_throwsDataIntegrityViolation() {
-        reservationRepository.save(buildReservation("브라운"));
+    @DisplayName("동일 예약이 있으면 저장 시 ConflictException이 발생한다.")
+    void save_duplicateReservation_throwsConflictException() {
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("테마", "설명", "url");
+        Reservation first = new Reservation("브라운", LocalDate.of(2026, 5, 1), time, theme,
+                LocalDate.of(2026, 5, 1).atStartOfDay());
+        reservationRepository.save(first);
 
-        assertThatThrownBy(() -> reservationRepository.save(buildReservation("브라운")))
-                .isInstanceOf(DataIntegrityViolationException.class);
+        Reservation duplicate = new Reservation("브라운", LocalDate.of(2026, 5, 1), time, theme,
+                LocalDate.of(2026, 5, 1).atStartOfDay());
+
+        assertThatThrownBy(() -> reservationRepository.save(duplicate))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
     @Test

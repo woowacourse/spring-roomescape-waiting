@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
@@ -208,7 +207,7 @@ class ReservationWaitingServiceTest {
         given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
         given(reservationWaitingRepository.save(any())).willThrow(
-                new DataIntegrityViolationException("Duplicate key error"));
+                new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING));
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))

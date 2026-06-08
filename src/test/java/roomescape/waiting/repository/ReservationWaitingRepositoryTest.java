@@ -13,12 +13,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.exception.ReservationWaitingErrorCode;
 
 @JdbcTest
 class ReservationWaitingRepositoryTest {
@@ -58,8 +59,8 @@ class ReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("이미 동일한 예약 대기(동일 날짜, 시간, 테마, 이름, 삭제여부)가 있으면 DataIntegrityViolationException이 발생한다.")
-    void save_duplicateWaiting_throwsDataIntegrityViolation() {
+    @DisplayName("이미 동일한 예약 대기(동일 날짜, 시간, 테마, 이름, 삭제여부)가 있으면 ConflictException이 발생한다.")
+    void save_duplicateWaiting_throwsConflictException() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -73,12 +74,13 @@ class ReservationWaitingRepositoryTest {
         assertThatThrownBy(() -> reservationWaitingRepository.save(
                 new ReservationWaiting(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
                         LocalDate.of(2026, 5, 1).atStartOfDay())
-        )).isInstanceOf(DataIntegrityViolationException.class);
+        )).isInstanceOf(ConflictException.class)
+                .hasMessage(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
     }
 
     @Test
     @DisplayName("존재하지 않는 시간 ID를 참조하여 예약 대기를 저장하면 외래키 제약조건 위반으로 예외가 발생한다.")
-    void save_nonExistentTimeId_throwsDataIntegrityViolation() {
+    void save_nonExistentTimeId_throwsConflictException() {
         // given
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
         ReservationTime nonExistentTime = new ReservationTime(9999L, LocalTime.of(10, 0));
@@ -88,12 +90,12 @@ class ReservationWaitingRepositoryTest {
                 new ReservationWaiting(null, "브라운",
                         new ReservationSlot(LocalDate.of(2026, 5, 1), nonExistentTime, theme),
                         LocalDate.of(2026, 5, 1).atStartOfDay())
-        )).isInstanceOf(DataIntegrityViolationException.class);
+        )).isInstanceOf(ConflictException.class);
     }
 
     @Test
     @DisplayName("존재하지 않는 테마 ID를 참조하여 예약 대기를 저장하면 외래키 제약조건 위반으로 예외가 발생한다.")
-    void save_nonExistentThemeId_throwsDataIntegrityViolation() {
+    void save_nonExistentThemeId_throwsConflictException() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme nonExistentTheme = new Theme(9999L, "없는테마", "설명", "url");
@@ -103,7 +105,7 @@ class ReservationWaitingRepositoryTest {
                 new ReservationWaiting(null, "브라운",
                         new ReservationSlot(LocalDate.of(2026, 5, 1), time, nonExistentTheme),
                         LocalDate.of(2026, 5, 1).atStartOfDay())
-        )).isInstanceOf(DataIntegrityViolationException.class);
+        )).isInstanceOf(ConflictException.class);
     }
 
     @Test

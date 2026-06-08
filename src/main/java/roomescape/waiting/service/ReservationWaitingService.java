@@ -2,10 +2,8 @@ package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
@@ -67,12 +65,8 @@ public class ReservationWaitingService {
     }
 
     private ReservationWaitingResult saveReservationWaiting(ReservationWaiting newWaiting) {
-        try {
-            ReservationWaiting saved = reservationWaitingRepository.save(newWaiting);
-            return ReservationWaitingResult.from(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING);
-        }
+        ReservationWaiting saved = reservationWaitingRepository.save(newWaiting);
+        return ReservationWaitingResult.from(saved);
     }
 
     @Transactional
