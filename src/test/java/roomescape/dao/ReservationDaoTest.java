@@ -8,7 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationResult;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.StoreReservationResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -265,7 +266,7 @@ public class ReservationDaoTest {
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
     void findByStoreId는_해당_매장의_예약만_조회한다() {
-        List<ReservationResult> gangnamReservations = reservationDao.findByStoreId(1L);
+        List<StoreReservationResult> gangnamReservations = reservationDao.findByStoreId(1L);
 
         assertThat(gangnamReservations).hasSize(2);
         assertThat(gangnamReservations)
@@ -285,7 +286,7 @@ public class ReservationDaoTest {
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
     void 다른_매장의_예약은_findByStoreId_결과에_포함되지_않는다() {
-        List<ReservationResult> hongdaeReservations = reservationDao.findByStoreId(2L);
+        List<StoreReservationResult> hongdaeReservations = reservationDao.findByStoreId(2L);
 
         assertThat(hongdaeReservations).hasSize(1);
         assertThat(hongdaeReservations)
@@ -301,7 +302,7 @@ public class ReservationDaoTest {
             INSERT_TWO_STORES_SQL
     })
     void 예약이_없는_매장은_findByStoreId가_빈_리스트를_반환한다() {
-        List<ReservationResult> reservations = reservationDao.findByStoreId(1L);
+        List<StoreReservationResult> reservations = reservationDao.findByStoreId(1L);
 
         assertThat(reservations).isEmpty();
     }

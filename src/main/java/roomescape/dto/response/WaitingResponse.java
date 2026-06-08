@@ -1,7 +1,7 @@
 package roomescape.dto.response;
 
 import roomescape.domain.Reservation;
-import roomescape.dto.WaitingResponseResult;
+import roomescape.dto.result.WaitingResponseResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,13 +13,10 @@ public record WaitingResponse(
         Long memberId,
         LocalDateTime createdAt
 ) {
-    public static record WaitingReservationResponse(
-            Long id,
-            LocalDate date,
-            ReservationTimeResponse time,
-            ThemeResponse theme,
-            StoreResponse store
-    ) {
+    public static List<WaitingResponse> fromAll(List<WaitingResponseResult> waitingResponseResults) {
+        return waitingResponseResults.stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 
     public static WaitingResponse from(WaitingResponseResult waitingResponseResult) {
@@ -39,9 +36,12 @@ public record WaitingResponse(
         );
     }
 
-    public static List<WaitingResponse> fromAll(List<WaitingResponseResult> waitingResponseResults) {
-        return waitingResponseResults.stream()
-                .map(WaitingResponse::from)
-                .toList();
+    public record WaitingReservationResponse(
+            Long id,
+            LocalDate date,
+            ReservationTimeResponse time,
+            ThemeResponse theme,
+            StoreResponse store
+    ) {
     }
 }

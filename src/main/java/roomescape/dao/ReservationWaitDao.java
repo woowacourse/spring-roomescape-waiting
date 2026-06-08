@@ -6,12 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWait;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.dto.WaitingResponseProjection;
+import roomescape.domain.*;
+import roomescape.dto.projection.WaitingResponseProjection;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -75,9 +71,10 @@ public class ReservationWaitDao {
                         reservation_id,
                         member_id,
                         created_at,
+                        id,
                         ROW_NUMBER() OVER (
                             PARTITION BY reservation_id
-                            ORDER BY created_at
+                            ORDER BY created_at, id
                         ) AS order_num
                     FROM reservation_wait
                 ) AS ranked
@@ -130,7 +127,7 @@ public class ReservationWaitDao {
                         id,
                         ROW_NUMBER() OVER (
                             PARTITION BY reservation_id
-                            ORDER BY created_at
+                            ORDER BY created_at, id
                         ) AS order_num
                     FROM reservation_wait
                 ) AS ranked

@@ -62,6 +62,24 @@ public class AdminStoreReservationControllerTest {
     private static final String REGULAR_USER_EMAIL = "user@email.com";
     private static final String PASSWORD = "password";
 
+    private Map<String, Object> updateParams(String date, long timeId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", date);
+        params.put("timeId", timeId);
+        return params;
+    }
+
+    private String loginAndGetCookie(String email) {
+        return RestAssured
+                .given()
+                .param("email", email)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
     @Nested
     class 매장_예약_목록_조회 {
 
@@ -84,6 +102,26 @@ public class AdminStoreReservationControllerTest {
                     .body("size()", is(1))
                     .body("id", hasItem(1))
                     .body("id", not(hasItem(2)));
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_TWO_STORES_SQL,
+                INSERT_MEMBERS_SQL,
+                INSERT_SINGLE_TIME_SQL,
+                INSERT_SINGLE_THEME_SQL,
+                INSERT_TWO_RESERVATIONS_SQL
+        })
+        void 예약_목록에_예약한_손님_정보가_포함된다() {
+            String cookie = loginAndGetCookie(GANGNAM_MANAGER_EMAIL);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().get("/api/v1/admin/store/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("[0].member.name", is("일반유저"))
+                    .body("[0].member.email", is(REGULAR_USER_EMAIL));
         }
 
         @Test
@@ -323,23 +361,5 @@ public class AdminStoreReservationControllerTest {
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_002"));
         }
-    }
-
-    private Map<String, Object> updateParams(String date, long timeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", date);
-        params.put("timeId", timeId);
-        return params;
-    }
-
-    private String loginAndGetCookie(String email) {
-        return RestAssured
-                .given()
-                .param("email", email)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
     }
 }

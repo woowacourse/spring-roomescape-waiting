@@ -35,6 +35,86 @@ public class AdminReservationTimeControllerTest {
     private static final String EMAIL = "manager-gangnam@email.com";
     private static final String PASSWORD = "password";
 
+    private String authenticate() {
+        return RestAssured
+                .given()
+                .param("email", EMAIL)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
+    private void createDefaultTimes(String cookie) {
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", "10:00");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .header("Cookie", cookie)
+                .body(time)
+                .when().post("/api/v1/admin/reservation-times")
+                .then().statusCode(201);
+
+        Map<String, String> time2 = new HashMap<>();
+        time2.put("startAt", "11:00");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .header("Cookie", cookie)
+                .body(time2)
+                .when().post("/api/v1/admin/reservation-times")
+                .then().statusCode(201);
+
+        Map<String, String> time3 = new HashMap<>();
+        time3.put("startAt", "12:00");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .header("Cookie", cookie)
+                .body(time3)
+                .when().post("/api/v1/admin/reservation-times")
+                .then().statusCode(201);
+    }
+
+    private void createDefaultThemes(String cookie) {
+        Map<String, Object> themeParams = new HashMap<>();
+        themeParams.put("name", "이든의 공포 하우스");
+        themeParams.put("description", "이든이 귀신으로 나옴");
+        themeParams.put("imgUrl", "https://images.example.com/themes/horror-house.jpg");
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .body(themeParams)
+                .when().post("/api/v1/admin/themes")
+                .then().statusCode(201);
+
+        Map<String, Object> themeParams2 = new HashMap<>();
+        themeParams2.put("name", "정콩이의 방탈출");
+        themeParams2.put("description", "니는 못나간다");
+        themeParams2.put("imgUrl", "https://images.example.com/themes/jungkong-room.jpg");
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .body(themeParams2)
+                .when().post("/api/v1/admin/themes")
+                .then().statusCode(201);
+    }
+
+    private Map<String, Object> reservationParams() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", LocalDate.now().plusDays(1).toString());
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+        params.put("storeId", 1L);
+        return params;
+    }
+
+    private Map<String, Object> timeParams() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("startAt", "10:00");
+        return params;
+    }
+
     @Nested
     class 예약시간_생성 {
 
@@ -191,85 +271,5 @@ public class AdminReservationTimeControllerTest {
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_003"));
         }
-    }
-
-    private String authenticate() {
-        return RestAssured
-                .given()
-                .param("email", EMAIL)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
-    }
-
-    private void createDefaultTimes(String cookie) {
-        Map<String, String> time = new HashMap<>();
-        time.put("startAt", "10:00");
-
-        RestAssured.given().contentType(ContentType.JSON)
-                .header("Cookie", cookie)
-                .body(time)
-                .when().post("/api/v1/admin/reservation-times")
-                .then().statusCode(201);
-
-        Map<String, String> time2 = new HashMap<>();
-        time2.put("startAt", "11:00");
-
-        RestAssured.given().contentType(ContentType.JSON)
-                .header("Cookie", cookie)
-                .body(time2)
-                .when().post("/api/v1/admin/reservation-times")
-                .then().statusCode(201);
-
-        Map<String, String> time3 = new HashMap<>();
-        time3.put("startAt", "12:00");
-
-        RestAssured.given().contentType(ContentType.JSON)
-                .header("Cookie", cookie)
-                .body(time3)
-                .when().post("/api/v1/admin/reservation-times")
-                .then().statusCode(201);
-    }
-
-    private void createDefaultThemes(String cookie) {
-        Map<String, Object> themeParams = new HashMap<>();
-        themeParams.put("name", "이든의 공포 하우스");
-        themeParams.put("description", "이든이 귀신으로 나옴");
-        themeParams.put("imgUrl", "https://images.example.com/themes/horror-house.jpg");
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/v1/admin/themes")
-                .then().statusCode(201);
-
-        Map<String, Object> themeParams2 = new HashMap<>();
-        themeParams2.put("name", "정콩이의 방탈출");
-        themeParams2.put("description", "니는 못나간다");
-        themeParams2.put("imgUrl", "https://images.example.com/themes/jungkong-room.jpg");
-
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(themeParams2)
-                .when().post("/api/v1/admin/themes")
-                .then().statusCode(201);
-    }
-
-    private Map<String, Object> reservationParams() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
-        params.put("storeId", 1L);
-        return params;
-    }
-
-    private Map<String, Object> timeParams() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("startAt", "10:00");
-        return params;
     }
 }

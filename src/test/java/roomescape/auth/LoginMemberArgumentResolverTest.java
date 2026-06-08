@@ -19,6 +19,12 @@ class LoginMemberArgumentResolverTest {
         assertThat(resolver.supportsParameter(parameter)).isTrue();
     }
 
+    private MethodParameter methodParameter(String methodName, Class<?> parameterType)
+            throws NoSuchMethodException {
+        Method method = Fixtures.class.getDeclaredMethod(methodName, parameterType);
+        return new MethodParameter(method, 0);
+    }
+
     @Test
     void 어노테이션이_있고_Member타입이면_지원한다() throws NoSuchMethodException {
         MethodParameter parameter = methodParameter("withMemberAnnotation", Member.class);
@@ -35,12 +41,6 @@ class LoginMemberArgumentResolverTest {
     void 어노테이션이_있어도_타입이_다르면_지원하지_않는다() throws NoSuchMethodException {
         MethodParameter parameter = methodParameter("wrongType", String.class);
         assertThat(resolver.supportsParameter(parameter)).isFalse();
-    }
-
-    private MethodParameter methodParameter(String methodName, Class<?> parameterType)
-            throws NoSuchMethodException {
-        Method method = Fixtures.class.getDeclaredMethod(methodName, parameterType);
-        return new MethodParameter(method, 0);
     }
 
     @SuppressWarnings("unused")

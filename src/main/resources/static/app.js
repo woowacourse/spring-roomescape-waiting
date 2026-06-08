@@ -189,6 +189,22 @@ async function deleteResource(url) {
     await ensureOk(response);
 }
 
+// ─── Date/time helpers ───────────────────
+function localDateString(date) {
+    const d = date || new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function isPastDateTime(dateStr, timeStr) {
+    if (!dateStr || !timeStr) return false;
+    const normalizedTime = timeStr.length === 5 ? `${timeStr}:00` : timeStr;
+    const slot = new Date(`${dateStr}T${normalizedTime}`);
+    return slot.getTime() < Date.now();
+}
+
 // ─── View routing ────────────────────────
 function renderView() {
     loginView.classList.add("hidden");
@@ -279,6 +295,7 @@ async function initUserView() {
     renderThemeGrid();
     renderPopularThemes();
     userReservationDate.value = "";
+    userReservationDate.min = localDateString();
     userTimeGrid.innerHTML = "";
     userTimeHint.textContent = "매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.";
     updateReserveButton();
@@ -373,11 +390,13 @@ async function refreshAvailableTimes() {
             return;
         }
         userTimeGrid.innerHTML = data.map(item => {
+            const past = isPastDateTime(date, item.time);
             const isSelected = state.userSelectedTimeId === item.id;
             const reservationIdAttr = item.reservationId != null ? `data-reservation-id="${item.reservationId}"` : "";
             const slotClass = ["time-slot", isSelected ? "selected" : "", item.available ? "" : "wait-eligible"].filter(Boolean).join(" ");
-            const titleAttr = item.available ? "" : `title="이미 예약된 슬롯 — 대기 신청"`;
-            return `<button type="button" class="${slotClass}" data-time-id="${item.id}" ${reservationIdAttr} ${titleAttr}>${item.time.slice(0, 5)}</button>`;
+            const titleAttr = past ? `title="이미 지난 시간"` : (item.available ? "" : `title="이미 예약된 슬롯 — 대기 신청"`);
+            const disabledAttr = past ? "disabled" : "";
+            return `<button type="button" class="${slotClass}" data-time-id="${item.id}" ${reservationIdAttr} ${titleAttr} ${disabledAttr}>${item.time.slice(0, 5)}</button>`;
         }).join("");
 
         userTimeGrid.querySelectorAll("[data-time-id]").forEach(el => {
@@ -561,6 +580,10 @@ async function loadManagerReservations() {
                 <td>${r.date}</td>
                 <td>${r.time.startAt.slice(0, 5)}</td>
                 <td>${r.theme.name}</td>
+                <td>
+                    <div class="cell-main">${r.member.name}</div>
+                    <div class="cell-sub">${r.member.email}</div>
+                </td>
                 <td class="actions">
                     <button type="button" class="btn btn-sm btn-secondary" data-edit-id="${r.id}" data-edit-date="${r.date}" data-edit-time-id="${r.time.id}">변경</button>
                     <button type="button" class="btn btn-sm btn-danger" data-delete-id="${r.id}">삭제</button>
@@ -595,13 +618,28 @@ async function loadManagerReservations() {
 function openEditModal(reservationId, date, timeId) {
     state.editingReservationId = reservationId;
     editModalReservationId.textContent = "#" + reservationId;
+    editModalDate.min = localDateString();
     editModalDate.value = date;
     editModalTimeSelect.innerHTML = '<option value="">시간을 선택하세요</option>' +
         state.allTimes.map(t => {
             const selected = t.id === timeId ? "selected" : "";
             return `<option value="${t.id}" ${selected}>${t.startAt.slice(0, 5)}</option>`;
         }).join("");
+    applyEditModalTimeConstraints();
     editModalOverlay.classList.remove("hidden");
+}
+
+function applyEditModalTimeConstraints() {
+    const date = editModalDate.value;
+    Array.from(editModalTimeSelect.options).forEach(option => {
+        if (!option.value) return;
+        const time = state.allTimes.find(t => String(t.id) === option.value);
+        option.disabled = !!(time && isPastDateTime(date, time.startAt));
+    });
+    const selected = editModalTimeSelect.selectedOptions[0];
+    if (selected && selected.disabled) {
+        editModalTimeSelect.value = "";
+    }
 }
 
 function closeEditModal() {
@@ -675,6 +713,7 @@ tabReservations.addEventListener("click", () => switchTab("reservations"));
 tabWaitings.addEventListener("click", () => switchTab("waitings"));
 
 refreshManagerButton.addEventListener("click", loadManagerReservations);
+editModalDate.addEventListener("change", applyEditModalTimeConstraints);
 editModalCancelButton.addEventListener("click", closeEditModal);
 editModalSubmitButton.addEventListener("click", submitEdit);
 editModalOverlay.addEventListener("click", e => {

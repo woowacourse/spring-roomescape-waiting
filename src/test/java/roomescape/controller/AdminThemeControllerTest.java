@@ -35,6 +35,34 @@ public class AdminThemeControllerTest {
     private static final String EMAIL = "manager-gangnam@email.com";
     private static final String PASSWORD = "password";
 
+    private Map<String, Object> themeParams() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "이든의 공포 하우스");
+        params.put("description", "이든이 귀신으로 나옴");
+        params.put("imgUrl", "https://images.example.com/themes/horror-house.jpg");
+        return params;
+    }
+
+    private Map<String, Object> reservationParams() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", LocalDate.now().plusDays(1).toString());
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+        params.put("storeId", 1L);
+        return params;
+    }
+
+    private String authenticate() {
+        return RestAssured
+                .given()
+                .param("email", EMAIL)
+                .param("password", PASSWORD)
+                .when().post("/api/v1/auth/login")
+                .then()
+                .extract().header("Set-Cookie")
+                .split(";")[0];
+    }
+
     @Nested
     class 테마_생성 {
 
@@ -233,33 +261,5 @@ public class AdminThemeControllerTest {
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_003"));
         }
-    }
-
-    private Map<String, Object> themeParams() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "이든의 공포 하우스");
-        params.put("description", "이든이 귀신으로 나옴");
-        params.put("imgUrl", "https://images.example.com/themes/horror-house.jpg");
-        return params;
-    }
-
-    private Map<String, Object> reservationParams() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
-        params.put("storeId", 1L);
-        return params;
-    }
-
-    private String authenticate() {
-        return RestAssured
-                .given()
-                .param("email", EMAIL)
-                .param("password", PASSWORD)
-                .when().post("/api/v1/auth/login")
-                .then()
-                .extract().header("Set-Cookie")
-                .split(";")[0];
     }
 }

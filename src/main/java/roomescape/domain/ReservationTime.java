@@ -18,6 +18,10 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
+    private void validateStartAt(LocalTime startAt) {
+        Validator.notNull(startAt, "예약 시작 시간은 비어 있을 수 없습니다.");
+    }
+
     public Long getId() {
         return id;
     }
@@ -28,9 +32,5 @@ public class ReservationTime {
 
     public boolean isPast(LocalDate date) {
         return LocalDateTime.of(date, startAt).isBefore(LocalDateTime.now());
-    }
-
-    private void validateStartAt(LocalTime startAt) {
-        Validator.notNull(startAt, "예약 시작 시간은 비어 있을 수 없습니다.");
     }
 }

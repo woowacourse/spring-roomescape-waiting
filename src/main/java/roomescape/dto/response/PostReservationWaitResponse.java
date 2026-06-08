@@ -1,7 +1,7 @@
 package roomescape.dto.response;
 
 import roomescape.domain.ReservationWait;
-import roomescape.dto.CreatedWaitResult;
+import roomescape.dto.result.CreatedWaitResult;
 
 import java.time.LocalDateTime;
 

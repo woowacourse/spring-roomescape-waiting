@@ -16,18 +16,18 @@ public class Store {
         this.name = name;
     }
 
+    private void validateName(String name) {
+        Validator.notBlank(name, "매장 이름은 비어 있을 수 없습니다.");
+        if (name.length() > MAX_NAME_LENGTH) {
+            throw new IllegalArgumentException("매장 이름은 " + MAX_NAME_LENGTH + "자 이하여야 합니다.");
+        }
+    }
+
     public Long getId() {
         return id;
     }
 
     public String getName() {
         return name;
-    }
-
-    private void validateName(String name) {
-        Validator.notBlank(name, "매장 이름은 비어 있을 수 없습니다.");
-        if (name.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("매장 이름은 " + MAX_NAME_LENGTH + "자 이하여야 합니다.");
-        }
     }
 }

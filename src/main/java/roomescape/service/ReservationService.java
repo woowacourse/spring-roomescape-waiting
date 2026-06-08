@@ -11,9 +11,10 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
-import roomescape.dto.CreatedWaitResult;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.WaitingResponseResult;
+import roomescape.dto.result.CreatedWaitResult;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.StoreReservationResult;
+import roomescape.dto.result.WaitingResponseResult;
 import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
@@ -47,7 +48,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResult> findByStoreId(Long storeId) {
+    public List<StoreReservationResult> findByStoreId(Long storeId) {
         return reservationDao.findByStoreId(storeId);
     }
 
@@ -67,7 +68,7 @@ public class ReservationService {
 
     @Transactional
     public CreatedWaitResult createWait(Long memberId, Long reservationId) {
-        Reservation reservation = findReservation(reservationId);
+        Reservation reservation = findReservationByIdForUpdate(reservationId);
         if (reservation.isPast()) {
             throw new PastReservationWaitNotAllowedException();
         }
@@ -84,6 +85,26 @@ public class ReservationService {
         }
     }
 
+    private Reservation findReservationByIdForUpdate(Long reservationId) {
+        reservationDao.lockById(reservationId);
+        Reservation reservation = findReservation(reservationId);
+        return reservation;
+    }
+
+    private Reservation findReservation(Long id) {
+        try {
+            return reservationDao.findReservationById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ReservationNotFoundException();
+        }
+    }
+
+    private static void validateIfSelfReserved(Long memberId, Reservation reservation) {
+        if (reservation.getMemberId().equals(memberId)) {
+            throw new SelfReservationWaitNotAllowedException();
+        }
+    }
+
     @Transactional
     public ReservationResult updateReservation(Long id, LocalDate date, Long memberId, Long timeId) {
         ReservationTime reservationTime = findReservationTime(timeId);
@@ -97,6 +118,20 @@ public class ReservationService {
             throw new ReservationAlreadyExistsException();
         }
         return reservationDao.findReservationResultById(id);
+    }
+
+    private void validateReservationOwner(Long memberId, Reservation reservation) {
+        if (!reservation.isReservedBy(memberId)) {
+            throw new ReservationOwnerMismatchException();
+        }
+    }
+
+    private ReservationTime findReservationTime(Long id) {
+        try {
+            return reservationTimeDao.findReservationTimeById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ReservationTimeNotFoundException();
+        }
     }
 
     @Transactional
@@ -117,7 +152,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long reservationId, Long memberId) {
-        Reservation reservation = findReservation(reservationId);
+        Reservation reservation = findReservationByIdForUpdate(reservationId);
         validateReservationOwner(memberId, reservation);
         if (reservation.isPast()) {
             throw new PastReservationCancelNotAllowedException();
@@ -132,6 +167,11 @@ public class ReservationService {
                         () -> reservationDao.delete(reservationId));
     }
 
+    private void changeToRecentWaitingMember(Long reservationId, Long memberId) {
+        reservationDao.updateMemberId(reservationId, memberId);
+        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
+    }
+
     @Transactional
     public void deleteByManager(Long reservationId, Member manager) {
         Reservation reservation = findReservation(reservationId);
@@ -142,38 +182,5 @@ public class ReservationService {
     @Transactional
     public void deleteReservationWait(Long reservationId, Long memberId) {
         reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
-    }
-
-    private void changeToRecentWaitingMember(Long reservationId, Long memberId) {
-        reservationDao.updateMemberId(reservationId, memberId);
-        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
-    }
-
-    private void validateReservationOwner(Long memberId, Reservation reservation) {
-        if (!reservation.isReservedBy(memberId)) {
-            throw new ReservationOwnerMismatchException();
-        }
-    }
-
-    private Reservation findReservation(Long id) {
-        try {
-            return reservationDao.findReservationById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ReservationNotFoundException();
-        }
-    }
-
-    private ReservationTime findReservationTime(Long id) {
-        try {
-            return reservationTimeDao.findReservationTimeById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ReservationTimeNotFoundException();
-        }
-    }
-
-    private static void validateIfSelfReserved(Long memberId, Reservation reservation) {
-        if (reservation.getMemberId().equals(memberId)) {
-            throw new SelfReservationWaitNotAllowedException();
-        }
     }
 }

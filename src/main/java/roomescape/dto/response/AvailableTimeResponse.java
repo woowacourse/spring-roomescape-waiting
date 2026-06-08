@@ -11,6 +11,12 @@ public record AvailableTimeResponse(
         Boolean available,
         Long reservationId
 ) {
+    public static List<AvailableTimeResponse> fromAll(Map<ReservationTime, Long> reservationTimesAvailability) {
+        return reservationTimesAvailability.entrySet().stream()
+                .map(entry -> from(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
     public static AvailableTimeResponse from(ReservationTime reservationTime, Long reservationId) {
         return new AvailableTimeResponse(
                 reservationTime.getId(),
@@ -18,11 +24,5 @@ public record AvailableTimeResponse(
                 reservationId == null,
                 reservationId
         );
-    }
-
-    public static List<AvailableTimeResponse> fromAll(Map<ReservationTime, Long> reservationTimesAvailability) {
-        return reservationTimesAvailability.entrySet().stream()
-                .map(entry -> from(entry.getKey(), entry.getValue()))
-                .toList();
     }
 }

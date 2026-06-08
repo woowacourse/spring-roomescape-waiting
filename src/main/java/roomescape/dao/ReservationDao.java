@@ -9,7 +9,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationResult;
+import roomescape.dto.projection.MemberSummaryProjection;
+import roomescape.dto.result.ReservationResult;
+import roomescape.dto.result.StoreReservationResult;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -38,6 +40,28 @@ public class ReservationDao {
             INNER JOIN store as s ON r.store_id = s.id
             """;
 
+    private static final String STORE_RESERVATION_DETAIL_SELECT = """
+            SELECT
+                r.id as reservation_id,
+                r.member_id,
+                r.date,
+                t.id as time_id,
+                t.start_at,
+                th.id as theme_id,
+                th.name as theme_name,
+                th.description as theme_description,
+                th.img_url as theme_img_url,
+                s.id as store_id,
+                s.name as store_name,
+                m.email as member_email,
+                m.name as member_name
+            FROM reservation as r
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
+            INNER JOIN store as s ON r.store_id = s.id
+            INNER JOIN member as m ON r.member_id = m.id
+            """;
+
     private final JdbcTemplate jdbcTemplate;
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
@@ -64,6 +88,23 @@ public class ReservationDao {
         return reservations;
     }
 
+    private RowMapper<Reservation> reservationRowMapper() {
+        return (resultSet, rowNum) -> {
+            Reservation newReservation = new Reservation(
+                    resultSet.getLong("reservation_id"),
+                    resultSet.getLong("member_id"),
+                    LocalDate.parse(resultSet.getString("date")),
+                    new ReservationTime(
+                            resultSet.getLong("time_id"),
+                            LocalTime.parse(resultSet.getString("start_at"))
+                    ),
+                    resultSet.getLong("theme_id"),
+                    resultSet.getLong("store_id")
+            );
+            return newReservation;
+        };
+    }
+
     public List<ReservationResult> findAllReservationsByMemberId(Long memberId) {
         String sql = RESERVATION_DETAIL_SELECT + "WHERE r.member_id = ?";
         return jdbcTemplate.query(
@@ -73,13 +114,72 @@ public class ReservationDao {
         );
     }
 
-    public List<ReservationResult> findByStoreId(Long storeId) {
-        String sql = RESERVATION_DETAIL_SELECT + "WHERE r.store_id = ?";
+    private RowMapper<ReservationResult> reservationResultRowMapper() {
+        return (resultSet, rowNum) -> {
+            Reservation reservation = new Reservation(
+                    resultSet.getLong("reservation_id"),
+                    resultSet.getLong("member_id"),
+                    LocalDate.parse(resultSet.getString("date")),
+                    new ReservationTime(
+                            resultSet.getLong("time_id"),
+                            LocalTime.parse(resultSet.getString("start_at"))
+                    ),
+                    resultSet.getLong("theme_id"),
+                    resultSet.getLong("store_id")
+            );
+            Theme theme = new Theme(
+                    resultSet.getLong("theme_id"),
+                    resultSet.getString("theme_name"),
+                    resultSet.getString("theme_description"),
+                    resultSet.getString("theme_img_url")
+            );
+            Store store = new Store(
+                    resultSet.getLong("store_id"),
+                    resultSet.getString("store_name")
+            );
+            return new ReservationResult(reservation, theme, store);
+        };
+    }
+
+    public List<StoreReservationResult> findByStoreId(Long storeId) {
+        String sql = STORE_RESERVATION_DETAIL_SELECT + "WHERE r.store_id = ?";
         return jdbcTemplate.query(
                 sql,
-                reservationResultRowMapper(),
+                storeReservationResultRowMapper(),
                 storeId
         );
+    }
+
+    private RowMapper<StoreReservationResult> storeReservationResultRowMapper() {
+        return (resultSet, rowNum) -> {
+            Reservation reservation = new Reservation(
+                    resultSet.getLong("reservation_id"),
+                    resultSet.getLong("member_id"),
+                    LocalDate.parse(resultSet.getString("date")),
+                    new ReservationTime(
+                            resultSet.getLong("time_id"),
+                            LocalTime.parse(resultSet.getString("start_at"))
+                    ),
+                    resultSet.getLong("theme_id"),
+                    resultSet.getLong("store_id")
+            );
+            Theme theme = new Theme(
+                    resultSet.getLong("theme_id"),
+                    resultSet.getString("theme_name"),
+                    resultSet.getString("theme_description"),
+                    resultSet.getString("theme_img_url")
+            );
+            Store store = new Store(
+                    resultSet.getLong("store_id"),
+                    resultSet.getString("store_name")
+            );
+            MemberSummaryProjection member = new MemberSummaryProjection(
+                    resultSet.getLong("member_id"),
+                    resultSet.getString("member_email"),
+                    resultSet.getString("member_name")
+            );
+            return new StoreReservationResult(reservation, theme, store, member);
+        };
     }
 
     public ReservationResult findReservationResultById(Long id) {
@@ -112,6 +212,13 @@ public class ReservationDao {
         return reservation;
     }
 
+    public void lockById(Long id) {
+        jdbcTemplate.query(
+                "SELECT id FROM reservation WHERE id = ? FOR UPDATE",
+                (rs, rowNum) -> rs.getLong("id"),
+                id);
+    }
+
     public int updateById(Long id, LocalDate date, Long timeId) {
         String sql = "update reservation set date = ?, time_id = ? where id = ?";
         return jdbcTemplate.update(sql, date.toString(), timeId, id);
@@ -139,50 +246,6 @@ public class ReservationDao {
 
     public int delete(Long id) {
         return jdbcTemplate.update("delete from reservation where id = ?", id);
-    }
-
-    private RowMapper<ReservationResult> reservationResultRowMapper() {
-        return (resultSet, rowNum) -> {
-            Reservation reservation = new Reservation(
-                    resultSet.getLong("reservation_id"),
-                    resultSet.getLong("member_id"),
-                    LocalDate.parse(resultSet.getString("date")),
-                    new ReservationTime(
-                            resultSet.getLong("time_id"),
-                            LocalTime.parse(resultSet.getString("start_at"))
-                    ),
-                    resultSet.getLong("theme_id"),
-                    resultSet.getLong("store_id")
-            );
-            Theme theme = new Theme(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("theme_description"),
-                    resultSet.getString("theme_img_url")
-            );
-            Store store = new Store(
-                    resultSet.getLong("store_id"),
-                    resultSet.getString("store_name")
-            );
-            return new ReservationResult(reservation, theme, store);
-        };
-    }
-
-    private RowMapper<Reservation> reservationRowMapper() {
-        return (resultSet, rowNum) -> {
-            Reservation newReservation = new Reservation(
-                    resultSet.getLong("reservation_id"),
-                    resultSet.getLong("member_id"),
-                    LocalDate.parse(resultSet.getString("date")),
-                    new ReservationTime(
-                            resultSet.getLong("time_id"),
-                            LocalTime.parse(resultSet.getString("start_at"))
-                    ),
-                    resultSet.getLong("theme_id"),
-                    resultSet.getLong("store_id")
-            );
-            return newReservation;
-        };
     }
 
     public void updateMemberId(Long reservationId, Long memberId) {

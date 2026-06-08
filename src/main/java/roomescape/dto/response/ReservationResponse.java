@@ -1,7 +1,7 @@
 package roomescape.dto.response;
 
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationResult;
+import roomescape.dto.result.ReservationResult;
 
 import java.util.List;
 
@@ -13,6 +13,12 @@ public record ReservationResponse(
         ThemeResponse theme,
         StoreResponse store
 ) {
+    public static List<ReservationResponse> fromAll(List<ReservationResult> reservationResults) {
+        return reservationResults.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     public static ReservationResponse from(ReservationResult reservationResult) {
         Reservation reservation = reservationResult.reservation();
         return new ReservationResponse(
@@ -23,11 +29,5 @@ public record ReservationResponse(
                 ThemeResponse.from(reservationResult.theme()),
                 StoreResponse.from(reservationResult.store())
         );
-    }
-
-    public static List<ReservationResponse> fromAll(List<ReservationResult> reservationResults) {
-        return reservationResults.stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 }

@@ -12,7 +12,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
-import roomescape.dto.CreatedWaitResult;
+import roomescape.dto.result.CreatedWaitResult;
 import roomescape.exception.auth.WrongStoreAccessException;
 import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
