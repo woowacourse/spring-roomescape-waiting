@@ -15,7 +15,7 @@ import roomescape.common.FixedClockConfig;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/popular-theme-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import(FixedClockConfig.class)
-public class ThemeProvideTest {
+public class UserThemeAcceptanceTest {
 
     @LocalServerPort
     private int port;
