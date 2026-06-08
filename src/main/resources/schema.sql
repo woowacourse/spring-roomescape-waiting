@@ -33,6 +33,11 @@ CREATE TABLE reservation_waiting
     created_at     TIMESTAMP    NOT NULL,
     reservation_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
     CONSTRAINT uk_waiting_name_reservation UNIQUE (name, reservation_id)
 );
+
+CREATE INDEX idx_waiting_reservation_created
+    ON reservation_waiting (reservation_id, created_at, id);
+
+ALTER TABLE reservation_waiting
+    ADD FOREIGN KEY (reservation_id) REFERENCES reservation (id);
