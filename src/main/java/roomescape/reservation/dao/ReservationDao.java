@@ -69,31 +69,6 @@ public class ReservationDao {
         return result.stream().findFirst();
     }
 
-    public List<Reservation> selectByThemeIdAndDate(Long themeId, LocalDate date) {
-        String sql =
-                """
-                        select r.id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
-                        from reservation r
-                        inner join reservation_time t
-                        on r.time_id = t.id
-                        where r.theme_id = ?
-                        and r.date = ?
-                        """;
-        return jdbcTemplate.query(sql, MAPPER, themeId, date);
-    }
-
-    public List<Reservation> selectByTimeId(Long timeId) {
-        String sql =
-                """
-                        select r.id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
-                        from reservation r
-                        inner join reservation_time t
-                        on r.time_id = t.id
-                        where r.time_id = ?
-                        """;
-        return jdbcTemplate.query(sql, MAPPER, timeId);
-    }
-
     public List<Long> selectTimeIdByThemeIdAndDate(Long themeId, LocalDate date) {
         String sql =
                 """
