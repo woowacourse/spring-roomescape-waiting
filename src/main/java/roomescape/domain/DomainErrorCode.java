@@ -6,13 +6,5 @@ public enum DomainErrorCode {
     INVALID_INPUT,
     PAST_DATE,
     FORBIDDEN,
-    RESOURCE_IN_USE;
-
-    public String messageKey() {
-        return "error." + name().toLowerCase();
-    }
-
-    public String titleKey() {
-        return "error.title." + name().toLowerCase();
-    }
+    RESOURCE_IN_USE
 }
