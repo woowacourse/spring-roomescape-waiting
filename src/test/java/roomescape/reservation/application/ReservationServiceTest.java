@@ -417,6 +417,73 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약 변경 시 대기 승격 실패는 예약 변경을 막지 않는다")
+    void updateReservationSchedule_success_when_waiting_promotion_fails() {
+        // given
+        ReservationTime savedTime1 = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(1))
+        );
+        ReservationTime savedTime2 = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.now().plusHours(2))
+        );
+        Theme savedTheme = themeRepository.save(
+                Theme.create("공포", "아니", "https://good.com/thumb-nail/1")
+        );
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(
+                Reservation.create(
+                        "인직",
+                        date,
+                        savedTime1,
+                        savedTheme
+                )
+        );
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime1,
+                savedTheme
+        ));
+        WaitingService failingWaitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                        throw new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST);
+                    }
+                },
+                new WaitingValidator(waitingRepository)
+        );
+        ReservationService reservationService = new ReservationService(
+                reservationRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitingRepository,
+                new ReservationValidator(reservationRepository),
+                failingWaitingService
+        );
+
+        // when
+        reservationService.updateReservationSchedule(new ReservationUpdateCommand(
+                savedReservation.getId(),
+                date,
+                savedTime2.getId(),
+                "인직"
+        ));
+
+        // then
+        Reservation updatedReservation = reservationRepository.findById(savedReservation.getId())
+                .orElseThrow();
+        assertThat(updatedReservation.getTime().getId()).isEqualTo(savedTime2.getId());
+    }
+
+    @Test
     @DisplayName("존재하지 않는 예약 아이디로 수정하면 예외가 발생한다")
     void updateReservationSchedule_fail_with_not_found_reservation() {
         // given
