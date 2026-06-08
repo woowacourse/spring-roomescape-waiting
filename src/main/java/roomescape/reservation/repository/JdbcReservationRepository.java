@@ -83,7 +83,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                h.description AS theme_description,
                h.thumbnail_url AS theme_url,
                'reserved' AS status,
-               NULL AS waiting_order
+               0 AS waiting_order
         FROM reservation r
         INNER JOIN reservation_time t ON r.time_id = t.id
         INNER JOIN theme h ON r.theme_id = h.id
