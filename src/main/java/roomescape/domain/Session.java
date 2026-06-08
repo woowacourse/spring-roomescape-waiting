@@ -2,9 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
 public class Session {
 
@@ -23,10 +20,6 @@ public class Session {
 
     public static Session transientOf(LocalDate date, TimeSlot timeSlot, Theme theme) {
         return new Session(null, date, timeSlot, theme);
-    }
-
-    public Optional<Waiting> promoteCandidate(List<Waiting> waitings) {
-        return waitings.stream().min(Comparator.naturalOrder());
     }
 
     public boolean isPast(LocalDateTime currentDateTime) {
