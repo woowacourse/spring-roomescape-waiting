@@ -233,6 +233,39 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("승격할 예약 대기가 없으면 아무 대기도 승격하지 않는다")
+    void promoteNextWaiting_success_when_waiting_not_exists() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting[] promotedWaiting = new Waiting[1];
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                        promotedWaiting[0] = waiting;
+                    }
+                },
+                new WaitingValidator(waitingRepository)
+        );
+
+        // when
+        waitingService.promoteNextWaiting(date, savedTime, savedTheme);
+
+        // then
+        assertThat(waitingRepository.isEmpty()).isTrue();
+        assertThat(promotedWaiting[0]).isNull();
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기를 취소한다")
     void cancelWaiting_success() {
         // given
