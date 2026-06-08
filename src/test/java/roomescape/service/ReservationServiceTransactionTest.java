@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
@@ -65,6 +66,25 @@ class ReservationServiceTransactionTest {
         assertThat(findStatus(pendingReservationId)).isEqualTo("CONFIRMED");
         assertThat(countConfirmedReservations(previousThemeSlotId)).isEqualTo(1);
         assertThat(countConfirmedReservations(targetThemeSlotId)).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("예약 취소 후 대기 승격 중 예외가 발생하면 취소 상태 변경을 롤백한다.")
+    void rollbackCancelledReservationWhenPromotingWaitingReservationFails() {
+        long themeSlotId = insertThemeSlot(LocalDate.now().plusDays(30), true);
+        long confirmedReservationId = insertReservation("브라운", "CONFIRMED", themeSlotId);
+        long pendingReservationId = insertReservation("김대기", "PENDING", themeSlotId);
+        doThrow(new RuntimeException("대기 승격 실패"))
+                .when(reservationRepository)
+                .updateStatus(any(Reservation.class), eq("PENDING"));
+
+        assertThatThrownBy(() -> reservationService.cancelReservation(confirmedReservationId, "브라운"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("대기 승격 실패");
+
+        assertThat(findStatus(confirmedReservationId)).isEqualTo("CONFIRMED");
+        assertThat(findStatus(pendingReservationId)).isEqualTo("PENDING");
+        assertThat(findThemeSlotReserved(themeSlotId)).isTrue();
     }
 
     private long insertThemeSlot(LocalDate date) {
