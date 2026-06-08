@@ -36,6 +36,10 @@ public class Reservation {
         return new Reservation(this.id, this.name, time, this.theme, this.status, this.createdAt);
     }
 
+    public Reservation withStatus(Status status) {
+        return new Reservation(this.id, this.name, this.time, this.theme, status, this.createdAt);
+    }
+
     public Reservation promote() {
         if (this.status != Status.WAITING) {
             throw new IllegalStateException("WAITING 상태만 예약으로 가능합니다.");
@@ -75,12 +79,7 @@ public class Reservation {
         return this.status.equals(Status.RESERVED);
     }
 
-    public void validateCancelBy(String name, LocalDateTime dateTime) {
-        validateOwnedBy(name);
-        time.validateExpired(dateTime);
-    }
-
-    public void validateUpdateBy(String name, LocalDateTime dateTime) {
+    public void validateChangeableBy(String name, LocalDateTime dateTime) {
         validateOwnedBy(name);
         time.validateExpired(dateTime);
     }
@@ -89,5 +88,17 @@ public class Reservation {
         if (!this.name.equals(name)) {
             throw new ForbiddenRequestException();
         }
+    }
+
+    public void validateExpired(LocalDateTime dateTime) {
+        time.validateExpired(dateTime);
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
     }
 }

@@ -28,17 +28,19 @@ public class ReservationServiceImpl implements ReservationService {
     private final TimeService timeService;
     private final ThemeRepository themeRepository;
     private final HolidayService holidayService;
+    private final SlotService slotService;
 
     public ReservationServiceImpl(
             ReservationRepository reservationRepository,
             TimeService timeService,
             ThemeRepository themeRepository,
-            HolidayService holidayService
+            HolidayService holidayService, SlotService slotService
     ) {
         this.reservationRepository = reservationRepository;
         this.timeService = timeService;
         this.themeRepository = themeRepository;
         this.holidayService = holidayService;
+        this.slotService = slotService;
     }
 
     @Override
@@ -49,6 +51,9 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
+        slotService.ensure(request.themeId(), request.timeId());
+        slotService.lock(request.themeId(), request.timeId());
+
         LocalDateTime now = LocalDateTime.now();
         ReservationTime time = timeService.findById(request.timeId());
         time.validateExpired(now);
@@ -72,10 +77,24 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public void cancel(Long id) {
-        boolean deleted = reservationRepository.deleteById(id);
-        if (!deleted) {
-            throw new ReservationNotFoundException(id);
+        Reservation reservationForSlotKey = reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+
+        slotService.ensure(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
+        slotService.lock(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        reservation.validateExpired(LocalDateTime.now());
+        if (reservation.isReserved()) {
+            ReservationWaitings waitings = new ReservationWaitings(
+                    reservationRepository.findAllWaitingBy(
+                            reservation.getTimeId(),
+                            reservation.getThemeId()));
+            waitings.earliest()
+                    .map(Reservation::promote)
+                    .ifPresent(reservationRepository::update);
         }
+        reservationRepository.deleteById(id);
     }
 
     @Override
@@ -87,8 +106,8 @@ public class ReservationServiceImpl implements ReservationService {
                         reservation,
                         new ReservationWaitings(
                                 reservationRepository.findAllWaitingBy(
-                                        reservation.getTime().getId(),
-                                        reservation.getTheme().getId()))))
+                                        reservation.getTimeId(),
+                                        reservation.getThemeId()))))
                 .map(ReservationWithWaitingOrderResponse::from)
                 .toList();
     }
@@ -96,15 +115,19 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public void cancelForUser(Long id, String name) {
+        Reservation reservationForSlotKey = reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        slotService.ensure(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
+        slotService.lock(reservationForSlotKey.getThemeId(), reservationForSlotKey.getTimeId());
+
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        reservation.validateCancelBy(name, LocalDateTime.now());
-
+        reservation.validateChangeableBy(name, LocalDateTime.now());
         if (reservation.isReserved()) {
             ReservationWaitings waitings = new ReservationWaitings(
                     reservationRepository.findAllWaitingBy(
-                            reservation.getTime().getId(),
-                            reservation.getTheme().getId()));
+                            reservation.getTimeId(),
+                            reservation.getThemeId()));
             waitings.earliest()
                     .map(Reservation::promote)
                     .ifPresent(reservationRepository::update);
@@ -118,20 +141,38 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         LocalDateTime now = LocalDateTime.now();
-        reservation.validateUpdateBy(name, now);
+        reservation.validateChangeableBy(name, now);
 
         ReservationTime newTime = timeService.findById(timeId);
         newTime.validateExpired(now);
-
         if (holidayService.isHoliday(newTime.getDate())) {
             throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
         }
 
-        if (reservationRepository.isDuplicated(reservation.getTheme().getId(), newTime)) {
+        if (reservationRepository.isDuplicatedWithName(name, reservation.getThemeId(), newTime)) {
             throw new DuplicateReservationException();
         }
 
-        Reservation updatedReservation = reservation.withTime(newTime).withCreatedAt(now);
-        return reservationRepository.update(updatedReservation);
+        if (reservation.isReserved()) {
+            ReservationWaitings waitings = new ReservationWaitings(
+                    reservationRepository.findAllWaitingBy(
+                            reservation.getTimeId(),
+                            reservation.getThemeId()));
+            waitings.earliest()
+                    .map(Reservation::promote)
+                    .ifPresent(reservationRepository::update);
+        }
+
+        if (reservationRepository.isDuplicated(reservation.getThemeId(), newTime)) {
+            return reservationRepository.update(reservation
+                    .withTime(newTime)
+                    .withStatus(Status.WAITING)
+                    .withCreatedAt(now));
+        }
+
+        return reservationRepository.update(reservation
+                .withTime(newTime)
+                .withStatus(Status.RESERVED)
+                .withCreatedAt(now));
     }
 }

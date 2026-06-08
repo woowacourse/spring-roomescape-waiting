@@ -2,8 +2,8 @@ package roomescape.holiday.exception;
 
 import org.springframework.http.HttpStatus;
 
-import roomescape.error.BusinessException;
-import roomescape.error.ErrorCode;
+import roomescape.global.error.BusinessException;
+import roomescape.global.error.ErrorCode;
 
 public class HolidayNotFoundException extends BusinessException {
     public HolidayNotFoundException(Long id) {

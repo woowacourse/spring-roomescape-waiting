@@ -28,17 +28,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceImplTest {
 
-    @Mock
-    private ThemeRepository themeRepository;
-
-    @Mock
-    private TimeService timeService;
-
-    @Mock
-    private HolidayRepository holidayRepository;
-
-    @Mock
-    private ReservationRepository reservationRepository;
+    @Mock private ThemeRepository themeRepository;
+    @Mock private TimeService timeService;
+    @Mock private HolidayRepository holidayRepository;
+    @Mock private ReservationRepository reservationRepository;
 
     private ThemeServiceImpl themeService;
 
