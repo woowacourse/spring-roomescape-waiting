@@ -12,6 +12,7 @@ import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.domain.reservationtime.dto.TimeSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waiting.WaitingRepository;
@@ -124,11 +125,9 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(Reservation reservation) {
-        waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-            )
+        TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
+
+        waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)
             .ifPresent(waiting -> {
                 reservationRepository.save(Reservation.of(
                     waiting.getName(),

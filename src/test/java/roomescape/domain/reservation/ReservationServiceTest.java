@@ -30,6 +30,7 @@ import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.domain.reservationtime.dto.TimeSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waiting.Waiting;
@@ -181,10 +182,9 @@ class ReservationServiceTest {
         @Test
         void 정상_삭제() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
+            TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
             when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
-            when(waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                reservation.getDate(), time.getId(), theme.getId()
-            )).thenReturn(Optional.empty());
+            when(waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)).thenReturn(Optional.empty());
 
             reservationService.deleteReservation(1L, "유저1");
 
@@ -195,19 +195,16 @@ class ReservationServiceTest {
         void 예약_취소_시_1순위_대기를_예약으로_전환한다() {
             Reservation reservation = Reservation.of(1L, "예약자", LocalDate.of(2099, 12, 31), time, theme);
             Waiting waiting = Waiting.of(2L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
+            TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
             when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
-            when(waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                reservation.getDate(), time.getId(), theme.getId()
-            )).thenReturn(Optional.of(waiting));
+            when(waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)).thenReturn(Optional.of(waiting));
 
             reservationService.deleteReservation(1L, "예약자");
 
             InOrder inOrder = inOrder(reservationRepository, waitingRepository);
             inOrder.verify(reservationRepository).findByIdForUpdate(1L);
             inOrder.verify(reservationRepository).deleteById(1L);
-            inOrder.verify(waitingRepository).findFirstByDateAndTimeIdAndThemeIdForUpdate(
-                reservation.getDate(), time.getId(), theme.getId()
-            );
+            inOrder.verify(waitingRepository).findFirstByTimeSlotForUpdate(canceledReservationSlot);
             inOrder.verify(reservationRepository).save(any(Reservation.class));
             inOrder.verify(waitingRepository).deleteById(waiting.getId());
         }
