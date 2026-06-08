@@ -57,6 +57,9 @@ class JdbcThemeSlotRepositoryTest {
         assertThat(themeSlots)
                 .extracting(ThemeSlot::getId)
                 .containsExactly(1L, 2L);
+        assertThat(themeSlots)
+                .extracting(themeSlot -> themeSlot.getTime().getId())
+                .containsExactly(1L, 2L);
     }
 
     private void insertThemeSlot(Long id, LocalDate date, Long timeId) {

@@ -104,6 +104,17 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
 
     @Override
     public List<ThemeSlot> findAllByIdsForUpdateInOrder(Long firstId, Long secondId) {
+        String lockSql = """
+                SELECT
+                    ts.id
+                FROM
+                    theme_slot ts
+                WHERE ts.id IN (?, ?)
+                ORDER BY ts.id
+                FOR UPDATE
+                """;
+        jdbcTemplate.query(lockSql, (rs, rowNum) -> rs.getLong("id"), firstId, secondId);
+
         String sql = """
                 SELECT
                     ts.id AS id,
@@ -121,7 +132,6 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
                         INNER JOIN theme th ON ts.theme_id = th.id
                 WHERE ts.id IN (?, ?)
                 ORDER BY ts.id
-                FOR UPDATE
                 """;
         return jdbcTemplate.query(sql, rowMapper(), firstId, secondId);
     }
