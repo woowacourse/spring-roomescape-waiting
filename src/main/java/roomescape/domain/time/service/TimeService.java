@@ -1,6 +1,8 @@
 package roomescape.domain.time.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -19,19 +21,22 @@ import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeService {
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final TimeMapper timeMapper;
+    private final Clock clock;
 
     public TimeService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository, TimeMapper timeMapper) {
+        ThemeRepository themeRepository, TimeMapper timeMapper, Clock clock) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.timeMapper = timeMapper;
+        this.clock = clock;
     }
 
     public List<TimeResponseDto> getTimes() {
@@ -51,8 +56,15 @@ public class TimeService {
 
         return timeRepository.findAllByDeletedAtIsNull()
             .stream()
-            .map(time -> timeMapper.toAvailabilityResponseDto(time, !reservedTimeIds.contains(time.getId())))
+            .map(time -> timeMapper.toAvailabilityResponseDto(
+                time,
+                !reservedTimeIds.contains(time.getId()) && !isPastSchedule(date, time)
+            ))
             .toList();
+    }
+
+    private boolean isPastSchedule(LocalDate date, Time time) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
     @Transactional

@@ -18,8 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
+import roomescape.domain.reservation.entity.ReservationEditableStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.service.ReservationService;
 import roomescape.domain.theme.dto.response.ReservationThemeResponseDto;
@@ -43,7 +43,7 @@ class AdminReservationControllerTest {
             new ReservationTimeResponseDto(1L, TimeFixture.VALID_10_00.getStartAt(), false),
             new ReservationThemeResponseDto(1L, ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(), ThemeFixture.VALID.getImageUrl(), false),
-            ReservationEditableStatus.EDITABLE, "", null
+            ReservationEditableStatus.EDITABLE, "", null, 0L
         );
     }
 

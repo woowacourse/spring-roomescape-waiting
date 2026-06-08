@@ -24,13 +24,14 @@ import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
 import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.ReservationEditableStatus;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.mapper.ThemeMapper;
@@ -67,7 +68,11 @@ class ReservationServiceTest {
     }
 
     private Time timeWithId(Long id) {
-        return Time.reconstruct(id, LocalTime.of(10, 0), null);
+        return timeWithId(id, LocalTime.of(10, 0));
+    }
+
+    private Time timeWithId(Long id, LocalTime startAt) {
+        return Time.reconstruct(id, startAt, null);
     }
 
     private Theme themeWithId(Long id) {
@@ -101,6 +106,42 @@ class ReservationServiceTest {
             // then
             assertThat(result).hasSize(1);
             assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.EDITABLE);
+        }
+
+        @Test
+        void 오늘_날짜라도_지난_시간의_예약은_LOCKED_상태로_반환한다() {
+            // given
+            LocalDate today = LocalDate.now(fixedClock);
+            Time pastTime = timeWithId(1L, LocalTime.of(8, 0));
+            Theme theme = themeWithId(1L);
+            Reservation reservation = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), today, pastTime, theme, ReservationStatus.ACTIVE);
+            when(reservationRepository.findReservationsByNotDeletedWithWaitingNumber())
+                .thenReturn(List.of(new ReservationWithWaitingNumber(reservation, null)));
+
+            // when
+            List<ReservationResponseDto> result = reservationService.getReservations();
+
+            // then
+            assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.LOCKED);
+        }
+
+        @Test
+        void 오늘_날짜라도_지난_시간의_대기_예약은_WAITING_LOCKED_상태로_반환한다() {
+            // given
+            LocalDate today = LocalDate.now(fixedClock);
+            Time pastTime = timeWithId(1L, LocalTime.of(8, 0));
+            Theme theme = themeWithId(1L);
+            Reservation reservation = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), today, pastTime, theme, ReservationStatus.WAITING);
+            when(reservationRepository.findReservationsByNotDeletedWithWaitingNumber())
+                .thenReturn(List.of(new ReservationWithWaitingNumber(reservation, 1)));
+
+            // when
+            List<ReservationResponseDto> result = reservationService.getReservations();
+
+            // then
+            assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.WAITING_LOCKED);
         }
 
         @Test
@@ -271,6 +312,23 @@ class ReservationServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("이미 예약된 날짜, 시간, 테마입니다.");
         }
+
+        @Test
+        void 오늘_날짜라도_지난_시간이면_예약을_생성할_수_없다() {
+            // given
+            Time pastTime = timeWithId(1L, LocalTime.of(8, 0));
+            Theme theme = themeWithId(1L);
+            LocalDate today = LocalDate.now(fixedClock);
+            ReservationCreateCommand command = new ReservationCreateCommand(
+                new ReserverName("예약자"), today, 1L, 1L);
+            when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(pastTime));
+            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.saveReservation(command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("지난 예약은 생성할 수 없습니다.");
+        }
     }
 
     @Nested
@@ -290,6 +348,8 @@ class ReservationServiceTest {
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
+            when(reservationRepository.lockActiveReservationBySchedule(new ReservationSchedule(date, 1L, 1L)))
+                .thenReturn(Optional.of(2L));
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
             // when
@@ -313,12 +373,36 @@ class ReservationServiceTest {
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
                 .thenReturn(false);
+            when(reservationRepository.lockActiveReservationBySchedule(new ReservationSchedule(date, 1L, 1L)))
+                .thenReturn(Optional.of(2L));
             when(reservationRepository.save(any(Reservation.class))).thenThrow(new DuplicateKeyException("duplicate"));
 
             // when & then
             assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("이미 대기 중인 이름, 날짜, 시간, 테마입니다.");
+        }
+
+        @Test
+        void 활성_예약이_없는_날짜_시간_테마에는_대기_예약을_생성할_수_없다() {
+            // given
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            LocalDate date = LocalDate.of(2026, 5, 20);
+            ReservationCreateCommand command = new ReservationCreateCommand(
+                new ReserverName("예약자"), date, 1L, 1L);
+            when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(reservationRepository.existsReservationAndStatus(
+                any(Reservation.class), any(ReservationStatus.class)))
+                .thenReturn(false);
+            when(reservationRepository.lockActiveReservationBySchedule(new ReservationSchedule(date, 1L, 1L)))
+                .thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("예약 가능한 시간은 대기할 수 없습니다.");
         }
 
         @Test
@@ -338,7 +422,7 @@ class ReservationServiceTest {
             // when & then
             assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
                 .isInstanceOf(GeneralException.class)
-                .hasMessage("이미 예약된 날짜, 시간, 테마입니다.");
+                .hasMessage("이미 동일한 일정의 예약을 보유하고 있습니다.");
         }
 
         @Test
@@ -375,9 +459,8 @@ class ReservationServiceTest {
             LocalDate newDate = futureDate.plusDays(1);
             Reservation updated = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), newDate, newTime, newTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(newDate, 2L, 2L);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(existing));
+            ReservationUpdateCommand command = new ReservationUpdateCommand(newDate, 2L, 2L, 0L);
+            givenReservation(1L, existing);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTheme));
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
@@ -400,11 +483,10 @@ class ReservationServiceTest {
             Theme existingTheme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(null, null, null);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(null, null, null, 0L);
             Reservation updated = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(existing));
+            givenReservation(1L, existing);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -421,9 +503,8 @@ class ReservationServiceTest {
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                LocalDate.now(fixedClock).plusDays(1), null, null);
-            when(reservationRepository.findReservationByIdAndNotDeleted(999L))
-                .thenReturn(Optional.empty());
+                LocalDate.now(fixedClock).plusDays(1), null, null, 0L);
+            givenReservationNotFound(999L);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(999L, new ReserverName("예약자"), command))
@@ -439,9 +520,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(existing));
+            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null, 0L);
+            givenReservation(1L, existing);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("다른사람"), command))
@@ -457,9 +537,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(canceled));
+            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null, 0L);
+            givenReservation(1L, canceled);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("예약자"), command))
@@ -475,9 +554,28 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(pastDate, null, null);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(past));
+            ReservationUpdateCommand command = new ReservationUpdateCommand(pastDate, null, null, 0L);
+            givenReservation(1L, past);
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("예약자"), command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("지난 예약은 변경할 수 없습니다.");
+        }
+
+        @Test
+        void 오늘_날짜라도_지난_시간으로는_예약을_수정할_수_없다() {
+            // given
+            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate today = LocalDate.now(fixedClock);
+            Time existingTime = timeWithId(1L);
+            Time pastTime = timeWithId(2L, LocalTime.of(8, 0));
+            Theme theme = themeWithId(1L);
+            Reservation existing = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, existingTime, theme, ReservationStatus.ACTIVE);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(today, 2L, null, 0L);
+            givenReservation(1L, existing);
+            when(timeRepository.findTimeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pastTime));
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, new ReserverName("예약자"), command))
@@ -493,9 +591,8 @@ class ReservationServiceTest {
             Theme existingTheme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(null, 999L, 999L);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(existing));
+            ReservationUpdateCommand command = new ReservationUpdateCommand(null, 999L, 999L, 0L);
+            givenReservation(1L, existing);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
 
@@ -517,9 +614,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate.plusDays(1), time, theme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(existing));
+            ReservationUpdateCommand command = new ReservationUpdateCommand(futureDate, null, null, 0L);
+            givenReservation(1L, existing);
             when(reservationRepository.update(any(Reservation.class))).thenThrow(
                 new DuplicateKeyException("duplicate"));
 
@@ -543,8 +639,7 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(reservation));
+            givenLockedReservation(1L, reservation);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceled);
 
             // when
@@ -558,8 +653,7 @@ class ReservationServiceTest {
         @Test
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
-            when(reservationRepository.findReservationByIdAndNotDeleted(999L))
-                .thenReturn(Optional.empty());
+            givenReservationLockNotFound(999L);
 
             // when & then
             assertThatThrownBy(() -> reservationService.cancelReservation(999L, new ReserverName("예약자")))
@@ -575,8 +669,7 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(reservation));
+            givenLockedReservation(1L, reservation);
 
             // when & then
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("다른사람")))
@@ -592,8 +685,7 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(canceled));
+            givenLockedReservation(1L, canceled);
 
             // when & then
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
@@ -609,8 +701,23 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(past));
+            givenLockedReservation(1L, past);
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("지난 예약은 취소할 수 없습니다.");
+        }
+
+        @Test
+        void 오늘_날짜라도_지난_시간의_예약이면_취소할_수_없다() {
+            // given
+            LocalDate today = LocalDate.now(fixedClock);
+            Time pastTime = timeWithId(1L, LocalTime.of(8, 0));
+            Theme theme = themeWithId(1L);
+            Reservation past = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), today, pastTime, theme, ReservationStatus.ACTIVE);
+            givenLockedReservation(1L, past);
 
             // when & then
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
@@ -632,7 +739,7 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
             Reservation canceledWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceledWaiting);
 
@@ -647,7 +754,7 @@ class ReservationServiceTest {
         @Test
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
-            when(reservationRepository.findReservationByIdAndNotDeleted(999L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(999L))
                 .thenReturn(Optional.empty());
 
             // when & then
@@ -664,7 +771,7 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
 
             // when & then
@@ -681,7 +788,7 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation active = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(active));
 
             // when & then
@@ -698,7 +805,24 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation pastWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.WAITING);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(pastWaiting));
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, new ReserverName("예약자")))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("지난 예약은 취소할 수 없습니다.");
+        }
+
+        @Test
+        void 오늘_날짜라도_지난_시간의_대기_예약이면_취소할_수_없다() {
+            // given
+            LocalDate today = LocalDate.now(fixedClock);
+            Time pastTime = timeWithId(1L, LocalTime.of(8, 0));
+            Theme theme = themeWithId(1L);
+            Reservation pastWaiting = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), today, pastTime, theme, ReservationStatus.WAITING);
+            when(reservationRepository.lockReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(pastWaiting));
 
             // when & then
@@ -713,20 +837,49 @@ class ReservationServiceTest {
 
         @Test
         void 예약을_삭제한다() {
-            when(reservationRepository.existsReservationByIdAndNotDeleted(1L)).thenReturn(true);
+            // given
+            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            Reservation reservation = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(reservation));
 
+            // when
             reservationService.deleteReservationById(1L);
         }
 
         @Test
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
-            when(reservationRepository.existsReservationByIdAndNotDeleted(999L)).thenReturn(false);
+            when(reservationRepository.findReservationByIdAndNotDeleted(999L))
+                .thenReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> reservationService.deleteReservationById(999L))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
         }
+    }
+
+    private void givenLockedReservation(Long id, Reservation reservation) {
+        when(reservationRepository.lockReservationByIdAndNotDeleted(id))
+            .thenReturn(Optional.of(reservation));
+    }
+
+    private void givenReservationLockNotFound(Long id) {
+        when(reservationRepository.lockReservationByIdAndNotDeleted(id))
+            .thenReturn(Optional.empty());
+    }
+
+    private void givenReservation(Long id, Reservation reservation) {
+        when(reservationRepository.findReservationByIdAndNotDeleted(id))
+            .thenReturn(Optional.of(reservation));
+    }
+
+    private void givenReservationNotFound(Long id) {
+        when(reservationRepository.findReservationByIdAndNotDeleted(id))
+            .thenReturn(Optional.empty());
     }
 }

@@ -88,6 +88,7 @@
     }
 
     .status-locked,
+    .status-waiting-locked,
     .status-canceled {
       background: #f1f3f5;
       color: #495057;
@@ -407,6 +408,7 @@
       EDITABLE: '수정 가능',
       EDIT_RECOMMENDED: '수정 권장',
       LOCKED: '잠김',
+      WAITING_LOCKED: '지난 대기',
       CANCELED: '취소됨',
       WAITING: '대기 중'
     }[status] || status;
@@ -417,6 +419,7 @@
       EDITABLE: 'status-editable',
       EDIT_RECOMMENDED: 'status-edit-recommended',
       LOCKED: 'status-locked',
+      WAITING_LOCKED: 'status-waiting-locked',
       CANCELED: 'status-canceled',
       WAITING: 'status-waiting'
     }[status] || 'status-locked';
@@ -561,10 +564,11 @@
     document.getElementById('userReservationList').innerHTML = userReservations.map(reservation => {
       const editable = reservation.status === 'EDITABLE' || reservation.status === 'EDIT_RECOMMENDED';
       const waiting = reservation.status === 'WAITING';
+      const waitingReservation = reservation.status === 'WAITING' || reservation.status === 'WAITING_LOCKED';
       const resourceBadges = [
         reservation.time?.deleted ? '<span class="resource-badge">시간 제공 중지</span>' : '',
         reservation.theme?.deleted ? '<span class="resource-badge">테마 제공 중지</span>' : '',
-        waiting && reservation.waitingNumber
+        waitingReservation && reservation.waitingNumber
             ? `<span class="queue-badge">대기 ${escapeHtml(reservation.waitingNumber)}번</span>`
             : ''
       ].filter(Boolean).join(' ');
@@ -704,15 +708,16 @@
     ], 'editReservationError');
 
     const id = document.getElementById('editReservationId').value;
+    const name = document.getElementById('editReservationName').value;
     const body = {
-      name: document.getElementById('editReservationName').value,
       date: document.getElementById('editReservationDate').value,
       themeId: document.getElementById('editReservationThemeId').value,
-      timeId: document.getElementById('editReservationTimeId').value
+      timeId: document.getElementById('editReservationTimeId').value,
+      version: currentEditReservation.version
     };
 
     try {
-      await requestJson(`/api/reservations/${id}`, {
+      await requestJson(`/api/reservations/${id}?name=${encodeURIComponent(name)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

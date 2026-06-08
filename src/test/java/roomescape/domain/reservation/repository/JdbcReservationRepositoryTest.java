@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.vo.ReserverName;
+import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.JdbcThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -437,6 +439,59 @@ class JdbcReservationRepositoryTest {
                 )
                 .containsExactly("예약자2", LocalDate.of(2026, 5, 2), updateTime.getId(), updateTheme.getId());
         }
+
+        @Test
+        void 이미_수정된_예약을_이전_버전으로_수정하면_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time updateTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme updateTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Reservation reservation = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+            Reservation updateReservation = Reservation.reconstruct(reservation.getId(), new ReserverName("예약자2"),
+                LocalDate.of(2026, 5, 2), updateTime, updateTheme, ReservationStatus.ACTIVE);
+            reservationRepository.update(updateReservation);
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("예약 정보가 이미 수정되었습니다. 다시 조회 후 시도해주세요.");
+        }
+
+        @Test
+        void 삭제된_예약을_수정하면_예약_없음_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation reservation = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+            Reservation updateReservation = Reservation.reconstruct(reservation.getId(), new ReserverName("예약자2"),
+                LocalDate.of(2026, 5, 2), time, theme, ReservationStatus.ACTIVE);
+            reservationRepository.deleteReservationById(reservation.getId());
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("예약을 찾을 수 없습니다.");
+        }
+
+        @Test
+        void 취소된_예약을_수정하면_이미_취소됨_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation reservation = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+            Reservation canceled = reservationRepository.update(reservation.cancel());
+            Reservation updateReservation = Reservation.reconstruct(canceled.getId(), new ReserverName("예약자2"),
+                LocalDate.of(2026, 5, 2), time, theme, ReservationStatus.ACTIVE, canceled.getVersion());
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("이미 취소된 예약입니다.");
+        }
     }
 
     @Nested
@@ -523,6 +578,126 @@ class JdbcReservationRepositoryTest {
             assertThatThrownBy(() -> reservationRepository.deleteReservationById(reservation.getId()))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
+        }
+    }
+
+    @Nested
+    class 날짜_테마_시간으로_예약_조회 {
+
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
+        @Test
+        void 날짜_테마_시간에_활성_예약이_존재하는지_확인한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time targetTime = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time otherTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
+            Theme targetTheme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme otherTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, targetTime, targetTheme));
+            Reservation canceledReservation = reservationRepository.save(
+                Reservation.create(new ReserverName("취소자1"), date, targetTime, targetTheme).toWaiting());
+            reservationRepository.update(canceledReservation.cancel());
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른날짜"), date.plusDays(1), targetTime, targetTheme));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른시간"), date, otherTime, targetTheme));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme));
+
+            // when
+            boolean actual = reservationRepository.existsActiveReservationBySchedule(
+                new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
+            boolean notFound = reservationRepository.existsActiveReservationBySchedule(
+                new ReservationSchedule(date.minusDays(1), targetTheme.getId(), targetTime.getId()));
+
+            // then
+            assertThat(actual).isTrue();
+            assertThat(notFound).isFalse();
+        }
+
+        @Test
+        void 날짜_테마_시간에_활성_예약을_락으로_조회한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time targetTime = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time otherTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
+            Theme targetTheme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme otherTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Reservation active = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), date, targetTime, targetTheme));
+            Reservation canceledReservation = reservationRepository.save(
+                Reservation.create(new ReserverName("취소자1"), date.plusDays(1), targetTime, targetTheme));
+            reservationRepository.update(canceledReservation.cancel());
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른시간"), date, otherTime, targetTheme));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme));
+
+            // when
+            Optional<Long> actual =
+                reservationRepository.lockActiveReservationBySchedule(
+                    new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
+            Optional<Long> notFound =
+                reservationRepository.lockActiveReservationBySchedule(
+                    new ReservationSchedule(date.minusDays(1), targetTheme.getId(), targetTime.getId()));
+
+            // then
+            assertThat(actual).contains(active.getId());
+            assertThat(notFound).isEmpty();
+        }
+
+        @Test
+        void 날짜_테마_시간에_가장_먼저_생성된_대기_예약을_조회한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time targetTime = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time otherTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
+            Theme targetTheme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme otherTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Reservation canceledWaiting = reservationRepository.save(
+                Reservation.create(new ReserverName("취소대기자"), date, targetTime, targetTheme).toWaiting());
+            reservationRepository.update(canceledWaiting.cancel());
+            Reservation firstWaiting = reservationRepository.save(
+                Reservation.create(new ReserverName("대기자1"), date, targetTime, targetTheme).toWaiting());
+            reservationRepository.save(
+                Reservation.create(new ReserverName("대기자2"), date, targetTime, targetTheme).toWaiting());
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른날짜"), date.plusDays(1), targetTime, targetTheme).toWaiting());
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른시간"), date, otherTime, targetTheme).toWaiting());
+            reservationRepository.save(
+                Reservation.create(new ReserverName("다른테마"), date, targetTime, otherTheme).toWaiting());
+
+            // when
+            Optional<Reservation> actual =
+                reservationRepository.lockFirstWaitingReservationBySchedule(
+                    new ReservationSchedule(date, targetTheme.getId(), targetTime.getId()));
+
+            // then
+            assertThat(actual).map(Reservation::getId).contains(firstWaiting.getId());
+        }
+
+        @Test
+        void 삭제된_대기_예약은_첫_번째_대기_예약으로_조회_되면_안된다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation deletedReservation = reservationRepository.save(
+                Reservation.create(new ReserverName("삭제된대기자"), date, time, theme).toWaiting());
+            reservationRepository.deleteReservationById(deletedReservation.getId());
+
+            // when
+            Optional<Reservation> actual =
+                reservationRepository.lockFirstWaitingReservationBySchedule(
+                    new ReservationSchedule(date, theme.getId(), time.getId()));
+
+            // then
+            assertThat(actual).isEmpty();
         }
     }
 

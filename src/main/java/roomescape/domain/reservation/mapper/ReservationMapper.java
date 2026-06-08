@@ -7,9 +7,9 @@ import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.ReservationEditableStatus;
 import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.mapper.ThemeMapper;
 import roomescape.domain.time.mapper.TimeMapper;
@@ -31,7 +31,8 @@ public final class ReservationMapper {
     }
 
     public ReservationUpdateCommand toUpdateCommand(ReservationUpdateRequestDto requestDto) {
-        return new ReservationUpdateCommand(requestDto.date(), requestDto.timeId(), requestDto.themeId());
+        return new ReservationUpdateCommand(requestDto.date(), requestDto.timeId(), requestDto.themeId(),
+            requestDto.version());
     }
 
     public ReservationResponseDto toResponseDto(
@@ -41,7 +42,8 @@ public final class ReservationMapper {
     ) {
         return new ReservationResponseDto(reservation.getId(), reservation.getName().value(), reservation.getDate(),
             timeMapper.toReservationResponseDto(reservation.getTime()),
-            themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber);
+            themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber,
+            reservation.getVersion());
     }
 
     public ReservationCreateResponseDto toCreateResponseDto(Reservation reservation) {
