@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -92,9 +93,7 @@ public class UserReservationService {
         Reservation updated = new Reservation(
                 reservation.getId(),
                 reservation.getName(),
-                command.date(),
-                newTime,
-                reservation.getTheme()
+                new ReservationSlot(null, command.date(), newTime, reservation.getTheme())
         );
         return ReservationResult.from(reservationRepository.update(updated));
     }

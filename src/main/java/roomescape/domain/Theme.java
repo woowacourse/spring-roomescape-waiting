@@ -40,5 +40,4 @@ public class Theme {
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
-
 }

@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -111,7 +112,7 @@ class UserReservationServiceTest {
     @DisplayName("이름으로 예약 목록을 조회한다")
     void 이름으로_예약_목록을_조회한다() {
         ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
-                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, 2L);
+                1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME), 2L);
         given(reservationRepository.findByName(OWNER)).willReturn(List.of(reservation));
 
         List<ReservationResult> results = userReservationService.findByName(OWNER);
@@ -124,7 +125,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인 예약을 정상적으로 취소한다")
     void 본인_예약을_정상적으로_취소한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         userReservationService.cancel(1L, OWNER);
@@ -144,7 +145,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인이 아닌 예약을 취소하면 UnauthorizedReservationException이 발생한다")
     void 본인이_아닌_예약_취소시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThrows(
@@ -156,7 +157,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("과거 예약을 취소하면 PastReservationException이 발생한다")
     void 과거_예약_취소시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, PAST_DATE, VALID_TIME, VALID_THEME));
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThrows(
@@ -168,7 +169,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인 예약을 정상적으로 변경한다")
     void 본인_예약을_정상적으로_변경한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
@@ -177,7 +178,7 @@ class UserReservationServiceTest {
         given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
-                    r.getId(), r.getName(), r.getDate(), r.getTime(), r.getTheme(), 0L);
+                    r.getId(), r.getName(), r.getSlot(), 0L);
         });
 
         ReservationResult result = userReservationService.update(command);
@@ -189,7 +190,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("본인이 아닌 예약을 변경하면 UnauthorizedReservationException이 발생한다")
     void 본인이_아닌_예약_변경시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OTHER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -202,7 +203,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 timeId로 변경하면 ReservationTimeNotFoundException이 발생한다")
     void 존재하지_않는_timeId로_변경시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 99L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(99L)).willReturn(Optional.empty());
@@ -216,7 +217,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("변경 시점이 과거이면 PastReservationException이 발생한다")
     void 변경_시점이_과거이면_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, PAST_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
@@ -230,7 +231,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("이미 지난 예약을 변경하려고 하면 PastReservationException이 발생한다")
     void 이미_지난_예약_변경시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, PAST_DATE, VALID_TIME, VALID_THEME));
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -243,7 +244,7 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("변경하려는 시간이 이미 차 있으면 ReservationConflictException이 발생한다")
     void 변경_시간_충돌시_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        Reservation reservation = new Reservation(1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME));
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));

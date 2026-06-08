@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -72,7 +73,7 @@ class ReservationServiceTest {
     @DisplayName("충돌이 없으면 정상적으로 예약을 생성한다")
     void 충돌이_없으면_정상적으로_예약을_생성한다() {
         ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                1L, VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L);
+                1L, VALID_COMMAND_MOA.name(), new ReservationSlot(1L, VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME), 0L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
@@ -140,7 +141,7 @@ class ReservationServiceTest {
                     1L))
                     .willReturn(false);
             given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L));
+                    1L, "모아", new ReservationSlot(1L, VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME), 0L));
 
             ReservationResult created = reservationService.create(VALID_COMMAND_MOA);
 
@@ -178,7 +179,7 @@ class ReservationServiceTest {
                         1L))
                         .willReturn(false);
                 given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 1L));
+                        1L, "모아", new ReservationSlot(1L, VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME), 1L));
 
                 ReservationResult created = reservationService.create(
                         new ReservationCreateCommand("모아", VALID_COMMAND_MOA.date(), 1L, 1L));

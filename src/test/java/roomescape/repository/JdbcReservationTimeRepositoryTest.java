@@ -97,9 +97,15 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     private void insertReservation(String name, LocalDate date, long timeId, long themeId) {
+        jdbcTemplate.update("INSERT INTO reservation_date (date) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM reservation_date WHERE date = ?)", date, date);
+        long dateId = jdbcTemplate.queryForObject("SELECT id FROM reservation_date WHERE date = ?", Long.class, date);
+        
+        jdbcTemplate.update("INSERT INTO reservation_slot (date_id, time_id, theme_id) SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?)", dateId, timeId, themeId, dateId, timeId, themeId);
+        long slotId = jdbcTemplate.queryForObject("SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?", Long.class, dateId, timeId, themeId);
+
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date.toString(), timeId, themeId
+                "INSERT INTO reservation (name, slot_id) VALUES (?, ?)",
+                name, slotId
         );
     }
 }

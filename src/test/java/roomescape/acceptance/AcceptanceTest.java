@@ -7,12 +7,15 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -23,13 +26,26 @@ class AcceptanceTest {
     private int port;
     private long themeId;
     private long timeId;
-    private final String date = "2099-12-31";
+    private final String date = LocalDate.now().plusDays(2).toString();
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        themeId = 테마_생성("테스트 테마");
+        themeId = 테마_생성("인수 테스트 테마");
         timeId = 시간_슬롯_생성("10:00");
+
+        jdbcTemplate.update("INSERT INTO reservation_date (date) VALUES (?)", date);
+        Long dateId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_date WHERE date = ?",
+                Long.class, date
+        );
+        jdbcTemplate.update(
+                "INSERT INTO reservation_slot (date_id, time_id, theme_id) VALUES (?, ?, ?)",
+                dateId, timeId, themeId
+        );
     }
 
     @Test
@@ -162,15 +178,6 @@ class AcceptanceTest {
                 .when().delete("/user/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(expectedStatusCode);
-    }
-
-    private static ExtractableResponse<Response> 내_예약_목록_조회(String username) {
-        return RestAssured.given().log().all()
-                .param("name", username)
-                .when().get("/user/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .extract();
     }
 
     private static void 내_예약_개수_확인(String username, int expectedSize) {

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
@@ -34,9 +35,10 @@ class JdbcReservationRepositoryTest {
     void save() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
+        insertSlot(DATE, time, theme);
 
         ReservationWithWaitingOrder saved = reservationRepository.save(
-                new Reservation(null, "브라운", DATE, time, theme));
+                new Reservation(null, "브라운", new ReservationSlot(null, DATE, time, theme)));
 
         assertThat(saved.id()).isNotNull();
         assertThat(saved.name()).isEqualTo("브라운");
@@ -74,8 +76,10 @@ class JdbcReservationRepositoryTest {
         Reservation saved = insertReservation("브라운", DATE, time, theme);
 
         LocalDate newDate = LocalDate.of(2099, 1, 1);
+        insertSlot(newDate, time, theme);
+        
         reservationRepository.update(
-                new Reservation(saved.getId(), "브라운", newDate, time, theme));
+                new Reservation(saved.getId(), "브라운", new ReservationSlot(null, newDate, time, theme)));
 
         Reservation updated = reservationRepository.findById(saved.getId()).orElseThrow();
         assertThat(updated.getDate()).isEqualTo(newDate);
@@ -165,17 +169,17 @@ class JdbcReservationRepositoryTest {
         assertThat(reservationRepository.findByName("루드비코"))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(first.getId(), "루드비코", DATE, time, theme, 0L));
+                        new ReservationWithWaitingOrder(first.getId(), "루드비코", first.getSlot(), 0L));
 
         assertThat(reservationRepository.findByName("모아"))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(second.getId(), "모아", DATE, time, theme, 1L));
+                        new ReservationWithWaitingOrder(second.getId(), "모아", second.getSlot(), 1L));
 
         assertThat(reservationRepository.findByName("브라운"))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(third.getId(), "브라운", DATE, time, theme, 2L));
+                        new ReservationWithWaitingOrder(third.getId(), "브라운", third.getSlot(), 2L));
     }
 
     @Test
@@ -227,12 +231,22 @@ class JdbcReservationRepositoryTest {
         return new Theme(id, name, "설명", "https://example.com/thumb.jpg");
     }
 
+    private long insertSlot(LocalDate date, ReservationTime time, Theme theme) {
+        jdbcTemplate.update("INSERT INTO reservation_date (date) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM reservation_date WHERE date = ?)", date, date);
+        long dateId = jdbcTemplate.queryForObject("SELECT id FROM reservation_date WHERE date = ?", Long.class, date);
+        
+        jdbcTemplate.update("INSERT INTO reservation_slot (date_id, time_id, theme_id) SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?)", dateId, time.getId(), theme.getId(), dateId, time.getId(), theme.getId());
+        return jdbcTemplate.queryForObject("SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?", Long.class, dateId, time.getId(), theme.getId());
+    }
+
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        long slotId = insertSlot(date, time, theme);
+        
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date.toString(), time.getId(), theme.getId()
+                "INSERT INTO reservation (name, slot_id) VALUES (?, ?)",
+                name, slotId
         );
         long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(id, name, new ReservationSlot(slotId, date, time, theme));
     }
 }

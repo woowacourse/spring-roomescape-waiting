@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -15,12 +16,7 @@ import roomescape.service.dto.PopularTheme;
 public class JdbcThemeRepository implements ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Theme> rowMapper = (rs, rowNum) -> new Theme(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("description"),
-            rs.getString("thumbnail_url")
-    );
+    private final RowMapper<Theme> themeRowMapper = new DataClassRowMapper<>(Theme.class);
     private final RowMapper<PopularTheme> popularThemeRowMapper = (rs, rowNum) -> new PopularTheme(
             new Theme(
                     rs.getLong("id"),
@@ -39,16 +35,16 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme",
-                rowMapper
+                "SELECT id, name, description, thumbnail_url FROM theme WHERE is_deleted = FALSE",
+                themeRowMapper
         );
     }
 
     @Override
     public Optional<Theme> findById(Long id) {
         List<Theme> result = jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ?",
-                rowMapper,
+                "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? AND is_deleted = FALSE",
+                themeRowMapper,
                 id
         );
         return result.stream().findFirst();
@@ -73,13 +69,13 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+        jdbcTemplate.update("UPDATE theme SET is_deleted = TRUE WHERE id = ?", id);
     }
 
     @Override
     public boolean existsById(Long id) {
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM theme WHERE id = ?)",
+                "SELECT EXISTS (SELECT 1 FROM theme WHERE id = ? AND is_deleted = FALSE)",
                 Boolean.class,
                 id
         );
@@ -89,7 +85,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public boolean existsByName(String name) {
         Boolean exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM theme WHERE name = ?)",
+                "SELECT EXISTS (SELECT 1 FROM theme WHERE name = ? AND is_deleted = FALSE)",
                 Boolean.class,
                 name
         );
@@ -102,9 +98,12 @@ public class JdbcThemeRepository implements ThemeRepository {
                 SELECT t.id, t.name, t.description, t.thumbnail_url,
                        COUNT(r.id) AS reservation_count
                 FROM theme t
-                INNER JOIN reservation r ON t.id = r.theme_id
-                WHERE r.date >= DATEADD('DAY', -7, CURRENT_DATE)
-                  AND r.date <  CURRENT_DATE
+                INNER JOIN reservation_slot s ON t.id = s.theme_id
+                INNER JOIN reservation r ON s.id = r.slot_id
+                INNER JOIN reservation_date d ON s.date_id = d.id
+                WHERE d.date >= DATEADD('DAY', -7, CURRENT_DATE)
+                  AND d.date <  CURRENT_DATE
+                  AND t.is_deleted = FALSE
                 GROUP BY t.id, t.name, t.description, t.thumbnail_url
                 ORDER BY reservation_count DESC
                 LIMIT 10
