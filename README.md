@@ -2,13 +2,43 @@
 
 ### 공통
 
-- [x] 요청 형식이 잘못된 경우 (검증 예외): `Http Status: 400 Bad Request`
+- [x] 요청 값 검증에 실패한 경우 (필드 누락, 빈 값 등): `Http Status: 400 Bad Request`
 
     ```text
     {
         "status": 400,
         "errorType": "BAD_REQUEST",
         "message": "[ERROR] (~ 이유)"
+    }
+    ```
+
+- [x] 요청 본문(JSON)의 형식이 올바르지 않은 경우: `Http Status: 400 Bad Request`
+
+    ```text
+    {
+        "status": 400,
+        "errorType": "BAD_REQUEST",
+        "message": "[ERROR] 요청 본문(JSON)의 형식이 올바르지 않거나 읽을 수 없습니다."
+    }
+    ```
+
+- [x] 경로 변수 또는 쿼리 파라미터의 타입이 올바르지 않은 경우: `Http Status: 400 Bad Request`
+
+    ```text
+    {
+        "status": 400,
+        "errorType": "BAD_REQUEST",
+        "message": "[ERROR] 요청 파라미터 또는 경로 변수의 타입이 올바르지 않습니다."
+    }
+    ```
+
+- [x] DB 제약 조건 위반이 발생한 경우 (중복 데이터 등): `Http Status: 400 Bad Request`
+
+    ```text
+    {
+        "status": 400,
+        "errorType": "BAD_REQUEST",
+        "message": "[ERROR] 이미 존재하는 데이터이거나 유효하지 않은 값이 포함되어 있습니다."
     }
     ```
 
@@ -29,6 +59,16 @@
         "status": 405,
         "errorType": "METHOD_NOT_ALLOWED",
         "message": "[ERROR] 지원하지 않는 메서드입니다."
+    }
+    ```
+
+- [x] 서버 내부 오류가 발생한 경우: `Http Status: 500 Internal Server Error`
+
+    ```text
+    {
+        "status": 500,
+        "errorType": "INTERNAL_SERVER_ERROR",
+        "message": "[ERROR] 서버 내부에서 에러가 발생했습니다."
     }
     ```
 
