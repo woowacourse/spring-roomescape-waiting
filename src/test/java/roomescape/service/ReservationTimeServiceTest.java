@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -22,6 +20,8 @@ import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.TimeSlotResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.AlreadyInUseException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional

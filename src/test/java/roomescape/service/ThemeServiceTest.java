@@ -11,9 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -21,6 +18,9 @@ import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.AlreadyInUseException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -39,25 +39,6 @@ class ThemeServiceTest {
     private ThemeRepository themeRepository;
 
     @Test
-    void 인기_테마_상위_3개_조회() {
-        Theme theme1 = themeRepository.save(new Theme("인기테마1", "설명", "url"));
-        Theme theme2 = themeRepository.save(new Theme("인기테마2", "설명", "url"));
-        Theme theme3 = themeRepository.save(new Theme("인기테마3", "설명", "url"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
-
-        reservationRepository.save(new Reservation("A", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        reservationRepository.save(new Reservation("B", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        reservationRepository.save(new Reservation("C", LocalDate.now().minusDays(1), time, theme2, ReservationStatus.CONFIRMED));
-        reservationRepository.save(new Reservation("D", LocalDate.now().minusDays(1), time, theme3, ReservationStatus.CONFIRMED));
-
-        List<ThemeResponse> result = themeService.findTopTheme(3L);
-
-        assertThat(result).hasSize(3);
-        assertThat(result.get(0).name()).isEqualTo("인기테마1");
-        assertThat(result.get(1).name()).isEqualTo("인기테마2");
-    }
-
-    @Test
     void 테마_생성() {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.jpg", "image/jpeg", "fake-image-content".getBytes()
@@ -74,7 +55,7 @@ class ThemeServiceTest {
     void 예약_없는_테마_삭제() {
         Theme saved = themeRepository.save(new Theme("삭제 테마", "설명", "url"));
         themeService.delete(saved.getId());
-        
+
         assertThat(themeRepository.findThemeById(saved.getId())).isEmpty();
     }
 
@@ -86,5 +67,29 @@ class ThemeServiceTest {
 
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
                 .isInstanceOf(AlreadyInUseException.class);
+    }
+
+    @Test
+    void 인기_테마_상위_3개_조회() {
+        Theme theme1 = themeRepository.save(new Theme("인기테마1", "설명", "url"));
+        Theme theme2 = themeRepository.save(new Theme("인기테마2", "설명", "url"));
+        Theme theme3 = themeRepository.save(new Theme("인기테마3", "설명", "url"));
+        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(2, 0)));
+
+        reservationRepository.save(
+                new Reservation("A", LocalDate.now().minusDays(1), time1, theme1, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("B", LocalDate.now().minusDays(1), time2, theme1, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("C", LocalDate.now().minusDays(1), time1, theme2, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("D", LocalDate.now().minusDays(1), time1, theme3, ReservationStatus.CONFIRMED));
+
+        List<ThemeResponse> result = themeService.findTopTheme(3L);
+
+        assertThat(result).hasSize(3);
+        assertThat(result.get(0).name()).isEqualTo("인기테마1");
+        assertThat(result.get(1).name()).isEqualTo("인기테마2");
     }
 }

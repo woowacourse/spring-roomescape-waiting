@@ -65,7 +65,7 @@ class ReservationTimeRepositoryTest {
     @Test
     void 예약에_사용중인_시간_존재하지_않는_경우() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
-        
+
         boolean exists = reservationTimeRepository.existsByTimeId(time.getId());
 
         assertThat(exists).isFalse();
@@ -74,7 +74,7 @@ class ReservationTimeRepositoryTest {
     @Test
     void 시간_삭제() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
-        
+
         reservationTimeRepository.delete(time.getId());
 
         assertThat(reservationTimeRepository.findTimeById(time.getId())).isEmpty();

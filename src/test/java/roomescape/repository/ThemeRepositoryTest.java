@@ -44,19 +44,27 @@ class ThemeRepositoryTest {
 
     @Test
     void 인기_테마_상위_3개_조회() {
-        Theme theme1 = themeRepository.save(new Theme( "인기테마1", "설명", "url"));
+        Theme theme1 = themeRepository.save(new Theme("인기테마1", "설명", "url"));
         Theme theme2 = themeRepository.save(new Theme("인기테마2", "설명", "url"));
         Theme theme3 = themeRepository.save(new Theme("인기테마3", "설명", "url"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
+        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(2, 0)));
+        ReservationTime time3 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(3, 0)));
 
-        reservationRepository.save(new Reservation("A", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        reservationRepository.save(new Reservation("B", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        reservationRepository.save(new Reservation("C", LocalDate.now().minusDays(1), time, theme1, ReservationStatus.CONFIRMED));
-        
-        reservationRepository.save(new Reservation("D", LocalDate.now().minusDays(1), time, theme2, ReservationStatus.CONFIRMED));
-        reservationRepository.save(new Reservation("E", LocalDate.now().minusDays(1), time, theme2, ReservationStatus.CONFIRMED));
-        
-        reservationRepository.save(new Reservation("F", LocalDate.now().minusDays(1), time, theme3, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("A", LocalDate.now().minusDays(1), time1, theme1, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("B", LocalDate.now().minusDays(1), time2, theme1, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("C", LocalDate.now().minusDays(1), time3, theme1, ReservationStatus.CONFIRMED));
+
+        reservationRepository.save(
+                new Reservation("D", LocalDate.now().minusDays(1), time1, theme2, ReservationStatus.CONFIRMED));
+        reservationRepository.save(
+                new Reservation("E", LocalDate.now().minusDays(1), time2, theme2, ReservationStatus.CONFIRMED));
+
+        reservationRepository.save(
+                new Reservation("F", LocalDate.now().minusDays(1), time1, theme3, ReservationStatus.CONFIRMED));
 
         List<Theme> topThemes = themeRepository.findTopThemes(3L);
 

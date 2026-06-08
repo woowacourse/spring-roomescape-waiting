@@ -7,7 +7,7 @@ public class Theme {
     private String url;
 
     public Theme(String name, String description, String url) {
-        this(null,name,description,url);
+        this(null, name, description, url);
     }
 
     public Theme(Long id, String name, String description, String url) {

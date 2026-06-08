@@ -101,7 +101,8 @@
                 try {
                     const json = JSON.parse(body);
                     if (json.message) msg = json.message;
-                } catch (e) {}
+                } catch (e) {
+                }
                 throw new Error(msg);
             }
 
