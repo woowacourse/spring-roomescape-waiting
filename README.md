@@ -73,7 +73,7 @@
 **Request**
 
 ```http
-GET /admin/reservations HTTP/1.1
+GET /admin/reservations?page=1&size=20 HTTP/1.1
 ```
 
 **Response**
@@ -83,7 +83,7 @@ HTTP/1.1 200
 Content-Type: application/json
 
 {
-  "reservations": [
+  "contents": [
     {
       "id": 1,
       "guestName": "브라운",
@@ -99,7 +99,14 @@ Content-Type: application/json
         "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
       }
     }
-  ]
+  ],
+  "page": 1,
+  "size": 20,
+  "numberOfElements": 1,
+  "totalElements": 1,
+  "totalPages": 1,
+  "hasPrevious": false,
+  "hasNext": false
 }
 ```
 
@@ -281,7 +288,7 @@ Content-Type: application/json
     "description": "우테코 레벨2를 탈출하는 내용입니다.",
     "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
   },
-  "status": "WAITED",
+  "status": "WAITING",
   "waitNumber": 5
 }
 ```
@@ -293,7 +300,7 @@ Content-Type: application/json
 | 유효하지 않는 입력값                      | `400` | ✅ |
 | 시간이 존재하지 않을 때                    | `404` | ✅ |
 | 테마가 존재하지 않을 때                    | `404` | ✅ |
-| 이미 해당 날짜, 시간, 테마에 이미 대기를 걸어놓은 경우 | `409` | ✅|
+| 해당 날짜, 시간, 테마에 본인 예약이 이미 있는 경우       | `409` | ✅|
 | 이미 지난 시간에 예약하려는 경우               | `422` | ✅ |
 
 ##### 사용자의 예약 목록 조회 API
@@ -301,7 +308,8 @@ Content-Type: application/json
 **Request**
 
 ```http
-GET /reservations?guestName=브라운 HTTP/1.1
+GET /reservations/me HTTP/1.1
+X-Guest-Name: 브라운
 ```
 
 **Response**
@@ -326,19 +334,18 @@ Content-Type: application/json
         "description": "우테코 레벨2를 탈출하는 내용입니다.",
         "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
       },
-        "status": 'WAITED',
-        "waitNumber": 5
+      "status": "WAITING",
+      "waitNumber": 5
     }
   ]
-  
 }
 ```
 
 에러 상황:
 
-| 에러 상황                     | 상태코드  | 구현여부 |
-|---------------------------|-------|------|
-| 유효하지 않는 입력값(guestName 누락) | `400` | ✅    |
+| 에러 상황                            | 상태코드  | 구현여부 |
+|----------------------------------|-------|------|
+| 예약자 이름 헤더가 없거나 유효하지 않은 경우       | `400` | ✅    |
 
 ##### 예약 수정 API
 
@@ -349,6 +356,7 @@ Content-Type: application/json
 ```http
 PATCH /reservations/1 HTTP/1.1
 Content-Type: application/json
+X-Guest-Name: 브라운
 
 {
   "date": "2023-08-05",
@@ -359,40 +367,23 @@ Content-Type: application/json
 **Response**
 
 ```http
-HTTP/1.1 200
-Content-Type: application/json
-
-{
-  "id": 1,
-  "guestName": "브라운",
-  "date": "2023-08-05",
-  "time": {
-    "id": 1,
-    "startAt": "10:00"
-  },
-  "theme": {
-    "id": 1,
-    "name": "레벨2 탈출",
-    "description": "우테코 레벨2를 탈출하는 내용입니다.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  },
-    "isWaited": true,
-    "waitNumber": 5
-}
+HTTP/1.1 204
 ```
 
 에러 상황:
 
-| 에러 상황               | 상태코드  | 구현여부 |
-|---------------------|-------|------|
-| 유효하지 않는 입력값         | `400` | ✅    |
-| 본인의 예약이 아닌 경우       | `403` | ✅    |
-| 예약 시간이 존재하지 않을 때    | `404` | ✅    |
-| 예약이 존재하지 않을 때       | `404` | ✅    |
-| 이미 취소된 예약인 경우       | `409` |  ✅    |
-| 해당 시간에 이미 예약이 있는 경우 | `409` | ✅    |
-| 이미 지난 시간에 예약하려는 경우  | `422` | ✅    |
-| 이미 시작된 예약을 수정하려는 경우 | `422` | ✅    |
+| 에러 상황                            | 상태코드  | 구현여부 |
+|----------------------------------|-------|------|
+| 유효하지 않는 입력값                      | `400` | ✅    |
+| 예약자 이름 헤더가 없거나 유효하지 않은 경우       | `400` | ✅    |
+| 기존 날짜, 시간과 동일한 값으로 수정하려는 경우     | `400` | ✅    |
+| 본인의 예약이 아닌 경우                    | `403` | ✅    |
+| 예약 시간이 존재하지 않을 때                 | `404` | ✅    |
+| 예약이 존재하지 않을 때                    | `404` | ✅    |
+| 이미 취소된 예약인 경우                    | `409` |  ✅    |
+| 해당 날짜, 시간, 테마에 본인 예약이 이미 있는 경우 | `409` | ✅    |
+| 이미 지난 시간에 예약하려는 경우               | `422` | ✅    |
+| 이미 시작된 예약을 수정하려는 경우              | `422` | ✅    |
 
 ##### 예약 삭제 API ✅
 
@@ -400,6 +391,7 @@ Content-Type: application/json
 
 ```http
 DELETE /reservations/1 HTTP/1.1
+X-Guest-Name: 브라운
 ```
 
 **Response**
@@ -410,13 +402,14 @@ HTTP/1.1 204
 
 에러 상황:
 
-| 에러 상황               | 상태코드  | 구현여부 |
-|---------------------|-------|------|
-| 유효하지 않는 입력값         | `400` | ✅    |
-| 본인의 예약이 아닌 경우       | `403` | ✅    |
-| 예약이 존재하지 않을 때       | `404` | ✅    |
-| 이미 취소된 예약인 경우       | `409` | ✅     |
-| 이미 시작된 예약을 취소하려는 경우 | `422` | ✅    |
+| 에러 상황                            | 상태코드  | 구현여부 |
+|----------------------------------|-------|------|
+| 유효하지 않는 입력값                      | `400` | ✅    |
+| 예약자 이름 헤더가 없거나 유효하지 않은 경우       | `400` | ✅    |
+| 본인의 예약이 아닌 경우                    | `403` | ✅    |
+| 예약이 존재하지 않을 때                    | `404` | ✅    |
+| 이미 취소된 예약인 경우                    | `409` | ✅     |
+| 이미 시작된 예약을 취소하려는 경우              | `422` | ✅    |
 
 #### 예약 시간
 
@@ -502,7 +495,7 @@ Content-Type: application/json
 
 | 에러 상황         | 상태코드  | 구현여부 |
 |---------------|-------|------|
-| 유효하지 않는 입력값 ㅋ | `400` | ✅    |
+| 유효하지 않는 입력값  | `400` | ✅    |
 
 ## 🖥️ 프론트엔드 페이지
 
