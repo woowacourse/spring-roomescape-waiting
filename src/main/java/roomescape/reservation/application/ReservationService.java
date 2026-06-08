@@ -90,6 +90,23 @@ public class ReservationService {
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
         }
+
+        boolean scheduleChanged = !targetReservation.getDate().equals(updateCommand.date())
+                || !targetReservation.getTime().getId().equals(updateCommand.timeId());
+
+        if (scheduleChanged) {
+            try {
+                waitingService.promoteNextWaiting(
+                        targetReservation.getDate(),
+                        targetReservation.getTime(),
+                        targetReservation.getTheme()
+                );
+            } catch (BusinessException | DataAccessException e) {
+                log.warn("예약 변경 후 기존 예약 시간의 다음 대기자 승격에 실패했습니다. reservationId={}",
+                        updateCommand.id(),
+                        e);
+            }
+        }
     }
 
     @Transactional
