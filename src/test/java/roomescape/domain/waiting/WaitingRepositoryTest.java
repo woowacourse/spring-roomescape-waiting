@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.dto.TimeSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.waiting.dto.MyWaitingResult;
 
@@ -216,7 +217,7 @@ class WaitingRepositoryTest {
 
     @Nested
     @DisplayName("슬롯의 첫 번째 대기 조회")
-    class FindFirstByDateAndTimeIdAndThemeIdForUpdate {
+    class FindFirstByTimeSlotForUpdate {
 
         @Test
         void 같은_날짜_시간_테마의_가장_먼저_등록된_대기를_반환한다() {
@@ -224,9 +225,11 @@ class WaitingRepositoryTest {
             waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
             waitingRepository.save(Waiting.of("다른날짜", LocalDate.of(2099, 12, 30), time, theme));
 
-            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+            TimeSlot timeSlot = new TimeSlot(
                 LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
             );
+
+            Optional<Waiting> result = waitingRepository.findFirstByTimeSlotForUpdate(timeSlot);
 
             assertAll(
                 () -> assertThat(result).isPresent(),
@@ -239,9 +242,11 @@ class WaitingRepositoryTest {
         void 해당_슬롯의_대기가_없으면_빈_Optional을_반환한다() {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+            TimeSlot timeSlot = new TimeSlot(
                 LocalDate.of(2099, 12, 30), time.getId(), theme.getId()
             );
+
+            Optional<Waiting> result = waitingRepository.findFirstByTimeSlotForUpdate(timeSlot);
 
             assertThat(result).isEmpty();
         }

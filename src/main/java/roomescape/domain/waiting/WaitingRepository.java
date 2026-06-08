@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.dto.TimeSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.waiting.dto.MyWaitingResult;
 
@@ -131,7 +132,7 @@ public class WaitingRepository {
             .findFirst();
     }
 
-    public Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Waiting> findFirstByTimeSlotForUpdate(TimeSlot timeSlot) {
         String query = """
             SELECT w.id AS waiting_id, w.name, w.date,
                    t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
@@ -146,7 +147,11 @@ public class WaitingRepository {
             FOR UPDATE
             """;
 
-        return jdbcTemplate.query(query, waitingRowMapper, date, timeId, themeId).stream()
+        return jdbcTemplate.query(query, waitingRowMapper,
+                timeSlot.date(),
+                timeSlot.timeId(),
+                timeSlot.themeId())
+            .stream()
             .findFirst();
     }
 }
