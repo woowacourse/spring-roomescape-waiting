@@ -14,15 +14,15 @@ public class ReservationWaiting {
     private final Long id;
     private final UserName userName;
     private final Slot slot;
-    private final LocalDateTime createAt;
+    private final LocalDateTime createdAt;
 
-    private ReservationWaiting(Long id, UserName userName, Slot slot, LocalDateTime createAt) {
+    private ReservationWaiting(Long id, UserName userName, Slot slot, LocalDateTime createdAt) {
         Objects.requireNonNull(slot, "슬롯은 필수입니다.");
 
         this.id = id;
         this.userName = userName;
         this.slot = slot;
-        this.createAt = createAt;
+        this.createdAt = createdAt;
     }
 
     public static ReservationWaiting from(Long id, UserName name, Slot slot, LocalDateTime createdAt) {
@@ -54,6 +54,10 @@ public class ReservationWaiting {
         return userName;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public String getUserNameValue() {
         return userName.getName();
     }
@@ -70,8 +74,8 @@ public class ReservationWaiting {
         return slot.getTheme();
     }
 
-    public LocalDateTime createAt() {
-        return createAt;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

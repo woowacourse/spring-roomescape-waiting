@@ -34,7 +34,7 @@ class ReservationWaitingTest {
         assertThat(waiting.getId()).isNull();
         assertThat(waiting.getUserName()).isEqualTo(name);
         assertThat(waiting.getWaitingDate()).isEqualTo(now.plusDays(1).toLocalDate());
-        assertThat(waiting.createAt()).isEqualTo(now);
+        assertThat(waiting.getCreatedAt()).isEqualTo(now);
     }
 
     @Test

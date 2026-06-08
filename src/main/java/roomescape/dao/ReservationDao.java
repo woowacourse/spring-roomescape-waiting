@@ -112,7 +112,7 @@ public class ReservationDao {
                 .findFirst();
     }
 
-    public List<Reservation> findByName(String name) {
+    public List<Reservation> findByName(UserName name) {
         String sql = """
                 SELECT
                     reservation.id as reservation_id,
@@ -129,7 +129,7 @@ public class ReservationDao {
                 INNER JOIN theme as theme ON reservation.theme_id = theme.id
                 WHERE reservation.name = ?
                 """;
-        return jdbcTemplate.query(sql, rowMapper, name);
+        return jdbcTemplate.query(sql, rowMapper, name.getName());
     }
 
     public Optional<Reservation> findBySlot(Slot slot) {

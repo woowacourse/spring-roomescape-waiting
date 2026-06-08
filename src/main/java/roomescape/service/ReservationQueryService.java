@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
+import roomescape.domain.common.UserName;
 import roomescape.domain.reservation.Reservation;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class ReservationQueryService {
         return reservationDao.findAllReservations();
     }
 
-    public List<Reservation> getByName(String name) {
+    public List<Reservation> getByName(UserName name) {
         return reservationDao.findByName(name);
     }
 }

@@ -36,6 +36,10 @@ public class Reservation {
         return new Reservation(null, username, slot);
     }
 
+    public static Reservation promote(UserName userName, Slot slot) {
+        return new Reservation(null, userName, slot);
+    }
+
     public boolean isOwnedBy(UserName name) {
         return Objects.equals(userName, name);
     }
@@ -51,12 +55,20 @@ public class Reservation {
         return new Reservation(this.id, this.userName, slot);
     }
 
+    public boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
+    }
+
     public void validateCancelable(LocalDateTime now) {
         slot.validateAvailableTime(now);
     }
 
     public UserName getUserName() {
         return userName;
+    }
+
+    public Slot getSlot() {
+        return slot;
     }
 
     public String getUserNameValue() {

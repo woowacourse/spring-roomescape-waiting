@@ -1,8 +1,7 @@
 package roomescape.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.dao.dto.WaitingWithRank;
-import roomescape.domain.common.UserName;
+import roomescape.domain.service.WaitingWithRank;
 import roomescape.domain.reservation.Reservation;
 
 import java.time.LocalDate;
@@ -40,7 +39,7 @@ public record ReservationResponse(
     public static ReservationResponse from(WaitingWithRank waiting) {
         return new ReservationResponse(
                 waiting.id(),
-                waiting.name(),
+                waiting.name().getName(),
                 waiting.reservationDate(),
                 new TimeInfo(waiting.reservationTime().getId(), waiting.reservationTime().getStartAt()),
                 new ThemeInfo(

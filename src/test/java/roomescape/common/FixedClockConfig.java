@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.common;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 @TestConfiguration
-class FixedClockConfig {
+public class FixedClockConfig {
     @Bean
     @Primary
     public Clock testClock() {
