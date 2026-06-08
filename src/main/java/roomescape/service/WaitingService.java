@@ -69,14 +69,16 @@ public class WaitingService {
     }
 
     private void promote(Waiting waiting, LocalDateTime now) {
-        if (waiting.isPast(now)) {
-            return;
-        }
+        waiting.promoteToReservation(now)
+                .ifPresent(reservation -> savePromotedReservation(waiting, reservation));
+    }
+
+    private void savePromotedReservation(Waiting waiting, Reservation reservation) {
         if (!waitingDao.delete(waiting.getId())) {
             return;
         }
         try {
-            reservationDao.insert(waiting.toReservation(now));
+            reservationDao.insert(reservation);
         } catch (DuplicateKeyException e) {
             throw new DuplicateEntityException("이미 예약이 존재하여 대기를 전환할 수 없습니다.");
         }

@@ -75,4 +75,17 @@ class WaitingTest {
                     .isInstanceOf(BusinessRuleViolationException.class);
         }
     }
+
+    @Nested
+    class PromoteToReservation {
+
+        @Test
+        @DisplayName("지난 시간의 예약 대기는 빈 값을 반환한다")
+        void returnsEmptyForPastSlot() {
+            Member member = new Member(1L, "유저", "user@test.com", "password", MemberRole.USER);
+            Waiting waiting = new Waiting(member, LocalDate.now().minusDays(1), time, theme, null);
+
+            assertThat(waiting.promoteToReservation(LocalDateTime.now())).isEmpty();
+        }
+    }
 }

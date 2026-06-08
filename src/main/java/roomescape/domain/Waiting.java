@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import roomescape.common.exception.BusinessRuleViolationException;
 
 public class Waiting {
@@ -33,13 +34,19 @@ public class Waiting {
     }
 
     public Reservation toReservation(LocalDateTime now) {
-        if (isPast(now)) {
-            throw new BusinessRuleViolationException("지난 시간의 예약 대기는 예약으로 전환할 수 없습니다.");
-        }
-        return Reservation.from(member, getSlot());
+        return promoteToReservation(now)
+                .orElseThrow(() -> new BusinessRuleViolationException(
+                        "지난 시간의 예약 대기는 예약으로 전환할 수 없습니다."));
     }
 
-    public boolean isPast(LocalDateTime now) {
+    public Optional<Reservation> promoteToReservation(LocalDateTime now) {
+        if (isPast(now)) {
+            return Optional.empty();
+        }
+        return Optional.of(Reservation.from(member, getSlot()));
+    }
+
+    private boolean isPast(LocalDateTime now) {
         return time.isReservationBefore(now, date);
     }
 
