@@ -1,4 +1,4 @@
-package roomescape.reservationtime.domain;
+package roomescape.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservationtime.adapter.out.persistence.JdbcReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 
 @JdbcTest
 @ActiveProfiles("test")

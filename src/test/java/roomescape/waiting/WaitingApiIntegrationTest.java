@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.waiting;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;

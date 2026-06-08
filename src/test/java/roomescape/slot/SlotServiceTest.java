@@ -1,4 +1,4 @@
-package roomescape.slot.domain;
+package roomescape.slot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,6 +23,7 @@ import roomescape.slot.application.dto.request.SlotSaveRequest;
 import roomescape.slot.application.dto.response.SlotFindResponse;
 import roomescape.slot.application.dto.response.SlotSaveResponse;
 import roomescape.slot.application.port.out.SlotRepository;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,4 +1,4 @@
-package roomescape.theme.domain;
+package roomescape.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;

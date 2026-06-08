@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.waiting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.waiting.adapter.out.persistence.JdbcWaitingRepository;
+import roomescape.waiting.domain.Waiting;
 
 @JdbcTest
 @ActiveProfiles("test")

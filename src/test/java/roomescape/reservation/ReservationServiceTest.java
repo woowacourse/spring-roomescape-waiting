@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -28,6 +28,7 @@ import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.port.out.ReservationRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.domain.Slot;

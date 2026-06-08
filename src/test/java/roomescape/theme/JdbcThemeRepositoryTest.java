@@ -1,4 +1,4 @@
-package roomescape.theme.domain;
+package roomescape.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.theme.adapter.out.persistence.JdbcThemeRepository;
+import roomescape.theme.domain.Theme;
 
 @JdbcTest
 @ActiveProfiles("test")

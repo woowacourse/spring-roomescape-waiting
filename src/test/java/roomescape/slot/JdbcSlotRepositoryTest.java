@@ -1,4 +1,4 @@
-package roomescape.slot.domain;
+package roomescape.slot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.adapter.out.persistence.JdbcSlotRepository;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 
 @JdbcTest

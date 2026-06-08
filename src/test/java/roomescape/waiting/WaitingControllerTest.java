@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.waiting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;

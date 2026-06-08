@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.waiting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -11,6 +11,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingPromotionPolicy;
 
 class WaitingPromotionPolicyTest {
 

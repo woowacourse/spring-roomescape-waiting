@@ -1,9 +1,10 @@
-package roomescape.slot.domain;
+package roomescape.slot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.slot.domain.SlotOccupancy;
 
 class SlotOccupancyTest {
 

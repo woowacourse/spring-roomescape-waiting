@@ -1,4 +1,4 @@
-package roomescape.slot.domain;
+package roomescape.slot;
 
 import static org.hamcrest.Matchers.is;
 

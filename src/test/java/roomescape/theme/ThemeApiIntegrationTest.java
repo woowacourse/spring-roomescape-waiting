@@ -1,4 +1,4 @@
-package roomescape.theme.domain;
+package roomescape.theme;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;

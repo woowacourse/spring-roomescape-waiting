@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -25,6 +25,7 @@ import roomescape.reservation.application.dto.response.ReservationSaveResponse;
 import roomescape.reservation.application.port.in.CancelReservationUseCase;
 import roomescape.reservation.application.port.in.CreateReservationUseCase;
 import roomescape.reservation.application.port.in.FindReservationUseCase;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.application.dto.response.TimeInformation;
 import roomescape.theme.application.dto.response.ThemeFindResponse;
 

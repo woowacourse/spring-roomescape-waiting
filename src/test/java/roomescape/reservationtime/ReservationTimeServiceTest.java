@@ -1,4 +1,4 @@
-package roomescape.reservationtime.domain;
+package roomescape.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,6 +23,7 @@ import roomescape.reservationtime.application.dto.request.ReservationTimeSaveReq
 import roomescape.reservationtime.application.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.application.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.application.port.out.ReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.application.SlotUsageValidator;
 
 @ExtendWith(MockitoExtension.class)

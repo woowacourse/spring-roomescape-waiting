@@ -1,4 +1,4 @@
-package roomescape.theme.domain;
+package roomescape.theme;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;

@@ -1,4 +1,4 @@
-package roomescape.slot.domain;
+package roomescape.slot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 
 class SlotTest {

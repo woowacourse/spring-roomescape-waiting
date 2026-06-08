@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import roomescape.reservation.domain.Reservation;
 import roomescape.slot.domain.Slot;
 import roomescape.support.ControllerTestSupport;
 import roomescape.waiting.domain.Waiting;

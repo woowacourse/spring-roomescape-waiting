@@ -1,4 +1,4 @@
-package roomescape.reservationtime.domain;
+package roomescape.reservationtime;
 
 import static org.hamcrest.Matchers.is;
 

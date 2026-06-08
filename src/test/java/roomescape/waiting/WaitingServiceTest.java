@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.waiting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -29,6 +29,7 @@ import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.application.dto.request.WaitingRequest;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
