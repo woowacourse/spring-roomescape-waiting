@@ -1,8 +1,6 @@
 package roomescape.reservation.application.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +13,7 @@ import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.event.ReservationScheduleVacatedEvent;
 import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.reservation.application.validator.ReservationValidator;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -35,6 +34,7 @@ public class ReservationService {
     private final ThemeService themeService;
     private final ReservationTimeService timeService;
     private final ApplicationEventPublisher eventPublisher;
+    private final ReservationValidator reservationValidator;
 
     @Transactional(readOnly = true)
     public List<ReservationQueryResult> findAll() {
@@ -53,14 +53,14 @@ public class ReservationService {
 
     public ReservationQueryResult save(ReservationCreateCommand request, LocalDateTime currentDateTime) {
         ReservationTimeQueryResult timeQueryResult = timeService.findById(request.timeId());
-        validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
+        reservationValidator.validateCreateDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
 
         ThemeQueryResult themeQueryResult = themeService.findById(request.themeId());
 
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
 
         if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
-            validateDuplicateReservationWaiting(request);
+            reservationValidator.validateWaitingRequest(request);
             log.info("이미 예약된 일정이므로 대기로 저장합니다. date={}, themeId={}, timeId={}",
                     request.date(), request.themeId(), request.timeId());
 
@@ -79,12 +79,20 @@ public class ReservationService {
     public ReservationQueryResult update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
         ReservationDetail reservationDetail = getReservationDetail(request.id());
         Reservation reservation = toReservation(reservationDetail);
-        validateOwner(request.name(), reservation);
-        validateReservationNotPast(reservationDetail, currentDateTime);
+        reservationValidator.validateModification(
+                request.name(),
+                reservation,
+                reservationDetail,
+                currentDateTime
+        );
 
         ReservationTimeQueryResult timeQueryResult = timeService.findById(request.timeId());
-        validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
-        validateDuplicateReservation(request, reservation);
+        reservationValidator.validateUpdateSchedule(
+                request,
+                reservation,
+                timeQueryResult.startAt(),
+                currentDateTime
+        );
 
         if (isSameSchedule(request, reservation)) {
             return toQueryResult(reservation);
@@ -99,8 +107,7 @@ public class ReservationService {
     public int delete(Long id, String name, LocalDateTime currentDateTime) {
         ReservationDetail reservationDetail = getReservationDetail(id);
         Reservation reservation = toReservation(reservationDetail);
-        validateOwner(name, reservation);
-        validateReservationNotPast(reservationDetail, currentDateTime);
+        reservationValidator.validateModification(name, reservation, reservationDetail, currentDateTime);
 
         int deletedCount = reservationRepository.delete(id);
 
@@ -109,19 +116,6 @@ public class ReservationService {
         }
 
         return deletedCount;
-    }
-
-    private void validateDuplicateReservationWaiting(ReservationCreateCommand request) {
-        boolean alreadyReservedBySameName = reservationRepository.existsByNameAndDateAndThemeAndTime(
-                request.name(),
-                request.date(),
-                request.themeId(),
-                request.timeId()
-        );
-
-        if (alreadyReservedBySameName) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
-        }
     }
 
     private ReservationQueryResult updateReservation(ReservationUpdateCommand request, Reservation reservation) {
@@ -153,40 +147,6 @@ public class ReservationService {
     private ReservationDetail getReservationDetail(Long id) {
         return reservationRepository.findDetailById(id)
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
-    }
-
-    private void validateDuplicateReservation(ReservationUpdateCommand request, Reservation reservation) {
-        Boolean existsByDateAndTime = reservationRepository.existsByDateAndThemeAndTimeExcludingId(
-                request.date(),
-                reservation.getThemeId(),
-                request.timeId(),
-                reservation.getId()
-        );
-        if (existsByDateAndTime) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
-        }
-    }
-
-    private void validateOwner(String name, Reservation reservation) {
-        if (!reservation.isOwner(name)) {
-            throw new RoomEscapeException(ReservationErrorCode.FORBIDDEN_RESERVATION_ACCESS);
-        }
-    }
-
-    private void validateReservationDateTime(LocalDate date, LocalTime startAt, LocalDateTime currentDateTime) {
-        LocalDateTime triedDateTime = LocalDateTime.of(date, startAt);
-
-        if (triedDateTime.isBefore(currentDateTime)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_TIME);
-        }
-    }
-
-    private void validateReservationNotPast(ReservationDetail reservationDetail, LocalDateTime currentDateTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDetail.date(), reservationDetail.startAt());
-
-        if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_MODIFICATION);
-        }
     }
 
     private ReservationQueryResult toQueryResult(Reservation reservation) {
