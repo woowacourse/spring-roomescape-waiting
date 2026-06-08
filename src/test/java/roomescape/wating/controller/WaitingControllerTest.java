@@ -58,6 +58,7 @@ class WaitingControllerTest {
         insertReservation("브라운", futureDate, time.getId(), theme.getId());
         Map<String, String> body = Map.of(
                 "name", "재키",
+                "email", emailFromName("재키"),
                 "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", theme.getId().toString()
@@ -84,6 +85,7 @@ class WaitingControllerTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
         Map<String, String> body = Map.of(
                 "name", "재키",
+                "email", emailFromName("재키"),
                 "date", futureDate.toString(),
                 "timeId", unSavedTime.getId().toString(),
                 "themeId", theme.getId().toString()
@@ -111,6 +113,7 @@ class WaitingControllerTest {
         Theme unSavedTheme = Theme.of(999L, "name", "des", "url");
         Map<String, String> body = Map.of(
                 "name", "재키",
+                "email", emailFromName("재키"),
                 "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", unSavedTheme.getId().toString()
@@ -143,6 +146,7 @@ class WaitingControllerTest {
 
         Map<String, String> body = Map.of(
                 "name", customerName,
+                "email", emailFromName(customerName),
                 "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", theme.getId().toString()
@@ -175,6 +179,7 @@ class WaitingControllerTest {
         //when
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", customerName)
+                .queryParam("customer-email", emailFromName(customerName))
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
@@ -197,6 +202,7 @@ class WaitingControllerTest {
         final String invalidCustomerName = "재키";
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", invalidCustomerName)
+                .queryParam("customer-email", emailFromName(invalidCustomerName))
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
@@ -216,6 +222,7 @@ class WaitingControllerTest {
         //when
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", customerName)
+                .queryParam("customer-email", emailFromName(customerName))
                 .when().delete("/waitings/{id}", unsavedWaitingId);
 
         //then
@@ -239,6 +246,7 @@ class WaitingControllerTest {
         //when
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", customerName)
+                .queryParam("customer-email", emailFromName(customerName))
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
@@ -275,8 +283,9 @@ class WaitingControllerTest {
     ) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation(customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation(customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
         return slotId;
@@ -290,15 +299,16 @@ class WaitingControllerTest {
     ) {
         Long slotId = insertReservationSlot(reservationDate, timeId, themeId);
         final String sql = """
-                INSERT INTO waiting(customer_name, slot_id)
-                VALUES (?, ?)
+                INSERT INTO waiting(customer_name, customer_email, slot_id)
+                VALUES (?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, name);
-            ps.setLong(2, slotId);
+            ps.setString(2, emailFromName(name));
+            ps.setLong(3, slotId);
             return ps;
         }, keyHolder);
 
@@ -307,6 +317,10 @@ class WaitingControllerTest {
             throw new IllegalStateException("대기 생성에 실패했습니다.");
         }
         return key.longValue();
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final LocalDate reservationDate, final long timeId, final long themeId) {

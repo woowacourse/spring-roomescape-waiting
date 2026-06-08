@@ -23,11 +23,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @GetMapping(params = "customer-name")
-    public ResponseEntity<ReservationsAndWaitingsResponse> getReservationsByCustomerName(
-            @RequestParam("customer-name") String customerName
+    @GetMapping(params = {"customer-name", "customer-email"})
+    public ResponseEntity<ReservationsAndWaitingsResponse> getReservationsByCustomer(
+            @RequestParam("customer-name") String customerName,
+            @RequestParam("customer-email") String customerEmail
     ) {
-        final ReservationsAndWaitingsResponse results = reservationService.getReservationsByCustomerName(customerName);
+        final ReservationsAndWaitingsResponse results = reservationService.getReservationsByCustomer(customerName, customerEmail);
         return ResponseEntity.ok(results);
     }
 
@@ -58,17 +59,26 @@ public class ReservationController {
     @PutMapping("/{reservation-id}")
     public ResponseEntity<ReservationResponse> update(
             @PathVariable("reservation-id") Long reservationId,
+            @RequestParam("customer-name") String customerName,
+            @RequestParam("customer-email") String customerEmail,
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
-        final ReservationResponse result = reservationService.updateByCustomer(reservationId, request);
+        final ReservationResponse result = reservationService.updateByCustomer(
+                reservationId,
+                customerName,
+                customerEmail,
+                request
+        );
         return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{reservation-id}")
     public ResponseEntity<Void> cancel(
-            @PathVariable("reservation-id") Long reservationId
+            @PathVariable("reservation-id") Long reservationId,
+            @RequestParam("customer-name") String customerName,
+            @RequestParam("customer-email") String customerEmail
     ) {
-        reservationService.cancelByCustomer(reservationId);
+        reservationService.cancelByCustomer(reservationId, customerName, customerEmail);
         return ResponseEntity.noContent().build();
     }
 }

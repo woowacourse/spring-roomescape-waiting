@@ -123,19 +123,25 @@ class JdbcReservationSlotRepositoryTest {
 
     private void insertReservation(final String name, final Long slotId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
     }
 
     private void insertWaiting(final String name, final Long slotId, final LocalDateTime createdAt) {
         jdbcTemplate.update(
-                "INSERT INTO waiting (customer_name, slot_id, created_at) VALUES (?, ?, ?)",
+                "INSERT INTO waiting (customer_name, customer_email, slot_id, created_at) VALUES (?, ?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId,
                 Timestamp.valueOf(createdAt)
         );
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final String date, final Long timeId, final Long themeId) {

@@ -41,6 +41,7 @@ public class FakeReservationRepository implements ReservationRepository  {
         Reservation savedReservationWithId = Reservation.of(
                 1L,
                 newReservation.getCustomerName(),
+                newReservation.getCustomerEmail(),
                 newReservation.getSlot()
         );
         reservations.add(savedReservationWithId);
@@ -73,9 +74,14 @@ public class FakeReservationRepository implements ReservationRepository  {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(final String customerName, final LocalDateTime now) {
+    public List<Reservation> findAllByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
+            final String customerName,
+            final String customerEmail,
+            final LocalDateTime now
+    ) {
         return reservations.stream()
                 .filter(reservation -> reservation.getCustomerName().equals(customerName))
+                .filter(reservation -> reservation.getCustomerEmail().equals(customerEmail))
                 .filter(reservation -> LocalDateTime.of(
                         reservation.getDate(),
                         reservation.getTime().getStartAt()).isAfter(now)

@@ -53,6 +53,7 @@ class JdbcWaitingRepositoryTest {
         Long slotId = insertReservation("브라운", tomorrow, time.getId(), theme.getId());
         Waiting waiting = Waiting.create(
                 "코로구",
+                "customer@example.com",
                 ReservationSlot.of(slotId, tomorrow, time, theme),
                 NOW
         );
@@ -73,6 +74,7 @@ class JdbcWaitingRepositoryTest {
         Long slotId = insertReservationSlot(NOW.plusDays(1).toLocalDate(), time.getId(), theme.getId());
         Waiting waiting = Waiting.create(
                 "코로구",
+                "customer@example.com",
                 ReservationSlot.of(slotId, NOW.plusDays(1).toLocalDate(), time, theme),
                 NOW
         );
@@ -138,8 +140,9 @@ class JdbcWaitingRepositoryTest {
         final String customerName = "재키";
 
         //when
-        List<WaitingWithRank> waitings = jdbcWaitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+        List<WaitingWithRank> waitings = jdbcWaitingRepository.findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
                 customerName,
+                "jaekkii@example.com",
                 NOW
         );
 
@@ -190,8 +193,9 @@ class JdbcWaitingRepositoryTest {
         insertWaiting(targetWaitingId, "재키", reservationDate, time.getId(), theme.getId(), sameCreatedAt);
 
         // when
-        List<WaitingWithRank> waitings = jdbcWaitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+        List<WaitingWithRank> waitings = jdbcWaitingRepository.findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
                 "재키",
+                emailFromName("재키"),
                 NOW
         );
 
@@ -227,8 +231,9 @@ class JdbcWaitingRepositoryTest {
     ) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation(customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation(customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
         return slotId;
@@ -242,15 +247,16 @@ class JdbcWaitingRepositoryTest {
     ) {
         Long slotId = insertReservationSlot(reservationDate, timeId, themeId);
         final String sql = """
-                INSERT INTO waiting(customer_name, slot_id)
-                VALUES (?, ?)
+                INSERT INTO waiting(customer_name, customer_email, slot_id)
+                VALUES (?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, name);
-            ps.setLong(2, slotId);
+            ps.setString(2, emailFromName(name));
+            ps.setLong(3, slotId);
             return ps;
         }, keyHolder);
 
@@ -271,17 +277,22 @@ class JdbcWaitingRepositoryTest {
     ) {
         Long slotId = insertReservationSlot(reservationDate, timeId, themeId);
         final String sql = """
-                INSERT INTO waiting(id, customer_name, slot_id, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO waiting(id, customer_name, customer_email, slot_id, created_at)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         jdbcTemplate.update(
                 sql,
                 id,
                 name,
+                emailFromName(name),
                 slotId,
                 Timestamp.valueOf(createdAt)
         );
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final LocalDate reservationDate, final long timeId, final long themeId) {

@@ -48,6 +48,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 return Waiting.of(
                         rs.getLong("id"),
                         rs.getString("customer_name"),
+                        rs.getString("customer_email"),
                         slot,
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
@@ -68,8 +69,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
         final WaitingEntity waitingEntity = toEntity(waiting);
 
         final String sql = """
-                INSERT INTO waiting(customer_name, slot_id)
-                SELECT ?, ?
+                INSERT INTO waiting(customer_name, customer_email, slot_id)
+                SELECT ?, ?, ?
                 FROM reservation
                 WHERE slot_id = ?
                 """;
@@ -78,8 +79,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
         int updateCount = jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, waitingEntity.customerName());
-            ps.setLong(2, waitingEntity.slotId());
+            ps.setString(2, waitingEntity.customerEmail());
             ps.setLong(3, waitingEntity.slotId());
+            ps.setLong(4, waitingEntity.slotId());
             return ps;
         }, keyHolder);
 
@@ -108,7 +110,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Optional<Waiting> findById(final long id) {
         final String sql = """
-                SELECT w.id, w.customer_name, w.created_at,
+                SELECT w.id, w.customer_name, w.customer_email, w.created_at,
                        s.id AS slot_id, s.reservation_date,
                        t.id AS t_id, t.start_at AS t_time,
                        th.id AS th_id, th.name AS th_name, th.description AS th_description, th.thumbnail_url AS th_thumbnail_url
@@ -133,7 +135,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Optional<Waiting> findEarliestBySlotId(final Long slotId) {
         final String sql = """
-                SELECT w.id, w.customer_name, w.created_at,
+                SELECT w.id, w.customer_name, w.customer_email, w.created_at,
                        s.id AS slot_id, s.reservation_date,
                        t.id AS t_id, t.start_at AS t_time,
                        th.id AS th_id, th.name AS th_name, th.description AS th_description, th.thumbnail_url AS th_thumbnail_url
@@ -158,8 +160,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+    public List<WaitingWithRank> findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
             final String customerName,
+            final String customerEmail,
             final LocalDateTime now
     ) {
         final String sql = """
@@ -167,6 +170,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     SELECT
                         w.id,
                         w.customer_name,
+                        w.customer_email,
                         w.created_at,
                         w.slot_id,
                         ROW_NUMBER() OVER (
@@ -178,6 +182,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 SELECT
                     rw.id,
                     rw.customer_name,
+                    rw.customer_email,
                     rw.created_at,
                     s.id AS slot_id,
                     s.reservation_date,
@@ -193,6 +198,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 JOIN reservation_time t ON s.time_id = t.id
                 JOIN theme th ON s.theme_id = th.id
                 WHERE rw.customer_name = ?
+                  AND rw.customer_email = ?
                   AND (s.reservation_date > ? OR (s.reservation_date = ? AND t.start_at > ?))
                 ORDER BY s.reservation_date ASC, t.start_at ASC
                 """;
@@ -200,6 +206,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return jdbcTemplate.query(sql,
                 WAITING_WITH_RANK_ROW_MAPPER,
                 customerName,
+                customerEmail,
                 Date.valueOf(now.toLocalDate()),
                 Date.valueOf(now.toLocalDate()),
                 Time.valueOf(now.toLocalTime())
@@ -210,6 +217,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return new WaitingEntity(
                 waiting.getId(),
                 waiting.getCustomerName().name(),
+                waiting.getCustomerEmail(),
                 waiting.getSlotId()
         );
     }

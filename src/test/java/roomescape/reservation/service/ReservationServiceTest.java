@@ -66,7 +66,7 @@ class ReservationServiceTest {
 
         // when
         ReservationResponse response = reservationService.create(
-                new ReservationCreateRequest("브라운", tomorrow, 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", tomorrow, 1L, 1L)
         );
 
         // then
@@ -85,6 +85,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 oneHourBefore.toLocalDate(),
                 ReservationTime.of(1L, oneHourBefore.toLocalTime()),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -92,6 +93,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 2L,
                 "브라운",
+                "customer@example.com",
                 oneHourAfter.toLocalDate(),
                 ReservationTime.of(2L, oneHourAfter.toLocalTime()),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -100,6 +102,7 @@ class ReservationServiceTest {
         waitingRepository.add(Waiting.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 Date.valueOf(oneHourBefore.toLocalDate()),
                 NOW,
                 ReservationTime.of(1L, oneHourBefore.toLocalTime()),
@@ -108,6 +111,7 @@ class ReservationServiceTest {
         waitingRepository.add(Waiting.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 Date.valueOf(oneHourAfter.toLocalDate()),
                 NOW,
                 ReservationTime.of(1L, oneHourAfter.toLocalTime()),
@@ -115,7 +119,7 @@ class ReservationServiceTest {
         ));
 
         // when
-        ReservationsAndWaitingsResponse responses = reservationService.getReservationsByCustomerName("브라운");
+        ReservationsAndWaitingsResponse responses = reservationService.getReservationsByCustomer("브라운", "customer@example.com");
 
         // then
         assertThat(responses.reservations()).hasSize(1);
@@ -136,7 +140,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", yesterday, 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", yesterday, 1L, 1L)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -146,7 +150,7 @@ class ReservationServiceTest {
     void throwExceptionWhenCreatingReservationWithNonExistingReservationTime() {
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -159,7 +163,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -174,7 +178,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
     }
@@ -189,7 +193,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", LocalDate.now().plusDays(1), 1L, 1L)
         ))
                 .isInstanceOf(ReservationOptionChangedException.class);
     }
@@ -203,6 +207,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -212,6 +217,8 @@ class ReservationServiceTest {
         // when
         ReservationResponse response = reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(changedFutureDate, 2L)
         );
 
@@ -233,6 +240,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(LocalDate.now().plusDays(1), 1L)
         ))
                 .isInstanceOf(NotFoundException.class);
@@ -246,6 +255,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -254,6 +264,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(futureDate, 999L)
         ))
                 .isInstanceOf(NotFoundException.class);
@@ -268,6 +280,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 futureDate,
                 ReservationTime.of(2L, LocalTime.of(11, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -277,6 +290,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(yesterday, 1L)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -291,6 +306,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 today,
                 ReservationTime.of(1L, LocalTime.of(11, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -300,6 +316,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(tomorrow, 2L)
         ))
                 .isInstanceOf(ReservationModificationException.class);
@@ -314,6 +332,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 today,
                 ReservationTime.of(1L, LocalTime.of(11, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -340,6 +359,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -350,6 +370,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(changedFutureDate, 2L)
         ))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
@@ -364,6 +386,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 futureDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -374,6 +397,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.updateByCustomer(
                 1L,
+                "브라운",
+                "customer@example.com",
                 new ReservationUpdateRequest(changedFutureDate, 2L)
         ))
                 .isInstanceOf(ReservationOptionChangedException.class);
@@ -402,7 +427,7 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약을 고객이 취소하면 예외가 발생한다")
     void throwExceptionWhenCustomerCancelsNonExistingReservation() {
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L, "브라운", "customer@example.com"))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -414,13 +439,14 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 today,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L, "브라운", "customer@example.com"))
                 .isInstanceOf(ReservationCancellationException.class);
     }
 
@@ -432,6 +458,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 today,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -460,12 +487,12 @@ class ReservationServiceTest {
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
-        waitingRepository.add(Waiting.of(3L, "브라운", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+        waitingRepository.add(Waiting.of(3L, "브라운", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
 
         // when
-        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomerName("브라운");
+        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomer("브라운", "customer@example.com");
 
         // then
         assertThat(response.waitings()).hasSize(1);
@@ -480,12 +507,12 @@ class ReservationServiceTest {
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(3L, "영이", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(3L, "영이", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
 
         // when
-        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomerName("영이");
+        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomer("영이", "customer@example.com");
 
         // then
         assertThat(response.waitings()).hasSize(1);
@@ -500,13 +527,13 @@ class ReservationServiceTest {
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", futureDate, time, theme));
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
 
         // when
-        reservationService.cancelByCustomer(1L);
+        reservationService.cancelByCustomer(1L, "브라운", "customer@example.com");
 
         // then
         assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
@@ -520,13 +547,13 @@ class ReservationServiceTest {
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", futureDate, time, theme));
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
 
         // when
-        reservationService.cancelByCustomer(1L);
+        reservationService.cancelByCustomer(1L, "브라운", "customer@example.com");
 
         // then
         assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
@@ -540,10 +567,10 @@ class ReservationServiceTest {
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", futureDate, time, theme));
 
         // when
-        reservationService.cancelByCustomer(1L);
+        reservationService.cancelByCustomer(1L, "브라운", "customer@example.com");
 
         // then
         assertThat(reservationRepository.findById(1L)).isEmpty();

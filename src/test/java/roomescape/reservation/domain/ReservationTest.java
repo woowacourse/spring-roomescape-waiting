@@ -27,6 +27,7 @@ class ReservationTest {
     void cannotCreateReservationBeforeNow() {
         assertThatThrownBy(() -> Reservation.create(
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 8),
                 PAST_TIME,
                 THEME,
@@ -39,6 +40,7 @@ class ReservationTest {
     void createReservationAfterNow() {
         Reservation reservation = Reservation.create(
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 8),
                 FUTURE_TIME,
                 THEME,
@@ -54,6 +56,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 8),
                 PAST_TIME,
                 THEME
@@ -68,6 +71,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 8),
                 FUTURE_TIME,
                 THEME
@@ -93,6 +97,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 9),
                 FUTURE_TIME,
                 THEME
@@ -111,6 +116,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 8),
                 FUTURE_TIME,
                 THEME
@@ -126,6 +132,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 9),
                 FUTURE_TIME,
                 THEME
@@ -141,6 +148,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 8),
                 FUTURE_TIME,
                 THEME
@@ -156,6 +164,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 LocalDate.of(2026, 5, 9),
                 FUTURE_TIME,
                 THEME

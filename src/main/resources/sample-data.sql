@@ -61,8 +61,8 @@ INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id) VALUES (3
 INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id) VALUES (4, DATEADD('DAY', 3, CURRENT_DATE), 5, 4);
 INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id) VALUES (5, DATEADD('DAY', 1, CURRENT_DATE), 4, 1);
 
-INSERT INTO reservation (customer_name, slot_id) VALUES ('홍길동', 1);
-INSERT INTO reservation (customer_name, slot_id) VALUES ('김철수', 2);
-INSERT INTO reservation (customer_name, slot_id) VALUES ('이영희', 3);
-INSERT INTO reservation (customer_name, slot_id) VALUES ('박민준', 4);
-INSERT INTO reservation (customer_name, slot_id) VALUES ('최지우', 5);
+INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES ('홍길동', 'hong@example.com', 1);
+INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES ('김철수', 'kim@example.com', 2);
+INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES ('이영희', 'lee@example.com', 3);
+INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES ('박민준', 'park@example.com', 4);
+INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES ('최지우', 'choi@example.com', 5);

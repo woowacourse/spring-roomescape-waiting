@@ -20,5 +20,9 @@ public interface ReservationRepository {
 
     List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(String customerName, LocalDateTime now);
+    List<Reservation> findAllByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
+            String customerName,
+            String customerEmail,
+            LocalDateTime now
+    );
 }

@@ -130,6 +130,7 @@ class ReservationControllerTest {
 
         ReservationsAndWaitingsResponse responses = RestAssured.given().log().all()
                 .queryParam("customer-name", "초코칩")
+                .queryParam("customer-email", emailFromName("초코칩"))
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
@@ -154,6 +155,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 1
@@ -166,6 +168,8 @@ class ReservationControllerTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -186,6 +190,8 @@ class ReservationControllerTest {
         insertReservation("브라운", futureDate, 1L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", changedFutureDate,
@@ -221,6 +227,8 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", futureDate,
@@ -243,6 +251,8 @@ class ReservationControllerTest {
         insertReservation("브라운", futureDate, 1L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", changedFutureDate,
@@ -259,6 +269,8 @@ class ReservationControllerTest {
     @DisplayName("예약 수정시 예약일을 입력하지 않으면 400을 응답한다")
     void respondBadRequestWhenReservationDateIsMissingOnUpdate() {
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "timeId", 1
@@ -281,6 +293,8 @@ class ReservationControllerTest {
         insertReservation("브라운", futureDate, 1L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", yesterday,
@@ -304,6 +318,8 @@ class ReservationControllerTest {
         insertReservation("재키", futureDate, 2L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", futureDate,
@@ -327,6 +343,8 @@ class ReservationControllerTest {
         insertReservation("브라운", today, 1L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", tomorrow,
@@ -348,6 +366,8 @@ class ReservationControllerTest {
         insertReservation("브라운", today, 1L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(409)
@@ -365,6 +385,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 999,
                         "themeId", 1
@@ -385,6 +406,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "themeId", 1
                 ))
@@ -418,6 +440,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 999
@@ -439,6 +462,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "",
+                        "email", "brown@example.com",
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 1
@@ -469,8 +493,9 @@ class ReservationControllerTest {
     private void insertReservation(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
     }
@@ -478,10 +503,15 @@ class ReservationControllerTest {
     private void insertWaiting(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO waiting (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final String date, final long timeId, final long themeId) {

@@ -45,6 +45,7 @@ public class WaitingService {
 
         final Waiting waiting = Waiting.create(
                 request.name(),
+                request.email(),
                 slot,
                 LocalDateTime.now()
         );
@@ -55,11 +56,11 @@ public class WaitingService {
         }
     }
 
-    public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
+    public void deleteByIdAndCustomer(final long waitingId, final String customerName, final String customerEmail) {
         final Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(WaitingNotFoundException::new);
 
-        if (!waiting.isOwnedBy(customerName)) {
+        if (!waiting.isOwnedBy(customerName, customerEmail)) {
             throw new WaitingNotFoundException();
         }
         if (!waiting.isCancelable(LocalDateTime.now())) {

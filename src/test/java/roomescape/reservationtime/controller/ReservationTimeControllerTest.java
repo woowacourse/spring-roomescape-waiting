@@ -86,7 +86,7 @@ class ReservationTimeControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         jdbcTemplate.update("INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)", "2026-08-05", "1", "1");
-        jdbcTemplate.update("INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)", "브라운", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)", "브라운", "brown@example.com", "1");
 
         RestAssured.given().log().all()
                 .when().delete("/times/1")

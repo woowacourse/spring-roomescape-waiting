@@ -73,6 +73,7 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
                     reservationRepository.save(Reservation.of(
                             null,
                             waiting.getCustomerName().name(),
+                            waiting.getCustomerEmail(),
                             waiting.getSlot()
                     ));
                 });

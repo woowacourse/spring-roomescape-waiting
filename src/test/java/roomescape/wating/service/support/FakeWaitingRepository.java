@@ -24,6 +24,7 @@ public class FakeWaitingRepository implements WaitingRepository {
         final Waiting savedWaitingWithId = Waiting.of(
                 1L,
                 waiting.getCustomerName().name(),
+                waiting.getCustomerEmail(),
                 waiting.getSlot(),
                 waiting.getCreatedAt()
         );
@@ -52,12 +53,13 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+    public List<WaitingWithRank> findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
             final String customerName,
+            final String customerEmail,
             final LocalDateTime now
     ) {
         return waitings.stream()
-                .filter(waiting -> waiting.isOwnedBy(customerName))
+                .filter(waiting -> waiting.isOwnedBy(customerName, customerEmail))
                 .filter(waiting -> LocalDateTime.of(
                         waiting.getReservationDate(),
                         waiting.getTime().getStartAt()

@@ -32,6 +32,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT
                     r.id AS reservation_id,
                     r.customer_name AS reservation_name,
+                    r.customer_email AS reservation_email,
                     s.id AS slot_id,
                     s.reservation_date AS reservation_date,
                     t.id AS time_id,
@@ -53,11 +54,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(String customerName, LocalDateTime now) {
+    public List<Reservation> findAllByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
+            final String customerName,
+            final String customerEmail,
+            final LocalDateTime now
+    ) {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
                     r.customer_name AS reservation_name,
+                    r.customer_email AS reservation_email,
                     s.id AS slot_id,
                     s.reservation_date AS reservation_date,
                     t.id AS time_id,
@@ -71,6 +77,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time t ON s.time_id = t.id
                 JOIN theme h ON s.theme_id = h.id
                 WHERE r.customer_name = ?
+                  AND r.customer_email = ?
                   AND (s.reservation_date > ? OR (s.reservation_date = ? AND t.start_at > ?))
                 ORDER BY s.reservation_date ASC
                 """;
@@ -78,6 +85,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(sql,
                         this::mapToDomain,
                         customerName,
+                        customerEmail,
                         Date.valueOf(now.toLocalDate()),
                         Date.valueOf(now.toLocalDate()),
                         Time.valueOf(now.toLocalTime())
@@ -92,6 +100,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT
                     r.id AS reservation_id,
                     r.customer_name AS reservation_name,
+                    r.customer_email AS reservation_email,
                     s.id AS slot_id,
                     s.reservation_date AS reservation_date,
                     t.id AS time_id,
@@ -123,6 +132,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Reservation.of(
                 newReservationId,
                 newReservation.getCustomerName(),
+                newReservation.getCustomerEmail(),
                 newReservation.getSlot()
         );
     }
@@ -179,8 +189,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private long insertReservation(final ReservationEntity reservationEntity) {
         final String sql = """
-                INSERT INTO reservation (customer_name, slot_id)
-                VALUES (?, ?)
+                INSERT INTO reservation (customer_name, customer_email, slot_id)
+                VALUES (?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -192,7 +202,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             );
 
             preparedStatement.setString(1, reservationEntity.name());
-            preparedStatement.setLong(2, reservationEntity.slotId());
+            preparedStatement.setString(2, reservationEntity.email());
+            preparedStatement.setLong(3, reservationEntity.slotId());
 
             return preparedStatement;
         }, keyHolder);
@@ -234,6 +245,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Reservation.of(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
+                resultSet.getString("reservation_email"),
                 slot
         );
     }
@@ -242,6 +254,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return new ReservationEntity(
                 reservation.getId(),
                 reservation.getCustomerName(),
+                reservation.getCustomerEmail(),
                 reservation.getSlotId()
         );
     }

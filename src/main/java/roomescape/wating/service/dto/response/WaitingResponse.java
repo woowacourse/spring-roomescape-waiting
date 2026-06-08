@@ -10,6 +10,7 @@ import java.time.LocalTime;
 public record WaitingResponse(
         long id,
         String customerName,
+        String customerEmail,
         LocalDate date,
         LocalTime startAt,
         ThemeWithoutIdResponse theme,
@@ -20,6 +21,7 @@ public record WaitingResponse(
         return new WaitingResponse(
                 waiting.getId(),
                 waiting.getCustomerName().name(),
+                waiting.getCustomerEmail(),
                 waiting.getReservationDate(),
                 waiting.getTime().getStartAt(),
                 ThemeWithoutIdResponse.from(waiting.getTheme()),

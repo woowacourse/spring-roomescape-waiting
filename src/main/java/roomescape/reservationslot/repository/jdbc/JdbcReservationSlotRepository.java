@@ -51,6 +51,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return Waiting.of(
                 rs.getLong("waiting_id"),
                 rs.getString("waiting_customer_name"),
+                rs.getString("waiting_customer_email"),
                 slot,
                 rs.getTimestamp("waiting_created_at").toLocalDateTime()
         );
@@ -231,6 +232,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 SELECT
                     w.id AS waiting_id,
                     w.customer_name AS waiting_customer_name,
+                    w.customer_email AS waiting_customer_email,
                     w.created_at AS waiting_created_at,
                     s.id AS slot_id,
                     s.reservation_date,
@@ -256,13 +258,14 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     private void promoteWaiting(final Waiting waiting) {
         final String reservationSql = """
-                INSERT INTO reservation (customer_name, slot_id)
-                VALUES (?, ?)
+                INSERT INTO reservation (customer_name, customer_email, slot_id)
+                VALUES (?, ?, ?)
                 """;
 
         jdbcTemplate.update(
                 reservationSql,
                 waiting.getCustomerName().name(),
+                waiting.getCustomerEmail(),
                 waiting.getSlotId()
         );
 

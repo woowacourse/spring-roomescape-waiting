@@ -5,6 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.reservation.domain.CustomerEmail;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
@@ -52,16 +53,19 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationsAndWaitingsResponse getReservationsByCustomerName(final String customerName) {
+    public ReservationsAndWaitingsResponse getReservationsByCustomer(final String customerName, final String customerEmail) {
         final LocalDateTime now = LocalDateTime.now();
         final CustomerName validCustomerName = new CustomerName(customerName);
+        final CustomerEmail validCustomerEmail = new CustomerEmail(customerEmail);
 
-        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
                 validCustomerName.name(),
+                validCustomerEmail.email(),
                 now
         );
-        final List<WaitingResponse> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
-                        customerName,
+        final List<WaitingResponse> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
+                        validCustomerName.name(),
+                        validCustomerEmail.email(),
                         now
                 )
                 .stream()
@@ -82,6 +86,7 @@ public class ReservationService {
 
         final Reservation reservation = Reservation.create(
                 data.name(),
+                data.email(),
                 slot,
                 LocalDateTime.now()
         );
@@ -91,8 +96,14 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest data) {
+    public ReservationResponse updateByCustomer(
+            final Long reservationId,
+            final String customerName,
+            final String customerEmail,
+            final ReservationUpdateRequest data
+    ) {
         final Reservation originReservation = getReservation(reservationId);
+        validateOwnedByCustomer(originReservation, customerName, customerEmail);
         originReservation.validateModifiableByCustomer(LocalDate.now());
 
         return updateSchedule(data, originReservation);
@@ -105,8 +116,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelByCustomer(final Long reservationId) {
+    public void cancelByCustomer(final Long reservationId, final String customerName, final String customerEmail) {
         final Reservation reservation = getReservation(reservationId);
+        validateOwnedByCustomer(reservation, customerName, customerEmail);
         reservation.validateCancelableByCustomer(LocalDate.now());
 
         deleteReservationAndPromoteWaiting(reservation);
@@ -199,6 +211,16 @@ public class ReservationService {
     private Reservation getReservation(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    private void validateOwnedByCustomer(
+            final Reservation reservation,
+            final String customerName,
+            final String customerEmail
+    ) {
+        if (!reservation.isOwnedBy(customerName, customerEmail)) {
+            throw new ReservationNotFoundException();
+        }
     }
 
     private ReservationTime getReservationTime(final Long reservationTimeId) {

@@ -76,6 +76,7 @@ class AdminReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 1
@@ -160,10 +161,15 @@ class AdminReservationControllerTest {
     private void insertReservation(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final String date, final long timeId, final long themeId) {

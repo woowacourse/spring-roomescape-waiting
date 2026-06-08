@@ -33,20 +33,22 @@ CREATE TABLE IF NOT EXISTS waiting
 (
     id                  BIGINT      NOT NULL AUTO_INCREMENT,
     customer_name       VARCHAR(10) NOT NULL,
+    customer_email      VARCHAR(255) NOT NULL,
     created_at          TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     slot_id             BIGINT      NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
-    CONSTRAINT unique_waiting_slot_customer_name UNIQUE (slot_id, customer_name)
+    CONSTRAINT unique_waiting_slot_customer_email UNIQUE (slot_id, customer_email)
 );
 
-CREATE INDEX IF NOT EXISTS idx_waiting_customer_name
-    ON waiting (customer_name);
+CREATE INDEX IF NOT EXISTS idx_waiting_customer_name_email
+    ON waiting (customer_name, customer_email);
 
 CREATE TABLE IF NOT EXISTS reservation
 (
     id      BIGINT       NOT NULL AUTO_INCREMENT,
     customer_name    VARCHAR(10) NOT NULL,
+    customer_email VARCHAR(255) NOT NULL,
     slot_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -54,5 +56,5 @@ CREATE TABLE IF NOT EXISTS reservation
     CONSTRAINT unique_reservation_slot UNIQUE (slot_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_reservation_customer_name
-    ON reservation (customer_name);
+CREATE INDEX IF NOT EXISTS idx_reservation_customer_name_email
+    ON reservation (customer_name, customer_email);

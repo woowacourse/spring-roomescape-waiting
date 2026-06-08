@@ -16,8 +16,9 @@ public interface WaitingRepository {
 
     Optional<Waiting> findEarliestBySlotId(Long slotId);
 
-    List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+    List<WaitingWithRank> findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
             String customerName,
+            String customerEmail,
             LocalDateTime now
     );
 }
