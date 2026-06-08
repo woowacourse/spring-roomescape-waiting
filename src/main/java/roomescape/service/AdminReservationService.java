@@ -77,7 +77,7 @@ public class AdminReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time);
         Reservation updated = reservationDao.update(reservation);
-        if (updated.isDifferentSlot(previousSlot)) {
+        if (updated.hasDifferentSlot(previousSlot)) {
             waitingService.promoteFirstWaiting(previousSlot, now);
         }
         return updated;

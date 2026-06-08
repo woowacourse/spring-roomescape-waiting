@@ -131,7 +131,7 @@ public class Reservation {
         return new Slot(date, time, theme, storeId);
     }
 
-    public boolean isDifferentSlot(Slot other) {
+    public boolean hasDifferentSlot(Slot other) {
         return !getSlot().equals(other);
     }
 

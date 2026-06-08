@@ -35,6 +35,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
+import roomescape.domain.Waiting;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
@@ -85,6 +86,13 @@ class ReservationServiceTest {
         savedTheme2 = themeDao.insert(new Theme(new Name("방탈출 이름2"), "http://thumbnail_url", "방탈출을 할 수 있다."));
         requestDto1 = new ReservationRequestDto(LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
         requestDto2 = new ReservationRequestDto(LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), storeId);
+    }
+
+    private Member saveMember(String name, String email) {
+        jdbcTemplate.update(
+                "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                name, email, "password", "USER");
+        return memberDao.findByEmail(email).orElseThrow();
     }
 
     @Nested
@@ -168,24 +176,21 @@ class ReservationServiceTest {
         @DisplayName("예약을 취소하면 같은 슬롯의 1순위 대기가 예약으로 자동 전환된다")
         void promotesFirstWaitingOnCancel() {
             Reservation reservation = reservationService.create(member, requestDto1);
-            jdbcTemplate.update(
-                    "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
-                    "대기자", "waiter@test.com", "password", "USER");
-            Member waiter = memberDao.findByEmail("waiter@test.com").orElseThrow();
+            Member waitingMember = saveMember("대기자", "waiting-member-cancel@test.com");
             waitingService.create(
                     new WaitingRequestDto(requestDto1.date(), requestDto1.timeId(), requestDto1.themeId(),
                             requestDto1.storeId()),
-                    waiter);
+                    waitingMember);
 
             reservationService.cancel(reservation.getId(), member.getId());
 
-            assertThat(reservationService.findAllByMemberId(waiter.getId()))
+            assertThat(reservationService.findAllByMemberId(waitingMember.getId()))
                     .singleElement()
                     .satisfies(promoted -> {
                         assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.BOOKED);
                         assertThat(promoted.getDate()).isEqualTo(requestDto1.date());
                     });
-            assertThat(waitingService.findAllByMemberId(waiter.getId())).isEmpty();
+            assertThat(waitingService.findAllByMemberId(waitingMember.getId())).isEmpty();
         }
     }
 
@@ -193,26 +198,43 @@ class ReservationServiceTest {
     class UpdateWithPromotion {
 
         @Test
-        @DisplayName("예약을 다른 슬롯으로 변경하면 비워진 슬롯의 1순위 대기가 전환된다")
-        void promotesWaitingOnVacatedSlotAfterUpdate() {
+        @DisplayName("예약을 다른 슬롯으로 변경하면 이전 슬롯의 1순위 대기가 전환된다")
+        void promotesWaitingOnPreviousSlotAfterUpdate() {
             Reservation reservation = reservationService.create(member, requestDto1);
-            jdbcTemplate.update(
-                    "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
-                    "대기자", "waiter@test.com", "password", "USER");
-            Member waiter = memberDao.findByEmail("waiter@test.com").orElseThrow();
+            Member waitingMember = saveMember("대기자", "waiting-member-update@test.com");
             waitingService.create(
                     new WaitingRequestDto(requestDto1.date(), requestDto1.timeId(), requestDto1.themeId(),
                             requestDto1.storeId()),
-                    waiter);
+                    waitingMember);
 
             reservationService.updateByUser(reservation.getId(), member.getId(),
                     new ReservationPatchDto(requestDto1.date(), savedTime2.getId()));
 
-            assertThat(reservationService.findAllByMemberId(waiter.getId()))
+            assertThat(reservationService.findAllByMemberId(waitingMember.getId()))
                     .singleElement()
                     .extracting(Reservation::getStatus)
                     .isEqualTo(ReservationStatus.BOOKED);
-            assertThat(waitingService.findAllByMemberId(waiter.getId())).isEmpty();
+            assertThat(waitingService.findAllByMemberId(waitingMember.getId())).isEmpty();
+        }
+
+        @Test
+        @DisplayName("예약을 같은 슬롯으로 변경하면 대기를 전환하지 않는다")
+        void doesNotPromoteWaitingWhenSlotIsSame() {
+            Reservation reservation = reservationService.create(member, requestDto1);
+            Member waitingMember = saveMember("대기자", "waiting-member-same-slot@test.com");
+            waitingService.create(
+                    new WaitingRequestDto(requestDto1.date(), requestDto1.timeId(), requestDto1.themeId(),
+                            requestDto1.storeId()),
+                    waitingMember);
+
+            reservationService.updateByUser(reservation.getId(), member.getId(),
+                    new ReservationPatchDto(requestDto1.date(), savedTime1.getId()));
+
+            assertThat(reservationService.findAllByMemberId(waitingMember.getId())).isEmpty();
+            assertThat(waitingService.findAllByMemberId(waitingMember.getId()))
+                    .singleElement()
+                    .extracting(Waiting::getRank)
+                    .isEqualTo(1L);
         }
     }
 
