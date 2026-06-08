@@ -115,7 +115,7 @@ class ReservationServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation savedReservation = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
                 savedTheme.getId());
-        Reservation foundReservation = reservationService.findReservationById(savedReservation.getId());
+        Reservation foundReservation = reservationService.getReservationById(savedReservation.getId());
         assertThat(foundReservation.getName()).isEqualTo("브라운");
     }
 
@@ -207,7 +207,7 @@ class ReservationServiceTest {
 
         reservationService.updateReservation(target.getId(), "브라운", futureDate, savedTimeSlot.getId());
 
-        Reservation reservation = reservationService.findReservationById(target.getId());
+        Reservation reservation = reservationService.getReservationById(target.getId());
         assertThat(reservation.getName()).isEqualTo("브라운");
         assertThat(reservation.getDate()).isEqualTo(futureDate);
         assertThat(reservation.getTimeSlot()).isEqualTo(savedTimeSlot);
@@ -226,7 +226,7 @@ class ReservationServiceTest {
 
         reservationService.removeReservation(reservation.getId(), "브라운");
 
-        Reservation promoted = reservationService.findReservationById(firstWaiting.getId());
+        Reservation promoted = reservationService.getReservationById(firstWaiting.getId());
         assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 

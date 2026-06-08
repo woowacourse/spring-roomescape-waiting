@@ -32,7 +32,7 @@ class ThemeServiceTest {
     @DisplayName("모든 테마 목록을 조회하여 반환한다.")
     void 전체_테마_조회() {
         themeService.saveTheme("공포", "귀신의 집", "https://url");
-        List<Theme> themes = themeService.allTheme();
+        List<Theme> themes = themeService.findAllThemes();
         assertThat(themes).hasSize(1);
     }
 
@@ -41,7 +41,7 @@ class ThemeServiceTest {
     void 테마_삭제() {
         Theme theme = themeService.saveTheme("공포", "귀신의 집", "https://url");
         themeService.removeTheme(theme.getId());
-        assertThat(themeService.allTheme()).isEmpty();
+        assertThat(themeService.findAllThemes()).isEmpty();
     }
 
     @Test
