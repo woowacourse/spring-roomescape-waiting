@@ -5,8 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
-import roomescape.reservationtime.service.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.service.dto.response.ReservationTimeResponse;
+import roomescape.reservationtime.controller.dto.request.ReservationTimeCreateRequest;
+import roomescape.reservationtime.controller.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
 
 import java.time.LocalTime;

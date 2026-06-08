@@ -1,6 +1,6 @@
-package roomescape.wating.service.dto.response;
+package roomescape.wating.controller.dto.response;
 
-import roomescape.theme.service.dto.response.ThemeWithoutIdResponse;
+import roomescape.theme.controller.dto.response.ThemeWithoutIdResponse;
 import roomescape.wating.domain.Waiting;
 import roomescape.wating.repository.dto.WaitingWithRank;
 

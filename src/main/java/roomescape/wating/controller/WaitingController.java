@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.wating.service.WaitingService;
-import roomescape.wating.service.dto.request.WaitingCreateRequest;
-import roomescape.wating.service.dto.response.WaitingCreateResponse;
+import roomescape.wating.controller.dto.request.WaitingCreateRequest;
+import roomescape.wating.controller.dto.response.WaitingCreateResponse;
 
 @RestController
 @RequestMapping("/waitings")

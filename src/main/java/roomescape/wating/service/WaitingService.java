@@ -20,7 +20,7 @@ import roomescape.wating.domain.exception.PastReservationWaitingCancellationExce
 import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
-import roomescape.wating.service.dto.request.WaitingCreateRequest;
+import roomescape.wating.controller.dto.request.WaitingCreateRequest;
 
 @Service
 @RequiredArgsConstructor

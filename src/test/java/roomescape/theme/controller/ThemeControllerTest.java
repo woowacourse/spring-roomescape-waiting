@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.theme.controller.dto.response.ThemeResponse;
 
 import java.util.HashMap;
 import java.util.List;

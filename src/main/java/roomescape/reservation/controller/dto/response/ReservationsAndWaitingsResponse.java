@@ -1,7 +1,7 @@
-package roomescape.reservation.service.dto.response;
+package roomescape.reservation.controller.dto.response;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.wating.service.dto.response.WaitingResponse;
+import roomescape.wating.controller.dto.response.WaitingResponse;
 
 import java.util.List;
 

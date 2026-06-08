@@ -7,8 +7,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeInUseException;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.dto.request.ThemeCreateRequest;
-import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.theme.controller.dto.request.ThemeCreateRequest;
+import roomescape.theme.controller.dto.response.ThemeResponse;
 
 import java.time.LocalDate;
 import java.util.List;

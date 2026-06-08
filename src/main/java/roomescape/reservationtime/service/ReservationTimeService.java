@@ -7,8 +7,8 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.reservationtime.service.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.service.dto.response.ReservationTimeResponse;
+import roomescape.reservationtime.controller.dto.request.ReservationTimeCreateRequest;
+import roomescape.reservationtime.controller.dto.response.ReservationTimeResponse;
 
 import java.util.List;
 

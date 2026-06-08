@@ -11,7 +11,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeInUseException;
-import roomescape.theme.service.dto.request.ThemeCreateRequest;
-import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.theme.controller.dto.request.ThemeCreateRequest;
+import roomescape.theme.controller.dto.response.ThemeResponse;
 import roomescape.theme.service.support.FakeThemeRepository;
 
 import java.time.LocalDate;

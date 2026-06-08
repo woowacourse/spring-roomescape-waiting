@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.theme.service.ThemeService;
-import roomescape.theme.service.dto.request.ThemeCreateRequest;
-import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.theme.controller.dto.request.ThemeCreateRequest;
+import roomescape.theme.controller.dto.response.ThemeResponse;
 
 import java.util.List;
 

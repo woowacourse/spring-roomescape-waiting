@@ -12,8 +12,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 
 import java.time.LocalDate;
 import java.util.List;

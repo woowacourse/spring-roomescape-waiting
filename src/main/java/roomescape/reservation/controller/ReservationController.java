@@ -6,11 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.request.ReservationCreateRequest;
-import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationResponse;
-import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
+import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 
 import java.net.URI;
 import java.time.LocalDate;
