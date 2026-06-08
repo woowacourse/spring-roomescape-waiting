@@ -475,6 +475,86 @@ public class ConcurrentTest {
                 .allMatch(e -> e instanceof ConflictException);
     }
 
+    @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
+    void 동시_같은_빈_슬롯으로_changeReservationSlot이_들어오면_한_쪽만_성공하고_나머지는_409() throws Exception {
+        jdbcTemplate.update("DELETE FROM waiting");
+        jdbcTemplate.update("DELETE FROM reservation");
+
+        Long timeIdA = 5L;
+        Long timeIdB = 7L;
+        Long newTimeId = 6L;
+        String userA = "사용자A";
+        String userB = "사용자B";
+
+        SimpleJdbcInsert reservationInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
+
+        Map<String, Object> aParams = new HashMap<>();
+        aParams.put("name", userA);
+        aParams.put("date", date);
+        aParams.put("time_id", timeIdA);
+        aParams.put("theme_id", themeId);
+        Long aId = reservationInsert.executeAndReturnKey(aParams).longValue();
+
+        Map<String, Object> bParams = new HashMap<>();
+        bParams.put("name", userB);
+        bParams.put("date", date);
+        bParams.put("time_id", timeIdB);
+        bParams.put("theme_id", themeId);
+        Long bId = reservationInsert.executeAndReturnKey(bParams).longValue();
+
+        ReservationCommand commandA = new ReservationCommand(userA, date, newTimeId, themeId);
+        ReservationCommand commandB = new ReservationCommand(userB, date, newTimeId, themeId);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        CountDownLatch finishGate = new CountDownLatch(2);
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.changeReservationSlot(aId, commandA);
+            } catch (Throwable e) {
+                errors.add(e);
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.changeReservationSlot(bId, commandB);
+            } catch (Throwable e) {
+                errors.add(e);
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        startGate.countDown();
+        boolean finished = finishGate.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(finished)
+                .as("두 작업이 5초 안에 끝나야 함 — 무한 대기/데드락 의심")
+                .isTrue();
+
+        int newSlotCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Integer.class, date, newTimeId, themeId
+        );
+        assertThat(newSlotCount)
+                .as("동시 change race에서 NEW slot으로 이동한 건은 정확히 1건")
+                .isEqualTo(1);
+
+        assertThat(errors)
+                .as("진 쪽은 409(ConflictException)만 허용된다.")
+                .allMatch(e -> e instanceof ConflictException);
+    }
+
     private int countReservations() {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?",

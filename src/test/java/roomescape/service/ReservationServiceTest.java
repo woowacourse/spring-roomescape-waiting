@@ -238,7 +238,22 @@ class ReservationServiceTest {
     }
 
     @Test
-    public void 예약_변경_저장에_실패하면_충돌_예외가_발생한다() {
+    public void 예약_변경_시_대상_슬롯이_다른_요청에_선점되면_충돌_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.update(any())).willThrow(new DuplicateKeyException("UNIQUE 예외"));
+
+        assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다. 다시 시도해주세요.");
+    }
+
+    @Test
+    public void 예약_변경_시_대상_예약이_사라지면_찾을_수_없음_예외가_발생한다() {
         ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
 
@@ -248,8 +263,8 @@ class ReservationServiceTest {
         given(reservationDao.update(any())).willReturn(false);
 
         assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("이미 예약된 시간입니다. 다시 시도해주세요.");
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("변경하고자 하는 예약이 존재하지 않습니다.");
     }
 
     @Test

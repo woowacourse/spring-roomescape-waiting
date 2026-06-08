@@ -89,12 +89,16 @@ public class ReservationService {
         validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
         validateNoWaiting(command);
-
-        boolean isSuccessful = reservationDao.update(modified);
-
-        if (!isSuccessful) {
+        boolean updated;
+        try {
+            updated = reservationDao.update(modified);
+        } catch (DuplicateKeyException e) {
             throw new ConflictException("이미 예약된 시간입니다. 다시 시도해주세요.");
         }
+        if (!updated) {
+            throw new NotFoundException("변경하고자 하는 예약이 존재하지 않습니다.");
+        }
+
         promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
         return ReservationResult.from(modified);
     }

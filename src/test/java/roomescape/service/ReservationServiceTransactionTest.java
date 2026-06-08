@@ -132,5 +132,4 @@ public class ReservationServiceTransactionTest {
         assertThat(reservationDao.findById(reservationId)).isPresent();
         assertThat(waitingDao.findById(waitingId)).isPresent();
     }
-
 }
