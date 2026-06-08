@@ -133,7 +133,9 @@ public class ReservationService {
 
         validateBeforeDate(themeSlot);
         validateDateTime(themeSlot);
-        if (reservation.hasDifferentThemeSlot(themeSlotId)) {
+        boolean changesThemeSlot = reservation.hasDifferentThemeSlot(themeSlotId);
+        boolean shouldPromotePreviousSlot = changesThemeSlot && reservation.isConfirmedStatus();
+        if (changesThemeSlot) {
             changeThemeSlot(reservation, themeSlotId, themeSlot);
         }
 
@@ -146,10 +148,16 @@ public class ReservationService {
         if (expectedStatus.equals(ConfirmedStatus.getInstance().getName()) && updateReservation.isPendingStatus()) {
             updateStatusOrElseThrow(updateReservation, expectedStatus);
             reservationRepository.updateThemeSlot(updateReservation);
+            if (shouldPromotePreviousSlot) {
+                promoteWaitingReservationOrReleaseSlot(reservation);
+            }
             return updateReservation;
         }
         reservationRepository.updateThemeSlot(updateReservation);
         updateStatusOrElseThrow(updateReservation, expectedStatus);
+        if (shouldPromotePreviousSlot) {
+            promoteWaitingReservationOrReleaseSlot(reservation);
+        }
         return updateReservation;
     }
 
@@ -157,10 +165,6 @@ public class ReservationService {
         validateDuplicatedReservation(reservation.getName(), themeSlotId);
         boolean targetSlotHasConfirmedReservation = reservationRepository.existsConfirmedByThemeSlotId(themeSlotId);
         updateThemeSlotReserved(themeSlot, true);
-
-        if (reservation.isConfirmedStatus()) {
-            promoteWaitingReservationOrReleaseSlot(reservation);
-        }
 
         if (targetSlotHasConfirmedReservation) {
             reservation.waiting();

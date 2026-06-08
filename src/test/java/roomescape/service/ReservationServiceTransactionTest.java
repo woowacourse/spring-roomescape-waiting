@@ -49,7 +49,29 @@ class ReservationServiceTransactionTest {
         assertThat(findThemeSlotReserved(themeSlotId)).isFalse();
     }
 
+    @Test
+    @DisplayName("확정 예약을 다른 빈 슬롯으로 변경하면 기존 슬롯을 먼저 비운 뒤 첫 번째 대기 예약을 확정한다.")
+    void promoteFirstPendingReservationAfterConfirmedReservationLeavesPreviousSlot() {
+        long previousThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(30), true);
+        long targetThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(31), false);
+        long confirmedReservationId = insertReservation("브라운", "CONFIRMED", previousThemeSlotId);
+        long pendingReservationId = insertReservation("김대기", "PENDING", previousThemeSlotId);
+
+        reservationService.modifyReservation(confirmedReservationId, targetThemeSlotId);
+
+        assertThat(findThemeSlotId(confirmedReservationId)).isEqualTo(targetThemeSlotId);
+        assertThat(findStatus(confirmedReservationId)).isEqualTo("CONFIRMED");
+        assertThat(findThemeSlotId(pendingReservationId)).isEqualTo(previousThemeSlotId);
+        assertThat(findStatus(pendingReservationId)).isEqualTo("CONFIRMED");
+        assertThat(countConfirmedReservations(previousThemeSlotId)).isEqualTo(1);
+        assertThat(countConfirmedReservations(targetThemeSlotId)).isEqualTo(1);
+    }
+
     private long insertThemeSlot(LocalDate date) {
+        return insertThemeSlot(date, false);
+    }
+
+    private long insertThemeSlot(LocalDate date, boolean isReserved) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("""
@@ -59,7 +81,22 @@ class ReservationServiceTransactionTest {
             ps.setLong(1, 1L);
             ps.setObject(2, date);
             ps.setLong(3, 1L);
-            ps.setBoolean(4, false);
+            ps.setBoolean(4, isReserved);
+            return ps;
+        }, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
+    private long insertReservation(String name, String status, long themeSlotId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement("""
+                    INSERT INTO reservation (name, status, theme_slot_id)
+                    VALUES (?, ?, ?)
+                    """, new String[]{"id"});
+            ps.setString(1, name);
+            ps.setString(2, status);
+            ps.setLong(3, themeSlotId);
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -72,6 +109,40 @@ class ReservationServiceTransactionTest {
                         WHERE id = ?
                         """,
                 Boolean.class,
+                themeSlotId
+        );
+    }
+
+    private long findThemeSlotId(long reservationId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT theme_slot_id
+                        FROM reservation
+                        WHERE id = ?
+                        """,
+                Long.class,
+                reservationId
+        );
+    }
+
+    private String findStatus(long reservationId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT status
+                        FROM reservation
+                        WHERE id = ?
+                        """,
+                String.class,
+                reservationId
+        );
+    }
+
+    private int countConfirmedReservations(long themeSlotId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT COUNT(*)
+                        FROM reservation
+                        WHERE theme_slot_id = ?
+                        AND status = 'CONFIRMED'
+                        """,
+                Integer.class,
                 themeSlotId
         );
     }
