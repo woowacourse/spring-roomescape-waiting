@@ -1,6 +1,5 @@
 package roomescape.domain.reservation;
 
-import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 
 import java.util.Optional;

@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,7 +10,6 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -19,7 +17,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (resultSet, rowNum) ->
             ReservationTime.load(resultSet.getLong("id"), resultSet.getTime("start_at").toLocalTime());
 
-    private static final String BASE_SELECT= "select id, start_at from reservation_time";
+    private static final String BASE_SELECT = "select id, start_at from reservation_time";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;

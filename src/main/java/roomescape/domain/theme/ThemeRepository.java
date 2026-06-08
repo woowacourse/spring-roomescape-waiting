@@ -1,6 +1,5 @@
 package roomescape.domain.theme;
 
-import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 
 import java.time.LocalDate;

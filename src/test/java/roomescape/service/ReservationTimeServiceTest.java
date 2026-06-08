@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.RoomEscapeException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.SlotRepository;
 
@@ -29,14 +29,13 @@ public class ReservationTimeServiceTest {
 
     @Mock
     private SlotRepository slotRepository;
+    @InjectMocks
+    private ReservationTimeService reservationTimeService;
 
     private void givenNow(LocalDateTime dateTime) {
         given(clock.instant()).willReturn(dateTime.toInstant(ZoneOffset.UTC));
         given(clock.getZone()).willReturn(ZoneOffset.UTC);
     }
-
-    @InjectMocks
-    private ReservationTimeService reservationTimeService;
 
     @Test
     void 정상적인_시간_삭제는_성공해야_한다() {
