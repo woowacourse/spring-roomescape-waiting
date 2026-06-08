@@ -1,15 +1,22 @@
 package roomescape.reservation.application.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.global.RoomEscapeException;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.WaitingQueryResult;
+import roomescape.reservation.application.event.ReservationScheduleVacatedEvent;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
 
@@ -19,6 +26,7 @@ import roomescape.reservation.domain.repository.dto.WaitingDetail;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
     @Transactional(readOnly = true)
     public List<WaitingQueryResult> findAllByName(String name) {
@@ -40,16 +48,27 @@ public class WaitingService {
         return waitingRepository.delete(id);
     }
 
-    public Optional<Waiting> findOldestByReservation(Reservation reservation) {
-        return waitingRepository.findOldestByDateAndThemeIdAndTimeId(
-                reservation.getDate(),
-                reservation.getThemeId(),
-                reservation.getTimeId()
-        );
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void promoteOldestWaiting(ReservationScheduleVacatedEvent event) {
+        waitingRepository.findOldestByDateAndThemeIdAndTimeId(
+                        event.date(),
+                        event.themeId(),
+                        event.timeId()
+                )
+                .ifPresent(this::promote);
     }
 
-    public int delete(Long id) {
-        return waitingRepository.delete(id);
+    private void promote(Waiting waiting) {
+        Reservation reservation = Reservation.builder()
+                .name(waiting.getName())
+                .date(waiting.getDate())
+                .themeId(waiting.getThemeId())
+                .timeId(waiting.getTimeId())
+                .build();
+
+        reservationRepository.save(reservation);
+        waitingRepository.delete(waiting.getId());
     }
 
     private WaitingDetail getWaitingDetail(Long id) {

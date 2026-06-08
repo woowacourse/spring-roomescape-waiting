@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.application.event.ReservationScheduleVacatedEvent;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
@@ -30,6 +32,7 @@ public class ReservationService {
     private final WaitingService waitingService;
     private final ThemeService themeService;
     private final ReservationTimeService timeService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<ReservationQueryResult> findAll() {
@@ -69,6 +72,49 @@ public class ReservationService {
         return ReservationQueryResult.from(reservationRepository.save(reservation), themeQueryResult, timeQueryResult);
     }
 
+    public ReservationQueryResult update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
+        ReservationDetail reservationDetail = getReservationDetail(request.id());
+        Reservation reservation = toReservation(reservationDetail);
+        validateOwner(request.name(), reservation);
+        validateReservationNotPast(reservationDetail, currentDateTime);
+
+        ReservationTimeQueryResult timeQueryResult = timeService.findById(request.timeId());
+        validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
+        validateDuplicateReservation(request, reservation);
+
+        if (isSameSchedule(request, reservation)) {
+            return toQueryResult(reservation);
+        }
+
+        ReservationQueryResult updatedReservation = updateReservation(request, reservation);
+        eventPublisher.publishEvent(new ReservationScheduleVacatedEvent(
+                reservation.getDate(),
+                reservation.getThemeId(),
+                reservation.getTimeId()
+        ));
+
+        return updatedReservation;
+    }
+
+    public int delete(Long id, String name, LocalDateTime currentDateTime) {
+        ReservationDetail reservationDetail = getReservationDetail(id);
+        Reservation reservation = toReservation(reservationDetail);
+        validateOwner(name, reservation);
+        validateReservationNotPast(reservationDetail, currentDateTime);
+
+        int deletedCount = reservationRepository.delete(id);
+
+        if (deletedCount > 0) {
+            eventPublisher.publishEvent(new ReservationScheduleVacatedEvent(
+                    reservation.getDate(),
+                    reservation.getThemeId(),
+                    reservation.getTimeId()
+            ));
+        }
+
+        return deletedCount;
+    }
+
     private void validateDuplicateReservationWaiting(ReservationCreateCommand request) {
         boolean alreadyReservedBySameName = reservationRepository.existsByNameAndDateAndThemeAndTime(
                 request.name(),
@@ -82,34 +128,6 @@ public class ReservationService {
         }
     }
 
-    public ReservationQueryResult update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
-        ReservationDetail reservationDetail = getReservationDetail(request.id());
-        Reservation reservation = toReservation(reservationDetail);
-        validateOwner(request.name(), reservation);
-        validateReservationNotPast(reservationDetail, currentDateTime);
-
-        ReservationTimeQueryResult timeQueryResult = timeService.findById(request.timeId());
-        validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
-        validateDuplicateReservation(request, reservation);
-
-        if (isSameSchedule(request, reservation)) {
-            return updateReservation(request, reservation);
-        }
-
-        return waitingService.findOldestByReservation(reservation)
-                .map(waiting -> updateWithWaiting(request, reservation, waiting))
-                .orElseGet(() -> updateReservation(request, reservation));
-    }
-
-    private ReservationQueryResult updateWithWaiting(ReservationUpdateCommand request, Reservation reservation, Waiting waiting) {
-        reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
-        waitingService.delete(waiting.getId());
-
-        Reservation movedReservation = reservation.update(request.date(), request.timeId());
-        Reservation savedReservation = reservationRepository.save(movedReservation);
-        return toQueryResult(savedReservation);
-    }
-
     private ReservationQueryResult updateReservation(ReservationUpdateCommand request, Reservation reservation) {
         Reservation updatedReservation = reservation.update(request.date(), request.timeId());
         Reservation savedReservation = reservationRepository.update(updatedReservation);
@@ -119,20 +137,6 @@ public class ReservationService {
     private boolean isSameSchedule(ReservationUpdateCommand request, Reservation reservation) {
         return reservation.getDate().equals(request.date())
                 && reservation.getTimeId().equals(request.timeId());
-    }
-
-    public int delete(Long id, String name, LocalDateTime currentDateTime) {
-        ReservationDetail reservationDetail = getReservationDetail(id);
-        Reservation reservation = toReservation(reservationDetail);
-        validateOwner(name, reservation);
-        validateReservationNotPast(reservationDetail, currentDateTime);
-
-        return waitingService.findOldestByReservation(reservation)
-                .map(waiting -> {
-                    reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
-                    return waitingService.delete(waiting.getId());
-                })
-                .orElseGet(() -> reservationRepository.delete(id));
     }
 
     private ReservationDetail getReservationDetail(Long id) {
