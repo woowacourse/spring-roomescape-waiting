@@ -13,7 +13,12 @@ java {
 }
 
 repositories {
+    maven { url 'https://jitpack.io' }
     mavenCentral()
+}
+
+dependencies {
+    implementation 'com.github.Uechann:my-sql-logger:v1.0.1'
 }
 
 dependencies {

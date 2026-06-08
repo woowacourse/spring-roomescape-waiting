@@ -101,6 +101,19 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
+    public Optional<Reservation> findBySlotForUpdate(ReservationSlot slot) {
+        String sql = baseSelectSql() + """
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?
+                FOR UPDATE
+                """;
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER,
+                    slot.getDate(), slot.getTime().getId(), slot.getTheme().getId()));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
     public boolean existsBySlot(ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0
@@ -108,6 +121,15 @@ public class ReservationDao {
                 WHERE date = ? AND time_id = ? AND theme_id = ?""";
         return jdbcTemplate.queryForObject(sql, Boolean.class,
                 slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
+    }
+
+    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+        String sql = """
+                SELECT COUNT(*) > 0
+                FROM reservation
+                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?""";
+        return jdbcTemplate.queryForObject(sql, Boolean.class,
+                name, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
     public boolean existsDuplicateExcluding(ReservationSlot slot, long reservationId) {

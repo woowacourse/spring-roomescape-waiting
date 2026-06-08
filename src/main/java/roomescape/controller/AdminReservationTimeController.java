@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.command.ReservationTimeCommand;
+import roomescape.dto.command.CreateReservationTimeCommand;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
@@ -28,14 +28,14 @@ public class AdminReservationTimeController {
     @PostMapping
     public ResponseEntity<CreateReservationTimeResponse> addReservationTime(
             @Valid @RequestBody ReservationTimeRequest request) {
-        ReservationTimeCommand command = new ReservationTimeCommand(request.startAt());
-        CreateReservationTimeResponse response = reservationTimeService.addReservationTime(command);
+        CreateReservationTimeCommand command = new CreateReservationTimeCommand(request.startAt());
+        CreateReservationTimeResponse response = reservationTimeService.createReservationTime(command);
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }
 
     @DeleteMapping("/{timeId}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable("timeId") long reservationTimeId) {
+    public ResponseEntity<Void> deleteReservationTime(@PathVariable("timeId") Long reservationTimeId) {
         reservationTimeService.deleteReservationTime(reservationTimeId);
         return ResponseEntity.noContent()
                 .build();

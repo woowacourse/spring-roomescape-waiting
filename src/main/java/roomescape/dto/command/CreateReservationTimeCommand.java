@@ -2,7 +2,7 @@ package roomescape.dto.command;
 
 import java.time.LocalTime;
 
-public record ReservationTimeCommand(
+public record CreateReservationTimeCommand(
         LocalTime startAt
 ) {
 }

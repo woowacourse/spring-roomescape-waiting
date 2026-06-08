@@ -10,6 +10,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.ThemeDao;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -20,6 +21,7 @@ import roomescape.dto.response.ReservationWaitingResponse;
 import java.time.LocalDateTime;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
     private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -34,20 +36,29 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
+    public ReservationWaitingResponse createReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);
 
-        validateReservationExists(slot);
         validateUniqueReservationWaiting(command.name(), slot);
+        validateAlreadyReservationInSlot(command.name(), slot);
         validatePastDatetime(slot, now);
+        lockReservationForSlot(slot);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot);
         ReservationWaiting savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
 
         int order = reservationWaitingDao.countOrder(slot, savedReservationWaiting.getId());
         return ReservationWaitingResponse.from(savedReservationWaiting, order);
+    }
+
+    @Transactional
+    public void promoteFirstWaiting(ReservationSlot slot) {
+        reservationWaitingDao.selectFirstBySlot(slot).ifPresent(waiting -> {
+            reservationDao.insert(Reservation.createWithoutId(waiting.getName(), slot));
+            reservationWaitingDao.delete(waiting.getId());
+        });
     }
 
     @Transactional
@@ -68,17 +79,22 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
-    private void validateReservationExists(ReservationSlot slot) {
-        boolean exists = reservationDao.existsBySlot(slot);
-        if (!exists) {
-            throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND);
-        }
+    private void lockReservationForSlot(ReservationSlot slot) {
+        reservationDao.findBySlotForUpdate(slot)
+                .orElseThrow(() -> new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void validateUniqueReservationWaiting(String name, ReservationSlot slot) {
         boolean exists = reservationWaitingDao.existsByNameAndSlot(name, slot);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
+        }
+    }
+
+    private void validateAlreadyReservationInSlot(String name, ReservationSlot slot) {
+        boolean exists = reservationDao.existsByNameAndSlot(name, slot);
+        if (exists) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 

@@ -1,9 +1,20 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
@@ -20,16 +31,12 @@ import roomescape.domain.ReservationTime;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
 class ReservationServiceTest {
+
+    @Autowired
+    private DatabaseInitializer databaseInitializer;
 
     @Autowired
     private ReservationService reservationService;
@@ -46,6 +53,11 @@ class ReservationServiceTest {
     @Autowired
     private ReservationWaitingDao waitingDao;
 
+    @BeforeEach
+    void setUp() {
+        databaseInitializer.clear();
+    }
+
     @Test
     void 예약을_추가한다() {
         ReservationTime time = saveTime(10, 0);
@@ -54,7 +66,7 @@ class ReservationServiceTest {
                 "브라운", LocalDate.now().plusDays(1), time.getId(), theme.getId()
         );
 
-        ReservationResponse response = reservationService.addReservation(command, LocalDateTime.now());
+        ReservationResponse response = reservationService.createReservation(command, LocalDateTime.now());
 
         assertThat(response)
                 .extracting(ReservationResponse::name, ReservationResponse::date)
@@ -62,29 +74,33 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 존재하지_않는_시간으로_예약하면_예외가_발생한다() {
+    void 존재하지_않는_시간으로_예약하면_404를_반환한다() {
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationCommand command = new CreateReservationCommand(
                 "브라운", LocalDate.now().plusDays(1), 999L, theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
-    void 존재하지_않는_테마로_예약하면_예외가_발생한다() {
+    void 존재하지_않는_테마로_예약하면_404를_반환한다() {
         ReservationTime time = saveTime(10, 0);
         CreateReservationCommand command = new CreateReservationCommand(
                 "브라운", LocalDate.now().plusDays(1), time.getId(), 999L
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
-    void 중복_예약을_하면_예외가_발생한다() {
+    void 중복_예약을_하면_409를_반환한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.now().plusDays(1);
@@ -94,20 +110,24 @@ class ReservationServiceTest {
                 "브라운", date, time.getId(), theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.CONFLICT));
     }
 
     @Test
-    void 지나간_날짜로_예약하면_예외가_발생한다() {
+    void 지나간_날짜로_예약하면_422를_반환한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationCommand command = new CreateReservationCommand(
                 "브라운", LocalDate.now().minusDays(1), time.getId(), theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY));
     }
 
     @Test
@@ -166,18 +186,20 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 존재하지_않는_예약을_변경하면_예외가_발생한다() {
+    void 존재하지_않는_예약을_변경하면_404를_반환한다() {
         ReservationTime time = saveTime(10, 0);
         UpdateReservationCommand command = new UpdateReservationCommand(
                 LocalDate.now().plusDays(1), time.getId()
         );
 
         assertThatThrownBy(() -> reservationService.update(999L, command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
-    void 지나간_날짜로_변경하면_예외가_발생한다() {
+    void 지나간_날짜로_변경하면_422를_반환한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         Reservation saved = saveReservation("브라운", LocalDate.now().plusDays(1), time, theme);
@@ -186,11 +208,13 @@ class ReservationServiceTest {
         );
 
         assertThatThrownBy(() -> reservationService.update(saved.getId(), command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY));
     }
 
     @Test
-    void 중복된_날짜_시간으로_변경하면_예외가_발생한다() {
+    void 중복된_날짜_시간으로_변경하면_409를_반환한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.now().plusDays(1);
@@ -199,7 +223,9 @@ class ReservationServiceTest {
         UpdateReservationCommand command = new UpdateReservationCommand(date, time.getId());
 
         assertThatThrownBy(() -> reservationService.update(saved.getId(), command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.CONFLICT));
     }
 
     @Test
@@ -212,9 +238,69 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 존재하지_않는_예약을_삭제하면_예외가_발생한다() {
+    void 존재하지_않는_예약을_삭제하면_404를_반환한다() {
         assertThatThrownBy(() -> reservationService.delete(999L))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
+    @Test
+    void 예약_취소_시_대기자가_자동으로_예약으로_승격된다() {
+        // given
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        waitingDao.insert(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
+                new ReservationSlot(date, time, theme)));
+
+        // when
+        reservationService.delete(reservation.getId());
+
+        // then
+        assertThat(reservationDao.selectByName("로지")).hasSize(1);
+        assertThat(waitingDao.select()).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_시_대기자가_없으면_예약만_삭제된다() {
+        // given
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = saveReservation("브라운", LocalDate.now().plusDays(1), time, theme);
+
+        // when
+        reservationService.delete(reservation.getId());
+
+        // then
+        assertThat(reservationDao.select()).isEmpty();
+        assertThat(waitingDao.select()).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_시_첫번째_대기자가_승격되어_남은_대기자_순번이_재정렬된다() {
+        // given
+        // 예약 1개
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+
+        // 대기 2명 (로지 1번, 맥스 2번)
+        waitingDao.insert(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), slot));
+        ReservationWaiting maxsWaiting = waitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now().plusSeconds(1), slot));
+
+        // when
+        // 예약 취소 및 대기 1번 자동 승격
+        reservationService.delete(reservation.getId());
+
+        // then
+        // 맥스 1번 대기로 재정렬
+        assertThat(reservationDao.selectByName("로지")).hasSize(1);
+        assertThat(waitingDao.countOrder(slot, maxsWaiting.getId())).isEqualTo(1);
     }
 
     private ReservationTime saveTime(int hour, int minute) {

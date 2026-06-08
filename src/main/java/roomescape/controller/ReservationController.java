@@ -27,12 +27,12 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(
+    public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request) {
         CreateReservationCommand command = new CreateReservationCommand(
                 request.name(), request.date(), request.timeId(), request.themeId()
         );
-        ReservationResponse response = reservationService.addReservation(command, LocalDateTime.now());
+        ReservationResponse response = reservationService.createReservation(command, LocalDateTime.now());
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }

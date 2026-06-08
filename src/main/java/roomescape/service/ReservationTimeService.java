@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -10,12 +13,9 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.command.ReservationTimeCommand;
+import roomescape.dto.command.CreateReservationTimeCommand;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,7 +32,7 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public CreateReservationTimeResponse addReservationTime(ReservationTimeCommand command) {
+    public CreateReservationTimeResponse createReservationTime(CreateReservationTimeCommand command) {
         ReservationTime reservationTime = ReservationTime.createWithoutId(command.startAt());
         ReservationTime newReservationTime = reservationTimeDao.insert(reservationTime);
         return CreateReservationTimeResponse.from(newReservationTime);
@@ -70,7 +70,7 @@ public class ReservationTimeService {
     private void validateTimeIncludeReservation(long reservationTimeId) {
         boolean existsByTimeId = reservationDao.existsByTimeId(reservationTimeId);
         if (existsByTimeId) {
-            throw new RoomEscapeException(ThemeErrorCode.THEME_CANNOT_DELETE);
+            throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_CANNOT_DELETE);
         }
     }
 }
