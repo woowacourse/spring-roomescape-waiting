@@ -2,6 +2,10 @@ package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.never;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,6 +13,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
@@ -24,20 +31,20 @@ import roomescape.reservationTime.fake.FakeReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
-import roomescape.waiting.application.WaitingReference;
 import roomescape.waiting.application.WaitingService;
-import roomescape.waiting.application.WaitingValidator;
-import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
+@ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
     private WaitingRepository waitingRepository;
+    @Mock
+    private WaitingService waitingService;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -46,27 +53,6 @@ class ReservationServiceTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         waitingRepository = new FakeWaitingRepository();
-        WaitingService waitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                        reservationRepository.save(Reservation.create(
-                                waiting.getName(),
-                                waiting.getDate(),
-                                waiting.getTime(),
-                                waiting.getTheme()
-                        ));
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
@@ -210,7 +196,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 1순위 대기를 예약으로 전환한다")
+    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 다음 대기 승격을 요청한다")
     void deleteReservation_success_when_first_waiting_exists() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
@@ -222,7 +208,7 @@ class ReservationServiceTest {
                 savedTime,
                 savedTheme
         ));
-        Waiting savedWaiting = waitingRepository.save(Waiting.create(
+        waitingRepository.save(Waiting.create(
                 "브라운",
                 date,
                 savedTime,
@@ -233,13 +219,8 @@ class ReservationServiceTest {
         reservationService.deleteReservation(savedReservation.getId());
 
         // then
-        Reservation promotedReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
-                date,
-                savedTime.getId(),
-                savedTheme.getId()
-        ).orElseThrow();
-        assertThat(promotedReservation.getName()).isEqualTo("브라운");
-        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        then(waitingService).should().promoteNextWaiting(date, savedTime, savedTheme);
     }
 
     @Test
@@ -270,30 +251,9 @@ class ReservationServiceTest {
                 savedTime,
                 savedTheme
         ));
-        WaitingService failingWaitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                        throw new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST);
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                waitingRepository,
-                new ReservationValidator(reservationRepository),
-                failingWaitingService
-        );
+        willThrow(new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST))
+                .given(waitingService)
+                .promoteNextWaiting(date, savedTime, savedTheme);
 
         // when
         reservationService.deleteReservation(savedReservation.getId());
@@ -373,7 +333,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 변경 시 기존 예약 시간의 1순위 대기를 예약으로 전환한다")
+    @DisplayName("예약 변경 시 기존 예약 시간의 다음 대기 승격을 요청한다")
     void updateReservationSchedule_success_when_first_waiting_exists() {
         // given
         ReservationTime savedTime1 = reservationTimeRepository.save(
@@ -394,7 +354,7 @@ class ReservationServiceTest {
                         savedTheme
                 )
         );
-        Waiting savedWaiting = waitingRepository.save(
+        waitingRepository.save(
                 Waiting.create("브라운", date, savedTime1, savedTheme)
         );
 
@@ -407,13 +367,10 @@ class ReservationServiceTest {
         ));
 
         // then
-        Reservation promotedReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
-                date,
-                savedTime1.getId(),
-                savedTheme.getId()
-        ).orElseThrow();
-        assertThat(promotedReservation.getName()).isEqualTo("브라운");
-        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        Reservation updatedReservation = reservationRepository.findById(savedReservation.getId())
+                .orElseThrow();
+        assertThat(updatedReservation.getTime().getId()).isEqualTo(savedTime2.getId());
+        then(waitingService).should().promoteNextWaiting(date, savedTime1, savedTheme);
     }
 
     @Test
@@ -444,30 +401,9 @@ class ReservationServiceTest {
                 savedTime1,
                 savedTheme
         ));
-        WaitingService failingWaitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                        throw new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST);
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                waitingRepository,
-                new ReservationValidator(reservationRepository),
-                failingWaitingService
-        );
+        willThrow(new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST))
+                .given(waitingService)
+                .promoteNextWaiting(date, savedTime1, savedTheme);
 
         // when
         reservationService.updateReservationSchedule(new ReservationUpdateCommand(
@@ -517,6 +453,7 @@ class ReservationServiceTest {
         // then
         assertThat(reservationRepository.findAll()).containsExactly(savedReservation);
         assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+        then(waitingService).should(never()).promoteNextWaiting(any(), any(), any());
     }
 
     @Test
@@ -591,7 +528,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 취소 시 같은 슬롯의 1순위 대기를 예약으로 전환한다")
+    @DisplayName("예약 취소 시 같은 슬롯의 다음 대기 승격을 요청한다")
     void cancelReservation_success_when_first_waiting_exists() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
@@ -603,7 +540,7 @@ class ReservationServiceTest {
                 savedTime,
                 savedTheme
         ));
-        Waiting savedWaiting = waitingRepository.save(Waiting.create(
+        waitingRepository.save(Waiting.create(
                 "브라운",
                 date,
                 savedTime,
@@ -614,13 +551,8 @@ class ReservationServiceTest {
         reservationService.cancelReservation(savedReservation.getId(), "인직");
 
         // then
-        Reservation promotedReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
-                date,
-                savedTime.getId(),
-                savedTheme.getId()
-        ).orElseThrow();
-        assertThat(promotedReservation.getName()).isEqualTo("브라운");
-        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        then(waitingService).should().promoteNextWaiting(date, savedTime, savedTheme);
     }
 
     @Test
@@ -642,30 +574,9 @@ class ReservationServiceTest {
                 savedTime,
                 savedTheme
         ));
-        WaitingService failingWaitingService = new WaitingService(
-                waitingRepository,
-                reservationTimeRepository,
-                themeRepository,
-                new WaitingReference() {
-                    @Override
-                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-                    }
-
-                    @Override
-                    public void promoteToReservation(Waiting waiting) {
-                        throw new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST);
-                    }
-                },
-                new WaitingValidator(waitingRepository)
-        );
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                waitingRepository,
-                new ReservationValidator(reservationRepository),
-                failingWaitingService
-        );
+        willThrow(new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST))
+                .given(waitingService)
+                .promoteNextWaiting(date, savedTime, savedTheme);
 
         // when
         reservationService.cancelReservation(savedReservation.getId(), "인직");
