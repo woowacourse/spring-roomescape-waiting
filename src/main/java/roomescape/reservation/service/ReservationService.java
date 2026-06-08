@@ -27,6 +27,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.controller.dto.response.ThemeResponse;
+import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.controller.dto.response.WaitingResponse;
 
@@ -187,11 +189,40 @@ public class ReservationService {
 
     private void deleteReservationAndPromoteWaiting(final Reservation reservation) {
         try {
-            reservationSlotRepository.deleteReservationAndPromoteWaiting(reservation);
+            final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(reservation.getSlotId())
+                    .orElseThrow(ReservationNotFoundException::new);
+
+            deleteReservation(reservation, slot);
+            waitingRepository.findEarliestBySlotId(slot.getId())
+                    .ifPresent(this::promoteWaiting);
         } catch (DuplicateKeyException exception) {
             throw new ReservationAlreadyExistsException(exception);
         } catch (DataIntegrityViolationException exception) {
             throw new ReservationOptionChangedException(exception);
+        }
+    }
+
+    private void deleteReservation(final Reservation reservation, final ReservationSlot slot) {
+        if (!reservationRepository.deleteByIdAndSlotId(reservation.getId(), slot.getId())) {
+            throw new ReservationNotFoundException();
+        }
+    }
+
+    private void promoteWaiting(final Waiting waiting) {
+        final Reservation promotedReservation = Reservation.of(
+                null,
+                waiting.getCustomerName().name(),
+                waiting.getCustomerEmail(),
+                waiting.getSlot()
+        );
+
+        saveReservation(promotedReservation);
+        deletePromotedWaiting(waiting);
+    }
+
+    private void deletePromotedWaiting(final Waiting waiting) {
+        if (!waitingRepository.deleteById(waiting.getId())) {
+            throw new WaitingNotFoundException();
         }
     }
 

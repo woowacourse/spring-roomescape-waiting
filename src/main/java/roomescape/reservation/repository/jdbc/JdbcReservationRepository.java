@@ -154,6 +154,16 @@ public class JdbcReservationRepository implements ReservationRepository {
         return hasUpdatedReservation(updatedCount);
     }
 
+    @Override
+    public boolean deleteByIdAndSlotId(final Long reservationId, final Long slotId) {
+        final String sql = """
+                DELETE FROM reservation
+                WHERE id = ? AND slot_id = ?
+                """;
+
+        return jdbcTemplate.update(sql, reservationId, slotId) > 0;
+    }
+
     private static boolean hasUpdatedReservation(final int updatedCount) {
         return updatedCount > 0;
     }

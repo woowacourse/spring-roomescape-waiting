@@ -1,13 +1,9 @@
 package roomescape.reservationslot.service.support;
 
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationNotFoundException;
-import roomescape.reservation.service.support.FakeReservationRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.repository.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.wating.service.support.FakeWaitingRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,16 +14,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
 
     private long nextId = 1L;
     private final List<ReservationSlot> slots = new ArrayList<>();
-    private final FakeReservationRepository reservationRepository;
-    private final FakeWaitingRepository waitingRepository;
-
-    public FakeReservationSlotRepository(
-            final FakeReservationRepository reservationRepository,
-            final FakeWaitingRepository waitingRepository
-    ) {
-        this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
-    }
 
     @Override
     public ReservationSlot findOrCreate(final LocalDate date, final ReservationTime time, final Theme theme) {
@@ -66,24 +52,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
         return slots.stream()
                 .filter(slot -> slot.getId().equals(slotId))
                 .findFirst();
-    }
-
-    @Override
-    public void deleteReservationAndPromoteWaiting(final Reservation reservation) {
-        if (!reservationRepository.removeById(reservation.getId())) {
-            throw new ReservationNotFoundException();
-        }
-
-        waitingRepository.findEarliestBySlotId(reservation.getSlotId())
-                .ifPresent(waiting -> {
-                    waitingRepository.deleteById(waiting.getId());
-                    reservationRepository.save(Reservation.of(
-                            null,
-                            waiting.getCustomerName().name(),
-                            waiting.getCustomerEmail(),
-                            waiting.getSlot()
-                    ));
-                });
     }
 
     public void add(final ReservationSlot slot) {

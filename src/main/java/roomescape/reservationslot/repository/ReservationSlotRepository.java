@@ -1,6 +1,5 @@
 package roomescape.reservationslot.repository;
 
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -17,6 +16,4 @@ public interface ReservationSlotRepository {
     Optional<ReservationSlot> findByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId);
 
     Optional<ReservationSlot> findByIdForUpdate(Long slotId);
-
-    void deleteReservationAndPromoteWaiting(Reservation reservation);
 }

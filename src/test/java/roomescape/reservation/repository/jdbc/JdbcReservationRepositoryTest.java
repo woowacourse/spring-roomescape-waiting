@@ -192,6 +192,36 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("예약을 id와 슬롯 id로 삭제한다")
+    void deleteReservationByIdAndSlotId() {
+        insertReservationTime("10:00");
+        insertTheme("링", "공포 테마", "http:~");
+        Long slotId = insertReservation("브라운", "2026-08-05", 1L, 1L);
+
+        boolean deleted = reservationRepository.deleteByIdAndSlotId(1L, slotId);
+
+        Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+        assertThat(deleted).isTrue();
+        assertThat(reservationCount).isZero();
+    }
+
+    @Test
+    @DisplayName("예약 id와 슬롯 id가 함께 일치하지 않으면 삭제하지 않는다")
+    void returnFalseWhenDeletingReservationWithDifferentSlotId() {
+        insertReservationTime("10:00");
+        insertReservationTime("11:00");
+        insertTheme("링", "공포 테마", "http:~");
+        insertReservation("브라운", "2026-08-05", 1L, 1L);
+        Long otherSlotId = insertReservationSlot("2026-08-05", 2L, 1L);
+
+        boolean deleted = reservationRepository.deleteByIdAndSlotId(1L, otherSlotId);
+
+        Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+        assertThat(deleted).isFalse();
+        assertThat(reservationCount).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("예약자 이름으로 예약 목록을 조회한다")
     void findReservationsByCustomerName() {
         insertReservationTime("10:00");
@@ -247,7 +277,7 @@ class JdbcReservationRepositoryTest {
         );
     }
 
-    private void insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
+    private Long insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
                 "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
@@ -255,6 +285,7 @@ class JdbcReservationRepositoryTest {
                 "customer@example.com",
                 slotId
         );
+        return slotId;
     }
 
     private Long insertReservationSlot(final String date, final Long timeId, final Long themeId) {

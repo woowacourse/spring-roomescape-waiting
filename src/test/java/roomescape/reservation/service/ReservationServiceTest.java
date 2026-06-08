@@ -17,6 +17,7 @@ import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.service.support.FakeReservationRepository;
 import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.service.support.FakeReservationSlotRepository;
 import roomescape.theme.service.support.FakeThemeRepository;
 import roomescape.wating.domain.Waiting;
@@ -45,7 +46,7 @@ class ReservationServiceTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         waitingRepository = new FakeWaitingRepository();
-        reservationSlotRepository = new FakeReservationSlotRepository(reservationRepository, waitingRepository);
+        reservationSlotRepository = new FakeReservationSlotRepository();
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
@@ -416,13 +417,14 @@ class ReservationServiceTest {
     void adminCanCancelReservationOnReservationDate() {
         // given
         final LocalDate today = LocalDate.now();
+        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
+        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final ReservationSlot slot = addReservationSlot(1L, today, time, theme);
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
                 "customer@example.com",
-                today,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
+                slot
         ));
 
         // when
@@ -487,11 +489,12 @@ class ReservationServiceTest {
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationSlot slot = addReservationSlot(1L, futureDate, time, theme);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", futureDate, time, theme));
+        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", slot));
 
-        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", slot, NOW.minusMinutes(2)));
+        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", slot, NOW.minusMinutes(1)));
 
         // when
         reservationService.cancelByCustomer(1L, "브라운", "customer@example.com");
@@ -507,11 +510,12 @@ class ReservationServiceTest {
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationSlot slot = addReservationSlot(1L, futureDate, time, theme);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", futureDate, time, theme));
+        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", slot));
 
-        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(1L, "코로구", "customer@example.com", slot, NOW));
+        waitingRepository.add(Waiting.of(2L, "재키", "customer@example.com", slot, NOW));
 
         // when
         reservationService.cancelByCustomer(1L, "브라운", "customer@example.com");
@@ -527,8 +531,9 @@ class ReservationServiceTest {
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
         final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationSlot slot = addReservationSlot(1L, futureDate, time, theme);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", futureDate, time, theme));
+        reservationRepository.add(Reservation.of(1L, "브라운", "customer@example.com", slot));
 
         // when
         reservationService.cancelByCustomer(1L, "브라운", "customer@example.com");
@@ -537,4 +542,14 @@ class ReservationServiceTest {
         assertThat(reservationRepository.findById(1L)).isEmpty();
     }
 
+    private ReservationSlot addReservationSlot(
+            final Long slotId,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        final ReservationSlot slot = ReservationSlot.of(slotId, date, time, theme);
+        reservationSlotRepository.add(slot);
+        return slot;
+    }
 }
