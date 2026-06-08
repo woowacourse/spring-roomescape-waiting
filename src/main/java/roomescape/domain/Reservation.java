@@ -40,7 +40,11 @@ public class Reservation {
         return new Reservation(this.id, this.name, updateSlot, this.createdAt, this.status);
     }
 
-    public void validateCancelable(LocalDateTime now) {
+    public void cancel(LocalDateTime now) {
+        validateCancelable(now);
+    }
+
+    private void validateCancelable(LocalDateTime now) {
         LocalDateTime cancelLimitTime = LocalDateTime.of(slot.getDate(), slot.getTimeSlot().getStartAt())
                 .minusHours(CANCEL_DEADLINE_HOURS);
 

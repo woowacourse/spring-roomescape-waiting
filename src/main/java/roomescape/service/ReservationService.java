@@ -124,7 +124,7 @@ public class ReservationService {
     private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,
                                                     LocalDateTime requestTime) {
         validateReservationOwner(reservation, requestName);
-        reservation.validateCancelable(requestTime);
+        reservation.cancel(requestTime);
 
         ReservationSlot lockedSlot = findLockedReservationSlot(reservation.getSlot());
 
