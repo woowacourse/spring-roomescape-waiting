@@ -61,6 +61,7 @@ erDiagram
         DATE reservation_date "예약 날짜"
         BIGINT time_id FK
         BIGINT theme_id FK
+        TIMESTAMP updated_at "갱신 일시"
     }
     
     reservation_waiting {
@@ -69,6 +70,7 @@ erDiagram
         DATE reservation_date "예약 날짜"
         BIGINT time_id FK
         BIGINT theme_id FK
+        TIMESTAMP updated_at "갱신 일시"
     }
 
     theme ||--o{ reservation : "has"
@@ -82,8 +84,9 @@ erDiagram
 * **예약(`reservation`)과 대기(`reservation_waiting`)의 분리**:
   예약(확정된 거래)과 대기(대기 열 데이터)는 데이터의 변경 주기, 라이프사이클 및 업무적 성격이 완전히 다르므로 테이블을 물리적으로 분리하여 무결성을 보호하고 비즈니스 흐름을 격리함.
 * **대기 순번 정렬 및 비관적 락(`FOR UPDATE`) 적용**:
-  예약 취소에 따른 대기자 자동 승급 시, 먼저 신청한 사람이 안전하게 승급되도록 대기자 조회 쿼리에 `FOR UPDATE` 비관적 락을 걸고 ID 순으로 정렬하여 동시성 레이스 컨디션을 데이터베이스 수준에서 원천 차단함.
-  * **적용 이유**: 대기 순번 정렬 및 비관적 락을 적용한 이유는 데이터베이스 제약 조건(DB Constraint)만으로는 이를 제한할 수 없기 때문임.
+  예약 취소에 따른 대기자 자동 승급 시, 먼저 신청한 사람이 안전하게 승급되도록 대기자 조회 쿼리에 `FOR UPDATE` 비관적 락을 걸고 ID 순으로 정렬하여 동시성 레이스 컨디션을 데이터베이스 수준에서 원천
+  차단함.
+    * **적용 이유**: 대기 순번 정렬 및 비관적 락을 적용한 이유는 데이터베이스 제약 조건(DB Constraint)만으로는 이를 제한할 수 없기 때문임.
 
 ---
 
@@ -111,14 +114,16 @@ erDiagram
 애플리케이션 실행 시 초기 예약, 테마, 시간 등의 예제 데이터를 자동으로 채워 넣고 테스트하고 싶다면 `local` 프로파일을 활성화하여 실행하세요.
 
 **명령어 (CLI):**
+
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
 **IDE (IntelliJ) 설정:**
+
 - Run/Debug Configurations 창을 엽니다.
 - Spring Boot 실행 설정에서 `Active profiles` 칸에 `local`을 입력하고 실행합니다.
 
 > [!WARNING]
-> `local` 프로파일로 실행 시 애플리케이션이 시작될 때 기존 데이터베이스의 **모든 데이터가 삭제되고 예제 데이터로 초기화**됩니다. 실제 서비스 환경이나 데이터 보존이 필요한 환경에서는 절대 사용하지 마세요.
-
+> `local` 프로파일로 실행 시 애플리케이션이 시작될 때 기존 데이터베이스의 **모든 데이터가 삭제되고 예제 데이터로 초기화**됩니다. 실제 서비스 환경이나 데이터 보존이 필요한 환경에서는 절대 사용하지
+> 마세요.
