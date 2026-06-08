@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS store_managers;
 DROP TABLE IF EXISTS reservation;
+DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
 DROP TABLE IF EXISTS store;
@@ -47,22 +48,36 @@ CREATE TABLE reservation_time
     PRIMARY KEY (id)
 );
 
+CREATE TABLE reservation_slot
+(
+    id         BIGINT   NOT NULL AUTO_INCREMENT,
+    date       DATE     NOT NULL,
+    theme_id   BIGINT   NOT NULL,
+    time_id    BIGINT   NOT NULL,
+    store_id   BIGINT   NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (store_id) REFERENCES store (id),
+    UNIQUE (date, theme_id, time_id, store_id)
+);
+
 CREATE TABLE reservation
 (
-    id         BIGINT      NOT NULL AUTO_INCREMENT,
-    user_id    BIGINT      NOT NULL,
-    theme_id   BIGINT,
-    date       DATE        NOT NULL,
-    time_id    BIGINT,
-    store_id   BIGINT      NOT NULL,
-    status     VARCHAR(30) NOT NULL,
-    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id               BIGINT      NOT NULL AUTO_INCREMENT,
+    user_id          BIGINT      NOT NULL,
+    slot_id          BIGINT      NOT NULL,
+    status           VARCHAR(30) NOT NULL,
+    reserved_slot_id BIGINT GENERATED ALWAYS AS (CASE WHEN status = 'RESERVED' THEN slot_id END),
+    created_at       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
-    FOREIGN KEY (store_id) REFERENCES store (id)
+    FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
+    CONSTRAINT unique_reservation UNIQUE (slot_id, user_id),
+    CONSTRAINT unique_reserved_per_slot UNIQUE (reserved_slot_id)
 );
 
 CREATE INDEX idx_reservation_user_id ON reservation (user_id);
@@ -77,6 +92,3 @@ CREATE TABLE store_managers
     FOREIGN KEY (store_id) REFERENCES store (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-ALTER TABLE reservation
-    ADD CONSTRAINT unique_reservation UNIQUE (date, theme_id, time_id, store_id, user_id);

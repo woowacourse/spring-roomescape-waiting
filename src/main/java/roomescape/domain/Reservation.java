@@ -9,40 +9,28 @@ public class Reservation {
 
     private final Long id;
     private final User user;
-    private final Theme theme;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Store store;
+    private final Slot slot;
     private final ReservationStatus status;
 
-    public Reservation(Long id, User user, Theme theme, LocalDate date, ReservationTime time, Store store,
-                       ReservationStatus status) {
-        validate(user, theme, date, time, store, status);
+    public Reservation(Long id, User user, Slot slot, ReservationStatus status) {
+        validate(user, slot, status);
         this.id = id;
         this.user = user;
-        this.theme = theme;
-        this.date = date;
-        this.time = time;
-        this.store = store;
+        this.slot = slot;
         this.status = status;
     }
 
-    private void validate(User user, Theme theme, LocalDate date, ReservationTime time, Store store,
-                          ReservationStatus status) {
+    public Reservation(Long id, User user, Theme theme, LocalDate date, ReservationTime time, Store store,
+                       ReservationStatus status) {
+        this(id, user, new Slot(null, date, theme, time, store), status);
+    }
+
+    private void validate(User user, Slot slot, ReservationStatus status) {
         if (user == null) {
             throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약자는 필수입니다.");
         }
-        if (theme == null) {
-            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "테마는 필수입니다.");
-        }
-        if (date == null) {
-            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 날짜는 필수입니다.");
-        }
-        if (time == null) {
-            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 시간은 필수입니다.");
-        }
-        if (store == null) {
-            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "매장은 필수입니다.");
+        if (slot == null) {
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 슬롯은 필수입니다.");
         }
         if (status == null) {
             throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 상태는 필수입니다.");
@@ -50,13 +38,11 @@ public class Reservation {
     }
 
     public boolean isInPast(LocalDateTime currentDateTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        return reservationDateTime.isBefore(currentDateTime);
+        return slot.isInPast(currentDateTime);
     }
 
     public boolean hasSameSlot(Reservation other) {
-        return date.equals(other.date) && time.getId().equals(other.time.getId()) && theme.getId()
-                .equals(other.theme.getId());
+        return slot.hasSameSlot(other.slot);
     }
 
     public boolean isReserved() {
@@ -68,7 +54,7 @@ public class Reservation {
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, user, theme, date, time, store, status);
+        return new Reservation(id, user, slot, status);
     }
 
     public Long getId() {
@@ -79,20 +65,24 @@ public class Reservation {
         return user;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Store getStore() {
-        return store;
+        return slot.getStore();
     }
 
     public ReservationStatus getStatus() {

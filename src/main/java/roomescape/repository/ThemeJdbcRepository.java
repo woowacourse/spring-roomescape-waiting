@@ -80,7 +80,8 @@ public class ThemeJdbcRepository implements ThemeRepository {
         String sql = """
                 select t.id, t.name, t.description, t.thumbnail_image_url, count(r.id) as reservation_count
                 from theme t
-                join reservation r on t.id = r.theme_id and r.date >= ? and r.date <= ?
+                join reservation_slot rs on t.id = rs.theme_id and rs.date >= ? and rs.date <= ?
+                join reservation r on r.slot_id = rs.id
                 group by t.id
                 order by reservation_count desc, t.id asc
                 limit ?

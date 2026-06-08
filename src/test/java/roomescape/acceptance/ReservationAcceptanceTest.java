@@ -446,7 +446,7 @@ class ReservationAcceptanceTest {
 
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 본인의 예약을 취소한다")
-    void cancelOwnReservation() {
+    void deleteOwnReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
@@ -457,8 +457,35 @@ class ReservationAcceptanceTest {
     }
 
     @Test
+    @DisplayName("POST /reservations/{id}/cancel - 본인 확정 예약을 취소하면 같은 슬롯의 대기가 승격된다")
+    void promotesWaitingWhenOwnReservedIsCanceled() {
+        String date = Fixtures.daysFromNow(1).toString();
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
+                .member("예약자").date(date).save();
+        Scenario.ExistingReservation waiting = Scenario.waitingReservation(jdbcTemplate)
+                .member("대기자").date(date)
+                .onTheme(reserved.themeId()).onTime(reserved.timeId()).onStore(reserved.storeId())
+                .save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, reserved.bearer())
+                .when().post("/reservations/" + reserved.reservationId() + "/cancel")
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, waiting.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", equalTo("대기자"))
+                .body("waitingReservations.size()", is(0));
+    }
+
+    @Test
     @DisplayName("POST /reservations/{id}/cancel - 소유자 불일치면 403과 메시지를 반환한다")
-    void cancelReservationReturns403OnOwnerMismatch() {
+    void deleteReservationReturns403OnOwnerMismatch() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
@@ -471,7 +498,7 @@ class ReservationAcceptanceTest {
 
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 없는 id면 404과 메시지를 반환한다")
-    void cancelReservationReturns404WhenIdDoesNotExist() {
+    void deleteReservationReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
                 .when().post("/reservations/9999/cancel")
@@ -482,7 +509,7 @@ class ReservationAcceptanceTest {
 
     @Test
     @DisplayName("POST /reservations/{id}/cancel - 토큰이 없으면 401과 메시지를 반환한다")
-    void cancelReservationReturns401WithoutToken() {
+    void deleteReservationReturns401WithoutToken() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()

@@ -89,7 +89,7 @@ class AdminThemeControllerTest {
     @Test
     @DisplayName("DELETE /admin/themes - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
     void deleteThemeReturns404OnResourceNotFoundException() throws Exception {
-        org.mockito.BDDMockito.willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", 9999L))
+        org.mockito.BDDMockito.willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마을(를) 찾을 수 없습니다. id=9999"))
                 .given(themeService).deleteTheme(9999L);
 
         mockMvc.perform(delete("/admin/themes/9999"))

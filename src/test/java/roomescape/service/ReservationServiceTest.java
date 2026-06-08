@@ -2,6 +2,7 @@ package roomescape.service;
 
 import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -161,8 +162,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 본인 예약만 반환한다")
-    void getMyReservationsReturnsOnlyOwnReservations() {
+    @DisplayName("getMyReservationStatuses - 본인 예약만 반환한다")
+    void getMyReservationStatusesReturnsOnlyOwnReservations() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -171,15 +172,15 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         saveReservation(other, themeId, timeId, Fixtures.daysFromNow(-5));
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
     }
 
     @Test
-    @DisplayName("getMyReservations - size를 초과하면 hasNext가 true이고 size만큼만 반환한다")
-    void getMyReservationsReturnsOnlySizeWithHasNextWhenExceedingSize() {
+    @DisplayName("getMyReservationStatuses - size를 초과하면 hasNext가 true이고 size만큼만 반환한다")
+    void getMyReservationStatusesReturnsOnlySizeWithHasNextWhenExceedingSize() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -187,8 +188,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-5));
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
-        ReservationWithStatusResponses firstPage = service.getMyReservations(brown, 0, 2);
-        ReservationWithStatusResponses secondPage = service.getMyReservations(brown, 1, 2);
+        ReservationWithStatusResponses firstPage = service.getMyReservationStatuses(brown, 0, 2);
+        ReservationWithStatusResponses secondPage = service.getMyReservationStatuses(brown, 1, 2);
 
         assertThat(firstPage.reservations()).hasSize(2);
         assertThat(firstPage.hasNext()).isTrue();
@@ -197,11 +198,11 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 예약과 대기가 없으면 빈 목록을 반환한다")
-    void getMyReservationsReturnsEmptyWhenNoReservationsOrWaiting() {
+    @DisplayName("getMyReservationStatuses - 예약과 대기가 없으면 빈 목록을 반환한다")
+    void getMyReservationStatusesReturnsEmptyWhenNoReservationsOrWaiting() {
         User brown = member("브라운");
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.reservations()).isEmpty();
         assertThat(responses.waitingReservations()).isEmpty();
@@ -209,8 +210,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 확정은 reservations에, 대기는 waitingReservations에 분리돼 노출된다")
-    void getMyReservationsSeparatesReservedAndWaiting() {
+    @DisplayName("getMyReservationStatuses - 확정은 reservations에, 대기는 waitingReservations에 분리돼 노출된다")
+    void getMyReservationStatusesSeparatesReservedAndWaiting() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -218,7 +219,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservedId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
         long waitingId = saveWaitingReservation(brown, themeId, timeId2, Fixtures.daysFromNow(-5));
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.reservations()).extracting("id").containsExactly(reservedId);
         assertThat(responses.waitingReservations()).extracting("id").containsExactly(waitingId);
@@ -226,8 +227,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("getMyReservations - 대기 순번은 슬롯별로 독립적으로 계산된다")
-    void getMyReservationsCalculatesWaitingOrderPerSlot() {
+    @DisplayName("getMyReservationStatuses - 대기 순번은 슬롯별로 독립적으로 계산된다")
+    void getMyReservationStatusesCalculatesWaitingOrderPerSlot() {
         User brown = member("브라운");
         User charles = member("샤를");
         User aron = member("아론");
@@ -249,7 +250,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         setCreatedAt(slotBAron, "2026-05-01 10:00:00");
         setCreatedAt(slotBBrown, "2026-05-01 11:00:00");
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
+        ReservationWithStatusResponses responses = service.getMyReservationStatuses(brown, 0, 20);
 
         assertThat(responses.waitingReservations()).extracting("id")
                 .containsExactly(slotABrown, slotBBrown);
@@ -281,38 +282,38 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelReservation - 없는 id이면 ResourceNotFoundException")
-    void cancelReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
-        assertThatThrownBy(() -> service.cancelReservation(9999L, manager))
+    @DisplayName("deleteReservation - 없는 id이면 ResourceNotFoundException")
+    void deleteReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
+        assertThatThrownBy(() -> service.deleteReservation(9999L, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
-    @DisplayName("cancelReservation - 취소 후 조회되지 않는다")
-    void cancelReservationMakesReservationUnqueryable() {
+    @DisplayName("deleteReservation - 취소 후 조회되지 않는다")
+    void deleteReservationMakesReservationUnqueryable() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(1));
 
-        service.cancelReservation(reservationId, manager);
+        service.deleteReservation(reservationId, manager);
 
         ReservationResponses responses = service.getReservations(0, 10, null, manager);
         assertThat(responses.reservations()).extracting("id").doesNotContain(reservationId);
     }
 
     @Test
-    @DisplayName("cancelReservation - 담당하지 않는 매장 예약이면 StoreManagementForbiddenException")
-    void cancelReservationThrowsStoreManagementForbiddenExceptionForUnmanagedStore() {
+    @DisplayName("deleteReservation - 담당하지 않는 매장 예약이면 StoreManagementForbiddenException")
+    void deleteReservationThrowsStoreManagementForbiddenExceptionForUnmanagedStore() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         insertOtherStore();
         long reservationId = saveReservationInStore(user, themeId, timeId, Fixtures.daysFromNow(1), OTHER_STORE_ID);
 
-        assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
+        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.STORE_MANAGEMENT_FORBIDDEN);
@@ -320,18 +321,83 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelReservation - 과거 예약이면 PastReservationModificationException")
-    void cancelReservationThrowsPastReservationModificationExceptionWhenPast() {
+    @DisplayName("deleteReservation - 과거 예약이면 PastReservationModificationException")
+    void deleteReservationThrowsPastReservationModificationExceptionWhenPast() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-1));
 
-        assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
+        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
+    }
+
+    @Test
+    @DisplayName("deleteReservation - 삭제 시 같은 슬롯의 첫 대기를 같은 트랜잭션에서 승격한다")
+    void deleteReservationPromotesFirstWaitingInSlot() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteReservation(reservationId, manager);
+
+        assertThat(statusOf(waitingId)).isEqualTo("RESERVED");
+    }
+
+    @Test
+    @DisplayName("deleteReservation - 대기가 여러 개면 가장 먼저 등록된 대기만 승격한다")
+    void deleteReservationPromotesOnlyEarliestWaiting() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        User daisy = member("데이지");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long firstWaitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+        long secondWaitingId = saveWaitingReservation(daisy, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteReservation(reservationId, manager);
+
+        assertThat(statusOf(firstWaitingId)).isEqualTo("RESERVED");
+        assertThat(statusOf(secondWaitingId)).isEqualTo("WAITING");
+    }
+
+    @Test
+    @DisplayName("deleteOwnReservation - 삭제 시 같은 슬롯의 첫 대기를 같은 트랜잭션에서 승격한다")
+    void deleteOwnReservationPromotesFirstWaitingInSlot() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, brown));
+
+        assertThat(statusOf(waitingId)).isEqualTo("RESERVED");
+    }
+
+    @Test
+    @DisplayName("deleteOwnReservation - 대기 예약을 삭제하면 다른 대기를 승격하지 않는다")
+    void deleteOwnReservationOfWaitingDoesNotPromote() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        User daisy = member("데이지");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
+        long charlesWaitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(1));
+        long daisyWaitingId = saveWaitingReservation(daisy, themeId, timeId, Fixtures.daysFromNow(1));
+
+        service.deleteOwnReservation(Fixtures.deleteCommand(charlesWaitingId, charles));
+
+        assertThat(statusOf(daisyWaitingId)).isEqualTo("WAITING");
     }
 
     @Test
@@ -409,15 +475,15 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelOwnReservation - userId 불일치면 예외")
-    void cancelOwnReservationThrowsWhenUserIdMismatch() {
+    @DisplayName("deleteOwnReservation - userId 불일치면 예외")
+    void deleteOwnReservationThrowsWhenUserIdMismatch() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other)))
+        assertThatThrownBy(() -> service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, other)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESERVATION_OWNER_MISMATCH);
@@ -425,25 +491,25 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("cancelOwnReservation - 없는 id이면 ResourceNotFoundException")
-    void cancelOwnReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
+    @DisplayName("deleteOwnReservation - 없는 id이면 ResourceNotFoundException")
+    void deleteOwnReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         User brown = member("브라운");
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(9999L, brown)))
+        assertThatThrownBy(() -> service.deleteOwnReservation(Fixtures.deleteCommand(9999L, brown)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
-    @DisplayName("cancelOwnReservation - 과거 예약이면 예외")
-    void cancelOwnReservationThrowsWhenReservationIsPast() {
+    @DisplayName("deleteOwnReservation - 과거 예약이면 예외")
+    void deleteOwnReservationThrowsWhenReservationIsPast() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
         long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown)))
+        assertThatThrownBy(() -> service.deleteOwnReservation(Fixtures.deleteCommand(reservationId, brown)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
@@ -466,6 +532,40 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         assertThat(updated.getDate()).isEqualTo(Fixtures.daysFromNow(26));
         assertThat(updated.getTheme().getId()).isEqualTo(themeId2);
         assertThat(updated.getTime().getId()).isEqualTo(timeId2);
+    }
+
+    @Test
+    @DisplayName("updateOwnReservation - 다른 슬롯으로 수정하면 기존 슬롯의 첫 대기를 같은 트랜잭션에서 승격한다")
+    void updateOwnReservationPromotesFirstWaitingInOldSlot() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        long themeId = theme("공포");
+        long themeId2 = theme("추리");
+        long timeId = time("10:00");
+        long timeId2 = time("11:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(25));
+
+        service.updateOwnReservation(
+                Fixtures.updateCommand(reservationId, brown, themeId2, Fixtures.daysFromNow(26), timeId2));
+
+        assertThat(statusOf(waitingId)).isEqualTo("RESERVED");
+    }
+
+    @Test
+    @DisplayName("updateOwnReservation - 동일 슬롯으로 수정하면 대기를 승격하지 않는다")
+    void updateOwnReservationDoesNotPromoteWhenSlotUnchanged() {
+        User brown = member("브라운");
+        User charles = member("샤를");
+        long themeId = theme("공포");
+        long timeId = time("10:00");
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+        long waitingId = saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(25));
+
+        service.updateOwnReservation(
+                Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(25), timeId));
+
+        assertThat(statusOf(waitingId)).isEqualTo("WAITING");
     }
 
     @Test
@@ -603,7 +703,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-3650));
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(-3650), timeId), ReservationStatus.WAITING))
+                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(-3650), timeId),
+                ReservationStatus.WAITING))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
@@ -658,5 +759,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
     private void insertOtherStore() {
         jdbcTemplate.update("INSERT INTO store(id, name) VALUES (?, ?)", OTHER_STORE_ID, "다른매장");
+    }
+
+    private String statusOf(long reservationId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM reservation WHERE id = ?", String.class, reservationId);
     }
 }

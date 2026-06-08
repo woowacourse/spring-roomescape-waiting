@@ -37,7 +37,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String token = authorizationExtractor.extract(request);
         if (token == null) {
-            throw new RoomescapeException(ErrorType.UNAUTHENTICATED);
+            throw new RoomescapeException(ErrorType.UNAUTHENTICATED,
+                    "인증이 필요합니다. 로그인 후 이용해주세요.");
         }
         Long userId = jwtProvider.getUserId(token);
         Role role = jwtProvider.getRole(token);
@@ -64,7 +65,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             return;
         }
         if (Arrays.stream(requiredRoles).noneMatch(required -> required == role)) {
-            throw new RoomescapeException(ErrorType.UNAUTHORIZED);
+            throw new RoomescapeException(ErrorType.UNAUTHORIZED,
+                    "접근 권한이 없습니다. 관리자만 이용할 수 있습니다.");
         }
     }
 }

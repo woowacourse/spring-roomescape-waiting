@@ -10,7 +10,7 @@ import roomescape.domain.Role;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.reservation.command.CancelReservationCommand;
+import roomescape.dto.reservation.command.DeleteReservationCommand;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
 
@@ -110,11 +110,11 @@ public final class Fixtures {
         return updateCommand(reservationId, memberWithId(userId, "브라운"), themeId, date, timeId);
     }
 
-    public static CancelReservationCommand cancelCommand(long reservationId, User user) {
-        return new CancelReservationCommand(reservationId, user);
+    public static DeleteReservationCommand deleteCommand(long reservationId, User user) {
+        return new DeleteReservationCommand(reservationId, user);
     }
 
-    public static CancelReservationCommand cancelCommand(long reservationId, long userId) {
-        return cancelCommand(reservationId, memberWithId(userId, "브라운"));
+    public static DeleteReservationCommand deleteCommand(long reservationId, long userId) {
+        return deleteCommand(reservationId, memberWithId(userId, "브라운"));
     }
 }

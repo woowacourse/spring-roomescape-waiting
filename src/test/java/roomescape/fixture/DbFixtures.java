@@ -92,23 +92,30 @@ public final class DbFixtures {
 
     public static long insertReservation(JdbcTemplate jdbc, long userId, long themeId, String date, long timeId,
                                          long storeId, String status) {
+        long slotId = slotId(jdbc, themeId, date, timeId, storeId);
         return insertAndReturnKey(jdbc, "reservation", Map.of(
-                "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
-                "store_id", storeId, "status", status));
+                "user_id", userId, "slot_id", slotId, "status", status));
     }
 
     public static long insertReservation(JdbcTemplate jdbc, long userId, long themeId, String date, long timeId,
                                          String status) {
-        return insertAndReturnKey(jdbc, "reservation", Map.of(
-                "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
-                "store_id", defaultStoreId(jdbc), "status", status));
+        return insertReservation(jdbc, userId, themeId, date, timeId, defaultStoreId(jdbc), status);
     }
 
     public static long insertReservationInStore(
             JdbcTemplate jdbc, long userId, long themeId, String date, long timeId, long storeId) {
-        return insertAndReturnKey(jdbc, "reservation", Map.of(
-                "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
-                "store_id", storeId, "status", "RESERVED"));
+        return insertReservation(jdbc, userId, themeId, date, timeId, storeId, "RESERVED");
+    }
+
+    public static long slotId(JdbcTemplate jdbc, long themeId, String date, long timeId, long storeId) {
+        List<Long> ids = jdbc.queryForList(
+                "SELECT id FROM reservation_slot WHERE date = ? AND theme_id = ? AND time_id = ? AND store_id = ?",
+                Long.class, LocalDate.parse(date), themeId, timeId, storeId);
+        if (!ids.isEmpty()) {
+            return ids.get(0);
+        }
+        return insertAndReturnKey(jdbc, "reservation_slot", Map.of(
+                "date", LocalDate.parse(date), "theme_id", themeId, "time_id", timeId, "store_id", storeId));
     }
 
     public static void assignManager(JdbcTemplate jdbc, long storeId, long userId) {

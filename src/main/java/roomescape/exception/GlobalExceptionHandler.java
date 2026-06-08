@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e) {
-        return response(ErrorType.ENDPOINT_NOT_FOUND);
+        return response(ErrorType.ENDPOINT_NOT_FOUND, "요청한 경로를 찾을 수 없습니다.");
     }
 
     @ExceptionHandler(Exception.class)
@@ -83,15 +83,11 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<ErrorResponse> internalServerErrorResponse() {
-        return response(ErrorType.INTERNAL_SERVER_ERROR);
+        return response(ErrorType.INTERNAL_SERVER_ERROR, "알 수 없는 서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
 
     private ResponseEntity<ErrorResponse> badRequest(String message) {
         return response(ErrorType.INVALID_REQUEST, message);
-    }
-
-    private ResponseEntity<ErrorResponse> response(ErrorType errorType) {
-        return response(errorType, errorType.format());
     }
 
     private ResponseEntity<ErrorResponse> response(ErrorType errorType, String message) {

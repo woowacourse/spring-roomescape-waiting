@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", id));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간을(를) 찾을 수 없습니다. id=" + id));
     }
 
     @Transactional
@@ -48,13 +48,14 @@ public class ReservationTimeService {
         validateNotReferencedByReservation(id);
         int affected = reservationTimeRepository.deleteById(id);
         if (affected == 0) {
-            throw new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", id);
+            throw new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간을(를) 찾을 수 없습니다. id=" + id);
         }
     }
 
     private void validateNotReferencedByReservation(Long id) {
         if (reservationRepository.existsByReservationTimeId(id)) {
-            throw new RoomescapeException(ErrorType.RESERVATION_TIME_IN_USE);
+            throw new RoomescapeException(ErrorType.RESERVATION_TIME_IN_USE,
+                    "예약이 존재하는 시간은 삭제할 수 없습니다.");
         }
     }
 }
