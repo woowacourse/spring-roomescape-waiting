@@ -11,19 +11,23 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.SlotRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
+    private final Clock clock;
     private final ReservationTimeRepository reservationTimeRepository;
     private final SlotRepository slotRepository;
 
     public ReservationTimeService(
+            Clock clock,
             ReservationTimeRepository reservationTimeRepository,
             SlotRepository slotRepository
     ) {
+        this.clock = clock;
         this.reservationTimeRepository = reservationTimeRepository;
         this.slotRepository = slotRepository;
     }
@@ -38,7 +42,9 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
-    public List<ReservationTime> findAvailable(AvailableTimeFindRequest request, LocalDate now) {
+    public List<ReservationTime> findAvailable(AvailableTimeFindRequest request) {
+        LocalDate now = LocalDate.now(clock);
+
         if (now.isAfter(request.getDate())) {
             throw new UnprocessableException("기준 날짜는 과거일 수 없습니다. 오늘 이후 날짜를 입력해 주세요");
         }

@@ -18,7 +18,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.service.ReservationTimeService;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -52,7 +51,7 @@ public class ReservationTimeController {
     public ResponseEntity<ReservationTimeResponses> findAvailable(
             @Valid @ModelAttribute AvailableTimeFindRequest request
     ) {
-        List<ReservationTime> reservationTimes = reservationTimeService.findAvailable(request, LocalDate.now());
+        List<ReservationTime> reservationTimes = reservationTimeService.findAvailable(request);
         return ResponseEntity.ok(ReservationTimeResponses.toDto(reservationTimes));
     }
 

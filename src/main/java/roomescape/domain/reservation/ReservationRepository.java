@@ -7,13 +7,21 @@ import java.util.Optional;
 
 public interface ReservationRepository {
     Reservations findAll();
+
     Optional<Reservation> findById(Long id);
+
     Reservations findByName(String name);
+
     Reservations findBySlotId(Long slotId);
+
     Reservation save(Reservation reservation);
+
     Reservation update(Long id, Reservation reservation);
+
     void updateStatusById(Long id, Status status);
+
     void deleteById(Long id);
+
     boolean existsById(Long id);
 
     default Reservation getById(Long id) {

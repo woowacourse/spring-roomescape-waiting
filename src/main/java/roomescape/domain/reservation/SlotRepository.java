@@ -9,13 +9,21 @@ import java.util.Optional;
 
 public interface SlotRepository {
     List<Slot> findAll();
+
     List<Slot> findAllByName(String name);
+
     Optional<Slot> findById(long slotId);
+
     Optional<Slot> findByDateAndTimeAndTheme(ReservationDate date, ReservationTime time, Theme theme);
+
     Slot save(Slot slot);
+
     Slot update(long id, Slot target);
+
     void deleteById(long id);
+
     boolean existsByTimeId(long timeId);
+
     boolean existsByThemeId(long themeId);
 
     default Slot getById(long id) {

@@ -54,7 +54,7 @@ public class ThemeServiceTest {
         int limit = 20;
 
         // when
-        themeService.findFamous(limit,days, date);
+        themeService.findFamous(limit, days, date);
 
         // then
         verify(themeRepository).findFamous(days, date, limit);

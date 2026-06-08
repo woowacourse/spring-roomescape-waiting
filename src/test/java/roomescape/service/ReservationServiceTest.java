@@ -51,10 +51,14 @@ class ReservationServiceTest {
     private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
     private static final long EXISTS_ID = 1L;
 
-    @Mock private Clock clock;
-    @Mock private ReservationAssembler assembler;
-    @Mock private ReservationRepository reservationRepository;
-    @InjectMocks private ReservationService reservationService;
+    @Mock
+    private Clock clock;
+    @Mock
+    private ReservationAssembler assembler;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @InjectMocks
+    private ReservationService reservationService;
 
     private void givenNow(LocalDateTime dateTime) {
         given(clock.instant()).willReturn(dateTime.toInstant(ZoneOffset.UTC));

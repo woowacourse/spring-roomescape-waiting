@@ -22,7 +22,6 @@ import roomescape.service.ReservationService;
 import roomescape.service.ReservationUpdateCommand;
 
 import java.net.URI;
-import java.time.LocalDate;
 
 @RestController
 public class ReservationController {
