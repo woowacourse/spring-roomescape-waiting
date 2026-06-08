@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.infrastructure.JdbcReservationRepository;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @JdbcTest
@@ -42,6 +45,15 @@ class JdbcReservationRepositoryTest {
             softly.assertThat(savedReservation.getMemberId()).isEqualTo(MEMBER_ID);
             softly.assertThat(savedReservation.getScheduleId()).isEqualTo(4L);
         });
+    }
+
+    @Test
+    @DisplayName("같은 스케줄에는 확정 예약을 중복 저장할 수 없다.")
+    void save_중복예약_DB제약_테스트() {
+        Reservation duplicatedReservation = new Reservation(null, 2L, 1L);
+
+        assertThatThrownBy(() -> reservationRepository.save(duplicatedReservation))
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
