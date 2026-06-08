@@ -152,28 +152,14 @@ public class JdbcReservationRepository implements ReservationRepository, LockedR
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return findWithWaitingOrderById(id);
-    }
-
-    @Override
-    public ReservationWithWaitingOrder update(Reservation reservation) {
-        return updateInternal(reservation, false);
+        return findWithWaitingOrderById(id).orElseThrow();
     }
 
     @Override
     public ReservationWithWaitingOrder updateAndRequeue(Reservation reservation) {
-        return updateInternal(reservation, true);
-    }
-
-    private ReservationWithWaitingOrder updateInternal(Reservation reservation, boolean renewQueueOrder) {
-        String enqueuedAtClause = "";
-        if (renewQueueOrder) {
-            enqueuedAtClause = "enqueued_at = CURRENT_TIMESTAMP, ";
-        }
         String sql = "UPDATE reservation "
                 + "SET reserver_name = ?, date = ?, time_id = ?, theme_id = ?, status = ?, "
-                + enqueuedAtClause
-                + "updated_at = CURRENT_TIMESTAMP "
+                + "enqueued_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP "
                 + "WHERE id = ?";
         jdbcTemplate.update(
                 sql,
@@ -184,12 +170,18 @@ public class JdbcReservationRepository implements ReservationRepository, LockedR
                 reservation.getStatus().name(),
                 reservation.getId()
         );
-        return findWithWaitingOrderById(reservation.getId());
+        return findWithWaitingOrderById(reservation.getId()).orElseThrow();
     }
 
-    private ReservationWithWaitingOrder findWithWaitingOrderById(Long id) {
+    @Override
+    public Optional<ReservationWithWaitingOrder> findWithWaitingOrderById(Long id) {
         String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.id = ?";
-        return jdbcTemplate.queryForObject(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, id);
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, id));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

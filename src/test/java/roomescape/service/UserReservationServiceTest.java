@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -222,6 +223,24 @@ class UserReservationServiceTest {
                 OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
         verify(reservationWriter, times(1)).updateAndRequeue(any(Reservation.class));
         verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    @DisplayName("같은 슬롯으로 변경하면 쓰기 없이 현재 상태를 반환한다")
+    void 같은_슬롯_변경은_쓰기없이_조회만_한다() {
+        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME,
+                ReservationStatus.WAITING);
+        ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, FUTURE_DATE, VALID_TIME.getId());
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationTimeRepository.findById(VALID_TIME.getId())).willReturn(Optional.of(VALID_TIME));
+        given(reservationRepository.findWithWaitingOrderById(1L)).willReturn(Optional.of(new ReservationWithWaitingOrder(
+                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, ReservationStatus.WAITING, new WaitingOrder(3))));
+
+        ReservationResult result = userReservationService.update(command);
+
+        assertThat(result.waitingOrder()).isEqualTo(3L);
+        verify(reservationRepository, never()).executeWithThemeLock(any(), any());
+        verifyNoInteractions(reservationWriter);
     }
 
     @Test

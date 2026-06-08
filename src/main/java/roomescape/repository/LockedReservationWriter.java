@@ -8,8 +8,6 @@ public interface LockedReservationWriter {
 
     ReservationWithWaitingOrder save(Reservation reservation);
 
-    ReservationWithWaitingOrder update(Reservation reservation);
-
     ReservationWithWaitingOrder updateAndRequeue(Reservation reservation);
 
     void cancel(Long id);

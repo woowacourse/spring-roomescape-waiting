@@ -86,21 +86,26 @@ public class UserReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
-        Long themeId = reservation.getTheme().getId();
 
+        boolean slotChanged = !(reservation.getDate().equals(command.date())
+                && reservation.getTime().getId().equals(command.timeId()));
+        if (!slotChanged) {
+            return ReservationResult.from(loadWithWaitingOrder(command.id()));
+        }
+
+        Long themeId = reservation.getTheme().getId();
         return reservationRepository.executeWithThemeLock(themeId, (lockedTheme, writer) -> {
             validateNoConflict(command, themeId);
 
             LocalDate oldDate = reservation.getDate();
             Long oldTimeId = reservation.getTime().getId();
-            boolean slotChanged = !(oldDate.equals(command.date()) && oldTimeId.equals(command.timeId()));
             boolean wasConfirmed = reservation.isConfirmed();
 
-            ReservationStatus newStatus = reservation.getStatus();
-            if (slotChanged) {
-                newStatus = reservationRepository.existsActiveConfirmed(command.date(), command.timeId(), themeId)
-                        ? ReservationStatus.WAITING
-                        : ReservationStatus.CONFIRMED;
+            ReservationStatus newStatus;
+            if (reservationRepository.existsActiveConfirmed(command.date(), command.timeId(), themeId)) {
+                newStatus = ReservationStatus.WAITING;
+            } else {
+                newStatus = ReservationStatus.CONFIRMED;
             }
 
             Reservation updated = new Reservation(
@@ -111,18 +116,19 @@ public class UserReservationService {
                     reservation.getTheme(),
                     newStatus
             );
-            ReservationWithWaitingOrder result;
-            if (slotChanged) {
-                result = writer.updateAndRequeue(updated);
-            } else {
-                result = writer.update(updated);
-            }
+            ReservationWithWaitingOrder result = writer.updateAndRequeue(updated);
 
-            if (slotChanged && wasConfirmed) {
+            if (wasConfirmed) {
                 writer.promoteEarliestWaiting(oldDate, oldTimeId, themeId);
             }
             return ReservationResult.from(result);
         });
+    }
+
+    private ReservationWithWaitingOrder loadWithWaitingOrder(Long id) {
+        return reservationRepository.findWithWaitingOrderById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(
+                        "존재하지 않는 예약입니다: reservationId=" + id));
     }
 
     private Reservation findReservation(Long id) {

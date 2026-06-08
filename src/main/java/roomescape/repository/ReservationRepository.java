@@ -13,6 +13,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<ReservationWithWaitingOrder> findWithWaitingOrderById(Long id);
+
     <T> T executeWithThemeLock(Long themeId, ThemeLockedAction<T> action);
 
     boolean existsActiveConfirmed(LocalDate date, Long timeId, Long themeId);
