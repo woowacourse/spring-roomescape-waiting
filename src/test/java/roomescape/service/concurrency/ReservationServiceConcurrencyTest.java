@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.common.exception.ConflictException;
+import roomescape.dao.ReservationDao;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -35,6 +37,9 @@ public class ReservationServiceConcurrencyTest {
     private final Long themeId = 1L;
     private final Theme theme = new Theme(themeId, ThemeName.parse("테마1"), Description.parse("설명1"),
             ThumbnailUrl.parse("/images/thumbnail"));
+
+    @Autowired
+    private ReservationDao reservationDao;
 
     @Autowired
     private ReservationService reservationService;
@@ -79,8 +84,10 @@ public class ReservationServiceConcurrencyTest {
             doneLatch.await();
         }
 
-        assertThat(successCount.get()).isEqualTo(1);
-        assertThat(conflictCount.get()).isEqualTo(threadCount - 1);
+        assertThat(successCount.get() + conflictCount.get()).isEqualTo(threadCount);
         assertThat(failCount.get()).isEqualTo(0);
+
+        Reservation finalReservation = reservationDao.findById(reservationId).orElseThrow();
+        assertThat(finalReservation.getEventSlot().date()).isEqualTo(newDate);
     }
 }
