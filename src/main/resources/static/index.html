@@ -689,6 +689,21 @@
             color: var(--muted);
         }
 
+        .pill--updated {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .pill--transferred-out {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .pill--transferred-in {
+            background: #dcfce7;
+            color: #166534;
+        }
+
         .reservation-row.canceled .row-title,
         .reservation-row.canceled .row-meta {
             color: var(--muted);
@@ -1762,6 +1777,22 @@
         }
     }
 
+    function actionStyle(action) {
+        switch (action) {
+            case "CREATED":
+                return { pillClass: "pill--confirmed", pillLabel: "확정", dimmed: false };
+            case "UPDATED":
+                return { pillClass: "pill--updated", pillLabel: "변경", dimmed: false };
+            case "TRANSFERRED_IN":
+                return { pillClass: "pill--transferred-in", pillLabel: "양도받음", dimmed: false };
+            case "TRANSFERRED_OUT":
+                return { pillClass: "pill--transferred-out", pillLabel: "양도해줌", dimmed: true };
+            case "CANCELED":
+            default:
+                return { pillClass: "pill--canceled", pillLabel: "취소", dimmed: true };
+        }
+    }
+
     async function loadMyHistory() {
         try {
             const data = await getJson("/api/v1/reservation-history");
@@ -1781,10 +1812,8 @@
 
             myHistoryEmpty.classList.add("hidden");
             myHistoryList.innerHTML = data.map(h => {
-                const isCanceled = h.status === "CANCELED";
-                const pillClass = isCanceled ? "pill--canceled" : "pill--confirmed";
-                const pillLabel = isCanceled ? "취소" : "확정";
-                const rowClass = isCanceled ? "reservation-row compact canceled" : "reservation-row compact";
+                const { pillClass, pillLabel, dimmed } = actionStyle(h.action);
+                const rowClass = dimmed ? "reservation-row compact canceled" : "reservation-row compact";
                 return `
                     <div class="${rowClass}">
                         <div class="row-left">
@@ -1794,7 +1823,7 @@
                                 <div class="row-meta">
                                     <span>${storeName(h.storeId)}</span>
                                     <span>·</span>
-                                    <span>변경 ${formatCreatedAt(h.createdAt)}</span>
+                                    <span>${formatCreatedAt(h.createdAt)}</span>
                                 </div>
                             </div>
                         </div>

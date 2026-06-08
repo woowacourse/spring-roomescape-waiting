@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import roomescape.reservationhistory.ReservationHistory;
-import roomescape.reservationhistory.ReservationHistoryStatus;
+import roomescape.reservationhistory.ReservationHistoryAction;
 
 public record ReservationHistoryResponse(
         Long id,
@@ -14,7 +14,7 @@ public record ReservationHistoryResponse(
         Long timeId,
         Long themeId,
         Long storeId,
-        ReservationHistoryStatus status,
+        ReservationHistoryAction action,
         Long actorId,
         LocalDateTime createdAt
 ) {
@@ -27,7 +27,7 @@ public record ReservationHistoryResponse(
                 history.getTimeId(),
                 history.getThemeId(),
                 history.getStoreId(),
-                history.getStatus(),
+                history.getAction(),
                 history.getActorId(),
                 history.getCreatedAt()
         );

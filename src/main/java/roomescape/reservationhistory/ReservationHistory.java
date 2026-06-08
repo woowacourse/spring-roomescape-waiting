@@ -13,20 +13,20 @@ public class ReservationHistory {
     private final Long timeId;
     private final Long themeId;
     private final Long storeId;
-    private final ReservationHistoryStatus status;
+    private final ReservationHistoryAction action;
     private final Long actorId;
     private final LocalDateTime createdAt;
 
     public ReservationHistory(Long id, Long reservationId, Long memberId, LocalDate date,
                               Long timeId, Long themeId, Long storeId,
-                              ReservationHistoryStatus status, Long actorId, LocalDateTime createdAt) {
+                              ReservationHistoryAction action, Long actorId, LocalDateTime createdAt) {
         validateReservationId(reservationId);
         validateMemberId(memberId);
         validateDate(date);
         validateTimeId(timeId);
         validateThemeId(themeId);
         validateStoreId(storeId);
-        validateStatus(status);
+        validateAction(action);
         validateActorId(actorId);
 
         this.id = id;
@@ -36,12 +36,12 @@ public class ReservationHistory {
         this.timeId = timeId;
         this.themeId = themeId;
         this.storeId = storeId;
-        this.status = status;
+        this.action = action;
         this.actorId = actorId;
         this.createdAt = createdAt;
     }
 
-    public static ReservationHistory create(Reservation reservation, Long actorId) {
+    public static ReservationHistory of(Reservation reservation, ReservationHistoryAction action, Long actorId) {
         return new ReservationHistory(
                 null,
                 reservation.getId(),
@@ -50,7 +50,7 @@ public class ReservationHistory {
                 reservation.getTime().getId(),
                 reservation.getThemeId(),
                 reservation.getStoreId(),
-                ReservationHistoryStatus.CONFIRMED,
+                action,
                 actorId,
                 null
         );
@@ -84,8 +84,8 @@ public class ReservationHistory {
         return storeId;
     }
 
-    public ReservationHistoryStatus getStatus() {
-        return status;
+    public ReservationHistoryAction getAction() {
+        return action;
     }
 
     public Long getActorId() {
@@ -132,9 +132,9 @@ public class ReservationHistory {
         }
     }
 
-    private void validateStatus(ReservationHistoryStatus status) {
-        if (status == null) {
-            throw new IllegalArgumentException("이력 상태는 비어 있을 수 없습니다.");
+    private void validateAction(ReservationHistoryAction action) {
+        if (action == null) {
+            throw new IllegalArgumentException("이력 액션은 비어 있을 수 없습니다.");
         }
     }
 

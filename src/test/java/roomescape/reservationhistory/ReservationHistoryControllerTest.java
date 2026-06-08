@@ -34,9 +34,9 @@ public class ReservationHistoryControllerTest {
 
     private static final String INSERT_BROWN_HISTORIES_SQL = """
             INSERT INTO reservation_history
-                (reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
+                (reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id)
             VALUES (1, 1, '2026-12-01', 1, 1, 1, 'CANCELED', 1),
-                   (2, 1, '2026-12-02', 1, 1, 1, 'CONFIRMED', 1);
+                   (2, 1, '2026-12-02', 1, 1, 1, 'CREATED', 1);
             """;
 
     @Test

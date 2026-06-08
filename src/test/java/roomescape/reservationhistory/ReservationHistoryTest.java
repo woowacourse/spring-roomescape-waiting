@@ -21,7 +21,7 @@ public class ReservationHistoryTest {
                 1L,
                 1L,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
@@ -38,7 +38,7 @@ public class ReservationHistoryTest {
                 1L,
                 1L,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
@@ -55,7 +55,7 @@ public class ReservationHistoryTest {
                 1L,
                 1L,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
@@ -72,7 +72,7 @@ public class ReservationHistoryTest {
                 null,
                 1L,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
@@ -89,7 +89,7 @@ public class ReservationHistoryTest {
                 1L,
                 null,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
@@ -106,7 +106,7 @@ public class ReservationHistoryTest {
                 1L,
                 1L,
                 null,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
@@ -114,7 +114,7 @@ public class ReservationHistoryTest {
     }
 
     @Test
-    void status가_null이면_이력을_생성할_수_없다() {
+    void action이_null이면_이력을_생성할_수_없다() {
         assertThatThrownBy(() -> new ReservationHistory(
                 1L,
                 1L,
@@ -127,7 +127,7 @@ public class ReservationHistoryTest {
                 1L,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이력 상태는 비어 있을 수 없습니다.");
+                .hasMessage("이력 액션은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -140,7 +140,7 @@ public class ReservationHistoryTest {
                 1L,
                 1L,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 null,
                 SAMPLE_CREATED_AT
         )).isInstanceOf(IllegalArgumentException.class)

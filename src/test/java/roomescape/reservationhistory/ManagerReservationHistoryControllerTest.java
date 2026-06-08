@@ -38,9 +38,9 @@ public class ManagerReservationHistoryControllerTest {
 
     private static final String INSERT_TWO_STORE_HISTORIES_SQL = """
             INSERT INTO reservation_history
-                (reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
-            VALUES (1, 3, '2026-12-01', 1, 1, 1, 'CONFIRMED', 3),
-                   (2, 3, '2026-12-02', 1, 1, 2, 'CONFIRMED', 3);
+                (reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id)
+            VALUES (1, 3, '2026-12-01', 1, 1, 1, 'CREATED', 3),
+                   (2, 3, '2026-12-02', 1, 1, 2, 'CREATED', 3);
             """;
 
     @Test

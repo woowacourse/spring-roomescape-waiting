@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.Reservation;
 
 @Repository
 public class ReservationHistoryDao {
@@ -21,7 +20,7 @@ public class ReservationHistoryDao {
 
     public ReservationHistory insert(ReservationHistory history) {
         String sql = "insert into reservation_history "
-                + "(reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id) "
+                + "(reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id) "
                 + "values (?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -36,7 +35,7 @@ public class ReservationHistoryDao {
             ps.setLong(4, history.getTimeId());
             ps.setLong(5, history.getThemeId());
             ps.setLong(6, history.getStoreId());
-            ps.setString(7, history.getStatus().name());
+            ps.setString(7, history.getAction().name());
             ps.setLong(8, history.getActorId());
             return ps;
         }, keyHolder);
@@ -50,36 +49,14 @@ public class ReservationHistoryDao {
                 history.getTimeId(),
                 history.getThemeId(),
                 history.getStoreId(),
-                history.getStatus(),
+                history.getAction(),
                 history.getActorId(),
                 history.getCreatedAt()
         );
     }
 
-    public int updateSnapshot(Reservation reservation) {
-        String sql = "update reservation_history "
-                + "set date = ?, time_id = ?, theme_id = ?, store_id = ? "
-                + "where reservation_id = ? and member_id = ?";
-        return jdbcTemplate.update(
-                sql,
-                reservation.getDate().toString(),
-                reservation.getTime().getId(),
-                reservation.getThemeId(),
-                reservation.getStoreId(),
-                reservation.getId(),
-                reservation.getMemberId()
-        );
-    }
-
-    public int markCanceled(Long reservationId, Long memberId) {
-        String sql = "update reservation_history "
-                + "set status = 'CANCELED' "
-                + "where reservation_id = ? and member_id = ?";
-        return jdbcTemplate.update(sql, reservationId, memberId);
-    }
-
     public List<ReservationHistory> findByReservationId(Long reservationId) {
-        String sql = "select id, reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id, created_at "
+        String sql = "select id, reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id, created_at "
                 + "from reservation_history "
                 + "where reservation_id = ? "
                 + "order by created_at, id";
@@ -87,18 +64,18 @@ public class ReservationHistoryDao {
     }
 
     public List<ReservationHistory> findByMemberId(Long memberId) {
-        String sql = "select id, reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id, created_at "
+        String sql = "select id, reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id, created_at "
                 + "from reservation_history "
                 + "where member_id = ? "
-                + "order by created_at, id";
+                + "order by created_at desc, id desc";
         return jdbcTemplate.query(sql, historyRowMapper(), memberId);
     }
 
     public List<ReservationHistory> findByStoreId(Long storeId) {
-        String sql = "select id, reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id, created_at "
+        String sql = "select id, reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id, created_at "
                 + "from reservation_history "
                 + "where store_id = ? "
-                + "order by created_at, id";
+                + "order by created_at desc, id desc";
         return jdbcTemplate.query(sql, historyRowMapper(), storeId);
     }
 
@@ -111,7 +88,7 @@ public class ReservationHistoryDao {
                 resultSet.getLong("time_id"),
                 resultSet.getLong("theme_id"),
                 resultSet.getLong("store_id"),
-                ReservationHistoryStatus.valueOf(resultSet.getString("status")),
+                ReservationHistoryAction.valueOf(resultSet.getString("action")),
                 resultSet.getLong("actor_id"),
                 resultSet.getTimestamp("created_at").toLocalDateTime()
         );

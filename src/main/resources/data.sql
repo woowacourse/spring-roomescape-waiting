@@ -135,37 +135,54 @@ VALUES
        (25, 16, '2026-06-05 20:00:00'); -- 1위 tube
 
 -- ─────────────────────────────────────────────────────────
--- 예약 이력 — 현재 살아있는 예약 32건에 대한 CONFIRMED 이력
+-- 예약 이력 — 현재 살아있는 예약 32건에 대한 CREATED 이력
 -- (Service 흐름과 동일하게 actor_id = member_id)
 -- ─────────────────────────────────────────────────────────
-INSERT INTO reservation_history (reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
-SELECT id, member_id, date, time_id, theme_id, store_id, 'CONFIRMED', member_id
+INSERT INTO reservation_history (reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id)
+SELECT id, member_id, date, time_id, theme_id, store_id, 'CREATED', member_id
 FROM reservation;
 
 -- ─────────────────────────────────────────────────────────
--- 예약 이력 — 옛날 취소된 흔적 (reservation row 없음, CANCELED 이력만 잔존)
--- 6/01 ~ 6/05 의 과거 활동
+-- 예약 이력 — 과거 사건들의 흔적 (reservation row 없음, 이력만 잔존)
+-- 6/01 ~ 6/05 의 활동
 -- reservation_id 는 100번대로 (실제 예약과 겹치지 않게)
 -- ─────────────────────────────────────────────────────────
-INSERT INTO reservation_history (reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
+INSERT INTO reservation_history (reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id)
 VALUES
-       -- 사용자 본인이 취소
-       (101, 1,  '2026-06-01', 1,  1, 1, 'CANCELED', 1),   -- lucy 가 6/01 예약 후 취소
+       -- 사용자 본인 예약 → 본인 취소 (CREATED + CANCELED 쌍)
+       (101, 1,  '2026-06-01', 1,  1, 1, 'CREATED',  1),   -- lucy 가 6/01 예약
+       (101, 1,  '2026-06-01', 1,  1, 1, 'CANCELED', 1),   -- → 본인 취소
+       (102, 2,  '2026-06-01', 2,  2, 2, 'CREATED',  2),
        (102, 2,  '2026-06-01', 2,  2, 2, 'CANCELED', 2),   -- brown 6/01 강남 슬롯 취소
+       (103, 7,  '2026-06-02', 3,  3, 3, 'CREATED',  7),
        (103, 7,  '2026-06-02', 3,  3, 3, 'CANCELED', 7),   -- cobi 6/02 판교 취소
+       (104, 8,  '2026-06-02', 4,  1, 1, 'CREATED',  8),
        (104, 8,  '2026-06-02', 4,  1, 1, 'CANCELED', 8),   -- sally 6/02 강남 취소
+       (105, 10, '2026-06-03', 5,  2, 2, 'CREATED',  10),
        (105, 10, '2026-06-03', 5,  2, 2, 'CANCELED', 10),  -- apeach 6/03 홍대 취소
+       (106, 11, '2026-06-03', 6,  3, 3, 'CREATED',  11),
        (106, 11, '2026-06-03', 6,  3, 3, 'CANCELED', 11),  -- ryan 6/03 판교 취소
+       (107, 13, '2026-06-04', 7,  1, 1, 'CREATED',  13),
        (107, 13, '2026-06-04', 7,  1, 1, 'CANCELED', 13),  -- frodo 6/04 강남 취소
+       (108, 15, '2026-06-04', 8,  2, 2, 'CREATED',  15),
        (108, 15, '2026-06-04', 8,  2, 2, 'CANCELED', 15),  -- con 6/04 홍대 취소
 
-       -- 매니저가 취소한 케이스 (actor_id = 매니저 id)
+       -- 매니저가 취소한 케이스 (CREATED → CANCELED, actor 다름)
+       (109, 3,  '2026-06-02', 9,  3, 1, 'CREATED',  3),
        (109, 3,  '2026-06-02', 9,  3, 1, 'CANCELED', 4),   -- 강남매니저(4)가 jeongkong 의 예약 취소
+       (110, 9,  '2026-06-03', 10, 1, 2, 'CREATED',  9),
        (110, 9,  '2026-06-03', 10, 1, 2, 'CANCELED', 5),   -- 홍대매니저(5)가 mooji 의 예약 취소
 
-       -- 양도 시나리오 — 원 예약자 CANCELED + 새 예약자 CONFIRMED
-       -- (실제 reservation 은 새 예약자가 가짐 → 다른 사람이 양도받았다고 가정)
-       (111, 12, '2026-06-04', 11, 2, 3, 'CANCELED', 12),  -- neo 가 본인 예약 취소 → 양도
-       (111, 14, '2026-06-04', 11, 2, 3, 'CANCELED', 12),  -- 양도 받았던 jayg 도 그 후 취소됨
-       (112, 16, '2026-06-05', 1,  3, 2, 'CANCELED', 16),  -- tube 양도 후 취소
-       (112, 18, '2026-06-05', 1,  3, 2, 'CANCELED', 16);  -- 양도받은 doge 도 취소
+       -- 매니저가 시간 변경 (CREATED → UPDATED)
+       (113, 6,  '2026-06-04', 5,  2, 2, 'CREATED',  6),   -- jelly 가 처음 예약 (10:00)
+       (113, 6,  '2026-06-04', 6,  2, 2, 'UPDATED',  5),   -- 홍대매니저(5)가 시간 변경
+
+       -- 양도 시나리오 — 원 예약자 CREATED → TRANSFERRED_OUT, 양도받은 사람 TRANSFERRED_IN → 이후 CANCELED
+       (111, 12, '2026-06-04', 11, 2, 3, 'CREATED',         12),  -- neo 가 처음 예약
+       (111, 12, '2026-06-04', 11, 2, 3, 'TRANSFERRED_OUT', 12),  -- neo 가 취소 → 양도
+       (111, 14, '2026-06-04', 11, 2, 3, 'TRANSFERRED_IN',  12),  -- jayg 가 양도받음
+       (111, 14, '2026-06-04', 11, 2, 3, 'CANCELED',        14),  -- jayg 도 결국 취소
+       (112, 16, '2026-06-05', 1,  3, 2, 'CREATED',         16),
+       (112, 16, '2026-06-05', 1,  3, 2, 'TRANSFERRED_OUT', 16),
+       (112, 18, '2026-06-05', 1,  3, 2, 'TRANSFERRED_IN',  16),  -- doge 가 양도받음
+       (112, 18, '2026-06-05', 1,  3, 2, 'CANCELED',        18);  -- doge 도 취소

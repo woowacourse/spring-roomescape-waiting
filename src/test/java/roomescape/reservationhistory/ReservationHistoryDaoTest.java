@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +11,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.Reservation;
-import roomescape.reservationtime.ReservationTime;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -22,11 +19,12 @@ class ReservationHistoryDaoTest {
 
     private static final String INSERT_THREE_HISTORIES_SQL = """
             INSERT INTO reservation_history
-                (id, reservation_id, member_id, date, time_id, theme_id, store_id, status, actor_id)
+                (id, reservation_id, member_id, date, time_id, theme_id, store_id, action, actor_id, created_at)
             VALUES
-                (1, 1, 1, '2026-12-01', 1, 1, 1, 'CONFIRMED', 1),
-                (2, 1, 2, '2026-12-01', 1, 1, 1, 'CANCELED', 1),
-                (3, 2, 2, '2026-12-02', 2, 1, 2, 'CONFIRMED', 2);
+                (1, 1, 1, '2026-12-01', 1, 1, 1, 'CREATED',         1, '2026-06-01 10:00:00'),
+                (2, 1, 1, '2026-12-01', 1, 1, 1, 'TRANSFERRED_OUT', 1, '2026-06-02 10:00:00'),
+                (3, 1, 2, '2026-12-01', 1, 1, 1, 'TRANSFERRED_IN',  1, '2026-06-02 10:00:00'),
+                (4, 2, 2, '2026-12-02', 2, 1, 2, 'CREATED',         2, '2026-06-03 10:00:00');
             """;
 
     @Autowired
@@ -43,7 +41,7 @@ class ReservationHistoryDaoTest {
                 1L,
                 1L,
                 1L,
-                ReservationHistoryStatus.CONFIRMED,
+                ReservationHistoryAction.CREATED,
                 1L,
                 null
         );
@@ -57,66 +55,65 @@ class ReservationHistoryDaoTest {
                 .extracting(
                         ReservationHistory::getReservationId,
                         ReservationHistory::getMemberId,
-                        ReservationHistory::getStatus,
+                        ReservationHistory::getAction,
                         ReservationHistory::getActorId
                 )
-                .containsExactly(1L, 1L, ReservationHistoryStatus.CONFIRMED, 1L);
+                .containsExactly(1L, 1L, ReservationHistoryAction.CREATED, 1L);
     }
 
     @Test
     @Sql(statements = INSERT_THREE_HISTORIES_SQL)
-    void reservationId로_이력_목록을_조회한다() {
+    void reservationId로_이력_목록을_시간순_조회한다() {
         // when
         List<ReservationHistory> histories = reservationHistoryDao.findByReservationId(1L);
 
-        // then: reservation(1) 의 이력 2건 (BROWN 양도 후 정콩이 입장 — 하지만 픽스처상 양쪽 다 reservation_id=1)
+        // then: reservation(1) 의 이력 3건이 created_at ASC, id ASC 순으로
         assertThat(histories)
-                .hasSize(2)
                 .extracting(
                         ReservationHistory::getMemberId,
-                        ReservationHistory::getStatus
+                        ReservationHistory::getAction
                 )
                 .containsExactly(
-                        tuple(1L, ReservationHistoryStatus.CONFIRMED),
-                        tuple(2L, ReservationHistoryStatus.CANCELED)
+                        tuple(1L, ReservationHistoryAction.CREATED),
+                        tuple(1L, ReservationHistoryAction.TRANSFERRED_OUT),
+                        tuple(2L, ReservationHistoryAction.TRANSFERRED_IN)
                 );
     }
 
     @Test
     @Sql(statements = INSERT_THREE_HISTORIES_SQL)
-    void memberId로_이력_목록을_조회한다() {
+    void memberId로_이력_목록을_최신순_조회한다() {
         // when
         List<ReservationHistory> histories = reservationHistoryDao.findByMemberId(2L);
 
-        // then: member(2) 의 이력 2건 (reservation 1 CANCELED, reservation 2 CONFIRMED)
+        // then: member(2) 의 이력 2건이 created_at DESC, id DESC 순으로
         assertThat(histories)
-                .hasSize(2)
                 .extracting(
                         ReservationHistory::getReservationId,
-                        ReservationHistory::getStatus
+                        ReservationHistory::getAction
                 )
                 .containsExactly(
-                        tuple(1L, ReservationHistoryStatus.CANCELED),
-                        tuple(2L, ReservationHistoryStatus.CONFIRMED)
+                        tuple(2L, ReservationHistoryAction.CREATED),
+                        tuple(1L, ReservationHistoryAction.TRANSFERRED_IN)
                 );
     }
 
     @Test
     @Sql(statements = INSERT_THREE_HISTORIES_SQL)
-    void storeId로_이력_목록을_조회한다() {
+    void storeId로_이력_목록을_최신순_조회한다() {
         // when
         List<ReservationHistory> histories = reservationHistoryDao.findByStoreId(1L);
 
-        // then: store(1) 의 이력 2건
+        // then: store(1) 의 이력 3건이 created_at DESC, id DESC 순으로
         assertThat(histories)
-                .hasSize(2)
                 .extracting(
                         ReservationHistory::getStoreId,
-                        ReservationHistory::getStatus
+                        ReservationHistory::getAction
                 )
                 .containsExactly(
-                        tuple(1L, ReservationHistoryStatus.CONFIRMED),
-                        tuple(1L, ReservationHistoryStatus.CANCELED)
+                        tuple(1L, ReservationHistoryAction.TRANSFERRED_IN),
+                        tuple(1L, ReservationHistoryAction.TRANSFERRED_OUT),
+                        tuple(1L, ReservationHistoryAction.CREATED)
                 );
     }
 
@@ -129,51 +126,7 @@ class ReservationHistoryDaoTest {
         List<ReservationHistory> histories = reservationHistoryDao.findByReservationId(1L);
 
         // then
-        assertThat(histories).hasSize(2);
+        assertThat(histories).hasSize(3);
     }
 
-    @Test
-    @Sql(statements = INSERT_THREE_HISTORIES_SQL)
-    void 예약_변경_시_CONFIRMED_이력_스냅샷이_동기화된다() {
-        // given: 변경된 reservation (reservation_id=1, member_id=1, 새 date/time)
-        Reservation updated = new Reservation(
-                1L,
-                1L,
-                LocalDate.of(2027, 1, 15),
-                new ReservationTime(2L, LocalTime.of(11, 0)),
-                1L,
-                1L
-        );
-
-        // when: 스냅샷 동기화
-        int affected = reservationHistoryDao.updateSnapshot(updated);
-
-        // then: 해당 (reservation_id, member_id) 의 row 가 1건 update
-        assertThat(affected).isEqualTo(1);
-
-        // then: 변경된 값 반영
-        ReservationHistory history = reservationHistoryDao.findByReservationId(1L).stream()
-                .filter(h -> h.getMemberId().equals(1L))
-                .findFirst()
-                .orElseThrow();
-        assertThat(history.getDate()).isEqualTo(LocalDate.of(2027, 1, 15));
-        assertThat(history.getTimeId()).isEqualTo(2L);
-    }
-
-    @Test
-    @Sql(statements = INSERT_THREE_HISTORIES_SQL)
-    void 예약_취소_시_CONFIRMED_이력이_CANCELED로_전환된다() {
-        // given: reservation_id=1, member_id=1 의 CONFIRMED 이력
-
-        // when
-        int affected = reservationHistoryDao.markCanceled(1L, 1L);
-
-        // then
-        assertThat(affected).isEqualTo(1);
-        ReservationHistory history = reservationHistoryDao.findByReservationId(1L).stream()
-                .filter(h -> h.getMemberId().equals(1L))
-                .findFirst()
-                .orElseThrow();
-        assertThat(history.getStatus()).isEqualTo(ReservationHistoryStatus.CANCELED);
-    }
 }

@@ -75,13 +75,13 @@ CREATE TABLE reservation_history
     time_id        BIGINT       NOT NULL,
     theme_id       BIGINT       NOT NULL,
     store_id       BIGINT       NOT NULL,
-    status         VARCHAR(20)  NOT NULL
-        CHECK (status IN ('CONFIRMED', 'CANCELED')),
+    action         VARCHAR(20)  NOT NULL
+        CHECK (action IN ('CREATED', 'UPDATED', 'CANCELED', 'TRANSFERRED_IN', 'TRANSFERRED_OUT')),
     actor_id       BIGINT       NOT NULL,
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    CONSTRAINT uq_history_reservation_member UNIQUE (reservation_id, member_id)
+    PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_history_member ON reservation_history (member_id);
-CREATE INDEX idx_history_store ON reservation_history (store_id);
+CREATE INDEX idx_history_member_created ON reservation_history (member_id, created_at DESC);
+CREATE INDEX idx_history_store_created ON reservation_history (store_id, created_at DESC);
+CREATE INDEX idx_history_reservation_created ON reservation_history (reservation_id, created_at);
