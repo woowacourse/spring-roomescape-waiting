@@ -1,66 +1,52 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.PastSessionControlException;
+import roomescape.exception.PastTimeException;
 
-import java.time.LocalDate;
-
-public class Waiting {
+public class Waiting implements Comparable<Waiting> {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final TimeSlot timeSlot;
-    private final Theme theme;
+    private final Session session;
     private final Integer waitingNumber;
 
-    public Waiting(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme, Integer waitingNumber) {
-        validateFields(name, date, timeSlot, theme);
+    public Waiting(Long id, String name, Session session, Integer waitingNumber) {
+        validateFields(name, session);
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.timeSlot = timeSlot;
-        this.theme = theme;
+        this.session = session;
         this.waitingNumber = waitingNumber;
     }
 
-    public static Waiting transientOf(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
-        return new Waiting(null, name, date, timeSlot, theme, null);
+    public static Waiting transientOf(String name, Session session) {
+        return new Waiting(null, name, session, null);
     }
 
-    private void validateFields(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
-        validateName(name);
-        validateDate(date);
-        validateTimeSlot(timeSlot);
-        validateTheme(theme);
-    }
-
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("예약 대기자의 이름은 필수이며 비어있을 수 없습니다.");
-        }
-    }
-
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("예약 대기 날짜는 필수입니다.");
-        }
-    }
-
-    private void validateTimeSlot(TimeSlot timeSlot) {
-        if (timeSlot == null) {
-            throw new IllegalArgumentException("존재하지 않는 예약 시간대입니다.");
-        }
-    }
-
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new IllegalArgumentException("존재하지 않는 테마입니다.");
-        }
-    }
-
-    public void validateModifiable(String requesterName) {
+    public void validateModifiable(String requesterName, LocalDateTime currentDateTime) {
         if (!this.name.equals(requesterName)) {
             throw new InvalidOwnershipException();
+        }
+        if (this.session.isPast(currentDateTime)) {
+            throw new PastSessionControlException();
+        }
+    }
+
+    public void validateNotPast(LocalDateTime currentDateTime) {
+        if (this.session.isPast(currentDateTime)) {
+            throw new PastTimeException("지난 시간/날짜로 예약 대기를 추가하실 수 없습니다.");
+        }
+    }
+
+    @Override
+    public int compareTo(Waiting other) {
+        return Integer.compare(this.waitingNumber, other.waitingNumber);
+    }
+
+    private void validateFields(String name, Session session) {
+        if (name == null || name.isBlank() || session == null) {
+            throw new IllegalArgumentException("필수 대기 정보가 누락되었습니다.");
         }
     }
 
@@ -72,16 +58,8 @@ public class Waiting {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public TimeSlot getTimeSlot() {
-        return timeSlot;
-    }
-
-    public Theme getTheme() {
-        return theme;
+    public Session getSession() {
+        return session;
     }
 
     public Integer getWaitingNumber() {

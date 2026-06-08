@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.repository.mapper.DomainRowMapperFactory;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,7 +30,8 @@ class JdbcThemeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
+        DomainRowMapperFactory factory = new DomainRowMapperFactory();
+        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate, factory);
     }
 
     @Test
@@ -54,7 +56,7 @@ class JdbcThemeRepositoryTest {
     void findAll() {
         jdbcThemeRepository.save(Theme.transientOf("공포", "귀신의 집", "https://url"));
         List<Theme> themes = jdbcThemeRepository.findAll();
-        assertThat(themes).hasSize(3);
+        assertThat(themes).hasSize(1);
     }
 
     @Test
@@ -62,8 +64,7 @@ class JdbcThemeRepositoryTest {
     void findPopularThemes() {
         Theme savedTheme = jdbcThemeRepository.save(Theme.transientOf("공포", "귀신의 집", "https://url"));
         insertReservation(savedTheme.getId());
-        List<Theme> themes = jdbcThemeRepository.findPopularThemes(10L, LocalDate.now().minusDays(1),
-                LocalDate.now().plusDays(1));
+        List<Theme> themes = jdbcThemeRepository.findPopularThemes(10L, LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
         assertThat(themes).hasSize(1);
     }
 
@@ -79,8 +80,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 테마를 삭제해도 예외가 발생하지 않는다.")
     void deleteNonExisting() {
-        assertThatCode(() -> jdbcThemeRepository.deleteById(999L))
-                .doesNotThrowAnyException();
+        assertThatCode(() -> jdbcThemeRepository.deleteById(999L)).doesNotThrowAnyException();
     }
 
     @Test
@@ -88,7 +88,7 @@ class JdbcThemeRepositoryTest {
     void updateExisting() {
         Theme savedTheme = jdbcThemeRepository.save(Theme.transientOf("공포", "귀신의 집", "https://url"));
         Theme updateTheme = new Theme(savedTheme.getId(), "코믹", "웃긴 집", "https://url2");
-        assertThat(jdbcThemeRepository.update(updateTheme)).isEqualTo(updateTheme);
+        assertThat(jdbcThemeRepository.update(updateTheme).getName()).isEqualTo("코믹");
     }
 
     @Test
@@ -99,7 +99,8 @@ class JdbcThemeRepositoryTest {
     }
 
     private void insertReservation(long themeId) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, "test", LocalDate.now(), 1L, themeId);
+        jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES ('10:00:00')");
+        jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, ?)", LocalDate.now(), themeId);
+        jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('test', 1)");
     }
 }

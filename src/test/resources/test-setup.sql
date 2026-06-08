@@ -1,58 +1,65 @@
 SET REFERENTIAL_INTEGRITY FALSE;
 
-DROP TABLE IF EXISTS reservation CASCADE;
 DROP TABLE IF EXISTS theme CASCADE;
-DROP TABLE IF EXISTS waiting CASCADE;
 DROP TABLE IF EXISTS time_slot CASCADE;
+DROP TABLE IF EXISTS session CASCADE;
+DROP TABLE IF EXISTS reservation CASCADE;
+DROP TABLE IF EXISTS waiting CASCADE;
 
 CREATE TABLE theme
 (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id            BIGINT       NOT NULL AUTO_INCREMENT,
     name          VARCHAR(250) NOT NULL,
     description   VARCHAR(250) NOT NULL,
-    thumbnail_url VARCHAR(250) NOT NULL
+    thumbnail_url VARCHAR(250) NOT NULL,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE time_slot
 (
-    id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    start_at TIME NOT NULL
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    start_at TIME   NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_time_slot_start_at UNIQUE (start_at)
+);
+
+CREATE TABLE session
+(
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    date     DATE   NOT NULL,
+    time_id  BIGINT NOT NULL,
+    theme_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES time_slot (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uk_session_date_time_theme UNIQUE (date, time_id, theme_id)
+);
+
+CREATE TABLE reservation
+(
+    id      BIGINT       NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(255) NOT NULL,
+    session_id BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (session_id) REFERENCES session (id),
+    CONSTRAINT uk_reservation_session UNIQUE (session_id)
 );
 
 CREATE TABLE waiting
 (
     id         BIGINT       NOT NULL AUTO_INCREMENT,
-    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     name       VARCHAR(250) NOT NULL,
-    date       DATE         NOT NULL,
-    time_id    BIGINT       NOT NULL,
-    theme_id   BIGINT       NOT NULL,
-    PRIMARY KEY (name, date, time_id, theme_id),
-    FOREIGN KEY (time_id) REFERENCES time_slot (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    session_id    BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (session_id) REFERENCES session (id),
+    CONSTRAINT uk_waiting_name_session UNIQUE (name, session_id)
 );
 
-CREATE TABLE reservation
-(
-    id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name     VARCHAR(255) NOT NULL,
-    date     DATE         NOT NULL,
-    time_id  BIGINT       NOT NULL,
-    theme_id BIGINT       NOT NULL,
-    FOREIGN KEY (time_id) REFERENCES time_slot (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id)
-);
-
+TRUNCATE TABLE waiting RESTART IDENTITY;
 TRUNCATE TABLE reservation RESTART IDENTITY;
+TRUNCATE TABLE session RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
 TRUNCATE TABLE time_slot RESTART IDENTITY;
-
-INSERT INTO time_slot (start_at)
-VALUES ('10:00:00'),
-       ('12:00:00');
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('Theme1', 'Desc1', 'url1'),
-       ('Theme2', 'Desc2', 'url2');
 
 SET REFERENTIAL_INTEGRITY TRUE;

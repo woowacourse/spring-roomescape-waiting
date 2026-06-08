@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.Session;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -33,9 +34,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         long id = sequence++;
-        Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getDate(),
-                reservation.getTimeSlot(),
-                reservation.getTheme());
+        Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getSession());
         storage.put(id, savedReservation);
         return savedReservation;
     }
@@ -48,7 +47,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return storage.values().stream()
-                .filter(reservation -> isDuplicate(reservation, date, timeId, themeId))
+                .filter(reservation -> matchSlot(reservation.getSession(), date, timeId, themeId))
                 .findAny();
     }
 
@@ -61,9 +60,9 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservation;
     }
 
-    private boolean isDuplicate(Reservation reservation, LocalDate date, Long timeId, Long themeId) {
-        return reservation.getDate().equals(date)
-                && reservation.getTimeSlot().getId().equals(timeId)
-                && reservation.getTheme().getId().equals(themeId);
+    private boolean matchSlot(Session session, LocalDate date, Long timeId, Long themeId) {
+        return session.getDate().equals(date)
+                && session.getTimeSlot().getId().equals(timeId)
+                && session.getTheme().getId().equals(themeId);
     }
 }

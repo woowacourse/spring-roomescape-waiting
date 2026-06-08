@@ -18,6 +18,7 @@ import java.util.List;
 public class ThemeService {
 
     private static final int ONE_DAY = 1;
+    
     private final ThemeRepository themeRepository;
 
     public ThemeService(ThemeRepository themeRepository) {
