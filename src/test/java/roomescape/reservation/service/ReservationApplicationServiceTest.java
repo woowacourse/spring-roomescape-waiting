@@ -17,7 +17,7 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.fixture.WaitingFixture;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.domain.exception.ReservationSlotDuplicateException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.domain.exception.WaitingExistsForSlotException;
 import roomescape.reservation.service.dto.response.ReservationResponse;
@@ -352,7 +352,7 @@ class ReservationApplicationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationApplicationService.create(request))
-                .isInstanceOf(ReservationAlreadyExistsException.class);
+                .isInstanceOf(ReservationSlotDuplicateException.class);
         }
 
         @Test

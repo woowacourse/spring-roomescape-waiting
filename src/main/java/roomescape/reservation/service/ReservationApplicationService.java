@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.domain.exception.ReservationSlotDuplicateException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.domain.exception.WaitingExistsForSlotException;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
@@ -149,7 +149,7 @@ public class ReservationApplicationService {
                 reservation.getTimeId(),
                 reservation.getThemeId()
             );
-        } catch (WaitingNotFoundException | ReservationAlreadyExistsException | ReservationOptionChangedException e) {
+        } catch (WaitingNotFoundException | ReservationSlotDuplicateException | ReservationOptionChangedException e) {
             log.warn("대기 승격 실패 - reservationId={} slot=[date={} time={} theme={}]",
                 reservation.getId(), reservation.getDate(), reservation.getTimeId(), reservation.getThemeId(), e);
         } catch (Exception e) {
