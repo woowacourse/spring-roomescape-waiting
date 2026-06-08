@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,13 +20,9 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsConflict(String name, ReservationSlot slot);
 
-    boolean existsByThemeId(Long themeId);
-
-    boolean existsConflict(String name, LocalDate date, Long timeId, Long themeId);
-
-    boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id);
+    boolean existsConflictExcluding(String name, ReservationSlot slot, Long id);
 
     void deleteById(Long id);
 }

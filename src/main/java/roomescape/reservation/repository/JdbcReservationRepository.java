@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InfrastructureException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -23,13 +24,11 @@ import java.util.Optional;
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
     private static final Logger log = LoggerFactory.getLogger(JdbcReservationRepository.class);
-    private static final String QUEUE_POSITION_SUBQUERY = """
-            SELECT COUNT(*)
-            FROM reservation same_slot
-            WHERE same_slot.date = r.date
-             AND same_slot.time_id = r.time_id
-             AND same_slot.theme_id = r.theme_id
-             AND same_slot.request_order <= r.request_order
+    private static final String QUEUE_POSITION_EXPRESSION = """
+            ROW_NUMBER() OVER (
+                PARTITION BY r.date, r.time_id, r.theme_id
+                ORDER BY r.request_order ASC, r.id ASC
+            )
             """;
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
@@ -44,15 +43,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getString("theme_description"),
                 resultSet.getString("theme_thumbnail")
         );
+        ReservationSlot slot = new ReservationSlot(
+                theme,
+                resultSet.getDate("date").toLocalDate(),
+                reservationTime
+        );
 
         return new Reservation(
                 resultSet.getLong("reservation_id"),
                 fromDbValue(resultSet.getString("status")),
                 resultSet.getObject("waiting_rank", Long.class),
                 resultSet.getString("name"),
-                resultSet.getDate("date").toLocalDate(),
-                reservationTime,
-                theme
+                slot
         );
     };
 
@@ -73,14 +75,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findByName(String name) {
         String sql = selectReservationsByNameSql();
 
-        return jdbcTemplate.query(sql, reservationRowMapper, name, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, name, name, name);
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = selectReservationByIdSql();
 
-        return jdbcTemplate.query(sql, reservationRowMapper, id)
+        return jdbcTemplate.query(sql, reservationRowMapper, id, id)
                 .stream()
                 .findFirst();
     }
@@ -133,8 +135,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (""" + QUEUE_POSITION_SUBQUERY + """
-                                ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
@@ -149,6 +151,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private String selectReservationsByNameSql() {
         return """
+                WITH target_slots AS (
+                    SELECT DISTINCT date,
+                                    time_id,
+                                    theme_id
+                    FROM reservation
+                    WHERE name = ?
+                )
                 SELECT result.reservation_id,
                        result.name,
                        result.date,
@@ -188,13 +197,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (""" + QUEUE_POSITION_SUBQUERY + """
-                                ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
+                        JOIN target_slots target
+                            ON target.date = r.date
+                           AND target.time_id = r.time_id
+                           AND target.theme_id = r.theme_id
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
-                        WHERE r.name = ?
                     ) ranked
+                    WHERE ranked.name = ?
                     UNION ALL
                     SELECT h.reservation_id,
                            h.name,
@@ -224,6 +237,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private String selectReservationByIdSql() {
         return """
+                WITH target_slot AS (
+                    SELECT date,
+                           time_id,
+                           theme_id
+                    FROM reservation
+                    WHERE id = ?
+                )
                 SELECT result.reservation_id,
                        result.name,
                        result.date,
@@ -263,13 +283,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (""" + QUEUE_POSITION_SUBQUERY + """
-                                ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
+                        JOIN target_slot target
+                            ON target.date = r.date
+                           AND target.time_id = r.time_id
+                           AND target.theme_id = r.theme_id
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
-                        WHERE r.id = ?
                     ) ranked
+                    WHERE ranked.reservation_id = ?
                 ) result
                 ORDER BY result.date ASC,
                          result.start_at ASC,
@@ -319,14 +343,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (
-                                   SELECT COUNT(*)
-                                   FROM reservation same_slot
-                                   WHERE same_slot.date = r.date
-                                     AND same_slot.time_id = r.time_id
-                                     AND same_slot.theme_id = r.theme_id
-                                     AND same_slot.request_order <= r.request_order
-                               ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
@@ -505,33 +523,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByTimeId(Long timeId) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation
-                    WHERE time_id = ?
-                )
-                """;
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
-    }
-
-    @Override
-    public boolean existsByThemeId(Long themeId) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation
-                    WHERE theme_id = ?
-                )
-                """;
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, themeId));
-    }
-
-    @Override
-    public boolean existsConflict(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean existsConflict(String name, ReservationSlot slot) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -540,11 +532,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                name,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
+        ));
     }
 
     @Override
-    public boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id) {
+    public boolean existsConflictExcluding(String name, ReservationSlot slot, Long id) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -553,7 +552,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 """;
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId, id));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                name,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId(),
+                id
+        ));
     }
 
     @Override

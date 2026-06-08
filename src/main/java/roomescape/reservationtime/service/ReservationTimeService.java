@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
+        ReservationTime reservationTime = ReservationTime.create(startAt);
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
             throw new ConflictException("이미 등록된 예약 시간입니다. 다른 시간을 입력해주세요.");
         }
@@ -48,11 +48,13 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
-            throw new ConflictException("예약이 존재하는 시간은 삭제할 수 없습니다. 먼저 해당 예약들을 삭제해주세요.");
-        }
-        reservationTimeRepository.deleteById(id);
+    public void activate(Long id) {
+        reservationTimeRepository.updateActive(id, true);
+    }
+
+    @Transactional
+    public void deactivate(Long id) {
+        reservationTimeRepository.updateActive(id, false);
     }
 
     @Transactional(readOnly = true)

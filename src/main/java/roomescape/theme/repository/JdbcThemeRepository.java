@@ -94,6 +94,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         String sql = """
                 SELECT id, name, description, thumbnail
                 FROM theme
+                WHERE is_active = TRUE
                 """;
 
         return jdbcTemplate.query(sql, themeRowMapper);
@@ -110,7 +111,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 FROM theme t
                 INNER JOIN reservation r
                     ON r.theme_id = t.id
-                WHERE r.date BETWEEN ? AND ?
+                WHERE t.is_active = TRUE
+                  AND r.date BETWEEN ? AND ?
                 GROUP BY t.id, t.name, t.description, t.thumbnail
                 ORDER BY COUNT(r.id) DESC
                 LIMIT ?
@@ -124,7 +126,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         String sql = """
                 SELECT id, name, description, thumbnail
                 FROM theme
-                WHERE id = ?
+                WHERE id = ? AND is_active = TRUE
                 """;
 
         return jdbcTemplate.query(sql, themeRowMapper, id)
@@ -138,7 +140,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 SELECT EXISTS (
                     SELECT 1
                     FROM theme
-                    WHERE id = ?
+                    WHERE id = ? AND is_active = TRUE
                 )
                 """;
 
@@ -159,12 +161,13 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void updateActive(Long id, boolean active) {
         String sql = """
-                DELETE FROM theme
+                UPDATE theme
+                SET is_active = ?
                 WHERE id = ?
                 """;
 
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(sql, active, id);
     }
 }

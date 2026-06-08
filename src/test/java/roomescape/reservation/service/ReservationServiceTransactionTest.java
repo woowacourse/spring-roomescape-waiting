@@ -21,7 +21,10 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -73,12 +76,36 @@ class ReservationServiceTransactionTest {
         assertThat(countAllReservations()).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("같은 날짜와 시간으로 예약 변경을 요청하면 저장소 변경 메서드를 호출하지 않는다.")
+    void updateDateTime_doNothing_whenSameDateTime() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        Reservation reservation = reservationService.create(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        clearInvocations(reservationRepository);
+
+        // when
+        Reservation updatedReservation = reservationService.updateDateTime(
+                reservation.getId(),
+                NAME,
+                FUTURE_DATE,
+                time.getId()
+        );
+
+        // then
+        assertThat(updatedReservation.getId()).isEqualTo(reservation.getId());
+        verify(reservationRepository, never()).update(any(Reservation.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
     private ReservationTime saveReservationTime(int hour) {
-        return reservationTimeRepository.save(new ReservationTime(LocalTime.of(hour, 0)));
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
 
     private Theme saveTheme() {
-        return themeRepository.save(new Theme(
+        return themeRepository.save(Theme.create(
                 "레벨2 탈출",
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://example.com/theme.png"

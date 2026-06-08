@@ -86,19 +86,21 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = """
                 SELECT id, start_at
                 FROM reservation_time
+                WHERE is_active = TRUE
                 """;
 
         return jdbcTemplate.query(sql, reservationTimeRowMapper);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void updateActive(Long id, boolean active) {
         String sql = """
-                DELETE FROM reservation_time
+                UPDATE reservation_time
+                SET is_active = ?
                 WHERE id = ?
                 """;
 
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(sql, active, id);
     }
 
     @Override
@@ -106,7 +108,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = """
                 SELECT id, start_at
                 FROM reservation_time
-                WHERE id = ?
+                WHERE id = ? AND is_active = TRUE
                 """;
 
         return jdbcTemplate.query(sql, reservationTimeRowMapper, id)

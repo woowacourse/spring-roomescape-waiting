@@ -15,14 +15,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTest {
 
-    private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-    private final Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+    private final ReservationTime time = ReservationTime.create(LocalTime.of(10, 0)).withId(1L);
+    private final Theme theme = Theme.create(
+            "레벨2 탈출",
+            "우테코 레벨2를 탈출하는 내용입니다.",
+            "https://example.com/theme.png"
+    ).withId(1L);
 
     @Test
     @DisplayName("예약자 이름이 비어있으면 도메인 예외가 발생한다.")
     void create_fail_whenNameIsBlank() {
         assertInvalidRequestException(
-                () -> new Reservation(" ", LocalDate.of(2023, 8, 5), time, theme)
+                () -> createReservation(
+                        " ",
+                        LocalDate.of(2026, 5, 15),
+                        time,
+                        theme,
+                        LocalDateTime.of(2026, 5, 15, 9, 0)
+                )
         );
     }
 
@@ -30,7 +40,13 @@ class ReservationTest {
     @DisplayName("예약 날짜가 null이면 도메인 예외가 발생한다.")
     void create_fail_whenDateIsNull() {
         assertInvalidRequestException(
-                () -> new Reservation("브라운", null, time, theme)
+                () -> createReservation(
+                        "브라운",
+                        null,
+                        time,
+                        theme,
+                        LocalDateTime.of(2026, 5, 15, 9, 0)
+                )
         );
     }
 
@@ -38,7 +54,13 @@ class ReservationTest {
     @DisplayName("예약 시간이 null이면 도메인 예외가 발생한다.")
     void create_fail_whenTimeIsNull() {
         assertInvalidRequestException(
-                () -> new Reservation("브라운", LocalDate.of(2023, 8, 5), null, theme)
+                () -> createReservation(
+                        "브라운",
+                        LocalDate.of(2026, 5, 15),
+                        null,
+                        theme,
+                        LocalDateTime.of(2026, 5, 15, 9, 0)
+                )
         );
     }
 
@@ -46,14 +68,26 @@ class ReservationTest {
     @DisplayName("예약 테마가 null이면 도메인 예외가 발생한다.")
     void create_fail_whenThemeIsNull() {
         assertInvalidRequestException(
-                () -> new Reservation("브라운", LocalDate.of(2023, 8, 5), time, null)
+                () -> createReservation(
+                        "브라운",
+                        LocalDate.of(2026, 5, 15),
+                        time,
+                        null,
+                        LocalDateTime.of(2026, 5, 15, 9, 0)
+                )
         );
     }
 
     @Test
     @DisplayName("예약 id가 null이면 도메인 예외가 발생한다.")
     void withId_fail_whenIdIsNull() {
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = createReservation(
+                "브라운",
+                LocalDate.of(2026, 5, 15),
+                time,
+                theme,
+                LocalDateTime.of(2026, 5, 15, 9, 0)
+        );
 
         assertInvalidRequestException(
                 () -> reservation.withId(null)
@@ -63,7 +97,13 @@ class ReservationTest {
     @Test
     @DisplayName("이미 id가 있는 예약에 id를 부여하면 도메인 예외가 발생한다.")
     void withId_fail_whenReservationAlreadyHasId() {
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = createReservation(
+                "브라운",
+                LocalDate.of(2026, 5, 15),
+                time,
+                theme,
+                LocalDateTime.of(2026, 5, 15, 9, 0)
+        ).withId(1L);
 
         assertInvalidRequestException(
                 () -> reservation.withId(2L)
@@ -77,7 +117,7 @@ class ReservationTest {
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 11, 0);
 
         assertInvalidRequestException(
-                () -> Reservation.create("브라운", date, time, theme, now)
+                () -> createReservation("브라운", date, time, theme, now)
         );
     }
 
@@ -87,7 +127,7 @@ class ReservationTest {
         LocalDate date = LocalDate.of(2026, 5, 15);
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 9, 0);
 
-        Reservation reservation = Reservation.create("브라운", date, time, theme, now);
+        Reservation reservation = createReservation("브라운", date, time, theme, now);
 
         assertThat(reservation.getDate()).isEqualTo(date);
         assertThat(reservation.getTime()).isEqualTo(time);
@@ -96,7 +136,14 @@ class ReservationTest {
     @Test
     @DisplayName("예약 날짜와 시간이 기준 시각보다 이전이면 과거 예약이다.")
     void isPastAt_success_whenReservationDateTimeIsBeforeNow() {
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 5, 15), time, theme);
+        LocalDate date = LocalDate.of(2026, 5, 15);
+        Reservation reservation = createReservation(
+                "브라운",
+                date,
+                time,
+                theme,
+                LocalDateTime.of(2026, 5, 15, 9, 0)
+        );
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 11, 0);
 
         assertThat(reservation.isPast(now)).isTrue();
@@ -105,8 +152,9 @@ class ReservationTest {
     @Test
     @DisplayName("예약 날짜와 시간이 기준 시각과 같으면 과거 예약이 아니다.")
     void isPastAt_false_whenReservationDateTimeIsSameAsNow() {
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 5, 15), time, theme);
+        LocalDate date = LocalDate.of(2026, 5, 15);
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
+        Reservation reservation = createReservation("브라운", date, time, theme, now);
 
         assertThat(reservation.isPast(now)).isFalse();
     }
@@ -114,8 +162,9 @@ class ReservationTest {
     @Test
     @DisplayName("예약 날짜와 시간이 기준 시각보다 이후이면 과거 예약이 아니다.")
     void isPastAt_false_whenReservationDateTimeIsAfterNow() {
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 5, 15), time, theme);
+        LocalDate date = LocalDate.of(2026, 5, 15);
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 9, 0);
+        Reservation reservation = createReservation("브라운", date, time, theme, now);
 
         assertThat(reservation.isPast(now)).isFalse();
     }
@@ -123,5 +172,14 @@ class ReservationTest {
     private void assertInvalidRequestException(Runnable runnable) {
         assertThatThrownBy(runnable::run)
                 .isInstanceOf(InvalidRequestException.class);
+    }
+
+    private Reservation createReservation(
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            LocalDateTime now) {
+        return Reservation.create(name, ReservationSlot.of(theme, date, time), now);
     }
 }

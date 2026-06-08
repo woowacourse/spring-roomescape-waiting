@@ -48,9 +48,48 @@ public class MissionStepTest {
                 .body("times.find { it.id == " + timeId + " }.startAt", is("10:00"));
 
         RestAssured.given().log().all()
-                .when().delete("/admin/times/" + timeId)
+                .contentType(ContentType.JSON)
+                .body(Map.of("status", "INACTIVE"))
+                .when().patch("/admin/times/" + timeId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("테마 관리 API")
+    void themeManagementApi() {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "공포");
+        params.put("description", "무서움");
+        params.put("thumbnail", "https://example.com/theme.png");
+
+        int themeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        RestAssured.given().log().all()
+                .when().get("/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("themes.find { it.id == " + themeId + " }.name", is("공포"));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of("status", "INACTIVE"))
+                .when().patch("/admin/themes/" + themeId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("themes.find { it.id == " + themeId + " }", nullValue());
     }
 
     @Test

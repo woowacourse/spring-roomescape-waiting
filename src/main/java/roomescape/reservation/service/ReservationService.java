@@ -6,6 +6,7 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -40,17 +41,13 @@ public class ReservationService {
     public Reservation create(String name, LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
+        ReservationSlot slot = ReservationSlot.of(theme, date, time);
 
-        if (reservationRepository.existsConflict(
-                name,
-                date,
-                time.getId(),
-                theme.getId()
-        )) {
+        if (reservationRepository.existsConflict(name, slot)) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }
 
-        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.create(name, slot, LocalDateTime.now());
 
         return reservationRepository.save(reservation);
     }
@@ -69,21 +66,18 @@ public class ReservationService {
         }
 
         ReservationTime time = findTime(timeId);
-        if (reservationRepository.existsConflictExcluding(
-                name,
-                date,
-                time.getId(),
-                reservation.getTheme().getId(),
-                reservation.getId()
-        )) {
+        ReservationSlot slot = ReservationSlot.of(reservation.getTheme(), date, time);
+        if (reservation.isSameSlot(slot)) {
+            return reservation;
+        }
+
+        if (reservationRepository.existsConflictExcluding(name, slot, reservation.getId())) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }
 
         Reservation newReservation = Reservation.create(
                 reservation.getName(),
-                date,
-                time,
-                reservation.getTheme(),
+                slot,
                 now);
 
         reservationRepository.update(reservation.cancel());

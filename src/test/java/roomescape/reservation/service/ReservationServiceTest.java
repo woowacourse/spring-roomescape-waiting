@@ -10,6 +10,7 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -18,6 +19,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -311,6 +313,35 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("같은 날짜와 시간으로 예약 변경을 요청하면 기존 예약을 그대로 반환한다.")
+    public void updateDateTime_success_whenSameDateTime() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+
+        Reservation reservedReservation = createReservation(NAME, FUTURE_DATE, time, theme);
+        Reservation waitingReservation = createReservation(OTHER_NAME, FUTURE_DATE, time, theme);
+
+        // when
+        Reservation updatedReservation = reservationService.updateDateTime(
+                waitingReservation.getId(),
+                OTHER_NAME,
+                FUTURE_DATE,
+                time.getId()
+        );
+
+        // then
+        assertThat(updatedReservation.getId()).isEqualTo(waitingReservation.getId());
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(updatedReservation.getWaitingRank()).isEqualTo(1L);
+        assertThat(countHistoryByReservationId(waitingReservation.getId())).isZero();
+
+        assertThat(reservationService.findAll())
+                .extracting(Reservation::getId)
+                .containsExactly(reservedReservation.getId(), waitingReservation.getId());
+    }
+
+    @Test
     @DisplayName("같은 사용자가 이미 신청한 날짜, 시간, 테마로 예약을 변경하면 예외가 발생한다.")
     public void updateDateTime_fail_whenDuplicatedReservation() {
         // given
@@ -357,15 +388,20 @@ class ReservationServiceTest {
     }
 
     private Reservation savePastReservation() {
-        return reservationRepository.save(new Reservation(NAME, PAST_DATE, saveReservationTime(14), saveTheme()));
+        ReservationTime time = saveReservationTime(14);
+        return reservationRepository.save(Reservation.create(
+                NAME,
+                ReservationSlot.of(saveTheme(), PAST_DATE, time),
+                LocalDateTime.of(PAST_DATE, time.getStartAt()).minusMinutes(1)
+        ));
     }
 
     private ReservationTime saveReservationTime(int hour) {
-        return reservationTimeRepository.save(new ReservationTime(LocalTime.of(hour, 0)));
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
 
     private Theme saveTheme() {
-        return themeRepository.save(new Theme(
+        return themeRepository.save(Theme.create(
                 "레벨2 탈출",
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://example.com/theme.png"

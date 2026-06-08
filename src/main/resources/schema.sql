@@ -4,14 +4,16 @@ CREATE TABLE theme
     name        VARCHAR(255)  NOT NULL,
     description VARCHAR(255)  NOT NULL,
     thumbnail   VARCHAR(2048) NOT NULL,
+    is_active   BOOLEAN       NOT NULL DEFAULT TRUE,
     PRIMARY KEY (id),
     UNIQUE (name)
 );
 
 CREATE TABLE reservation_time
 (
-    id       BIGINT NOT NULL AUTO_INCREMENT,
-    start_at TIME   NOT NULL,
+    id        BIGINT  NOT NULL AUTO_INCREMENT,
+    start_at  TIME    NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (id),
     UNIQUE (start_at)
 );
@@ -56,3 +58,6 @@ CREATE INDEX idx_reservation_slot_request_order
 
 CREATE INDEX idx_reservation_name
     ON reservation (name);
+
+CREATE INDEX idx_reservation_history_name
+    ON reservation_history (name);
