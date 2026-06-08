@@ -11,4 +11,5 @@ public interface WaitingRepository {
     List<Waiting> findByName(String name);
     Optional<Waiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
     boolean deleteByIdAndName(Long id, String name);
+    List<Waiting> findFirstWaitingsWithoutReservation();
 }

@@ -66,6 +66,25 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findFirstWaitingsWithoutReservation() {
+        return store.values().stream()
+                .collect(java.util.stream.Collectors.groupingBy(waiting ->
+                        "%s:%d:%d".formatted(
+                                waiting.getDate(),
+                                waiting.getTime().getId(),
+                                waiting.getTheme().getId()
+                        )
+                ))
+                .values()
+                .stream()
+                .map(waitings -> waitings.stream()
+                        .min(Comparator.comparing(Waiting::getCreatedAt)
+                                .thenComparing(Waiting::getId))
+                        .orElseThrow())
+                .toList();
+    }
+
+    @Override
     public boolean deleteByIdAndName(Long id, String name) {
         return store.values().removeIf(waiting ->
                 waiting.getId().equals(id)

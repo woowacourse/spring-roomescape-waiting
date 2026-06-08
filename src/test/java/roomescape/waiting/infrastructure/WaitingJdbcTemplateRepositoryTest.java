@@ -253,6 +253,51 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
+    @DisplayName("예약이 없는 슬롯의 1순위 예약 대기 목록을 조회한다")
+    void findFirstWaitingsWithoutReservation_success() {
+        // given
+        LocalDate waitingOnlyDate = LocalDate.now().plusDays(1);
+        LocalDate reservedDate = LocalDate.now().plusDays(2);
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "늦은대기",
+                waitingOnlyDate,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, DATEADD('SECOND', -1, CURRENT_TIMESTAMP))",
+                "빠른대기",
+                waitingOnlyDate,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "예약자",
+                reservedDate,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "예약있는대기",
+                reservedDate,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when
+        List<Waiting> waitings = waitingRepository.findFirstWaitingsWithoutReservation();
+
+        // then
+        assertThat(waitings)
+                .extracting(Waiting::getName)
+                .containsExactly("빠른대기");
+        assertThat(waitings.getFirst().getRank()).isEqualTo(1L);
+    }
+
+    @Test
     @DisplayName("예약 대기 삭제 후 같은 슬롯의 남은 대기 순번을 재정렬한다")
     void deleteByIdAndName_success_when_remaining_waiting_exists() {
         // given

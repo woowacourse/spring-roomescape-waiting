@@ -111,6 +111,34 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
         LIMIT 1
         FOR UPDATE
         """;
+    private static final String FIND_FIRST_WAITING_WITHOUT_RESERVATION_QUERY = """
+        SELECT *
+        FROM (
+            SELECT w.id,
+                   w.name AS waiting_name,
+                   w.date,
+                   w.created_at,
+                   rt.id AS time_id,
+                   rt.start_at,
+                   t.id AS theme_id,
+                   t.name AS theme_name,
+                   t.description AS theme_description,
+                   t.thumbnail_url,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY w.date, w.time_id, w.theme_id
+                       ORDER BY w.created_at, w.id
+                   ) AS rank
+            FROM waiting w
+            JOIN reservation_time rt ON w.time_id = rt.id
+            JOIN theme t ON w.theme_id = t.id
+            LEFT JOIN reservation r
+              ON r.date = w.date
+             AND r.time_id = w.time_id
+             AND r.theme_id = w.theme_id
+            WHERE r.id IS NULL
+        ) ranked
+        WHERE rank = 1
+        """;
     private static final String DELETE_BY_ID_AND_NAME_QUERY = "DELETE FROM waiting WHERE id = ? AND name = ?";
 
     private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> {
@@ -194,6 +222,14 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
                 id,
                 name
         ) == 1;
+    }
+
+    @Override
+    public List<Waiting> findFirstWaitingsWithoutReservation() {
+        return jdbcTemplate.query(
+                FIND_FIRST_WAITING_WITHOUT_RESERVATION_QUERY,
+                ROW_MAPPER
+        );
     }
 
     @Override
