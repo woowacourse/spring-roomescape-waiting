@@ -31,8 +31,8 @@ import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.reservation.vo.ReservationSchedule;
+import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.mapper.ThemeMapper;
 import roomescape.domain.theme.repository.ThemeRepository;
@@ -422,7 +422,7 @@ class ReservationServiceTest {
             // when & then
             assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
                 .isInstanceOf(GeneralException.class)
-                .hasMessage("이미 예약된 날짜, 시간, 테마입니다.");
+                .hasMessage("이미 동일한 일정의 예약을 보유하고 있습니다.");
         }
 
         @Test

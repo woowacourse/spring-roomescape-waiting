@@ -257,7 +257,7 @@ public class ReservationService {
 
     private void validateWaitingReservationCreationAllowed(Reservation reservation) {
         if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
+            throw new GeneralException(ReservationErrorType.RESERVER_ALREADY_RESERVED);
         }
 
         Optional<Long> reservationId = reservationRepository.lockActiveReservationBySchedule(reservation.getSchedule());
