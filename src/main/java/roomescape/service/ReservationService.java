@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -76,9 +78,8 @@ public class ReservationService {
             results.add(ReservationWithStatus.reserved(reservation));
         }
 
-        for (Waitlist waitlist : waitlistRepository.findAll()) {
-            results.add(ReservationWithStatus.waiting(waitlist, calculateWaitingOrder(waitlist)));
-        }
+        List<Waitlist> waitlists = waitlistRepository.findAll();
+        addWaitingReservations(results, waitlists, waitlists);
 
         results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
             .thenComparing(reservation -> reservation.getTime().getStartAt()));
@@ -94,9 +95,13 @@ public class ReservationService {
             results.add(ReservationWithStatus.reserved(reservation));
         }
 
-        for (Waitlist waitlist : waitlistRepository.findByName(name)) {
-            results.add(ReservationWithStatus.waiting(waitlist, calculateWaitingOrder(waitlist)));
-        }
+        List<Waitlist> waitlists = waitlistRepository.findByName(name);
+        List<Long> slotIds = waitlists.stream()
+            .map(waitlist -> waitlist.getSlot().getId())
+            .distinct()
+            .toList();
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotIds(slotIds);
+        addWaitingReservations(results, waitlists, sameSlotWaitlists);
 
         results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
             .thenComparing(reservation -> reservation.getTime().getStartAt()));
@@ -104,10 +109,19 @@ public class ReservationService {
         return results;
     }
 
-    private int calculateWaitingOrder(Waitlist waitlist) {
-        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(waitlist.getSlot().getId());
+    private void addWaitingReservations(
+        List<ReservationWithStatus> results,
+        List<Waitlist> targetWaitlists,
+        List<Waitlist> orderSourceWaitlists
+    ) {
+        Map<Long, List<Waitlist>> waitlistsBySlotId = orderSourceWaitlists.stream()
+            .collect(Collectors.groupingBy(waitlist -> waitlist.getSlot().getId()));
 
-        return waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
+        for (Waitlist waitlist : targetWaitlists) {
+            List<Waitlist> sameSlotWaitlists = waitlistsBySlotId.getOrDefault(waitlist.getSlot().getId(), List.of());
+            int waitingOrder = waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
+            results.add(ReservationWithStatus.waiting(waitlist, waitingOrder));
+        }
     }
 
     public Reservation getReservation(Long id) {

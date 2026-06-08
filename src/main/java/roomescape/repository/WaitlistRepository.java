@@ -25,6 +25,8 @@ public interface WaitlistRepository {
 
     List<Waitlist> findBySlotId(Long slotId);
 
+    List<Waitlist> findBySlotIds(List<Long> slotIds);
+
     default Waitlist getById(Long id, String message) {
         return findById(id).orElseThrow(() -> new RoomEscapeException(RESERVATION_NOT_FOUND, message));
     }

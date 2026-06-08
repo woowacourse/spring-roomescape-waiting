@@ -63,6 +63,24 @@ class JdbcWaitlistRepositoryTest {
             .containsExactly(brieId, pobiId, neoId);
     }
 
+    @Test
+    void 여러_슬롯의_대기_목록을_한_번에_조회한다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+        Slot firstSlot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE, reservationTime, theme));
+        Slot secondSlot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE.plusDays(1), reservationTime, theme));
+
+        Long brieId = waitlistRepository.save(new Reservation("브리", firstSlot), CREATED_AT);
+        Long pobiId = waitlistRepository.save(new Reservation("포비", firstSlot), CREATED_AT.plusMinutes(1));
+        Long neoId = waitlistRepository.save(new Reservation("네오", secondSlot), CREATED_AT);
+
+        List<Waitlist> waitlists = waitlistRepository.findBySlotIds(List.of(firstSlot.getId(), secondSlot.getId()));
+
+        assertThat(waitlists)
+            .extracting(Waitlist::getId)
+            .containsExactly(brieId, pobiId, neoId);
+    }
+
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
         Long id = timeRepository.save(reservationTime);

@@ -3,6 +3,7 @@ package roomescape.infra;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -159,6 +160,29 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
             """;
 
         return jdbcTemplate.query(sql, wailtListRowMapper, slotId);
+    }
+
+    @Override
+    public List<Waitlist> findBySlotIds(List<Long> slotIds) {
+        if (slotIds.isEmpty()) {
+            return List.of();
+        }
+
+        String placeholders = String.join(", ", Collections.nCopies(slotIds.size(), "?"));
+        String sql = """
+            SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM waitlist as w
+            INNER JOIN slot as s ON w.slot_id = s.id
+            INNER JOIN reservation_time as t ON s.time_id = t.id
+            INNER JOIN theme as th ON s.theme_id = th.id
+            WHERE w.slot_id IN (%s)
+            ORDER BY w.slot_id ASC, w.created_at ASC, w.id ASC;
+            """.formatted(placeholders);
+
+        return jdbcTemplate.query(sql, wailtListRowMapper, slotIds.toArray());
     }
 
     private Long getSlotId(Reservation reservation) {
