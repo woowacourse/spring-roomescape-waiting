@@ -75,6 +75,17 @@ public class ReservationLineTest {
     }
 
     @Test
+    @DisplayName("하나의 슬롯에 확정 예약이 여러 개 있으면 예외가 발생한다.")
+    void 확정_예약_여러개일_경우_예외() {
+        Reservation first = createReserved(1L, "예약자1", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation second = createReserved(2L, "예약자2", LocalDateTime.of(2026, 6, 3, 10, 1));
+
+        assertThatThrownBy(() -> new ReservationLine(createSlot(), List.of(first, second)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("하나의 예약 슬롯에는 확정 예약이 하나만 존재할 수 있습니다.");
+    }
+
+    @Test
     @DisplayName("같은 슬롯에 이미 예약 또는 대기 중이면 추가할 수 없다.")
     void 같은_슬롯_중복_추가_예외() {
         Reservation reserved = createReserved(1L, "브라운", LocalDateTime.of(2026, 6, 3, 10, 0));
