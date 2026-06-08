@@ -101,3 +101,23 @@ erDiagram
 전체 API에 대한 상세 명세(Endpoint, Request/Response 형식, 상태 코드, 인증 방식 등)는 아래 파일 링크를 통해 확인할 수 있음.
 
 **[API 명세서 보기 (docs/API.md)](./docs/API.md)**
+
+---
+
+## 5. 실행 방법
+
+### 로컬 환경에서 예제 데이터와 함께 실행하기
+
+애플리케이션 실행 시 초기 예약, 테마, 시간 등의 예제 데이터를 자동으로 채워 넣고 테스트하고 싶다면 `local` 프로파일을 활성화하여 실행하세요.
+
+**명령어 (CLI):**
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+**IDE (IntelliJ) 설정:**
+- Run/Debug Configurations 창을 엽니다.
+- Spring Boot 실행 설정에서 `Active profiles` 칸에 `local`을 입력하고 실행합니다.
+
+> [!WARNING]
+> `local` 프로파일로 실행 시 애플리케이션이 시작될 때 기존 데이터베이스의 **모든 데이터가 삭제되고 예제 데이터로 초기화**됩니다. 실제 서비스 환경이나 데이터 보존이 필요한 환경에서는 절대 사용하지 마세요.
