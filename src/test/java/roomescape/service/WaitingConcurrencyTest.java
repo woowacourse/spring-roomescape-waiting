@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +23,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.repository.WaitingWithOrder;
 
 @SpringBootTest(classes = RoomescapeApplication.class)
 @Sql(scripts = "/empty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -102,5 +104,60 @@ class WaitingConcurrencyTest {
         Assertions.assertThat(numbers).doesNotHaveDuplicates();
         Assertions.assertThat(numbers)
                 .containsExactlyInAnyOrder(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
+    }
+
+    @Test
+    void 동시에_10개의_대기취소가_요청되면_10개의_대기가_모두_정상적으로_삭제된다() throws InterruptedException{
+        int threadCount = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        LocalDate date = LocalDate.of(2030, 6, 1);
+
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.of(10, 0))
+        );
+        Theme theme = themeRepository.save(
+                Theme.create("귀신찾기", "귀신을 찾는다", "example.com")
+        );
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+
+        List<Long> waitingIds = new ArrayList<>();
+        for (int i = 0; i < threadCount; i++) {
+            Waiting savedWaiting = waitingRepository.save(
+                    Waiting.create("사용자" + i, slot, (long) i + 1)
+            );
+            waitingIds.add(savedWaiting.getId());
+        }
+
+        for (int i = 0; i < threadCount; i++) {
+            Long targetId = waitingIds.get(i);
+
+            executorService.submit(() -> {
+                readyLatch.countDown();
+                try {
+                    startLatch.await();
+                    waitingService.deleteWaiting(targetId);
+                } catch (Exception e) {
+                    System.out.println("취소 실패: " + e.getMessage());
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+        executorService.shutdown();
+
+        List<WaitingWithOrder> remainingWaitings = waitingRepository.findAll().stream()
+                .filter(w -> w.waiting().getReservationSlot().equals(slot))
+                .toList();
+
+        Assertions.assertThat(remainingWaitings).isEmpty();
     }
 }
