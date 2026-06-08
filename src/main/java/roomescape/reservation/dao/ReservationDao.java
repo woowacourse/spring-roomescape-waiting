@@ -174,6 +174,17 @@ public class ReservationDao {
     return count != null && count > 0;
   }
 
+  public void lockByDateTimeTheme(String date, Long timeId, Long themeId) {
+    String sql = """
+        select id
+        from reservation
+        where date = ? and time_id = ? and theme_id = ?
+        for update
+        """;
+
+    jdbcTemplate.query(sql, (resultSet, rowNum) -> resultSet.getLong("id"), date, timeId, themeId);
+  }
+
   public boolean existsByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
     String sql = """
         select count(*)

@@ -25,7 +25,9 @@ public class ReservationService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional
     public ReservationCreateResponse create(ReservationRequest request, ReservationTime time, Theme theme) {
+        reservationDao.lockByDateTimeTheme(request.date(), time.getId(), theme.getId());
 
         boolean isAlreadyExist = reservationDao.existsByNameAndDateAndTimeAndTheme(request.name(), request.date(), time.getId(), theme.getId());
         if (isAlreadyExist) {
@@ -61,6 +63,12 @@ public class ReservationService {
     public void cancelReservationByNameAndId(String name, Long id) {
         Reservation reservation = reservationDao.findById(id);
         validateReservationAuthority(name, reservation);
+
+        reservationDao.lockByDateTimeTheme(
+                reservation.getDate().toString(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
 
         reservationDao.cancelByNameAndId(name, id);
 
