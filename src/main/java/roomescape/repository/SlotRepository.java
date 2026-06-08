@@ -10,5 +10,5 @@ public interface SlotRepository {
 
     Optional<Slot> findByDateAndThemeAndTimeAndStore(LocalDate date, Long themeId, Long timeId, Long storeId);
 
-    Long save(Slot slot);
+    Slot save(Slot slot);
 }

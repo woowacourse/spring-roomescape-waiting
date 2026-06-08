@@ -170,10 +170,7 @@ public class ReservationService {
 
     private Slot resolveSlot(LocalDate date, Theme theme, ReservationTime time, Store store) {
         return slotRepository.findByDateAndThemeAndTimeAndStore(date, theme.getId(), time.getId(), store.getId())
-                .orElseGet(() -> {
-                    Slot slot = new Slot(null, date, theme, time, store);
-                    return slot.withId(slotRepository.save(slot));
-                });
+                .orElseGet(() -> slotRepository.save(new Slot(null, date, theme, time, store)));
     }
 
     private void validateIsReserved(Reservation existing) {

@@ -80,7 +80,7 @@ public class SlotJdbcRepository implements SlotRepository {
     }
 
     @Override
-    public Long save(Slot slot) {
+    public Slot save(Slot slot) {
         String sql = "insert into reservation_slot(date, theme_id, time_id, store_id) values(?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -93,6 +93,6 @@ public class SlotJdbcRepository implements SlotRepository {
             return ps;
         }, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        return slot.withId(keyHolder.getKey().longValue());
     }
 }
