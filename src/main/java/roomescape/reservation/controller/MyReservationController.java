@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -8,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import java.time.LocalDateTime;
 import roomescape.auth.Authorized;
 import roomescape.auth.OwnerOnly;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationUpdateCommand;
 
 @RestController
 @RequestMapping("/reservations")
@@ -32,7 +33,9 @@ public class MyReservationController {
             @PathVariable Long id,
             @RequestBody ReservationUpdateRequest request
     ) {
-        reservationService.update(request.toCommand(), id, name, LocalDateTime.now());
+        ReservationUpdateCommand reservationUpdateCommand = new ReservationUpdateCommand(id, name, request.date(),
+                request.timeId());
+        reservationService.update(reservationUpdateCommand, LocalDateTime.now());
     }
 
     @Authorized

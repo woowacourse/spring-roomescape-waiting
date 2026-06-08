@@ -3,7 +3,6 @@ package roomescape.reservation.controller.dto;
 import java.time.LocalDate;
 import roomescape.global.exception.BadRequestException;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.reservation.service.dto.ReservationUpdateCommand;
 
 public record ReservationUpdateRequest(
         LocalDate date,
@@ -13,12 +12,5 @@ public record ReservationUpdateRequest(
         if (date == null && timeId == null) {
             throw new BadRequestException(ReservationErrorCode.INVALID_UPDATE_FORMAT);
         }
-    }
-
-    public ReservationUpdateCommand toCommand() {
-        return new ReservationUpdateCommand(
-                date,
-                timeId
-        );
     }
 }

@@ -59,9 +59,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void update(ReservationUpdateCommand command, long id, String name, LocalDateTime requestTime) {
-        Reservation reservation = getById(id);
-        reservation.validateDeletableByUser(name, requestTime);
+    public void update(ReservationUpdateCommand command, LocalDateTime requestTime) {
+        Reservation reservation = getById(command.id());
+        reservation.validateDeletableByUser(command.name(), requestTime);
 
         ReservationTime newTime = null;
         if (command.timeId() != null) {
@@ -69,8 +69,8 @@ public class ReservationService {
         }
 
         ReservationSlot temporalSlot = reservation.generateTemporalSlot(command.date(), newTime);
-        validateSlotAvailable(id, name, temporalSlot);
-        Reservation updated = reservation.update(command.date(), newTime, name, requestTime);
+        validateSlotAvailable(command.id(), command.name(), temporalSlot);
+        Reservation updated = reservation.update(command.date(), newTime, command.name(), requestTime);
 
         try {
             reservationRepository.save(updated);

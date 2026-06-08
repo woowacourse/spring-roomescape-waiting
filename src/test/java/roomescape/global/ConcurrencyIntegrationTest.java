@@ -1,5 +1,6 @@
 package roomescape.global;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.testSupport.RestAssuredTestHelper.createReservation;
 import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
@@ -105,11 +106,11 @@ class ConcurrencyIntegrationTest {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationService.save(new ReservationCommand(
-                                "name" + java.util.UUID.randomUUID().toString(),
-                                LocalDate.now().plusDays(7),
-                                1L,
-                                1L
-                        ), java.time.LocalDateTime.now()),
+                        "name" + java.util.UUID.randomUUID().toString(),
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                ), now()),
                 100,
                 ConflictException.class
         );
@@ -167,7 +168,7 @@ class ConcurrencyIntegrationTest {
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.deleteByUser(1L, "브라운", java.time.LocalDateTime.now()),
+                () -> reservationService.deleteByUser(1L, "브라운", now()),
                 100,
                 NotFoundException.class
         );
@@ -239,12 +240,10 @@ class ConcurrencyIntegrationTest {
 
         //when
         List<Runnable> tasks = List.of(
-                () -> reservationService.update(new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
-                        reservationId1,
-                        "브라운", java.time.LocalDateTime.now()),
-                () -> reservationService.update(new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
-                        reservationId2,
-                        "코니", java.time.LocalDateTime.now())
+                () -> reservationService.update(
+                        new ReservationUpdateCommand(reservationId1, "브라운", LocalDate.now().plusDays(14), 3L), now()),
+                () -> reservationService.update(
+                        new ReservationUpdateCommand(reservationId2, "코니", LocalDate.now().plusDays(14), 3L), now())
         );
 
         for (Runnable task : tasks) {
@@ -286,11 +285,11 @@ class ConcurrencyIntegrationTest {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationWaitingService.save(new ReservationWaitingCommand(
-                                "name",
-                                LocalDate.now().plusDays(7),
-                                1L,
-                                1L
-                        ), java.time.LocalDateTime.now()),
+                        "name",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                ), now()),
                 100,
                 BusinessException.class
         );
@@ -313,11 +312,11 @@ class ConcurrencyIntegrationTest {
                 LocalDate.now().plusDays(7),
                 1L,
                 1L
-        ), java.time.LocalDateTime.now());
+        ), now());
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "포비", java.time.LocalDateTime.now()),
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "포비", now()),
                 100,
                 NotFoundException.class
         );
@@ -351,13 +350,13 @@ class ConcurrencyIntegrationTest {
                         LocalDate.now().plusDays(7),
                         1L,
                         1L
-                ), java.time.LocalDateTime.now()),
+                ), now()),
                 () -> reservationService.save(new ReservationCommand(
                         "브라운",
                         LocalDate.now().plusDays(7),
                         1L,
                         2L
-                ), java.time.LocalDateTime.now())
+                ), now())
         );
 
         for (Runnable task : tasks) {

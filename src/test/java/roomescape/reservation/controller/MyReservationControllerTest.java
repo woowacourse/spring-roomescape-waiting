@@ -1,7 +1,6 @@
 package roomescape.reservation.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -24,6 +23,7 @@ import roomescape.global.exception.ForbiddenException;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationUpdateCommand;
 
 @WebMvcTest(MyReservationController.class)
 @Import({WebMvcConfig.class, AuthInterceptor.class, OwnerOnlyArgumentResolver.class})
@@ -57,7 +57,7 @@ class MyReservationControllerTest {
     void updateMyReservation_MismatchOwner_Forbidden() throws Exception {
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(1), 1L);
         willThrow(new ForbiddenException("접근 권한이 없습니다."))
-                .given(reservationService).update(any(), eq(1L), eq("다른사용자"), any());
+                .given(reservationService).update(any(ReservationUpdateCommand.class), any());
 
         mockMvc.perform(patch("/reservations/1")
                         .header("Authorization", "다른사용자")
