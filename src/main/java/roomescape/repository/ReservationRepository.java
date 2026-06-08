@@ -7,7 +7,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWithWaitingOrder;
 
 public interface ReservationRepository {
-    List<ReservationWithWaitingOrder> findAll();
+    List<ReservationWithWaitingOrder> findAllActive();
 
     List<ReservationWithWaitingOrder> findByReserverName(String reserverName);
 

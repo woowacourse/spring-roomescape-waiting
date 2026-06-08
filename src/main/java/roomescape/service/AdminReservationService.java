@@ -38,7 +38,7 @@ public class AdminReservationService {
 
 
     public List<ReservationResult> findAll() {
-        return reservationRepository.findAll().stream()
+        return reservationRepository.findAllActive().stream()
                 .map(ReservationResult::from)
                 .toList();
     }

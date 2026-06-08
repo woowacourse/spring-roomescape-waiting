@@ -113,7 +113,7 @@ public class JdbcReservationRepository implements ReservationRepository, LockedR
     }
 
     @Override
-    public List<ReservationWithWaitingOrder> findAll() {
+    public List<ReservationWithWaitingOrder> findAllActive() {
         String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.status <> '" + CANCELED + "'";
         return jdbcTemplate.query(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER);
     }

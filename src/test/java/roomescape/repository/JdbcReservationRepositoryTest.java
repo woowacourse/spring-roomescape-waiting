@@ -56,7 +56,7 @@ class JdbcReservationRepositoryTest {
         insertReservation("브라운", DATE, time, theme);
         insertReservation("리사", DATE, time, theme);
 
-        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAll();
+        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAllActive();
 
         assertThat(reservations).hasSize(2);
     }
@@ -70,7 +70,7 @@ class JdbcReservationRepositoryTest {
         Reservation canceled = insertReservation("리사", DATE, time, theme,
                 ReservationStatus.CANCELED, Instant.now());
 
-        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAll();
+        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAllActive();
 
         assertThat(reservations)
                 .extracting(ReservationWithWaitingOrder::id)
