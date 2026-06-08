@@ -6,24 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.request.UserReservationUpdateRequest;
-import roomescape.dto.response.ReservationRankResponse;
+import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.InvalidStateException;
 import roomescape.exception.NotFoundException;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -98,12 +96,14 @@ class ReservationServiceTest {
     void 예약_변경_시_이미_예약이_존재하면_대기_불가() {
         ReservationTime anotherTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(21, 0)));
         ReservationRequest firstRequest = new ReservationRequest("그해", LocalDate.now().plusDays(1), timeId, themeId);
-        ReservationRequest secondRequest = new ReservationRequest("그해", LocalDate.now().plusDays(1), anotherTime.getId(), themeId);
+        ReservationRequest secondRequest = new ReservationRequest("그해", LocalDate.now().plusDays(1),
+                anotherTime.getId(), themeId);
 
         long id = reservationService.save(firstRequest).id();
         reservationService.save(secondRequest);
 
-        UserReservationUpdateRequest updateRequest = new UserReservationUpdateRequest(LocalDate.now().plusDays(1), anotherTime.getId());
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(LocalDate.now().plusDays(1),
+                anotherTime.getId());
 
         assertThatThrownBy(() -> reservationService.update(id, updateRequest))
                 .isInstanceOf(AlreadyExistsException.class);
@@ -121,17 +121,18 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약_삭제_시_대기_순번_승인_확인() {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
-        ReservationRequest firstRequest = new ReservationRequest("브라운", futureDate, timeId, themeId);
-        ReservationRequest secondRequest = new ReservationRequest("테스트유저", futureDate, timeId, themeId);
+    void 예약_변경시_승인된_예약이_있을_경우_예약_대기() {
+        ReservationTime anotherTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(21, 0)));
+        reservationService.save(
+                new ReservationRequest("브라운", LocalDate.now().plusDays(1), anotherTime.getId(), themeId));
 
-        long firstId = reservationService.save(firstRequest).id();
-        long secondId = reservationService.save(secondRequest).id();
+        long id = reservationService.save(new ReservationRequest("그해", LocalDate.now().plusDays(1), timeId, themeId))
+                .id();
 
-        reservationService.delete(firstId);
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(LocalDate.now().plusDays(1),
+                anotherTime.getId());
+        ReservationResponse updated = reservationService.update(id, updateRequest);
 
-        List<ReservationRankResponse> reservations = reservationService.find("테스트유저");
-        assertThat(reservations.getFirst().status()).isEqualTo(ReservationStatus.CONFIRMED);
+        assertThat(updated.status()).isEqualTo(ReservationStatus.WAITING);
     }
 }

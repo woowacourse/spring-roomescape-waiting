@@ -41,7 +41,8 @@ class ReservationRepositoryTest {
 
     @Test
     void ID로_예약_조회() {
-        Reservation saved = reservationRepository.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+        Reservation saved = reservationRepository.save(
+                new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
 
         Optional<Reservation> reservation = reservationRepository.findById(saved.getId());
 
@@ -52,7 +53,8 @@ class ReservationRepositoryTest {
 
     @Test
     void 이름으로_예약_조회() {
-        Reservation saved = reservationRepository.save(new Reservation("아나키", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+        Reservation saved = reservationRepository.save(
+                new Reservation("아나키", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
 
         List<ReservationRank> reservation = reservationRepository.findByName("아나키");
 
@@ -88,10 +90,11 @@ class ReservationRepositoryTest {
     @Test
     void 대기_삭제_시_후순위_대기자_순번_재정렬() {
         reservationRepository.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
-        Reservation waiting1 = reservationRepository.save(new Reservation("그해", LocalDate.now(), time, theme, ReservationStatus.WAITING));
+        Reservation firstWaiting = reservationRepository.save(
+                new Reservation("그해", LocalDate.now(), time, theme, ReservationStatus.WAITING));
         reservationRepository.save(new Reservation("아나키", LocalDate.now(), time, theme, ReservationStatus.WAITING));
 
-        reservationRepository.delete(waiting1.getId());
+        reservationRepository.delete(firstWaiting.getId());
 
         ReservationRank secondWaiting = reservationRepository.findByName("아나키").stream()
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
@@ -104,11 +107,13 @@ class ReservationRepositoryTest {
     @Test
     void 대기_예약_승인_확인() {
         LocalDate date = LocalDate.now();
-        Reservation confirmed = reservationRepository.save(new Reservation("브라운", date, time, theme, ReservationStatus.CONFIRMED));
-        Reservation waiting = reservationRepository.save(new Reservation("아나키", date, time, theme, ReservationStatus.WAITING));
+        Reservation confirmed = reservationRepository.save(
+                new Reservation("브라운", date, time, theme, ReservationStatus.CONFIRMED));
+        Reservation waiting = reservationRepository.save(
+                new Reservation("아나키", date, time, theme, ReservationStatus.WAITING));
 
         reservationRepository.delete(confirmed.getId());
-        reservationRepository.update(date, theme.getId(), time.getId());
+        reservationRepository.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED);
 
         Reservation result = reservationRepository.findById(waiting.getId()).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
@@ -127,7 +132,8 @@ class ReservationRepositoryTest {
 
     @Test
     void 예약_삭제() {
-        Reservation saved = reservationRepository.save(new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
+        Reservation saved = reservationRepository.save(
+                new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED));
 
         reservationRepository.delete(saved.getId());
 

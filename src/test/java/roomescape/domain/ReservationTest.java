@@ -14,6 +14,27 @@ class ReservationTest {
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
     private final Theme theme = new Theme(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror");
 
+
+    @Test
+    void 유효하지_않은_이름으로_생성_시_예외() {
+        assertThatThrownBy(() -> new Reservation("", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Reservation(null, LocalDate.now(), time, theme, ReservationStatus.CONFIRMED))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 날짜가_없으면_생성_시_예외() {
+        assertThatThrownBy(() -> new Reservation("브라운", null, time, theme, ReservationStatus.CONFIRMED))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 시간이_없으면_생성_시_예외() {
+        assertThatThrownBy(() -> new Reservation("브라운", LocalDate.now(), null, theme, ReservationStatus.CONFIRMED))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
     @Test
     void 같은_날짜와_시간인지_확인() {
         Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 1, 1), time, theme,
@@ -26,14 +47,35 @@ class ReservationTest {
 
     @Test
     void 과거_날짜와_시간이면_예외() {
-        Reservation reservation = new Reservation("브라운", LocalDate.now().plusDays(1), time, theme,
+        Reservation pastReservation = new Reservation("브라운", LocalDate.now().minusDays(1), time, theme,
                 ReservationStatus.WAITING);
 
-        assertThatThrownBy(() -> reservation.validateNotPast(LocalDate.now().minusDays(1), time))
+        assertThatThrownBy(pastReservation::validateNotPast)
                 .isInstanceOf(InvalidStateException.class)
                 .hasMessage("이미 지난 시간/날짜는 예약할 수 없습니다.");
 
-        assertThatCode(() -> reservation.validateNotPast(LocalDate.now().plusDays(1), time))
+        Reservation futureReservation = new Reservation("브라운", LocalDate.now().plusDays(1), time, theme,
+                ReservationStatus.WAITING);
+
+        assertThatCode(futureReservation::validateNotPast)
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 대기_상태에서_예약_승인() {
+        Reservation waiting = new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.WAITING);
+
+        waiting.confirm();
+
+        assertThat(waiting.isConfirmed()).isTrue();
+    }
+
+    @Test
+    void 이미_승인된_경우_승인_시_예외() {
+        Reservation confirmed = new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED);
+
+        assertThatThrownBy(confirmed::confirm)
+                .isInstanceOf(InvalidStateException.class)
+                .hasMessage("대기 중인 예약만 승격할 수 있습니다.");
     }
 }
