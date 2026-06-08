@@ -5,6 +5,8 @@ import roomescape.exception.RoomescapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -85,6 +87,7 @@ public class ReservationService {
         return ReservationWithStatusResponses.of(rows, hasNext);
     }
 
+    @Retryable(retryFor = DataIntegrityViolationException.class, maxAttempts = 3)
     @Transactional
     public Reservation create(CreateReservationCommand command, ReservationStatus status) {
         Reservation newReservation = buildReservation(command, status);
@@ -96,6 +99,7 @@ public class ReservationService {
         return newReservation.withId(newReservationId);
     }
 
+    @Retryable(retryFor = DataIntegrityViolationException.class, maxAttempts = 3)
     @Transactional
     public Reservation updateOwnReservation(UpdateReservationCommand command) {
         Reservation existing = reservationRepository.findById(command.reservationId())
