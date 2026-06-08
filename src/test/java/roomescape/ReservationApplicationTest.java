@@ -2,7 +2,6 @@ package roomescape;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import roomescape.application.ReservationApplicationService;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.service.ReservationService;
@@ -25,8 +25,8 @@ import roomescape.reservationwaiting.service.ReservationWaitingService;
  * 예약 승격 테스트
  * 1. [성공] 대기가 존재하지 않는 예약 삭제 성공
  * 2. [성공] 대기가 존재하는 예약 삭제 성공
- * 3. [롤백] 대기 조회 성공 후 대기 삭제 실패 시 롤백
- * 4. [롤백] 대기 조회 성공 후 대기 승격 실패 시 롤백
+ * 3. [성공] 대기 삭제 실패 시에도 예약 취소 성공 (승격만 실패)
+ * 4. [성공] 대기 승격 실패 시에도 예약 취소 성공 (승격만 실패)
  */
 @SpringBootTest
 public class ReservationApplicationTest {
@@ -95,7 +95,7 @@ public class ReservationApplicationTest {
     }
 
     @Test
-    void 대기_삭제_실패시_예약_삭제도_롤백() {
+    void 대기_삭제_실패시에도_예약_취소_성공() {
         // given
         insertReservation("도우너", TOMORROW, 1L, 1L);
         insertReservationWaiting("둘리", TOMORROW, 1L, 1L, LocalDateTime.now());
@@ -107,23 +107,20 @@ public class ReservationApplicationTest {
                 .when(reservationWaitingService).deleteById(anyLong());
 
         // when
-        assertThrows(ResourceNotFoundException.class,
-                () -> reservationApplicationService.cancelReservation(reservationId, "도우너"));
+        reservationApplicationService.cancelReservation(reservationId, "도우너");
 
-        // then
+        // then: 취소는 성공, 승격은 실패했으므로 대기는 그대로
         Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(*) FROM reservation", Integer.class);
-        String remainingName = jdbcTemplate.queryForObject("SELECT name FROM reservation LIMIT 1", String.class);
         Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
 
         assertAll(
-                () -> assertThat(reservationCount).isEqualTo(1),
-                () -> assertThat(remainingName).isEqualTo("도우너"),
+                () -> assertThat(reservationCount).isEqualTo(0),
                 () -> assertThat(waitingCount).isEqualTo(1)
         );
     }
 
     @Test
-    void 대기_승격_실패시_예약_삭제도_롤백() {
+    void 대기_승격_실패시에도_예약_취소_성공() {
         // given
         insertReservation("도우너", TOMORROW, 1L, 1L);
         insertReservationWaiting("둘리", TOMORROW, 1L, 1L, LocalDateTime.now());
@@ -134,17 +131,14 @@ public class ReservationApplicationTest {
                 .when(reservationService).saveWith(any(), any(), any(), any());
 
         // when
-        assertThrows(RuntimeException.class,
-                () -> reservationApplicationService.cancelReservation(reservationId, "도우너"));
+        reservationApplicationService.cancelReservation(reservationId, "도우너");
 
-        // then
+        // then: 취소는 성공, 승격은 실패했으므로 대기는 그대로
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM reservation", Integer.class);
-        String name = jdbcTemplate.queryForObject("select name from reservation LIMIT 1", String.class);
         Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
 
         assertAll(
-                () -> assertThat(count).isEqualTo(1),
-                () -> assertThat(name).isEqualTo("도우너"),
+                () -> assertThat(count).isEqualTo(0),
                 () -> assertThat(waitingCount).isEqualTo(1)
         );
     }

@@ -1,8 +1,9 @@
-package roomescape;
+package roomescape.application;
 
 import java.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.Reservation;
@@ -12,15 +13,19 @@ import roomescape.reservationwaiting.service.ReservationWaitingService;
 
 @Service
 public class ReservationApplicationService {
+    private static final Logger log = LoggerFactory.getLogger(ReservationApplicationService.class);
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
+    private final WaitingPromotionService waitingPromotionService;
 
     public ReservationApplicationService(
             final ReservationService reservationService,
-            final ReservationWaitingService reservationWaitingService
+            final ReservationWaitingService reservationWaitingService,
+            final WaitingPromotionService waitingPromotionService
     ) {
         this.reservationService = reservationService;
         this. reservationWaitingService = reservationWaitingService;
+        this.waitingPromotionService = waitingPromotionService;
     }
 
     public ReservationWaiting saveWaiting(String name, LocalDate date, Long themeId, Long timeId) {
@@ -31,24 +36,14 @@ public class ReservationApplicationService {
         return reservationWaitingService.save(name, date, themeId, timeId);
     }
 
-    @Transactional
     public void cancelReservation(Long id, String name) {
         Reservation reservation = reservationService.deleteByIdAndName(id, name);
 
-        reservationWaitingService.findFirstWaiting(
-                reservation.getDate(),
-                reservation.getTheme().getId(),
-                reservation.getTime().getId()
-        ).ifPresent(waiting -> {
-            reservationService.saveWith(
-                    waiting.getName(),
-                    waiting.getDate(),
-                    reservation.getTheme(),
-                    reservation.getTime()
-            );
-
-            reservationWaitingService.deleteById(waiting.getId());
-        });
+        try {
+            waitingPromotionService.promoteFirstWaiting(reservation);
+        } catch (Exception e) {
+            log.warn("대기 승격 실패", e.getMessage());
+        }
     }
 
     private void validateReservationOwner(String name, Reservation reservation) {

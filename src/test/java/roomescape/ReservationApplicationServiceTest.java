@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import roomescape.application.ReservationApplicationService;
+import roomescape.application.WaitingPromotionService;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.Reservation;
@@ -26,6 +28,9 @@ class ReservationApplicationServiceTest {
 
     @Mock
     private ReservationWaitingService reservationWaitingService;
+
+    @Mock
+    private WaitingPromotionService waitingPromotionService;
 
     @InjectMocks
     private ReservationApplicationService reservationApplicationService;

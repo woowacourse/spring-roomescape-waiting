@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import roomescape.ReservationApplicationService;
+import roomescape.application.ReservationApplicationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.controller.dto.ThemeResponse;
