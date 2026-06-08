@@ -35,9 +35,13 @@ public class ReservationAdminCommandService {
 
         reservationDao.delete(reservation);
 
-        if (promotion.isPresent() && !promotion.get().promotedReservation().isPast(LocalDateTime.now(clock))) {
+        if (isPromotable(promotion)) {
             reservationDao.create(promotion.get().promotedReservation());
             waitingDao.delete(promotion.get().targetWaiting());
         }
+    }
+
+    private boolean isPromotable(Optional<WaitingPromotionResult> promotion) {
+        return promotion.isPresent() && !promotion.get().promotedReservation().isPast(LocalDateTime.now(clock));
     }
 }
