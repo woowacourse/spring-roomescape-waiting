@@ -39,7 +39,7 @@ public class ThemeAdminController {
     public ResponseEntity<Void> update(
             @Positive(message = "테마 id는 1 이상의 숫자여야 합니다.") @PathVariable Long id,
             @Valid @RequestBody ThemeUpdateRequest request) {
-        if (request.status().isActive()) {
+        if (request.isActive()) {
             themeService.activate(id);
             return ResponseEntity.noContent().build();
         }

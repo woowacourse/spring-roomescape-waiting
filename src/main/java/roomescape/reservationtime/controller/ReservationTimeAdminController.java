@@ -39,7 +39,7 @@ public class ReservationTimeAdminController {
     public ResponseEntity<Void> update(
             @Positive(message = "예약 시간 id는 1 이상의 숫자여야 합니다.") @PathVariable Long id,
             @Valid @RequestBody ReservationTimeUpdateRequest request) {
-        if (request.status().isActive()) {
+        if (request.isActive()) {
             reservationTimeService.activate(id);
             return ResponseEntity.noContent().build();
         }
