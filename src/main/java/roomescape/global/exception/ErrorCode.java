@@ -15,6 +15,7 @@ public enum ErrorCode {
     RESERVATION_NOT_ALLOWED_DATE(HttpStatus.UNPROCESSABLE_ENTITY, "과거 날짜 시간은 예약할 수 없습니다."),
     RESERVATION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 해당 날짜, 시간, 테마에 예약이 존재합니다."),
     RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT(HttpStatus.CONFLICT,"이미 같은 시간에 예약 또는 대기를 신청했습니다."),
+    RESERVATION_STATUS_CONFLICT(HttpStatus.CONFLICT, "예약 상태가 이미 변경되었습니다."),
     INVALID_MODIFY_COMMAND(HttpStatus.UNPROCESSABLE_ENTITY, "변경할 수 없는 예약입니다."),
 
     // reservation status

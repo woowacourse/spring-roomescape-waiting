@@ -27,13 +27,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingColumns("name", "theme_slot_id", "status")
                 .usingGeneratedKeyColumns("id");
     }
 
     @Override
     public List<Reservation> findAll() {
         String sql = """
-                SELECT 
+                SELECT
                     r.id AS r_id, 
                     r.name, 
                     r.status,
@@ -69,23 +70,40 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ts.date,
                     ts.is_reserved,
                     t.id AS t_id,
-                    t.start_at, 
+                    t.start_at,
                     theme.id as theme_id,
                     theme.name AS theme_name,
                     theme.description AS theme_description,
                     theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
+                FROM
+                    reservation r
                         INNER JOIN
                         theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN 
+                        INNER JOIN
                         time t ON ts.time_id = t.id
-                        INNER JOIN 
+                        INNER JOIN
                         theme theme ON ts.theme_id = theme.id
                 WHERE r.id = ?
                 """;
 
         return jdbcTemplate.query(sql, rowMapper(), reservationId).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByIdForUpdate(long reservationId) {
+        String sql = """
+                SELECT
+                    r.id
+                FROM
+                    reservation r
+                WHERE r.id = ?
+                FOR UPDATE
+                """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), reservationId)
+                .stream()
+                .findFirst()
+                .flatMap(this::findById);
     }
 
     @Override
@@ -153,16 +171,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Reservation reservation) {
+    public boolean updateStatus(Reservation reservation, String expectedStatus) {
         String sql = """
                 UPDATE reservation 
                 SET status = ? 
                 WHERE id = ?
+                AND status = ?
                 """;
-        jdbcTemplate.update(sql,
+        int updatedCount = jdbcTemplate.update(sql,
                 reservation.getReservationStatusName(),
-                reservation.getId()
+                reservation.getId(),
+                expectedStatus
         );
+        return updatedCount == 1;
     }
 
     @Override
@@ -318,7 +339,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
+    public Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId) {
         String sql = """
                 SELECT 
                     r.id AS r_id,
@@ -345,6 +366,39 @@ public class JdbcReservationRepository implements ReservationRepository {
                 AND r.status = 'PENDING'
                 ORDER BY r.id
                 LIMIT 1
+                """;
+        return jdbcTemplate.query(sql, rowMapper(), themeSlotId).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId) {
+        String sql = """
+                SELECT
+                    r.id AS r_id,
+                    r.name,
+                    r.status,
+                    ts.id AS theme_slot_id,
+                    ts.date,
+                    ts.is_reserved,
+                    t.id AS t_id,
+                    t.start_at,
+                    theme.id as theme_id,
+                    theme.name AS theme_name,
+                    theme.description AS theme_description,
+                    theme.thumbnail_url AS theme_thumbnail_url
+                FROM
+                    reservation r
+                        INNER JOIN
+                        theme_slot ts ON r.theme_slot_id = ts.id
+                        INNER JOIN
+                        time t ON ts.time_id = t.id
+                        INNER JOIN
+                        theme theme ON ts.theme_id = theme.id
+                WHERE ts.id = ?
+                AND r.status = 'PENDING'
+                ORDER BY r.id
+                LIMIT 1
+                FOR UPDATE
                 """;
         return jdbcTemplate.query(sql, rowMapper(), themeSlotId).stream().findFirst();
     }

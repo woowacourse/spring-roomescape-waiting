@@ -11,16 +11,27 @@ import roomescape.global.exception.ErrorCode;
 public class FakeReservationDao implements ReservationRepository {
 
     private final Map<Long, Reservation> storage = new HashMap<>();
+    private final List<Long> findByIdForUpdateHistory = new ArrayList<>();
     private long sequence = 1L;
 
     @Override
     public List<Reservation> findAll() {
-        return List.copyOf(storage.values());
+        return storage.values()
+                .stream()
+                .map(this::copy)
+                .toList();
     }
 
     @Override
     public Optional<Reservation> findById(long id) {
-        return Optional.ofNullable(storage.get(id));
+        return Optional.ofNullable(storage.get(id))
+                .map(this::copy);
+    }
+
+    @Override
+    public Optional<Reservation> findByIdForUpdate(long id) {
+        findByIdForUpdateHistory.add(id);
+        return findById(id);
     }
 
     @Override
@@ -54,6 +65,7 @@ public class FakeReservationDao implements ReservationRepository {
     public List<Reservation> findByName(String name) {
         return storage.values().stream()
                 .filter(reservation -> Objects.equals(reservation.getName(), name))
+                .map(this::copy)
                 .toList();
     }
 
@@ -90,14 +102,18 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Reservation reservation) {
+    public boolean updateStatus(Reservation reservation, String expectedStatus) {
         Long id = reservation.getId();
         if (!storage.containsKey(id)) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
         }
 
         Reservation getReservation = storage.get(id);
+        if (!getReservation.getReservationStatusName().equals(expectedStatus)) {
+            return false;
+        }
         getReservation.changeStatus(reservation.getReservationStatus());
+        return true;
     }
 
     @Override
@@ -145,11 +161,34 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
+    public Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId) {
         return storage.values().stream()
                 .filter(reservation -> reservation.getThemeSlot().getId().equals(themeSlotId) && reservation.getReservationStatus().equals(
                         PendingStatus.getInstance()))
                 .sorted(Comparator.comparing(Reservation::getId))
+                .map(this::copy)
                 .findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId) {
+        return findFirstPendingByThemeSlotId(themeSlotId);
+    }
+
+    private Reservation copy(Reservation reservation) {
+        return new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getThemeSlot(),
+                reservation.getReservationStatus()
+        );
+    }
+
+    public List<Long> findByIdForUpdateHistory() {
+        return List.copyOf(findByIdForUpdateHistory);
+    }
+
+    public void clearFindByIdForUpdateHistory() {
+        findByIdForUpdateHistory.clear();
     }
 }

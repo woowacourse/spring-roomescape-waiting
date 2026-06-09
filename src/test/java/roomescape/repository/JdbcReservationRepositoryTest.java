@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
@@ -18,6 +20,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.WaitingReservation;
+import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 
 @JdbcTest
@@ -50,12 +53,32 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("같은 슬롯에는 확정 예약을 하나만 저장할 수 있다.")
+    void saveConfirmedReservationOnlyOncePerThemeSlot() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
+        Reservation reservation = new Reservation(2L, "네오", themeSlot, ConfirmedStatus.getInstance());
+
+        assertThatThrownBy(() -> jdbcReservationRepository.save(reservation))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
     @DisplayName("식별자로 예약 객체를 조회한다.")
     void findById() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_14, false);
         Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
         Reservation foundReservation = jdbcReservationRepository.findById(savedReservation.getId()).get();
         assertThat(foundReservation.getName()).isEqualTo("브라운");
+    }
+
+    @Test
+    @DisplayName("식별자로 예약 row를 잠그고 예약 객체를 조회한다.")
+    void findByIdForUpdate() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_14, false);
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
+        Reservation foundReservation = jdbcReservationRepository.findByIdForUpdate(savedReservation.getId()).get();
+        assertThat(foundReservation.getThemeSlotId()).isEqualTo(themeSlot.getId());
     }
 
     @Test
@@ -103,7 +126,7 @@ class JdbcReservationRepositoryTest {
         jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
         jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
 
-        Optional<Reservation> reservation = jdbcReservationRepository.findRecentReservationByThemeSlot(
+        Optional<Reservation> reservation = jdbcReservationRepository.findFirstPendingByThemeSlotId(
                 themeSlot.getId());
         assertThat(reservation).isNotEmpty();
         assertThat(reservation.get().getName()).isEqualTo("브라운1");
@@ -127,5 +150,45 @@ class JdbcReservationRepositoryTest {
         assertThat(waitingReservations)
                 .extracting(WaitingReservation::waitingOrder)
                 .containsExactly(2, 1);
+    }
+
+    @Test
+    @DisplayName("기대 상태와 현재 상태가 같을 때만 상태를 변경한다.")
+    void updateStatus() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        Reservation pendingReservation = jdbcReservationRepository.save(new Reservation("김대기", themeSlot));
+        pendingReservation.confirm();
+
+        boolean updated = jdbcReservationRepository.updateStatus(pendingReservation, "PENDING");
+
+        Reservation reservation = jdbcReservationRepository.findById(pendingReservation.getId()).orElseThrow();
+        assertThat(updated).isTrue();
+        assertThat(reservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+    }
+
+    @Test
+    @DisplayName("기대 상태와 현재 상태가 다르면 상태 변경에서 제외한다.")
+    void updateStatusWhenExpectedStatusIsDifferent() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        Reservation reservation = jdbcReservationRepository.save(new Reservation("김대기", themeSlot));
+        Reservation cancelledReservation = new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getThemeSlot(),
+                CancelledStatus.getInstance()
+        );
+        jdbcReservationRepository.updateStatus(cancelledReservation, "PENDING");
+        Reservation confirmedReservation = new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getThemeSlot(),
+                ConfirmedStatus.getInstance()
+        );
+
+        boolean updated = jdbcReservationRepository.updateStatus(confirmedReservation, "PENDING");
+
+        Reservation foundReservation = jdbcReservationRepository.findById(reservation.getId()).orElseThrow();
+        assertThat(updated).isFalse();
+        assertThat(foundReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
     }
 }

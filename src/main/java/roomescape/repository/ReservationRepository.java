@@ -12,6 +12,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(long id);
 
+    Optional<Reservation> findByIdForUpdate(long id);
+
     Reservation save(Reservation reservation);
 
     void deleteById(long id);
@@ -22,7 +24,7 @@ public interface ReservationRepository {
 
     List<WaitingReservation> findWaitingReservationsWithOrderByName(String name);
 
-    void updateStatus(Reservation reservation);
+    boolean updateStatus(Reservation reservation, String expectedStatus);
 
     void updateThemeSlot(Reservation reservation);
 
@@ -32,5 +34,7 @@ public interface ReservationRepository {
 
     boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId);
 
-    Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId);
+    Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId);
+
+    Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId);
 }

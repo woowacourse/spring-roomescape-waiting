@@ -8,6 +8,7 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
@@ -34,6 +35,7 @@ public class ReservationService {
         this.themeSlotRepository = themeSlotRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> allReservations() {
         return reservationRepository.findAll();
     }
@@ -58,12 +60,11 @@ public class ReservationService {
 
     @Transactional
     public void removeReservation(long reservationId) {
-        Reservation reservation = getReservationOrElseThrow(reservationId);
+        Reservation reservation = getReservationForUpdateOrElseThrow(reservationId);
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+            lockFirstPendingReservationThenThemeSlot(reservation);
         }
 
         reservationRepository.deleteById(reservationId);
@@ -77,6 +78,7 @@ public class ReservationService {
         updateThemeSlotReserved(reservation.getThemeSlot(), hasConfirmedReservation);
     }
 
+    @Transactional(readOnly = true)
     public MyReservationResponse findReservationBy(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         List<ReservationResponse> myNotPendingReservation = reservations.stream()
@@ -93,21 +95,21 @@ public class ReservationService {
 
     @Transactional
     public void cancelReservation(Long reservationId, String name) {
-        Reservation reservation = getReservationOrElseThrow(reservationId);
+        Reservation reservation = getReservationForUpdateOrElseThrow(reservationId);
         validateOwner(reservation, name);
         cancel(reservation);
     }
 
     private void cancel(Reservation reservation) {
+        String expectedStatus = reservation.getReservationStatusName();
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+            lockFirstPendingReservationThenThemeSlot(reservation);
         }
 
         reservation.cancel();
-        reservationRepository.updateStatus(reservation);
+        updateStatusOrElseThrow(reservation, expectedStatus);
 
         if (wasConfirmed) {
             promoteWaitingReservationOrReleaseSlot(reservation);
@@ -122,13 +124,16 @@ public class ReservationService {
 
     @Transactional
     public Reservation modifyReservation(Long reservationId, Long themeSlotId) {
-        Reservation reservation = getReservationOrElseThrow(reservationId);
+        Reservation reservation = getReservationForUpdateOrElseThrow(reservationId);
         validateModifiable(reservation);
-        ThemeSlot themeSlot = getThemeSlotForUpdateOrElseThrow(themeSlotId);
+        String expectedStatus = reservation.getReservationStatusName();
+        ThemeSlot themeSlot = getThemeSlotWithOrderedLock(reservation.getThemeSlotId(), themeSlotId);
 
         validateBeforeDate(themeSlot);
         validateDateTime(themeSlot);
-        if (reservation.hasDifferentThemeSlot(themeSlotId)) {
+        boolean changesThemeSlot = reservation.hasDifferentThemeSlot(themeSlotId);
+        boolean shouldPromotePreviousSlot = changesThemeSlot && reservation.isConfirmedStatus();
+        if (changesThemeSlot) {
             changeThemeSlot(reservation, themeSlotId, themeSlot);
         }
 
@@ -138,8 +143,19 @@ public class ReservationService {
                 themeSlot,
                 reservation.getReservationStatus()
         );
+        if (expectedStatus.equals(ConfirmedStatus.getInstance().getName()) && updateReservation.isPendingStatus()) {
+            updateStatusOrElseThrow(updateReservation, expectedStatus);
+            reservationRepository.updateThemeSlot(updateReservation);
+            if (shouldPromotePreviousSlot) {
+                promoteWaitingReservationOrReleaseSlot(reservation);
+            }
+            return updateReservation;
+        }
         reservationRepository.updateThemeSlot(updateReservation);
-        reservationRepository.updateStatus(updateReservation);
+        updateStatusOrElseThrow(updateReservation, expectedStatus);
+        if (shouldPromotePreviousSlot) {
+            promoteWaitingReservationOrReleaseSlot(reservation);
+        }
         return updateReservation;
     }
 
@@ -148,14 +164,8 @@ public class ReservationService {
         boolean targetSlotHasConfirmedReservation = reservationRepository.existsConfirmedByThemeSlotId(themeSlotId);
         updateThemeSlotReserved(themeSlot, true);
 
-        if (reservation.isConfirmedStatus()) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
-            promoteWaitingReservationOrReleaseSlot(reservation);
-        }
-
         if (targetSlotHasConfirmedReservation) {
-            reservation.changeStatus(PendingStatus.getInstance());
+            reservation.waiting();
             return;
         }
 
@@ -170,16 +180,37 @@ public class ReservationService {
         }
     }
 
+    private void lockFirstPendingReservationThenThemeSlot(Reservation reservation) {
+        reservationRepository.findFirstPendingByThemeSlotIdForUpdate(reservation.getThemeSlotId());
+        themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
+                .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+    }
+
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
-        Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlotId());
+        while (true) {
+            Optional<Reservation> waitingReservation = reservationRepository.findFirstPendingByThemeSlotId(reservation.getThemeSlotId());
 
-        if (waitingReservation.isPresent()) {
-            waitingReservation.ifPresent(Reservation::confirm);
-            reservationRepository.updateStatus(waitingReservation.get());
+            if (waitingReservation.isEmpty()) {
+                updateThemeSlotReserved(reservation.getThemeSlot(), false);
+                return;
+            }
+
+            Reservation waiting = waitingReservation.get();
+            Reservation promotedReservation = new Reservation(
+                    waiting.getId(),
+                    waiting.getName(),
+                    waiting.getThemeSlot(),
+                    ConfirmedStatus.getInstance()
+            );
+            if (reservationRepository.updateStatus(promotedReservation, PendingStatus.getInstance().getName())) {
+                return;
+            }
         }
+    }
 
-        if (waitingReservation.isEmpty()) {
-            updateThemeSlotReserved(reservation.getThemeSlot(), false);
+    private void updateStatusOrElseThrow(Reservation reservation, String expectedStatus) {
+        if (!reservationRepository.updateStatus(reservation, expectedStatus)) {
+            throw new CustomException(ErrorCode.RESERVATION_STATUS_CONFLICT);
         }
     }
 
@@ -193,6 +224,21 @@ public class ReservationService {
     private Reservation getReservationOrElseThrow(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    @NonNull
+    private Reservation getReservationForUpdateOrElseThrow(long reservationId) {
+        return reservationRepository.findByIdForUpdate(reservationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    @NonNull
+    private ThemeSlot getThemeSlotWithOrderedLock(Long currentThemeSlotId, Long targetThemeSlotId) {
+        return themeSlotRepository.findAllByIdsForUpdateInOrder(currentThemeSlotId, targetThemeSlotId)
+                .stream()
+                .filter(themeSlot -> themeSlot.hasSameId(targetThemeSlotId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
     }
 
     private void validateBeforeDate(ThemeSlot themeSlot) {

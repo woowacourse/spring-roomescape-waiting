@@ -102,6 +102,10 @@ public class Reservation {
         reservationStatus.confirm(this);
     }
 
+    public void waiting() {
+        reservationStatus.waiting(this);
+    }
+
     public void cancel() {
         reservationStatus.cancel(this);
     }

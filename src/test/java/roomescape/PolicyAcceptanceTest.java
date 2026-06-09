@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasSize;
 
 /**
  * 서비스 정책 검증 인수 테스트
@@ -299,6 +300,61 @@ public class PolicyAcceptanceTest {
                 .body("waitingReservationResponses.waitingOrder", containsInAnyOrder(1, 1));
     }
 
+    @Test
+    @DisplayName("[자동승격] 확정 예약을 취소하면 첫 번째 대기가 확정되고 다음 대기 순번이 1로 재정렬된다.")
+    void 확정_예약_취소시_첫번째_대기가_확정되고_남은_대기_순번이_재정렬된다() {
+        long themeSlotId = createReservedThemeSlotWithConfirmedReservation("확정자");
+        long confirmedReservationId = findReservationId("확정자", themeSlotId);
+        insertReservation("첫대기", "PENDING", themeSlotId);
+        insertReservation("둘대기", "PENDING", themeSlotId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "확정자")
+                .when().patch("/reservations/{reservationId}/cancel", confirmedReservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "첫대기")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationResponses", hasSize(1))
+                .body("reservationResponses[0].status", equalTo("CONFIRMED"))
+                .body("waitingReservationResponses", empty());
+
+        RestAssured.given().log().all()
+                .queryParam("name", "둘대기")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservationResponses", hasSize(1))
+                .body("waitingReservationResponses[0].status", equalTo("PENDING"))
+                .body("waitingReservationResponses[0].waitingOrder", equalTo(1));
+    }
+
+    @Test
+    @DisplayName("[대기] 앞 순번 대기를 취소하면 뒤 순번 대기가 1번으로 재정렬된다.")
+    void 앞순번_대기_취소시_뒤순번_대기가_첫번째로_재정렬된다() {
+        long themeSlotId = createReservedThemeSlotWithConfirmedReservation("확정자");
+        long firstWaitingId = insertReservationAndReturnId("첫대기", "PENDING", themeSlotId);
+        insertReservation("둘대기", "PENDING", themeSlotId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "첫대기")
+                .when().patch("/reservations/{reservationId}/cancel", firstWaitingId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "둘대기")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservationResponses", hasSize(1))
+                .body("waitingReservationResponses[0].waitingOrder", equalTo(1));
+    }
+
     // ── 예약 규칙: 예약이 존재하는 시간 삭제(422) ──────────────────────────────────
 
     @Test
@@ -340,6 +396,34 @@ public class PolicyAcceptanceTest {
                         """,
                 name,
                 status,
+                themeSlotId
+        );
+    }
+
+    private long insertReservationAndReturnId(String name, String status, long themeSlotId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement("""
+                    INSERT INTO reservation (name, status, theme_slot_id)
+                    VALUES (?, ?, ?)
+                    """, new String[]{"id"});
+            ps.setString(1, name);
+            ps.setString(2, status);
+            ps.setLong(3, themeSlotId);
+            return ps;
+        }, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
+    private long findReservationId(String name, long themeSlotId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT id
+                        FROM reservation
+                        WHERE name = ?
+                        AND theme_slot_id = ?
+                        """,
+                Long.class,
+                name,
                 themeSlotId
         );
     }

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
@@ -22,15 +23,18 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> allTheme() {
         return themeRepository.findAll();
     }
 
+    @Transactional
     public Theme saveTheme(String name, String description, String thumbnailUrl) {
         Theme theme = new Theme(name, description, thumbnailUrl);
         return themeRepository.save(theme);
     }
 
+    @Transactional
     public void removeTheme(long themeId) {
         getThemeOrElseThrow(themeId);
         if (reservationRepository.existsByThemeId(themeId)) {
@@ -45,6 +49,7 @@ public class ThemeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findPopularThemes(Long topCount, Long during) {
         LocalDate fromDate = LocalDate.now().minusDays(during);
         LocalDate toDate = LocalDate.now();

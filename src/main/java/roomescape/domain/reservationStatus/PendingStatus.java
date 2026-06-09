@@ -27,6 +27,10 @@ public class PendingStatus implements ReservationStatus {
     }
 
     @Override
+    public void waiting(Reservation reservation) {
+    }
+
+    @Override
     public void complete(Reservation reservation) {
         throw new CustomException(ErrorCode.INVALID_PENDING_COMMAND);
     }

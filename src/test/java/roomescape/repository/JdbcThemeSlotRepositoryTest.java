@@ -3,6 +3,7 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,5 +44,32 @@ class JdbcThemeSlotRepositoryTest {
         assertThat(themeSlot.getId()).isEqualTo(1L);
         assertThat(themeSlot.getTheme().getId()).isEqualTo(1L);
         assertThat(themeSlot.getDate()).isEqualTo(LocalDate.parse("2026-05-29"));
+    }
+
+    @Test
+    @DisplayName("여러 ThemeSlot을 식별자 순서대로 잠금 조회한다.")
+    void findAllByIdsForUpdateInOrder() {
+        insertThemeSlot(1L, LocalDate.parse("2026-05-29"), 1L);
+        insertThemeSlot(2L, LocalDate.parse("2026-05-30"), 2L);
+
+        List<ThemeSlot> themeSlots = jdbcThemeSlotRepository.findAllByIdsForUpdateInOrder(2L, 1L);
+
+        assertThat(themeSlots)
+                .extracting(ThemeSlot::getId)
+                .containsExactly(1L, 2L);
+        assertThat(themeSlots)
+                .extracting(themeSlot -> themeSlot.getTime().getId())
+                .containsExactly(1L, 2L);
+    }
+
+    private void insertThemeSlot(Long id, LocalDate date, Long timeId) {
+        jdbcTemplate.update(
+                "INSERT INTO theme_slot (id, theme_id, date, time_id, is_reserved) VALUES (?, ?, ?, ?, ?)",
+                id,
+                1L,
+                date,
+                timeId,
+                true
+        );
     }
 }
