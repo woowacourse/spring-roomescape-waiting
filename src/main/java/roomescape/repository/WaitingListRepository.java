@@ -104,14 +104,15 @@ public class WaitingListRepository {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND created_at <= ?
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND created_at <= ? AND id <= ?
                 """;
 
         Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
                 waitingList.getReservationDate().date(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
-                waitingList.getCreatedAt()
+                waitingList.getCreatedAt(),
+                waitingList.getId()
         );
 
         if (waitingOrder != null) {
@@ -138,7 +139,7 @@ public class WaitingListRepository {
                 JOIN reservation_time t ON w.time_id = t.id
                 JOIN theme h ON w.theme_id = h.id 
                 WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
-                ORDER BY w.created_at ASC 
+                ORDER BY w.created_at ASC, w.id ASC
                 LIMIT 1
                 """;
         try {
