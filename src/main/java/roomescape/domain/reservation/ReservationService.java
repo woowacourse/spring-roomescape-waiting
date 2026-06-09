@@ -1,12 +1,12 @@
 package roomescape.domain.reservation;
 
 import jakarta.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.ReservationCreationRequest;
 import roomescape.domain.reservation.dto.ReservationCreationResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
@@ -42,14 +42,15 @@ public class ReservationService {
         Theme theme = themeService.findById(request.themeId());
         validateNotDuplicated(request.dateId(), request.timeId(), request.themeId());
         Reservation savedReservation = reservationRepository.save(
-                request.toEntity(reservationDate, reservationTime, theme));
+            request.toEntity(reservationDate, reservationTime, theme));
         return ReservationCreationResponse.from(savedReservation);
     }
 
     public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationRepository.findAll()
+            .stream()
+            .map(ReservationResponse::from)
+            .toList();
     }
 
     public void deleteReservation(Long id) {
@@ -60,53 +61,44 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationRepository.findByName(name)
+            .stream()
+            .map(ReservationResponse::from)
+            .toList();
     }
 
+    @Transactional
     public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
-        validateNotToday(reservation.getDate());
+        validateModifiable(reservation.getDate(), reservation.getTime());
 
-        Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
-                reservation.getDate().getId(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        );
-        if (waitingReservationOpt.isPresent()) {
-            WaitingReservation waitingReservation = waitingReservationOpt.get();
-            reservationRepository.save(Reservation.createWithoutId(
-                    waitingReservation.getName(),
-                    waitingReservation.getDate(),
-                    waitingReservation.getTime(),
-                    waitingReservation.getTheme()
-            ));
-            waitingReservationRepository.deleteById(waitingReservation.getId());
-        }
         reservationRepository.deleteById(id);
+        promoteWaitingReservation(reservation);
     }
 
+    @Transactional
     public ReservationResponse updateReservation(Long id, @Valid ReservationUpdateRequest request) {
         Reservation reservation = findById(id);
-        validateNotToday(reservation.getDate());
+        validateModifiable(reservation.getDate(), reservation.getTime());
 
         ReservationDate newReservationDate = reservationDateService.findById(request.dateId());
         ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
 
         validateNotPast(newReservationDate, newReservationTime);
-        validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme().getId());
+        validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme()
+            .getId());
 
         int updatedCount = reservationRepository.updateReservation(id, request.dateId(), request.timeId());
         if (updatedCount == 0) {
             log.warn(" 수정할 예약 건이 없습니다. reservationId={}", id);
         }
+        promoteWaitingReservation(reservation);
         return ReservationResponse.from(findById(id));
     }
 
     private Reservation findById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void validateNotDuplicated(Long dateId, Long timeId, Long themeId) {
@@ -116,7 +108,7 @@ public class ReservationService {
     }
 
     private void validateNotPast(ReservationDate reservationDate, ReservationTime reservationTime) {
-        if(reservationDate.isPast(reservationTime)) {
+        if (reservationDate.isPast(reservationTime)) {
             throw new RoomescapeException(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED);
         }
     }
@@ -124,6 +116,26 @@ public class ReservationService {
     private void validateNotToday(ReservationDate reservationDate) {
         if (reservationDate.isToday()) {
             throw new RoomescapeException(ReservationDateErrorCode.TODAY_NOT_MODIFIED);
+        }
+    }
+
+    private void validateModifiable(ReservationDate reservationDate, ReservationTime reservationTime) {
+        validateNotPast(reservationDate, reservationTime);
+        validateNotToday(reservationDate);
+    }
+
+    private void promoteWaitingReservation(Reservation reservation) {
+        Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
+            reservation.getDate()
+                .getId(), reservation.getTime()
+                .getId(), reservation.getTheme()
+                .getId());
+        if (waitingReservationOpt.isPresent()) {
+            WaitingReservation waitingReservation = waitingReservationOpt.get();
+            reservationRepository.save(
+                Reservation.createWithoutId(waitingReservation.getName(), waitingReservation.getDate(),
+                    waitingReservation.getTime(), waitingReservation.getTheme()));
+            waitingReservationRepository.deleteById(waitingReservation.getId());
         }
     }
 }
