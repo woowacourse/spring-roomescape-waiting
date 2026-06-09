@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.UnprocessableContentException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
@@ -16,7 +18,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.wating.controller.dto.request.WaitingCreateRequest;
 import roomescape.wating.domain.Waiting;
-import roomescape.wating.domain.exception.*;
 import roomescape.wating.repository.WaitingRepository;
 
 import java.time.LocalDate;
@@ -83,7 +84,8 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.create(
                 new WaitingCreateRequest("재키", "jaekkii@example.com", tomorrow, time.getId(), theme.getId())
         ))
-                .isInstanceOf(NoReservationForWaitingException.class);
+                .isInstanceOf(UnprocessableContentException.class)
+                .hasMessage("예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.");
     }
 
     @Test
@@ -100,7 +102,8 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.create(
                 new WaitingCreateRequest("재키", "jaekkii@example.com", tomorrow, time.getId(), theme.getId())
         ))
-                .isInstanceOf(WaitingSlotDuplicateException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("해당 시간에 이미 대기가 존재합니다.");
     }
 
     @Test
@@ -142,7 +145,8 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.create(
                 new WaitingCreateRequest("재키", "jaekkii@example.com", yesterday, time.getId(), theme.getId())
         ))
-                .isInstanceOf(PastDateTimeWaitingException.class);
+                .isInstanceOf(UnprocessableContentException.class)
+                .hasMessage("과거 시간의 예약에 대기를 등록할 수 없습니다.");
     }
 
     @Test
@@ -182,7 +186,8 @@ class WaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> waitingService.deleteByIdAndCustomer(waitingId, "브라운", "brown@example.com"))
-                .isInstanceOf(WaitingNotOwnedException.class);
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 대기입니다.");
     }
 
     @Test
@@ -197,7 +202,8 @@ class WaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> waitingService.deleteByIdAndCustomer(waitingId, "재키", "jaekkii@example.com"))
-                .isInstanceOf(PastReservationWaitingCancellationException.class);
+                .isInstanceOf(UnprocessableContentException.class)
+                .hasMessage("과거 시간 예약의 대기를 삭제할 수 없습니다.");
     }
 
     private ReservationTime saveReservationTime(final String startAt) {

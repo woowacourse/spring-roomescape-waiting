@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
 @Getter
 public class ReservationSlot {
 
+    private static final String DATE_REQUIRED_MESSAGE = "예약일을 입력해야 합니다.";
+    private static final String TIME_REQUIRED_MESSAGE = "예약 시간을 선택해야 합니다.";
+    private static final String THEME_REQUIRED_MESSAGE = "테마를 선택해야 합니다.";
+
     private final Long id;
     private final LocalDate date;
     private final ReservationTime time;
@@ -51,13 +55,13 @@ public class ReservationSlot {
 
     private void validateRequiredValues(final LocalDate date, final ReservationTime time, final Theme theme) {
         if (date == null) {
-            throw new IllegalArgumentException("예약일을 입력해야 합니다.");
+            throw new IllegalArgumentException(DATE_REQUIRED_MESSAGE);
         }
         if (time == null) {
-            throw new IllegalArgumentException("예약 시간을 선택해야 합니다.");
+            throw new IllegalArgumentException(TIME_REQUIRED_MESSAGE);
         }
         if (theme == null) {
-            throw new IllegalArgumentException("테마를 선택해야 합니다.");
+            throw new IllegalArgumentException(THEME_REQUIRED_MESSAGE);
         }
     }
 }

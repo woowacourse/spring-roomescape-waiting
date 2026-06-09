@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
@@ -12,9 +13,6 @@ import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
-import roomescape.reservation.domain.exception.ReservationCancellationException;
-import roomescape.reservation.domain.exception.ReservationNotOwnedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.repository.ReservationSlotRepository;
@@ -180,7 +178,8 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.create(
                 new ReservationCreateRequest("재키", "jaekkii@example.com", tomorrow, timeId, themeId)
         ))
-                .isInstanceOf(ReservationAlreadyExistsException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
     }
 
     @Test
@@ -303,7 +302,8 @@ class ReservationServiceTest {
                 reservationId,
                 new ReservationUpdateRequest(changedFutureDate, changedTimeId)
         ))
-                .isInstanceOf(ReservationAlreadyExistsException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
     }
 
     @Test
@@ -344,7 +344,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.cancelByCustomer(reservationId, "재키", "other@example.com"))
-                .isInstanceOf(ReservationNotOwnedException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
     }
 
@@ -359,7 +359,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.cancelByCustomer(reservationId, "브라운", "customer@example.com"))
-                .isInstanceOf(ReservationCancellationException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("당일 예약은 취소할 수 없습니다.");
     }
 
     @Test

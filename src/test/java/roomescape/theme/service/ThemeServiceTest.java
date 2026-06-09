@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -15,7 +16,6 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.controller.dto.request.ThemeCreateRequest;
 import roomescape.theme.controller.dto.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeInUseException;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
@@ -100,7 +100,8 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
-                .isInstanceOf(ThemeInUseException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     private ReservationTime saveReservationTime(final String startAt) {

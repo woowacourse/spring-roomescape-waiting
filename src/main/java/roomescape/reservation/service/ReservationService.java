@@ -5,13 +5,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.CustomerEmail;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
-import roomescape.reservation.domain.exception.ReservationNotFoundException;
-import roomescape.reservation.domain.exception.ReservationNotOwnedException;
-import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
@@ -20,15 +18,12 @@ import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.repository.ReservationSlotRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.controller.dto.response.ThemeResponse;
-import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.controller.dto.response.WaitingResponse;
 
@@ -41,6 +36,12 @@ import java.util.List;
 public class ReservationService {
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
+    private static final String RESERVATION_NOT_FOUND_MESSAGE = "존재하지 않는 예약입니다.";
+    private static final String RESERVATION_ALREADY_EXISTS_MESSAGE = "이미 예약된 시간입니다.";
+    private static final String RESERVATION_OPTION_CHANGED_MESSAGE = "예약 가능한 시간 또는 테마 상태가 변경되었습니다.";
+    private static final String RESERVATION_TIME_NOT_FOUND_MESSAGE = "존재하지 않는 예약 시간입니다.";
+    private static final String THEME_NOT_FOUND_MESSAGE = "존재하지 않는 테마입니다.";
+    private static final String WAITING_NOT_FOUND_MESSAGE = "존재하지 않는 대기입니다.";
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -153,9 +154,9 @@ public class ReservationService {
         try {
             return reservationRepository.save(reservation);
         } catch (DuplicateKeyException exception) {
-            throw new ReservationAlreadyExistsException(exception);
+            throw new ConflictException(RESERVATION_ALREADY_EXISTS_MESSAGE, exception);
         } catch (DataIntegrityViolationException exception) {
-            throw new ReservationOptionChangedException(exception);
+            throw new ConflictException(RESERVATION_OPTION_CHANGED_MESSAGE, exception);
         }
     }
 
@@ -164,14 +165,14 @@ public class ReservationService {
             final boolean updated = reservationRepository.update(reservation);
 
             if (!updated) {
-                throw new ReservationNotFoundException();
+                throw new NotFoundException(RESERVATION_NOT_FOUND_MESSAGE);
             }
 
             return reservation;
         } catch (DuplicateKeyException exception) {
-            throw new ReservationAlreadyExistsException(exception);
+            throw new ConflictException(RESERVATION_ALREADY_EXISTS_MESSAGE, exception);
         } catch (DataIntegrityViolationException exception) {
-            throw new ReservationOptionChangedException(exception);
+            throw new ConflictException(RESERVATION_OPTION_CHANGED_MESSAGE, exception);
         }
     }
 
@@ -183,16 +184,16 @@ public class ReservationService {
         try {
             return reservationSlotRepository.findOrCreate(date, reservationTime, theme);
         } catch (DataIntegrityViolationException exception) {
-            throw new ReservationOptionChangedException(exception);
+            throw new ConflictException(RESERVATION_OPTION_CHANGED_MESSAGE, exception);
         }
     }
 
     private void deleteReservationAndPromoteWaiting(final Reservation reservation) {
         final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(reservation.getSlotId())
-                .orElseThrow(ReservationNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_MESSAGE));
 
         if (!reservationRepository.deleteByIdAndSlotId(reservation.getId(), slot.getId())) {
-            throw new ReservationNotFoundException();
+            throw new NotFoundException(RESERVATION_NOT_FOUND_MESSAGE);
         }
 
         waitingRepository.findEarliestBySlotId(slot.getId())
@@ -206,14 +207,14 @@ public class ReservationService {
 
                     saveReservation(promotedReservation);
                     if (!waitingRepository.deleteById(waiting.getId())) {
-                        throw new WaitingNotFoundException();
+                        throw new NotFoundException(WAITING_NOT_FOUND_MESSAGE);
                     }
                 });
     }
 
     private Reservation getReservation(final Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(ReservationNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_MESSAGE));
     }
 
     private void validateOwnedByCustomer(
@@ -222,17 +223,17 @@ public class ReservationService {
             final String customerEmail
     ) {
         if (!reservation.isOwnedBy(customerName, customerEmail)) {
-            throw new ReservationNotOwnedException();
+            throw new NotFoundException(RESERVATION_NOT_FOUND_MESSAGE);
         }
     }
 
     private ReservationTime getReservationTime(final Long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(ReservationTimeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(RESERVATION_TIME_NOT_FOUND_MESSAGE));
     }
 
     private Theme getTheme(final Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(ThemeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(THEME_NOT_FOUND_MESSAGE));
     }
 }

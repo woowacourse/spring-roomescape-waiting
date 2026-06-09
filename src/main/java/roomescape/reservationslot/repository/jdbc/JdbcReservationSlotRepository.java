@@ -24,6 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
 
+    private static final String GENERATED_SLOT_ID_NOT_FOUND_MESSAGE = "생성된 예약 슬롯 id를 가져오지 못했습니다.";
+
     private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> mapToDomain(rs);
 
     private final JdbcTemplate jdbcTemplate;
@@ -206,7 +208,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     private long generatedIdFrom(final KeyHolder keyHolder) {
         if (keyHolder.getKey() == null) {
-            throw new IllegalStateException("생성된 예약 슬롯 id를 가져오지 못했습니다.");
+            throw new IllegalStateException(GENERATED_SLOT_ID_NOT_FOUND_MESSAGE);
         }
 
         return keyHolder.getKey().longValue();

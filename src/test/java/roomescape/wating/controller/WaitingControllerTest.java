@@ -17,13 +17,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeNotFoundException;
-import roomescape.wating.domain.exception.PastReservationWaitingCancellationException;
-import roomescape.wating.domain.exception.WaitingNotFoundException;
-import roomescape.wating.domain.exception.WaitingNotOwnedException;
-import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -100,10 +94,9 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
         //then
-        final Exception expectedException = new ReservationTimeNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 예약 시간입니다."));
     }
 
     @Test
@@ -128,10 +121,9 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
         //then
-        final Exception expectedException = new ThemeNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 테마입니다."));
     }
 
     @Test
@@ -161,10 +153,9 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
         //then
-        final Exception expectedException = new WaitingSlotDuplicateException();
         response.then().log().all()
                 .statusCode(HttpStatus.CONFLICT.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("해당 시간에 이미 대기가 존재합니다."));
     }
 
     @Test
@@ -208,10 +199,9 @@ class WaitingControllerTest {
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
-        final Exception expectedException = new WaitingNotOwnedException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 대기입니다."));
     }
 
     @Test
@@ -228,10 +218,9 @@ class WaitingControllerTest {
                 .when().delete("/waitings/{id}", unsavedWaitingId);
 
         //then
-        final Exception expectedException = new WaitingNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 대기입니다."));
     }
 
     @Test
@@ -252,10 +241,9 @@ class WaitingControllerTest {
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
-        final Exception expectedException = new PastReservationWaitingCancellationException();
         response.then().log().all()
                 .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("과거 시간 예약의 대기를 삭제할 수 없습니다."));
     }
 
     private ReservationTime insertReservationTime(final String startAt) {

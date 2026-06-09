@@ -5,6 +5,9 @@ import lombok.Getter;
 @Getter
 public class Theme {
 
+    private static final String DESCRIPTION_REQUIRED_MESSAGE = "테마 설명을 입력해야 합니다.";
+    private static final String THUMBNAIL_URL_REQUIRED_MESSAGE = "썸네일 URL을 입력해야 합니다.";
+
     private final Long id;
     private final ThemeName name;
     private final String description;
@@ -49,13 +52,13 @@ public class Theme {
 
     private void validateDescription(final String description) {
         if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("테마 설명을 입력해야 합니다.");
+            throw new IllegalArgumentException(DESCRIPTION_REQUIRED_MESSAGE);
         }
     }
 
     private void validateThumbnailUrl(final String thumbnailUrl) {
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new IllegalArgumentException("썸네일 URL을 입력해야 합니다.");
+            throw new IllegalArgumentException(THUMBNAIL_URL_REQUIRED_MESSAGE);
         }
     }
 }

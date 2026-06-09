@@ -11,11 +11,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.UnprocessableContentException;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
-import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.repository.dto.WaitingWithRank;
 
 import java.sql.Date;
@@ -81,7 +81,8 @@ class JdbcWaitingRepositoryTest {
 
         //when & then
         assertThatThrownBy(() -> jdbcWaitingRepository.save(waiting))
-                .isInstanceOf(NoReservationForWaitingException.class);
+                .isInstanceOf(UnprocessableContentException.class)
+                .hasMessage("예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.");
     }
 
     @Test

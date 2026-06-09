@@ -2,7 +2,7 @@ package roomescape.reservation.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.domain.exception.ReservationCancellationException;
+import roomescape.common.exception.ConflictException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -122,7 +122,8 @@ class ReservationTest {
         );
 
         assertThatThrownBy(() -> reservation.validateCancelableByCustomer(LocalDate.of(2026, 5, 8)))
-                .isInstanceOf(ReservationCancellationException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("당일 예약은 취소할 수 없습니다.");
     }
 
     @Test

@@ -13,11 +13,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.UnprocessableContentException;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
-import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.repository.entity.WaitingEntity;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.repository.dto.WaitingWithRank;
@@ -25,6 +25,9 @@ import roomescape.wating.repository.dto.WaitingWithRank;
 @Repository
 @RequiredArgsConstructor
 public class JdbcWaitingRepository implements WaitingRepository {
+
+    private static final String NO_RESERVATION_FOR_WAITING_MESSAGE = "예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.";
+    private static final String WAITING_CREATION_FAILED_MESSAGE = "대기 생성에 실패했습니다.";
 
     private static final RowMapper<Waiting> WAITING_ROW_MAPPER = ((rs, rowNum) ->
             {
@@ -86,12 +89,12 @@ public class JdbcWaitingRepository implements WaitingRepository {
         }, keyHolder);
 
         if (updateCount == 0) {
-            throw new NoReservationForWaitingException();
+            throw new UnprocessableContentException(NO_RESERVATION_FOR_WAITING_MESSAGE);
         }
 
         Number key = keyHolder.getKey();
         if (key == null) {
-            throw new IllegalStateException("대기 생성에 실패했습니다.");
+            throw new IllegalStateException(WAITING_CREATION_FAILED_MESSAGE);
         }
         return key.longValue();
     }

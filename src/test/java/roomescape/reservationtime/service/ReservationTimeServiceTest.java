@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -13,7 +14,6 @@ import roomescape.reservationslot.repository.ReservationSlotRepository;
 import roomescape.reservationtime.controller.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.controller.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -78,7 +78,8 @@ class ReservationTimeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(time.getId()))
-                .isInstanceOf(ReservationTimeInUseException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     private ReservationTime saveReservationTime(final String startAt) {

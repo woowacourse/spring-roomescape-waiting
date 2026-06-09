@@ -2,6 +2,8 @@ package roomescape.theme.domain;
 
 public class ThemeName {
 
+    private static final String NAME_REQUIRED_MESSAGE = "이름을 입력해야 합니다.";
+
     private final String name;
 
     private ThemeName(final String value) {
@@ -15,7 +17,7 @@ public class ThemeName {
 
     private void validate(final String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("이름을 입력해야 합니다.");
+            throw new IllegalArgumentException(NAME_REQUIRED_MESSAGE);
         }
     }
 

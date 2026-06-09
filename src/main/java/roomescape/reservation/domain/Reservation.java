@@ -1,7 +1,7 @@
 package roomescape.reservation.domain;
 
 import lombok.Getter;
-import roomescape.reservation.domain.exception.ReservationCancellationException;
+import roomescape.common.exception.ConflictException;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 
 @Getter
 public class Reservation {
+
+    private static final String RESERVATION_CANCELLATION_MESSAGE = "당일 예약은 취소할 수 없습니다.";
+    private static final String SLOT_REQUIRED_MESSAGE = "예약 슬롯을 입력해야 합니다.";
+    private static final String PAST_RESERVATION_MESSAGE = "과거 시간으로는 예약할 수 없습니다.";
 
     private final Long id;
     private final CustomerName customerName;
@@ -137,7 +141,7 @@ public class Reservation {
 
     public void validateCancelableByCustomer(final LocalDate today) {
         if (!isBeforeReservationDate(today)) {
-            throw new ReservationCancellationException();
+            throw new ConflictException(RESERVATION_CANCELLATION_MESSAGE);
         }
     }
 
@@ -147,13 +151,13 @@ public class Reservation {
 
     private void validateRequiredValues(final ReservationSlot slot) {
         if (slot == null) {
-            throw new IllegalArgumentException("예약 슬롯을 입력해야 합니다.");
+            throw new IllegalArgumentException(SLOT_REQUIRED_MESSAGE);
         }
     }
 
     private void validateNotPast(final LocalDateTime now) {
         if (isPast(now)) {
-            throw new IllegalArgumentException("과거 시간으로는 예약할 수 없습니다.");
+            throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
         }
     }
 
