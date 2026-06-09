@@ -35,7 +35,9 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
 
     private ReservationDate date1;
     private ReservationTime time1;
+    private ReservationTime time2;
     private ReservationSlot slot1;
+    private ReservationSlot slot2;
     private Theme theme;
 
     @Autowired
@@ -45,8 +47,10 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     void setUp() {
         date1 = saveDate(ReservationDateFixture.oneWeekLater());
         time1 = saveTime(ReservationTimeFixture.activeTime15());
+        time2 = saveTime(ReservationTimeFixture.activeTime16());
         theme = saveTheme(themeName);
         slot1 = saveSlot(ReservationSlot.of(date1, time1, theme));
+        slot2 = saveSlot(ReservationSlot.of(date1, time2, theme));
     }
 
     @Test
@@ -116,6 +120,31 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
 
         Assertions.assertThat(waitingCanceled.getStatus())
                 .isEqualTo(CANCELED);
+    }
+
+    @Test
+    @DisplayName("예약자 두명이 서로의 Slot으로 변경할 때, 데드락을 방지한다.")
+    @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void reschedule_sametime_each_slot_defense_deadlock() {
+        // given
+        Reservation slot1Reserved = reservationService.reserve("송송", slot1.getId());
+        Reservation slot2Reserved = reservationService.reserve("피온", slot2.getId());
+
+        doConcurrent(
+                () -> reservationService.reschedule(slot1.getId(), slot2.getId(), slot1Reserved.getId(), slot1Reserved.getName()),
+                () -> reservationService.reschedule(slot2.getId(), slot1.getId(), slot2Reserved.getId(), slot2Reserved.getName())
+        );
+
+        // when
+        Reservation reservedCanceled = reservationRepository.findById(slot1Reserved.getId()).get();
+        Reservation waitingCanceled = reservationRepository.findById(slot2Reserved.getId()).get();
+
+        // then
+        Assertions.assertThat(reservedCanceled.getStatus())
+                .isEqualTo(RESERVED);
+
+        Assertions.assertThat(waitingCanceled.getStatus())
+                .isEqualTo(RESERVED);
     }
 
 }
