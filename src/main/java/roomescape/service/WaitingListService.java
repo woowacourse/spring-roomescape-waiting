@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class WaitingListService {
+
+    private static final Logger failureLog = LoggerFactory.getLogger("waiting.approval.failure");
 
     private final WaitingListRepository waitingListRepository;
     private final ThemeRepository themeRepository;
@@ -81,26 +85,33 @@ public class WaitingListService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleReservationCanceled(final ReservationAvailableEvent event) {
-        final Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
-                event.date(), event.timeId(), event.themeId());
+        try {
+            final Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
+                    event.date(), event.timeId(), event.themeId());
 
-        if (nextWaiting.isEmpty()) {
-            return;
-        }
+            if (nextWaiting.isEmpty()) {
+                return;
+            }
 
-        final WaitingList waiting = nextWaiting.get();
-        final Reservation newReservation = Reservation.create(
-                waiting.getName(),
-                waiting.getReservationDate().date(),
-                waiting.getReservationTime(),
-                waiting.getTheme()
-        );
+            final WaitingList waiting = nextWaiting.get();
+            final Reservation newReservation = Reservation.create(
+                    waiting.getName(),
+                    waiting.getReservationDate().date(),
+                    waiting.getReservationTime(),
+                    waiting.getTheme()
+            );
 
-        reservationRepository.save(newReservation);
+            reservationRepository.save(newReservation);
 
-        final boolean deleted = waitingListRepository.deleteById(waiting.getId());
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
+            final boolean deleted = waitingListRepository.deleteById(waiting.getId());
+            if (!deleted) {
+                throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
+            }
+        } catch (RuntimeException e) {
+            failureLog.error(
+                    "예약 대기 승인에 실패했습니다. date={}, timeId={}, themeId={} 에러 원인: {}",
+                    event.date(), event.timeId(), event.themeId(), e.getMessage());
+            throw e;
         }
     }
 
