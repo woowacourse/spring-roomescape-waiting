@@ -70,4 +70,10 @@ public class FakeThemeRepository implements ThemeRepository {
     public List<PopularThemeResult> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {
         return List.of();
     }
+
+    @Override
+    public List<Theme> findSlotOfThemes() {
+        return List.of();
+    }
+
 }

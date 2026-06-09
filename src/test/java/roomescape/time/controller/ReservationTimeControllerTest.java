@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
+import static roomescape.slot.fixture.SlotApiFixture.createSlot;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 import static roomescape.time.fixture.ReservationTimeApiFixture.updateTimeStatus;
@@ -26,35 +27,19 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt1);
         updateTimeStatus(managerToken, timeId, true);
         Integer themeId = createTheme(managerToken, themeName);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
                 .queryParam("themeId", themeId)
-                .when().get("/member/times")
+                .when().get("/member/slots/times")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].id", is(timeId))
-                .body("[0].startAt", is(startAt1));
-    }
-
-    @Test
-    @DisplayName("예약 가능한 시간 조회시, 비활성화된 시간은 제외된다.")
-    void readAvailableTimesExcludeInactive() {
-        Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer activeTimeId = createReservationTime(managerToken, startAt1);
-        Integer inactiveTimeId = createReservationTime(managerToken, startAt2);
-        updateTimeStatus(managerToken, activeTimeId, true);
-        updateTimeStatus(managerToken, inactiveTimeId, false);
-        Integer themeId = createTheme(managerToken, themeName);
-
-        RestAssured.given().log().all()
-                .queryParam("dateId", dateId)
-                .queryParam("themeId", themeId)
-                .when().get("/member/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+                .body("[0].timeId", is(timeId))
+                .body("[0].slotId", is(slotId))
+                .body("[0].startAt", is(startAt1))
+                .body("[0].isActive", is(true));
     }
 
     @Test
@@ -66,7 +51,7 @@ class ReservationTimeControllerTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .queryParam("dateId", dateId)
                 .queryParam("themeId", themeId)
-                .when().get("/member/times")
+                .when().get("/member/slots/times")
                 .then().log().all()
                 .statusCode(200);
     }

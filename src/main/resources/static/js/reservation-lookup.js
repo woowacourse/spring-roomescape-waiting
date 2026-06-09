@@ -23,11 +23,11 @@ const ERROR_MESSAGES = {
     "RES_012": "과거 날짜나 시간으로 일정을 변경할 수 없습니다.",
 };
 
-async function handleResponseError(response, defaultMessage) {
+async function handleResponseError(response, defaultMessage, overrides = {}) {
     try {
         const errorData = await response.json();
         const errorCode = errorData.errorCode;
-        const message = ERROR_MESSAGES[errorCode] || errorData.message || defaultMessage;
+        const message = overrides[errorCode] || ERROR_MESSAGES[errorCode] || errorData.message || defaultMessage;
         alert(message);
     } catch (e) {
         alert(defaultMessage);
@@ -136,7 +136,7 @@ function renderReservations(reservations) {
 
         if (!isCanceled) {
             cancelButton.addEventListener("click", async () => {
-                await cancelReservation(reservation.id);
+                await cancelReservation(reservation.slotId, reservation.id);
             });
 
             rescheduleButton.addEventListener("click", () => {
@@ -206,7 +206,7 @@ async function loadRescheduleDates() {
 
 async function loadRescheduleTimes() {
     const themeId = reschedulingReservation.themeId;
-    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${themeId}`);
+    const response = await authFetch(`/member/slots/times?dateId=${selectedDate.id}&themeId=${themeId}`);
 
     if (!response.ok) {
         await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
@@ -247,14 +247,13 @@ async function submitReschedule() {
         return;
     }
 
-    const response = await authFetch(`/member/reservations/${reschedulingReservation.id}/schedule`, {
+    const response = await authFetch(`/member/slots/${reschedulingReservation.slotId}/reservations/${reschedulingReservation.id}/reschedule`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            dateId: selectedDate.id,
-            timeId: selectedTime.id
+            newSlotId: selectedTime.slotId
         })
     });
 
@@ -268,18 +267,20 @@ async function submitReschedule() {
     await loadMyReservations();
 }
 
-async function cancelReservation(reservationId) {
+async function cancelReservation(slotId, reservationId) {
     const confirmed = confirm("예약을 취소하시겠습니까?");
     if (!confirmed) {
         return;
     }
 
-    const response = await authFetch(`/member/reservations/${reservationId}/cancel`, {
+    const response = await authFetch(`/member/slots/${slotId}/reservations/${reservationId}/cancel`, {
         method: "PATCH"
     });
 
     if (!response.ok) {
-        await handleResponseError(response, "예약 취소에 실패했습니다.");
+        await handleResponseError(response, "예약 취소에 실패했습니다.", {
+            "COMMON_004": "취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        });
         return;
     }
 

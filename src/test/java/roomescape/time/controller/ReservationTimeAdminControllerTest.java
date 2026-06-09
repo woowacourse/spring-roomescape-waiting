@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
 import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
+import static roomescape.slot.fixture.SlotApiFixture.createSlot;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.exception.ReservationTimeErrorInformation.START_AT_IS_NULL;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
@@ -90,7 +91,8 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, LocalDate.of(2099, 1, 1).toString());
         Integer timeId = createReservationTime(managerToken, "10:00");
         Integer themeId = createTheme(managerToken, "테마1");
-        createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        createReservationWithToken(managerToken, slotId);
 
         Map<String, Object> updateParams = new HashMap<>();
         updateParams.put("isActive", false);

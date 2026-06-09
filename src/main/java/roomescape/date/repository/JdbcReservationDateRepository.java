@@ -52,6 +52,18 @@ public class JdbcReservationDateRepository implements ReservationDateRepository 
     }
 
     @Override
+    public List<ReservationDate> findSlotOfDatesByThemeId(Long themeId) {
+        String sql = """
+                SELECT DISTINCT rd.*
+                FROM reservation_date rd
+                JOIN reservation_slot s ON rd.id = s.date_id
+                WHERE s.theme_id = :theme_id
+                  AND rd.is_active = TRUE
+                """;
+        return jdbcTemplate.query(sql, new MapSqlParameterSource("theme_id", themeId), reservationDateRowMapper);
+    }
+
+    @Override
     public List<ReservationDate> findAllAfterToday() {
         String sql = """
                 SELECT id, date, is_active

@@ -1,6 +1,5 @@
 package roomescape.reservation.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -8,9 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.annotation.LoginMember;
 import roomescape.member.domain.Member;
-import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDto;
-import roomescape.reservation.controller.dto.request.ReservationSaveDto;
+import roomescape.reservation.controller.dto.request.ReservationRescheduleDto;
 import roomescape.reservation.controller.dto.response.ReservationDetailDto;
+import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
 
@@ -27,40 +26,44 @@ public class ReservationAdminController {
 
     @AuthGuard(roles = MANAGER)
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationDetailDto>> getReservations() {
-        List<ReservationDetailDto> responseData = reservationService.readAll().stream()
-                .map(ReservationDetailDto::from)
+    public ResponseEntity<List<ReservationWithSlotDetailDto>> getReservations() {
+        List<ReservationWithSlotDetailDto> responseData = reservationService.readAll().stream()
+                .map(ReservationWithSlotDetailDto::from)
                 .toList();
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = MANAGER)
-    @PostMapping("/reservations")
+    @PostMapping("/slots/{slotId}/reservations")
     public ResponseEntity<ReservationDetailDto> createReservation(
-            @Valid @RequestBody ReservationSaveDto dto,
+            @PathVariable Long slotId,
             @LoginMember Member manager
     ) {
-        Reservation reservation = reservationService.reserve(manager.getName(), dto.toCommand());
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
+        Reservation saved = reservationService.reserve(manager.getName(), slotId);
+        ReservationDetailDto responseData = ReservationDetailDto.from(saved);
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = MANAGER)
-    @PatchMapping("/reservations/{id}/cancel")
-    public ResponseEntity<ReservationDetailDto> cancelReservation(@PathVariable Long id) {
-        Reservation reservation = reservationService.cancelByManager(id);
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
-        return ResponseEntity.ok(responseData);
-    }
-
-    @AuthGuard(roles = MANAGER)
-    @PatchMapping("/reservations/{id}/schedule")
-    public ResponseEntity<ReservationDetailDto> updateSchedule(
-            @PathVariable Long id,
-            @Validated @RequestBody ReservationChangeScheduleDto dto
+    @PatchMapping("/slots/{slotId}/reservations/{reservationId}/cancel")
+    public ResponseEntity<ReservationDetailDto> cancelReservation(
+            @PathVariable Long slotId,
+            @PathVariable Long reservationId
     ) {
-        Reservation reservation = reservationService.changeScheduleByManager(dto.toCommand(id));
-        ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
+        Reservation canceled = reservationService.cancelByManager(slotId, reservationId);
+        ReservationDetailDto responseData = ReservationDetailDto.from(canceled);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @AuthGuard(roles = MANAGER)
+    @PatchMapping("/slots/{slotId}/reservations/{reservationId}/reschedule")
+    public ResponseEntity<ReservationDetailDto> updateSchedule(
+            @PathVariable Long slotId,
+            @PathVariable Long reservationId,
+            @Validated @RequestBody ReservationRescheduleDto dto
+    ) {
+        Reservation rescheduled = reservationService.rescheduleByManager(slotId, dto.newSlotId(), reservationId);
+        ReservationDetailDto responseData = ReservationDetailDto.from(rescheduled);
         return ResponseEntity.ok(responseData);
     }
 

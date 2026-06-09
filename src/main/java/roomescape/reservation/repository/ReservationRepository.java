@@ -1,8 +1,7 @@
 package roomescape.reservation.repository;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
+import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,19 +10,16 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findAll();
+    List<ReservationWithSlotInformation> findAll();
 
-    List<Reservation> findReservedAndWaitingBySlot(ReservationSlot slot);
+    List<ReservationWithSlotInformation> findByMemberName(String name);
 
-    List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName);
+    List<Reservation> findReservedAndWaitingBySlotId(Long slotId);
 
     Reservation save(Reservation reservation);
-
-    boolean existsReservedBySlot(ReservationSlot slot);
 
     boolean updateStatus(Reservation reservation);
 
     boolean updateSchedule(Reservation reservation);
-
 
 }

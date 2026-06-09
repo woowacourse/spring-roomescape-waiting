@@ -19,6 +19,8 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.slot.domain.ReservationSlot;
+import roomescape.slot.repository.JdbcReservationSlotRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.theme.repository.JdbcThemeRepository;
@@ -32,6 +34,7 @@ class ReservationTimeRepositoryTest {
     private JdbcReservationDateRepository jdbcReservationDateRepository;
     private JdbcThemeRepository jdbcThemeRepository;
     private JdbcReservationRepository jdbcReservationRepository;
+    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -42,6 +45,7 @@ class ReservationTimeRepositoryTest {
         jdbcReservationDateRepository = new JdbcReservationDateRepository(jdbcTemplate);
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
     }
 
     @Test
@@ -133,8 +137,8 @@ class ReservationTimeRepositoryTest {
         ReservationDate date = saveDate(ReservationDateFixture.oneWeekLater());
         Theme theme = saveTheme(ThemeFixture.activeTheme());
 
-        saveReservation(date, reservedTime15, theme);
-        saveReservation(date, reservedTime16, theme);
+        saveSlot(ReservationSlot.of(date, reservedTime15, theme));
+        saveSlot(ReservationSlot.of(date, reservedTime16, theme));
 
         // when
         List<ReservationTime> availableTimes = jdbcReservationTimeRepository.findAvailableByDateIdAndThemeId(
@@ -143,13 +147,11 @@ class ReservationTimeRepositoryTest {
         );
 
         // then
-// then
         assertThat(availableTimes)
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
                 .containsExactlyInAnyOrder(
                         reservedTime15,
-                        reservedTime16,
-                        nonReservedTime
+                        reservedTime16
                 );
     }
 
@@ -173,12 +175,12 @@ class ReservationTimeRepositoryTest {
         return jdbcThemeRepository.save(theme);
     }
 
-    private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        jdbcReservationRepository.save(reservation("송송", reservationDate, reservationTime, theme));
-    }
-
     private boolean updateStatus(ReservationTime saved) {
         return jdbcReservationTimeRepository.updateStatus(saved);
+    }
+
+    private ReservationSlot saveSlot(ReservationSlot slot) {
+        return jdbcReservationSlotRepository.save(slot);
     }
 
 }

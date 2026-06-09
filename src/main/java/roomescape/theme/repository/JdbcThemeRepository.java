@@ -106,10 +106,11 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.is_active,
                     COUNT(r.id) AS reservation_count
                 FROM reservation r
-                JOIN theme t ON r.theme_id = t.id
-                JOIN reservation_date d ON r.date_id = d.id
+                JOIN reservation_slot rs ON r.slot_id  = rs.id
+                JOIN theme             t  ON rs.theme_id = t.id
+                JOIN reservation_date  d  ON rs.date_id  = d.id
                 WHERE t.is_active = true
-                  AND r.status = 'RESERVED'
+                  AND r.status    = 'RESERVED'
                   AND d.date >= :startDate
                   AND d.date <= :endDate
                 GROUP BY t.id, t.name, t.description, t.thumbnail_url, t.is_active
@@ -130,6 +131,18 @@ public class JdbcThemeRepository implements ThemeRepository {
                 rs.getBoolean("is_active"),
                 rs.getLong("reservation_count")
         ));
+    }
+
+    @Override
+    public List<Theme> findSlotOfThemes() {
+        String sql = """
+                SELECT DISTINCT t.*
+                FROM theme t
+                JOIN reservation_slot s ON t.id = s.theme_id
+                WHERE t.is_active = TRUE;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        return jdbcTemplate.query(sql, params, themeRowMapper);
     }
 
 }

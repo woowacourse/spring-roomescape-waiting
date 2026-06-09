@@ -18,6 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+mysql-k6-env/**
 .idea
 *.iws
 *.iml

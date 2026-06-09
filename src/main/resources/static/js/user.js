@@ -84,7 +84,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     await loadThemes();
     await loadPopularThemes();
-    await loadDates();
 });
 
 async function loadPopularThemes() {
@@ -116,6 +115,7 @@ async function loadPopularThemes() {
     themes.forEach((theme, index) => {
         const article = document.createElement("article");
         article.className = "popular-theme-card";
+        article.dataset.themeId = theme.id;
 
         article.innerHTML = `
             <img src="${theme.thumbnailUrl}" alt="${theme.name}">
@@ -128,53 +128,9 @@ async function loadPopularThemes() {
 
         article.addEventListener("click", () => {
             selectTheme(theme);
-
-            const themeSection = document.getElementById("theme-select-section");
-            themeSection.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
         });
 
         popularThemeList.appendChild(article);
-    });
-}
-
-async function loadDates() {
-    const response = await authFetch("/member/dates");
-
-    if (!response.ok) {
-        await handleResponseError(response, "날짜 목록을 불러오지 못했습니다.");
-        return;
-    }
-
-    const dates = await response.json();
-
-    const dateList = document.getElementById("date-list");
-    dateList.innerHTML = "";
-
-    dates.forEach(date => {
-        const localDate = new Date(date.date);
-        const month = localDate.toLocaleString("en-US", { month: "short" }).toUpperCase();
-        const day = localDate.getDate();
-
-        const button = document.createElement("button");
-        button.className = "date-card";
-        button.type = "button";
-        button.innerHTML = `
-            <span class="month">${month}</span>
-            <span class="day">${day}</span>
-        `;
-
-        button.addEventListener("click", () => {
-            document.querySelectorAll(".date-card")
-                .forEach(item => item.classList.remove("selected"));
-
-            button.classList.add("selected");
-            selectedDate = date;
-        });
-
-        dateList.appendChild(button);
     });
 }
 
@@ -216,48 +172,82 @@ async function loadThemes() {
     });
 }
 
-function selectTheme(theme) {
+async function selectTheme(theme) {
     selectedTheme = theme;
-
-    document.querySelectorAll(".theme-card")
-        .forEach(card => {
-            const cardThemeId = Number(card.dataset.themeId);
-
-            if (cardThemeId === Number(theme.id)) {
-                card.classList.add("selected");
-                return;
-            }
-
-            card.classList.remove("selected");
-        });
-}
-
-async function goToReservationStep() {
-    if (!selectedDate) {
-        alert("날짜를 선택해주세요.");
-        return;
-    }
-
-    if (!selectedTheme) {
-        alert("테마를 선택해주세요.");
-        return;
-    }
-
-    document.getElementById("select-section").classList.add("hidden");
-    document.getElementById("confirm-section").classList.remove("hidden");
-
-    await loadAvailableTimes();
-}
-
-function goBackToSelectStep() {
-    document.getElementById("confirm-section").classList.add("hidden");
-    document.getElementById("select-section").classList.remove("hidden");
-
+    selectedDate = null;
     selectedTime = null;
+
+    // 모든 테마 카드(일반 + 인기)에서 selected 제거 후 해당 ID만 추가
+    document.querySelectorAll(".theme-card, .popular-theme-card").forEach(card => {
+        const cardThemeId = card.dataset.themeId;
+        if (Number(cardThemeId) === Number(theme.id)) {
+            card.classList.add("selected");
+        } else {
+            card.classList.remove("selected");
+        }
+    });
+
+    // 다음 섹션 표시 및 데이터 로드
+    document.getElementById("date-select-section").classList.remove("hidden");
+    document.getElementById("time-select-section").classList.add("hidden");
+    
+    await loadDatesForTheme(theme.id);
+
+    document.getElementById("date-select-section").scrollIntoView({ behavior: "smooth" });
+}
+
+async function loadDatesForTheme(themeId) {
+    const response = await authFetch(`/member/slot-dates?themeId=${themeId}`);
+
+    if (!response.ok) {
+        await handleResponseError(response, "날짜 목록을 불러오지 못했습니다.");
+        return;
+    }
+
+    const dates = await response.json();
+    const dateList = document.getElementById("date-list");
+    dateList.innerHTML = "";
+
+    if (dates.length === 0) {
+        dateList.innerHTML = `<p style="color: #b5b5b5; padding: 20px;">선택한 테마로 예약 가능한 날짜가 없습니다.</p>`;
+        return;
+    }
+
+    dates.forEach(date => {
+        const localDate = new Date(date.date);
+        const month = localDate.toLocaleString("en-US", { month: "short" }).toUpperCase();
+        const day = localDate.getDate();
+
+        const button = document.createElement("button");
+        button.className = "date-card";
+        button.type = "button";
+        button.innerHTML = `
+            <span class="month">${month}</span>
+            <span class="day">${day}</span>
+        `;
+
+        button.addEventListener("click", () => {
+            document.querySelectorAll(".date-card").forEach(item => item.classList.remove("selected"));
+            button.classList.add("selected");
+            selectDate(date);
+        });
+
+        dateList.appendChild(button);
+    });
+}
+
+async function selectDate(date) {
+    selectedDate = date;
+    selectedTime = null;
+
+    document.getElementById("time-select-section").classList.remove("hidden");
+    await loadAvailableTimes();
+    
+    document.getElementById("time-select-section").scrollIntoView({ behavior: "smooth" });
 }
 
 async function loadAvailableTimes() {
-    const response = await authFetch(`/member/times?dateId=${selectedDate.id}&themeId=${selectedTheme.id}`);
+    const response = await authFetch(`/member/slots/times?dateId=${selectedDate.id}&themeId=${selectedTheme.id}`);
 
     if (!response.ok) {
         await handleResponseError(response, "예약 가능 시간을 불러오지 못했습니다.");
@@ -282,9 +272,7 @@ async function loadAvailableTimes() {
         button.textContent = formatTime(time.startAt);
 
         button.addEventListener("click", () => {
-            document.querySelectorAll(".time-button")
-                .forEach(item => item.classList.remove("selected"));
-
+            document.querySelectorAll(".time-button").forEach(item => item.classList.remove("selected"));
             button.classList.add("selected");
             selectedTime = time;
         });
@@ -299,18 +287,8 @@ async function createReservation() {
         return;
     }
 
-    const requestBody = {
-        dateId: selectedDate.id,
-        timeId: selectedTime.id,
-        themeId: selectedTheme.id
-    };
-
-    const response = await authFetch("/member/reservations", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestBody)
+    const response = await authFetch(`/member/slots/${selectedTime.slotId}/reservations`, {
+        method: "POST"
     });
 
     if (!response.ok) {

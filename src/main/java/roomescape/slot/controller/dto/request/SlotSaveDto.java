@@ -1,9 +1,9 @@
-package roomescape.reservation.controller.dto.request;
+package roomescape.slot.controller.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import roomescape.reservation.service.dto.ReservationSaveCommand;
+import roomescape.slot.service.dto.SlotSaveCommand;
 
-public record ReservationSaveDto(
+public record SlotSaveDto(
 
         @NotNull(message = "dateId는 필수 입력값입니다.")
         Long dateId,
@@ -16,8 +16,8 @@ public record ReservationSaveDto(
 
 ) {
 
-    public ReservationSaveCommand toCommand() {
-        return new ReservationSaveCommand(dateId, timeId, themeId);
+    public SlotSaveCommand toCommand() {
+        return new SlotSaveCommand(dateId, timeId, themeId);
     }
 
 }

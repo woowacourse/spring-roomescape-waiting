@@ -19,5 +19,5 @@ Content-Type: application/json
 }
 
 ### [Member] 4. 예약 가능한 시간 목록 조회
-GET http://localhost:8080/member/times?dateId=1&themeId=1
+GET http://localhost:8080/member/slots/times?dateId=1&themeId=1
 Accept: application/json

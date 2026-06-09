@@ -9,7 +9,12 @@ import org.springframework.context.annotation.Import;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.fixture.ReservationDateFixture;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.support.ServiceSupport;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.fixture.ThemeFixture;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.fixture.ReservationTimeFixture;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -123,6 +128,96 @@ class ReservationDateServiceIntegrationTest extends ServiceSupport {
                 .hasMessage(DATE_ALREADY_EXISTS.getMessage());
     }
 
+
+    @Test
+    @DisplayName("특정 테마의 슬롯이 등록된 활성화 날짜를 조회한다.")
+    void readSlotOfDatesByThemeId() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme());
+        ReservationDate date = saveDate(ReservationDateFixture.activeOneWeekLater());
+        ReservationTime time = saveTime(ReservationTimeFixture.activeTime15());
+        saveSlot(ReservationSlot.of(date, time, theme));
+
+        // when
+        List<ReservationDate> actual = reservationDateService.readSlotOfDatesByThemeId(theme.getId());
+
+        // then
+        assertThat(actual)
+                .hasSize(1);
+
+        assertThat(actual.get(0))
+                .usingRecursiveComparison()
+                .isEqualTo(date);
+    }
+
+    @Test
+    @DisplayName("슬롯이 없는 날짜는 특정 테마의 슬롯 날짜 조회 시 반환되지 않는다.")
+    void readSlotOfDatesByThemeId_without_slot() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme());
+        saveDate(ReservationDateFixture.activeOneWeekLater());
+
+        // when
+        List<ReservationDate> actual = reservationDateService.readSlotOfDatesByThemeId(theme.getId());
+
+        // then
+        assertThat(actual)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("다른 테마의 슬롯만 있는 날짜는 조회되지 않는다.")
+    void readSlotOfDatesByThemeId_other_theme_slot_not_returned() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme("테마1"));
+        Theme otherTheme = saveTheme(ThemeFixture.activeTheme("테마2"));
+        ReservationDate date = saveDate(ReservationDateFixture.activeOneWeekLater());
+        ReservationTime time = saveTime(ReservationTimeFixture.activeTime15());
+        saveSlot(ReservationSlot.of(date, time, otherTheme));
+
+        // when
+        List<ReservationDate> actual = reservationDateService.readSlotOfDatesByThemeId(theme.getId());
+
+        // then
+        assertThat(actual)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("비활성화 날짜는 슬롯이 있어도 조회되지 않는다.")
+    void readSlotOfDatesByThemeId_inactive_date_not_returned() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme());
+        ReservationDate inactiveDate = saveDate(ReservationDateFixture.inActiveTwoWeekLater());
+        ReservationTime time = saveTime(ReservationTimeFixture.activeTime15());
+        saveSlot(ReservationSlot.of(inactiveDate, time, theme));
+
+        // when
+        List<ReservationDate> actual = reservationDateService.readSlotOfDatesByThemeId(theme.getId());
+
+        // then
+        assertThat(actual)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("동일 날짜에 여러 슬롯이 있어도 한 번만 반환된다.")
+    void readSlotOfDatesByThemeId_multiple_slots_distinct() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme());
+        ReservationDate date = saveDate(ReservationDateFixture.activeOneWeekLater());
+        ReservationTime time1 = saveTime(ReservationTimeFixture.activeTime15());
+        ReservationTime time2 = saveTime(ReservationTimeFixture.activeTime16());
+        saveSlot(ReservationSlot.of(date, time1, theme));
+        saveSlot(ReservationSlot.of(date, time2, theme));
+
+        // when
+        List<ReservationDate> actual = reservationDateService.readSlotOfDatesByThemeId(theme.getId());
+
+        // then
+        assertThat(actual)
+                .hasSize(1);
+    }
 
     private List<ReservationDate> saveAll(List<ReservationDate> dates) {
         List<ReservationDate> saved = new ArrayList<>();

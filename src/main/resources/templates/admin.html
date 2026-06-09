@@ -41,6 +41,7 @@
         <button class="tab-button active" data-panel="date-panel">날짜 관리</button>
         <button class="tab-button" data-panel="time-panel">시간 관리</button>
         <button class="tab-button" data-panel="theme-panel">테마 관리</button>
+        <button class="tab-button" data-panel="slot-panel">슬롯 관리</button>
         <button class="tab-button" data-panel="reservation-panel">예약 조회</button>
     </section>
 
@@ -138,6 +139,30 @@
                     <tbody id="theme-table-body"></tbody>
                 </table>
             </article>
+        </div>
+    </section>
+
+    <!-- 슬롯 관리 -->
+    <section id="slot-panel" class="panel">
+        <div class="slot-grid">
+            <article class="card slot-card">
+                <h2>01. 날짜 선택</h2>
+                <div id="slot-date-list" class="selectable-list"></div>
+            </article>
+
+            <article class="card slot-card">
+                <h2>02. 시간 선택</h2>
+                <div id="slot-time-list" class="selectable-list"></div>
+            </article>
+
+            <article class="card slot-card">
+                <h2>03. 테마 선택</h2>
+                <div id="slot-theme-list" class="selectable-list"></div>
+            </article>
+        </div>
+
+        <div class="slot-action-row">
+            <button class="submit-button create-slot-button" type="button" onclick="createSlot()">슬롯 생성하기</button>
         </div>
     </section>
 

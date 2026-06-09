@@ -3,10 +3,7 @@ package roomescape.reservation.domain;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDateTime;
 
@@ -18,63 +15,44 @@ public class Reservation {
 
     private Long id;
     private String name;
-    private ReservationSlot slot;
+    private Long slotId;
     private ReservationStatus status;
     private LocalDateTime reservedAt;
 
-    public static Reservation reserve(String name, ReservationSlot slot, LocalDateTime reservedAt) {
-        return of(name, slot, ReservationStatus.RESERVED, reservedAt);
-    }
-
-    public static Reservation wait(String name, ReservationSlot slot, LocalDateTime reservedAt) {
-        return of(name, slot, ReservationStatus.WAITING, reservedAt);
-    }
-
-    private static Reservation of(String name, ReservationSlot slot, ReservationStatus status, LocalDateTime reservedAt) {
+    public static Reservation reserve(String name, Long slotId, ReservationStatus status, LocalDateTime reservedAt) {
         validateName(name);
-        validateSlot(slot);
-        slot.validateNotPast(reservedAt);
-        return new Reservation(null, name, slot, status, reservedAt);
+        return new Reservation(null, name, slotId, status, reservedAt);
     }
 
-    public static Reservation load(Long id, String name, ReservationSlot slot, ReservationStatus status, LocalDateTime reservedAt) {
+    public static Reservation load(Long id, String name, Long slotId, ReservationStatus status, LocalDateTime reservedAt) {
         validateName(name);
-        validateSlot(slot);
         validateId(id);
-        return new Reservation(id, name, slot, status, reservedAt);
+        return new Reservation(id, name, slotId, status, reservedAt);
     }
 
-    public void cancel(String requesterName, LocalDateTime cancelRequestAt) {
+    public void cancel(String requesterName) {
         validateOwner(requesterName);
         validateNotCanceled();
-        slot.validateNotPast(cancelRequestAt);
-
         this.status = ReservationStatus.CANCELED;
     }
 
-    public void changeSchedule(String requesterName, ReservationSlot newSlot, LocalDateTime changeRequestAt) {
+    public void cancelByManager() {
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void reschedule(Long newSlotId, String requesterName, ReservationStatus status) {
         validateOwner(requesterName);
         validateNotCanceled();
-        validateNotWaiting();
-        slot.validateNotPast(changeRequestAt);
-        newSlot.validateNotPast(changeRequestAt);
-
-        this.slot = newSlot;
+        this.slotId = newSlotId;
+        this.status = status;
+        this.reservedAt = LocalDateTime.now();
     }
 
-    public void changeScheduleByManager(ReservationSlot newSlot, LocalDateTime changeRequestAt) {
+    public void rescheduleByManager(Long newSlotId, ReservationStatus status) {
         validateNotCanceled();
-        validateNotWaiting();
-        slot.validateNotPast(changeRequestAt);
-        newSlot.validateNotPast(changeRequestAt);
-
-        this.slot = newSlot;
-    }
-
-    private static void validateSlot(ReservationSlot slot) {
-        if (slot == null) {
-            throw new ReservationException(RESERVATION_DATE_IS_NULL);
-        }
+        this.slotId = newSlotId;
+        this.status = status;
+        this.reservedAt = LocalDateTime.now();
     }
 
     private static void validateName(String name) {
@@ -107,28 +85,18 @@ public class Reservation {
         return this.status == ReservationStatus.RESERVED;
     }
 
+    public boolean isWaiting() {
+        return this.status == ReservationStatus.WAITING;
+    }
+
+    public void promote() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
         }
-    }
-
-    private void validateNotWaiting() {
-        if (status == ReservationStatus.WAITING) {
-            throw new ReservationException(RESERVATION_ALREADY_WAITING);
-        }
-    }
-
-    public ReservationDate getDate() {
-        return slot.date();
-    }
-
-    public ReservationTime getTime() {
-        return slot.time();
-    }
-
-    public Theme getTheme() {
-        return slot.theme();
     }
 
 }

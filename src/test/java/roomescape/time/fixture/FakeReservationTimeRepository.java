@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.repository.projection.AvailableSlotTime;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 
@@ -61,6 +62,11 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAvailableByDateIdAndThemeId(Long dateId, Long themeId) {
+        return List.of();
+    }
+
+    @Override
+    public List<AvailableSlotTime> findAvailableSlotTimeByDateIdAndThemeId(Long dateId, Long themeId) {
         return List.of();
     }
 

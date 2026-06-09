@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationApiFixture.*;
+import static roomescape.slot.fixture.SlotApiFixture.createSlot;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 
@@ -19,9 +20,9 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.AcceptanceTest;
+import roomescape.reservation.domain.ReservationStatus;
 
 class ReservationAdminControllerTest extends AcceptanceTest {
 
@@ -46,8 +47,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
-
-        createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        createReservationWithToken(managerToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
@@ -63,12 +64,12 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
-
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .when().patch("/admin/reservations/" + reservationId + "/cancel")
+                .when().patch("/admin/slots/" + slotId + "/reservations/" + reservationId + "/cancel")
                 .then().log().all()
                 .statusCode(200);
 
@@ -81,69 +82,6 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
-    void reserve_reservation_without_date_id() {
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer themeId = createTheme(managerToken, themeName);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", null);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
-    @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
-    void reserve_reservation_without_time_id() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer themeId = createTheme(managerToken, themeName);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", dateId);
-        params.put("timeId", null);
-        params.put("themeId", themeId);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
-    @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
-    void reserve_reservation_without_theme_id() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(managerToken, startAt);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", dateId);
-        params.put("timeId", timeId);
-        params.put("themeId", null);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
     @DisplayName("관리자는 예약자 확인 없이, 예약 날짜/시간을 변경할 수 있다.")
     void updateSchedule() {
         String futureDate = LocalDate.now().plusDays(1).toString();
@@ -153,21 +91,21 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, futureTime);
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer newSlotId = createSlot(managerToken, changedDateId, changedTimeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/admin/reservations/" + reservationId + "/schedule")
+                .when().patch("/admin/slots/" + slotId +"/reservations/" + reservationId + "/reschedule")
                 .then().log().all()
                 .statusCode(200)
-                .body("date", is(futureDate))
-                .body("time", is(futureTime));
+                .body("slotId", is(newSlotId));
     }
 
     @Test
@@ -178,47 +116,49 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer newSlotId = createSlot(managerToken, changedDateId, changedTimeId, themeId);
 
-        cancelReservationWithToken(this.managerToken, reservationId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
+        cancelReservationWithToken(managerToken, reservationId, slotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/admin/reservations/" + reservationId + "/schedule")
+                .when().patch("/admin/slots/" + slotId +"/reservations/" + reservationId + "/reschedule")
                 .then().log().all()
-                .statusCode(RESERVATION_ALREADY_CANCELED.getHttpStatus().value())
-                .body("message", is(RESERVATION_ALREADY_CANCELED.getMessage()));
+                .statusCode(RESERVATION_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(RESERVATION_NOT_FOUND.getMessage()));
     }
 
     @Test
-    @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
+    @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 대기로 들어간다.")
     void updateScheduleByManager_fail_duplicated() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer alreadyReservedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer alreadyReservedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
-        createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer newSlotId = createSlot(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
+        Integer reservationId = createReservationWithToken(memberToken, slotId);
+        createReservationWithToken(managerToken, newSlotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", alreadyReservedDateId);
-        params.put("timeId", alreadyReservedTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/admin/reservations/" + reservationId + "/schedule")
+                .when().patch("/admin/slots/" + slotId + "/reservations/" + reservationId + "/reschedule")
                 .then().log().all()
-                .statusCode(RESERVATION_ALREADY_BOOKED.getHttpStatus().value())
-                .body("message", is(RESERVATION_ALREADY_BOOKED.getMessage()));
+                .statusCode(200)
+                .body("status", is(ReservationStatus.WAITING.name()));
     }
 
     @Test
@@ -233,17 +173,18 @@ class ReservationAdminControllerTest extends AcceptanceTest {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer pastTimeId = createReservationTime(managerToken, "00:01");
         Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+        Integer newSlotId = createSlot(managerToken, pastSqlDateId, pastTimeId, themeId);
+        Integer reservationId = createReservationWithToken(managerToken, slotId);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("dateId", pastSqlDateId);
-        params.put("timeId", pastTimeId);
+        params.put("newSlotId", newSlotId);
 
         RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/admin/reservations/" + reservationId + "/schedule")
+                .when().patch("/admin/slots/" + slotId +"/reservations/" + reservationId + "/reschedule")
                 .then().log().all()
                 .statusCode(RESERVATION_ALREADY_PAST.getHttpStatus().value())
                 .body("message", is(RESERVATION_ALREADY_PAST.getMessage()));

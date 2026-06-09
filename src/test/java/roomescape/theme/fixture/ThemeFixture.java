@@ -24,4 +24,10 @@ public class ThemeFixture {
         return theme;
     }
 
+    public static Theme inActiveTheme() {
+        Theme theme = Theme.create("테마1", "설명1", "썸네일1");
+        theme.updateStatus(false);
+        return theme;
+    }
+
 }
