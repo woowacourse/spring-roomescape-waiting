@@ -11,7 +11,6 @@ import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
 import roomescape.slot.repository.ReservationSlotRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
@@ -35,14 +34,14 @@ public class ReservationService {
     @Transactional
     public Reservation reserve(String requesterName, Long slotId) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservation reservation = slot.reserve(requesterName, LocalDateTime.now());
+        Reservation reservation = slot.reserve(requesterName);
         return reservationRepository.save(reservation);
     }
 
     @Transactional
     public Reservation cancelByManager(Long slotId, String requesterName) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservations changed = slot.cancelByManager(requesterName, LocalDateTime.now());
+        Reservations changed = slot.cancelByManager(requesterName);
         cancelAndPromote(changed);
         return changed.findByName(requesterName);
     }
@@ -50,7 +49,7 @@ public class ReservationService {
     @Transactional
     public Reservation cancel(Long slotId, String requesterName) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservations changed = slot.cancel(requesterName, LocalDateTime.now());
+        Reservations changed = slot.cancel(requesterName);
         cancelAndPromote(changed);
         return changed.findByName(requesterName);
     }
@@ -60,7 +59,7 @@ public class ReservationService {
         ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
         ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
 
-        Reservations changed = currentSlot.reschedule(newSlot, requesterName, LocalDateTime.now());
+        Reservations changed = currentSlot.reschedule(newSlot, requesterName);
         rescheduleAndPromote(changed);
         return changed.findByName(requesterName);
     }
@@ -70,7 +69,7 @@ public class ReservationService {
         ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
         ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
 
-        Reservations changed = currentSlot.rescheduleByManager(newSlot, requesterName, LocalDateTime.now());
+        Reservations changed = currentSlot.rescheduleByManager(newSlot, requesterName);
         rescheduleAndPromote(changed);
         return changed.findByName(requesterName);
     }

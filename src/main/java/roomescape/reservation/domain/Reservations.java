@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
@@ -74,6 +75,17 @@ public record Reservations(
         }
 
         target.rescheduleByManager(newSlotId, status);
+        return new Reservations(List.of(target));
+    }
+
+    private Reservations processAction(String requesterName, Consumer<Reservation> action) {
+        Reservation target = popByName(requesterName);
+        if (target.isReserved()) {
+            action.accept(target);
+            return withPromotedIfPresent(target);
+        }
+
+        action.accept(target);
         return new Reservations(List.of(target));
     }
 

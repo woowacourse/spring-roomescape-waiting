@@ -44,29 +44,32 @@ public class ReservationSlot {
         return new ReservationSlot(id, date, time, theme, reservations);
     }
 
-    public Reservation reserve(String requesterName, LocalDateTime reservedAt) {
+    public Reservation reserve(String requesterName) {
+        LocalDateTime reservedAt = LocalDateTime.now();
         validateNotPast(reservedAt);
         return reservations.reserve(requesterName, this.id, reservedAt);
     }
 
-    public Reservations cancel(String requesterName, LocalDateTime requestAt) {
-        validateNotPast(requestAt);
+    public Reservations cancel(String requesterName) {
+        validateNotPast(LocalDateTime.now());
         return reservations.cancel(requesterName);
     }
 
-    public Reservations cancelByManager(String requesterName, LocalDateTime reservedAt) {
-        validateNotPast(reservedAt);
+    public Reservations cancelByManager(String requesterName) {
+        validateNotPast(LocalDateTime.now());
         return reservations.cancelByManager(requesterName);
     }
 
-    public Reservations reschedule(ReservationSlot newSlot, String requesterName, LocalDateTime requestAt) {
+    public Reservations reschedule(ReservationSlot newSlot, String requesterName) {
+        LocalDateTime requestAt = LocalDateTime.now();
         this.validateNotPast(requestAt);
         newSlot.validateNotPast(requestAt);
         ReservationStatus status = newSlot.decideStatus(requesterName);
         return reservations.reschedule(newSlot.getId(), requesterName, status);
     }
 
-    public Reservations rescheduleByManager(ReservationSlot newSlot, String requesterName, LocalDateTime requestAt) {
+    public Reservations rescheduleByManager(ReservationSlot newSlot, String requesterName) {
+        LocalDateTime requestAt = LocalDateTime.now();
         this.validateNotPast(requestAt);
         newSlot.validateNotPast(requestAt);
         ReservationStatus status = newSlot.decideStatus(requesterName);
