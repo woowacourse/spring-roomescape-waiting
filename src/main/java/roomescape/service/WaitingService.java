@@ -1,6 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
@@ -12,6 +14,7 @@ import roomescape.dao.TimeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.Waiting;
@@ -60,6 +63,11 @@ public class WaitingService {
         }
     }
 
+    public void promoteFirstWaiting(Slot slot, LocalDateTime now) {
+        waitingDao.findFirstForUpdate(slot.getDate(), slot.getTimeId(), slot.getThemeId(), slot.getStoreId())
+                .ifPresent(first -> promote(first, now));
+    }
+
     @Transactional(readOnly = true)
     public List<Waiting> findAll() {
         return waitingDao.findAll();
@@ -73,6 +81,22 @@ public class WaitingService {
     @Transactional(readOnly = true)
     public List<Waiting> findAllByStoreId(Long storeId) {
         return waitingDao.findAllByStoreId(storeId);
+    }
+
+    private void promote(Waiting waiting, LocalDateTime now) {
+        waiting.promoteToReservation(now)
+                .ifPresent(reservation -> savePromotedReservation(waiting, reservation));
+    }
+
+    private void savePromotedReservation(Waiting waiting, Reservation reservation) {
+        if (!waitingDao.delete(waiting.getId())) {
+            throw new IllegalStateException("예약 대기 삭제에 실패했습니다.");
+        }
+        try {
+            reservationDao.insert(reservation);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateEntityException("이미 예약이 존재하여 대기를 전환할 수 없습니다.");
+        }
     }
 
     private Waiting buildWaiting(WaitingRequestDto waitingRequestDto, Member member) {

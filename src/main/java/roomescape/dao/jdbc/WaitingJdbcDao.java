@@ -50,8 +50,7 @@ public class WaitingJdbcDao implements WaitingDao {
             rs.getObject("store_id", Long.class),
             rs.getLong("rank")
     );
-    private static final String BASE_SELECT = """
-            SELECT
+    private static final String SELECT_COLUMNS = """
                     w.id,
                     w.date,
                     w.store_id,
@@ -67,6 +66,17 @@ public class WaitingJdbcDao implements WaitingDao {
                     th.name AS theme_name,
                     th.thumbnail_url AS theme_thumbnail_url,
                     th.description AS theme_description,
+            """;
+    private static final String SELECT_FROM = """
+                FROM waitings w
+                INNER JOIN members m ON w.member_id = m.id
+                INNER JOIN times t ON w.time_id = t.id
+                INNER JOIN themes th ON w.theme_id = th.id
+                WHERE w.deleted_at = :sentinel
+            """;
+    private static final String BASE_SELECT = """
+            SELECT
+            """ + SELECT_COLUMNS + """
                     (SELECT COUNT(*)+1
                         FROM waitings w2
                         WHERE w2.date = w.date
@@ -75,12 +85,12 @@ public class WaitingJdbcDao implements WaitingDao {
                         AND w2.store_id = w.store_id
                         AND w2.deleted_at = :sentinel
                         AND w2.id < w.id) AS rank
-                FROM waitings w
-                INNER JOIN members m ON w.member_id = m.id
-                INNER JOIN times t ON w.time_id = t.id
-                INNER JOIN themes th ON w.theme_id = th.id
-                WHERE w.deleted_at = :sentinel
-            """;
+            """ + SELECT_FROM;
+    private static final String FIRST_WAITING_SELECT = """
+            SELECT
+            """ + SELECT_COLUMNS + """
+                    1 AS rank
+            """ + SELECT_FROM;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -189,10 +199,14 @@ public class WaitingJdbcDao implements WaitingDao {
     }
 
     @Override
-    public Optional<Waiting> findFirst(LocalDate date, Long timeId, Long themeId, Long storeId) {
-        String sql = BASE_SELECT + """
-                AND w.date = :date AND w.time_id = :timeId AND w.theme_id = :themeId AND w.store_id = :storeId
+    public Optional<Waiting> findFirstForUpdate(LocalDate date, Long timeId, Long themeId, Long storeId) {
+        String sql = FIRST_WAITING_SELECT + """
+                AND w.date = :date
+                AND w.time_id = :timeId
+                AND w.theme_id = :themeId
+                AND w.store_id = :storeId
                 ORDER BY w.id LIMIT 1
+                FOR UPDATE OF w
                 """;
         SqlParameterSource params = new MapSqlParameterSource("date", date)
                 .addValue("timeId", timeId)
@@ -201,7 +215,8 @@ public class WaitingJdbcDao implements WaitingDao {
                 .addValue("sentinel", SENTINEL);
 
         return jdbcTemplate.query(sql, params, ROW_MAPPER)
-                .stream().findFirst();
+                .stream()
+                .findFirst();
     }
 
     @Override

@@ -13,12 +13,6 @@ public class Name {
         this.value = value;
     }
 
-    private void validateLength(String name) {
-        if (name.isBlank() || name.length() < MIN_LENGTH || name.length() > MAX_LENGTH) {
-            throw new InvalidInputException("이름은 2~40글자만 가능합니다.");
-        }
-    }
-
     public String getValue() {
         return value;
     }
@@ -41,5 +35,10 @@ public class Name {
     public String toString() {
         return value;
     }
-}
 
+    private void validateLength(String name) {
+        if (name.isBlank() || name.length() < MIN_LENGTH || name.length() > MAX_LENGTH) {
+            throw new InvalidInputException("이름은 2~40글자만 가능합니다.");
+        }
+    }
+}

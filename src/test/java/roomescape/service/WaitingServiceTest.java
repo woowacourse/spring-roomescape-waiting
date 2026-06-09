@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
@@ -26,7 +28,12 @@ import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
+import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
+import roomescape.domain.Time;
 import roomescape.domain.Waiting;
+import roomescape.domain.vo.Name;
 import roomescape.dto.request.WaitingRequestDto;
 
 @JdbcTest
@@ -40,6 +47,8 @@ class WaitingServiceTest {
     @Autowired
     private WaitingDao waitingDao;
     @Autowired
+    private ReservationDao reservationDao;
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     private Long reserverId;
@@ -50,6 +59,8 @@ class WaitingServiceTest {
     private Long storeId;
     private Long otherStoreId;
     private LocalDate date;
+    private Time time;
+    private Theme theme;
     private Member member;
     private Member otherMember;
     private Member reserver;
@@ -85,6 +96,7 @@ class WaitingServiceTest {
         jdbcTemplate.update("INSERT INTO times(start_at) VALUES (?)", LocalTime.of(13, 0));
         timeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM times WHERE start_at = ?", Long.class, LocalTime.of(13, 0));
+        time = new Time(timeId, LocalTime.of(13, 0));
 
         jdbcTemplate.update(
                 "INSERT INTO themes(name, thumbnail_url, description) VALUES (?, ?, ?)",
@@ -92,6 +104,7 @@ class WaitingServiceTest {
         );
         themeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM themes WHERE name = ?", Long.class, "방탈출1");
+        theme = new Theme(themeId, new Name("방탈출1"), "http://thumbnail_url", "설명");
 
         date = LocalDate.now().plusDays(1);
 
@@ -99,15 +112,24 @@ class WaitingServiceTest {
         member = new Member(memberId, "유저1", "user1@test.com", "password", MemberRole.USER);
         otherMember = new Member(otherMemberId, "유저2", "user2@test.com", "password", MemberRole.USER);
 
-        seedReservation(reserverId, storeId);
-        seedReservation(reserverId, otherStoreId);
+        seedReservation(reserverId, date, storeId);
+        seedReservation(reserverId, date, otherStoreId);
     }
 
-    private void seedReservation(Long memberId, Long storeId) {
+    private void seedReservation(Long memberId, LocalDate date, Long storeId) {
         jdbcTemplate.update(
                 "INSERT INTO reservations(member_id, date, time_id, theme_id, store_id, status) "
                         + "VALUES (?, ?, ?, ?, ?, 'BOOKED')",
                 memberId, date, timeId, themeId, storeId);
+    }
+
+    private void cancelReservation(LocalDate date, Long storeId) {
+        jdbcTemplate.update("""
+                        UPDATE reservations
+                        SET status = 'CANCELED', deleted_at = ?
+                        WHERE member_id = ? AND date = ? AND time_id = ? AND theme_id = ? AND store_id = ?
+                        """,
+                LocalDateTime.now(), reserverId, date, timeId, themeId, storeId);
     }
 
     @Nested
@@ -200,6 +222,56 @@ class WaitingServiceTest {
             Waiting second = waitingService.create(dto, member);
 
             assertThat(second.getId()).isNotEqualTo(first.getId());
+        }
+    }
+
+    @Nested
+    class PromoteFirstWaiting {
+
+        @Test
+        @DisplayName("첫 번째 대기를 예약으로 전환하고 남은 대기의 순번을 당긴다")
+        void promotesFirstWaiting() {
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, storeId), member);
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, storeId), otherMember);
+            cancelReservation(date, storeId);
+
+            waitingService.promoteFirstWaiting(new Slot(date, time, theme, storeId), LocalDateTime.now());
+
+            assertThat(reservationDao.findAllByMemberId(memberId))
+                    .singleElement()
+                    .extracting(Reservation::getDate)
+                    .isEqualTo(date);
+            assertThat(waitingService.findAllByMemberId(memberId)).isEmpty();
+            assertThat(waitingService.findAllByMemberId(otherMemberId))
+                    .singleElement()
+                    .extracting(Waiting::getRank)
+                    .isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("승격할 대기가 없으면 아무 대기도 전환하지 않는다")
+        void doesNotPromoteWhenWaitingIsEmpty() {
+            waitingService.promoteFirstWaiting(new Slot(date, time, theme, storeId), LocalDateTime.now());
+
+            assertThat(reservationDao.findAllByMemberId(memberId)).isEmpty();
+            assertThat(waitingService.findAll()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("지난 슬롯의 대기는 예약으로 전환하지 않는다")
+        void doesNotPromotePastSlot() {
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            seedReservation(reserverId, pastDate, storeId);
+            waitingService.create(new WaitingRequestDto(pastDate, timeId, themeId, storeId), member);
+            cancelReservation(pastDate, storeId);
+
+            waitingService.promoteFirstWaiting(new Slot(pastDate, time, theme, storeId), LocalDateTime.now());
+
+            assertThat(reservationDao.findAllByMemberId(memberId)).isEmpty();
+            assertThat(waitingService.findAllByMemberId(memberId))
+                    .singleElement()
+                    .extracting(Waiting::getRank)
+                    .isEqualTo(1L);
         }
     }
 

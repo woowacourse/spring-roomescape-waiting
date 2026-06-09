@@ -12,6 +12,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.dto.request.AdminReservationRequestDto;
@@ -25,17 +26,20 @@ public class AdminReservationService {
     private final MemberDao memberDao;
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
+    private final WaitingService waitingService;
 
     public AdminReservationService(
             ReservationDao reservationDao,
             MemberDao memberDao,
             TimeDao timeDao,
-            ThemeDao themeDao
+            ThemeDao themeDao,
+            WaitingService waitingService
     ) {
         this.reservationDao = reservationDao;
         this.memberDao = memberDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
+        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
@@ -54,8 +58,7 @@ public class AdminReservationService {
 
     @Transactional(readOnly = true)
     public Reservation findById(Long id) {
-        return reservationDao.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+        return getById(id);
     }
 
     public Reservation createByAdmin(AdminReservationRequestDto request) {
@@ -66,23 +69,36 @@ public class AdminReservationService {
     }
 
     public Reservation update(Long id, ReservationPatchDto request) {
-        Reservation reservation = findById(id);
+        LocalDateTime now = LocalDateTime.now();
+        Reservation reservation = getById(id);
+        Slot previousSlot = reservation.getSlot();
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time);
-        return reservationDao.update(reservation);
+        Reservation updated = reservationDao.update(reservation);
+        if (updated.hasDifferentSlot(previousSlot)) {
+            waitingService.promoteFirstWaiting(previousSlot, now);
+        }
+        return updated;
     }
 
     public void cancelByAdmin(Long id) {
-        Reservation reservation = findById(id);
-        reservation.cancelByAdmin(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        Reservation reservation = getById(id);
+        reservation.cancelByAdmin(now);
         reservationDao.update(reservation);
+        waitingService.promoteFirstWaiting(reservation.getSlot(), now);
     }
 
     public void delete(Long id) {
         if (!reservationDao.delete(id)) {
             throw new EntityNotFoundException("존재하지 않는 예약입니다.");
         }
+    }
+
+    private Reservation getById(Long id) {
+        return reservationDao.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
     }
 
     private Reservation buildReservation(Member member, AdminReservationRequestDto request) {

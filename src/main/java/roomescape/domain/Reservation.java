@@ -16,18 +16,6 @@ public class Reservation {
     private ReservationStatus status;
     private LocalDateTime deletedAt;
 
-    private Reservation(Builder builder) {
-        this.id = builder.id;
-        this.member = builder.member;
-        this.date = builder.date;
-        this.time = builder.time;
-        this.theme = builder.theme;
-        this.storeId = builder.storeId;
-        this.status = builder.status;
-        this.deletedAt = builder.deletedAt;
-        this.version = builder.version;
-    }
-
     public static Reservation createByUser(Member member, LocalDate date, Time time, Theme theme,
                                            Long storeId, LocalDateTime now) {
         if (time.isReservationBefore(now, date)) {
@@ -76,23 +64,29 @@ public class Reservation {
         return reconstruct(id, member, date, time, theme, ReservationStatus.BOOKED, null, 0L, null);
     }
 
+    public static Reservation from(Member member, Slot slot) {
+        return new Builder()
+                .member(member)
+                .date(slot.getDate())
+                .time(slot.getTime())
+                .theme(slot.getTheme())
+                .storeId(slot.getStoreId())
+                .build();
+    }
+
     public void cancelByUser(LocalDateTime now) {
         if (getTime().isReservationBefore(now, date)) {
             throw new BusinessRuleViolationException("지난 예약은 취소 불가능합니다.");
         }
-        doCancel(now);
+        cancel(now);
     }
 
     public void cancelByAdmin(LocalDateTime now) {
-        doCancel(now);
-    }
-
-    private void doCancel(LocalDateTime now) {
-        this.status = ReservationStatus.CANCELED;
-        this.deletedAt = now;
+        cancel(now);
     }
 
     public void update(LocalDate date, Time time) {
+        validateActive();
         LocalDateTime now = LocalDateTime.now();
         if (time.isReservationBefore(now, date)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 수정은 불가능합니다.");
@@ -107,6 +101,14 @@ public class Reservation {
 
     public boolean isOwnedBy(Long memberId) {
         return Objects.equals(this.member.getId(), memberId);
+    }
+
+    public Slot getSlot() {
+        return new Slot(date, time, theme, storeId);
+    }
+
+    public boolean hasDifferentSlot(Slot other) {
+        return !getSlot().equals(other);
     }
 
     @Override
@@ -131,6 +133,30 @@ public class Reservation {
     public ReservationStatus getStatus() { return status; }
     public long getVersion() { return version; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    private Reservation(Builder builder) {
+        this.id = builder.id;
+        this.member = builder.member;
+        this.date = builder.date;
+        this.time = builder.time;
+        this.theme = builder.theme;
+        this.storeId = builder.storeId;
+        this.status = builder.status;
+        this.deletedAt = builder.deletedAt;
+        this.version = builder.version;
+    }
+
+    private void cancel(LocalDateTime now) {
+        validateActive();
+        this.status = ReservationStatus.CANCELED;
+        this.deletedAt = now;
+    }
+
+    private void validateActive() {
+        if (!isActive()) {
+            throw new BusinessRuleViolationException("이미 취소된 예약입니다.");
+        }
+    }
 
     private static class Builder {
         private Long id;

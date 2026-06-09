@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
@@ -26,6 +27,7 @@ import roomescape.dao.jdbc.MemberJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
+import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -34,15 +36,18 @@ import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
+import roomescape.dto.request.WaitingRequestDto;
 import roomescape.dto.response.PageResponse;
 
 @JdbcTest
-@Import({AdminReservationService.class, ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class})
+@Import({AdminReservationService.class, ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class, WaitingService.class, WaitingJdbcDao.class})
 @ActiveProfiles("test")
 class AdminReservationServiceTest {
 
     @Autowired
     private AdminReservationService adminReservationService;
+    @Autowired
+    private WaitingService waitingService;
     @Autowired
     private ReservationDao reservationDao;
     @Autowired
@@ -59,11 +64,14 @@ class AdminReservationServiceTest {
     private Time savedTime2;
     private Theme savedTheme1;
     private Theme savedTheme2;
+    private Long storeId;
     private AdminReservationRequestDto requestDto1;
     private AdminReservationRequestDto requestDto2;
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
+        storeId = jdbcTemplate.queryForObject("SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
         jdbcTemplate.update(
                 "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
                 "유저", "user@test.com", "password", "USER"
@@ -75,6 +83,13 @@ class AdminReservationServiceTest {
         savedTheme2 = themeDao.insert(new Theme(new Name("방탈출 이름2"), "http://thumbnail_url", "방탈출을 할 수 있다."));
         requestDto1 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), null);
         requestDto2 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), null);
+    }
+
+    private Member saveMember(String name, String email) {
+        jdbcTemplate.update(
+                "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                name, email, "password", "USER");
+        return memberDao.findByEmail(email).orElseThrow();
     }
 
     @Nested
@@ -178,6 +193,29 @@ class AdminReservationServiceTest {
         }
 
         @Test
+        @DisplayName("예약을 다른 슬롯으로 수정하면 이전 슬롯의 1순위 대기가 전환된다")
+        void promotesWaitingOnPreviousSlotAfterUpdate() {
+            AdminReservationRequestDto request = new AdminReservationRequestDto(
+                    member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
+            Reservation saved = adminReservationService.createByAdmin(request);
+            Member waitingMember = saveMember("대기자", "waiting-member-update@test.com");
+            waitingService.create(
+                    new WaitingRequestDto(request.date(), request.timeId(), request.themeId(), request.storeId()),
+                    waitingMember);
+
+            adminReservationService.update(saved.getId(),
+                    new ReservationPatchDto(request.date(), savedTime2.getId()));
+
+            assertThat(reservationDao.findAllByMemberId(waitingMember.getId()))
+                    .singleElement()
+                    .satisfies(promoted -> {
+                        assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.BOOKED);
+                        assertThat(promoted.getTime()).isEqualTo(savedTime1);
+                    });
+            assertThat(waitingService.findAllByMemberId(waitingMember.getId())).isEmpty();
+        }
+
+        @Test
         @DisplayName("존재하지 않는 id를 수정하면 예외를 반환한다")
         void throwsWhenIdNotFound() {
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime1.getId());
@@ -213,10 +251,42 @@ class AdminReservationServiceTest {
         }
 
         @Test
+        @DisplayName("예약을 취소하면 같은 슬롯의 1순위 대기가 예약으로 자동 전환된다")
+        void promotesFirstWaitingOnCancel() {
+            AdminReservationRequestDto request = new AdminReservationRequestDto(
+                    member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
+            Reservation saved = adminReservationService.createByAdmin(request);
+            Member waitingMember = saveMember("대기자", "waiting-member-cancel@test.com");
+            waitingService.create(
+                    new WaitingRequestDto(request.date(), request.timeId(), request.themeId(), request.storeId()),
+                    waitingMember);
+
+            adminReservationService.cancelByAdmin(saved.getId());
+
+            assertThat(reservationDao.findAllByMemberId(waitingMember.getId()))
+                    .singleElement()
+                    .satisfies(promoted -> {
+                        assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.BOOKED);
+                        assertThat(promoted.getDate()).isEqualTo(request.date());
+                    });
+            assertThat(waitingService.findAllByMemberId(waitingMember.getId())).isEmpty();
+        }
+
+        @Test
         @DisplayName("존재하지 않는 id를 취소하면 예외를 반환한다")
         void throwsWhenIdNotFound() {
             assertThatThrownBy(() -> adminReservationService.cancelByAdmin(-1L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("이미 취소된 예약을 다시 취소하면 예외를 반환한다")
+        void throwsWhenAlreadyCanceled() {
+            Reservation saved = adminReservationService.createByAdmin(requestDto1);
+            adminReservationService.cancelByAdmin(saved.getId());
+
+            assertThatThrownBy(() -> adminReservationService.cancelByAdmin(saved.getId()))
+                    .isInstanceOf(BusinessRuleViolationException.class);
         }
     }
 

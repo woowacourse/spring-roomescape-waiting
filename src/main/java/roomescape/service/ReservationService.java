@@ -13,6 +13,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.dto.request.ReservationPatchDto;
@@ -25,32 +26,25 @@ public class ReservationService {
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
     private final ReservationAuthorizationService authorizationService;
+    private final WaitingService waitingService;
 
     public ReservationService(
             ReservationDao reservationDao,
             TimeDao timeDao,
             ThemeDao themeDao,
-            ReservationAuthorizationService authorizationService
+            ReservationAuthorizationService authorizationService,
+            WaitingService waitingService
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
         this.authorizationService = authorizationService;
+        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllByMemberId(Long memberId) {
         return reservationDao.findAllByMemberId(memberId);
-    }
-
-    @Transactional(readOnly = true)
-    public Reservation findActiveById(Long id) {
-        Reservation reservation = reservationDao.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
-        if (!reservation.isActive()) {
-            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
-        }
-        return reservation;
     }
 
     public Reservation create(Member member, ReservationRequestDto request) {
@@ -64,18 +58,35 @@ public class ReservationService {
 
     public Reservation updateByUser(Long id, Long memberId, ReservationPatchDto request) {
         authorizationService.validateMemberCanAccess(memberId, id);
+        LocalDateTime now = LocalDateTime.now();
         Reservation reservation = findActiveById(id);
+        Slot previousSlot = reservation.getSlot();
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         reservation.update(request.date(), time);
-        return reservationDao.update(reservation);
+        Reservation updated = reservationDao.update(reservation);
+        if (updated.hasDifferentSlot(previousSlot)) {
+            waitingService.promoteFirstWaiting(previousSlot, now);
+        }
+        return updated;
     }
 
     public void cancel(Long id, Long memberId) {
         authorizationService.validateMemberCanAccess(memberId, id);
+        LocalDateTime now = LocalDateTime.now();
         Reservation reservation = findActiveById(id);
-        reservation.cancelByUser(LocalDateTime.now());
+        reservation.cancelByUser(now);
         reservationDao.update(reservation);
+        waitingService.promoteFirstWaiting(reservation.getSlot(), now);
+    }
+
+    private Reservation findActiveById(Long id) {
+        Reservation reservation = reservationDao.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+        if (!reservation.isActive()) {
+            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
+        }
+        return reservation;
     }
 
     private Reservation buildReservation(Member member, ReservationRequestDto request, LocalDateTime now) {
