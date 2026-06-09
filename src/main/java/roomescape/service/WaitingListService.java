@@ -80,16 +80,16 @@ public class WaitingListService {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleReservationCanceled(ReservationAvailableEvent event) {
-        Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
+    public void handleReservationCanceled(final ReservationAvailableEvent event) {
+        final Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
                 event.date(), event.timeId(), event.themeId());
 
         if (nextWaiting.isEmpty()) {
             return;
         }
 
-        WaitingList waiting = nextWaiting.get();
-        Reservation newReservation = Reservation.create(
+        final WaitingList waiting = nextWaiting.get();
+        final Reservation newReservation = Reservation.create(
                 waiting.getName(),
                 waiting.getReservationDate().date(),
                 waiting.getReservationTime(),
@@ -97,7 +97,11 @@ public class WaitingListService {
         );
 
         reservationRepository.save(newReservation);
-        waitingListRepository.deleteById(waiting.getId());
+
+        final boolean deleted = waitingListRepository.deleteById(waiting.getId());
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
+        }
     }
 
     public List<WaitingListResult> getWaitingListByName(final String name) {

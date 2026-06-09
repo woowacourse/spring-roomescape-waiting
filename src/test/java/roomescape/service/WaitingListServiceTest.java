@@ -379,13 +379,13 @@ class WaitingListServiceTest {
         WaitingList waiting = WaitingList.createWithId(1L, "대기자", date, time, theme, LocalDateTime.now());
 
         given(waitingListRepository.findFirstBySlot(date, 1L, 1L)).willReturn(Optional.of(waiting));
+        given(waitingListRepository.deleteById(1L)).willReturn(true);
 
         // when
         waitingListService.handleReservationCanceled(event);
 
         // then
         verify(reservationRepository).save(any(Reservation.class));
-        verify(waitingListRepository).deleteById(1L);
     }
 
     @Test
