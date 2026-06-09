@@ -56,7 +56,12 @@ public class AdminReservationService {
         return reservationDao.findAllByStoreId(storeId);
     }
 
+    @Transactional(readOnly = true)
     public Reservation findById(Long id) {
+        return getById(id);
+    }
+
+    private Reservation getById(Long id) {
         return reservationDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
     }
@@ -70,7 +75,7 @@ public class AdminReservationService {
 
     public Reservation update(Long id, ReservationPatchDto request) {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = findById(id);
+        Reservation reservation = getById(id);
         Slot previousSlot = reservation.getSlot();
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
@@ -84,7 +89,7 @@ public class AdminReservationService {
 
     public void cancelByAdmin(Long id) {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = findById(id);
+        Reservation reservation = getById(id);
         reservation.cancelByAdmin(now);
         reservationDao.update(reservation);
         waitingService.promoteFirstWaiting(reservation.getSlot(), now);
