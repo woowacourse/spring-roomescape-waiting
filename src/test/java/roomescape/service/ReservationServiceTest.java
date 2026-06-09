@@ -147,29 +147,6 @@ class ReservationServiceTest {
     }
 
     @Nested
-    class FindActiveById {
-
-        @Test
-        @DisplayName("BOOKED 예약을 조회한다")
-        void returnsActiveReservation() {
-            Reservation saved = reservationService.create(member, requestDto1);
-
-            assertThat(reservationService.findActiveById(saved.getId())).isEqualTo(saved);
-        }
-
-        @Test
-        @DisplayName("CANCELED 예약을 조회하면 예외를 반환한다")
-        void throwsWhenCanceled() {
-            Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
-            reservationService.cancel(saved.getId(), member.getId());
-
-            assertThatThrownBy(() -> reservationService.findActiveById(saved.getId()))
-                    .isInstanceOf(EntityNotFoundException.class);
-        }
-    }
-
-    @Nested
     class CancelWithPromotion {
 
         @Test
@@ -333,6 +310,17 @@ class ReservationServiceTest {
         @DisplayName("존재하지 않는 id를 취소하면 예외를 반환한다")
         void throwsWhenIdNotFound() {
             assertThatThrownBy(() -> reservationService.cancel(-1L, member.getId()))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("이미 취소된 예약을 취소하면 예외를 반환한다")
+        void throwsWhenAlreadyCanceled() {
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
+            reservationService.cancel(saved.getId(), member.getId());
+
+            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), member.getId()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
