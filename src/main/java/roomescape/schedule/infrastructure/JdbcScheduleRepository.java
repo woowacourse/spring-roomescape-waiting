@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.schedule.Schedule;
+import roomescape.schedule.ScheduleRepository;
 
 import java.time.LocalDate;
 import java.util.List;

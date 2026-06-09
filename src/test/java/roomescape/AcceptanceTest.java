@@ -273,6 +273,180 @@ class AcceptanceTest {
     }
 
     @Test
+    @DisplayName("대기 신청 시 취소할 예약을 함께 전달하면 해댱 예약을 취소하고 대상 스케줄의 대기로 신청한다. 즉, 예약 변경 시 다른 스케줄의 대기로 신청할 경우")
+    void 대기_신청_시나리오_테스트_1() {
+        String userAToken = userAToken();
+
+        List<Map<String, Object>> beforeMyReservations = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userAToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .extract()
+                .path("data");
+
+        assertThat(beforeMyReservations)
+                .anySatisfy(item -> {
+                    assertThat(item.get("id")).isEqualTo(1);
+                    assertThat(item.get("status")).isEqualTo("RESERVED");
+                    assertThat(item.get("date")).isEqualTo("2026-05-05");
+                    Map<String, Object> theme = (Map<String, Object>) item.get("theme");
+                    Map<String, Object> time = (Map<String, Object>) item.get("time");
+                    assertThat(theme.get("id")).isEqualTo(1);
+                    assertThat(time.get("id")).isEqualTo(1);
+                });
+
+        Map<String, Object> waitingRequest = new HashMap<>();
+        waitingRequest.put("date", "2026-05-06");
+        waitingRequest.put("timeId", 3);
+        waitingRequest.put("themeId", 2);
+        waitingRequest.put("reservationIdToCancel", 1);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userAToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.scheduleId", is(6))
+                .body("data.waitingOrder", is(1));
+
+        List<Map<String, Object>> myReservations = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userAToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .extract()
+                .path("data");
+
+        assertThat(myReservations)
+                .filteredOn(item -> "RESERVED".equals(item.get("status")))
+                .filteredOn(item -> Integer.valueOf(1).equals(item.get("id")))
+                .isEmpty();
+
+        assertThat(myReservations)
+                .filteredOn(item -> "RESERVED".equals(item.get("status")))
+                .filteredOn(item -> "2026-05-05".equals(item.get("date")))
+                .filteredOn(item -> Integer.valueOf(1).equals(((Map<String, Object>) item.get("theme")).get("id")))
+                .filteredOn(item -> Integer.valueOf(1).equals(((Map<String, Object>) item.get("time")).get("id")))
+                .isEmpty();
+
+        assertThat(myReservations)
+                .anySatisfy(item -> {
+                    assertThat(item.get("status")).isEqualTo("WAITING");
+                    assertThat(item.get("date")).isEqualTo("2026-05-06");
+                    Map<String, Object> theme = (Map<String, Object>) item.get("theme");
+                    Map<String, Object> time = (Map<String, Object>) item.get("time");
+                    assertThat(theme.get("id")).isEqualTo(2);
+                    assertThat(time.get("id")).isEqualTo(3);
+                    assertThat(item.get("waitingOrder")).isEqualTo(1);
+                });
+    }
+
+    @Test
+    @DisplayName("대기 신청 시 취소할 예약을 함께 전달하면 해당 예약을 취소하고 기존 예약의 선두 대기자를 예약으로 승격한다.")
+    void 대기_신청_시나리오_테스트_2() {
+        String userAToken = userAToken();
+        String userBToken = userBToken();
+
+        Map<String, Object> firstWaitingRequest = new HashMap<>();
+        firstWaitingRequest.put("date", "2026-05-05");
+        firstWaitingRequest.put("timeId", 1);
+        firstWaitingRequest.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userBToken)
+                .contentType(ContentType.JSON)
+                .body(firstWaitingRequest)
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.scheduleId", is(1))
+                .body("data.waitingOrder", is(1));
+
+        Map<String, Object> waitingRequest = new HashMap<>();
+        waitingRequest.put("date", "2026-05-06");
+        waitingRequest.put("timeId", 3);
+        waitingRequest.put("themeId", 2);
+        waitingRequest.put("reservationIdToCancel", 1);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userAToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.scheduleId", is(6))
+                .body("data.waitingOrder", is(1));
+
+        List<Map<String, Object>> userAMyReservations = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userAToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .extract()
+                .path("data");
+
+        assertThat(userAMyReservations)
+                .filteredOn(item -> "RESERVED".equals(item.get("status")))
+                .filteredOn(item -> Integer.valueOf(1).equals(item.get("id")))
+                .isEmpty();
+
+        assertThat(userAMyReservations)
+                .anySatisfy(item -> {
+                    assertThat(item.get("status")).isEqualTo("WAITING");
+                    assertThat(item.get("date")).isEqualTo("2026-05-06");
+                    Map<String, Object> theme = (Map<String, Object>) item.get("theme");
+                    Map<String, Object> time = (Map<String, Object>) item.get("time");
+                    assertThat(theme.get("id")).isEqualTo(2);
+                    assertThat(time.get("id")).isEqualTo(3);
+                    assertThat(item.get("waitingOrder")).isEqualTo(1);
+                });
+
+        List<Map<String, Object>> userBMyReservations = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userBToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .extract()
+                .path("data");
+
+        assertThat(userBMyReservations)
+                .anySatisfy(item -> {
+                    assertThat(item.get("status")).isEqualTo("RESERVED");
+                    assertThat(item.get("date")).isEqualTo("2026-05-05");
+                    Map<String, Object> theme = (Map<String, Object>) item.get("theme");
+                    Map<String, Object> time = (Map<String, Object>) item.get("time");
+                    assertThat(theme.get("id")).isEqualTo(1);
+                    assertThat(time.get("id")).isEqualTo(1);
+                    assertThat(item.get("waitingOrder")).isNull();
+                });
+
+        assertThat(userBMyReservations)
+                .noneSatisfy(item -> {
+                    assertThat(item.get("status")).isEqualTo("WAITING");
+                    assertThat(item.get("date")).isEqualTo("2026-05-05");
+                    Map<String, Object> theme = (Map<String, Object>) item.get("theme");
+                    Map<String, Object> time = (Map<String, Object>) item.get("time");
+                    assertThat(theme.get("id")).isEqualTo(1);
+                    assertThat(time.get("id")).isEqualTo(1);
+                });
+    }
+
+    @Test
     @DisplayName("앞 대기 취소 후 내 예약 조회시 뒤 대기의 순번이 1로 조회된다.")
     void 앞_대기_취소_후_내_예약_조회() {
         String firstUserToken = login("b", "test2");

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.infrastructure.JdbcReservationRepository;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @JdbcTest
@@ -45,6 +48,15 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("같은 스케줄에는 확정 예약을 중복 저장할 수 없다.")
+    void save_중복예약_DB제약_테스트() {
+        Reservation duplicatedReservation = new Reservation(null, 2L, 1L);
+
+        assertThatThrownBy(() -> reservationRepository.save(duplicatedReservation))
+                .isInstanceOf(DuplicateKeyException.class);
+    }
+
+    @Test
     void 전체_예약_상세_조회_레포지토리_테스트() {
         Reservation reservation = new Reservation(null, MEMBER_ID, 4L);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -57,16 +69,14 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 예약_삭제_레포지토리_테스트() {
+    @DisplayName("예약 id로 예약을 삭제할 수 있다.")
+    void deleteById_테스트() {
         Reservation reservation = new Reservation(null, MEMBER_ID, 4L);
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        reservationRepository.deleteByIdAndMemberId(savedReservation.getId(), MEMBER_ID);
+        reservationRepository.deleteById(savedReservation.getId());
 
-        List<ReservationDetailProjection> reservations = reservationRepository.findAll();
-        assertThat(reservations).hasSize(5);
-        assertThat(reservations).extracting(ReservationDetailProjection::id)
-                .doesNotContain(savedReservation.getId());
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
     }
 
     @Test
@@ -75,26 +85,6 @@ class JdbcReservationRepositoryTest {
         Set<Long> result = reservationRepository.findTimeIdByDateAndThemeId(LocalDate.parse("2026-05-05"), 1L);
 
         assertThat(result).containsExactlyInAnyOrder(1L);
-    }
-
-    @Test
-    @DisplayName("예약 id와 회원 id가 일치하면 예약을 삭제할 수 있다.")
-    void deleteByIdAndMemberId_테스트() {
-        reservationRepository.deleteByIdAndMemberId(1L, MEMBER_ID);
-
-        assertThat(reservationRepository.findAll())
-                .extracting(ReservationDetailProjection::id)
-                .doesNotContain(1L);
-    }
-
-    @Test
-    @DisplayName("회원 id가 일치하지 않으면 예약은 삭제되지 않는다.")
-    void deleteByIdAndMemberId_회원불일치_테스트() {
-        reservationRepository.deleteByIdAndMemberId(1L, 999L);
-
-        assertThat(reservationRepository.findAll())
-                .extracting(ReservationDetailProjection::id)
-                .contains(1L);
     }
 
     @Test

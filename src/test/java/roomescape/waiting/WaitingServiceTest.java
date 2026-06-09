@@ -6,14 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.when;
 class WaitingServiceTest {
 
     private static final long MEMBER_ID = 1L;
-    private static final long MANAGER_ID = 2L;
 
     @Mock
     private ScheduleService scheduleService;
@@ -42,6 +42,9 @@ class WaitingServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private ReservationPromotionService reservationPromotionService;
+
     @InjectMocks
     private WaitingService waitingService;
 
@@ -50,6 +53,7 @@ class WaitingServiceTest {
     void save_테스트_1() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, null);
         long scheduleId = 1L;
+        Reservation reservation = new Reservation(1L, 1L, 1L);
         Waiting savedWaiting = new Waiting(10L, MEMBER_ID, scheduleId);
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
@@ -58,10 +62,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(false);
-        when(waitingRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, savedWaiting.getId()))
@@ -88,7 +90,8 @@ class WaitingServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ALREADY_EXIST));
 
         verify(scheduleService).findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         verify(waitingRepository, never()).save(any(Waiting.class));
@@ -106,7 +109,9 @@ class WaitingServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ON_OWN_RESERVATION_NOT_ALLOWED)
+                );
 
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
@@ -123,13 +128,15 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(false);
+        when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
+                .thenReturn(Optional.empty());
         when(waitingRepository.existsByScheduleId(scheduleId))
                 .thenReturn(false);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_TARGET_BAD_REQUEST)
+                );
 
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
@@ -137,8 +144,9 @@ class WaitingServiceTest {
     @Test
     @DisplayName("reservationId가 있으면 예약 존재/권한을 검증하고 삭제한 뒤 대기를 저장한다. 즉, 현재 예약을 대기 가능한 다른 스케줄로 변경하려 할 때")
     void save_테스트_5() {
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, 10L);
+        long reservationIdToCancel = 10L;
         long scheduleId = 1L;
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, reservationIdToCancel);
         Waiting savedWaiting = new Waiting(11L, MEMBER_ID, scheduleId);
         Reservation reservation = new Reservation(
                 10L,
@@ -148,14 +156,14 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(reservationRepository.findById(request.reservationId()))
+        when(reservationRepository.findByIdForModification(reservationIdToCancel))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, savedWaiting.getId()))
@@ -164,14 +172,15 @@ class WaitingServiceTest {
         WaitingResponse response = waitingService.save(request, MEMBER_ID);
 
         assertThat(response.id()).isEqualTo(11L);
-        verify(reservationRepository).deleteById(10L);
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Test
-    @DisplayName("reservationId의 예약이 본인 소유가 아니면 예외가 발생한다.")
+    @DisplayName("확정예약을 다른 스케줄의 대기로 변경할 경우 취소할 예약이 본인 소유가 아니면 예외가 발생한다.")
     void save_테스트_6() {
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, 10L);
         long scheduleId = 1L;
+        long reservationIdToCancel = 10L;
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, reservationIdToCancel);
         Reservation reservation = new Reservation(
                 10L,
                 999L,
@@ -180,14 +189,22 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(reservationRepository.findById(request.reservationId()))
+        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+                .thenReturn(false);
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
+                .thenReturn(false);
+        when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForModification(reservationIdToCancel))
                 .thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER));
 
         verify(waitingRepository, never()).save(any(Waiting.class));
         verify(reservationRepository, never()).deleteById(anyLong());
+        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(any(Reservation.class));
     }
 
     @Test
@@ -195,6 +212,7 @@ class WaitingServiceTest {
     void save_테스트_7() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, null);
         long scheduleId = 1L;
+        Reservation reservation = new Reservation(1L, MEMBER_ID, scheduleId);
         Waiting waiting = new Waiting(
                 10L,
                 MEMBER_ID,
@@ -207,8 +225,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForPromotion(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(waiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, waiting.getId()))
@@ -223,16 +241,17 @@ class WaitingServiceTest {
 
         verify(reservationRepository, never()).findById(anyLong());
         verify(reservationRepository, never()).deleteById(anyLong());
+        verify(reservationPromotionService, never()).cancelReservationAndPromoteFirstWaiting(any(Reservation.class));
         verify(waitingRepository).save(any(Waiting.class));
     }
 
     @Test
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
-    void deleteByIdForUser_테스트_1() {
+    void cancelByIdForUser_테스트_1() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
-        when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
+        when(waitingRepository.findByIdForModification(waiting.getId())).thenReturn(Optional.of(waiting));
 
-        assertThatCode(() -> waitingService.deleteByIdForUser(1L, 1L))
+        assertThatCode(() -> waitingService.cancelByIdForUser(1L, 1L))
                 .doesNotThrowAnyException();
 
         verify(waitingRepository).deleteById(1L);
@@ -240,22 +259,23 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
-    void deleteByIdForUser_테스트_2() {
+    void cancelByIdForUser_테스트_2() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
-        when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
+        when(waitingRepository.findByIdForModification(waiting.getId())).thenReturn(Optional.of(waiting));
 
-        assertThatThrownBy(() -> waitingService.deleteByIdForUser(1L, 2L))
-                .isInstanceOf(EscapeRoomException.class);
+        assertThatThrownBy(() -> waitingService.cancelByIdForUser(1L, 2L))
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER));
 
         verify(waitingRepository, never()).deleteById(1L);
     }
 
     @Test
     @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
-    void deleteByIdForUser_테스트_3() {
-        when(waitingRepository.findById(999L)).thenReturn(Optional.empty());
+    void cancelByIdForUser_테스트_3() {
+        when(waitingRepository.findByIdForModification(999L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> waitingService.deleteByIdForUser(999L, 1L))
+        assertThatCode(() -> waitingService.cancelByIdForUser(999L, 1L))
                 .doesNotThrowAnyException();
 
         verify(waitingRepository, never()).deleteById(999L);

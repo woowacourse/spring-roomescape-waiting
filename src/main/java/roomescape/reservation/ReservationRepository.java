@@ -1,6 +1,5 @@
-package roomescape.reservation.infrastructure;
+package roomescape.reservation;
 
-import roomescape.reservation.Reservation;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
@@ -25,6 +24,10 @@ public interface ReservationRepository {
     int updateScheduleById(long reservationId, long scheduleId);
 
     Optional<Reservation> findById(long reservationId);
+
+    Optional<Reservation> findByIdForModification(long reservationId);
+
+    Optional<Reservation> findByScheduleIdForPromotion(long scheduleId);
 
     boolean existsByScheduleId(long scheduleId);
 

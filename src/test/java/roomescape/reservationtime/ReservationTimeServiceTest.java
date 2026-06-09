@@ -6,12 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.EscapeRoomException;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservationtime.application.ReservationTimeService;
 import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.schedule.application.ScheduleService;
 
 import java.time.LocalTime;
@@ -27,9 +28,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
-    @Mock
-    private ReservationRepository reservationRepository;
-
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
 
@@ -75,11 +73,14 @@ public class ReservationTimeServiceTest {
     void delete_실패_테스트_1() {
         // given
         long timeId = 1L;
-        doThrow(new IllegalStateException()).when(scheduleService).validateTimeDeletable(timeId);
+        doThrow(new EscapeRoomException(ErrorCode.SCHEDULE_TIME_IN_USE, timeId))
+            .when(scheduleService).validateTimeDeletable(timeId);
 
         // when, then
         assertThatThrownBy(() -> reservationTimeService.delete(timeId))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception -> {
+                    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SCHEDULE_TIME_IN_USE);
+                });
 
         verify(reservationTimeRepository, never()).deleteById(anyLong());
     }

@@ -37,8 +37,8 @@ public class ManagerReservationController {
     public ResponseEntity<ApiResponse<Void>> deleteByManager(
             @PathVariable @Positive long reservationId
     ) {
-        reservationService.deleteByIdForManager(reservationId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+        reservationService.cancelByIdForManager(reservationId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PatchMapping("/{reservationId}")

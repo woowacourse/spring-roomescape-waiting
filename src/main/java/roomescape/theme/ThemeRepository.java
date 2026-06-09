@@ -1,6 +1,4 @@
-package roomescape.theme.infrastructure;
-
-import roomescape.theme.Theme;
+package roomescape.theme;
 
 import java.time.LocalDate;
 import java.util.List;

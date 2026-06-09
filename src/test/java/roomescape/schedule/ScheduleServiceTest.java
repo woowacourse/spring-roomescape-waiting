@@ -6,16 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.schedule.dto.request.ScheduleSaveRequest;
 import roomescape.schedule.dto.response.ScheduleFindResponse;
 import roomescape.schedule.dto.response.ScheduleSaveResponse;
-import roomescape.schedule.infrastructure.ScheduleRepository;
 import roomescape.theme.Theme;
-import roomescape.theme.infrastructure.ThemeRepository;
+import roomescape.theme.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -101,7 +101,8 @@ class ScheduleServiceTest {
 
         // when, then
         assertThatThrownBy(() -> scheduleService.validateSchedule(beforeDate, testTimeId, testThemeId))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PAST_SCHEDULE));
     }
 
     @Test
@@ -120,7 +121,8 @@ class ScheduleServiceTest {
 
         // when, then
         assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATIONTIME_NOT_FOUND));
     }
 
     @Test
@@ -142,7 +144,9 @@ class ScheduleServiceTest {
 
         // when, then
         assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.THEME_NOT_FOUND));
+        ;
     }
 
     @Test

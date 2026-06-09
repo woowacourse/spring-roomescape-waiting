@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.waiting.infrastructure.JdbcWaitingRepository;
@@ -41,6 +42,16 @@ class JdbcWaitingRepositoryTest {
 
         assertThatThrownBy(() -> waitingRepository.save(waiting))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("같은 회원은 같은 스케줄에 대기를 중복 저장할 수 없다.")
+    void save_중복대기_DB제약_테스트() {
+        Waiting waiting = new Waiting(null, 1L, 1L);
+        waitingRepository.save(waiting);
+
+        assertThatThrownBy(() -> waitingRepository.save(waiting))
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test

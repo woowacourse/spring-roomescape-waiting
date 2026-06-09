@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
@@ -104,16 +105,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 (rs, rowNum) -> rs.getLong("time_id")));
     }
 
-    public void deleteByIdAndMemberId(long reservationId, long memberId) {
-        String sql = "DELETE FROM reservation WHERE id = :reservationId AND member_id = :memberId";
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("reservationId", reservationId)
-                .addValue("memberId", memberId);
-
-        template.update(sql, params);
-    }
-
     @Override
     public void deleteById(long reservationId) {
         String sql = "DELETE FROM reservation WHERE id = :reservationId";
@@ -183,6 +174,38 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservationId);
+
+        return template.query(sql, params,
+                (resultSet, rowNum) -> new Reservation(
+                        resultSet.getLong("id"),
+                        resultSet.getLong("member_id"),
+                        resultSet.getLong("schedule_id")
+                )
+        ).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByIdForModification(long reservationId) {
+        String sql = "SELECT * FROM reservation WHERE id = :id FOR UPDATE";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", reservationId);
+
+        return template.query(sql, params,
+                (resultSet, rowNum) -> new Reservation(
+                        resultSet.getLong("id"),
+                        resultSet.getLong("member_id"),
+                        resultSet.getLong("schedule_id")
+                )
+        ).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByScheduleIdForPromotion(long scheduleId) {
+        String sql = "SELECT * FROM reservation WHERE schedule_id = :scheduleId FOR UPDATE";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("scheduleId", scheduleId);
 
         return template.query(sql, params,
                 (resultSet, rowNum) -> new Reservation(

@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.Theme;
+import roomescape.theme.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;

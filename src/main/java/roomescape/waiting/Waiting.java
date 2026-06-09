@@ -9,5 +9,9 @@ public class Waiting {
     private final Long id;
     private final Long memberId;
     private Long scheduleId;
+
+    public boolean isSameMemberId(long otherMemberId) {
+        return this.memberId.equals(otherMemberId);
+    }
 }
 

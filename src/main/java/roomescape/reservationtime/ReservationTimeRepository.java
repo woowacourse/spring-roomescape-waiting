@@ -1,6 +1,4 @@
-package roomescape.reservationtime.infrastructure;
-
-import roomescape.reservationtime.ReservationTime;
+package roomescape.reservationtime;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

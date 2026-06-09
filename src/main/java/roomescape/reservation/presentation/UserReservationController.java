@@ -49,7 +49,7 @@ public class UserReservationController {
             @PathVariable @Positive long id,
             @LoginMember AuthenticatedMember member
     ) {
-        reservationService.deleteByIdForUser(id, member.id());
+        reservationService.cancelByIdForUser(id, member.id());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
     }
 

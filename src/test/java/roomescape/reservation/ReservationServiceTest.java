@@ -6,16 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.reservation.application.ReservationPromotionService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
-import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.Clock;
@@ -29,10 +29,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,6 +45,9 @@ class ReservationServiceTest {
 
     @Mock
     private ScheduleService scheduleService;
+
+    @Mock
+    private ReservationPromotionService reservationPromotionService;
 
     @Mock
     private WaitingRepository waitingRepository;
@@ -78,241 +80,214 @@ class ReservationServiceTest {
         );
     }
 
+    private Reservation reservation(long reservationId, long memberId, long scheduleId) {
+        return new Reservation(reservationId, memberId, scheduleId);
+    }
+
     @Test
     @DisplayName("유저는 본인 예약 삭제에 성공한다.")
-    void deleteByIdForUser_테스트_1() {
+    void cancelByIdForUser_테스트_1() {
         long reservationId = 1L;
+        Reservation reservation = reservation(reservationId, 1L, 99L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(1L);
-        when(waitingRepository.findFirstByScheduleId(1L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, 1L))
+        assertThatCode(() -> reservationService.cancelByIdForUser(reservationId, 1L))
                 .doesNotThrowAnyException();
-        verify(reservationRepository).deleteById(reservationId);
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Test
     @DisplayName("유저는 타인 예약 삭제를 할 수 없다.")
-    void deleteByIdForUser_테스트_2() {
+    void cancelByIdForUser_테스트_2() {
         long reservationId = 1L;
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, 2L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
-        );
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        Reservation reservation = reservation(reservationId, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, 1L))
-                .isInstanceOf(EscapeRoomException.class);
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.cancelByIdForUser(reservationId, 2L))
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER)
+                );
+
         verify(reservationRepository, never()).deleteById(anyLong());
     }
 
     @Test
     @DisplayName("유저 예약 삭제 시 해당 슬롯의 선두 대기자는 자동 승격된다.")
-    void deleteByIdForUser_테스트_3() {
+    void cancelByIdForUser_테스트_3() {
         long reservationId = 1L;
+        Reservation reservation = reservation(reservationId, 1L, 99L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
-        long scheduleId = 10L;
-        Waiting waiting = new Waiting(100L, 3L, scheduleId);
 
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(scheduleId);
-        when(waitingRepository.findFirstByScheduleId(scheduleId)).thenReturn(Optional.of(waiting));
 
-        reservationService.deleteByIdForUser(reservationId, 1L);
+        reservationService.cancelByIdForUser(reservationId, 1L);
 
-        verify(reservationRepository).deleteById(reservationId);
-        verify(reservationRepository).save(argThat(promoted ->
-                promoted.getMemberId().equals(waiting.getMemberId())
-                        && promoted.getScheduleId().equals(waiting.getScheduleId())
-        ));
-        verify(waitingRepository).deleteById(waiting.getId());
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
 
     @Test
     @DisplayName("매니저는 예약 삭제에 성공한다.")
-    void deleteByIdForManager_테스트_1() {
+    void cancelByIdForManager_테스트_1() {
         long reservationId = 1L;
-        ReservationDetailProjection oldReservation = reservationDetail(
+        Reservation reservation = reservation(reservationId, 1L, 1L);
+        ReservationDetailProjection reservationDetail = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(1L);
-        when(waitingRepository.findFirstByScheduleId(1L)).thenReturn(Optional.empty());
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(reservationDetail));
 
-        assertThatCode(() -> reservationService.deleteByIdForManager(reservationId))
+        assertThatCode(() -> reservationService.cancelByIdForManager(reservationId))
                 .doesNotThrowAnyException();
-        verify(reservationRepository).deleteById(reservationId);
+        verify(reservationPromotionService).cancelReservationAndPromoteFirstWaiting(reservation);
     }
 
     @Test
     @DisplayName("유저는 본인 예약 수정에 성공한다.")
     void updateForUser_테스트_1() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Reservation updated = new Reservation(reservationId, 1L, 99L);
 
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(3L);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(3L)).thenReturn(Optional.empty());
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
         ReservationSaveResponse response = reservationService.updateForUser(request, reservationId, 1L);
 
         assertThat(response.id()).isEqualTo(reservationId);
-        verify(reservationRepository).updateScheduleById(reservationId, 99L);
+        assertThat(response.memberId()).isEqualTo(1L);
+        assertThat(response.scheduleId()).isEqualTo(99L);
+        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservation, 99L);
     }
 
     @Test
     @DisplayName("매니저는 예약 수정에 성공한다.")
     void updateForManager_테스트_1() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Reservation updated = new Reservation(reservationId, 1L, 99L);
 
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(3L);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(3L)).thenReturn(Optional.empty());
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
         ReservationSaveResponse response = reservationService.updateForManager(request, reservationId);
 
         assertThat(response.id()).isEqualTo(reservationId);
-        verify(reservationRepository).updateScheduleById(reservationId, 99L);
+        assertThat(response.memberId()).isEqualTo(1L);
+        assertThat(response.scheduleId()).isEqualTo(99L);
+        verify(reservationPromotionService).changeReservationScheduleAndPromoteFirstWaiting(reservation, 99L);
     }
 
     @Test
     @DisplayName("유저는 타인 예약 수정을 할 수 없다.")
     void updateForUser_테스트_2() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, 2L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
-        );
 
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
 
-        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
-                .isInstanceOf(EscapeRoomException.class);
-        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 999L))
+                .isInstanceOfSatisfying(EscapeRoomException.class,  exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER));
+        verify(reservationRepository, never()).findDetailById(reservationId);
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
 
     @Test
     @DisplayName("예약 시간이 과거면 수정에 실패한다.")
     void updateForUser_테스트_3() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 1L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        doNothing().when(scheduleService).validateNotPastDate(oldReservation.date());
-        doThrow(IllegalStateException.class).when(scheduleService).validateNotPastTime(oldReservation.date(), oldReservation.getTime());
+        doThrow(new EscapeRoomException(ErrorCode.PAST_SCHEDULE))
+                .when(scheduleService)
+                .validateNotPastTime(oldReservation.date(), oldReservation.startAt());
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
-                .isInstanceOf(IllegalStateException.class);
-        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PAST_SCHEDULE));
+        verify(scheduleService).validateNotPastDate(oldReservation.date());
+        verify(scheduleService).validateNotPastTime(oldReservation.date(), oldReservation.startAt());
+        verify(scheduleService, never()).findScheduleIdByDateAndTimeIdAndThemeId(any(LocalDate.class), anyLong(), anyLong());
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
 
     @Test
     @DisplayName("유저 예약 수정으로 기존 슬롯이 비면 선두 대기자가 자동 승격된다.")
     void updateForUser_테스트_4() {
         long reservationId = 4L;
+        long oldScheduleId = 30L;
+        long newScheduleId = 99L;
+
+        Reservation reservation = reservation(reservationId, 1L, oldScheduleId);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        long oldScheduleId = 30L;
-        long newScheduleId = 99L;
-        Waiting waiting = new Waiting(200L, 5L, oldScheduleId);
-        Reservation updated = new Reservation(reservationId, 1L, newScheduleId);
 
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(oldScheduleId);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
         when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, newScheduleId)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(oldScheduleId)).thenReturn(Optional.of(waiting));
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
         reservationService.updateForUser(request, reservationId, 1L);
 
-        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
-        verify(reservationRepository).save(argThat(promoted ->
-                promoted.getMemberId().equals(waiting.getMemberId())
-                        && promoted.getScheduleId().equals(waiting.getScheduleId())
-        ));
-        verify(waitingRepository).deleteById(waiting.getId());
+        verify(reservationPromotionService)
+                .changeReservationScheduleAndPromoteFirstWaiting(reservation, newScheduleId);
     }
 
     @Test
     @DisplayName("예약 수정 시 기존 스케줄과 새 스케줄이 같으면 예외가 발생한다")
     void updateForUser_테스트_5() {
         long reservationId = 1L;
+        long oldScheduleId = 30L;
+        long newScheduleId = 30L;
+
+        Reservation reservation = reservation(reservationId, 1L, oldScheduleId);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        long oldScheduleId = 30L;
-        long newScheduleId = 30L;
 
+        when(reservationRepository.findByIdForModification(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(oldScheduleId);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception -> {
+                    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_SAME_SCHEDULE);
+                });
 
-        verify(reservationRepository, never()).updateScheduleById(reservationId, newScheduleId);
+        verify(reservationPromotionService, never()).changeReservationScheduleAndPromoteFirstWaiting(any(Reservation.class), anyLong());
     }
 
     @Test

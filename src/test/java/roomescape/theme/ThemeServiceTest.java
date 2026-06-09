@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.EscapeRoomException;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.theme.application.ThemeService;
-import roomescape.theme.infrastructure.ThemeRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -32,11 +34,13 @@ public class ThemeServiceTest {
     void delete_실패_테스트_1() {
         // given
         long themeId = 1L;
-        doThrow(new IllegalStateException()).when(scheduleService).validateThemeDeletable(themeId);
+        doThrow(new EscapeRoomException(ErrorCode.SCHEDULE_THEME_IN_USE)).when(scheduleService).validateThemeDeletable(themeId);
 
         // when, then
         assertThatThrownBy(() -> themeService.delete(themeId))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SCHEDULE_THEME_IN_USE)
+                );
 
         verify(themeRepository, never()).deleteById(anyLong());
     }

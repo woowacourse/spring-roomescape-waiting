@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.LocalDateTime;
@@ -76,13 +77,31 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findFirstByScheduleId(long scheduleId) {
+    public Optional<Waiting> findByIdForModification(long waitingId) {
+        String sql = """
+                SELECT id, member_id, schedule_id
+                FROM waiting
+                WHERE id = :waitingId
+                FOR UPDATE
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("waitingId", waitingId);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper)
+                .stream()
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Waiting> findFirstByScheduleIdForPromotion(long scheduleId) {
         String sql = """
                 SELECT id, member_id, schedule_id
                 FROM waiting
                 WHERE schedule_id = :scheduleId
                 ORDER BY id ASC
                 LIMIT 1
+                FOR UPDATE
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
