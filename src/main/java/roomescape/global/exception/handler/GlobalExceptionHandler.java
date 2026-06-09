@@ -1,5 +1,11 @@
 package roomescape.global.exception.handler;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -26,8 +32,42 @@ public class GlobalExceptionHandler {
     private static final String UNSUPPORTED_MEDIA_TYPE_MESSAGE = "지원하지 않는 미디어 타입입니다. 전송하는 데이터의 형식을 확인해 주세요.";
     private static final String TYPE_MISMATCH_MESSAGE = "요청 파라미터 타입이 일치하지 않습니다. 입력 값의 형식을 확인해 주세요.";
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private static void printErrorLog(Exception e, HttpServletRequest request) {
+        StackTraceElement element = e.getStackTrace()[0];
+        String traceId = Optional.ofNullable(MDC.get("traceId")).orElse("N/A");
+        logger.error("""
+                        ===================================================
+                        🚨 [500 INTERNAL SERVER ERROR] 🚨
+                        ===================================================
+                        ▪ Time      : {}
+                        ▪ TraceId   : {}
+                        ▪ Thread    : {}
+                        ▪ URI       : {} {}
+                        ▪ Exception : {}
+                        ▪ Message   : {}
+                        ▪ Location  : {}.{}({}) : line {}
+                        ===================================================
+                        """,
+                LocalDateTime.now(),
+                traceId,
+                Thread.currentThread().getName(),
+                request.getMethod(),
+                request.getRequestURI(),
+                e.getClass().getSimpleName(),
+                e.getMessage(),
+                element.getClassName(),
+                element.getMethodName(),
+                element.getFileName(),
+                element.getLineNumber(),
+                e);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e,
+                                                                jakarta.servlet.http.HttpServletRequest request) {
+        printErrorLog(e, request);
         return ResponseEntity
                 .internalServerError()
                 .body(new ErrorResponse(INTERNAL_SERVER_ERROR_MESSAGE));
