@@ -51,11 +51,6 @@ public class ReservationWaitServiceIntegrationTest {
               VALUES (1, 2, '2026-12-01', 1, 1, 1);
               """;
 
-    private static final String INSERT_BROWN_WAIT_SQL = """
-              INSERT INTO reservation_wait (id, reservation_id, member_id)
-              VALUES (1, 1, 1);
-              """;
-
     private static final String INSERT_THREE_MEMBERS_SQL = """
               INSERT INTO member (id, email, password, name, role)
               VALUES (1, 'brown@email.com', 'password', '브라운', 'USER'),
@@ -112,17 +107,16 @@ public class ReservationWaitServiceIntegrationTest {
             INSERT_TWO_MEMBERS_SQL,
             INSERT_DEFAULT_THEME_SQL,
             INSERT_DEFAULT_TIME_SQL,
-            INSERT_JEONGKONG_RESERVATION_SQL,
-            INSERT_BROWN_WAIT_SQL
+            INSERT_JEONGKONG_RESERVATION_SQL
     })
     void 같은_사용자는_같은_슬롯에_예약대기를_걸_수_없다() {
-        // given: BROWN이 이미 대기 중
+        // given
+        reservationWaitService.createReservationWait(BROWN_ID, RESERVATION_ID);
 
-        // when & then: 또 신청 시도 → UNIQUE 위반
+        // when & then
         assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, RESERVATION_ID))
                 .isInstanceOf(ReservationWaitAlreadyExistsException.class);
 
-        // then: 기존 대기 row 만 유지 (중복 row 안 생김)
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ? AND member_id = ?",
                 Integer.class, RESERVATION_ID, BROWN_ID);

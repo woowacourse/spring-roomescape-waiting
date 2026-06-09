@@ -49,19 +49,6 @@ class ReservationWaitDaoTest {
                    (2, 2, '2026-05-02', 2, 1, 1);
             """;
 
-    private static final String INSERT_TWO_RESERVATION_WAITS_SQL = """
-            INSERT INTO reservation_wait (id, reservation_id, member_id)
-            VALUES (1, 1, 2),
-                   (2, 2, 1);
-            """;
-
-    private static final String INSERT_MULTIPLE_WAITS_SQL = """
-          INSERT INTO reservation_wait (id, reservation_id, member_id)
-          VALUES (1, 1, 1),
-                 (2, 1, 2),
-                 (3, 2, 1);
-          """;
-
     @Autowired
     ReservationWaitDao reservationWaitDao;
 
@@ -99,36 +86,32 @@ class ReservationWaitDaoTest {
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
             INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL,
-            INSERT_TWO_RESERVATION_WAITS_SQL
+            INSERT_TWO_RESERVATIONS_SQL
     })
     void id로_예약대기를_조회한다() {
-        long waitId = 1L;
+        // given
+        ReservationWait jeongkongWait = reservationWaitDao.insert(
+                new ReservationWait(null, 1L, 2L, null));
 
-        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(waitId);
+        // when
+        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(jeongkongWait.getId());
+
+        // then
         assertTrue(wait.isPresent());
         assertThat(wait.get())
                 .extracting(
-                        ReservationWait::getId,
                         ReservationWait::getReservationId,
                         ReservationWait::getMemberId
                 )
-                .containsExactly(waitId, 1L, 2L);
+                .containsExactly(1L, 2L);
     }
 
     @Test
-    @Sql(statements = {
-            INSERT_THREE_TIMES_SQL,
-            INSERT_SINGLE_THEME_SQL,
-            INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL,
-            INSERT_TWO_RESERVATION_WAITS_SQL
-    })
     void 존재하지_않는_id면_빈_Optional을_반환한다() {
-        long waitId = 3L;
+        // when
+        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(999L);
 
-        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(waitId);
+        // then
         assertThat(wait.isEmpty()).isTrue();
     }
 
@@ -138,20 +121,18 @@ class ReservationWaitDaoTest {
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
             INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL,
-            INSERT_TWO_RESERVATION_WAITS_SQL
+            INSERT_TWO_RESERVATIONS_SQL
     })
     void reservationId와_memberId로_예약대기를_삭제한다() {
-        // given: wait(id=1) 의 reservation_id=1, member_id=2
-        long reservationId = 1L;
-        long memberId = 2L;
+        // given
+        ReservationWait jeongkongWait = reservationWaitDao.insert(
+                new ReservationWait(null, 1L, 2L, null));
 
-        // when: 복합 키로 삭제
-        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
+        // when
+        reservationWaitDao.deleteByReservationIdAndMemberId(1L, 2L);
 
-        // then: 해당 wait row 사라짐
-        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(1L);
-        assertThat(wait.isEmpty()).isTrue();
+        // then
+        assertThat(reservationWaitDao.findReservationWaitById(jeongkongWait.getId())).isEmpty();
     }
 
     @Test
@@ -160,16 +141,17 @@ class ReservationWaitDaoTest {
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
             INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL,
-            """
-                    INSERT INTO reservation_wait (id, reservation_id, member_id)
-                    VALUES (1, 1, 1),
-                           (2, 1, 2);
-                    """
+            INSERT_TWO_RESERVATIONS_SQL
     })
     void 가장_먼저_예약대기한_memberId를_반환한다() {
+        // given
+        reservationWaitDao.insert(new ReservationWait(null, 1L, 1L, null));
+        reservationWaitDao.insert(new ReservationWait(null, 1L, 2L, null));
+
+        // when
         Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberIdForUpdate(1L);
 
+        // then
         assertThat(earliestMemberId).isPresent();
         assertThat(earliestMemberId.get()).isEqualTo(1L);
     }
@@ -211,20 +193,24 @@ class ReservationWaitDaoTest {
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
             INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL,
-            INSERT_MULTIPLE_WAITS_SQL
+            INSERT_TWO_RESERVATIONS_SQL
     })
     void reservationId에_해당하는_모든_대기를_삭제한다() {
-        // given: reservation(1) 에 wait 2개, reservation(2) 에 wait 1개
+        // given
+        ReservationWait waitOnReservation1ByBrown = reservationWaitDao.insert(
+                new ReservationWait(null, 1L, 1L, null));
+        ReservationWait waitOnReservation1ByJeongkong = reservationWaitDao.insert(
+                new ReservationWait(null, 1L, 2L, null));
+        ReservationWait waitOnReservation2ByBrown = reservationWaitDao.insert(
+                new ReservationWait(null, 2L, 1L, null));
 
         // when
         reservationWaitDao.deleteAllByReservationId(1L);
 
         // then
-        assertThat(reservationWaitDao.findReservationWaitById(1L)).isEmpty();
-        assertThat(reservationWaitDao.findReservationWaitById(2L)).isEmpty();
-
-        assertThat(reservationWaitDao.findReservationWaitById(3L)).isPresent();
+        assertThat(reservationWaitDao.findReservationWaitById(waitOnReservation1ByBrown.getId())).isEmpty();
+        assertThat(reservationWaitDao.findReservationWaitById(waitOnReservation1ByJeongkong.getId())).isEmpty();
+        assertThat(reservationWaitDao.findReservationWaitById(waitOnReservation2ByBrown.getId())).isPresent();
     }
 
     @Test

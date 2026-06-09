@@ -45,23 +45,10 @@ public class ReservationDaoTest {
             VALUES (1, '강남점');
             """;
 
-    private static final String INSERT_TWO_RESERVATIONS_SQL = """
-            INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-            VALUES (1, 1, '2026-05-01', 1, 1, 1),
-                   (2, 2, '2026-05-02', 2, 1, 1);
-            """;
-
     private static final String INSERT_TWO_STORES_SQL = """
             INSERT INTO store (id, name)
             VALUES (1, '강남점'),
                    (2, '홍대점');
-            """;
-
-    private static final String INSERT_RESERVATIONS_ACROSS_STORES_SQL = """
-            INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-            VALUES (1, 1, '2026-05-01', 1, 1, 1),
-                   (2, 2, '2026-05-02', 2, 1, 1),
-                   (3, 1, '2026-05-03', 3, 1, 2);
             """;
 
     @Autowired
@@ -72,12 +59,19 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL
+            INSERT_DEFAULT_STORE_SQL
     })
     void 모든_예약을_조회한다() {
+        // given
+        Reservation brownReservation = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        Reservation jeongkongReservation = reservationDao.insert(new Reservation(
+                null, 2L, LocalDate.of(2026, 5, 2), new ReservationTime(2L, LocalTime.of(11, 0)), 1L, 1L));
+
+        // when
         List<Reservation> reservations = reservationDao.findAllReservations();
 
+        // then
         assertThat(reservations).hasSize(2);
         assertThat(reservations)
                 .extracting(
@@ -89,8 +83,8 @@ public class ReservationDaoTest {
                         Reservation::getThemeId
                 )
                 .containsExactlyInAnyOrder(
-                        tuple(1L, 1L, LocalDate.of(2026, 5, 1), 1L, LocalTime.of(10, 0), 1L),
-                        tuple(2L, 2L, LocalDate.of(2026, 5, 2), 2L, LocalTime.of(11, 0), 1L)
+                        tuple(brownReservation.getId(), 1L, LocalDate.of(2026, 5, 1), 1L, LocalTime.of(10, 0), 1L),
+                        tuple(jeongkongReservation.getId(), 2L, LocalDate.of(2026, 5, 2), 2L, LocalTime.of(11, 0), 1L)
                 );
     }
 
@@ -99,12 +93,19 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL
+            INSERT_DEFAULT_STORE_SQL
     })
     void memberId로_예약을_조회한다() {
+        // given
+        reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        reservationDao.insert(new Reservation(
+                null, 2L, LocalDate.of(2026, 5, 2), new ReservationTime(2L, LocalTime.of(11, 0)), 1L, 1L));
+
+        // when
         List<Reservation> reservations = reservationDao.findAllReservationsByMemberId(1L);
 
+        // then
         assertThat(reservations).hasSize(1);
         assertThat(reservations)
                 .extracting(
@@ -123,23 +124,30 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL
+            INSERT_DEFAULT_STORE_SQL
     })
     void ID에_해당하는_예약을_조회한다() {
-        Reservation reservation = reservationDao.findReservationByIdForUpdate(1L);
+        // given
+        Reservation brownReservation = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        reservationDao.insert(new Reservation(
+                null, 2L, LocalDate.of(2026, 5, 2), new ReservationTime(2L, LocalTime.of(11, 0)), 1L, 1L));
 
+        // when
+        Reservation reservation = reservationDao.findReservationByIdForUpdate(brownReservation.getId());
+
+        // then
         assertThat(reservation)
                 .extracting(
                         Reservation::getId,
                         Reservation::getMemberId,
                         Reservation::getDate,
-                        reservationTime -> reservationTime.getTime().getId(),
-                        reservationTime -> reservationTime.getTime().getStartAt(),
+                        r -> r.getTime().getId(),
+                        r -> r.getTime().getStartAt(),
                         Reservation::getThemeId
                 )
                 .containsExactly(
-                        1L,
+                        brownReservation.getId(),
                         1L,
                         LocalDate.of(2026, 5, 1),
                         1L,
@@ -153,37 +161,37 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL
+            INSERT_DEFAULT_STORE_SQL
     })
     void 예약을_수정한다() {
-        // given: 기존 예약 조회 후 수정본 준비
-        Reservation current = reservationDao.findReservationByIdForUpdate(1L);
+        // given
+        Reservation brownReservation = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
         Reservation modified = new Reservation(
-                current.getId(),
-                current.getMemberId(),
+                brownReservation.getId(),
+                brownReservation.getMemberId(),
                 LocalDate.of(2026, 5, 3),
                 new ReservationTime(2L, LocalTime.of(11, 0)),
-                current.getThemeId(),
-                current.getStoreId()
+                brownReservation.getThemeId(),
+                brownReservation.getStoreId()
         );
 
-        // when: 수정 실행
+        // when
         reservationDao.update(modified);
 
-        // then: DB 상태가 수정본대로 변경됨
-        Reservation updatedReservation = reservationDao.findReservationByIdForUpdate(1L);
+        // then
+        Reservation updatedReservation = reservationDao.findReservationByIdForUpdate(brownReservation.getId());
         assertThat(updatedReservation)
                 .extracting(
                         Reservation::getId,
                         Reservation::getMemberId,
                         Reservation::getDate,
-                        reservation -> reservation.getTime().getId(),
-                        reservation -> reservation.getTime().getStartAt(),
+                        r -> r.getTime().getId(),
+                        r -> r.getTime().getStartAt(),
                         Reservation::getThemeId
                 )
                 .containsExactly(
-                        1L,
+                        brownReservation.getId(),
                         1L,
                         LocalDate.of(2026, 5, 3),
                         2L,
@@ -200,7 +208,7 @@ public class ReservationDaoTest {
             INSERT_DEFAULT_STORE_SQL
     })
     void 예약을_추가한다() {
-        // given: 신규 예약 후보 (id null)
+        // given
         Reservation candidate = new Reservation(
                 null,
                 1L,
@@ -210,10 +218,10 @@ public class ReservationDaoTest {
                 1L
         );
 
-        // when: insert 실행 (DB 가 id 채워서 반환)
+        // when
         Reservation inserted = reservationDao.insert(candidate);
 
-        // then: DB 에 저장된 row 검증
+        // then
         Reservation reservation = reservationDao.findReservationByIdForUpdate(inserted.getId());
 
         assertThat(inserted.getId()).isPositive();
@@ -222,8 +230,8 @@ public class ReservationDaoTest {
                         Reservation::getId,
                         Reservation::getMemberId,
                         Reservation::getDate,
-                        reservationTime -> reservationTime.getTime().getId(),
-                        reservationTime -> reservationTime.getTime().getStartAt(),
+                        r -> r.getTime().getId(),
+                        r -> r.getTime().getStartAt(),
                         Reservation::getThemeId
                 )
                 .containsExactly(
@@ -241,14 +249,20 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL
+            INSERT_DEFAULT_STORE_SQL
     })
     void 예약을_삭제한다() {
-        int deletedCount = reservationDao.delete(1L);
+        // given
+        Reservation brownReservation = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        reservationDao.insert(new Reservation(
+                null, 2L, LocalDate.of(2026, 5, 2), new ReservationTime(2L, LocalTime.of(11, 0)), 1L, 1L));
 
+        // when
+        int deletedCount = reservationDao.delete(brownReservation.getId());
+
+        // then
         assertThat(deletedCount).isEqualTo(1);
-
         assertThat(reservationDao.findAllReservations()).hasSize(1);
     }
 
@@ -257,19 +271,16 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_DEFAULT_STORE_SQL,
-            INSERT_TWO_RESERVATIONS_SQL
+            INSERT_DEFAULT_STORE_SQL
     })
     void 같은_날짜_시간_테마의_예약을_추가하면_예외가_발생한다() {
+        // given
+        reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
         Reservation duplicate = new Reservation(
-                null,
-                2L,
-                LocalDate.of(2026, 5, 1),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                1L,
-                1L
-        );
+                null, 2L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L);
 
+        // when & then
         assertThatThrownBy(() -> reservationDao.insert(duplicate))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
@@ -279,18 +290,27 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_TWO_STORES_SQL,
-            INSERT_RESERVATIONS_ACROSS_STORES_SQL
+            INSERT_TWO_STORES_SQL
     })
     void findReservationsByStoreId는_해당_매장의_예약만_조회한다() {
+        // given
+        Reservation gangnam1 = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        Reservation gangnam2 = reservationDao.insert(new Reservation(
+                null, 2L, LocalDate.of(2026, 5, 2), new ReservationTime(2L, LocalTime.of(11, 0)), 1L, 1L));
+        reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 3), new ReservationTime(3L, LocalTime.of(13, 0)), 1L, 2L));
+
+        // when
         List<Reservation> gangnamReservations = reservationDao.findReservationsByStoreId(1L);
 
+        // then
         assertThat(gangnamReservations).hasSize(2);
         assertThat(gangnamReservations)
                 .extracting(Reservation::getId, Reservation::getStoreId)
                 .containsExactlyInAnyOrder(
-                        tuple(1L, 1L),
-                        tuple(2L, 1L)
+                        tuple(gangnam1.getId(), 1L),
+                        tuple(gangnam2.getId(), 1L)
                 );
     }
 
@@ -299,16 +319,25 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_TWO_STORES_SQL,
-            INSERT_RESERVATIONS_ACROSS_STORES_SQL
+            INSERT_TWO_STORES_SQL
     })
     void 다른_매장의_예약은_findReservationsByStoreId_결과에_포함되지_않는다() {
+        // given
+        reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        reservationDao.insert(new Reservation(
+                null, 2L, LocalDate.of(2026, 5, 2), new ReservationTime(2L, LocalTime.of(11, 0)), 1L, 1L));
+        Reservation hongdaeReservation = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 3), new ReservationTime(3L, LocalTime.of(13, 0)), 1L, 2L));
+
+        // when
         List<Reservation> hongdaeReservations = reservationDao.findReservationsByStoreId(2L);
 
+        // then
         assertThat(hongdaeReservations).hasSize(1);
         assertThat(hongdaeReservations)
                 .extracting(Reservation::getId, Reservation::getStoreId)
-                .containsExactly(tuple(3L, 2L));
+                .containsExactly(tuple(hongdaeReservation.getId(), 2L));
     }
 
     @Test
@@ -319,8 +348,10 @@ public class ReservationDaoTest {
             INSERT_TWO_STORES_SQL
     })
     void 예약이_없는_매장은_findReservationsByStoreId가_빈_리스트를_반환한다() {
+        // when
         List<Reservation> reservations = reservationDao.findReservationsByStoreId(1L);
 
+        // then
         assertThat(reservations).isEmpty();
     }
 
@@ -329,19 +360,19 @@ public class ReservationDaoTest {
             INSERT_THREE_TIMES_SQL,
             INSERT_SINGLE_THEME_SQL,
             INSERT_TWO_MEMBERS_SQL,
-            INSERT_TWO_STORES_SQL,
-            INSERT_RESERVATIONS_ACROSS_STORES_SQL
+            INSERT_TWO_STORES_SQL
     })
     void 예약한_사용자id를_수정한다() {
-        // given: 기존 예약 조회 + 양도 후보 생성
-        Reservation current = reservationDao.findReservationByIdForUpdate(1L);
-        Reservation promoted = current.promoteTo(2L);
+        // given
+        Reservation brownReservation = reservationDao.insert(new Reservation(
+                null, 1L, LocalDate.of(2026, 5, 1), new ReservationTime(1L, LocalTime.of(10, 0)), 1L, 1L));
+        Reservation promoted = brownReservation.promoteTo(2L);
 
-        // when: 양도 적용
+        // when
         reservationDao.update(promoted);
 
-        // then: member_id 가 2 로 변경됨
-        Reservation updatedReservation = reservationDao.findReservationByIdForUpdate(1L);
+        // then
+        Reservation updatedReservation = reservationDao.findReservationByIdForUpdate(brownReservation.getId());
         assertThat(updatedReservation.getMemberId()).isEqualTo(2L);
     }
 }
