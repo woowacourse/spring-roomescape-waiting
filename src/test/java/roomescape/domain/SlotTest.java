@@ -28,6 +28,19 @@ class SlotTest {
     }
 
     @Test
+    @DisplayName("같은 슬롯은 같은 해시 코드를 가진다")
+    void sameHashCode() {
+        Slot slot = new Slot(date, time, theme, 1L);
+        Slot same = new Slot(
+                date,
+                new Time(1L, LocalTime.of(13, 0)),
+                new Theme(1L, new Name("다른 이름"), "http://other", "다른 설명"),
+                1L);
+
+        assertThat(slot).hasSameHashCodeAs(same);
+    }
+
+    @Test
     @DisplayName("날짜, 시간, 테마, 매장 중 하나라도 다르면 다른 슬롯이다")
     void differentSlot() {
         Slot slot = new Slot(date, time, theme, 1L);
