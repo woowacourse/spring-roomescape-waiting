@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
 import roomescape.dto.command.CreateReservationCommand;
@@ -256,7 +257,9 @@ class ReservationServiceTest {
         LocalDateTime now = LocalDateTime.of(2026, 6, 10, 10, 1);
 
         assertThatThrownBy(() -> reservationService.cancel(reservation.getId(), now))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOfSatisfying(RoomEscapeException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ReservationErrorCode.CANNOT_CANCEL)
+                );
     }
 
     @Test
