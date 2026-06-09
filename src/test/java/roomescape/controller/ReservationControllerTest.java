@@ -167,7 +167,7 @@ class ReservationControllerTest {
         willThrow(new RoomEscapeException(DomainErrorCode.FORBIDDEN))
                 .given(reservationService).cancel(anyLong(), anyString());
         mockMvc.perform(delete("/reservations/1").param("name", "other"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test

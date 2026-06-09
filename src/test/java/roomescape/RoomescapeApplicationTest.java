@@ -241,7 +241,7 @@ class RoomescapeApplicationTest {
         RestAssured.given()
                 .param("name", "other")
                 .when().delete("/reservations/" + id)
-                .then().statusCode(401);
+                .then().statusCode(403);
     }
 
     @Test

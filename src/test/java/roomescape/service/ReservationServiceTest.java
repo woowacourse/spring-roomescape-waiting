@@ -45,6 +45,7 @@ class ReservationServiceTest {
             Theme.load(1L, "any", "any", URL)
     );
     private static final Reservation DUMMY = Reservation.load(1L, NAME, "APPROVED", DUMMY_SLOT);
+    private static final Reservations DUMMIES = new Reservations(List.of(DUMMY));
 
     private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
     private static final long EXISTS_ID = 1L;
@@ -265,7 +266,7 @@ class ReservationServiceTest {
     @Test
     void 단건_조회시_존재하는_ID면_결과를_반환한다() {
         given(reservationRepository.getById(EXISTS_ID)).willReturn(DUMMY);
-
+        given(reservationRepository.findBySlotId(EXISTS_ID)).willReturn(DUMMIES);
         Reservation result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getId()).isEqualTo(EXISTS_ID);
@@ -301,7 +302,7 @@ class ReservationServiceTest {
     @Test
     void 첫번째_예약은_승인_상태이다() {
         given(reservationRepository.getById(EXISTS_ID)).willReturn(DUMMY);
-
+        given(reservationRepository.findBySlotId(EXISTS_ID)).willReturn(DUMMIES);
         Reservation result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getStatus()).isEqualTo(Status.APPROVED);
