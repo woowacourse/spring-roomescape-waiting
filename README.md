@@ -27,7 +27,7 @@
 | `GET` `/reservations?name={name}`                                       | 내 예약 목록 조회               | -                          | `List<ReservationResult>`           |
 | `POST` `/reservations`                                                  | 신규 예약 생성                 | `ReservationCreateCommand` | `ReservationResult`                 |
 | `PATCH` `/reservations/{reservation-id}`                                | 내 예약 수정                  | `ReservationModifyRequest` | `ReservationResult`                 |
-| `DELETE` `/reservations/{reservation-id}?name={name}`                   | 내 예약 취소                  | -                          | -                                   |
+| `DELETE` `/reservations/{reservation-id}`                               | 내 예약 취소                  | `ReservationDeleteRequest` | -                                   |
 
 ### 예약 대기 (`/waiting-list`)
 
@@ -47,6 +47,7 @@
 |:------------------------------------------------|:------------|:------|:--------------------------|
 | `GET` `/admin/reservations`                     | 전체 예약 목록 조회 | -     | `List<ReservationResult>` |
 | `DELETE` `/admin/reservations/{reservation-id}` | 특정 예약 삭제    | -     | -                         |
+
 ### 예약 시간 관리 (`/times`)
 
 | HTTP Method & URL           | 설명             | 요청 본문                          | 응답 본문                         |
