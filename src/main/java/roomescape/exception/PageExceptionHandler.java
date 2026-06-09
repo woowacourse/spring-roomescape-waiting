@@ -8,8 +8,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import roomescape.reservation.controller.ReservationAdminPageController;
-import roomescape.reservation.controller.ReservationPageController;
+import roomescape.reservation.controller.page.ReservationAdminPageController;
+import roomescape.reservation.controller.page.ReservationPageController;
 import roomescape.reservationtime.controller.ReservationTimeAdminPageController;
 import roomescape.theme.controller.ThemeAdminPageController;
 

@@ -135,7 +135,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS rt ON r.time_id = rt.id
                 INNER JOIN theme AS t ON r.theme_id = t.id
-                WHERE r.date = ? AND theme_id = ? AND time_id = ?;
+                WHERE r.date = ? AND theme_id = ? AND time_id = ?
+                FOR UPDATE;
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, date, themeId, timeId)
@@ -258,15 +259,5 @@ public class JdbcReservationRepository implements ReservationRepository {
                 Boolean.class,
                 themeId
         ));
-    }
-
-    @Override
-    public Long findReservationIdByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId) {
-        final String sql = """
-                              SELECT id FROM reservation
-                              WHERE date = ? AND theme_id = ? AND time_id = ?
-                          """;
-
-        return jdbcTemplate.queryForObject(sql, Long.class, Date.valueOf(date), themeId, timeId);
     }
 }

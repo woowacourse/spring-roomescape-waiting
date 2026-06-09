@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.ResourceNotFoundException;
@@ -52,11 +53,17 @@ public class ReservationService {
         return reservationRepository.save(nonIdReservation);
     }
 
+    public void saveWith(String name, LocalDate date, Theme theme, ReservationTime reservationTime) {
+        Reservation nonIdReservation = Reservation.createNew(name, date, theme, reservationTime);
+
+        reservationRepository.save(nonIdReservation);
+    }
+
     public Reservation findByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId, final Long timeId) {
         return reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
-                        "예약 정보가 없으면 대기 생성이 불가능합니다."
+                        "해당 예약을 찾을 수 없습니다."
                 ));
     }
 
@@ -68,7 +75,8 @@ public class ReservationService {
         }
     }
 
-    public void deleteByIdAndName(final long id, final String name) {
+    @Transactional
+    public Reservation deleteByIdAndName(final long id, final String name) {
         reservationValidator.validateLookupName(name);
 
         Reservation reservation = reservationRepository.findByIdAndName(id, name)
@@ -82,8 +90,10 @@ public class ReservationService {
         int affectedRowCount = reservationRepository.deleteById(reservation.getId());
 
         if(affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "해당 예약 데이터가 존재하지 않습니다.");
         }
+
+        return reservation;
     }
 
     public Reservation updateByIdAndName(

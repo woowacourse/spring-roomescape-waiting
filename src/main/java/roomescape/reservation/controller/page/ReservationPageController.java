@@ -1,4 +1,4 @@
-package roomescape.reservation.controller;
+package roomescape.reservation.controller.page;
 
 import java.time.LocalDate;
 import org.springframework.stereotype.Controller;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import roomescape.ReservationApplicationService;
+import roomescape.application.ReservationApplicationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.controller.dto.ThemeResponse;
@@ -79,9 +79,6 @@ public class ReservationPageController {
         LocalDate parsedDate = reservationPageRequestParser.parseDate(date);
         reservationService.save(name, parsedDate, parsedThemeId, parsedTimeId);
 
-        addReservationNameAttribute(redirectAttributes, name);
-        addThemeIdAttribute(redirectAttributes, parsedThemeId);
-        addDateAttribute(redirectAttributes, parsedDate);
         return "redirect:/pages/user/reservations";
     }
 
@@ -128,7 +125,7 @@ public class ReservationPageController {
             @RequestParam(required = false) final String reservationName,
             final RedirectAttributes redirectAttributes
     ) {
-        reservationService.deleteByIdAndName(id, reservationName);
+        reservationApplicationService.cancelReservation(id, reservationName);
         addReservationNameAttribute(redirectAttributes, reservationName);
         return "redirect:/pages/user/reservations";
     }
