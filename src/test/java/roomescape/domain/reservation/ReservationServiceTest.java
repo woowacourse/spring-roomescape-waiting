@@ -210,12 +210,12 @@ class ReservationServiceTest {
         }
 
         @Test
-        void 존재하지_않는_id면_예외() {
+        void 존재하지_않는_id면_삭제하지_않음() {
             when(reservationRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> reservationService.deleteReservation(99L, "유저1"))
-                .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
+            reservationService.deleteReservation(99L, "유저1");
+
+            verify(reservationRepository, times(0)).deleteById(99L);
         }
     }
 
