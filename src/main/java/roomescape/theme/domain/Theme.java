@@ -35,6 +35,10 @@ public class Theme {
         return restore(id, name, thumbnailImageUrl, description, false);
     }
 
+    public Theme withId(Long id) {
+        return new Theme(id, name, thumbnailImageUrl, description, isActive);
+    }
+
     public void validateInactive() {
         if (!isActive()) {
             throw new InactiveException("비활성화 된 테마입니다.");

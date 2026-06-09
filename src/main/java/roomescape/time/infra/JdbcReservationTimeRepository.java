@@ -46,7 +46,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
             jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
 
             long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-            return ReservationTime.restore(generatedId, reservationTime.getStartAt(), reservationTime.isActive());
+            return reservationTime.withId(generatedId);
         } catch (DuplicateKeyException e) {
             throw new DuplicateException(e.getMessage());
         }

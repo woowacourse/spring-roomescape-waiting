@@ -49,13 +49,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
             jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
             long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-            return Theme.restore(
-                    generatedId,
-                    theme.getName(),
-                    theme.getThumbnailImageUrl(),
-                    theme.getDescription(),
-                    theme.isActive()
-            );
+            return theme.withId(generatedId);
         } catch (DuplicateKeyException e) {
             throw new DuplicateException(e.getMessage());
         }

@@ -16,8 +16,7 @@ public class FakeThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        Theme saved = Theme.restore(idGenerator.getAndIncrement(), theme.getName(), theme.getThumbnailImageUrl(),
-                theme.getDescription(), theme.isActive());
+        Theme saved = theme.withId(idGenerator.getAndIncrement());
         themes.add(saved);
         return saved;
     }

@@ -92,15 +92,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
             jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
             long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-            return Reservation.restore(
-                    generatedId,
-                    reservation.getName(),
-                    reservation.getDate(),
-                    reservation.getTime(),
-                    reservation.getTheme(),
-                    reservation.getStatus(),
-                    reservation.getCreatedAt()
-            );
+            return reservation.withId(generatedId);
         } catch (DuplicateKeyException e) {
             throw new DuplicateException(e.getMessage());
         }
