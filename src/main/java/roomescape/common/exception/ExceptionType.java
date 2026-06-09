@@ -25,7 +25,7 @@ public enum ExceptionType {
             case ALREADY_EXISTS -> HttpStatus.CONFLICT;
             case INVALID_INPUT -> HttpStatus.BAD_REQUEST;
             case PAST_DATE -> HttpStatus.UNPROCESSABLE_ENTITY;
-            case FORBIDDEN -> HttpStatus.UNAUTHORIZED;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case RESOURCE_IN_USE -> HttpStatus.CONFLICT;
         };
     }
