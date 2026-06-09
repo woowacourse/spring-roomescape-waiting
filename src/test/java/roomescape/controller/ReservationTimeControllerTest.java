@@ -1,32 +1,61 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.domain.ReservationTimeStatus;
+import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.TimeSlotResponse;
+import roomescape.service.ReservationTimeService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@WebMvcTest(ReservationTimeController.class)
 public class ReservationTimeControllerTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
+    @MockitoBean
+    private ReservationTimeService reservationTimeService;
+
+    @Test
+    void 전체_시간_조회() throws Exception {
+        ReservationTimeResponse response = new ReservationTimeResponse(1L, LocalTime.of(10, 0));
+        given(reservationTimeService.findAll()).willReturn(List.of(response));
+
+        mockMvc.perform(get("/times"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].startAt").value("10:00:00"));
     }
 
     @Test
-    void 전체_시간_조회_API() {
-        RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(9));
+    void 예약_가능_시간_조회() throws Exception {
+        TimeSlotResponse response = new TimeSlotResponse(1L, LocalTime.of(10, 0), ReservationTimeStatus.AVAILABLE);
+        given(reservationTimeService.findAvailableTime(1L, LocalDate.now())).willReturn(List.of(response));
+
+        mockMvc.perform(get("/times/available-times")
+                        .param("themeId", "1")
+                        .param("date", LocalDate.now().toString()))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].startAt").value("10:00:00"))
+                .andExpect(jsonPath("$[0].status").value("AVAILABLE"));
     }
 }

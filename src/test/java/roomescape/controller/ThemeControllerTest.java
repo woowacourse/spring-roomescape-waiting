@@ -1,32 +1,55 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.dto.response.ThemeResponse;
+import roomescape.service.ThemeService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@WebMvcTest(ThemeController.class)
 class ThemeControllerTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
+    @MockitoBean
+    private ThemeService themeService;
+
+    @Test
+    void 전체_테마_조회() throws Exception {
+        ThemeResponse response = new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror");
+        given(themeService.findAllThemes()).willReturn(List.of(response));
+
+        mockMvc.perform(get("/themes"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("우테코 공포물"));
     }
 
     @Test
-    void 인기_테마_조회_API() {
-        RestAssured.given().log().all()
-                .when().get("/themes/popular?limit=10")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(10));
+    void 인기_테마_조회() throws Exception {
+        ThemeResponse response = new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror");
+        given(themeService.findTopTheme(10L)).willReturn(List.of(response));
+
+        mockMvc.perform(get("/themes/popular")
+                        .param("limit", "10"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("우테코 공포물"));
     }
 }

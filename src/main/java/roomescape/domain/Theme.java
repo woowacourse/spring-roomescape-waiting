@@ -6,6 +6,10 @@ public class Theme {
     private String description;
     private String url;
 
+    public Theme(String name, String description, String url) {
+        this(null, name, description, url);
+    }
+
     public Theme(Long id, String name, String description, String url) {
         this.id = id;
         validateName(name);
@@ -30,7 +34,7 @@ public class Theme {
 
     private void validateUrl(String url) {
         if (url == null) {
-            throw new IllegalArgumentException("테마 사진 업로드에 실패했습니다.");
+            throw new IllegalArgumentException("URL이 유효하지 않습니다.");
         }
     }
 

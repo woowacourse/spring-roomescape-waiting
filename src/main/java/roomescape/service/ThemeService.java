@@ -7,30 +7,30 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.AlreadyInUseException;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
     private final String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
-    public ThemeService(ThemeDao themeDao) {
-        this.themeDao = themeDao;
+    public ThemeService(ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
     }
 
     public List<ThemeResponse> findAllThemes() {
-        return themeDao.findAllThemes()
+        return themeRepository.findAllThemes()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public List<ThemeResponse> findTopTheme(Long count) {
-        return themeDao.findTopThemes(count)
+        return themeRepository.findTopThemes(count)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -57,22 +57,21 @@ public class ThemeService {
         String imageUrl = "/images/" + fileName;
 
         Theme theme = new Theme(
-                null,
                 request.name(),
                 request.description(),
                 imageUrl
         );
 
-        Theme saved = themeDao.save(theme);
+        Theme saved = themeRepository.save(theme);
 
         return ThemeResponse.from(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-        if (themeDao.existsByThemeId(id)) {
+        if (themeRepository.existsByThemeId(id)) {
             throw new AlreadyInUseException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
-        themeDao.delete(id);
+        themeRepository.delete(id);
     }
 }

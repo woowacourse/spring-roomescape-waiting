@@ -1,53 +1,71 @@
 package roomescape.controller.admin;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.dto.response.ThemeResponse;
+import roomescape.exception.AlreadyExistsException;
+import roomescape.service.ThemeService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@WebMvcTest(AdminThemeController.class)
 class AdminThemeControllerTest {
-    @LocalServerPort
-    private int port;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private ThemeService themeService;
 
     @Test
-    void 테마_관리_API() {
+    void 테마_생성() throws Exception {
         String name = "추리물";
         String description = "추리";
-        byte[] fileContent = "fake-image-content".getBytes();
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png",
+                "fake-image-content".getBytes());
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.MULTIPART)
-                .multiPart("name", name)
-                .multiPart("description", description)
-                .multiPart("file", "test.png", fileContent, "image/png")
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201);
+        given(themeService.create(any())).willReturn(new ThemeResponse(1L, name, description, "http://image.url"));
 
-        RestAssured.given().log().all()
-                .when().delete("/admin/themes/16")
-                .then().log().all()
-                .statusCode(204);
+        mockMvc.perform(multipart("/admin/themes")
+                        .file(file)
+                        .param("name", name)
+                        .param("description", description)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString("/admin/themes/1")))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value(name));
     }
 
     @Test
-    void 예약이_존재하는_테마_삭제_불가() {
-        RestAssured.given().log().all()
-                .when().delete("/admin/themes/1")
-                .then().log().all()
-                .statusCode(409)
-                .body("message", equalTo("해당 테마에 예약이 존재하여 삭제할 수 없습니다."));
+    void 테마_삭제() throws Exception {
+        willDoNothing().given(themeService).delete(16L);
+
+        mockMvc.perform(delete("/admin/themes/16"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void 예약이_존재하는_테마_삭제_불가() throws Exception {
+        willThrow(new AlreadyExistsException("해당 테마에 예약이 존재하여 삭제할 수 없습니다."))
+                .given(themeService).delete(1L);
+
+        mockMvc.perform(delete("/admin/themes/1"))
+                .andExpect(status().isConflict());
     }
 }

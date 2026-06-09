@@ -1,49 +1,52 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.request.UserReservationUpdateRequest;
+import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotFoundException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
-    }
-
-    public List<ReservationRankResponse> find(String name) {
-        return reservationDao.findByName(name)
-                .stream()
-                .map(ReservationRankResponse::from)
-                .toList();
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository
+    ) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationDao.findAll()
+        return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    public List<ReservationRankResponse> find(String name) {
+        return reservationRepository.findByName(name)
+                .stream()
+                .map(ReservationRankResponse::from)
+                .toList();
     }
 
     @Transactional
@@ -51,8 +54,11 @@ public class ReservationService {
         ReservationTime time = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
 
-        validateReservationDateTime(request.date(), time);
-        ReservationStatus status = checkReservationStatus(request.date(), theme, time);
+        Reservations reservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
+                request.date(), theme.getId(), time.getId());
+        reservations.validateDuplicate(request.name());
+
+        ReservationStatus status = reservations.determineStatus();
 
         Reservation reservation = new Reservation(
                 request.name(),
@@ -62,80 +68,111 @@ public class ReservationService {
                 status
         );
 
-        validateDuplicate(reservation);
+        reservation.validateNotPast();
 
-        Reservation saved = reservationDao.save(reservation);
-        return ReservationResponse.from(saved);
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     @Transactional
-    public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
+    public ReservationResponse update(Long id, ReservationUpdateRequest request) {
         Reservation reservation = getReservation(id);
+
+        if (reservation.isSameDateTime(request.date(), request.timeId())) {
+            return ReservationResponse.from(reservation);
+        }
+
         ReservationTime time = getReservationTime(request.timeId());
+        Theme theme = reservation.getTheme();
+        LocalDate currentDate = reservation.getDate();
+        Long currentTimeId = reservation.getTime().getId();
+        LocalDate newDate = request.date();
+        Long newTimeId = request.timeId();
 
-        reservationDao.delete(id);
+        Reservations currentReservations;
+        Reservations newReservations;
 
-        validateReservationDateTime(request.date(), time);
-        ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
+        if (isBefore(currentDate, currentTimeId, newDate, newTimeId)) {
+            currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(currentDate, theme.getId(),
+                    currentTimeId);
+            newReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(newDate, theme.getId(),
+                    newTimeId);
+        } else {
+            newReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(newDate, theme.getId(),
+                    newTimeId);
+            currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(currentDate, theme.getId(),
+                    currentTimeId);
+        }
 
-        Reservation newReservation = new Reservation(
-                reservation.getName(),
-                request.date(),
-                time,
-                reservation.getTheme(),
-                status
-        );
+        newReservations.validateDuplicate(reservation.getName());
 
-        validateDuplicate(newReservation);
-        Reservation saved = reservationDao.save(newReservation);
+        Reservation newReservation = buildUpdatedReservation(reservation, newDate, time, newReservations);
 
-        return ReservationResponse.from(saved);
+        return ReservationResponse.from(applyUpdate(id, reservation, currentReservations, newReservation));
     }
 
     @Transactional
     public void delete(Long id) {
-        reservationDao.delete(id);
+        Reservation reservation = getReservation(id);
+
+        Reservations currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
+                reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+
+        reservationRepository.delete(id);
+        promoteNextWaiting(reservation, currentReservations);
+    }
+
+    private boolean isBefore(LocalDate date1, Long timeId1, LocalDate date2, Long timeId2) {
+        if (date1.isBefore(date2)) {
+            return true;
+        }
+        if (date1.isAfter(date2)) {
+            return false;
+        }
+        return timeId1 < timeId2;
+    }
+
+    private Reservation buildUpdatedReservation(Reservation origin, LocalDate newDate, ReservationTime newTime,
+                                                Reservations newReservations) {
+        Reservation newReservation = new Reservation(
+                origin.getName(),
+                newDate,
+                newTime,
+                origin.getTheme(),
+                newReservations.determineStatus()
+        );
+        newReservation.validateNotPast();
+        return newReservation;
+    }
+
+    private Reservation applyUpdate(Long id, Reservation deleted, Reservations currentReservations,
+                                    Reservation newReservation) {
+        reservationRepository.delete(id);
+        promoteNextWaiting(deleted, currentReservations);
+        return reservationRepository.save(newReservation);
+    }
+
+    private void promoteNextWaiting(Reservation deleted, Reservations currentReservations) {
+        if (deleted.isConfirmed()) {
+            currentReservations.findNextWaiting(deleted.getId())
+                    .ifPresent(next -> {
+                        next.confirm();
+                        reservationRepository.updateStatus(next.getId(), next.getStatus());
+                    });
+        }
     }
 
     private Reservation getReservation(long id) {
-        return reservationDao.findById(id)
+        return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("요청하신 예약을 찾을 수 없습니다."));
     }
 
     private ReservationTime getReservationTime(Long timeId) {
-        return reservationTimeDao.findTimeById(timeId)
+        return reservationTimeRepository.findTimeById(timeId)
                 .orElseThrow(() -> new NotFoundException("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요."));
     }
 
     private Theme getTheme(Long themeId) {
-        return themeDao.findThemeById(themeId)
+        return themeRepository.findThemeById(themeId)
                 .orElseThrow(() -> new NotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요."));
     }
-
-    private void validateReservationDateTime(LocalDate date, ReservationTime time) {
-        LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (targetDateTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("이미 지난 시간/날짜는 예약할 수 없습니다.");
-        }
-    }
-
-    private void validateDuplicate(Reservation reservation) {
-        if (reservationDao.existsByDateAndThemeAndTimeAndName(
-                reservation.getDate(),
-                reservation.getTheme().getId(),
-                reservation.getTime().getId(),
-                reservation.getName())
-        ) {
-            throw new AlreadyExistsException("이미 예약되었습니다.");
-        }
-    }
-
-    private ReservationStatus checkReservationStatus(LocalDate date, Theme theme, ReservationTime time) {
-        if (reservationDao.existsByDateAndThemeAndTime(date, theme, time)) {
-            return ReservationStatus.WAITING;
-        }
-
-        return ReservationStatus.CONFIRMED;
-    }
 }
-
