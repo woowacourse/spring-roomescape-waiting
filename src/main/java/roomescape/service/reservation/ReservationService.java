@@ -17,6 +17,7 @@ import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
@@ -42,6 +43,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    @Transactional
     public Reservation save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
         reservationValidator.validateCreateReferenceIds(themeId, timeId);
 
@@ -101,6 +103,7 @@ public class ReservationService {
         reservationWaitingRepository.deleteById(earliestWaiting.getId());
     }
 
+    @Transactional
     public Reservation updateByIdAndName(
             final long id,
             final String name,

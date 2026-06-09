@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.exception.ConflictException;
@@ -28,6 +29,7 @@ public class ReservationWaitingService {
         this.clock = clock;
     }
 
+    @Transactional
     public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
         Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -62,6 +64,7 @@ public class ReservationWaitingService {
         }
     }
 
+    @Transactional
     public void deleteByIdAndName(Long waitingId, String name) {
         int affectedRowCount = reservationWaitingRepository.deleteByIdAndName(waitingId, name);
 
