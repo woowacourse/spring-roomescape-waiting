@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
@@ -34,46 +35,29 @@ public record Reservations(
     }
 
     public Reservations cancel(Long reservationId, String requesterName) {
-        Reservation cancelTarget = popById(reservationId);
-        if (cancelTarget.isReserved()) {
-            cancelTarget.cancel(requesterName);
-            return withPromotedIfPresent(cancelTarget);
-        }
-
-        cancelTarget.cancel(requesterName);
-        return new Reservations(List.of(cancelTarget));
+        return processUpdateAction(reservationId, reservation -> reservation.cancel(requesterName));
     }
 
     public Reservations cancelByManager(Long reservationId) {
-        Reservation cancelTarget = popById(reservationId);
-        if (cancelTarget.isReserved()) {
-            cancelTarget.cancelByManager();
-            return withPromotedIfPresent(cancelTarget);
-        }
-
-        cancelTarget.cancelByManager();
-        return new Reservations(List.of(cancelTarget));
+        return processUpdateAction(reservationId, reservation -> reservation.cancelByManager());
     }
 
     public Reservations reschedule(Long newSlotId, Long reservationId, String requesterName, ReservationStatus status) {
-        Reservation target = popById(reservationId);
-        if (target.isReserved()) {
-            target.reschedule(newSlotId, requesterName, status);
-            return withPromotedIfPresent(target);
-        }
-
-        target.reschedule(newSlotId, requesterName, status);
-        return new Reservations(List.of(target));
+        return processUpdateAction(reservationId, reservation -> reservation.reschedule(newSlotId, requesterName, status));
     }
 
     public Reservations rescheduleByManager(Long newSlotId, Long reservationId, ReservationStatus status) {
+        return processUpdateAction(reservationId, reservation -> reservation.rescheduleByManager(newSlotId, status));
+    }
+
+    private Reservations processUpdateAction(Long reservationId, Consumer<Reservation> action) {
         Reservation target = popById(reservationId);
         if (target.isReserved()) {
-            target.rescheduleByManager(newSlotId, status);
+            action.accept(target);
             return withPromotedIfPresent(target);
         }
 
-        target.rescheduleByManager(newSlotId, status);
+        action.accept(target);
         return new Reservations(List.of(target));
     }
 
