@@ -45,7 +45,7 @@ class ReservationOwnerIntegrationTest {
     @DisplayName("인증 헤더가 없으면 예약 수정 시 401을 반환한다.")
     void updateMyReservation_MissingAuthHeader_Unauthorized() {
         Long reservationId = setupDefaultReservation("brown", LocalDate.now().plusDays(1));
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(2), null);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(2), 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -59,7 +59,7 @@ class ReservationOwnerIntegrationTest {
     @DisplayName("예약 소유자가 불일치하면 403을 반환한다.")
     void updateMyReservation_MismatchOwner_Forbidden() {
         Long reservationId = setupDefaultReservation("brown", LocalDate.now().plusDays(1));
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(2), null);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(2), 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "anotherUser")
@@ -88,7 +88,7 @@ class ReservationOwnerIntegrationTest {
     @DisplayName("예약 수정 요청이 성공하면 204를 반환한다.")
     void updateMyReservation_Success() {
         Long reservationId = setupDefaultReservation("brown", LocalDate.now().plusDays(1));
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(2), null);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(2), 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")

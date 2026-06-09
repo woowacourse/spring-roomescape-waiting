@@ -43,23 +43,7 @@ public class Reservation {
     }
 
     public ReservationSlot generateTemporalSlot(LocalDate newDate, ReservationTime newTime) {
-        LocalDate targetDate = getNewDateValue(newDate);
-        ReservationTime targetTime = getNewReservationTimeValue(newTime);
-        return new ReservationSlot(targetDate, targetTime, this.slot.theme());
-    }
-
-    private LocalDate getNewDateValue(LocalDate newDate) {
-        if (newDate == null) {
-            return this.slot.date();
-        }
-        return newDate;
-    }
-
-    private ReservationTime getNewReservationTimeValue(ReservationTime newTime) {
-        if (newTime == null) {
-            return this.slot.time();
-        }
-        return newTime;
+        return new ReservationSlot(newDate, newTime, this.slot.theme());
     }
 
     public void validateDeletableByUser(String name, LocalDateTime requestTime) {

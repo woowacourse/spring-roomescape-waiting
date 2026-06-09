@@ -113,6 +113,7 @@ public class ExceptionIntegrationTest {
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().plusDays(14).toString());
+        body.put("timeId", 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
@@ -133,6 +134,7 @@ public class ExceptionIntegrationTest {
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().minusDays(1).toString());
+        body.put("timeId", 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
@@ -167,7 +169,8 @@ public class ExceptionIntegrationTest {
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().plusDays(8).toString());
-
+        body.put("timeId", 1L);
+        
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
                 .contentType(ContentType.JSON)

@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,10 +32,14 @@ public class MyReservationController {
     public void updateMyReservation(
             @OwnerOnly String name,
             @PathVariable Long id,
-            @RequestBody ReservationUpdateRequest request
+            @RequestBody @Valid ReservationUpdateRequest request
     ) {
-        ReservationUpdateCommand reservationUpdateCommand = new ReservationUpdateCommand(id, name, request.date(),
-                request.timeId());
+        ReservationUpdateCommand reservationUpdateCommand = new ReservationUpdateCommand(
+                id,
+                name,
+                request.date(),
+                request.timeId()
+        );
         reservationService.update(reservationUpdateCommand, LocalDateTime.now());
     }
 

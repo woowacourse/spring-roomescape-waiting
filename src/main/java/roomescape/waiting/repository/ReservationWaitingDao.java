@@ -171,7 +171,6 @@ public class ReservationWaitingDao {
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme h ON r.theme_id = h.id
                 WHERE r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
-                ORDER BY r.id ASC
                 FOR UPDATE
                 """;
 

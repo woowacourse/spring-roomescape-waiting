@@ -139,23 +139,6 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("예약 수정 시 날짜와 시간이 null이면 기존의 날짜와 시간을 유지한다.")
-    void update_nullInput_keepsOriginalValues() {
-        // given
-        Reservation original = new Reservation(1L, "브라운",
-                new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
-        LocalDateTime requestTime = LocalDateTime.now();
-
-        // when
-        Reservation updated = original.update(null, null, "브라운", requestTime);
-
-        // then
-        assertThat(updated.getDate()).isEqualTo(original.getDate());
-        assertThat(updated.getTime()).isEqualTo(original.getTime());
-    }
-
-    @Test
     @DisplayName("소유자가 아닌 사람이 수정을 요청하면 ForbiddenException을 던진다.")
     void update_mismatchOwner_throwsForbiddenException() {
         // given
@@ -163,9 +146,10 @@ class ReservationTest {
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
                 LocalDate.now().plusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
 
         // when & then
-        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(2), null, "코니", requestTime))
+        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(2), newTime, "코니", requestTime))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -178,9 +162,10 @@ class ReservationTest {
                 new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme),
                 LocalDate.now().minusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
 
         // when & then
-        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(1), null, "브라운", requestTime))
+        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(1), newTime, "브라운", requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
@@ -193,8 +178,11 @@ class ReservationTest {
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
                 LocalDate.now().plusDays(1).atStartOfDay());
         LocalDateTime requestTime = LocalDateTime.now();
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
 
         // when & then
-        assertThatThrownBy(() -> original.update(LocalDate.now().minusDays(1), null, "브라운", requestTime)).isInstanceOf(InvalidBusinessStateException.class).hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
+        assertThatThrownBy(() -> original.update(LocalDate.now().minusDays(1), newTime, "브라운", requestTime))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 }

@@ -56,11 +56,7 @@ public class ReservationService {
         Reservation reservation = getById(command.id());
         reservation.validateDeletableByUser(command.name(), requestTime);
 
-        ReservationTime newTime = null;
-        if (command.timeId() != null) {
-            newTime = reservationTimeService.getById(command.timeId());
-        }
-
+        ReservationTime newTime = reservationTimeService.getById(command.timeId());
         ReservationSlot temporalSlot = reservation.generateTemporalSlot(command.date(), newTime);
         validateSlotAvailable(command.id(), command.name(), temporalSlot);
         Reservation updated = reservation.update(command.date(), newTime, command.name(), requestTime);

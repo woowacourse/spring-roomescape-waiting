@@ -79,7 +79,7 @@ class MyReservationControllerTest {
     @Test
     @DisplayName("예약 수정 요청이 성공하면 204를 반환한다.")
     void updateMyReservation_Success() throws Exception {
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(1), null);
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.now().plusDays(1), 1L);
 
         mockMvc.perform(patch("/reservations/1")
                         .header("Authorization", "브라운")
