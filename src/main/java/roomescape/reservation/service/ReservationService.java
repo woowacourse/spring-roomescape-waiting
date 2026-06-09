@@ -27,7 +27,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.controller.dto.response.ThemeResponse;
-import roomescape.wating.domain.Waiting;
 import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.controller.dto.response.WaitingResponse;
@@ -104,6 +103,23 @@ public class ReservationService {
         return updateSchedule(data, originReservation);
     }
 
+    private ReservationResponse updateSchedule(final ReservationUpdateRequest data, final Reservation originReservation) {
+        final ReservationTime newReservationTime = getReservationTime(data.timeId());
+        final ReservationSlot slot = findOrCreateSlot(
+                data.date(),
+                newReservationTime,
+                originReservation.getTheme()
+        );
+
+        final Reservation updatedReservation = originReservation.changeSchedule(
+                slot,
+                LocalDateTime.now()
+        );
+        final Reservation reservation = updateReservation(updatedReservation);
+
+        return ReservationResponse.from(reservation);
+    }
+
     @Transactional
     public void cancelByCustomer(final Long reservationId, final String customerName, final String customerEmail) {
         final Reservation reservation = getReservation(reservationId);
@@ -130,23 +146,6 @@ public class ReservationService {
                 .toList();
 
         return new ReservationOptionResponse(dates, themes);
-    }
-
-    private ReservationResponse updateSchedule(final ReservationUpdateRequest data, final Reservation originReservation) {
-        final ReservationTime newReservationTime = getReservationTime(data.timeId());
-        final ReservationSlot slot = findOrCreateSlot(
-                data.date(),
-                newReservationTime,
-                originReservation.getTheme()
-        );
-
-        final Reservation updatedReservation = originReservation.changeSchedule(
-                slot,
-                LocalDateTime.now()
-        );
-        final Reservation reservation = updateReservation(updatedReservation);
-
-        return ReservationResponse.from(reservation);
     }
 
     private Reservation saveReservation(final Reservation reservation) {
@@ -188,42 +187,27 @@ public class ReservationService {
     }
 
     private void deleteReservationAndPromoteWaiting(final Reservation reservation) {
-        try {
-            final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(reservation.getSlotId())
-                    .orElseThrow(ReservationNotFoundException::new);
+        final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(reservation.getSlotId())
+                .orElseThrow(ReservationNotFoundException::new);
 
-            deleteReservation(reservation, slot);
-            waitingRepository.findEarliestBySlotId(slot.getId())
-                    .ifPresent(this::promoteWaiting);
-        } catch (DuplicateKeyException exception) {
-            throw new ReservationAlreadyExistsException(exception);
-        } catch (DataIntegrityViolationException exception) {
-            throw new ReservationOptionChangedException(exception);
-        }
-    }
-
-    private void deleteReservation(final Reservation reservation, final ReservationSlot slot) {
         if (!reservationRepository.deleteByIdAndSlotId(reservation.getId(), slot.getId())) {
             throw new ReservationNotFoundException();
         }
-    }
 
-    private void promoteWaiting(final Waiting waiting) {
-        final Reservation promotedReservation = Reservation.of(
-                null,
-                waiting.getCustomerName().name(),
-                waiting.getCustomerEmail(),
-                waiting.getSlot()
-        );
+        waitingRepository.findEarliestBySlotId(slot.getId())
+                .ifPresent(waiting -> {
+                    final Reservation promotedReservation = Reservation.of(
+                            null,
+                            waiting.getCustomerName().name(),
+                            waiting.getCustomerEmail(),
+                            waiting.getSlot()
+                    );
 
-        saveReservation(promotedReservation);
-        deletePromotedWaiting(waiting);
-    }
-
-    private void deletePromotedWaiting(final Waiting waiting) {
-        if (!waitingRepository.deleteById(waiting.getId())) {
-            throw new WaitingNotFoundException();
-        }
+                    saveReservation(promotedReservation);
+                    if (!waitingRepository.deleteById(waiting.getId())) {
+                        throw new WaitingNotFoundException();
+                    }
+                });
     }
 
     private Reservation getReservation(final Long reservationId) {
