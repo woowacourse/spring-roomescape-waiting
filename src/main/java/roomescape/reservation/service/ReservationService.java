@@ -86,6 +86,12 @@ public class ReservationService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void promoteFirstWaiting(Reservation reservation) {
+        boolean slotTaken = reservationDao.findByDateTimeThemeStatus(
+            reservation.getDate().toString(), reservation.getTime().getId(), reservation.getTheme().getId()
+        );
+        if (slotTaken) {
+            throw new IllegalStateException("해당 슬롯에 이미 확정 예약이 존재합니다.");
+        }
         reservationDao.findFirstWaitingByDateTimeTheme(
             reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
         ).ifPresent(waiting -> {
