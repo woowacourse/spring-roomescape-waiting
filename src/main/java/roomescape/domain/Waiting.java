@@ -46,10 +46,6 @@ public class Waiting {
         return Optional.of(Reservation.from(member, getSlot()));
     }
 
-    private boolean isPast(LocalDateTime now) {
-        return time.isReservationBefore(now, date);
-    }
-
     public Slot getSlot() {
         return new Slot(date, time, theme, storeId);
     }
@@ -80,5 +76,9 @@ public class Waiting {
 
     public Long getRank() {
         return rank;
+    }
+
+    private boolean isPast(LocalDateTime now) {
+        return time.isReservationBefore(now, date);
     }
 }

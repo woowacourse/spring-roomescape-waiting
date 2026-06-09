@@ -16,18 +16,6 @@ public class Reservation {
     private ReservationStatus status;
     private LocalDateTime deletedAt;
 
-    private Reservation(Builder builder) {
-        this.id = builder.id;
-        this.member = builder.member;
-        this.date = builder.date;
-        this.time = builder.time;
-        this.theme = builder.theme;
-        this.storeId = builder.storeId;
-        this.status = builder.status;
-        this.deletedAt = builder.deletedAt;
-        this.version = builder.version;
-    }
-
     public static Reservation createByUser(Member member, LocalDate date, Time time, Theme theme,
                                            Long storeId, LocalDateTime now) {
         if (time.isReservationBefore(now, date)) {
@@ -97,12 +85,6 @@ public class Reservation {
         cancel(now);
     }
 
-    private void cancel(LocalDateTime now) {
-        validateActive();
-        this.status = ReservationStatus.CANCELED;
-        this.deletedAt = now;
-    }
-
     public void update(LocalDate date, Time time) {
         validateActive();
         LocalDateTime now = LocalDateTime.now();
@@ -115,12 +97,6 @@ public class Reservation {
 
     public boolean isActive() {
         return status == ReservationStatus.BOOKED;
-    }
-
-    private void validateActive() {
-        if (!isActive()) {
-            throw new BusinessRuleViolationException("이미 취소된 예약입니다.");
-        }
     }
 
     public boolean isOwnedBy(Long memberId) {
@@ -157,6 +133,30 @@ public class Reservation {
     public ReservationStatus getStatus() { return status; }
     public long getVersion() { return version; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
+
+    private Reservation(Builder builder) {
+        this.id = builder.id;
+        this.member = builder.member;
+        this.date = builder.date;
+        this.time = builder.time;
+        this.theme = builder.theme;
+        this.storeId = builder.storeId;
+        this.status = builder.status;
+        this.deletedAt = builder.deletedAt;
+        this.version = builder.version;
+    }
+
+    private void cancel(LocalDateTime now) {
+        validateActive();
+        this.status = ReservationStatus.CANCELED;
+        this.deletedAt = now;
+    }
+
+    private void validateActive() {
+        if (!isActive()) {
+            throw new BusinessRuleViolationException("이미 취소된 예약입니다.");
+        }
+    }
 
     private static class Builder {
         private Long id;

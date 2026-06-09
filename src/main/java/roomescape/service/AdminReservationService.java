@@ -61,11 +61,6 @@ public class AdminReservationService {
         return getById(id);
     }
 
-    private Reservation getById(Long id) {
-        return reservationDao.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
-    }
-
     public Reservation createByAdmin(AdminReservationRequestDto request) {
         Member member = memberDao.findById(request.memberId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 멤버입니다."));
@@ -99,6 +94,11 @@ public class AdminReservationService {
         if (!reservationDao.delete(id)) {
             throw new EntityNotFoundException("존재하지 않는 예약입니다.");
         }
+    }
+
+    private Reservation getById(Long id) {
+        return reservationDao.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
     }
 
     private Reservation buildReservation(Member member, AdminReservationRequestDto request) {

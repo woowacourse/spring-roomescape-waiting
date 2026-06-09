@@ -47,15 +47,6 @@ public class ReservationService {
         return reservationDao.findAllByMemberId(memberId);
     }
 
-    private Reservation findActiveById(Long id) {
-        Reservation reservation = reservationDao.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
-        if (!reservation.isActive()) {
-            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
-        }
-        return reservation;
-    }
-
     public Reservation create(Member member, ReservationRequestDto request) {
         Reservation reservation = buildReservation(member, request, LocalDateTime.now());
         try {
@@ -87,6 +78,15 @@ public class ReservationService {
         reservation.cancelByUser(now);
         reservationDao.update(reservation);
         waitingService.promoteFirstWaiting(reservation.getSlot(), now);
+    }
+
+    private Reservation findActiveById(Long id) {
+        Reservation reservation = reservationDao.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+        if (!reservation.isActive()) {
+            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
+        }
+        return reservation;
     }
 
     private Reservation buildReservation(Member member, ReservationRequestDto request, LocalDateTime now) {

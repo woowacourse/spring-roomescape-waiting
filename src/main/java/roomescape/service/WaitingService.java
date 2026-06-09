@@ -68,6 +68,21 @@ public class WaitingService {
                 .ifPresent(first -> promote(first, now));
     }
 
+    @Transactional(readOnly = true)
+    public List<Waiting> findAll() {
+        return waitingDao.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Waiting> findAllByMemberId(Long memberId) {
+        return waitingDao.findAllByMemberId(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Waiting> findAllByStoreId(Long storeId) {
+        return waitingDao.findAllByStoreId(storeId);
+    }
+
     private void promote(Waiting waiting, LocalDateTime now) {
         waiting.promoteToReservation(now)
                 .ifPresent(reservation -> savePromotedReservation(waiting, reservation));
@@ -82,21 +97,6 @@ public class WaitingService {
         } catch (DuplicateKeyException e) {
             throw new DuplicateEntityException("이미 예약이 존재하여 대기를 전환할 수 없습니다.");
         }
-    }
-
-    @Transactional(readOnly = true)
-    public List<Waiting> findAll() {
-        return waitingDao.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Waiting> findAllByMemberId(Long memberId) {
-        return waitingDao.findAllByMemberId(memberId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Waiting> findAllByStoreId(Long storeId) {
-        return waitingDao.findAllByStoreId(storeId);
     }
 
     private Waiting buildWaiting(WaitingRequestDto waitingRequestDto, Member member) {

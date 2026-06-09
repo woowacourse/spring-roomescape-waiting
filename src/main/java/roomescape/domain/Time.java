@@ -20,12 +20,6 @@ public class Time {
         this(null, startAt);
     }
 
-    private void validate(LocalTime startAt) {
-        if (startAt.isBefore(LocalTime.of(10, 0)) || startAt.isAfter(LocalTime.of(22, 0))) {
-            throw new InvalidInputException("영업 시간은 10시부터 22시 사이입니다.");
-        }
-    }
-
     public boolean isReservationBefore(LocalDateTime dateTime, LocalDate reservationDate) {
         LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate, startAt);
 
@@ -54,5 +48,11 @@ public class Time {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    private void validate(LocalTime startAt) {
+        if (startAt.isBefore(LocalTime.of(10, 0)) || startAt.isAfter(LocalTime.of(22, 0))) {
+            throw new InvalidInputException("영업 시간은 10시부터 22시 사이입니다.");
+        }
     }
 }
