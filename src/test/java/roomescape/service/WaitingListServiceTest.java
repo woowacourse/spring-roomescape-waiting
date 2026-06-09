@@ -231,7 +231,7 @@ class WaitingListServiceTest {
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
 
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, timeId, themeId)).willReturn(true);
-        given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(name, tomorrow, themeId, timeId)).willReturn(true);
+        given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(name, tomorrow, timeId, themeId)).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand, LocalDate.now(), LocalTime.of(9, 0)))
