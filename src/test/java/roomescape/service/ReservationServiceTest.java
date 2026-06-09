@@ -260,7 +260,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약_시간까지_24시간_이하이면_취소할_수_있다() {
+    void 예약_시간까지_24시간_전이면_취소할_수_있다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         Reservation reservation = saveReservation(
@@ -272,8 +272,10 @@ class ReservationServiceTest {
 
         LocalDateTime now = LocalDateTime.of(2026, 6, 9, 10, 0);
 
-        assertThatNoException()
-                .isThrownBy(() -> reservationService.cancel(reservation.getId(), now));
+        reservationService.cancel(reservation.getId(), now);
+
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+        assertThat(reservations).isEmpty();
     }
 
     @Test
