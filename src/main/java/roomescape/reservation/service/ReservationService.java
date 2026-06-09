@@ -59,10 +59,7 @@ public class ReservationService {
     @Transactional
     public Reservation reschedule(Long currentSlotId, Long newSlotId, Long reservationId, String requesterName) {
         RescheduleSlots slots = getRescheduleSlotsWithLock(currentSlotId, newSlotId);
-        ReservationSlot currentSlot = slots.findById(currentSlotId);
-        ReservationSlot newSlot = slots.findById(newSlotId);
-
-        Reservations changed = currentSlot.reschedule(newSlot, reservationId, requesterName);
+        Reservations changed = slots.reschedule(currentSlotId, newSlotId, reservationId, requesterName);
         rescheduleAndPromote(changed);
         return changed.findById(reservationId);
     }
@@ -70,10 +67,7 @@ public class ReservationService {
     @Transactional
     public Reservation rescheduleByManager(Long currentSlotId, Long newSlotId, Long reservationId) {
         RescheduleSlots slots = getRescheduleSlotsWithLock(currentSlotId, newSlotId);
-        ReservationSlot currentSlot = slots.findById(currentSlotId);
-        ReservationSlot newSlot = slots.findById(newSlotId);
-
-        Reservations changed = currentSlot.rescheduleByManager(newSlot, reservationId);
+        Reservations changed = slots.rescheduleByManager(currentSlotId, newSlotId, reservationId);
         rescheduleAndPromote(changed);
         return changed.findById(reservationId);
     }
