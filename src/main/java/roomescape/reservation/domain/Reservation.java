@@ -89,9 +89,8 @@ public class Reservation {
         return this.status == ReservationStatus.WAITING;
     }
 
-    public Reservation promote() {
+    public void promote() {
         this.status = ReservationStatus.RESERVED;
-        return this;
     }
 
     private void validateNotCanceled() {

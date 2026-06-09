@@ -83,10 +83,12 @@ public record Reservations(
     }
 
     public Optional<Reservation> promoteWaiting() {
-        return values.stream()
+        Optional<Reservation> waiting = values.stream()
                 .filter(Reservation::isWaiting)
-                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId))
-                .map(Reservation::promote);
+                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId));
+
+        waiting.ifPresent(Reservation::promote);
+        return waiting;
     }
 
     public void validateNotAlreadyBookedBy(String requestName) {
