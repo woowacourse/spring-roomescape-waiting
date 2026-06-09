@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.ThemeResult;
-import roomescape.support.ClearDbTest;
+import roomescape.support.SpringBootApiTest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ClearDbTest
+@SpringBootApiTest
 class ThemeControllerTest {
 
     @Autowired

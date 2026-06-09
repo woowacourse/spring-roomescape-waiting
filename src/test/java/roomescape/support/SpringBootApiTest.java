@@ -17,5 +17,5 @@ import java.lang.annotation.Target;
         mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
 )
 @Sql(value = "/clear.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public @interface ClearDbTest {
+public @interface SpringBootApiTest {
 }

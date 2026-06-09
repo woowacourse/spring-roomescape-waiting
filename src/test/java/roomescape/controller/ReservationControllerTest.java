@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.dto.AvailableDateResult;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.ReservationTimeStatusResult;
-import roomescape.support.ClearDbTest;
+import roomescape.support.SpringBootApiTest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ClearDbTest
+@SpringBootApiTest
 class ReservationControllerTest {
 
     private static final LocalDate TODAY = LocalDate.now();
