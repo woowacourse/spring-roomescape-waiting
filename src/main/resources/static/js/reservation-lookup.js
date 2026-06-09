@@ -136,7 +136,7 @@ function renderReservations(reservations) {
 
         if (!isCanceled) {
             cancelButton.addEventListener("click", async () => {
-                await cancelReservation(reservation.slotId);
+                await cancelReservation(reservation.slotId, reservation.id);
             });
 
             rescheduleButton.addEventListener("click", () => {
@@ -247,7 +247,7 @@ async function submitReschedule() {
         return;
     }
 
-    const response = await authFetch(`/member/slots/${reschedulingReservation.slotId}/reservations/reschedule`, {
+    const response = await authFetch(`/member/slots/${reschedulingReservation.slotId}/reservations/${reschedulingReservation.id}/reschedule`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"
@@ -267,13 +267,13 @@ async function submitReschedule() {
     await loadMyReservations();
 }
 
-async function cancelReservation(slotId) {
+async function cancelReservation(slotId, reservationId) {
     const confirmed = confirm("예약을 취소하시겠습니까?");
     if (!confirmed) {
         return;
     }
 
-    const response = await authFetch(`/member/slots/${slotId}/cancel`, {
+    const response = await authFetch(`/member/slots/${slotId}/reservations/${reservationId}/cancel`, {
         method: "PATCH"
     });
 

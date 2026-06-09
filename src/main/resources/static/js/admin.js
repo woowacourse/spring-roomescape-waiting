@@ -388,7 +388,7 @@ async function loadReservations() {
                 </button>
                 <button class="status-button" type="button" 
                         ${isCanceled ? "disabled" : ""}
-                        onclick="cancelReservation(${reservation.slotId}, '${reservation.name}')">
+                        onclick="cancelReservation(${reservation.slotId}, ${reservation.id})">
                     ${isCanceled ? "취소 완료" : "취소"}
                 </button>
             </td>
@@ -488,7 +488,7 @@ async function submitReschedule() {
         return;
     }
 
-    const response = await authFetch(`/admin/slots/${reschedulingReservation.slotId}/reservations/${encodeURIComponent(reschedulingReservation.name)}/reschedule`, {
+    const response = await authFetch(`/admin/slots/${reschedulingReservation.slotId}/reservations/${reschedulingReservation.id}/reschedule`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newSlotId: selectedTime.slotId })
@@ -504,10 +504,10 @@ async function submitReschedule() {
     await loadReservations();
 }
 
-async function cancelReservation(slotId, name) {
+async function cancelReservation(slotId, reservationId) {
     if (!confirm("해당 예약을 취소하시겠습니까?")) return;
 
-    const response = await authFetch(`/admin/slots/${slotId}/reservations/${name}/cancel`, { method: "PATCH" });
+    const response = await authFetch(`/admin/slots/${slotId}/reservations/${reservationId}/cancel`, { method: "PATCH" });
     if (!response || !response.ok) {
         if (response) await handleResponseError(response, "예약 취소에 실패했습니다.", {
             "COMMON_004": "취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
