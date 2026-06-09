@@ -105,6 +105,10 @@ public class ReservationDao {
   }
 
   public Reservation findById(Long id) {
+    jdbcTemplate.queryForObject(
+        "select id from reservation where id = ? for update",
+        Long.class, id);
+
     String sql = "select r.id, r.name, r.date, r.status, "
         + "t.id as time_id, t.start_at, "
         + "th.id as theme_id, th.name as theme_name, "
