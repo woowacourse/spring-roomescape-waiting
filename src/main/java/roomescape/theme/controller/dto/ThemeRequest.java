@@ -1,27 +1,21 @@
 package roomescape.theme.controller.dto;
 
-import roomescape.global.exception.InvalidRequestFormatException;
-import roomescape.theme.exception.ThemeErrorCode;
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.URL;
 import roomescape.theme.service.dto.ThemeCommand;
 
 public record ThemeRequest(
+
+        @NotBlank(message = "테마 이름은 필수입니다.")
         String name,
+
+        @NotBlank(message = "테마 설명은 필수입니다.")
         String description,
+
+        @NotBlank(message = "테마 썸네일 URL은 필수입니다.")
+        @URL(message = "올바른 썸네일 URL 형식이 아닙니다.")
         String thumbnailUrl
 ) {
-
-    public ThemeRequest {
-        validateString(name);
-        validateString(description);
-        validateString(thumbnailUrl);
-    }
-
-    private void validateString(String value) {
-        if (value == null || value.isBlank()) {
-            throw new InvalidRequestFormatException(ThemeErrorCode.INVALID_FORMAT.getMessage());
-        }
-    }
-
     public ThemeCommand toCommand() {
         return new ThemeCommand(name, description, thumbnailUrl);
     }

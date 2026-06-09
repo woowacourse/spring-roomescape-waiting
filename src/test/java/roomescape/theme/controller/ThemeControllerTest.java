@@ -17,9 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.AuthInterceptor;
 import roomescape.auth.OwnerOnlyArgumentResolver;
 import roomescape.global.config.WebMvcConfig;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.query.dto.PopularThemeQueryResult;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
@@ -36,10 +35,7 @@ class ThemeControllerTest {
     private ThemeService themeService;
 
     @MockitoBean
-    private ReservationService reservationService;
-
-    @MockitoBean
-    private ReservationRepository reservationRepository;
+    private ReservationQueryService reservationQueryService;
 
     @Test
     @DisplayName("모든 테마를 성공적으로 조회한다.")
@@ -62,7 +58,7 @@ class ThemeControllerTest {
         PopularThemesResult result = new PopularThemesResult(List.of(
                 new PopularThemeQueryResult(1L, "인기테마", "설명", "url")
         ));
-        given(reservationService.findPopularThemes(anyInt(), anyInt())).willReturn(result);
+        given(reservationQueryService.queryPopularThemes(anyInt(), anyInt())).willReturn(result);
 
         // when & then
         mockMvc.perform(get("/themes")
@@ -82,7 +78,30 @@ class ThemeControllerTest {
                         .param("popular", "true")
                         .param("period", "0")
                         .param("limit", "10"))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("값이 유효하지 않습니다."));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("요청 기간 및 개수는 1 이상이어야 합니다."));
+    }
+
+    @Test
+    @DisplayName("인기 테마 조회 시 limit가 1 미만이면 400 에러를 반환한다.")
+    void readPopular_InvalidLimit_BadRequest() throws Exception {
+        // when & then
+        mockMvc.perform(get("/themes")
+                        .param("popular", "true")
+                        .param("period", "7")
+                        .param("limit", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("요청 기간 및 개수는 1 이상이어야 합니다."));
+    }
+
+    @Test
+    @DisplayName("인기 테마 조회 시 필수 파라미터가 누락되면 400 에러를 반환한다.")
+    void readPopular_MissingParams_BadRequest() throws Exception {
+        // when & then
+        mockMvc.perform(get("/themes")
+                        .param("popular", "true")
+                        .param("period", "7")) // missing limit
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("필수 요청 파라미터가 누락되었습니다. 입력 값을 다시 확인해 주세요."));
     }
 }

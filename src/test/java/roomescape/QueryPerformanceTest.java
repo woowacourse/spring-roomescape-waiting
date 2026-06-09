@@ -1,146 +1,173 @@
 package roomescape;
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import org.junit.jupiter.api.DisplayName;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = NONE)
+@Disabled("윈도우 함수를 이용한 쿼리 vs 별도 쿼리 의 성능을 비교하기 위한 테스트")
 public class QueryPerformanceTest {
-
-    private static final int NETWORK_DELAY_MS = 2; // 실제 DB 인프라 네트워크 I/O 평균 지연시간 (2ms 가정)
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Test
-    @DisplayName("데이터 개수별 예약 목록 및 대기 순번 조회 성능 비교 테스트")
-    public void comparePerformance() {
-        int[] dataSizes = {10_000, 100_000, 300_000};
-        String targetName = "브라운";
+    private Long timeId1;
+    private Long timeId2;
+    private Long themeId1;
+    private Long themeId2;
 
-        for (int size : dataSizes) {
-            System.out.println("==================================================");
-            System.out.println("데이터 세팅 시작... (목표 데이터 수: " + size + ")");
+    @BeforeEach
+    void setUp() {
+        // 1. Clean data
+        jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_waiting");
+        jdbcTemplate.update("DELETE FROM reservation_time");
+        jdbcTemplate.update("DELETE FROM theme");
 
-            // 매 반복마다 메타데이터와 더미 데이터를 새롭게 세팅
-            setupMetaData();
-            setupDummyData(size, targetName);
-            System.out.println("데이터 세팅 완료! 성능 측정을 시작합니다.");
+        // 2. Insert Times
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", Time.valueOf(LocalTime.of(10, 0)));
+        timeId1 = jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class,
+                Time.valueOf(LocalTime.of(10, 0)));
 
-            // 1. 단일 쿼리로 한 번에 조회 (Window Function)
-            long timeAllInOne = measureAllInOne(targetName);
-            System.out.println("[방법 1] 단일 쿼리(JOIN + Window 함수) 소요 시간: " + timeAllInOne + " ms");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", Time.valueOf(LocalTime.of(12, 0)));
+        timeId2 = jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class,
+                Time.valueOf(LocalTime.of(12, 0)));
 
-            // 2. 예약/대기 조회 후 개별 쿼리로 대기 순번 구하기 (N+1 방식)
-            long timeSeparately = measureSeparately(targetName);
-            System.out.println("[방법 2] 분리 조회(N+1 개별 카운트) 소요 시간: " + timeSeparately + " ms");
+        // 3. Insert Themes
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "테마1", "설명1",
+                "url1");
+        themeId1 = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, "테마1");
 
-            System.out.println("==================================================\n");
-        }
-    }
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "테마2", "설명2",
+                "url2");
+        themeId2 = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, "테마2");
 
-    private void setupMetaData() {
-        clearData();
-        jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
+        // 4. Create Indexes to simulate optimized database environment
+        jdbcTemplate.update(
+                "CREATE INDEX IF NOT EXISTS idx_waiting_date_time_theme ON reservation_waiting (reservation_date, time_id, theme_id)");
+        jdbcTemplate.update("CREATE INDEX IF NOT EXISTS idx_waiting_name ON reservation_waiting (name)");
 
-        for (int i = 1; i <= 100; i++) {
-            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                    "테마" + i, "설명" + i, "url" + i);
-        }
-        for (int i = 1; i <= 100; i++) {
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)",
-                    LocalTime.of(0, 0).plusMinutes(i));
-        }
-    }
+        // 5. Insert dummy Reservations
+        jdbcTemplate.update("INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "브라운", LocalDate.of(2026, 5, 1), timeId1, themeId1);
+        jdbcTemplate.update("INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "네오", LocalDate.of(2026, 5, 1), timeId2, themeId2);
 
-    private void setupDummyData(int size, String targetName) {
-        Random random = new Random();
-        List<Object[]> reservationArgs = new ArrayList<>();
-        List<Object[]> waitingArgs = new ArrayList<>();
+        // 6. Insert target user ("브라운") waitings
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "브라운", LocalDate.of(2026, 5, 1), timeId1, themeId1);
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "브라운", LocalDate.of(2026, 5, 1), timeId2, themeId2);
 
-        // targetName 의 데이터가 무조건 일부 섞이도록 조치
-        for (int i = 0; i < size; i++) {
-            boolean isTarget = random.nextInt(100) < 5; // 5% 확률로 타겟 유저
-            String name = isTarget ? targetName : "User" + i;
+        // 7. [Batch Insert] Insert 100,000 dummy records across 20,000 different slots (5 waitings per slot)
+        System.out.println("대기 테이블 10만 건 데이터 적재 시작...");
+        int totalRows = 100000;
+        int batchSize = 10000;
 
-            // i 값을 기반으로 유니크한 조합 생성 (theme: 1~100, time: 1~100, date: 순차적 증가)
-            long themeId = (i % 100) + 1;
-            long timeId = ((i / 100) % 100) + 1;
-            LocalDate date = LocalDate.now().plusDays(i / 10000);
-
-            if (random.nextBoolean()) {
-                reservationArgs.add(new Object[]{name, date, timeId, themeId});
-            } else {
-                waitingArgs.add(new Object[]{name, date, timeId, themeId});
-            }
-
-            // 배치 인서트 (메모리 초과 방지)
-            if (reservationArgs.size() >= 10000) {
-                batchInsert("INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                        reservationArgs);
-                reservationArgs.clear();
-            }
-            if (waitingArgs.size() >= 10000) {
-                batchInsert(
-                        "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                        waitingArgs);
-                waitingArgs.clear();
-            }
-        }
-
-        if (!reservationArgs.isEmpty()) {
-            batchInsert("INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                    reservationArgs);
-        }
-        if (!waitingArgs.isEmpty()) {
-            batchInsert(
+        for (int i = 0; i < totalRows; i += batchSize) {
+            final int offset = i;
+            jdbcTemplate.batchUpdate(
                     "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                    waitingArgs);
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int j) throws SQLException {
+                            int index = offset + j;
+                            // Distribute across slots dynamically (vary date offset to create 20,000 slots of 5 waitings)
+                            int slotIndex = index / 5;
+                            LocalDate date = LocalDate.of(2026, 5, 1).plusDays(slotIndex);
+                            Long timeId = (slotIndex % 2 == 0) ? timeId1 : timeId2;
+                            Long themeId = (slotIndex % 2 == 0) ? themeId1 : themeId2;
+
+                            ps.setString(1, "유저" + index);
+                            ps.setDate(2, java.sql.Date.valueOf(date));
+                            ps.setLong(3, timeId);
+                            ps.setLong(4, themeId);
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return batchSize;
+                        }
+                    }
+            );
+        }
+        System.out.println("대기 테이블 10만 건 데이터 적재 완료!");
+    }
+
+    @AfterEach
+    void tearDown() {
+        jdbcTemplate.update("DROP INDEX IF EXISTS idx_waiting_date_time_theme");
+        jdbcTemplate.update("DROP INDEX IF EXISTS idx_waiting_name");
+        jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_waiting");
+        jdbcTemplate.update("DELETE FROM reservation_time");
+        jdbcTemplate.update("DELETE FROM theme");
+    }
+
+    private void simulateDbNetworkDelay() {
+        try {
+            Thread.sleep(1); // 1ms simulated DB network roundtrip
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
-    private void batchInsert(String sql, List<Object[]> args) {
-        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                Object[] row = args.get(i);
-                ps.setString(1, (String) row[0]);
-                ps.setObject(2, row[1]);
-                ps.setLong(3, (Long) row[2]);
-                ps.setLong(4, (Long) row[3]);
-            }
+    @Test
+    void runExperiment() {
+        int iterations = 100;
+        String name = "브라운";
 
-            @Override
-            public int getBatchSize() {
-                return args.size();
-            }
-        });
+        // Warm up
+        for (int i = 0; i < 5; i++) {
+            runOneQueryApproach(name);
+            runThreeQueryApproach(name);
+        }
+
+        // Test 1-Query Window Function
+        long start1 = System.currentTimeMillis();
+        for (int i = 0; i < iterations; i++) {
+            runOneQueryApproach(name);
+        }
+        long end1 = System.currentTimeMillis();
+        long totalOneQueryTime = end1 - start1;
+
+        // Test 3-Query In-Memory
+        long start2 = System.currentTimeMillis();
+        for (int i = 0; i < iterations; i++) {
+            runThreeQueryApproach(name);
+        }
+        long end2 = System.currentTimeMillis();
+        long totalThreeQueryTime = end2 - start2;
+
+        System.out.println("==================================================");
+        System.out.println("10만 건 적재 후 대기 순번 조회 성능 비교 결과 (반복: " + iterations + ")");
+        System.out.println("--------------------------------------------------");
+        System.out.println("1-Query 방식 (SQL Window Function): " + totalOneQueryTime + " ms");
+        System.out.println("  (평균 1회 수행 시간: " + ((double) totalOneQueryTime / iterations) + " ms)");
+        System.out.println("3-Query 방식 (In-Memory 정렬):     " + totalThreeQueryTime + " ms");
+        System.out.println("  (평균 1회 수행 시간: " + ((double) totalThreeQueryTime / iterations) + " ms)");
+        System.out.println("==================================================");
     }
 
-    private void clearData() {
-        jdbcTemplate.execute("DELETE FROM reservation");
-        jdbcTemplate.execute("DELETE FROM reservation_waiting");
-        jdbcTemplate.execute("DELETE FROM theme");
-        jdbcTemplate.execute("DELETE FROM reservation_time");
-    }
-
-    private long measureAllInOne(String name) {
+    private void runOneQueryApproach(String targetName) {
         String sql = """
                 SELECT id, name, reservation_date, time_id, time_start_at,
                        theme_id, theme_name, theme_description, theme_thumbnail_url,
@@ -194,64 +221,70 @@ public class QueryPerformanceTest {
                 ORDER BY reservation_date, time_id, theme_id, status
                 """;
 
-        long start = System.currentTimeMillis();
-        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, name, name);
-        simulateNetworkDelay(1); // 단일 쿼리 1회 실행에 대한 I/O 지연
-        long end = System.currentTimeMillis();
-        return end - start;
+        jdbcTemplate.queryForList(sql, targetName, targetName);
+        simulateDbNetworkDelay(); // 1 query execution delay
     }
 
-    private long measureSeparately(String name) {
-        long start = System.currentTimeMillis();
+    private void runThreeQueryApproach(String targetName) {
+        // Query 1: Reservations
+        String sqlReservations = "SELECT r.id, r.name, r.reservation_date, r.time_id, r.theme_id FROM reservation r WHERE r.name = ?";
+        List<Map<String, Object>> reservations = jdbcTemplate.queryForList(sqlReservations, targetName);
+        simulateDbNetworkDelay();
 
-        // 1. 예약과 대기 목록을 UNION ALL로 한 번에 조회 (단, 순번은 계산하지 않음)
-        String baseSql = """
-                SELECT r.id, r.name, r.reservation_date, r.time_id, t.start_at,
-                       h.id AS theme_id, h.name AS theme_name, 'reserved' AS status
-                FROM reservation r
-                INNER JOIN reservation_time t ON r.time_id = t.id
-                INNER JOIN theme h ON r.theme_id = h.id
-                WHERE r.name = ?
-                UNION ALL
-                SELECT rw.id, rw.name, rw.reservation_date, rw.time_id, t.start_at,
-                       h.id AS theme_id, h.name AS theme_name, 'waiting' AS status
-                FROM reservation_waiting rw
-                INNER JOIN reservation_time t ON rw.time_id = t.id
-                INNER JOIN theme h ON rw.theme_id = h.id
-                WHERE rw.name = ?
-                """;
-        List<Map<String, Object>> records = jdbcTemplate.queryForList(baseSql, name, name);
-        simulateNetworkDelay(1); // UNION ALL 기본 쿼리 1회 실행 지연
+        // Query 2: Waitings
+        String sqlWaitings = "SELECT w.id, w.name, w.reservation_date, w.time_id, w.theme_id FROM reservation_waiting w WHERE w.name = ?";
+        List<Map<String, Object>> waitings = jdbcTemplate.queryForList(sqlWaitings, targetName);
+        simulateDbNetworkDelay();
 
-        // 2. 조회된 전체 목록 중 'waiting' 상태인 건에 대해서만 별도 쿼리로 대기 순번 계산 (N+1 발생 지점)
-        for (Map<String, Object> record : records) {
-            if ("waiting".equals(record.get("status"))) {
-                String countSql = """
-                        SELECT COUNT(*) + 1 
-                        FROM reservation_waiting 
-                        WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND id < ?
-                        """;
-                Long order = jdbcTemplate.queryForObject(countSql, Long.class,
-                        record.get("reservation_date"),
-                        record.get("time_id"),
-                        record.get("theme_id"),
-                        record.get("id"));
-                record.put("waiting_order", order);
-                simulateNetworkDelay(1); // N+1 쿼리마다 각각 지연시간 발생
-            }
+        if (waitings.isEmpty()) {
+            return;
         }
 
-        // 4. 리스트 합치기 및 정렬은 생략 (DB I/O 성능 비교가 주 목적이므로)
+        // Query 3: Batch query for slots
+        StringBuilder sqlAllQueue = new StringBuilder("""
+                SELECT r.id, r.name, r.reservation_date, r.time_id, r.theme_id
+                FROM reservation_waiting r
+                WHERE 
+                """);
+        List<Object> params = new ArrayList<>();
+        for (int i = 0; i < waitings.size(); i++) {
+            if (i > 0) {
+                sqlAllQueue.append(" OR ");
+            }
+            sqlAllQueue.append("(r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?)");
+            Map<String, Object> w = waitings.get(i);
+            params.add(w.get("reservation_date"));
+            params.add(w.get("time_id"));
+            params.add(w.get("theme_id"));
+        }
 
-        long end = System.currentTimeMillis();
-        return end - start;
-    }
+        List<Map<String, Object>> allWaitingsForSlots = jdbcTemplate.queryForList(sqlAllQueue.toString(),
+                params.toArray());
+        simulateDbNetworkDelay();
 
-    private void simulateNetworkDelay(int queryCount) {
-        try {
-            Thread.sleep((long) NETWORK_DELAY_MS * queryCount);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        // In-memory grouping and sorting emulation
+        Map<String, List<Map<String, Object>>> grouped = allWaitingsForSlots.stream()
+                .collect(Collectors.groupingBy(w ->
+                        w.get("reservation_date").toString() + "-" + w.get("time_id").toString() + "-" + w.get(
+                                "theme_id").toString()
+                ));
+
+        for (Map<String, Object> w : waitings) {
+            String key =
+                    w.get("reservation_date").toString() + "-" + w.get("time_id").toString() + "-" + w.get("theme_id")
+                            .toString();
+            List<Map<String, Object>> slotQueue = grouped.getOrDefault(key, new ArrayList<>());
+
+            // Sort by id
+            slotQueue.sort((o1, o2) -> ((Long) o1.get("id")).compareTo((Long) o2.get("id")));
+
+            int rank = -1;
+            for (int index = 0; index < slotQueue.size(); index++) {
+                if (slotQueue.get(index).get("id").equals(w.get("id"))) {
+                    rank = index + 1;
+                    break;
+                }
+            }
         }
     }
 }

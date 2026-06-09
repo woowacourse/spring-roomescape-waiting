@@ -1,11 +1,8 @@
 package roomescape.theme.service;
 
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.BadRequestException;
-import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeErrorCode;
@@ -25,21 +22,9 @@ public class ThemeService {
 
     @Transactional
     public ThemeResult save(ThemeCommand command) {
-        validateThemeNameUniqueness(command.name());
         Theme newTheme = Theme.of(command.name(), command.description(), command.thumbnailUrl());
-
-        try {
-            Theme saved = themeRepository.save(newTheme);
-            return ThemeResult.from(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
-        }
-    }
-
-    private void validateThemeNameUniqueness(String name) {
-        if (themeRepository.existsByName(name)) {
-            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
-        }
+        Theme saved = themeRepository.save(newTheme);
+        return ThemeResult.from(saved);
     }
 
     public List<ThemeResult> findAll() {
@@ -48,22 +33,16 @@ public class ThemeService {
                 .toList();
     }
 
-    public Theme findById(Long id) {
+    public Theme findById(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(
-                        () -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage())
+                        () -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND)
                 );
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        try {
-            int affectedRow = themeRepository.deleteById(id);
-            if (affectedRow == 0) {
-                throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException(ThemeErrorCode.THEME_IN_USE.getMessage());
-        }
+    public void delete(long id) {
+        Theme deleteTarget = findById(id);
+        themeRepository.delete(deleteTarget);
     }
 }

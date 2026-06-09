@@ -10,21 +10,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.time.controller.dto.AvailableTimeResponse;
 import roomescape.time.controller.dto.ReservationTimeResponse;
-import roomescape.time.service.ReservationTimeService;
+import roomescape.time.service.ReservationTimeQueryService;
 
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeController {
 
-    private final ReservationTimeService reservationTimeService;
+    private final ReservationTimeQueryService reservationTimeQueryService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService) {
-        this.reservationTimeService = reservationTimeService;
+    public ReservationTimeController(ReservationTimeQueryService reservationTimeQueryService) {
+        this.reservationTimeQueryService = reservationTimeQueryService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> readAll() {
-        List<ReservationTimeResponse> responses = reservationTimeService.findAll()
+        List<ReservationTimeResponse> responses = reservationTimeQueryService.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .collect(Collectors.toList());
@@ -36,7 +36,7 @@ public class ReservationTimeController {
             @RequestParam("themeId") Long themeId,
             @RequestParam("date") LocalDate date
     ) {
-        List<AvailableTimeResponse> responses = reservationTimeService.findAvailableTimes(themeId, date)
+        List<AvailableTimeResponse> responses = reservationTimeQueryService.queryAvailableTimes(themeId, date)
                 .availableTimeQueryResults()
                 .stream()
                 .map(AvailableTimeResponse::from)

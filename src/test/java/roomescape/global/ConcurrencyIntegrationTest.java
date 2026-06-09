@@ -1,5 +1,6 @@
 package roomescape.global;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.testSupport.RestAssuredTestHelper.createReservation;
 import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
@@ -17,31 +18,36 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
-import roomescape.reservationWaiting.service.ReservationWaitingService;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
+import roomescape.waiting.service.ReservationWaitingService;
+import roomescape.waiting.service.dto.ReservationWaitingCommand;
 
 @SpringWebTest
 class ConcurrencyIntegrationTest {
 
     @Autowired
     private DatabaseHelper databaseHelper;
+
     @Autowired
     private ReservationService reservationService;
+
     @Autowired
     private ReservationWaitingService reservationWaitingService;
+
     @Autowired
     private ReservationTimeService reservationTimeService;
+
     @Autowired
     private ThemeService themeService;
 
@@ -95,19 +101,18 @@ class ConcurrencyIntegrationTest {
     void saveReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationService.save(new ReservationCommand(
-                                "name",
-                                LocalDate.now().plusDays(7),
-                                1L,
-                                1L
-                        )
-                ),
+                        "name" + java.util.UUID.randomUUID().toString(),
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                ), now()),
                 100,
-                DuplicateException.class
+                ConflictException.class
         );
 
         //then
@@ -125,7 +130,7 @@ class ConcurrencyIntegrationTest {
                         new ReservationTimeCommand(LocalTime.of(10, 0))
                 ),
                 100,
-                DuplicateException.class
+                ConflictException.class
         );
 
         //then
@@ -143,7 +148,7 @@ class ConcurrencyIntegrationTest {
                         new ThemeCommand("테마", "설명", "thumbnailUrl")
                 ),
                 100,
-                DuplicateException.class
+                ConflictException.class
         );
 
         //then
@@ -157,13 +162,13 @@ class ConcurrencyIntegrationTest {
     void deleteReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.deleteById(1L, "브라운"),
+                () -> reservationService.deleteByUser(1L, "브라운", now()),
                 100,
                 NotFoundException.class
         );
@@ -178,11 +183,11 @@ class ConcurrencyIntegrationTest {
     @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     void deleteTheme() throws InterruptedException {
         //given
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> themeService.deleteById(1L),
+                () -> themeService.delete(1L),
                 100,
                 NotFoundException.class
         );
@@ -219,7 +224,7 @@ class ConcurrencyIntegrationTest {
         createReservationTime("10:00");
         createReservationTime("11:00");
         createReservationTime("12:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         Long reservationId1 = createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
         Long reservationId2 = createReservation("코니", LocalDate.now().plusDays(7), 2L, 1L);
@@ -236,15 +241,9 @@ class ConcurrencyIntegrationTest {
         //when
         List<Runnable> tasks = List.of(
                 () -> reservationService.update(
-                        new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
-                        reservationId1,
-                        "브라운"
-                ),
+                        new ReservationUpdateCommand(reservationId1, "브라운", LocalDate.now().plusDays(14), 3L), now()),
                 () -> reservationService.update(
-                        new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
-                        reservationId2,
-                        "코니"
-                )
+                        new ReservationUpdateCommand(reservationId2, "코니", LocalDate.now().plusDays(14), 3L), now())
         );
 
         for (Runnable task : tasks) {
@@ -254,7 +253,7 @@ class ConcurrencyIntegrationTest {
                     startLatch.await();
                     task.run();
                     successCount.incrementAndGet();
-                } catch (DuplicateException e) {
+                } catch (ConflictException e) {
                     duplicateCount.incrementAndGet();
                 } catch (Throwable throwable) {
                     unexpectedErrorCount.incrementAndGet();
@@ -280,20 +279,19 @@ class ConcurrencyIntegrationTest {
     void saveReservationWaiting() throws InterruptedException {
         //given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationWaitingService.save(new ReservationWaitingCommand(
-                                "name",
-                                LocalDate.now().plusDays(7),
-                                1L,
-                                1L
-                        )
-                ),
+                        "name",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                ), now()),
                 100,
-                DuplicateException.class
+                BusinessException.class
         );
 
         //then
@@ -307,18 +305,18 @@ class ConcurrencyIntegrationTest {
     void delete() throws InterruptedException {
         // given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
         reservationWaitingService.save(new ReservationWaitingCommand(
                 "포비",
                 LocalDate.now().plusDays(7),
                 1L,
                 1L
-        ));
+        ), now());
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.delete(1L, "포비"),
+                () -> reservationWaitingService.deleteOwnedWaitingById(1L, "포비", now()),
                 100,
                 NotFoundException.class
         );
@@ -328,4 +326,66 @@ class ConcurrencyIntegrationTest {
         assertThat(result.get(1)).isEqualTo(99);
         assertThat(result.get(2)).isEqualTo(0);
     }
+
+    @Test
+    @DisplayName("동일한 사용자가 동일한 시간에 서로 다른 테마를 동시에 예약하면 하나만 성공하고 하나는 예외가 발생한다")
+    void saveSameTimeDifferentThemeReservation() throws InterruptedException {
+        // given
+        createReservationTime("10:00");
+        createTheme("테마1", "설명1", "https://example.com/url1.png");
+        createTheme("테마2", "설명2", "https://example.com/url2.png");
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        CountDownLatch readyLatch = new CountDownLatch(2);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(2);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+        AtomicInteger unexpectedErrorCount = new AtomicInteger();
+
+        List<Runnable> tasks = List.of(
+                () -> reservationService.save(new ReservationCommand(
+                        "브라운",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                ), now()),
+                () -> reservationService.save(new ReservationCommand(
+                        "브라운",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        2L
+                ), now())
+        );
+
+        for (Runnable task : tasks) {
+            executorService.submit(() -> {
+                readyLatch.countDown();
+                try {
+                    startLatch.await();
+                    task.run();
+                    successCount.incrementAndGet();
+                } catch (InvalidBusinessStateException | ConflictException e) {
+                    duplicateCount.incrementAndGet();
+                } catch (Throwable throwable) {
+                    unexpectedErrorCount.incrementAndGet();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+        executorService.shutdown();
+
+        // then
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(duplicateCount.get()).isEqualTo(1);
+        assertThat(unexpectedErrorCount.get()).isEqualTo(0);
+    }
+
+
 }

@@ -1,8 +1,9 @@
 package roomescape.time.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalTime;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,11 +16,11 @@ class ReservationTimeTest {
         LocalTime time = LocalTime.of(10, 0);
 
         // when
-        ReservationTime reservationTime = ReservationTime.of(time);
+        ReservationTime reservationTime = new ReservationTime(time);
 
         // then
-        assertThat(reservationTime.startAt()).isEqualTo(LocalTime.of(10, 0));
-        assertThat(reservationTime.id()).isNull();
+        assertThat(reservationTime.getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(reservationTime.getId()).isNull();
     }
 
     @Test
@@ -30,7 +31,19 @@ class ReservationTimeTest {
         ReservationTime reservationTime = new ReservationTime(1L, now);
 
         // then
-        assertThat(reservationTime.id()).isEqualTo(1L);
-        assertThat(reservationTime.startAt()).isEqualTo(now);
+        assertThat(reservationTime.getId()).isEqualTo(1L);
+        assertThat(reservationTime.getStartAt()).isEqualTo(now);
+    }
+
+    @Test
+    @DisplayName("아이디가 다르면 시간이 같아도 다른 객체로 인식한다")
+    void equals_false_when_id_is_diff() {
+        // given
+        LocalTime testTime = LocalTime.of(10, 0);
+        ReservationTime reservationTime1 = new ReservationTime(1L, testTime);
+        ReservationTime reservationTime2 = new ReservationTime(2L, testTime);
+
+        // when, then
+        Assertions.assertNotEquals(reservationTime1, reservationTime2);
     }
 }

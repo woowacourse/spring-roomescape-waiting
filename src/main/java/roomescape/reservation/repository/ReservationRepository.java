@@ -1,33 +1,73 @@
 package roomescape.reservation.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Repository;
+import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.exception.ReservationErrorCode;
 
-public interface ReservationRepository {
+@Repository
+public class ReservationRepository {
 
-    Reservation save(Reservation reservation);
+    private final ReservationDao reservationDao;
 
-    List<Reservation> findAllByName(String name);
+    public ReservationRepository(ReservationDao reservationDao) {
+        this.reservationDao = reservationDao;
+    }
 
-    Optional<Reservation> findById(Long id);
+    public Reservation save(Reservation reservation) {
+        try {
+            if (reservation.getId() == null) {
+                return reservationDao.save(reservation);
+            }
+            reservationDao.update(reservation);
+            return reservation;
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
 
-    List<ReservationWithStatusResult> findAllByNameWithStatus(String name);
+    public List<Reservation> findAll() {
+        return reservationDao.findAll();
+    }
 
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    public List<Reservation> findAllByName(String name) {
+        return reservationDao.findAllByName(name);
+    }
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    public Optional<Reservation> findById(long id) {
+        return reservationDao.findById(id);
+    }
 
-    List<Reservation> findAll();
+    public Optional<Reservation> findBySlot(ReservationSlot slot) {
+        return reservationDao.findByDateAndTimeIdAndThemeId(
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
+        );
+    }
 
-    List<PopularThemeQueryResult> findPopularThemes(LocalDate from, LocalDate to, int limit);
+    public void delete(Reservation reservation) {
+        reservationDao.delete(reservation);
+    }
 
-    boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id);
+    public boolean hasBookingAtSameTime(String name, ReservationSlot reservationSlot) {
+        return reservationDao.existsByDateAndTimeIdAndName(
+                reservationSlot.date(),
+                reservationSlot.time().getId(),
+                name
+        );
+    }
 
-    void update(Reservation reservation);
-
-    int deleteById(Long id);
+    public boolean isAlreadyBookedByOthers(Long id, String name, ReservationSlot reservationSlot) {
+        return reservationDao.existsByDateAndTimeIdAndNameAndIdNot(
+                reservationSlot.date(),
+                reservationSlot.time().getId(),
+                name,
+                id
+        );
+    }
 }

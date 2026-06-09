@@ -1,36 +1,33 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
-import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
-import java.util.Optional;
+import java.util.Collections;
+import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-
+    private final ReservationTimeService reservationTimeService;
+    private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -44,113 +41,90 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResult save(ReservationCommand command) {
-        try {
-            Reservation saved = reservationRepository.save(
-                    consistNewReservationObject(command)
-            );
-            return ReservationResult.from(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
-        }
-    }
-
-    private Reservation consistNewReservationObject(ReservationCommand command) {
-        ReservationTime time = reservationTimeService.findById(command.timeId());
+    public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
+        ReservationTime time = reservationTimeService.getById(command.timeId());
         Theme theme = themeService.findById(command.themeId());
-        validateReservationUniqueness(command.date(), time, theme);
 
-        Reservation newReservation = Reservation.of(command.name(), command.date(), time, theme);
-        newReservation.validateExpiry();
-        return newReservation;
+        ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
+        validateSlotAvailable(null, command.name(), slot);
+        Reservation newReservation = new Reservation(command.name(), slot, requestTime);
+        Reservation result = reservationRepository.save(newReservation);
+        return ReservationResult.from(result);
     }
 
-    private void validateReservationUniqueness(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.id(), theme.id())) {
-            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
+    @Transactional
+    public void update(ReservationUpdateCommand command, LocalDateTime requestTime) {
+        Reservation reservation = getById(command.id());
+        reservation.validateDeletableByUser(command.name(), requestTime);
+
+        ReservationTime newTime = reservationTimeService.getById(command.timeId());
+        ReservationSlot temporalSlot = reservation.generateTemporalSlot(command.date(), newTime);
+        validateSlotAvailable(command.id(), command.name(), temporalSlot);
+        Reservation updated = reservation.update(command.date(), newTime, command.name(), requestTime);
+        reservationRepository.save(updated);
+    }
+
+    private void validateSlotAvailable(Long id, String name, ReservationSlot slot) {
+        boolean isBooked = false;
+        if (id == null) {
+            isBooked = reservationRepository.hasBookingAtSameTime(name, slot);
+        }
+
+        boolean isBookedByOthers = false;
+        if (id != null) {
+            isBookedByOthers = reservationRepository.isAlreadyBookedByOthers(id, name, slot);
+        }
+
+        boolean isAlreadyWaiting = reservationWaitingRepository.hasWaitingAtSameTime(name, slot);
+
+        if (isBooked || isBookedByOthers || isAlreadyWaiting) {
+            throw new InvalidBusinessStateException(ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
     }
 
     @Transactional
-    public void update(ReservationUpdateCommand command, Long id, String name) {
-        Reservation updated = consistUpdatedReservation(command, id, name);
-        try {
-            reservationRepository.update(updated);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
-        }
-    }
-
-    private Reservation consistUpdatedReservation(ReservationUpdateCommand command, Long id, String name) {
-        Reservation reservation = findById(id);
-        reservation.validateOwner(name);
-        reservation.validateExpiry();
-
-        ReservationTime newTime = null;
-        if (command.timeId() != null) {
-            newTime = reservationTimeService.findById(command.timeId());
-        }
-
-        Reservation updated = reservation.update(command.date(), newTime);
-        updated.validateExpiry();
-        validateUpdateUniqueness(updated.date(), updated.time(), updated.theme(), id);
-        return updated;
-    }
-
-    private void validateUpdateUniqueness(LocalDate date, ReservationTime time, Theme theme, Long excludeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(date, time.id(), theme.id(), excludeId)) {
-            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
-        }
-    }
-
-    public List<ReservationWithStatusResult> findAllByName(String name) {
-        return reservationRepository.findAllByNameWithStatus(name);
-    }
-
-    public List<ReservationResult> findAll() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResult::from)
-                .toList();
-    }
-
-    public PopularThemesResult findPopularThemes(int period, int limit) {
-        int oneDayDifference = 1;
-        LocalDate to = LocalDate.now().minusDays(oneDayDifference);
-        LocalDate from = to.minusDays(period).plusDays(oneDayDifference);
-        return new PopularThemesResult(
-                reservationRepository.findPopularThemes(from, to, limit)
-        );
+    public void deleteByUser(long id, String name, LocalDateTime requestTime) {
+        Reservation reservation = getById(id);
+        reservation.validateDeletableByUser(name, requestTime);
+        processDeletion(reservation, requestTime);
     }
 
     @Transactional
-    public void deleteById(Long id, String name) {
-        Reservation reservation = findById(id);
-        if (name != null) {
-            reservation.validateOwner(name);
-        }
-        reservation.validateExpiry();
+    public void deleteByAdmin(long id, LocalDateTime requestTime) {
+        Reservation reservation = getById(id);
+        reservation.validateDeletableByAdmin(requestTime);
+        processDeletion(reservation, requestTime);
+    }
 
-        int affectedRow = reservationRepository.deleteById(id);
-        if (affectedRow == 0) {
-            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
-        }
-
-        Optional<ReservationWaiting> firstWaitingOpt = reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
-                reservation.date(),
-                reservation.time().id(),
-                reservation.theme().id()
+    private void processDeletion(Reservation reservation, LocalDateTime requestTime) {
+        List<ReservationWaiting> waitings = reservationWaitingRepository.queryAllBySlotForUpdate(
+                new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
         );
 
-        if (firstWaitingOpt.isPresent()) {
-            ReservationWaiting waiting = firstWaitingOpt.get();
-            Reservation newReservation = Reservation.of(waiting.name(), waiting.date(), waiting.time(), waiting.theme());
-            reservationRepository.save(newReservation);
-            reservationWaitingRepository.deleteById(waiting.id());
+        reservationRepository.delete(reservation);
+        promoteNextWaiting(waitings, requestTime);
+    }
+
+    public Reservation getById(long id) {
+        return reservationRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND)
+        );
+    }
+
+    private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
+        List<ReservationWaiting> waitings = new java.util.ArrayList<>(lockedWaitings);
+        java.util.Collections.sort(waitings);
+        for (ReservationWaiting waiting : waitings) {
+            if (!reservationRepository.hasBookingAtSameTime(waiting.getName(), waiting.getSlot())) {
+                createReservationFromWaiting(waiting, requestTime);
+                return;
+            }
         }
     }
 
-    public Reservation findById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage()));
+    private void createReservationFromWaiting(ReservationWaiting waiting, LocalDateTime requestTime) {
+        reservationWaitingRepository.delete(waiting);
+        Reservation newReservation = waiting.toReservation(requestTime);
+        reservationRepository.save(newReservation);
     }
 }

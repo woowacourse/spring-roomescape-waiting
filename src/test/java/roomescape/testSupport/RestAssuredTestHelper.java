@@ -5,9 +5,9 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.theme.controller.dto.ThemeRequest;
 import roomescape.time.controller.dto.ReservationTimeRequest;
+import roomescape.waiting.controller.dto.ReservationWaitingRequest;
 
 public class RestAssuredTestHelper {
 

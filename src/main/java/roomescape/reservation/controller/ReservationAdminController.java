@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import java.time.LocalDateTime;
 import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -17,14 +19,17 @@ import roomescape.reservation.service.ReservationService;
 public class ReservationAdminController {
 
     private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ReservationAdminController(ReservationService reservationService) {
+    public ReservationAdminController(ReservationService reservationService,
+                                      ReservationQueryService reservationQueryService) {
         this.reservationService = reservationService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations() {
-        List<ReservationResponse> responses = reservationService.findAll()
+        List<ReservationResponse> responses = reservationQueryService.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -35,6 +40,6 @@ public class ReservationAdminController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        reservationService.deleteById(id, null);
+        reservationService.deleteByAdmin(id, LocalDateTime.now());
     }
 }

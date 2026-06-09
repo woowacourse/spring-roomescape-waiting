@@ -1,25 +1,13 @@
 package roomescape.reservation.controller.dto;
 
-import roomescape.global.exception.InvalidRequestFormatException;
-
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.global.exception.BadRequestException;
 
-import roomescape.reservation.service.dto.ReservationUpdateCommand;
+public record ReservationUpdateRequest(
+        @NotNull(message = "새로운 예약 날짜를 입력해주세요.")
 
-public record ReservationUpdateRequest(LocalDate date, Long timeId) {
-
-    public ReservationUpdateRequest {
-        if (date == null && timeId == null) {
-            throw new InvalidRequestFormatException(ReservationErrorCode.INVALID_FORMAT.getMessage());
-        }
-    }
-
-    public ReservationUpdateCommand toCommand() {
-        return new ReservationUpdateCommand(
-                date,
-                timeId
-        );
-    }
+        LocalDate date,
+        @NotNull(message = "새로운 예약 시간을 선택해주세요.")
+        Long timeId
+) {
 }

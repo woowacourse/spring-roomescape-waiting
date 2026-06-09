@@ -8,6 +8,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.global.exception.UnauthorizedException;
 import roomescape.reservation.exception.ReservationErrorCode;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
@@ -24,10 +27,11 @@ public class AuthInterceptor implements HandlerInterceptor {
         String name = request.getHeader("Authorization");
 
         if (name == null || name.isBlank()) {
-            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER.getMessage());
+            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER);
         }
 
-        request.setAttribute("loginName", name);
+        String decodedName = URLDecoder.decode(name, StandardCharsets.UTF_8);
+        request.setAttribute("loginName", decodedName);
 
         return true;
     }

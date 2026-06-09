@@ -2,17 +2,43 @@ package roomescape.theme.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Repository;
+import roomescape.global.exception.ConflictException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.exception.ThemeErrorCode;
 
-public interface ThemeRepository {
+@Repository
+public class ThemeRepository {
 
-    Theme save(Theme theme);
+    private final ThemeDao themeDao;
 
-    Optional<Theme> findById(Long id);
+    public ThemeRepository(ThemeDao themeDao) {
+        this.themeDao = themeDao;
+    }
 
-    boolean existsByName(String name);
+    public Theme save(Theme theme) {
+        try {
+            return themeDao.save(theme);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME);
+        }
+    }
 
-    List<Theme> findAll();
+    public Optional<Theme> findById(long id) {
+        return themeDao.findById(id);
+    }
 
-    int deleteById(Long id);
+    public List<Theme> findAll() {
+        return themeDao.findAll();
+    }
+
+    public void delete(Theme theme) {
+        try {
+            themeDao.delete(theme);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(ThemeErrorCode.THEME_IN_USE);
+        }
+    }
 }

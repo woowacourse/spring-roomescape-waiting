@@ -31,13 +31,6 @@ public class DatabaseHelper {
         );
     }
 
-    public void insertReservationWaitingDirectly(String name, LocalDate date, Long timeId, Long themeId) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, java.sql.Date.valueOf(date), timeId, themeId
-        );
-    }
-
     public Long findFirstReservationId() {
         return jdbcTemplate.queryForObject("SELECT MIN(id) FROM reservation", Long.class);
     }

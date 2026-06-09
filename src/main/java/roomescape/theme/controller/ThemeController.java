@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.global.exception.InvalidRequestValueException;
-import roomescape.reservation.service.ReservationService;
+import roomescape.global.exception.BadRequestException;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.theme.controller.dto.ThemeResponse;
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -17,11 +18,11 @@ import roomescape.theme.service.ThemeService;
 public class ThemeController {
 
     private final ThemeService themeService;
-    private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ThemeController(ThemeService themeService, ReservationService reservationService) {
+    public ThemeController(ThemeService themeService, ReservationQueryService reservationQueryService) {
         this.themeService = themeService;
-        this.reservationService = reservationService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping
@@ -38,7 +39,7 @@ public class ThemeController {
             @RequestParam("period") int period, @RequestParam("limit") int limit
     ) {
         validatePeriodAndLimit(period, limit);
-        List<ThemeResponse> responses = reservationService.findPopularThemes(period, limit).popularThemes()
+        List<ThemeResponse> responses = reservationQueryService.queryPopularThemes(period, limit).popularThemes()
                 .stream()
                 .map(ThemeResponse::from)
                 .collect(Collectors.toList());
@@ -48,7 +49,7 @@ public class ThemeController {
 
     private static void validatePeriodAndLimit(int period, int limit) {
         if (period < 1 || limit < 1) {
-            throw new InvalidRequestValueException();
+            throw new BadRequestException(ThemeErrorCode.INVALID_PERIOD_OR_LIMIT);
         }
     }
 }

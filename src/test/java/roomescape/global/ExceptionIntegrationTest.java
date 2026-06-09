@@ -30,7 +30,7 @@ public class ExceptionIntegrationTest {
 
     private void setupDefaultTimeAndTheme() {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
     }
 
     @Test
@@ -63,6 +63,9 @@ public class ExceptionIntegrationTest {
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 
+        Map<String, Object> duplicateBody = new HashMap<>(body);
+        duplicateBody.put("name", "pobi");
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -72,7 +75,7 @@ public class ExceptionIntegrationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(duplicateBody)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
@@ -104,12 +107,13 @@ public class ExceptionIntegrationTest {
     @DisplayName("예약 수정 시, 원본 예약이 이미 지난 예약이면 예외가 발생한다.")
     void updateReservation_expired_original() {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         databaseHelper.insertReservationDirectly("brown", LocalDate.now().minusDays(7), 1L, 1L);
         Long id = databaseHelper.findFirstReservationId();
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().plusDays(14).toString());
+        body.put("timeId", 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
@@ -124,12 +128,13 @@ public class ExceptionIntegrationTest {
     @DisplayName("예약 수정 시, 변경하려는 날짜가 이미 지난 날짜이면 예외가 발생한다.")
     void updateReservation_expired_target() {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         databaseHelper.insertReservationDirectly("brown", LocalDate.now().plusDays(7), 1L, 1L);
         Long id = databaseHelper.findFirstReservationId();
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().minusDays(1).toString());
+        body.put("timeId", 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
@@ -144,7 +149,7 @@ public class ExceptionIntegrationTest {
     @DisplayName("예약 삭제 시, 이미 지난 예약이면 예외가 발생한다.")
     void deleteReservation_expired() {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         databaseHelper.insertReservationDirectly("brown", LocalDate.now().minusDays(7), 1L, 1L);
         Long id = databaseHelper.findFirstReservationId();
 
@@ -164,7 +169,8 @@ public class ExceptionIntegrationTest {
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().plusDays(8).toString());
-
+        body.put("timeId", 1L);
+        
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
                 .contentType(ContentType.JSON)
@@ -178,7 +184,7 @@ public class ExceptionIntegrationTest {
     @DisplayName("예약 대기 신청 시, 이미 지난 날짜이면 예외가 발생한다.")
     void makeReservationWaiting_expired() {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         databaseHelper.insertReservationDirectly("brown", LocalDate.now().minusDays(1), 1L, 1L);
 
         Map<String, Object> body = new HashMap<>();

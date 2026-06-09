@@ -127,7 +127,7 @@ $("#submitUpdate").addEventListener("click", async () => {
   try {
     await api(`/reservations/${reservationId}`, {
       method: "PATCH",
-      headers: { Authorization: authName },
+      headers: { Authorization: encodeURIComponent(authName) },
       body: JSON.stringify({
         date,
         timeId: selectedTimeId

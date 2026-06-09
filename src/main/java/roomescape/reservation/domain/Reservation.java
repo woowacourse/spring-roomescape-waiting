@@ -2,74 +2,119 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.global.exception.ForbiddenException;
-import roomescape.global.exception.InvalidRequestValueException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.TimeErrorCode;
 
-public record Reservation(
-        Long id,
-        String name,
-        LocalDate date,
-        ReservationTime time,
-        Theme theme
-) {
-    public static Reservation of(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, name, date, time, theme);
+public class Reservation {
+    private final Long id;
+    private final String name;
+    private final ReservationSlot slot;
+    private final LocalDateTime updatedAt;
+
+    public Reservation(Long id, String name, ReservationSlot slot, LocalDateTime updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.slot = slot;
+        this.updatedAt = updatedAt;
+        validateExpiry(updatedAt);
     }
 
-    public Reservation withId(Long id) {
-        return new Reservation(id, this.name, this.date, this.time, this.theme);
+    public Reservation(String name, ReservationSlot reservationSlot, LocalDateTime requestTime) {
+        this(null, name, reservationSlot, requestTime);
     }
 
-    public Reservation update(LocalDate newDate, ReservationTime newTime) {
-        LocalDate targetDate = getNewDateValue(newDate);
-        ReservationTime targetTime = getNewReservationTimeValue(newTime);
+    public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
+        validateOwner(userName);
+        validateExpiry(requestTime);
 
-        return new Reservation(
+        ReservationSlot targetSlot = generateTemporalSlot(newDate, newTime);
+
+        Reservation updated = new Reservation(
                 this.id,
                 this.name,
-                targetDate,
-                targetTime,
-                this.theme
+                targetSlot,
+                requestTime
         );
+        updated.validateExpiry(requestTime);
+        return updated;
     }
 
-    private ReservationTime getNewReservationTimeValue(ReservationTime newTime) {
-        if (newTime == null) {
-            return this.time;
-        }
-        return newTime;
+    public ReservationSlot generateTemporalSlot(LocalDate newDate, ReservationTime newTime) {
+        return new ReservationSlot(newDate, newTime, this.slot.theme());
     }
 
-    private LocalDate getNewDateValue(LocalDate newDate) {
-        if (newDate == null) {
-            return this.date;
-        }
-        return newDate;
+    public void validateDeletableByUser(String name, LocalDateTime requestTime) {
+        validateOwner(name);
+        validateExpiry(requestTime);
     }
 
-    public void validateOwner(String name) {
+    public void validateDeletableByAdmin(LocalDateTime requestTime) {
+        validateExpiry(requestTime);
+    }
+
+    private void validateOwner(String name) {
         if (!this.name.equals(name)) {
-            throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
+            throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL);
         }
     }
 
-    public void validateExpiry() {
-        LocalDate today = LocalDate.now();
-        if (this.date.isBefore(today)) {
-            throw new InvalidRequestValueException(ReservationErrorCode.INVALID_DATE.getMessage());
-        }
-        LocalDateTime current = LocalDateTime.now();
-        LocalDateTime targetTime = LocalDateTime.of(this.date, this.time.startAt());
-        if (current.isAfter(targetTime)) {
-            throw new InvalidRequestValueException(TimeErrorCode.INVALID_START_AT.getMessage());
-        }
+    private void validateExpiry(LocalDateTime requestTime) {
+        this.slot.validateNotExpired(requestTime);
     }
 
-    public boolean hasSameName(String name) {
-        return this.name.equals(name);
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ReservationSlot getSlot() {
+        return slot;
+    }
+
+    public LocalDate getDate() {
+        return slot.date();
+    }
+
+    public ReservationTime getTime() {
+        return slot.time();
+    }
+
+    public Theme getTheme() {
+        return slot.theme();
+    }
+
+    public Long getTimeId() {
+        return slot.time().getId();
+    }
+
+    public Long getThemeId() {
+        return slot.theme().getId();
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

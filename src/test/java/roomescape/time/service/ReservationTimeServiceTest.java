@@ -1,72 +1,136 @@
 package roomescape.time.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 
 import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
+import roomescape.time.service.dto.ReservationTimeResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
 
     @Mock
-    ThemeRepository themeRepository;
-
-    @Mock
-    ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @InjectMocks
-    ReservationTimeService reservationTimeService;
+    private ReservationTimeService reservationTimeService;
 
     @Test
-    @DisplayName("예약 시간 생성 시, 기존에 이미 동일한 시간이 있으면 예외가 발생한다.")
-    void registerReservationTime_duplicate() {
-        //given
-        given(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0)))
-                .willReturn(true);
+    @DisplayName("save returns the created reservation time.")
+    void save_success() {
+        // given
+        ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
+        ReservationTime savedTime = new ReservationTime(1L, LocalTime.of(10, 0));
 
-        //when & then
-        assertThatThrownBy(() -> reservationTimeService.save(
-                new ReservationTimeCommand(LocalTime.of(10, 0))
-        )).isInstanceOf(DuplicateException.class)
+        given(reservationTimeRepository.save(any(ReservationTime.class))).willReturn(savedTime);
+
+        // when
+        ReservationTimeResult result = reservationTimeService.save(command);
+
+        // then
+        assertThat(result).isEqualTo(new ReservationTimeResult(1L, LocalTime.of(10, 0)));
+        then(reservationTimeRepository).should().save(any(ReservationTime.class));
+    }
+
+
+    @Test
+    @DisplayName("save throws ConflictException when the database rejects a duplicate time.")
+    void save_databaseDuplicate_throwsConflictException() {
+        // given
+        ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
+
+        given(reservationTimeRepository.save(any(ReservationTime.class)))
+                .willThrow(new ConflictException(TimeErrorCode.DUPLICATE_TIME));
+
+        // when & then
+        assertThatThrownBy(() -> reservationTimeService.save(command))
+                .isInstanceOf(ConflictException.class)
                 .hasMessage(TimeErrorCode.DUPLICATE_TIME.getMessage());
     }
 
     @Test
-    @DisplayName("id에 해당하는 테마가 없으면 예외가 발생한다.")
-    void deleteById_nonExistentTime_throwsNotFoundException() {
-        //given
-        given(reservationTimeRepository.deleteById(1L))
-                .willReturn(0);
+    @DisplayName("getById returns the reservation time when it exists.")
+    void getById_success() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
 
-        //when & then
+        // when
+        ReservationTime result = reservationTimeService.getById(1L);
+
+        // then
+        assertThat(result).isEqualTo(time);
+        then(reservationTimeRepository).should().findById(1L);
+    }
+
+    @Test
+    @DisplayName("getById throws NotFoundException when the time does not exist.")
+    void getById_notFound_throwsNotFoundException() {
+        // given
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> reservationTimeService.getById(1L))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(TimeErrorCode.TIME_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("deleteById deletes the reservation time when it exists.")
+    void deleteById_success() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+
+        // when
+        reservationTimeService.deleteById(1L);
+
+        // then
+        then(reservationTimeRepository).should().findById(1L);
+        then(reservationTimeRepository).should().delete(time);
+    }
+
+    @Test
+    @DisplayName("deleteById throws NotFoundException when the time does not exist.")
+    void deleteById_notFound_throwsNotFoundException() {
+        // given
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
+
+        // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(TimeErrorCode.TIME_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("예약 시간 삭제시, 예약 시간이 사용 중이면 예외가 발생한다.")
-    void deleteById_timeInUse_throwsDeleteFailedException() {
-        //given
-        given(reservationTimeRepository.deleteById(1L))
-                .willThrow(new DataIntegrityViolationException("foreign key"));
+    @DisplayName("deleteById throws ConflictException when the time is in use.")
+    void deleteById_timeInUse_throwsConflictException() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        willThrow(new ConflictException(TimeErrorCode.TIME_IN_USE))
+                .given(reservationTimeRepository).delete(time);
 
-        //when & then
+        // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
-                .isInstanceOf(roomescape.global.exception.DeleteFailedException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessage(TimeErrorCode.TIME_IN_USE.getMessage());
     }
 }

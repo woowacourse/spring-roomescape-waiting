@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS reservation;
+
 DROP TABLE IF EXISTS reservation_waiting;
+DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
 
@@ -21,12 +23,14 @@ CREATE TABLE reservation (
     id                 BIGINT          NOT NULL AUTO_INCREMENT,
     name               VARCHAR(255)    NOT NULL,
     reservation_date   DATE            NOT NULL,
-    time_id BIGINT                     NOT NULL,
-    theme_id BIGINT                    NOT NULL,
+    time_id            BIGINT          NOT NULL,
+    theme_id           BIGINT          NOT NULL,
+    updated_at         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    UNIQUE (reservation_date, time_id, theme_id)
+    UNIQUE (reservation_date, time_id, theme_id),
+    UNIQUE (name, reservation_date, time_id)
 );
 
 CREATE TABLE reservation_waiting (
@@ -35,6 +39,7 @@ CREATE TABLE reservation_waiting (
     reservation_date   DATE         NOT NULL,
     time_id            BIGINT       NOT NULL,
     theme_id           BIGINT       NOT NULL,
+    updated_at         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),

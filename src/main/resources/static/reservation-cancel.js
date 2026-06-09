@@ -61,7 +61,7 @@ $("#cancelForm").addEventListener("submit", async (event) => {
 
     await api(endpoint, {
       method: "DELETE",
-      headers: { Authorization: authName }
+      headers: { Authorization: encodeURIComponent(authName) }
     });
     setMessage("정상적으로 취소되었습니다. 잠시 후 사용자 페이지로 이동합니다.");
     setTimeout(() => {

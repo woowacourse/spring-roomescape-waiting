@@ -1,23 +1,50 @@
 package roomescape.time.repository;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Repository;
+import roomescape.global.exception.ConflictException;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
-public interface ReservationTimeRepository {
+@Repository
+public class ReservationTimeRepository {
 
-    ReservationTime save(ReservationTime reservationTime);
+    private final ReservationTimeDao reservationTimeDao;
 
-    Optional<ReservationTime> findById(Long id);
+    public ReservationTimeRepository(ReservationTimeDao reservationTimeDao) {
+        this.reservationTimeDao = reservationTimeDao;
+    }
 
-    boolean existsByStartAt(LocalTime localTime);
+    public ReservationTime save(ReservationTime reservationTime) {
+        try {
+            return reservationTimeDao.save(reservationTime);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME);
+        }
+    }
 
-    List<ReservationTime> findAll();
+    public Optional<ReservationTime> findById(long id) {
+        return reservationTimeDao.findById(id);
+    }
 
-    List<AvailableTimeQueryResult> findAvailableTimes(Long themeId, LocalDate date);
+    public List<ReservationTime> findAll() {
+        return reservationTimeDao.findAll();
+    }
 
-    int deleteById(Long id);
+    public List<AvailableTimeQueryResult> queryAvailableTimes(long themeId, LocalDate date) {
+        return reservationTimeDao.queryAvailableTimes(themeId, date);
+    }
+
+    public void delete(ReservationTime time) {
+        try {
+            reservationTimeDao.delete(time);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(TimeErrorCode.TIME_IN_USE);
+        }
+    }
 }

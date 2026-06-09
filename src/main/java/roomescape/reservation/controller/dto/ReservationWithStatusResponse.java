@@ -1,7 +1,7 @@
 package roomescape.reservation.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -15,14 +15,14 @@ public record ReservationWithStatusResponse(
         Long waitingOrder
 ) {
 
-    public static ReservationWithStatusResponse from (ReservationWithStatusResult result) {
+    public static ReservationWithStatusResponse from(ReservationWithStatusResult result) {
         return new ReservationWithStatusResponse(
                 result.id(),
                 result.name(),
                 result.date(),
                 result.time(),
                 result.theme(),
-                result.status(),
+                result.status().name().toLowerCase(),
                 result.waitingOrder()
         );
     }

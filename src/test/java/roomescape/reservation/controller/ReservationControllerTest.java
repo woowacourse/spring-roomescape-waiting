@@ -24,10 +24,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.global.config.WebMvcConfig;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
-import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -45,18 +47,29 @@ class ReservationControllerTest {
     private ReservationService reservationService;
 
     @MockitoBean
+    private ReservationQueryService reservationQueryService;
+
+    @MockitoBean
     private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("예약을 성공적으로 생성한다.")
     void create_Success() throws Exception {
         // given
-        ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
+        ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme);
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1),
+                        time,
+                        theme
+                ),
+                java.time.LocalDateTime.now()
+        );
 
-        given(reservationService.save(any())).willReturn(ReservationResult.from(reservation));
+        given(reservationService.save(any(), any())).willReturn(ReservationResult.from(reservation));
 
         // when & then
         mockMvc.perform(post("/reservations")
@@ -69,8 +82,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 생성 시 필수 필드가 누락되면 400 에러를 반환한다.")
-    void create_MissingFields_BadRequest() throws Exception {
+    @DisplayName("예약 생성 시 이름이 누락되면 400 에러를 반환한다.")
+    void create_EmptyName_BadRequest() throws Exception {
         // given
         String requestBody = "{\"name\":\"\", \"date\":\"2026-05-05\", \"timeId\":1, \"themeId\":1}";
 
@@ -79,7 +92,49 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
+                .andExpect(jsonPath("$.message").value("예약자 이름을 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 날짜가 누락되면 400 에러를 반환한다.")
+    void create_NullDate_BadRequest() throws Exception {
+        // given
+        String requestBody = "{\"name\":\"브라운\", \"date\":null, \"timeId\":1, \"themeId\":1}";
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("예약 날짜를 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 시간이 누락되면 400 에러를 반환한다.")
+    void create_NullTimeId_BadRequest() throws Exception {
+        // given
+        String requestBody = "{\"name\":\"브라운\", \"date\":\"2026-05-05\", \"timeId\":null, \"themeId\":1}";
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("예약 시간을 선택해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 테마가 누락되면 400 에러를 반환한다.")
+    void create_NullThemeId_BadRequest() throws Exception {
+        // given
+        String requestBody = "{\"name\":\"브라운\", \"date\":\"2026-05-05\", \"timeId\":1, \"themeId\":null}";
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("테마를 선택해주세요."));
     }
 
     @Test
@@ -89,10 +144,11 @@ class ReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         List<ReservationWithStatusResult> results = List.of(
-                new ReservationWithStatusResult(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme, "reserved", 0L)
+                new ReservationWithStatusResult(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme,
+                        roomescape.reservation.domain.ReservationStatus.RESERVED, 0L)
         );
 
-        given(reservationService.findAllByName(anyString())).willReturn(results);
+        given(reservationQueryService.findAllByName(anyString())).willReturn(results);
 
         // when & then
         mockMvc.perform(get("/reservations")
@@ -109,6 +165,8 @@ class ReservationControllerTest {
         // when & then
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("필수 요청 파라미터가 누락되었습니다."));
+                .andExpect(jsonPath("$.message").value("필수 요청 파라미터가 누락되었습니다. 입력 값을 다시 확인해 주세요."));
     }
 }
+
+

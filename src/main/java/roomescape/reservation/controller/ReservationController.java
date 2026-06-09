@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
 
@@ -20,24 +23,26 @@ import roomescape.reservation.service.dto.ReservationResult;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 ReservationQueryService reservationQueryService) {
         this.reservationService = reservationService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest requestDto) {
-        ReservationResult reservation = reservationService.save(requestDto.toCommand());
+    public ResponseEntity<ReservationResponse> create(@RequestBody @Valid ReservationRequest requestDto) {
+        ReservationResult reservation = reservationService.save(requestDto.toCommand(), LocalDateTime.now());
         ReservationResponse response = ReservationResponse.from(reservation);
         return ResponseEntity
                 .created(URI.create("/reservations/" + response.id()))
                 .body(response);
     }
 
-
     @GetMapping
     public ResponseEntity<List<ReservationWithStatusResponse>> readAllByName(@RequestParam String name) {
-        List<ReservationWithStatusResponse> responses = reservationService.findAllByName(name)
+        List<ReservationWithStatusResponse> responses = reservationQueryService.findAllByName(name)
                 .stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();

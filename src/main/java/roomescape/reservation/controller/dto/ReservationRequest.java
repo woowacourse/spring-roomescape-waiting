@@ -1,23 +1,23 @@
 package roomescape.reservation.controller.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.global.exception.InvalidRequestFormatException;
-import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.service.dto.ReservationCommand;
 
 public record ReservationRequest(
+        @NotBlank(message = "예약자 이름을 입력해주세요.")
         String name,
+
+        @NotNull(message = "예약 날짜를 입력해주세요.")
         LocalDate date,
+
+        @NotNull(message = "예약 시간을 선택해주세요.")
         Long timeId,
+
+        @NotNull(message = "테마를 선택해주세요.")
         Long themeId
 ) {
-    public ReservationRequest {
-        if (name == null || name.isBlank() ||
-                date == null || timeId == null || themeId == null) {
-            throw new InvalidRequestFormatException(ReservationErrorCode.INVALID_FORMAT.getMessage());
-        }
-    }
-
     public ReservationCommand toCommand() {
         return new ReservationCommand(
                 name,
