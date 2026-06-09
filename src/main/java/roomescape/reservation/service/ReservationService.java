@@ -17,6 +17,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
+import java.util.Collections;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.repository.ReservationWaitingRepository;
 
@@ -111,6 +112,7 @@ public class ReservationService {
     }
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
+        Collections.sort(lockedWaitings);
         for (ReservationWaiting waiting : lockedWaitings) {
             if (!reservationRepository.hasBookingAtSameTime(waiting.getName(), waiting.getSlot())) {
                 createReservationFromWaiting(waiting, requestTime);
