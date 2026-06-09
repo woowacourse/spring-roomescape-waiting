@@ -190,16 +190,13 @@ public class WaitingJdbcDao implements WaitingDao {
 
     @Override
     public Optional<Waiting> findFirstForUpdate(LocalDate date, Long timeId, Long themeId, Long storeId) {
-        String sql = """
-                SELECT w.id
-                FROM waitings w
-                WHERE w.deleted_at = :sentinel
+        String sql = BASE_SELECT + """
                 AND w.date = :date
                 AND w.time_id = :timeId
                 AND w.theme_id = :themeId
                 AND w.store_id = :storeId
                 ORDER BY w.id LIMIT 1
-                FOR UPDATE
+                FOR UPDATE OF w
                 """;
         SqlParameterSource params = new MapSqlParameterSource("date", date)
                 .addValue("timeId", timeId)
@@ -207,10 +204,9 @@ public class WaitingJdbcDao implements WaitingDao {
                 .addValue("storeId", storeId)
                 .addValue("sentinel", SENTINEL);
 
-        return jdbcTemplate.queryForList(sql, params, Long.class)
+        return jdbcTemplate.query(sql, params, ROW_MAPPER)
                 .stream()
-                .findFirst()
-                .flatMap(this::findById);
+                .findFirst();
     }
 
     @Override
