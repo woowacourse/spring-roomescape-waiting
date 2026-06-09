@@ -135,4 +135,27 @@ class ReservationServiceTest {
 
         assertThat(updated.status()).isEqualTo(ReservationStatus.WAITING);
     }
+
+    @Test
+    void 예약_삭제_시_대기_1순위_예약_승격() {
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long firstId = reservationService.save(new ReservationRequest("첫번째", date, timeId, themeId)).id();
+        Long secondId = reservationService.save(new ReservationRequest("두번째", date, timeId, themeId)).id();
+        Long thirdId = reservationService.save(new ReservationRequest("세번째", date, timeId, themeId)).id();
+
+        reservationService.delete(firstId);
+
+        ReservationResponse second = findReservation(secondId);
+        ReservationResponse third = findReservation(thirdId);
+
+        assertThat(second.status()).isEqualTo(ReservationStatus.CONFIRMED);
+        assertThat(third.status()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    private ReservationResponse findReservation(Long id) {
+        return reservationService.findAll().stream()
+                .filter(it -> it.id().equals(id))
+                .findFirst()
+                .orElseThrow();
+    }
 }
