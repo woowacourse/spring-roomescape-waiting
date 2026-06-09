@@ -57,11 +57,11 @@ public class ThemeService {
     @Transactional
     public void delete(long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, themeId);
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "해당 테마를 찾을 수 없습니다: " + themeId);
         }
 
         if (slotRepository.existsByThemeId(themeId)) {
-            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, themeId);
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, "해당 테마는 사용 중이라 삭제할 수 없습니다: " + themeId);
         }
 
         themeRepository.deleteById(themeId);

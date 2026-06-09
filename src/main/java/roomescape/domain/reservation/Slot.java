@@ -35,7 +35,7 @@ public class Slot {
 
     public void validateNotPast(LocalDateTime now) {
         if (isPast(now)) {
-            throw new RoomEscapeException(DomainErrorCode.PAST_DATE, date.getDate(), time.getStartAt());
+            throw new RoomEscapeException(DomainErrorCode.PAST_DATE, "지나간 날짜/시간에는 예약할 수 없습니다: " + date.getDate() + " " + time.getStartAt());
         }
     }
 

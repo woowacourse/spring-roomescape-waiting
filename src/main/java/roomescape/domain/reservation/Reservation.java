@@ -62,7 +62,7 @@ public class Reservation {
 
     public void validateOwner(String ownerName) {
         if (!name.isSame(new ReservationName(ownerName))) {
-            throw new RoomEscapeException(DomainErrorCode.FORBIDDEN, ownerName);
+            throw new RoomEscapeException(DomainErrorCode.FORBIDDEN, "본인의 예약만 취소할 수 있습니다.");
         }
     }
 

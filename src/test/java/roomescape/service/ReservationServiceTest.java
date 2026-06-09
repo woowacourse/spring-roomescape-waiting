@@ -90,7 +90,7 @@ class ReservationServiceTest {
 
     @Test
     void 지나간_날짜로_예약_시_예외가_발생해야_한다() {
-        given(assembler.from(any(ReservationCreateCommand.class))).willThrow(new RoomEscapeException(DomainErrorCode.PAST_DATE));
+        given(assembler.from(any(ReservationCreateCommand.class))).willThrow(new RoomEscapeException(DomainErrorCode.PAST_DATE, "test"));
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
         Assertions.assertThatThrownBy(() -> reservationService.reserve(ReservationCreateCommand.from(request)))
                 .isInstanceOf(RoomEscapeException.class);
@@ -121,7 +121,7 @@ class ReservationServiceTest {
     @Test
     void 예약_수정시_ID가_없으면_예외가_발생한다() {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
-        given(reservationRepository.getById(999L)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, 999L));
+        given(reservationRepository.getById(999L)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "test"));
         Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 999L))
                 .isInstanceOf(RoomEscapeException.class);
     }
@@ -130,7 +130,7 @@ class ReservationServiceTest {
     void 예약_수정시_과거_날짜의_예약이면_예외가_발생한다() {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2000-04-06"), 1L, 1L);
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(assembler.from(any(ReservationUpdateCommand.class))).willThrow(new RoomEscapeException(DomainErrorCode.PAST_DATE));
+        given(assembler.from(any(ReservationUpdateCommand.class))).willThrow(new RoomEscapeException(DomainErrorCode.PAST_DATE, "test"));
 
         Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .isInstanceOf(RoomEscapeException.class);
@@ -140,7 +140,7 @@ class ReservationServiceTest {
     void 예약_수정시_시간을_찾을_수_없으면_예외가_발생한다() {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(assembler.from(any(ReservationUpdateCommand.class))).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND));
+        given(assembler.from(any(ReservationUpdateCommand.class))).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "test"));
         Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .isInstanceOf(RoomEscapeException.class);
     }
@@ -274,7 +274,7 @@ class ReservationServiceTest {
 
     @Test
     void 단건_조회시_존재하지_않는_ID면_예외가_발생한다() {
-        given(reservationRepository.getById(NOT_EXISTS_ID)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, NOT_EXISTS_ID));
+        given(reservationRepository.getById(NOT_EXISTS_ID)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "test"));
         Assertions.assertThatThrownBy(() -> reservationService.find(NOT_EXISTS_ID))
                 .isInstanceOf(RoomEscapeException.class);
     }

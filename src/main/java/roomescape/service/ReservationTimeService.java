@@ -45,7 +45,7 @@ public class ReservationTimeService {
         LocalDate now = LocalDate.now(clock);
 
         if (now.isAfter(request.getDate())) {
-            throw new RoomEscapeException(DomainErrorCode.PAST_DATE, request.getDate());
+            throw new RoomEscapeException(DomainErrorCode.PAST_DATE, "지나간 날짜는 조회할 수 없습니다: " + request.getDate());
         }
 
         return reservationTimeRepository.findByDateAndTheme(request.getDate(), request.getThemeId());
@@ -54,11 +54,11 @@ public class ReservationTimeService {
     @Transactional
     public void delete(long reservationTimeId) {
         if (!reservationTimeRepository.existsById(reservationTimeId)) {
-            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, reservationTimeId);
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "해당 예약 시간을 찾을 수 없습니다: " + reservationTimeId);
         }
 
         if (slotRepository.existsByTimeId(reservationTimeId)) {
-            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, reservationTimeId);
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, "해당 예약 시간은 사용 중이라 삭제할 수 없습니다: " + reservationTimeId);
         }
 
         reservationTimeRepository.delete(reservationTimeId);

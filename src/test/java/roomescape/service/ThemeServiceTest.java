@@ -31,7 +31,7 @@ public class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마_조회_시_예외가_발생한다() {
         // given
-        given(themeRepository.getById(999L)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, 999L));
+        given(themeRepository.getById(999L)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "test"));
 
         // when & then
         Assertions.assertThatThrownBy(() -> themeService.find(999L)).isInstanceOf(RoomEscapeException.class);

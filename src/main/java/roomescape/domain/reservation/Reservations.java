@@ -25,7 +25,7 @@ public class Reservations {
 
     public void conflictByName(Reservation reservation) {
         if (hasByName(reservation)) {
-            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, reservation.getName().getValue());
+            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, "이미 같은 슬롯에 예약이 존재합니다: " + reservation.getName().getValue());
         }
     }
 
