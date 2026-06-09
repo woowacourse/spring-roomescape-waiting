@@ -33,6 +33,7 @@ public class ReservationFacade {
     public ReservationCreateResponse createReservation(ReservationRequest request) {
         Lock lock = getSlotLock(LocalDate.parse(request.date()), request.timeId(),
             request.themeId());
+        lock.lock();
         try {
             return reservationService.create(request);
         } finally {
@@ -90,18 +91,24 @@ public class ReservationFacade {
     }
 
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
-        Reservation reservation = reservationService.updateMyReservation(updateMyReservation, name,
-            reservationId);
+        ReservationResponse info = reservationService.findById(reservationId);
+        Lock newSlotLock = getSlotLock(updateMyReservation.date(), updateMyReservation.timeId(), info.theme().id());
+        newSlotLock.lock();
         try {
-            reservationService.promoteFirstWaiting(reservation);
-        } catch (Exception e) {
-            reservationService.revertReservationUpdate(
-                reservationId,
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                name
-            );
-            throw e;
+            Reservation reservation = reservationService.updateMyReservation(updateMyReservation, name, reservationId);
+            try {
+                reservationService.promoteFirstWaiting(reservation);
+            } catch (Exception e) {
+                reservationService.revertReservationUpdate(
+                    reservationId,
+                    reservation.getDate(),
+                    reservation.getTime().getId(),
+                    name
+                );
+                throw e;
+            }
+        } finally {
+            newSlotLock.unlock();
         }
     }
 

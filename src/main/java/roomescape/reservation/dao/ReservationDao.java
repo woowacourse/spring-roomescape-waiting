@@ -130,7 +130,7 @@ public class ReservationDao {
         + "inner join reservation_time t on r.time_id = t.id "
         + "inner join theme th on r.theme_id = th.id "
         + "where r.date = ? and r.time_id = ? and r.theme_id = ? and r.status = ? "
-        + "order by r.id asc limit 1";
+        + "order by r.id asc limit 1 for update";
 
     List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId, ReservationStatus.WAITING.name());
     return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
