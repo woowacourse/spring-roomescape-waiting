@@ -87,6 +87,35 @@ class ReservationConcurrencyTest {
         assertReservationCount(2);
     }
 
+    @Test
+    void 같은_예약을_동시에_취소해도_대기는_한_번만_예약으로_전환된다() throws Exception {
+        Long themeId = insertTheme("취소동시성테마");
+        Long timeId = insertTime("10:00", "11:00");
+        Long reservationId = insertReservation("예약자", LocalDate.of(2099, 12, 31), timeId, themeId);
+        insertWaiting("대기자1", LocalDate.of(2099, 12, 31), timeId, themeId);
+        insertWaiting("대기자2", LocalDate.of(2099, 12, 31), timeId, themeId);
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        Callable<ReservationResult> firstTask = deleteReservationTask(ready, start, reservationId, "예약자");
+        Callable<ReservationResult> secondTask = deleteReservationTask(ready, start, reservationId, "예약자");
+
+        Future<ReservationResult> firstResult = executorService.submit(firstTask);
+        Future<ReservationResult> secondResult = executorService.submit(secondTask);
+        ready.await(1, TimeUnit.SECONDS);
+        start.countDown();
+
+        List<ReservationResult> results = List.of(firstResult.get(), secondResult.get());
+        executorService.shutdown();
+
+        assertThat(results).allMatch(ReservationResult::success);
+        assertReservationCount(1);
+        assertWaitingCount(1);
+        assertThat(reservationNames()).containsExactly("대기자1");
+        assertThat(waitingNames()).containsExactly("대기자2");
+    }
+
     private Callable<ReservationResult> createReservationTask(
         CountDownLatch ready, CountDownLatch start, ReservationRequest request
     ) {
@@ -95,6 +124,21 @@ class ReservationConcurrencyTest {
             start.await();
             try {
                 reservationService.createReservation(request);
+                return ReservationResult.succeeded();
+            } catch (RoomescapeException exception) {
+                return ReservationResult.failed(exception.getErrorCode());
+            }
+        };
+    }
+
+    private Callable<ReservationResult> deleteReservationTask(
+        CountDownLatch ready, CountDownLatch start, Long reservationId, String name
+    ) {
+        return () -> {
+            ready.countDown();
+            start.await();
+            try {
+                reservationService.deleteReservation(reservationId, name);
                 return ReservationResult.succeeded();
             } catch (RoomescapeException exception) {
                 return ReservationResult.failed(exception.getErrorCode());
@@ -118,9 +162,37 @@ class ReservationConcurrencyTest {
         return jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt);
     }
 
+    private Long insertReservation(String name, LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+            "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+            name, date, timeId, themeId
+        );
+        return jdbcTemplate.queryForObject("SELECT id FROM reservation WHERE name = ?", Long.class, name);
+    }
+
+    private void insertWaiting(String name, LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+            "INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+            name, date, timeId, themeId
+        );
+    }
+
     private void assertReservationCount(int expected) {
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         assertThat(count).isEqualTo(expected);
+    }
+
+    private void assertWaitingCount(int expected) {
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM waiting", Integer.class);
+        assertThat(count).isEqualTo(expected);
+    }
+
+    private List<String> reservationNames() {
+        return jdbcTemplate.queryForList("SELECT name FROM reservation ORDER BY id", String.class);
+    }
+
+    private List<String> waitingNames() {
+        return jdbcTemplate.queryForList("SELECT name FROM waiting ORDER BY id", String.class);
     }
 
     private record ReservationResult(boolean success, ErrorCode errorCode) {

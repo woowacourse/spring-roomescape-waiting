@@ -65,8 +65,11 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaiting(Long id, String name) {
-        validateWaitingOwner(id, name);
-        waitingRepository.deleteById(id);
+        waitingRepository.findById(id)
+            .ifPresent(waiting -> {
+                waiting.validateOwner(name);
+                waitingRepository.deleteById(id);
+            });
     }
 
     @Transactional(readOnly = true)
@@ -81,12 +84,6 @@ public class WaitingService {
         if (isDuplicated) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_WAITING_NAME);
         }
-    }
-
-    private void validateWaitingOwner(Long id, String name) {
-        Waiting waiting = waitingRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ErrorCode.WAITING_ID_NOT_FOUND));
-        waiting.validateOwner(name);
     }
 
     private void validateWaitingIsAvailable(WaitingRequest waitingRequest) {

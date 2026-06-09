@@ -12,8 +12,10 @@ import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.domain.reservationtime.dto.TimeSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -23,15 +25,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationTimeRepository reservationTimeRepository,
-        ThemeRepository themeRepository
+        ThemeRepository themeRepository,
+        WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -72,8 +77,12 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id, String name) {
-        validateReservationOwner(id, name);
-        reservationRepository.deleteById(id);
+        reservationRepository.findByIdForUpdate(id)
+            .ifPresent(reservation -> {
+                reservation.validateOwner(name);
+                reservationRepository.deleteById(id);
+                promoteFirstWaiting(reservation);
+            });
     }
 
     @Transactional(readOnly = true)
@@ -104,17 +113,26 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationOwner(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
-        reservation.validateOwner(name);
-    }
-
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
         boolean isDuplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (isDuplicated) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    private void promoteFirstWaiting(Reservation reservation) {
+        TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
+
+        waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)
+            .ifPresent(waiting -> {
+                reservationRepository.save(Reservation.of(
+                    waiting.getName(),
+                    waiting.getDate(),
+                    waiting.getTime(),
+                    waiting.getTheme()
+                ));
+                waitingRepository.deleteById(waiting.getId());
+            });
     }
 
 }

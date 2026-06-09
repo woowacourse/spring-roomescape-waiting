@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -188,12 +189,12 @@ class WaitingServiceTest {
         }
 
         @Test
-        void 존재하지_않는_id면_예외() {
+        void 존재하지_않는_id면_삭제하지_않음() {
             when(waitingRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> waitingService.deleteWaiting(99L, "유저1"))
-                .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.WAITING_ID_NOT_FOUND);
+            waitingService.deleteWaiting(99L, "유저1");
+
+            verify(waitingRepository, never()).deleteById(99L);
         }
     }
 

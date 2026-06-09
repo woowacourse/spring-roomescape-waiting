@@ -30,8 +30,11 @@ import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.domain.reservationtime.dto.TimeSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -46,6 +49,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private WaitingRepository waitingRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -176,7 +182,9 @@ class ReservationServiceTest {
         @Test
         void 정상_삭제() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
-            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+            TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
+            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)).thenReturn(Optional.empty());
 
             reservationService.deleteReservation(1L, "유저1");
 
@@ -184,12 +192,30 @@ class ReservationServiceTest {
         }
 
         @Test
-        void 존재하지_않는_id면_예외() {
-            when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
+        void 예약_취소_시_1순위_대기를_예약으로_전환한다() {
+            Reservation reservation = Reservation.of(1L, "예약자", LocalDate.of(2099, 12, 31), time, theme);
+            Waiting waiting = Waiting.of(2L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
+            TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
+            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)).thenReturn(Optional.of(waiting));
 
-            assertThatThrownBy(() -> reservationService.deleteReservation(99L, "유저1"))
-                .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
+            reservationService.deleteReservation(1L, "예약자");
+
+            InOrder inOrder = inOrder(reservationRepository, waitingRepository);
+            inOrder.verify(reservationRepository).findByIdForUpdate(1L);
+            inOrder.verify(reservationRepository).deleteById(1L);
+            inOrder.verify(waitingRepository).findFirstByTimeSlotForUpdate(canceledReservationSlot);
+            inOrder.verify(reservationRepository).save(any(Reservation.class));
+            inOrder.verify(waitingRepository).deleteById(waiting.getId());
+        }
+
+        @Test
+        void 존재하지_않는_id면_삭제하지_않음() {
+            when(reservationRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+
+            reservationService.deleteReservation(99L, "유저1");
+
+            verify(reservationRepository, times(0)).deleteById(99L);
         }
     }
 
