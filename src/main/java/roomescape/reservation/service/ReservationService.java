@@ -7,10 +7,12 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
+import roomescape.slot.domain.RescheduleSlots;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
 import roomescape.slot.repository.ReservationSlotRepository;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
@@ -56,8 +58,9 @@ public class ReservationService {
 
     @Transactional
     public Reservation reschedule(Long currentSlotId, Long newSlotId, Long reservationId, String requesterName) {
-        ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
-        ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
+        RescheduleSlots slots = getRescheduleSlotsWithLock(currentSlotId, newSlotId);
+        ReservationSlot currentSlot = slots.findById(currentSlotId);
+        ReservationSlot newSlot = slots.findById(newSlotId);
 
         Reservations changed = currentSlot.reschedule(newSlot, reservationId, requesterName);
         rescheduleAndPromote(changed);
@@ -66,12 +69,22 @@ public class ReservationService {
 
     @Transactional
     public Reservation rescheduleByManager(Long currentSlotId, Long newSlotId, Long reservationId) {
-        ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
-        ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
+        RescheduleSlots slots = getRescheduleSlotsWithLock(currentSlotId, newSlotId);
+        ReservationSlot currentSlot = slots.findById(currentSlotId);
+        ReservationSlot newSlot = slots.findById(newSlotId);
 
         Reservations changed = currentSlot.rescheduleByManager(newSlot, reservationId);
         rescheduleAndPromote(changed);
         return changed.findById(reservationId);
+    }
+
+    private RescheduleSlots getRescheduleSlotsWithLock(Long... slotIds) {
+        List<ReservationSlot> rescheduleSlots = Arrays.stream(slotIds)
+                .sorted()
+                .map(this::getSlotAndReservationsWithLock)
+                .toList();
+
+        return RescheduleSlots.of(rescheduleSlots);
     }
 
     private ReservationSlot getSlotAndReservationsWithLock(Long slotId) {
