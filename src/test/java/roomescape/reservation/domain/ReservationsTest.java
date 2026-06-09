@@ -111,9 +111,9 @@ class ReservationsTest {
         Reservations reservations = new Reservations(List.of(reserved, waiting));
 
         // when
-        Reservations changed = reservations.cancel(name);
-        Reservation canceled = changed.findByName(reserved.getName());
-        Reservation promoted = changed.findByName(waiting.getName());
+        Reservations changed = reservations.cancel(reserved.getId(), reserved.getName());
+        Reservation canceled = changed.findById(reserved.getId());
+        Reservation promoted = changed.findById(waiting.getId());
 
         // then
         Assertions.assertThat(changed.values()).hasSize(2);
@@ -133,7 +133,7 @@ class ReservationsTest {
         Reservations reservations = new Reservations(List.of(waiting));
 
         // when
-        Reservations changed = reservations.cancel(name);
+        Reservations changed = reservations.cancel(waiting.getId(), waiting.getName());
         Reservation canceled = changed.values().get(0);
 
         // then
@@ -153,9 +153,9 @@ class ReservationsTest {
         Reservations reservations = new Reservations(List.of(reserved, waiting));
 
         // when
-        Reservations changed = reservations.cancelByManager(reserved.getName());
-        Reservation canceled = changed.findByName(reserved.getName());
-        Reservation promoted = changed.findByName(waiting.getName());
+        Reservations changed = reservations.cancelByManager(reserved.getId());
+        Reservation canceled = changed.findById(reserved.getId());
+        Reservation promoted = changed.findById(waiting.getId());
 
         // then
         Assertions.assertThat(changed.values()).hasSize(2);
@@ -241,9 +241,9 @@ class ReservationsTest {
         Long newSlotId = 2L;
 
         // when
-        Reservations changed = reservations.reschedule(newSlotId, name, RESERVED);
-        Reservation rescheduled = changed.findByName(reserved.getName());
-        Reservation promoted = changed.findByName(waiting.getName());
+        Reservations changed = reservations.reschedule(newSlotId, reserved.getId(), reserved.getName(), RESERVED);
+        Reservation rescheduled = changed.findById(reserved.getId());
+        Reservation promoted = changed.findById(waiting.getId());
 
         // then
         Assertions.assertThat(changed.values()).hasSize(2);

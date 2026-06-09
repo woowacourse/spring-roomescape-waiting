@@ -50,63 +50,33 @@ public class ReservationSlot {
         return reservations.reserve(requesterName, this.id, reservedAt);
     }
 
-    // TODO 삭제
-//    public Reservations cancel(String requesterName) {
-//        validateNotPast(LocalDateTime.now());
-//        return reservations.cancel(requesterName);
-//    }
-
-    public Reservations cancelV2(Long reservationId, String requesterName) {
+    public Reservations cancel(Long reservationId, String requesterName) {
         validateNotPast(LocalDateTime.now());
-        return reservations.cancelV2(reservationId, requesterName);
+        return reservations.cancel(reservationId, requesterName);
     }
 
-    // TODO 삭제
-    public Reservations cancelByManager(String requesterName) {
+    public Reservations cancelByManager(Long reservationId) {
         validateNotPast(LocalDateTime.now());
-        return reservations.cancelByManager(requesterName);
+        return reservations.cancelByManager(reservationId);
     }
 
-    public Reservations cancelByManagerV2(Long reservationId) {
-        validateNotPast(LocalDateTime.now());
-        return reservations.cancelByManagerV2(reservationId);
-    }
-
-    // TODO 삭제
-    public Reservations reschedule(ReservationSlot newSlot, String requesterName) {
-        LocalDateTime requestAt = LocalDateTime.now();
-        this.validateNotPast(requestAt);
-        newSlot.validateNotPast(requestAt);
-        ReservationStatus status = newSlot.decideStatus(requesterName);
-        return reservations.reschedule(newSlot.getId(), requesterName, status);
-    }
-
-    public Reservations rescheduleV2(ReservationSlot newSlot, Long reservationId, String requesterName) {
+    public Reservations reschedule(ReservationSlot newSlot, Long reservationId, String requesterName) {
         LocalDateTime requestAt = LocalDateTime.now();
         this.validateNotPast(requestAt);
         newSlot.validateNotPast(requestAt);
 
         ReservationStatus nextStatus = newSlot.decideStatus(requesterName);
-        return reservations.rescheduleV2(newSlot.getId(), reservationId, requesterName, nextStatus);
+        return reservations.reschedule(newSlot.getId(), reservationId, requesterName, nextStatus);
     }
 
-/*    // TODO 삭제
-    public Reservations rescheduleByManager(ReservationSlot newSlot, String requesterName) {
-        LocalDateTime requestAt = LocalDateTime.now();
-        this.validateNotPast(requestAt);
-        newSlot.validateNotPast(requestAt);
-        ReservationStatus status = newSlot.decideStatus(requesterName);
-        return reservations.rescheduleByManager(newSlot.getId(), requesterName, status);
-    }*/
-
-    public Reservations rescheduleByManagerV2(ReservationSlot newSlot, Long reservationId) {
+    public Reservations rescheduleByManager(ReservationSlot newSlot, Long reservationId) {
         LocalDateTime requestAt = LocalDateTime.now();
         this.validateNotPast(requestAt);
         newSlot.validateNotPast(requestAt);
 
         String requesterName = findRequesterName(reservationId);
         ReservationStatus nextStatus = newSlot.decideStatus(requesterName);
-        return reservations.rescheduleByManagerV2(newSlot.getId(), reservationId, nextStatus);
+        return reservations.rescheduleByManager(newSlot.getId(), reservationId, nextStatus);
     }
 
     private ReservationStatus decideStatus(String requesterName) {

@@ -119,9 +119,9 @@ class ReservationSlotTest {
         ReservationSlot mySlot = slot.withReservations(new Reservations(List.of(reserved, waiting)));
 
         // when
-        Reservations changed = mySlot.cancelV2(reserved.getId(), reserved.getName());
-        Reservation canceled = changed.findByName(name);
-        Reservation promoted = changed.findByName(waiterName);
+        Reservations changed = mySlot.cancel(reserved.getId(), reserved.getName());
+        Reservation canceled = changed.findById(reserved.getId());
+        Reservation promoted = changed.findById(waiting.getId());
 
         // then
         Assertions.assertThat(canceled.getStatus())
@@ -139,7 +139,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.cancelV2(reserved.getId(), reserved.getName()))
+        assertThatThrownBy(() -> slot.cancel(reserved.getId(), reserved.getName()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -152,7 +152,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.cancelByManager(reserved.getName()))
+        assertThatThrownBy(() -> slot.cancelByManager(reserved.getId()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -165,7 +165,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.reschedule(futureSlot, "한다"))
+        assertThatThrownBy(() -> slot.reschedule(futureSlot, reserved.getId(), reserved.getName()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -178,7 +178,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.rescheduleByManagerV2(futureSlot, reserved.getId()))
+        assertThatThrownBy(() -> slot.rescheduleByManager(futureSlot, reserved.getId()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -191,7 +191,7 @@ class ReservationSlotTest {
         ReservationSlot slot = futureSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.reschedule(pastSlot, "한다"))
+        assertThatThrownBy(() -> slot.reschedule(pastSlot, reserved.getId(), reserved.getName()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -204,7 +204,7 @@ class ReservationSlotTest {
         ReservationSlot slot = futureSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.rescheduleByManagerV2(pastSlot, reserved.getId()))
+        assertThatThrownBy(() -> slot.rescheduleByManager(pastSlot, reserved.getId()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -214,11 +214,10 @@ class ReservationSlotTest {
     void reschedule_to_waiting() {
         // given
         String requesterName = "송송";
+        Reservation reserved = Reservation.load(1L, requesterName, 2L, RESERVED, LocalDateTime.now());
+        Reservation waiting = Reservation.load(2L, "대기중인 사람", 2L, WAITING, LocalDateTime.now());
+        Reservations myReservations = new Reservations(List.of(reserved, waiting));
 
-        Reservations myReservations = new Reservations(List.of(
-                Reservation.load(1L, requesterName, 2L, RESERVED, LocalDateTime.now()),
-                Reservation.load(2L, "대기중인 사람", 2L, WAITING, LocalDateTime.now())
-        ));
         ReservationSlot mySlot = slot.withReservations(myReservations);
 
         Reservations changeTargetReservations = new Reservations(List.of(
@@ -227,8 +226,8 @@ class ReservationSlotTest {
         ReservationSlot alreadyReservedSlot = futureSlot.withReservations(changeTargetReservations);
 
         // when
-        Reservations changed = mySlot.reschedule(alreadyReservedSlot, requesterName);
-        Reservation actual = changed.findByName(requesterName);
+        Reservations changed = mySlot.reschedule(alreadyReservedSlot, reserved.getId(), reserved.getName());
+        Reservation actual = changed.findById(reserved.getId());
 
         // then
         Assertions.assertThat(actual.getStatus())
@@ -241,11 +240,9 @@ class ReservationSlotTest {
         // given
         String requesterName = "송송";
         String waitingName = "대기중인 사람";
-
-        Reservations myReservations = new Reservations(List.of(
-                Reservation.load(1L, requesterName, 2L, RESERVED, LocalDateTime.now()),
-                Reservation.load(2L, waitingName, 2L, WAITING, LocalDateTime.now())
-        ));
+        Reservation reserved = Reservation.load(1L, requesterName, 2L, RESERVED, LocalDateTime.now());
+        Reservation waiting = Reservation.load(2L, waitingName, 2L, WAITING, LocalDateTime.now());
+        Reservations myReservations = new Reservations(List.of(reserved, waiting));
         ReservationSlot mySlot = slot.withReservations(myReservations);
 
         Reservations changeTargetReservations = new Reservations(List.of(
@@ -254,8 +251,8 @@ class ReservationSlotTest {
         ReservationSlot alreadyReservedSlot = futureSlot.withReservations(changeTargetReservations);
 
         // when
-        Reservations changed = mySlot.reschedule(alreadyReservedSlot, requesterName);
-        Reservation actual = changed.findByName(waitingName);
+        Reservations changed = mySlot.reschedule(alreadyReservedSlot, reserved.getId(), reserved.getName());
+        Reservation actual = changed.findById(waiting.getId());
 
         // then
         Assertions.assertThat(actual.getStatus())

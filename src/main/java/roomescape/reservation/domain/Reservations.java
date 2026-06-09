@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
@@ -34,18 +33,7 @@ public record Reservations(
         return ReservationStatus.RESERVED;
     }
 
-    public Reservations cancel(String requesterName) {
-        Reservation cancelTarget = popByName(requesterName);
-        if (cancelTarget.isReserved()) {
-            cancelTarget.cancel(requesterName);
-            return withPromotedIfPresent(cancelTarget);
-        }
-
-        cancelTarget.cancel(requesterName);
-        return new Reservations(List.of(cancelTarget));
-    }
-
-    public Reservations cancelV2(Long reservationId, String requesterName) {
+    public Reservations cancel(Long reservationId, String requesterName) {
         Reservation cancelTarget = popById(reservationId);
         if (cancelTarget.isReserved()) {
             cancelTarget.cancel(requesterName);
@@ -56,18 +44,7 @@ public record Reservations(
         return new Reservations(List.of(cancelTarget));
     }
 
-    public Reservations cancelByManager(String requesterName) {
-        Reservation cancelTarget = popByName(requesterName);
-        if (cancelTarget.isReserved()) {
-            cancelTarget.cancelByManager();
-            return withPromotedIfPresent(cancelTarget);
-        }
-
-        cancelTarget.cancelByManager();
-        return new Reservations(List.of(cancelTarget));
-    }
-
-    public Reservations cancelByManagerV2(Long reservationId) {
+    public Reservations cancelByManager(Long reservationId) {
         Reservation cancelTarget = popById(reservationId);
         if (cancelTarget.isReserved()) {
             cancelTarget.cancelByManager();
@@ -78,18 +55,7 @@ public record Reservations(
         return new Reservations(List.of(cancelTarget));
     }
 
-    public Reservations reschedule(Long newSlotId, String requesterName, ReservationStatus status) {
-        Reservation target = popByName(requesterName);
-        if (target.isReserved()) {
-            target.reschedule(newSlotId, requesterName, status);
-            return withPromotedIfPresent(target);
-        }
-
-        target.reschedule(newSlotId, requesterName, status);
-        return new Reservations(List.of(target));
-    }
-
-    public Reservations rescheduleV2(Long newSlotId, Long reservationId, String requesterName, ReservationStatus status) {
+    public Reservations reschedule(Long newSlotId, Long reservationId, String requesterName, ReservationStatus status) {
         Reservation target = popById(reservationId);
         if (target.isReserved()) {
             target.reschedule(newSlotId, requesterName, status);
@@ -100,18 +66,7 @@ public record Reservations(
         return new Reservations(List.of(target));
     }
 
-    public Reservations rescheduleByManager(Long newSlotId, String requesterName, ReservationStatus status) {
-        Reservation target = popByName(requesterName);
-        if (target.isReserved()) {
-            target.rescheduleByManager(newSlotId, status);
-            return withPromotedIfPresent(target);
-        }
-
-        target.rescheduleByManager(newSlotId, status);
-        return new Reservations(List.of(target));
-    }
-
-    public Reservations rescheduleByManagerV2(Long newSlotId, Long reservationId, ReservationStatus status) {
+    public Reservations rescheduleByManager(Long newSlotId, Long reservationId, ReservationStatus status) {
         Reservation target = popById(reservationId);
         if (target.isReserved()) {
             target.rescheduleByManager(newSlotId, status);
@@ -150,24 +105,11 @@ public record Reservations(
                 .anyMatch(Reservation::isReserved);
     }
 
-    public Reservation findByName(String requesterName) {
-        return values.stream()
-                .filter(r -> r.isOwner(requesterName))
-                .findFirst()
-                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-    }
-
     public Reservation findById(Long reservationId) {
         return values.stream()
                 .filter(r -> r.getId().equals(reservationId))
                 .findFirst()
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-    }
-
-    private Reservation popByName(String requesterName) {
-        Reservation target = findByName(requesterName);
-        values.remove(target);
-        return target;
     }
 
     private Reservation popById(Long reservationId) {
