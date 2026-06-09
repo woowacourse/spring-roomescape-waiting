@@ -83,7 +83,6 @@ public class ReservationService {
 
         ReservationTime time = getReservationTime(request.timeId());
         Theme theme = reservation.getTheme();
-
         LocalDate currentDate = reservation.getDate();
         Long currentTimeId = reservation.getTime().getId();
         LocalDate newDate = request.date();
@@ -93,34 +92,22 @@ public class ReservationService {
         Reservations newReservations;
 
         if (isBefore(currentDate, currentTimeId, newDate, newTimeId)) {
-            currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
-                    currentDate, theme.getId(), currentTimeId);
-            newReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
-                    newDate, theme.getId(), newTimeId);
+            currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(currentDate, theme.getId(),
+                    currentTimeId);
+            newReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(newDate, theme.getId(),
+                    newTimeId);
         } else {
-            newReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
-                    newDate, theme.getId(), newTimeId);
-            currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
-                    currentDate, theme.getId(), currentTimeId);
+            newReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(newDate, theme.getId(),
+                    newTimeId);
+            currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(currentDate, theme.getId(),
+                    currentTimeId);
         }
 
         newReservations.validateDuplicate(reservation.getName());
-        ReservationStatus status = newReservations.determineStatus();
 
-        Reservation newReservation = new Reservation(
-                reservation.getName(),
-                newDate,
-                time,
-                theme,
-                status
-        );
+        Reservation newReservation = buildUpdatedReservation(reservation, newDate, time, newReservations);
 
-        newReservation.validateNotPast();
-
-        reservationRepository.delete(id);
-        promoteNextWaiting(reservation, currentReservations);
-
-        return ReservationResponse.from(reservationRepository.save(newReservation));
+        return ReservationResponse.from(applyUpdate(id, reservation, currentReservations, newReservation));
     }
 
     @Transactional
@@ -142,6 +129,26 @@ public class ReservationService {
             return false;
         }
         return timeId1 < timeId2;
+    }
+
+    private Reservation buildUpdatedReservation(Reservation origin, LocalDate newDate, ReservationTime newTime,
+                                                Reservations newReservations) {
+        Reservation newReservation = new Reservation(
+                origin.getName(),
+                newDate,
+                newTime,
+                origin.getTheme(),
+                newReservations.determineStatus()
+        );
+        newReservation.validateNotPast();
+        return newReservation;
+    }
+
+    private Reservation applyUpdate(Long id, Reservation deleted, Reservations currentReservations,
+                                    Reservation newReservation) {
+        reservationRepository.delete(id);
+        promoteNextWaiting(deleted, currentReservations);
+        return reservationRepository.save(newReservation);
     }
 
     private void promoteNextWaiting(Reservation deleted, Reservations currentReservations) {
