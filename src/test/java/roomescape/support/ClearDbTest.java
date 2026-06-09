@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.support;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestExecutionListeners;

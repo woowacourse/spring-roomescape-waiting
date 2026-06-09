@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.support;
 
 import io.restassured.RestAssured;
 import org.springframework.test.context.TestContext;

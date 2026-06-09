@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.ClearDbTest;
 import roomescape.dto.ThemeResult;
+import roomescape.support.ClearDbTest;
 
 import java.util.HashMap;
 import java.util.List;
