@@ -75,7 +75,7 @@ public class WaitingService {
 
     private void savePromotedReservation(Waiting waiting, Reservation reservation) {
         if (!waitingDao.delete(waiting.getId())) {
-            return;
+            throw new IllegalStateException("예약 대기 삭제에 실패했습니다.");
         }
         try {
             reservationDao.insert(reservation);
