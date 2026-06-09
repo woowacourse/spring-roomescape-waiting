@@ -39,39 +39,39 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation cancelByManager(Long slotId, String requesterName) {
+    public Reservation cancel(Long slotId, Long reservationId, String requesterName) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservations changed = slot.cancelByManager(requesterName);
+        Reservations changed = slot.cancelV2(reservationId, requesterName);
         cancelAndPromote(changed);
         return changed.findByName(requesterName);
     }
 
     @Transactional
-    public Reservation cancel(Long slotId, String requesterName) {
+    public Reservation cancelByManager(Long slotId, Long reservationId) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservations changed = slot.cancel(requesterName);
+        Reservations changed = slot.cancelByManagerV2(reservationId);
         cancelAndPromote(changed);
-        return changed.findByName(requesterName);
+        return changed.findById(reservationId);
     }
 
     @Transactional
-    public Reservation reschedule(Long currentSlotId, Long newSlotId, String requesterName) {
+    public Reservation reschedule(Long currentSlotId, Long newSlotId, Long reservationId, String requesterName) {
         ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
         ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
 
-        Reservations changed = currentSlot.reschedule(newSlot, requesterName);
+        Reservations changed = currentSlot.rescheduleV2(newSlot, reservationId, requesterName);
         rescheduleAndPromote(changed);
-        return changed.findByName(requesterName);
+        return changed.findById(reservationId);
     }
 
     @Transactional
-    public Reservation rescheduleByManager(Long currentSlotId, Long newSlotId, String requesterName) {
+    public Reservation rescheduleByManager(Long currentSlotId, Long newSlotId, Long reservationId) {
         ReservationSlot currentSlot = getSlotAndReservationsWithLock(currentSlotId);
         ReservationSlot newSlot = getSlotAndReservationsWithLock(newSlotId);
 
-        Reservations changed = currentSlot.rescheduleByManager(newSlot, requesterName);
+        Reservations changed = currentSlot.rescheduleByManagerV2(newSlot, reservationId);
         rescheduleAndPromote(changed);
-        return changed.findByName(requesterName);
+        return changed.findById(reservationId);
     }
 
     private ReservationSlot getSlotAndReservationsWithLock(Long slotId) {

@@ -119,7 +119,7 @@ class ReservationSlotTest {
         ReservationSlot mySlot = slot.withReservations(new Reservations(List.of(reserved, waiting)));
 
         // when
-        Reservations changed = mySlot.cancel(name);
+        Reservations changed = mySlot.cancelV2(reserved.getId(), reserved.getName());
         Reservation canceled = changed.findByName(name);
         Reservation promoted = changed.findByName(waiterName);
 
@@ -139,7 +139,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.cancel("한다"))
+        assertThatThrownBy(() -> slot.cancelV2(reserved.getId(), reserved.getName()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -178,7 +178,7 @@ class ReservationSlotTest {
         ReservationSlot slot = pastSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.rescheduleByManager(futureSlot, "한다"))
+        assertThatThrownBy(() -> slot.rescheduleByManagerV2(futureSlot, reserved.getId()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
@@ -204,7 +204,7 @@ class ReservationSlotTest {
         ReservationSlot slot = futureSlot.withReservations(new Reservations(List.of(reserved)));
 
         // when & then
-        assertThatThrownBy(() -> slot.rescheduleByManager(pastSlot, "한다"))
+        assertThatThrownBy(() -> slot.rescheduleByManagerV2(pastSlot, reserved.getId()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }

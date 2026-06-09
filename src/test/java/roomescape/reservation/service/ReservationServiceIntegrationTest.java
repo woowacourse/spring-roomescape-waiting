@@ -119,7 +119,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         void reserved_when_cancel_same_name() {
             // given
             Reservation reservation = saveReservation(name, slot1);
-            reservationService.cancelByManager(slot1.getId(), reservation.getName());
+            reservationService.cancelByManager(slot1.getId(), reservation.getId());
 
             // when
             Reservation actual = reservationService.reserve(name, slot1.getId());
@@ -135,7 +135,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             // given
             String anotherName = "다른사람";
             Reservation saved = saveReservation(name, slot1);
-            reservationService.cancelByManager(slot1.getId(), saved.getName());
+            reservationService.cancelByManager(slot1.getId(), saved.getId());
 
             // when
             Reservation actual = reservationService.reserve(anotherName, slot1.getId());
@@ -184,7 +184,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             Reservation saved = saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.cancelByManager(slot1.getId(), saved.getName());
+            Reservation actual = reservationService.cancelByManager(slot1.getId(), saved.getId());
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -195,10 +195,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @DisplayName("아직 지나지 않은 본인의 예약은 취소할 수 있다.")
         void cancel() {
             // given
-            saveReservation(name, slot1);
+            Reservation reserved = saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.cancel(slot1.getId(), name);
+            Reservation actual = reservationService.cancel(slot1.getId(), reserved.getId(), reserved.getName());
 
             // then
             Assertions.assertThat(actual.getStatus())
@@ -209,20 +209,20 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @DisplayName("본인의 예약이 아닌데 취소를하면 예외가 발생한다.")
         void cancel_not_owner() {
             // given
-            saveReservation(name, slot1);
+            Reservation reserved = saveReservation(name, slot1);
             String anotherName = "다른사람";
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancel(slot1.getId(), anotherName))
+            assertThatThrownBy(() -> reservationService.cancel(slot1.getId(), reserved.getId(), anotherName))
                     .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_NOT_FOUND.getMessage());
+                    .hasMessage(RESERVATION_NOT_OWNER.getMessage());
         }
 
         @Test
         @DisplayName("이미 지난 예약을 취소하면 예외가 발생한다.")
         @Sql(scripts = {"classpath:past-reservation.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
         void cancel_not_past() {
-            assertThatThrownBy(() -> reservationService.cancel(1L, "member"))
+            assertThatThrownBy(() -> reservationService.cancel(1L, 1L, "member"))
                     .isInstanceOf(ReservationException.class)
                     .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
         }
@@ -237,7 +237,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             Reservation reservation2 = saveWaitReservation(name2, slot1);
 
             // when
-            reservationService.cancel(slot1.getId(), name1);
+            reservationService.cancel(slot1.getId(), reservation1.getId(), reservation1.getName());
             Reservation canceled = reservationRepository.findById(reservation1.getId()).get();
             Reservation promoted = reservationRepository.findById(reservation2.getId()).get();
 
@@ -259,7 +259,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             Reservation reservation2 = saveWaitReservation(name2, slot1);
 
             // when
-            reservationService.cancelByManager(slot1.getId(), reservation1.getName());
+            reservationService.cancelByManager(slot1.getId(), reservation1.getId());
             Reservation canceled = reservationRepository.findById(reservation1.getId()).get();
             Reservation promoted = reservationRepository.findById(reservation2.getId()).get();
 
@@ -277,12 +277,12 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
     @DisplayName("예약 변경 시, 가장 뒤 대기열로 이동한다.")
     void reschedule() {
         // when
-        saveReservation(name, slot1);
+        Reservation reservation = saveReservation(name, slot1);
         saveReservation("Slot2 예약자", slot2);
         saveWaitReservation("Slot2 대기자 순번1", slot2);
 
         // when
-        reservationService.reschedule(slot1.getId(), slot2.getId(), name);
+        reservationService.reschedule(slot1.getId(), slot2.getId(), reservation.getId(), reservation.getName());
 
         // then
         ReservationWithSlotInformation actual = reservationService.readAllByName(name).stream()
@@ -298,12 +298,12 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
     @DisplayName("관리자가 예약을 변경해도, 가장 뒤 대기열로 이동한다.")
     void rescheduleByManger() {
         // when
-        saveReservation(name, slot1);
+        Reservation reserved = saveReservation(name, slot1);
         saveReservation("Slot2 예약자", slot2);
         saveWaitReservation("Slot2 대기자 순번1", slot2);
 
         // when
-        reservationService.rescheduleByManager(slot1.getId(), slot2.getId(), name);
+        reservationService.rescheduleByManager(slot1.getId(), slot2.getId(), reserved.getId());
 
         // then
         ReservationWithSlotInformation actual = reservationService.readAllByName(name).stream()

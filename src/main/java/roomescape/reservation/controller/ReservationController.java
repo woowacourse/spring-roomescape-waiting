@@ -46,24 +46,26 @@ public class ReservationController {
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
-    @PatchMapping("/slots/{slotId}/cancel")
+    @PatchMapping("/slots/{slotId}/reservations/{reservationId}/cancel")
     public ResponseEntity<ReservationDetailDto> cancel(
             @PathVariable Long slotId,
+            @PathVariable Long reservationId,
             @LoginMember Member member
     ) {
-        Reservation canceled = reservationService.cancel(slotId, member.getName());
+        Reservation canceled = reservationService.cancel(slotId, reservationId, member.getName());
         ReservationDetailDto responseData = ReservationDetailDto.from(canceled);
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
-    @PatchMapping("/slots/{slotId}/reservations/reschedule")
+    @PatchMapping("/slots/{slotId}/reservations/{reservationId}/reschedule")
     public ResponseEntity<ReservationDetailDto> updateSchedule(
             @PathVariable Long slotId,
+            @PathVariable Long reservationId,
             @LoginMember Member member,
             @Validated @RequestBody ReservationRescheduleDto dto
     ) {
-        Reservation rescheduled = reservationService.reschedule(slotId, dto.newSlotId(), member.getName());
+        Reservation rescheduled = reservationService.reschedule(slotId, dto.newSlotId(), reservationId, member.getName());
         ReservationDetailDto responseData = ReservationDetailDto.from(rescheduled);
         return ResponseEntity.ok(responseData);
     }

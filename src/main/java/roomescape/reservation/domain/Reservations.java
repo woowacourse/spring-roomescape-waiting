@@ -45,8 +45,30 @@ public record Reservations(
         return new Reservations(List.of(cancelTarget));
     }
 
+    public Reservations cancelV2(Long reservationId, String requesterName) {
+        Reservation cancelTarget = popById(reservationId);
+        if (cancelTarget.isReserved()) {
+            cancelTarget.cancel(requesterName);
+            return withPromotedIfPresent(cancelTarget);
+        }
+
+        cancelTarget.cancel(requesterName);
+        return new Reservations(List.of(cancelTarget));
+    }
+
     public Reservations cancelByManager(String requesterName) {
         Reservation cancelTarget = popByName(requesterName);
+        if (cancelTarget.isReserved()) {
+            cancelTarget.cancelByManager();
+            return withPromotedIfPresent(cancelTarget);
+        }
+
+        cancelTarget.cancelByManager();
+        return new Reservations(List.of(cancelTarget));
+    }
+
+    public Reservations cancelByManagerV2(Long reservationId) {
+        Reservation cancelTarget = popById(reservationId);
         if (cancelTarget.isReserved()) {
             cancelTarget.cancelByManager();
             return withPromotedIfPresent(cancelTarget);
@@ -67,6 +89,17 @@ public record Reservations(
         return new Reservations(List.of(target));
     }
 
+    public Reservations rescheduleV2(Long newSlotId, Long reservationId, String requesterName, ReservationStatus status) {
+        Reservation target = popById(reservationId);
+        if (target.isReserved()) {
+            target.reschedule(newSlotId, requesterName, status);
+            return withPromotedIfPresent(target);
+        }
+
+        target.reschedule(newSlotId, requesterName, status);
+        return new Reservations(List.of(target));
+    }
+
     public Reservations rescheduleByManager(Long newSlotId, String requesterName, ReservationStatus status) {
         Reservation target = popByName(requesterName);
         if (target.isReserved()) {
@@ -78,14 +111,14 @@ public record Reservations(
         return new Reservations(List.of(target));
     }
 
-    private Reservations processAction(String requesterName, Consumer<Reservation> action) {
-        Reservation target = popByName(requesterName);
+    public Reservations rescheduleByManagerV2(Long newSlotId, Long reservationId, ReservationStatus status) {
+        Reservation target = popById(reservationId);
         if (target.isReserved()) {
-            action.accept(target);
+            target.rescheduleByManager(newSlotId, status);
             return withPromotedIfPresent(target);
         }
 
-        action.accept(target);
+        target.rescheduleByManager(newSlotId, status);
         return new Reservations(List.of(target));
     }
 
@@ -124,8 +157,21 @@ public record Reservations(
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
+    public Reservation findById(Long reservationId) {
+        return values.stream()
+                .filter(r -> r.getId().equals(reservationId))
+                .findFirst()
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+    }
+
     private Reservation popByName(String requesterName) {
         Reservation target = findByName(requesterName);
+        values.remove(target);
+        return target;
+    }
+
+    private Reservation popById(Long reservationId) {
+        Reservation target = findById(reservationId);
         values.remove(target);
         return target;
     }

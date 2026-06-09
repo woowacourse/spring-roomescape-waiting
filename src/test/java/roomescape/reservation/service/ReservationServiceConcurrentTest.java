@@ -102,8 +102,8 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
         Reservation waiting = reservationService.reserve("대기자", slot1.getId());
 
         doConcurrent(
-                () -> reservationService.cancel(slot1.getId(), "송송"),
-                () -> reservationService.cancel(slot1.getId(), "대기자")
+                () -> reservationService.cancel(slot1.getId(), reserved.getId(), reserved.getName()),
+                () -> reservationService.cancel(slot1.getId(), waiting.getId(), waiting.getName())
         );
 
         // when

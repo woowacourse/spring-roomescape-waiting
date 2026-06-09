@@ -130,7 +130,7 @@ class ReservationServiceTest {
         Reservation savedReservation = reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
 
         // when
-        Reservation actual = reservationService.cancelByManager(slot1.getId(), savedReservation.getName());
+        Reservation actual = reservationService.cancelByManager(slot1.getId(), savedReservation.getId());
 
         // then
         Assertions.assertThat(actual.getStatus())
@@ -141,10 +141,10 @@ class ReservationServiceTest {
     @DisplayName("본인의 예약을 취소할 수 있다.")
     void cancel() {
         // given
-        reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
+        Reservation saved = reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
 
         // when
-        Reservation actual = reservationService.cancel(slot1.getId(), name);
+        Reservation actual = reservationService.cancel(slot1.getId(), saved.getId(), saved.getName());
 
         // then
         Assertions.assertThat(actual.getStatus())
@@ -155,13 +155,13 @@ class ReservationServiceTest {
     @DisplayName("슬롯에 본인 예약이 없는데 취소하면 NOT_FOUND 예외가 발생한다.")
     void cancel_no_reservation_in_slot() {
         // given
-        reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
+        Reservation saved = reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
         String anotherName = "다른사람";
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancel(slot1.getId(), anotherName))
+        assertThatThrownBy(() -> reservationService.cancel(slot1.getId(), saved.getId(), anotherName))
                 .isInstanceOf(ReservationException.class)
-                .hasMessage(RESERVATION_NOT_FOUND.getMessage());
+                .hasMessage(RESERVATION_NOT_OWNER.getMessage());
     }
 
     @Test
@@ -170,10 +170,10 @@ class ReservationServiceTest {
         // given
         ReservationDate pastDate = ReservationDate.load(99L, LocalDate.now().minusDays(1), true);
         ReservationSlot pastSlot = reservationSlotRepository.save(ReservationSlot.of(pastDate, reservationTime1, theme1));
-        reservationRepository.save(Reservation.reserve(name, pastSlot.getId(), RESERVED, LocalDateTime.now()));
+        Reservation saved = reservationRepository.save(Reservation.reserve(name, pastSlot.getId(), RESERVED, LocalDateTime.now()));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancel(pastSlot.getId(), name))
+        assertThatThrownBy(() -> reservationService.cancel(pastSlot.getId(), saved.getId(), saved.getName()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
