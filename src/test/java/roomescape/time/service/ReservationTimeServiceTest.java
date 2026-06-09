@@ -18,8 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.exception.TimeErrorCode;
+import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
 
@@ -48,7 +48,6 @@ class ReservationTimeServiceTest {
         assertThat(result).isEqualTo(new ReservationTimeResult(1L, LocalTime.of(10, 0)));
         then(reservationTimeRepository).should().save(any(ReservationTime.class));
     }
-
 
 
     @Test

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.service.ThemeService;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.AvailableTimesResult;
 import roomescape.time.service.dto.ReservationTimeResult;
 

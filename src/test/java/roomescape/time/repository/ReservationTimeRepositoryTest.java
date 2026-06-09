@@ -16,12 +16,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 @JdbcTest
-class ReservationTimeRepositoryImplTest {
+class ReservationTimeRepositoryTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -29,8 +28,8 @@ class ReservationTimeRepositoryImplTest {
     ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    public ReservationTimeRepositoryImplTest(JdbcTemplate jdbcTemplate) {
-        this.reservationTimeRepository = new ReservationTimeRepositoryImpl(new JdbcReservationTimeDao(jdbcTemplate));
+    public ReservationTimeRepositoryTest(JdbcTemplate jdbcTemplate) {
+        this.reservationTimeRepository = new ReservationTimeRepository(new ReservationTimeDao(jdbcTemplate));
     }
 
     @Nested

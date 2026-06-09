@@ -19,7 +19,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 import roomescape.time.service.dto.ReservationTimeResult;
 
