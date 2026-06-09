@@ -132,7 +132,7 @@ public class ReservationService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void restoreReservation(Long id) {
         Reservation reservation = reservationDao.findById(id);
-        reservation.promote(ReservationStatus.RESERVED);
+        reservation.restore();
         reservationDao.updateStatus(id, ReservationStatus.RESERVED);
     }
 

@@ -38,6 +38,13 @@ public class Reservation {
         this.status = this.status.transitionTo(status);
     }
 
+    public void restore() {
+        if (this.status != ReservationStatus.CANCELED) {
+            throw new IllegalStateException("취소된 예약만 복구할 수 있습니다.");
+        }
+        this.status = ReservationStatus.RESERVED;
+    }
+
     public boolean isReserved() {
         return this.status == ReservationStatus.RESERVED;
     }

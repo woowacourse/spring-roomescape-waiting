@@ -10,8 +10,7 @@ public enum ReservationStatus {
 
   private static final Map<ReservationStatus, Set<ReservationStatus>> TRANSITIONS = Map.of(
       RESERVED, Set.of(CANCELED),
-      WAITING, Set.of(RESERVED, CANCELED),
-      CANCELED, Set.of(RESERVED)
+      WAITING, Set.of(RESERVED, CANCELED)
   );
 
   public boolean canTransitionTo(ReservationStatus status) {
