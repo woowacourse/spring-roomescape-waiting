@@ -25,6 +25,11 @@ import roomescape.time.domain.ReservationTime;
 @RequiredArgsConstructor
 public class JdbcReservationRepository implements ReservationRepository {
 
+    private static final List<String> ACTIVE_STATUSES = List.of(
+            statusName(Status.RESERVED),
+            statusName(Status.WAITING)
+    );
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
         Theme theme = Theme.restore(
@@ -108,7 +113,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                         theme_id = :themeId,
                         status = :status
                     WHERE id = :id
-                        AND status IN ('RESERVED', 'WAITING')
                     """;
 
             SqlParameterSource params = new MapSqlParameterSource()
@@ -128,20 +132,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findById(Long id) {
         String sql = BASE_SELECT + """
                 WHERE r.id = :id
-                    AND r.status IN ('RESERVED', 'WAITING')
+                    AND r.status IN (:statuses)
                 """;
-        return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findFirst();
+        return jdbcTemplate.query(sql, Map.of("id", id, "statuses", ACTIVE_STATUSES), rowMapper).stream().findFirst();
     }
 
     @Override
     public List<Reservation> findAll(int page, int size) {
         String sql = BASE_SELECT + """
-                WHERE r.status = 'RESERVED'
+                WHERE r.status = :status
                 ORDER BY r.date ASC, rt.start_at ASC
                 LIMIT :size OFFSET :offset
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("status", statusName(Status.RESERVED))
                 .addValue("size", size)
                 .addValue("offset", page * size);
 
@@ -153,12 +158,13 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = BASE_SELECT + """
                 WHERE r.theme_id = :themeId
                     AND r.date = :date
-                    AND r.status = 'RESERVED'
+                    AND r.status = :status
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("themeId", themeId)
-                .addValue("date", date);
+                .addValue("date", date)
+                .addValue("status", statusName(Status.RESERVED));
 
         return jdbcTemplate.query(sql, params, rowMapper);
     }
@@ -167,11 +173,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findAllByName(String username) {
         String sql = BASE_SELECT + """
                 WHERE r.name = :username
-                    AND r.status IN ('RESERVED', 'WAITING')
+                    AND r.status IN (:statuses)
                 ORDER BY r.created_at DESC
                 """;
 
-        return jdbcTemplate.query(sql, Map.of("username", username), rowMapper);
+        return jdbcTemplate.query(sql, Map.of("username", username, "statuses", ACTIVE_STATUSES), rowMapper);
     }
 
     @Override
@@ -179,7 +185,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE status = 'WAITING'
+                WHERE status = :status
                     AND date = :date
                     AND time_id = :timeId
                     AND theme_id = :themeId
@@ -190,6 +196,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("status", statusName(Status.WAITING))
                 .addValue("date", reservation.getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("themeId", reservation.getTheme().getId())
@@ -206,10 +213,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                     SELECT 1
                     FROM reservation
                     WHERE time_id = :timeId
-                        AND status = 'RESERVED'
+                        AND status = :status
                 )
                 """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId), Boolean.class));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql,
+                Map.of("timeId", timeId, "status", statusName(Status.RESERVED)), Boolean.class));
     }
 
     @Override
@@ -221,11 +229,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                     WHERE time_id = :timeId
                         AND theme_id = :themeId
                         AND date = :date
-                        AND status = 'RESERVED'
+                        AND status = :status
                 )
                 """;
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId, "themeId", themeId, "date", date),
+                jdbcTemplate.queryForObject(sql,
+                        Map.of("timeId", timeId, "themeId", themeId, "date", date,
+                                "status", statusName(Status.RESERVED)),
                         Boolean.class));
     }
 
@@ -239,12 +249,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                         AND time_id = :timeId
                         AND date = :date
                         AND name = :name
-                        AND status IN ('WAITING', 'RESERVED')
+                        AND status IN (:statuses)
                 )
                 """;
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql,
-                        Map.of("themeId", themeId, "timeId", timeId, "date", date, "name", name),
+                        Map.of("themeId", themeId, "timeId", timeId, "date", date, "name", name,
+                                "statuses", ACTIVE_STATUSES),
                         Boolean.class));
     }
 
@@ -255,10 +266,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                     SELECT 1
                     FROM reservation
                     WHERE theme_id = :themeId
-                        AND status IN ('RESERVED', 'WAITING')
+                        AND status IN (:statuses)
                 )
                 """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("themeId", themeId), Boolean.class));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql,
+                Map.of("themeId", themeId, "statuses", ACTIVE_STATUSES), Boolean.class));
     }
 
     @Override
@@ -267,15 +279,20 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE r.date = :date
                     AND r.time_id = :timeId
                     AND r.theme_id = :themeId
-                    AND r.status = 'WAITING'
+                    AND r.status = :status
                 ORDER BY r.created_at ASC
                 LIMIT 1
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("timeId", timeId)
-                .addValue("themeId", themeId);
+                .addValue("themeId", themeId)
+                .addValue("status", statusName(Status.WAITING));
 
         return jdbcTemplate.query(sql, params, rowMapper).stream().findFirst();
+    }
+
+    private static String statusName(Status status) {
+        return status.name();
     }
 }
