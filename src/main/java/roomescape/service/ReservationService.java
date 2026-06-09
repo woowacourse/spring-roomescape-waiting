@@ -157,7 +157,7 @@ public class ReservationService {
     }
 
     private void promoteWaitingToReservation(ReservationWaiting waiting) {
-        Reservation promotedReservation = Reservation.createWithoutId(waiting.getName(), waiting.getReservationDate(), waiting.getTime(), waiting.getTheme());
+        Reservation promotedReservation = waiting.promoteToReservation();
 
         reservationDao.insert(promotedReservation);
         reservationWaitingDao.delete(waiting.getId());

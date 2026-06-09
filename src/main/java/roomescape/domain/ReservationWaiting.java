@@ -30,6 +30,10 @@ public class ReservationWaiting {
         return new ReservationWaiting(null, name, createdAt, reservationDate, time, theme);
     }
 
+    public Reservation promoteToReservation() {
+        return Reservation.createWithoutId(name, reservationDate, time, theme);
+    }
+
     public Long getId() {
         return id;
     }
