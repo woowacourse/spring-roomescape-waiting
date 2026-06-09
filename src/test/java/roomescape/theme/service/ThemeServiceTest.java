@@ -57,7 +57,7 @@ class ThemeServiceTest {
 
         @Test
         @DisplayName("테마 생성 시, 데이터베이스 제약 조건 위반(이름 중복 등)이 발생하면 예외가 변경된다.")
-        void save_dataIntegrityViolationException() {
+        void save_duplicateKeyException() {
             // given
             ThemeCommand command = new ThemeCommand("브라운", "설명", "url");
 

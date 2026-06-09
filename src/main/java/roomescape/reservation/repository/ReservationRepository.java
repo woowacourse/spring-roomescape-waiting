@@ -2,7 +2,7 @@ package roomescape.reservation.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
@@ -25,7 +25,7 @@ public class ReservationRepository {
             }
             reservationDao.update(reservation);
             return reservation;
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
     }

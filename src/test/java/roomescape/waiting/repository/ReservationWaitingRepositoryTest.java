@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.ReservationSlot;
@@ -90,7 +92,7 @@ class ReservationWaitingRepositoryTest {
                 new ReservationWaiting(null, "브라운",
                         new ReservationSlot(LocalDate.of(2026, 5, 1), nonExistentTime, theme),
                         LocalDate.of(2026, 5, 1).atStartOfDay())
-        )).isInstanceOf(ConflictException.class);
+        )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -105,7 +107,7 @@ class ReservationWaitingRepositoryTest {
                 new ReservationWaiting(null, "브라운",
                         new ReservationSlot(LocalDate.of(2026, 5, 1), time, nonExistentTheme),
                         LocalDate.of(2026, 5, 1).atStartOfDay())
-        )).isInstanceOf(ConflictException.class);
+        )).isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test

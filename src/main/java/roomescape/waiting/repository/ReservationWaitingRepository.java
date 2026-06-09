@@ -2,13 +2,13 @@ package roomescape.waiting.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.ReservationSlot;
-import roomescape.waiting.exception.ReservationWaitingErrorCode;
 import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.exception.ReservationWaitingErrorCode;
 
 @Repository
 public class ReservationWaitingRepository {
@@ -22,7 +22,7 @@ public class ReservationWaitingRepository {
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
         try {
             return reservationWaitingDao.save(reservationWaiting);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING);
         }
     }

@@ -3,6 +3,7 @@ package roomescape.theme.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.ConflictException;
 import roomescape.theme.domain.Theme;
@@ -20,7 +21,7 @@ public class ThemeRepository {
     public Theme save(Theme theme) {
         try {
             return themeDao.save(theme);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME);
         }
     }
