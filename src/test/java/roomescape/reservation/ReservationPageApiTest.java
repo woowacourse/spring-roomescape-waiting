@@ -115,7 +115,7 @@ class ReservationPageApiTest {
     }
 
     @Test
-    void 대기자가_있는_예약_취소_시_에러코드와_함께_리다이렉트한다() {
+    void 대기자가_있는_예약을_취소하면_1순위_대기가_예약으로_전환된다() {
         createTheme(1L, "미술관의 밤");
         createReservationTime(1L, "10:00:00");
         createReservation("brown", LocalDate.now().plusDays(1), 1L, 1L);
@@ -126,8 +126,14 @@ class ReservationPageApiTest {
                 .formParam("reservationName", "brown")
                 .when().post("/pages/user/reservations/1/delete")
                 .then().log().all()
-                .statusCode(302)
-                .header("Location", containsString("errorCode=RESERVATION_HAS_WAITINGS"));
+                .statusCode(302);
+
+        String owner = jdbcTemplate.queryForObject(
+                "SELECT name FROM reservation WHERE id = 1", String.class);
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1", Integer.class);
+        org.assertj.core.api.Assertions.assertThat(owner).isEqualTo("aru");
+        org.assertj.core.api.Assertions.assertThat(waitingCount).isZero();
     }
 
     @Test
@@ -192,7 +198,7 @@ class ReservationPageApiTest {
                 .when().post("/pages/user/reservations/waitings")
                 .then().log().all()
                 .statusCode(302)
-                .header("Location", containsString("errorCode=RESERVATION_WAITING_DUPLICATED"));
+                .header("Location", containsString("errorCode=RESERVATION_WAITING_BY_RESERVER"));
     }
 
     private void createTheme(final long id, final String name) {

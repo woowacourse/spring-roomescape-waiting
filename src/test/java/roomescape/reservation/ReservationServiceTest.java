@@ -10,13 +10,16 @@ import static org.mockito.Mockito.when;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
@@ -108,12 +111,15 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 삭제한다")
+    @DisplayName("대기자가 없는 예약은 삭제된다")
     void deleteById() {
         Fixture fixture = new Fixture();
-        when(fixture.reservationRepository.deleteById(1L)).thenReturn(1);
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.parse("2026-08-06"), theme, time);
+        when(fixture.reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        fixture.reservationService.deleteById(1L);
+        fixture.reservationService.cancelById(1L);
 
         verify(fixture.reservationRepository).deleteById(1L);
     }
@@ -122,18 +128,31 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약은 삭제할 수 없다")
     void deleteByIdNotFound() {
         Fixture fixture = new Fixture();
-        when(fixture.reservationRepository.deleteById(1L)).thenReturn(0);
+        when(fixture.reservationRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.deleteById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.cancelById(1L));
     }
 
     @Test
-    @DisplayName("대기자가 있는 예약은 삭제할 수 없다")
-    void deleteByIdWithWaitings() {
+    @DisplayName("대기자가 있는 예약을 삭제하면 1순위 대기가 예약으로 승격된다")
+    void deleteByIdPromotesEarliestWaiting() {
         Fixture fixture = new Fixture();
-        when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.parse("2026-08-06"), theme, time);
+        ReservationWaiting earliest = ReservationWaiting
+                .createNew(reservation, "아루", LocalDateTime.now(CLOCK))
+                .withId(5L);
+        when(fixture.reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(fixture.reservationWaitingRepository.findEarliestByReservationId(1L))
+                .thenReturn(Optional.of(earliest));
 
-        assertThrows(ConflictException.class, () -> fixture.reservationService.deleteById(1L));
+        fixture.reservationService.cancelById(1L);
+
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(fixture.reservationRepository).update(captor.capture());
+        assertThat(captor.getValue().getName()).isEqualTo("아루");
+        verify(fixture.reservationWaitingRepository).deleteById(5L);
     }
 
     @Test
@@ -150,25 +169,31 @@ class ReservationServiceTest {
 
         assertThrows(
                 ConflictException.class,
-                () -> fixture.reservationService.deleteByIdAndName(1L, "쿠다")
+                () -> fixture.reservationService.cancelByIdAndName(1L, "쿠다")
         );
     }
 
     @Test
-    @DisplayName("대기자가 있는 내 예약은 취소할 수 없다")
-    void deleteByIdAndNameWithWaitings() {
+    @DisplayName("대기자가 있는 내 예약을 취소하면 1순위 대기가 예약으로 승격된다")
+    void deleteByIdAndNamePromotesEarliestWaiting() {
         Fixture fixture = new Fixture();
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
         Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(CLOCK).plusDays(1), theme, time);
+        ReservationWaiting earliest = ReservationWaiting
+                .createNew(reservation, "아루", LocalDateTime.now(CLOCK))
+                .withId(5L);
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
-        when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
+        when(fixture.reservationWaitingRepository.findEarliestByReservationId(1L))
+                .thenReturn(Optional.of(earliest));
 
-        assertThrows(
-                ConflictException.class,
-                () -> fixture.reservationService.deleteByIdAndName(1L, "쿠다")
-        );
+        fixture.reservationService.cancelByIdAndName(1L, "쿠다");
+
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(fixture.reservationRepository).update(captor.capture());
+        assertThat(captor.getValue().getName()).isEqualTo("아루");
+        verify(fixture.reservationWaitingRepository).deleteById(5L);
     }
 
     @Test

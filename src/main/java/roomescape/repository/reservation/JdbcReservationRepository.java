@@ -152,12 +152,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation update(final Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?
+                SET name = ?, date = ?, time_id = ?
                 WHERE id = ?
                 """;
 
         jdbcTemplate.update(
                 sql,
+                reservation.getName(),
                 Date.valueOf(reservation.getDate()),
                 reservation.getTime().getId(),
                 reservation.getId()
@@ -238,13 +239,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Long> findReservationIdByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId) {
+    public Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId) {
         final String sql = """
-                              SELECT id FROM reservation
-                              WHERE date = ? AND theme_id = ? AND time_id = ?
-                          """;
+                SELECT r.id,
+                       r.name AS reservation_name,
+                       r.date,
+                       rt.id AS time_id,
+                       rt.start_at,
+                       t.id AS theme_id,
+                       t.name AS theme_name,
+                       t.description,
+                       t.thumbnail_url
+                FROM reservation AS r
+                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
+                INNER JOIN theme AS t ON r.theme_id = t.id
+                WHERE r.date = ? AND r.theme_id = ? AND r.time_id = ?
+                """;
 
-        return jdbcTemplate.queryForList(sql, Long.class, Date.valueOf(date), themeId, timeId)
+        return jdbcTemplate.query(sql, reservationRowMapper, Date.valueOf(date), themeId, timeId)
                 .stream()
                 .findFirst();
     }

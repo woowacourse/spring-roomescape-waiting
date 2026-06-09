@@ -7,13 +7,13 @@ import roomescape.domain.reservation.Reservation;
 public class ReservationWaiting {
     private final Long id;
     private final Reservation reservation;
-    private final String name;
+    private final ReserverName name;
     private final LocalDateTime requestedAt;
 
     private ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestedAt) {
         this.id = id;
         this.reservation = reservation;
-        this.name = ReserverName.from(name).value();
+        this.name = ReserverName.from(name);
         this.requestedAt = requestedAt;
     }
 
@@ -22,7 +22,7 @@ public class ReservationWaiting {
     }
 
     public ReservationWaiting withId(final Long id) {
-        return new ReservationWaiting(id, this.reservation, this.name, this.requestedAt);
+        return new ReservationWaiting(id, this.reservation, this.name.value(), this.requestedAt);
     }
 
     public Long getId() {
@@ -34,7 +34,7 @@ public class ReservationWaiting {
     }
 
     public String getName() {
-        return name;
+        return name.value();
     }
 
     public LocalDateTime getRequestedAt() {

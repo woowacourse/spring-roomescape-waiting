@@ -47,9 +47,8 @@ class ReservationWaitingServiceTest {
         );
 
         Reservation reservation = createReservation();
-        when(reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(DATE, 1L, 1L))
-                .thenReturn(Optional.of(1L));
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByDateAndThemeIdAndTimeId(DATE, 1L, 1L))
+                .thenReturn(Optional.of(reservation));
     }
 
     @Test
@@ -66,7 +65,7 @@ class ReservationWaitingServiceTest {
     @Test
     @DisplayName("예약이 없는 슬롯에는 대기를 생성할 수 없다")
     void saveWithoutReservation() {
-        when(reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(DATE, 1L, 1L))
+        when(reservationRepository.findByDateAndThemeIdAndTimeId(DATE, 1L, 1L))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.save("아루", DATE, 1L, 1L))

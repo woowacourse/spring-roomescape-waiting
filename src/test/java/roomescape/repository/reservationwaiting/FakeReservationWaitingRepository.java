@@ -1,7 +1,9 @@
 package roomescape.repository.reservationwaiting;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 
@@ -25,6 +27,19 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
         }
         store.remove(id);
         return 1;
+    }
+
+    @Override
+    public int deleteById(final long id) {
+        return store.remove(id) != null ? 1 : 0;
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findEarliestByReservationId(final long reservationId) {
+        return store.values().stream()
+                .filter(waiting -> waiting.getReservation().getId().equals(reservationId))
+                .min(Comparator.comparing(ReservationWaiting::getRequestedAt)
+                        .thenComparing(ReservationWaiting::getId));
     }
 
     @Override

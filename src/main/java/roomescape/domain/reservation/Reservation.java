@@ -41,6 +41,10 @@ public class Reservation {
         return new Reservation(this.id, this.name, date, this.theme, time);
     }
 
+    public Reservation changeOwnerTo(final String newOwnerName) {
+        return new Reservation(this.id, newOwnerName, this.date, this.theme, this.time);
+    }
+
     public boolean hasName(final String name) {
         return this.name.equals(name);
     }

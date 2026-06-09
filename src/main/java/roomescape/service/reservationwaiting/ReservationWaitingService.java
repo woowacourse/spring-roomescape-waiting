@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.exception.ConflictException;
@@ -28,9 +29,9 @@ public class ReservationWaitingService {
         this.clock = clock;
     }
 
+    @Transactional
     public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
-        Long reservationId = findReservationId(date, themeId, timeId);
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "예약 정보가 없으면 대기 생성이 불가능합니다."
@@ -50,7 +51,7 @@ public class ReservationWaitingService {
     private void validateWaitableName(final Reservation reservation, final String waitingName) {
         if (reservation.getName().equals(waitingName)) {
             throw new ConflictException(
-                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    ErrorCode.RESERVATION_WAITING_BY_RESERVER,
                     "이미 예약한 사람은 같은 예약에 대기할 수 없습니다."
             );
         }
@@ -63,14 +64,7 @@ public class ReservationWaitingService {
         }
     }
 
-    private Long findReservationId(final LocalDate date, final Long themeId, final Long timeId) {
-        return reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, themeId, timeId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.RESERVATION_NOT_FOUND,
-                        "예약 정보가 없으면 대기 생성이 불가능합니다."
-                ));
-    }
-
+    @Transactional
     public void deleteByIdAndName(Long waitingId, String name) {
         int affectedRowCount = reservationWaitingRepository.deleteByIdAndName(waitingId, name);
 
