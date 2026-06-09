@@ -265,6 +265,11 @@ public class ReservationServiceTest {
                 2L
         );
 
+        given(timeDao.selectById(request.timeId()))
+                .willReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(12, 0))));
+        given(themeDao.existsById(request.themeId())).willReturn(true);
+        given(reservationDao.existsByThemeIdAndDateAndTimeId(request.themeId(), request.date(), request.timeId()))
+                .willReturn(false);
         given(reservationDao.lockById(reservationId))
                 .willReturn(Optional.of(reservationId));
         given(reservationDao.selectById(reservationId))
@@ -291,6 +296,11 @@ public class ReservationServiceTest {
                 2L
         );
 
+        given(timeDao.selectById(request.timeId()))
+                .willReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(10, 0))));
+        given(themeDao.existsById(request.themeId())).willReturn(true);
+        given(reservationDao.existsByThemeIdAndDateAndTimeId(request.themeId(), request.date(), request.timeId()))
+                .willReturn(false);
         given(reservationDao.lockById(notFoundId)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
@@ -307,13 +317,7 @@ public class ReservationServiceTest {
     void 변경시_존재하지_않는_시간이면_예외발생() {
         Long reservationId = 1L;
         String name = "로치";
-        Reservation origin = new Reservation(
-                reservationId, name, 1L, LocalDate.now().plusDays(2),
-                new ReservationTime(3L, LocalTime.of(10, 0))
-        );
 
-        given(reservationDao.lockById(reservationId)).willReturn(Optional.of(reservationId));
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(anyLong())).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.modifyDateTimeByName(
@@ -327,13 +331,7 @@ public class ReservationServiceTest {
         Long reservationId = 1L;
         String name = "로치";
         Long timeId = 2L;
-        Reservation origin = new Reservation(
-                reservationId, name, 1L, LocalDate.now().plusDays(2),
-                new ReservationTime(3L, LocalTime.of(10, 0))
-        );
 
-        given(reservationDao.lockById(reservationId)).willReturn(Optional.of(reservationId));
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
 
@@ -349,13 +347,7 @@ public class ReservationServiceTest {
         String name = "로치";
         Long themeId = 999L;
         Long timeId = 2L;
-        Reservation origin = new Reservation(
-                reservationId, name, 1L, LocalDate.now().plusDays(2),
-                new ReservationTime(3L, LocalTime.of(10, 0))
-        );
 
-        given(reservationDao.lockById(reservationId)).willReturn(Optional.of(reservationId));
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
         given(themeDao.existsById(themeId)).willReturn(false);
@@ -373,13 +365,7 @@ public class ReservationServiceTest {
         Long themeId = 1L;
         Long timeId = 2L;
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation origin = new Reservation(
-                reservationId, name, themeId, LocalDate.now().plusDays(2),
-                new ReservationTime(3L, LocalTime.of(10, 0))
-        );
 
-        given(reservationDao.lockById(reservationId)).willReturn(Optional.of(reservationId));
-        given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));
         given(timeDao.selectById(timeId))
                 .willReturn(Optional.of(new ReservationTime(timeId, LocalTime.of(10, 0))));
         given(themeDao.existsById(themeId)).willReturn(true);
