@@ -33,14 +33,16 @@ CREATE TABLE reservation
 
 CREATE TABLE reservation_waiting
 (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    name           VARCHAR(255) NOT NULL,
-    reservation_id BIGINT       NOT NULL,
-    created_at     TIMESTAMP    NOT NULL,
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    name       VARCHAR(255) NOT NULL,
+    date       DATE         NOT NULL,
+    time_id    BIGINT       NOT NULL,
+    theme_id   BIGINT       NOT NULL,
+    created_at TIMESTAMP    NOT NULL,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
-        ON DELETE CASCADE,
-    CONSTRAINT unique_reservation_waiting_name_reservation
-        UNIQUE (reservation_id, name)
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT unique_reservation_waiting_date_time_theme_name
+        UNIQUE (date, theme_id, time_id, name)
 );

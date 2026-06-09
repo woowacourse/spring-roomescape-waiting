@@ -23,7 +23,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
-import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
 import roomescape.repository.ReservationWaitingJdbcRepository;
 import roomescape.repository.ReservationWaitingQueryJdbcRepository;
@@ -80,76 +79,52 @@ class ReservationWaitingJdbcRepositoryTest {
     void save는_생성된_id를_부여해_반환한다() {
         ReservationWaiting waiting = waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT);
 
-        ReservationWaiting saved = repository.save(waiting, reservation.getId());
+        ReservationWaiting saved = repository.save(waiting);
 
         assertThat(saved.getId()).isNotNull();
     }
 
     @Test
     void 같은_예약에_같은_이름으로_대기를_저장하면_ConflictException을_던진다() {
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         ReservationWaiting duplicated = waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusSeconds(1));
 
-        assertThatThrownBy(() -> repository.save(duplicated, reservation.getId()))
+        assertThatThrownBy(() -> repository.save(duplicated))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("이미 대기");
     }
 
     @Test
-    void 존재하지_않는_예약에_대기를_저장하면_NotFoundException을_던진다() {
-        ReservationWaiting waiting = waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT);
+    void 같은_슬롯에_먼저_신청한_대기가_있으면_다음_순번을_부여한다() {
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
-        assertThatThrownBy(() -> repository.save(waiting, 9999L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("예약을 찾을 수 없습니다");
-    }
-
-    @Test
-    void 같은_예약에_먼저_신청한_대기가_있으면_다음_순번을_부여한다() {
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
-
-        ReservationWaiting second = repository.save(
-                waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
+        ReservationWaiting second = repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT));
         ReservationWaitingWithOrder found = queryRepository.findById(second.getId()).orElseThrow();
 
         assertThat(found.order()).isEqualTo(2);
     }
 
     @Test
-    void existBy는_같은_이름과_예약의_대기가_있으면_true를_반환한다() {
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
+    void existsBy는_같은_이름과_슬롯의_대기가_있으면_true를_반환한다() {
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
-        assertThat(repository.existBy(member("민욱"), reservation.getId())).isTrue();
+        assertThat(repository.existsBy(member("민욱"), reservation.getSlot())).isTrue();
     }
 
     @Test
-    void existBy는_일치하는_대기가_없으면_false를_반환한다() {
-        assertThat(repository.existBy(member("민욱"), reservation.getId())).isFalse();
+    void existsBy는_일치하는_대기가_없으면_false를_반환한다() {
+        assertThat(repository.existsBy(member("민욱"), reservation.getSlot())).isFalse();
     }
 
     @Test
     void findById는_저장된_대기를_반환한다() {
-        ReservationWaiting saved = repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
+        ReservationWaiting saved = repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         Optional<ReservationWaiting> found = repository.findById(saved.getId());
 
         assertThat(found).isPresent();
-        assertThat(found.get().getName()).isEqualTo("민욱");
+        assertThat(found.get().getWaiter()).isEqualTo(member("민욱"));
         assertThat(found.get().getSlot()).isEqualTo(reservation.getSlot());
     }
 
@@ -159,28 +134,30 @@ class ReservationWaitingJdbcRepositoryTest {
     }
 
     @Test
-    void findByName은_같은_예약의_대기_순번을_계산해_반환한다() {
-        repository.save(
-                waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)),
-                reservation.getId()
-        );
+    void findFirstBySlot은_생성_ID가_가장_작은_대기를_반환한다() {
+        repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
+        repository.save(waiting("밀란", reservation.getSlot(), WAITING_CREATED_AT));
+
+        Optional<ReservationWaiting> found = repository.findFirstBySlot(reservation.getSlot());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getWaiter()).isEqualTo(member("브라운"));
+    }
+
+    @Test
+    void findByName은_같은_슬롯의_대기_순번을_계산해_반환한다() {
+        repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT));
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
 
         List<ReservationWaitingWithOrder> found = queryRepository.findByMember(member("민욱"));
 
         assertThat(found).hasSize(1);
-        assertThat(found.get(0).order()).isEqualTo(2);
+        assertThat(found.getFirst().order()).isEqualTo(2);
     }
 
     @Test
     void deleteById_이후_findById는_빈_Optional을_반환한다() {
-        ReservationWaiting saved = repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT),
-                reservation.getId()
-        );
+        ReservationWaiting saved = repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         repository.deleteById(saved.getId());
 

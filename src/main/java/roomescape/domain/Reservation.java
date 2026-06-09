@@ -48,6 +48,17 @@ public class Reservation {
         );
     }
 
+    public static Reservation promoteFrom(
+            Member waiter,
+            Slot slot
+    ) {
+        return new Reservation(
+                null,
+                waiter,
+                slot
+        );
+    }
+
     private static void validateCreatable(Slot slot, LocalDateTime now) {
         if (slot.isPast(now)) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_CREATE_REJECTED);
@@ -69,7 +80,7 @@ public class Reservation {
         );
     }
 
-    public void cancelBy(Member member, LocalDateTime now) {
+    public void validateCancellableBy(Member member, LocalDateTime now) {
         validateOwner(member);
         validatePast(now, PAST_RESERVATION_CANCEL_REJECTED);
     }

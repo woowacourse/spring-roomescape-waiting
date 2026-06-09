@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Slot;
+import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 
 @Service
+@Transactional
 public class ReservationCommandService {
 
     private final ReservationRepository reservationRepository;
@@ -23,7 +26,6 @@ public class ReservationCommandService {
         this.clock = clock;
     }
 
-    @Transactional
     public Reservation save(Member reserver, Slot slot) {
         Reservation reservation = Reservation.createWith(
                 reserver,
@@ -34,7 +36,15 @@ public class ReservationCommandService {
         return reservationRepository.save(reservation);
     }
 
-    @Transactional
+    public void promote(ReservationWaiting waiting) {
+        Reservation reservation = Reservation.promoteFrom(
+                waiting.getWaiter(),
+                waiting.getSlot()
+        );
+
+        reservationRepository.save(reservation);
+    }
+
     public Reservation updateMine(Reservation existing, Member requester, Slot targetSlot) {
         Reservation updated = existing.updateWith(
                 requester,
@@ -45,14 +55,17 @@ public class ReservationCommandService {
         return reservationRepository.update(updated);
     }
 
-    @Transactional
-    public void delete(Long id) {
-        reservationRepository.deleteById(id);
+    public Reservation getByIdForUpdate(Long id) {
+        return reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new NotFoundException("존재하지않는 예약입니다. Id: " + id));
     }
 
-    @Transactional
+    public void delete(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+    }
+
     public void deleteMine(Reservation reservation, Member requester) {
-        reservation.cancelBy(
+        reservation.validateCancellableBy(
                 requester,
                 now()
         );

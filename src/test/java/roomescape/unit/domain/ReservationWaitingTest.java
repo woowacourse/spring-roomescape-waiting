@@ -60,7 +60,7 @@ class ReservationWaitingTest {
                 WAITING_CREATED_AT
         );
 
-        assertThat(waiting.getName()).isEqualTo("민욱");
+        assertThat(waiting.getWaiter()).isEqualTo(member("민욱"));
         assertThat(waiting.getCreatedAt()).isEqualTo(WAITING_CREATED_AT);
         assertThat(waiting.getSlot()).isEqualTo(SLOT);
     }

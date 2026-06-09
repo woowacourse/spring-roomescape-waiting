@@ -10,7 +10,6 @@ import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.Theme;
 
 @Service
-@Transactional(readOnly = true)
 public class ThemeApplicationService {
 
     private final ThemeCommandService themeCommandService;
@@ -35,10 +34,12 @@ public class ThemeApplicationService {
         return themeCommandService.save(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findAll() {
         return themeQueryService.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findPopular(LocalDate now, Integer days, Integer limit) {
         return themeQueryService.findPopular(
                 now,

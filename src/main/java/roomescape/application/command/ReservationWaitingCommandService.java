@@ -10,6 +10,7 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.repository.ReservationWaitingRepository;
 
 @Service
+@Transactional
 public class ReservationWaitingCommandService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
@@ -23,7 +24,6 @@ public class ReservationWaitingCommandService {
         this.clock = clock;
     }
 
-    @Transactional
     public ReservationWaiting save(Member waiter, Reservation reservation) {
         ReservationWaiting reservationWaiting = ReservationWaiting.createWith(
                 waiter,
@@ -32,13 +32,13 @@ public class ReservationWaitingCommandService {
                 LocalDateTime.now(clock)
         );
 
-        return reservationWaitingRepository.save(
-                reservationWaiting,
-                reservation.getId()
-        );
+        return reservationWaitingRepository.save(reservationWaiting);
     }
 
-    @Transactional
+    public void delete(ReservationWaiting reservationWaiting) {
+        reservationWaitingRepository.deleteById(reservationWaiting.getId());
+    }
+
     public void deleteMine(ReservationWaiting reservationWaiting, Member requester) {
         reservationWaiting.cancelBy(requester);
 

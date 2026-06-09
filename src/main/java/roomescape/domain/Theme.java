@@ -16,9 +16,9 @@ public class Theme {
             String thumbnailImageUrl
     ) {
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.thumbnailImageUrl = thumbnailImageUrl;
+        this.name = Objects.requireNonNull(name);
+        this.description = Objects.requireNonNull(description);
+        this.thumbnailImageUrl = Objects.requireNonNull(thumbnailImageUrl);
     }
 
     public Theme(

@@ -132,14 +132,14 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void existsByDateAndTimeIdAndThemeId는_해당_슬롯에_예약이_있으면_true를_반환한다() {
+    void findByIdForUpdate는_해당_id의_예약을_반환한다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
-        LocalDate date = RESERVATION_DATE;
-        Slot targetSlot = slot(date, time, theme);
-        repository.save(reservation("브라운", date, time, theme));
+        Reservation saved = repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
 
-        assertThat(repository.existsBySlot(targetSlot)).isTrue();
+        Optional<Reservation> result = repository.findByIdForUpdate(saved.getId());
+
+        assertThat(result).contains(saved);
     }
 
     @Test
@@ -169,19 +169,19 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void deleteById는_예약에_달린_대기도_함께_삭제한다() {
+    void deleteById는_예약만_삭제하고_같은_슬롯의_대기는_남긴다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         Reservation saved = repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
         jdbcTemplate.update(
-                "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)",
-                "민욱", Timestamp.valueOf(WAITING_CREATED_AT), saved.getId()
+                "INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)",
+                "민욱", RESERVATION_DATE, timeId, themeId, Timestamp.valueOf(WAITING_CREATED_AT)
         );
 
         repository.deleteById(saved.getId());
 
         Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
-        assertThat(waitingCount).isZero();
+        assertThat(waitingCount).isOne();
     }
 
     @Test

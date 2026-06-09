@@ -2,6 +2,7 @@ package roomescape.e2e;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static roomescape.application.ReservationModificationUseCase.CANNOT_MOVE_TO_RESERVED_SLOT;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -551,7 +552,9 @@ class ReservationApiTest {
                 .body(body)
                 .when().put("/reservations/me/" + reservationId + "?name=민욱")
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(409)
+                .body("type", is(ProblemType.CONFLICT.uri().toString()))
+                .body("detail", is(CANNOT_MOVE_TO_RESERVED_SLOT));
     }
 
     @Test

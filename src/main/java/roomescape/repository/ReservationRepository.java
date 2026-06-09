@@ -16,9 +16,9 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsBySlot(Slot slot);
-
     Optional<Reservation> findById(Long id);
+
+    Optional<Reservation> findByIdForUpdate(Long id);
 
     Optional<Reservation> findBySlot(Slot slot);
 

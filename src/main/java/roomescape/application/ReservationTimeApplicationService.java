@@ -15,7 +15,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.projection.ReservationTimeAvailability;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationTimeApplicationService {
 
     private final ReservationTimeCommandService reservationTimeCommandService;
@@ -42,10 +41,12 @@ public class ReservationTimeApplicationService {
         return reservationTimeCommandService.save(time);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTime> findAll() {
         return reservationTimeQueryService.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeAvailability> findWithAvailability(LocalDate date, Long themeId) {
         List<ReservationTime> times = reservationTimeQueryService.findAll();
         Theme theme = themeQueryService.getById(themeId);

@@ -151,22 +151,14 @@ VALUES ('민욱', '2026-06-04', 4, 3);
 
 -- reservation_waiting
 -- 미래 예약 슬롯에 대한 대기 데이터
-INSERT INTO reservation_waiting (name, created_at, reservation_id)
-SELECT '민욱', '2026-05-27 09:00:00', id
-FROM reservation
-WHERE name = '윤채영' AND date = '2026-06-03' AND time_id = 9 AND theme_id = 8;
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
+VALUES ('민욱', '2026-06-03', 9, 8, '2026-05-27 09:00:00');
 
-INSERT INTO reservation_waiting (name, created_at, reservation_id)
-SELECT '브라운', '2026-05-27 09:05:00', id
-FROM reservation
-WHERE name = '윤채영' AND date = '2026-06-03' AND time_id = 9 AND theme_id = 8;
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
+VALUES ('브라운', '2026-06-03', 9, 8, '2026-05-27 09:05:00');
 
-INSERT INTO reservation_waiting (name, created_at, reservation_id)
-SELECT '티뉴', '2026-05-27 09:10:00', id
-FROM reservation
-WHERE name = '임재현' AND date = '2026-06-03' AND time_id = 5 AND theme_id = 6;
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
+VALUES ('티뉴', '2026-06-03', 5, 6, '2026-05-27 09:10:00');
 
-INSERT INTO reservation_waiting (name, created_at, reservation_id)
-SELECT '민욱', '2026-05-27 09:15:00', id
-FROM reservation
-WHERE name = '송하은' AND date = '2026-06-04' AND time_id = 6 AND theme_id = 10;
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
+VALUES ('민욱', '2026-06-04', 6, 10, '2026-05-27 09:15:00');
