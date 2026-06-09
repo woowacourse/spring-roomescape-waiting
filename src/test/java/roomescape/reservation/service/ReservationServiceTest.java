@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
@@ -26,7 +25,6 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.wating.domain.Waiting;
 import roomescape.wating.repository.WaitingRepository;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,9 +38,6 @@ class ReservationServiceTest {
 
     @Autowired
     ReservationService reservationService;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
@@ -401,9 +396,9 @@ class ReservationServiceTest {
         final long slotId = insertReservationSlot(futureDate, timeId, themeId);
         insertReservation("예약자", "owner@example.com", slotId);
 
-        insertWaiting(1L, "코로구", "korogoo@example.com", slotId, LocalDateTime.now().minusMinutes(2));
-        insertWaiting(2L, "재키", "jaekkii@example.com", slotId, LocalDateTime.now().minusMinutes(1));
-        insertWaiting(3L, "브라운", "customer@example.com", slotId, LocalDateTime.now());
+        insertWaiting("코로구", "korogoo@example.com", slotId, LocalDateTime.now().minusMinutes(2));
+        insertWaiting("재키", "jaekkii@example.com", slotId, LocalDateTime.now().minusMinutes(1));
+        insertWaiting("브라운", "customer@example.com", slotId, LocalDateTime.now());
 
         // when
         ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomer(
@@ -427,9 +422,9 @@ class ReservationServiceTest {
         insertReservation("예약자", "owner@example.com", slotId);
         final LocalDateTime sameCreatedAt = LocalDateTime.now();
 
-        insertWaiting(1L, "코로구", "korogoo@example.com", slotId, sameCreatedAt);
-        insertWaiting(2L, "재키", "jaekkii@example.com", slotId, sameCreatedAt);
-        insertWaiting(3L, "영이", "customer@example.com", slotId, sameCreatedAt);
+        insertWaiting("코로구", "korogoo@example.com", slotId, sameCreatedAt);
+        insertWaiting("재키", "jaekkii@example.com", slotId, sameCreatedAt);
+        insertWaiting("영이", "customer@example.com", slotId, sameCreatedAt);
 
         // when
         ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomer(
@@ -452,16 +447,26 @@ class ReservationServiceTest {
         final long slotId = insertReservationSlot(futureDate, timeId, themeId);
         final long reservationId = insertReservation("브라운", "brown@example.com", slotId);
 
-        insertWaiting(1L, "코로구", "korogoo@example.com", slotId, LocalDateTime.now().minusMinutes(2));
-        insertWaiting(2L, "재키", "jaekkii@example.com", slotId, LocalDateTime.now().minusMinutes(1));
+        final long firstWaitingId = insertWaiting(
+                "코로구",
+                "korogoo@example.com",
+                slotId,
+                LocalDateTime.now().minusMinutes(2)
+        );
+        final long secondWaitingId = insertWaiting(
+                "재키",
+                "jaekkii@example.com",
+                slotId,
+                LocalDateTime.now().minusMinutes(1)
+        );
 
         // when
         reservationService.cancelByCustomer(reservationId, "브라운", "brown@example.com");
 
         // then
         assertThat(findReservationBySlotId(slotId).getCustomerName()).isEqualTo("코로구");
-        assertThat(waitingRepository.findById(1L)).isEmpty();
-        assertThat(waitingRepository.findById(2L)).isPresent();
+        assertThat(waitingRepository.findById(firstWaitingId)).isEmpty();
+        assertThat(waitingRepository.findById(secondWaitingId)).isPresent();
     }
 
     @Test
@@ -475,16 +480,16 @@ class ReservationServiceTest {
         final long reservationId = insertReservation("브라운", "brown@example.com", slotId);
         final LocalDateTime sameCreatedAt = LocalDateTime.now();
 
-        insertWaiting(1L, "코로구", "korogoo@example.com", slotId, sameCreatedAt);
-        insertWaiting(2L, "재키", "jaekkii@example.com", slotId, sameCreatedAt);
+        final long firstWaitingId = insertWaiting("코로구", "korogoo@example.com", slotId, sameCreatedAt);
+        final long secondWaitingId = insertWaiting("재키", "jaekkii@example.com", slotId, sameCreatedAt);
 
         // when
         reservationService.cancelByCustomer(reservationId, "브라운", "brown@example.com");
 
         // then
         assertThat(findReservationBySlotId(slotId).getCustomerName()).isEqualTo("코로구");
-        assertThat(waitingRepository.findById(1L)).isEmpty();
-        assertThat(waitingRepository.findById(2L)).isPresent();
+        assertThat(waitingRepository.findById(firstWaitingId)).isEmpty();
+        assertThat(waitingRepository.findById(secondWaitingId)).isPresent();
     }
 
     @Test
@@ -558,7 +563,7 @@ class ReservationServiceTest {
                 .getId();
     }
 
-    private void insertWaiting(
+    private long insertWaiting(
             final String customerName,
             final String customerEmail,
             final long slotId,
@@ -567,35 +572,13 @@ class ReservationServiceTest {
         final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(slotId)
                 .orElseThrow();
 
-        waitingRepository.save(Waiting.of(
+        return waitingRepository.save(Waiting.of(
                 null,
                 customerName,
                 customerEmail,
                 slot,
                 createdAt
         ));
-    }
-
-    private void insertWaiting(
-            final long id,
-            final String customerName,
-            final String customerEmail,
-            final long slotId,
-            final LocalDateTime createdAt
-    ) {
-        final String sql = """
-                INSERT INTO waiting (id, customer_name, customer_email, slot_id, created_at)
-                VALUES (?, ?, ?, ?, ?)
-                """;
-
-        jdbcTemplate.update(
-                sql,
-                id,
-                customerName,
-                customerEmail,
-                slotId,
-                Timestamp.valueOf(createdAt)
-        );
     }
 
     private Reservation findReservationBySlotId(final long slotId) {
