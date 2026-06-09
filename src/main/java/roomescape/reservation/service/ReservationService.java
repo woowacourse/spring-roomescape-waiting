@@ -10,6 +10,7 @@ import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.exception.ReservationNotOwnedException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
@@ -221,7 +222,7 @@ public class ReservationService {
             final String customerEmail
     ) {
         if (!reservation.isOwnedBy(customerName, customerEmail)) {
-            throw new ReservationNotFoundException();
+            throw new ReservationNotOwnedException();
         }
     }
 

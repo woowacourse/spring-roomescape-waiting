@@ -18,6 +18,7 @@ import roomescape.wating.domain.Waiting;
 import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.wating.domain.exception.WaitingNotFoundException;
+import roomescape.wating.domain.exception.WaitingNotOwnedException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.controller.dto.request.WaitingCreateRequest;
@@ -79,7 +80,7 @@ public class WaitingService {
             final String customerEmail
     ) {
         if (!waiting.isOwnedBy(customerName, customerEmail)) {
-            throw new WaitingNotFoundException();
+            throw new WaitingNotOwnedException();
         }
         if (!waiting.isCancelable(LocalDateTime.now())) {
             throw new PastReservationWaitingCancellationException();
