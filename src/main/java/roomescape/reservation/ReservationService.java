@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationtime.ReservationTimeDao;
 import roomescape.reservationwait.ReservationWaitDao;
 import roomescape.member.Member;
+import roomescape.reservationhistory.ReservationHistoryService;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -21,12 +22,15 @@ public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ReservationWaitDao reservationWaitDao;
+    private final ReservationHistoryService reservationHistoryService;
 
     public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao,
-                              ReservationWaitDao reservationWaitDao) {
+                              ReservationWaitDao reservationWaitDao,
+                              ReservationHistoryService reservationHistoryService) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.reservationWaitDao = reservationWaitDao;
+        this.reservationHistoryService = reservationHistoryService;
     }
 
     public List<Reservation> getReservations(Long memberId) {
@@ -42,7 +46,9 @@ public class ReservationService {
         ReservationTime time = findReservationTime(timeId);
         Reservation candidate = Reservation.create(memberId, date, time, themeId, storeId);
         try {
-            return reservationDao.insert(candidate);
+            Reservation saved = reservationDao.insert(candidate);
+            reservationHistoryService.recordCreated(saved, memberId);
+            return saved;
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistsException();
         }
@@ -54,7 +60,9 @@ public class ReservationService {
         ReservationTime newTime = findReservationTime(timeId);
         Reservation updated = existing.changeTo(memberId, date, newTime);
         try {
-            return reservationDao.update(updated);
+            Reservation saved = reservationDao.update(updated);
+            reservationHistoryService.recordUpdated(saved, memberId);
+            return saved;
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistsException();
         }
@@ -66,7 +74,9 @@ public class ReservationService {
         ReservationTime newTime = findReservationTime(timeId);
         Reservation updated = existing.changeToByManager(manager, date, newTime);
         try {
-            return reservationDao.update(updated);
+            Reservation saved = reservationDao.update(updated);
+            reservationHistoryService.recordUpdated(saved, manager.getId());
+            return saved;
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistsException();
         }
@@ -76,31 +86,42 @@ public class ReservationService {
     public void deleteReservation(Long reservationId, Long memberId) {
         Reservation reservation = findReservation(reservationId);
         reservation.cancelBy(memberId);
-        deleteOrPromoteWait(reservation);
+        deleteOrPromoteWait(reservation, memberId);
     }
 
     @Transactional
     public void deleteReservationByManager(Long reservationId, Member manager) {
         Reservation reservation = findReservation(reservationId);
         reservation.validateStoreOwnership(manager);
-        reservationDao.delete(reservationId);
+        deleteOrPromoteWait(reservation, manager.getId());
     }
 
-    private void deleteOrPromoteWait(Reservation reservation) {
-        reservationWaitDao.findEarliestMemberId(reservation.getId())
+    private void deleteOrPromoteWait(Reservation reservation, Long actorId) {
+        if (reservation.isPast()) {
+            reservationWaitDao.deleteAllByReservationId(reservation.getId());
+            reservationDao.delete(reservation.getId());
+            reservationHistoryService.recordCanceled(reservation, actorId);
+            return;
+        }
+        reservationWaitDao.findEarliestMemberIdForUpdate(reservation.getId())
                 .ifPresentOrElse(
-                        waiterId -> promote(reservation, waiterId),
-                        () -> reservationDao.delete(reservation.getId()));
+                        waiterId -> promote(reservation, waiterId, actorId),
+                        () -> {
+                            reservationDao.delete(reservation.getId());
+                            reservationHistoryService.recordCanceled(reservation, actorId);
+                        });
     }
 
-    private void promote(Reservation reservation, Long waiterId) {
-        reservationDao.update(reservation.promoteTo(waiterId));
+    private void promote(Reservation reservation, Long waiterId, Long actorId) {
+        Reservation promoted = reservation.promoteTo(waiterId);
+        reservationDao.update(promoted);
         reservationWaitDao.deleteByReservationIdAndMemberId(reservation.getId(), waiterId);
+        reservationHistoryService.recordTransfer(reservation, promoted, actorId);
     }
 
     private Reservation findReservation(Long id) {
         try {
-            return reservationDao.findReservationById(id);
+            return reservationDao.findReservationByIdForUpdate(id);
         } catch (EmptyResultDataAccessException e) {
             throw new ReservationNotFoundException();
         }

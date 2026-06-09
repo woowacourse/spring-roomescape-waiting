@@ -65,3 +65,23 @@ CREATE TABLE reservation_wait
 
 CREATE INDEX idx_wait_reservation_created ON reservation_wait (reservation_id, created_at);
 CREATE INDEX idx_wait_member ON reservation_wait (member_id);
+
+CREATE TABLE reservation_history
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT       NOT NULL,
+    member_id      BIGINT       NOT NULL,
+    date           VARCHAR(255) NOT NULL,
+    time_id        BIGINT       NOT NULL,
+    theme_id       BIGINT       NOT NULL,
+    store_id       BIGINT       NOT NULL,
+    action         VARCHAR(20)  NOT NULL
+        CHECK (action IN ('CREATED', 'UPDATED', 'CANCELED', 'TRANSFERRED_IN', 'TRANSFERRED_OUT')),
+    actor_id       BIGINT       NOT NULL,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_history_member_created ON reservation_history (member_id, created_at DESC);
+CREATE INDEX idx_history_store_created ON reservation_history (store_id, created_at DESC);
+CREATE INDEX idx_history_reservation_created ON reservation_history (reservation_id, created_at);

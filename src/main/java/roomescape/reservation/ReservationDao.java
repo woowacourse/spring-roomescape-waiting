@@ -86,7 +86,7 @@ public class ReservationDao {
         return reservations;
     }
 
-    public Reservation findReservationById(Long id) {
+    public Reservation findReservationByIdForUpdate(Long id) {
         String sql = """
                 SELECT
                     r.id as reservation_id,
@@ -100,6 +100,7 @@ public class ReservationDao {
                 INNER JOIN reservation_time as t
                   ON r.time_id = t.id
                 WHERE r.id = ?
+                FOR UPDATE
                 """;
         Reservation reservation = jdbcTemplate.queryForObject(
                 sql,

@@ -3,6 +3,7 @@ package roomescape.reservationwait;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -11,6 +12,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.ReservationDao;
+import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservationwait.dto.WaitingResult;
 import roomescape.reservationwait.exception.ReservationWaitAlreadyExistsException;
 
 @JdbcTest
@@ -19,6 +22,7 @@ import roomescape.reservationwait.exception.ReservationWaitAlreadyExistsExceptio
 public class ReservationWaitServiceIntegrationTest {
 
     private static final long BROWN_ID = 1L;
+    private static final long YOUNGHEE_ID = 3L;
     private static final long RESERVATION_ID = 1L;
 
     private static final String INSERT_DEFAULT_STORE_SQL = """
@@ -47,9 +51,17 @@ public class ReservationWaitServiceIntegrationTest {
               VALUES (1, 2, '2026-12-01', 1, 1, 1);
               """;
 
-    private static final String INSERT_BROWN_WAIT_SQL = """
-              INSERT INTO reservation_wait (id, reservation_id, member_id)
-              VALUES (1, 1, 1);
+    private static final String INSERT_THREE_MEMBERS_SQL = """
+              INSERT INTO member (id, email, password, name, role)
+              VALUES (1, 'brown@email.com', 'password', '브라운', 'USER'),
+                     (2, 'jeongkong@email.com', 'password', '정콩이', 'USER'),
+                     (3, 'younghee@email.com', 'password', '영희', 'USER');
+              """;
+
+    private static final String INSERT_TIE_CREATED_AT_WAITS_SQL = """
+              INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
+              VALUES (1, 1, 1, '2026-11-01 10:00:00'),
+                     (2, 1, 3, '2026-11-01 10:00:00');
               """;
 
     private final ReservationWaitService reservationWaitService;
@@ -95,20 +107,52 @@ public class ReservationWaitServiceIntegrationTest {
             INSERT_TWO_MEMBERS_SQL,
             INSERT_DEFAULT_THEME_SQL,
             INSERT_DEFAULT_TIME_SQL,
-            INSERT_JEONGKONG_RESERVATION_SQL,
-            INSERT_BROWN_WAIT_SQL
+            INSERT_JEONGKONG_RESERVATION_SQL
     })
     void 같은_사용자는_같은_슬롯에_예약대기를_걸_수_없다() {
-        // given: BROWN이 이미 대기 중
+        // given
+        reservationWaitService.createReservationWait(BROWN_ID, RESERVATION_ID);
 
-        // when & then: 또 신청 시도 → UNIQUE 위반
+        // when & then
         assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, RESERVATION_ID))
                 .isInstanceOf(ReservationWaitAlreadyExistsException.class);
 
-        // then: 기존 대기 row 만 유지 (중복 row 안 생김)
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ? AND member_id = ?",
                 Integer.class, RESERVATION_ID, BROWN_ID);
         assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = {
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_THREE_MEMBERS_SQL,
+            INSERT_DEFAULT_THEME_SQL,
+            INSERT_DEFAULT_TIME_SQL,
+            INSERT_JEONGKONG_RESERVATION_SQL,
+            INSERT_TIE_CREATED_AT_WAITS_SQL
+    })
+    void 동일_시각_대기자라도_먼저_신청한_사용자가_앞순번을_가진다() {
+        // given: 정콩이가 예약자, BROWN(id=1)·영희(id=3)가 동일 createdAt으로 대기
+
+        // when: 각자 본인의 대기 목록 조회
+        List<WaitingResult> brownWaitings = reservationWaitService.getWaitings(BROWN_ID);
+        List<WaitingResult> youngheeWaitings = reservationWaitService.getWaitings(YOUNGHEE_ID);
+
+        // then: 먼저 INSERT 한 BROWN 이 1번, 영희가 2번
+        assertThat(brownWaitings).hasSize(1);
+        assertThat(brownWaitings.get(0).order()).isEqualTo(1L);
+
+        assertThat(youngheeWaitings).hasSize(1);
+        assertThat(youngheeWaitings.get(0).order()).isEqualTo(2L);
+    }
+
+    @Test
+    void 존재하지_않는_예약에는_대기를_걸_수_없다() {
+        // given: 빈 DB
+
+        // when & then: 없는 reservation(999) 으로 대기 신청 시도
+        assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, 999L))
+                .isInstanceOf(ReservationNotFoundException.class);
     }
 }

@@ -47,7 +47,7 @@ public class ReservationWaitService {
 
     private Reservation findReservation(Long id) {
         try {
-            return reservationDao.findReservationById(id);
+            return reservationDao.findReservationByIdForUpdate(id);
         } catch (EmptyResultDataAccessException e) {
             throw new ReservationNotFoundException();
         }

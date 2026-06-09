@@ -55,10 +55,11 @@ public class ReservationWaitDao {
                     (SELECT COUNT(*) + 1
                      FROM reservation_wait sub
                      WHERE sub.reservation_id = rw.reservation_id
-                       AND sub.created_at < rw.created_at) AS order_num
+                       AND (sub.created_at < rw.created_at
+                            OR (sub.created_at = rw.created_at AND sub.id < rw.id))) AS order_num
                 FROM reservation_wait rw
                 WHERE rw.member_id = ?
-                ORDER BY rw.created_at;
+                ORDER BY rw.created_at, rw.id;
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new WaitingProjection(
@@ -74,13 +75,19 @@ public class ReservationWaitDao {
         jdbcTemplate.update(sql, reservationId, memberId);
     }
 
-    public Optional<Long> findEarliestMemberId(Long reservationId) {
+    public void deleteAllByReservationId(Long reservationId) {
+        String sql = "DELETE FROM reservation_wait WHERE reservation_id = ?";
+        jdbcTemplate.update(sql, reservationId);
+    }
+
+    public Optional<Long> findEarliestMemberIdForUpdate(Long reservationId) {
         try {
             String sql = "SELECT member_id " +
                     "FROM reservation_wait " +
                     "WHERE reservation_id = ? " +
                     "ORDER BY created_at, id " +
-                    "LIMIT 1";
+                    "LIMIT 1 " +
+                    "FOR UPDATE";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, Long.class, reservationId));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
