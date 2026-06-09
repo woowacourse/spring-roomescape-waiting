@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.DomainPreconditions;
+import roomescape.domain.exception.RoomEscapeException;
 
 public class Wait {
 
@@ -32,6 +33,12 @@ public class Wait {
 
     public static Wait of(Long id, Wait wait) {
         return new Wait(id, wait.createdAt, wait.name, wait.reservationDate, wait.time, wait.theme);
+    }
+
+    public void validateDeletable(LocalDateTime now) {
+        if (isPast(now)) {
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
+        }
     }
 
     public Long getId() {
@@ -62,7 +69,7 @@ public class Wait {
         return this.name.equals(other.name);
     }
 
-    public boolean isPast(LocalDateTime now) {
+    private boolean isPast(LocalDateTime now) {
         if (reservationDate.isBefore(now.toLocalDate())) {
             return true;
         }

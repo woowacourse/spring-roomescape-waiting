@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.domain.exception.RoomEscapeException;
 
@@ -30,6 +31,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleNotReadable(HttpMessageNotReadableException e, Locale locale,
                                            HttpServletRequest request) {
+        log.warn("[Bad Request] {}", e.getMessage());
+
+        String detail = messageSource.getMessage("error.invalid-input", null, locale);
+        String title = messageSource.getMessage("error.title.bad-request", null, locale);
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        pd.setTitle(title);
+        pd.setInstance(URI.create(request.getRequestURI()));
+        pd.setProperty("code", "INVALID_INPUT");
+        return pd;
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ProblemDetail handleMissingParam(MissingServletRequestParameterException e, Locale locale,
+                                            HttpServletRequest request) {
         log.warn("[Bad Request] {}", e.getMessage());
 
         String detail = messageSource.getMessage("error.invalid-input", null, locale);

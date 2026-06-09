@@ -398,7 +398,7 @@ function recentWeekPeriod() {
 }
 
 function rankingUrl(period) {
-  return `/themes/ranking?start-date=${period.startDate}&end-date=${period.endDate}`;
+  return `/themes/ranking?startDate=${period.startDate}&endDate=${period.endDate}`;
 }
 
 function availableTimeUrl() {

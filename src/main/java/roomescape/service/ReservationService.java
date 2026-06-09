@@ -47,6 +47,15 @@ public class ReservationService {
         return reservationRepository.findBySlot(date, timeId, themeId);
     }
 
+    public void lockById(Long id) {
+        reservationRepository.lockById(id)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_RESERVATION));
+    }
+
+    public Optional<Long> lockBySlot(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.lockBySlot(date, timeId, themeId);
+    }
+
     public void validateReferencedTheme(Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
             throw new RoomEscapeException(DomainErrorCode.REFERENCED_THEME);

@@ -2,9 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalTime;
 import java.util.Objects;
-
-import roomescape.domain.exception.DomainPreconditions;
 import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.DomainPreconditions;
 
 public class ReservationTime {
 
@@ -25,10 +24,6 @@ public class ReservationTime {
         return new ReservationTime(id, reservationTime.startAt);
     }
 
-    private void validate(LocalTime startAt) {
-        DomainPreconditions.requireNonNull(startAt, DomainErrorCode.INVALID_INPUT, "startAt");
-    }
-
     public boolean isPast(LocalTime localTime) {
         return startAt.isBefore(localTime);
     }
@@ -39,6 +34,10 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    private void validate(LocalTime startAt) {
+        DomainPreconditions.requireNonNull(startAt, DomainErrorCode.INVALID_INPUT, "startAt");
     }
 
     @Override

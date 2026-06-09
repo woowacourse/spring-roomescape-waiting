@@ -1,9 +1,8 @@
 package roomescape.domain;
 
 import java.util.Objects;
-
-import roomescape.domain.exception.DomainPreconditions;
 import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.DomainPreconditions;
 
 public class Theme {
 
@@ -29,12 +28,6 @@ public class Theme {
         return new Theme(id, theme.name, theme.description, theme.thumbnailUrl);
     }
 
-    private void validate(String name, String description, String thumbnailUrl) {
-        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
-        DomainPreconditions.requireNonBlank(description, DomainErrorCode.INVALID_INPUT, "description");
-        DomainPreconditions.requireNonBlank(thumbnailUrl, DomainErrorCode.INVALID_INPUT, "thumbnailUrl");
-    }
-
     public Long getId() {
         return id;
     }
@@ -49,6 +42,12 @@ public class Theme {
 
     public String getThumbnailUrl() {
         return thumbnailUrl;
+    }
+
+    private void validate(String name, String description, String thumbnailUrl) {
+        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
+        DomainPreconditions.requireNonBlank(description, DomainErrorCode.INVALID_INPUT, "description");
+        DomainPreconditions.requireNonBlank(thumbnailUrl, DomainErrorCode.INVALID_INPUT, "thumbnailUrl");
     }
 
     @Override

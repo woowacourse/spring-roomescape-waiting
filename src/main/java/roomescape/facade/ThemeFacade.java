@@ -11,7 +11,6 @@ import roomescape.service.ThemeService;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
 @Service
-@Transactional(readOnly = true)
 public class ThemeFacade {
 
     private final ReservationService reservationService;

@@ -3,6 +3,7 @@ package roomescape.facade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,7 +73,7 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
+        when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
                 Optional.empty());
         when(reservationService.save(request, reservationTime, theme)).thenReturn(newReservation);
 
@@ -91,8 +92,9 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
-                Optional.of(beforeReservation));
+        when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
+                Optional.of(beforeReservation.getId()));
+        when(reservationService.findReservation(beforeReservation.getId())).thenReturn(beforeReservation);
         when(waitService.save(newWait)).thenReturn(savedWait);
         when(waitService.calculateOrder(savedWait)).thenReturn(1L);
 
@@ -121,8 +123,9 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
-                Optional.of(beforeReservation));
+        when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
+                Optional.of(beforeReservation.getId()));
+        when(reservationService.findReservation(beforeReservation.getId())).thenReturn(beforeReservation);
 
         assertThatThrownBy(() -> receptionFacade.save(request))
                 .isInstanceOf(RoomEscapeException.class)
@@ -176,6 +179,7 @@ public class ReceptionFacadeTest {
     void deleteReservationWithoutWaitTest() {
         Reservation reservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme);
 
+        doNothing().when(reservationService).lockById(reservation.getId());
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())).thenReturn(new Waits(List.of()));
@@ -193,6 +197,7 @@ public class ReceptionFacadeTest {
                 firstWait.getReservationDate(),
                 firstWait.getTime().getId(), firstWait.getTheme().getId());
 
+        doNothing().when(reservationService).lockById(reservation.getId());
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())).thenReturn(new Waits(List.of(firstWait)));
@@ -208,6 +213,7 @@ public class ReceptionFacadeTest {
         LocalDate pastReservationDate = LocalDate.of(2026, 3, 20);
         Reservation reservation = new Reservation(1L, "fizz", pastReservationDate, reservationTime, theme);
 
+        doNothing().when(reservationService).lockById(reservation.getId());
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
 
         assertThatThrownBy(() -> receptionFacade.deleteReservation(reservation.getId()))

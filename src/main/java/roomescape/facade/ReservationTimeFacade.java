@@ -16,7 +16,6 @@ import roomescape.service.ThemeService;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationTimeFacade {
 
     private final ReservationTimeService reservationTimeService;
@@ -44,6 +43,7 @@ public class ReservationTimeFacade {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(LocalDate date, Long themeId) {
         themeService.validateExistTheme(themeId);
         if (date.isBefore(LocalDate.now(clock))) {
