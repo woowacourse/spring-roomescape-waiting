@@ -1,6 +1,8 @@
 package roomescape.reservation.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -237,6 +239,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)
         ).andExpect(status().isNoContent());
+
+        verify(reservationService).updateReservation(any(), eq(1L), eq("brown"));
     }
 
     @DisplayName("내 예약 수정 시에, Authorization 헤더가 없으면 401을 반환한다.")
@@ -263,6 +267,8 @@ class ReservationControllerTest {
                 delete("/reservations/{id}", 1)
                         .header(HttpHeaders.AUTHORIZATION, "brown")
         ).andExpect(status().isNoContent());
+
+        verify(reservationService).deleteReservationById(1L, "brown");
     }
 
     @DisplayName("내 예약 삭제 시에, Authorization 헤더가 없으면 401을 반환한다.")

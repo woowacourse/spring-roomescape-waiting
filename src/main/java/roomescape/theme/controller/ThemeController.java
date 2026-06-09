@@ -42,7 +42,7 @@ public class ThemeController {
             throw new InvalidRequestValueException();
         }
 
-        List<ThemeResponse> responses = reservationService.findPopularThemes(period, limit).popularThemes()
+        List<ThemeResponse> responses = reservationService.findPopularThemes(period, limit)
                 .stream()
                 .map(ThemeResponse::from)
                 .collect(Collectors.toList());

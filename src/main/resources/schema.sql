@@ -29,6 +29,9 @@ CREATE TABLE reservation (
     UNIQUE (reservation_date, time_id, theme_id)
 );
 
+CREATE INDEX idx_reservation_name
+    ON reservation (name);
+
 CREATE TABLE reservation_waiting (
     id                 BIGINT       NOT NULL AUTO_INCREMENT,
     name               VARCHAR(255) NOT NULL,
@@ -40,3 +43,6 @@ CREATE TABLE reservation_waiting (
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (reservation_date, time_id, theme_id, name)
 );
+
+CREATE INDEX idx_reservation_waiting_name
+    ON reservation_waiting (name);

@@ -2,8 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -11,11 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
-import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.ReservationSlotHasWaitingException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.dto.PopularThemesResult;
+import roomescape.reservation.service.dto.PopularThemeResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
@@ -26,7 +23,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.InvalidTimeStartAtValueException;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.repository.ReservationTimeRepository;
 
@@ -38,51 +34,48 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final ExpiryValidator expiryValidator;
+
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationWaitingRepository reservationWaitingRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              Clock clock) {
+                              Clock clock,
+                              ExpiryValidator expiryValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.expiryValidator = expiryValidator;
     }
 
-    @Transactional
     public Reservation makeReservation(ReservationCommand command) {
         if (reservationRepository.existByDateAndTimeIdAndThemeId(
-                command.date(),
-                command.timeId(),
-                command.themeId())
-        ) {
+                command.date(), command.timeId(), command.themeId())) {
             throw new DuplicateReservationException();
         }
 
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
-                command.date(), command.timeId(), command.themeId()
-        )) {
-            throw new ReservationSlotHasWaitingException();
-        }
+        validateDoNotHaveWaiting(command.date(), command.timeId(), command.themeId());
 
         ReservationTime time = getReservationTime(command.timeId());
-        validateExpiry(command.date(), time.getStartAt());
+        expiryValidator.validate(command.date(), time.getStartAt());
 
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(ThemeNotFoundException::new);
 
         try {
             return reservationRepository.save(
-                    Reservation.of(
-                            command.name(),
-                            command.date(),
-                            time,
-                            theme
-                    )
+                    Reservation.of(command.name(), command.date(), time, theme)
             );
         } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
+        }
+    }
+
+    private void validateDoNotHaveWaiting(LocalDate date, Long timeId, Long themeId) {
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new ReservationSlotHasWaitingException();
         }
     }
 
@@ -91,95 +84,39 @@ public class ReservationService {
                 .orElseThrow(TimeNotFoundException::new);
     }
 
-    private void validateExpiry(LocalDate date, LocalTime startAt) {
-        LocalDate nowDate = LocalDate.now(clock);
-
-        if (nowDate.isAfter(date)) {
-            throw new InvalidReservationDateValueException();
-        }
-
-        if (nowDate.equals(date) && LocalTime.now(clock).isAfter(startAt)) {
-            throw new InvalidTimeStartAtValueException();
-        }
-    }
-
     public List<ReservationWithStatusResult> findReservationsByName(String name) {
-        List<ReservationWithStatusResult> reserved = reservationRepository.findAllByName(name)
-                .stream()
-                .map(
-                        reservation -> new ReservationWithStatusResult(
-                                reservation.getId(),
-                                reservation.getName(),
-                                reservation.getDate(),
-                                reservation.getReservationTime(),
-                                reservation.getTheme(),
-                                "reserved",
-                                0L
-                        )
-                )
-                .toList();
-
-        List<ReservationWithStatusResult> waiting = reservationWaitingRepository.findAllByName(name)
-                .stream()
-                .map(
-                        reservationWaiting -> new ReservationWithStatusResult(
-                                reservationWaiting.getId(),
-                                reservationWaiting.getName(),
-                                reservationWaiting.getDate(),
-                                reservationWaiting.getTime(),
-                                reservationWaiting.getTheme(),
-                                "waiting",
-                                calculateOrder(reservationWaiting)
-                        )).toList();
-
-        List<ReservationWithStatusResult> results = new ArrayList<>();
-
-        results.addAll(reserved);
-        results.addAll(waiting);
-
-        return results;
-    }
-
-    private long calculateOrder(ReservationWaiting reservationWaiting) {
-        return reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime().getId(),
-                reservationWaiting.getTheme().getId(),
-                reservationWaiting.getId()
-        ) + 1;
+        return reservationRepository.findAllByName(name);
     }
 
     public List<Reservation> findReservations() {
         return reservationRepository.findAll();
     }
 
-    public PopularThemesResult findPopularThemes(int period, int limit) {
+    public List<PopularThemeResult> findPopularThemes(int period, int limit) {
         int oneDayDifference = 1;
 
         LocalDate to = LocalDate.now(clock).minusDays(oneDayDifference);
         LocalDate from = to.minusDays(period).plusDays(oneDayDifference);
 
-        return new PopularThemesResult(
-                reservationRepository.findPopularThemes(from, to, limit)
-        );
+        return reservationRepository.findPopularThemes(from, to, limit);
     }
 
     @Transactional
-    public void updateReservation(ReservationUpdateCommand command, Long id) {
+    public void updateReservation(ReservationUpdateCommand command, Long id, String name) {
         Reservation original = getReservation(id);
 
-        validateExpiry(
+        validateReservationOwnership(original, name);
+        expiryValidator.validate(
                 original.getDate(),
                 original.getReservationTime().getStartAt()
         );
 
         Reservation updated = updateField(command, original);
 
-        validateExpiry(
+        expiryValidator.validate(
                 updated.getDate(),
                 updated.getReservationTime().getStartAt()
         );
-
         if (original.getDate().equals(updated.getDate())
                 && original.getReservationTime().equals(updated.getReservationTime())) {
             return;
@@ -194,18 +131,16 @@ public class ReservationService {
             throw new DuplicateReservationException();
         }
 
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
+        validateDoNotHaveWaiting(
                 updated.getDate(),
                 updated.getReservationTime().getId(),
                 updated.getTheme().getId()
-        )) {
-            throw new ReservationSlotHasWaitingException();
-        }
+        );
 
         try {
             reservationRepository.update(updated);
 
-            reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
+            reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(
                     original.getDate(), original.getReservationTime().getId(), original.getTheme().getId()
             ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
         } catch (DuplicateKeyException e) {
@@ -214,8 +149,14 @@ public class ReservationService {
     }
 
     private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
+        return reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    private void validateReservationOwnership(Reservation reservation, String userName) {
+        if (!reservation.hasSameName(userName)) {
+            throw new AuthorizationException();
+        }
     }
 
     private void promoteFirstWaitingForSameSlotToReservation(ReservationWaiting waiting) {
@@ -252,36 +193,34 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservationById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
+    public void deleteReservationById(Long id, String name) {
+        Reservation reservation = getReservation(id);
 
-        int affectedRow = reservationRepository.deleteById(id);
+        validateReservationOwnership(reservation, name);
+        expiryValidator.validate(
+                reservation.getDate(),
+                reservation.getReservationTime().getStartAt()
+        );
+
+        deleteReservation(reservation);
+    }
+
+    @Transactional
+    public void deleteReservationById(Long id) {
+        Reservation reservation = getReservation(id);
+        deleteReservation(reservation);
+    }
+
+    private void deleteReservation(Reservation reservation) {
+        int affectedRow = reservationRepository.deleteById(reservation.getId());
         int nonAffected = 0;
 
         if (affectedRow == nonAffected) {
             throw new ReservationNotFoundException();
         }
 
-        reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
+        reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeIdForUpdate(
                 reservation.getDate(), reservation.getReservationTime().getId(), reservation.getTheme().getId()
         ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
-    }
-
-    public void validateReservationNotExpired(Long id) {
-        Reservation reservation = getReservation(id);
-
-        validateExpiry(
-                reservation.getDate(),
-                reservation.getReservationTime().getStartAt()
-        );
-    }
-
-    public void validateReservationOwnership(Long reservationId, String userName) {
-        Reservation reservation = getReservation(reservationId);
-
-        if (!reservation.hasSameName(userName)) {
-            throw new AuthorizationException();
-        }
     }
 }

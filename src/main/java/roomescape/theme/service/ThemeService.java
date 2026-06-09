@@ -4,7 +4,6 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.DuplicateThemeException;
 import roomescape.theme.exception.ThemeInUseException;
@@ -21,7 +20,6 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional
     public Theme registerTheme(ThemeCommand command) {
         if (themeRepository.existByName(command.name())) {
             throw new DuplicateThemeException();
@@ -44,7 +42,6 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
-    @Transactional
     public void removeThemeById(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
             throw new ThemeNotFoundException();

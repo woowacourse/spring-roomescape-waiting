@@ -12,7 +12,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
+import roomescape.reservation.service.dto.PopularThemeResult;
+import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -70,31 +71,77 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByName(String name) {
+    public List<ReservationWithStatusResult> findAllByName(String name) {
         String sql = """
-        SELECT r.id AS reservation_id,
-               r.name AS reservation_name,
-               r.reservation_date,
-               r.time_id,
+        SELECT r.id AS id,
+               r.name AS name,
+               r.reservation_date AS reservation_date,
+               t.id AS time_id,
                t.start_at AS time_start_at,
                h.id AS theme_id,
                h.name AS theme_name,
                h.description AS theme_description,
-               h.thumbnail_url AS theme_thumbnail_url
+               h.thumbnail_url AS theme_url,
+               'reserved' AS status,
+               0 AS waiting_order
         FROM reservation r
-        INNER JOIN reservation_time t
-          ON r.time_id = t.id
-        INNER JOIN theme h
-          ON r.theme_id = h.id
+        INNER JOIN reservation_time t ON r.time_id = t.id
+        INNER JOIN theme h ON r.theme_id = h.id
         WHERE r.name = ?
-        ORDER BY reservation_date ASC, time_start_at ASC, reservation_id ASC
+
+        UNION ALL
+
+        SELECT rw.id AS id,
+               rw.name AS name,
+               rw.reservation_date AS reservation_date,
+               t.id AS time_id,
+               t.start_at AS time_start_at,
+               h.id AS theme_id,
+               h.name AS theme_name,
+               h.description AS theme_description,
+               h.thumbnail_url AS theme_url,
+               'waiting' AS status,
+               ROW_NUMBER() OVER (
+                    PARTITION BY rw.reservation_date, rw.time_id, rw.theme_id
+                    ORDER BY rw.id
+               ) AS waiting_order
+        FROM reservation_waiting rw
+        INNER JOIN reservation_time t ON rw.time_id = t.id
+        INNER JOIN theme h ON rw.theme_id = h.id
+        WHERE rw.name = ?
+
+        ORDER BY reservation_date ASC, time_start_at ASC, waiting_order ASC
         """;
 
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, name);
+        RowMapper<ReservationWithStatusResult> withStatusResultRowMapper = (resultSet, rowNum) -> {
+            ReservationTime time = new ReservationTime(
+                    resultSet.getLong("time_id"),
+                    resultSet.getTime("time_start_at").toLocalTime()
+            );
+
+            Theme theme = new Theme(
+                    resultSet.getLong("theme_id"),
+                    resultSet.getString("theme_name"),
+                    resultSet.getString("theme_description"),
+                    resultSet.getString("theme_url")
+            );
+
+            return new ReservationWithStatusResult(
+                    resultSet.getLong("id"),
+                    resultSet.getString("name"),
+                    resultSet.getDate("reservation_date").toLocalDate(),
+                    time,
+                    theme,
+                    resultSet.getString("status"),
+                    resultSet.getLong("waiting_order")
+            );
+        };
+
+        return jdbcTemplate.query(sql, withStatusResultRowMapper, name, name);
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
+    public Optional<Reservation> findByIdForUpdate(Long id) {
         String sql = """
         SELECT r.id AS reservation_id,
                r.name AS reservation_name,
@@ -111,6 +158,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         INNER JOIN theme h
           ON r.theme_id = h.id
         WHERE r.id = ?
+        FOR UPDATE
         """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, id)
@@ -118,7 +166,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
         String sql = """
         SELECT r.id AS reservation_id,
                r.name AS reservation_name,
@@ -135,6 +183,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         INNER JOIN theme h
           ON r.theme_id = h.id
         WHERE  r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
+        FOR UPDATE
         """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date, timeId, themeId)
@@ -179,7 +228,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<PopularThemeQueryResult> findPopularThemes(LocalDate from, LocalDate to, int limit) {
+    public List<PopularThemeResult> findPopularThemes(LocalDate from, LocalDate to, int limit) {
         String sql = """
         SELECT t.id,
                t.name,
@@ -201,7 +250,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return jdbcTemplate.query(
                 sql,
-                (resultSet, rowNum) -> new PopularThemeQueryResult(
+                (resultSet, rowNum) -> new PopularThemeResult(
                         resultSet.getLong("id"),
                         resultSet.getString("name"),
                         resultSet.getString("description"),
@@ -219,7 +268,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         SELECT EXISTS (
             SELECT 1
             FROM reservation
-            WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND id != ?
+            WHERE reservation_date = ?  AND time_id = ? AND theme_id = ? AND id != ?
         )
         """;
 

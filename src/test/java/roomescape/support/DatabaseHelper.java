@@ -1,4 +1,4 @@
-package roomescape.e2e.support;
+package roomescape.support;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -22,5 +22,4 @@ public class DatabaseHelper {
         jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
     }
-
 }

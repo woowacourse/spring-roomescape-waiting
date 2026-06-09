@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.PopularThemesResult;
+import roomescape.reservation.service.dto.PopularThemeResult;
 import roomescape.theme.service.ThemeService;
 
 @WebMvcTest(ThemeController.class)
@@ -34,9 +33,7 @@ class ThemeControllerTest {
     void getPopularThemes_success() throws Exception {
         //given
         when(reservationService.findPopularThemes(anyInt(), anyInt()))
-                .thenReturn(new PopularThemesResult(
-                        List.of(new PopularThemeQueryResult(1L, "테마", "설명", "url"))
-                ));
+                .thenReturn(List.of(new PopularThemeResult(1L, "테마", "설명", "url")));
 
         //when & then
         mockMvc.perform(

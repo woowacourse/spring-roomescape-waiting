@@ -7,39 +7,52 @@ import static org.hamcrest.Matchers.not;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 
-@SpringWebTest
-public class PopularThemeE2ETest {
+public class ThemeE2ETest extends E2ETest {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+    @DisplayName("예약 시간을 생성, 조회, 삭제한다.")
+    @Test
+    void manageReservationTime() {
+        Map<String, String> requestBody = Map.of("startAt", "10:00");
 
-    @Autowired
-    Clock clock;
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201);
 
-    @Autowired
-    DatabaseHelper helper;
+        RestAssured.given().log().all()
+                .when().get("/times")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
 
-    @BeforeEach
-    void setup() {
-        helper.clear();
+        RestAssured.given().log().all()
+                .when().delete("/admin/times/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/times")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
+
 
     @DisplayName("5월 1일 기준, 직전 period 일 동안의 예약 수를 기준으로 상위 limit 개의 테마들을 조회한다.")
     @Test
     void readPopular() {
         // given
-        createTime(LocalTime.of(10, 0));
+        clock.setInstant(Instant.parse("2026-04-23T09:00:00+09:00"));
+
+        createReservationTime("10:00");
 
         createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/woowa.png");
         createTheme("페어 테마", "페어 전용 테마입니다.", "https://example.com/pair.png");
@@ -51,6 +64,8 @@ public class PopularThemeE2ETest {
         createReservation("boundaryReservation", LocalDate.of(2026, 4, 24), 1L, 2L);
         createReservation("todayReservation", LocalDate.of(2026, 5, 1), 1L, 3L);
         createReservation("outOfRangeReservation", LocalDate.of(2026, 4, 23), 1L, 3L);
+
+        clock.setInstant(Instant.parse("2026-05-01T09:00:00+09:00"));
 
         // when & then
         RestAssured.given().log().all()
@@ -65,30 +80,5 @@ public class PopularThemeE2ETest {
 
         assertThat(LocalDate.of(2026, 5, 1))
                 .isEqualTo(LocalDate.now(clock));
-    }
-
-    private void createTime(LocalTime time) {
-        jdbcTemplate.update("""
-            insert into reservation_time(start_at)
-            values (?)
-        """, time
-        );
-    }
-
-    private void createTheme(String name, String description, String thumbnailUrl) {
-        jdbcTemplate.update("""
-            insert into theme(name, description, thumbnail_url)
-            values (?, ?, ?)
-        """, name, description, thumbnailUrl
-        );
-    }
-
-    private void createReservation(String name, LocalDate date, Long timeId, Long themeId) {
-        jdbcTemplate.update("""
-            insert into reservation(name, reservation_date, time_id, theme_id)
-            values (?, ?, ?, ?)
-        """, name, date,timeId, themeId
-        );
-
     }
 }
