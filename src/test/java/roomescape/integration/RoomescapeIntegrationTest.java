@@ -111,7 +111,7 @@ public class RoomescapeIntegrationTest {
         RestAssured.given().log().all()
                 .queryParam("limit", 10)
                 .queryParam("days", 7)
-                .when().get("/themes")
+                .when().get("/themes/popular")
                 .then().log().all()
                 .statusCode(200)
                 .body("themeResponses.size()", greaterThanOrEqualTo(1))
@@ -121,9 +121,8 @@ public class RoomescapeIntegrationTest {
     @Test
     @DisplayName("예약자가 예약을 취소하면 첫 번째 대기가 예약으로 자동 승급된다.")
     void 예약_취소시_첫번째_대기_자동_승급() {
-        insertTestData();
-
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate tomorrow = LocalDate.now().plusDays(2);
+        insertTestData(tomorrow);
 
         ReservationRequest firstWaitingRequest = new ReservationRequest("네오", tomorrow, 1L, 1L);
         ReservationRequest secondWaitingRequest = new ReservationRequest("대길", tomorrow, 1L, 1L);
@@ -173,6 +172,10 @@ public class RoomescapeIntegrationTest {
 
     private void insertTestData() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
+        insertTestData(tomorrow);
+    }
+
+    private void insertTestData(LocalDate tomorrow) {
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
                 "테마1", "설명1", "thumbnail1.png");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",

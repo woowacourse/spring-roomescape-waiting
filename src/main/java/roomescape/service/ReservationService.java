@@ -131,7 +131,7 @@ public class ReservationService {
 
         deleteReservation(reservation);
         if (reservation.isReserved()) {
-            promoteFirstWaiting(lockedSlot);
+            updatePromotedReservation(lockedSlot);
         }
     }
 
@@ -139,9 +139,9 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
-    private void promoteFirstWaiting(ReservationSlot slot) {
-        ReservationLine waitings = new ReservationLine(slot, reservationRepository.findWaitingsBySlotId(slot.getId()));
-        waitings.promoteFirstWaiting()
+    private void updatePromotedReservation(ReservationSlot slot) {
+        ReservationLine reservationLine = new ReservationLine(slot, reservationRepository.findWaitingsBySlotId(slot.getId()));
+        reservationLine.promoteFirstWaiting()
                 .ifPresent(reservationRepository::update);
     }
 
@@ -164,7 +164,7 @@ public class ReservationService {
         reservationRepository.update(updateReservation);
 
         if (nowReservation.isReserved()) {
-            promoteFirstWaiting(nowReservation.getSlot());
+            updatePromotedReservation(nowReservation.getSlot());
         }
     }
 
