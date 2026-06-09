@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationCanceledEvent;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.ReservationCreateCommand;
 import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
@@ -154,7 +154,7 @@ class ReservationServiceTest {
         assertThat(response.date()).isEqualTo(request.date());
         assertThat(response.time().id()).isEqualTo(2L);
         verify(reservationRepository).updateDateAndTime(any(Reservation.class));
-        verify(eventPublisher).publishEvent(any(ReservationCanceledEvent.class));
+        verify(eventPublisher).publishEvent(any(ReservationAvailableEvent.class));
     }
 
     @Test
@@ -222,7 +222,7 @@ class ReservationServiceTest {
 
         // then
         verify(reservationRepository).deleteById(1L);
-        verify(eventPublisher).publishEvent(any(ReservationCanceledEvent.class));
+        verify(eventPublisher).publishEvent(any(ReservationAvailableEvent.class));
     }
 
     @Test

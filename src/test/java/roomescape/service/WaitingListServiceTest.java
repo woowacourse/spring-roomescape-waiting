@@ -10,7 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.ReservationCanceledEvent;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.ReservationStatus;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
@@ -373,7 +373,7 @@ class WaitingListServiceTest {
     void 예약_취소_이벤트_수신시_다음_대기자가_있으면_예약으로_전환된다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        ReservationCanceledEvent event = new ReservationCanceledEvent(date, 1L, 1L);
+        ReservationAvailableEvent event = new ReservationAvailableEvent(date, 1L, 1L);
         ReservationTime time = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         Theme theme = Theme.createWithId(1L, "테마", "테스트 설명", "url");
         WaitingList waiting = WaitingList.createWithId(1L, "대기자", date, time, theme, LocalDateTime.now());
@@ -392,7 +392,7 @@ class WaitingListServiceTest {
     void 예약_취소_이벤트_수신시_다음_대기자가_없으면_아무일도_일어나지_않는다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        ReservationCanceledEvent event = new ReservationCanceledEvent(date, 1L, 1L);
+        ReservationAvailableEvent event = new ReservationAvailableEvent(date, 1L, 1L);
 
         given(waitingListRepository.findFirstBySlot(date, 1L, 1L)).willReturn(Optional.empty());
 

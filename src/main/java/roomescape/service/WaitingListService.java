@@ -10,7 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.ReservationCanceledEvent;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
@@ -80,7 +80,7 @@ public class WaitingListService {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleReservationCanceled(ReservationCanceledEvent event) {
+    public void handleReservationCanceled(ReservationAvailableEvent event) {
         Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
                 event.date(), event.timeId(), event.themeId());
 

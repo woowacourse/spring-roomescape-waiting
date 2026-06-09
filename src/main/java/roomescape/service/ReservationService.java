@@ -8,7 +8,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableDateResult;
-import roomescape.dto.ReservationCanceledEvent;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.ReservationCreateCommand;
 import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
@@ -147,7 +147,7 @@ public class ReservationService {
     }
 
     private void callEventListenerForWaitingListApproval(final Reservation reservation) {
-        eventPublisher.publishEvent(new ReservationCanceledEvent(
+        eventPublisher.publishEvent(new ReservationAvailableEvent(
                         reservation.getDate(),
                         reservation.getTime().getId(),
                         reservation.getTheme().getId()
