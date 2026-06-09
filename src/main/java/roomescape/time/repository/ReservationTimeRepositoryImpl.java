@@ -35,11 +35,6 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public boolean existsByStartAt(ReservationTime reservationTime) {
-        return reservationTimeDao.existsByStartAt(reservationTime.getStartAt());
-    }
-
-    @Override
     public List<ReservationTime> findAll() {
         return reservationTimeDao.findAll();
     }

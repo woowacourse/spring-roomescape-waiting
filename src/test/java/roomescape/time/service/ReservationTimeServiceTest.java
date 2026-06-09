@@ -39,7 +39,6 @@ class ReservationTimeServiceTest {
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
         ReservationTime savedTime = new ReservationTime(1L, LocalTime.of(10, 0));
 
-        given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(false);
         given(reservationTimeRepository.save(any(ReservationTime.class))).willReturn(savedTime);
 
         // when
@@ -47,23 +46,10 @@ class ReservationTimeServiceTest {
 
         // then
         assertThat(result).isEqualTo(new ReservationTimeResult(1L, LocalTime.of(10, 0)));
-        then(reservationTimeRepository).should().existsByStartAt(any(ReservationTime.class));
         then(reservationTimeRepository).should().save(any(ReservationTime.class));
     }
 
-    @Test
-    @DisplayName("save throws ConflictException when the start time already exists.")
-    void save_duplicateTime_throwsConflictException() {
-        // given
-        ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
 
-        given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> reservationTimeService.save(command))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage(TimeErrorCode.DUPLICATE_TIME.getMessage());
-    }
 
     @Test
     @DisplayName("save throws ConflictException when the database rejects a duplicate time.")
@@ -71,7 +57,6 @@ class ReservationTimeServiceTest {
         // given
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
 
-        given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(false);
         given(reservationTimeRepository.save(any(ReservationTime.class)))
                 .willThrow(new ConflictException(TimeErrorCode.DUPLICATE_TIME));
 

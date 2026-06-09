@@ -11,7 +11,6 @@ public interface ReservationTimeRepository {
 
     Optional<ReservationTime> findById(long id);
 
-    boolean existsByStartAt(ReservationTime reservationTime);
 
     List<ReservationTime> findAll();
 

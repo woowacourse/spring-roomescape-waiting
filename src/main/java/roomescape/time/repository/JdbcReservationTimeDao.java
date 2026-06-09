@@ -65,19 +65,7 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
         ).stream().findFirst();
     }
 
-    @Override
-    public boolean existsByStartAt(LocalTime localTime) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation_time
-                    WHERE start_at = ?
-                )
-                """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, localTime);
-        return Boolean.TRUE.equals(exists);
-    }
 
     @Override
     public List<ReservationTime> findAll() {

@@ -112,8 +112,9 @@ public class ReservationService {
     }
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
-        Collections.sort(lockedWaitings);
-        for (ReservationWaiting waiting : lockedWaitings) {
+        List<ReservationWaiting> waitings = new java.util.ArrayList<>(lockedWaitings);
+        java.util.Collections.sort(waitings);
+        for (ReservationWaiting waiting : waitings) {
             if (!reservationRepository.hasBookingAtSameTime(waiting.getName(), waiting.getSlot())) {
                 createReservationFromWaiting(waiting, requestTime);
                 return;

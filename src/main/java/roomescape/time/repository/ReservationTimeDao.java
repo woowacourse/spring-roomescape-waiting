@@ -13,7 +13,6 @@ public interface ReservationTimeDao {
 
     Optional<ReservationTime> findById(Long id);
 
-    boolean existsByStartAt(LocalTime localTime);
 
     List<ReservationTime> findAll();
 

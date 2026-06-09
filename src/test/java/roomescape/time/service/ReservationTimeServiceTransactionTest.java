@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
@@ -52,8 +52,10 @@ public class ReservationTimeServiceTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        boolean exists = reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(10, 0)));
-        Assertions.assertFalse(exists);
+        Optional<ReservationTime> targetTime = reservationTimeRepository.findAll()
+                .stream().filter(e -> e.getStartAt().equals(LocalTime.of(10, 0)))
+                .findAny();
+        Assertions.assertFalse(targetTime.isPresent());
     }
 
     @Test

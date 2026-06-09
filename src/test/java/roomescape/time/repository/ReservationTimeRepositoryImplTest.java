@@ -80,19 +80,6 @@ class ReservationTimeRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("existsByStartAt returns whether a time exists at the given start time.")
-    void existsByStartAt_ReturnsTrueIfTimeExists() {
-        // given
-        createTime(LocalTime.of(11, 0));
-
-        // when & then
-        assertThat(reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(11, 0))))
-                .isTrue();
-        assertThat(reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(12, 0))))
-                .isFalse();
-    }
-
-    @Test
     @DisplayName("findAll returns all persisted times.")
     void findAll_multipleTimes_returnsAllTimes() {
         // given
