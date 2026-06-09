@@ -10,11 +10,11 @@ public class ReservationResponse {
     private final String name;
     private final LocalDate date;
     private final String state;
-    private final Integer rank;
+    private final Long rank;
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
 
-    public ReservationResponse(long id, String name, LocalDate date, String state, Integer rank,
+    public ReservationResponse(long id, String name, LocalDate date, String state, Long rank,
                                ReservationTimeResponse time, ThemeResponse theme) {
         this.id = id;
         this.name = name;
@@ -27,7 +27,7 @@ public class ReservationResponse {
 
     public static ReservationResponse toDto(Reservation reservation) {
         Slot slot = reservation.getSlot();
-        Integer rank = reservation.getRank() != null ? reservation.getRank().getValue() : null;
+        Long rank = reservation.getRank() != null ? reservation.getRank().getValue() : null;
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getName().getValue(),
@@ -54,7 +54,7 @@ public class ReservationResponse {
         return state;
     }
 
-    public Integer getRank() {
+    public Long getRank() {
         return rank;
     }
 

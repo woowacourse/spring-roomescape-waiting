@@ -32,22 +32,16 @@ public class ReservationService {
     public Reservation reserve(ReservationCreateCommand command) {
         Reservation assembled = assembler.from(command);
         Slot slot = assembled.getSlot();
+
         Reservations existing = reservationRepository.findBySlotId(slot.getId());
-
-        existing.conflictByName(assembled);
-
-        return reservationRepository.save(assembled.withStatus(existing.nextStatus()));
+        Reservation join = existing.join(assembled);
+        return reservationRepository.save(join);
     }
 
     public Reservation find(long id) {
         Reservation reservation = reservationRepository.getById(id);
-
-        if (reservation.isWaiting()) {
-            Reservations slotReservations = reservationRepository.findBySlotId(reservation.getSlotId());
-            return reservation.withRank(slotReservations.rankOf(reservation));
-        }
-
-        return reservation;
+        Reservations slotReservations = reservationRepository.findBySlotId(reservation.getSlotId());
+        return reservation.withRank(slotReservations.rankOf(reservation));
     }
 
     public Reservations findAll(String name) {
@@ -64,9 +58,7 @@ public class ReservationService {
         Slot newSlot = assembled.getSlot();
 
         Reservations slotReservations = reservationRepository.findBySlotId(newSlot.getId()).excluding(id);
-        slotReservations.conflictByName(assembled);
-
-        Reservation updated = assembled.withStatus(slotReservations.nextStatus());
+        Reservation updated = slotReservations.join(assembled);
         reservationRepository.update(id, updated);
 
         boolean slotChanged = !existing.getSlotId().equals(newSlot.getId());

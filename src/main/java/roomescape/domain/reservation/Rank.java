@@ -1,13 +1,13 @@
 package roomescape.domain.reservation;
 
 public class Rank {
-    private final int value;
+    private final long value;
 
-    public Rank(int value) {
+    public Rank(long value) {
         this.value = value;
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 }

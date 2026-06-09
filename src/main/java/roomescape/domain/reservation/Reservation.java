@@ -33,7 +33,7 @@ public class Reservation {
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, name, status, slot);
+        return new Reservation(id, name, status, slot, rank);
     }
 
     public Reservation withStatus(Status status) {

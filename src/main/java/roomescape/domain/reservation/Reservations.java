@@ -13,7 +13,13 @@ public class Reservations {
         this.values = List.copyOf(values);
     }
 
-    public Status nextStatus() {
+    public Reservation join(Reservation assembled) {
+        conflictByName(assembled);
+        Reservation withStatus = assembled.withStatus(nextStatus());
+        return withStatus.withRank(rankOf(withStatus));
+    }
+
+    private Status nextStatus() {
         return values.stream().anyMatch(Reservation::isApproved) ? Status.WAITING : Status.APPROVED;
     }
 
@@ -38,16 +44,13 @@ public class Reservations {
                 .findFirst();
     }
 
-    public Rank rankOf(Reservation target) {
-        List<Reservation> waitings = values.stream()
-                .filter(Reservation::isWaiting)
-                .toList();
-        int position = waitings.indexOf(target);
-
-        if (position == -1) {
-            throw new IllegalStateException("해당 예약이 슬롯 목록에 존재하지 않습니다.");
+    public Rank rankOf(Reservation reservation) {
+        if (reservation.isApproved()) {
+            return new Rank(0);
         }
-        return new Rank(position + 1);
+        List<Reservation> waitings = values.stream().filter(Reservation::isWaiting).toList();
+        int position = waitings.indexOf(reservation);
+        return position == -1 ? new Rank(waitings.size() + 1) : new Rank(position + 1);
     }
 
     public List<Reservation> getValues() {
