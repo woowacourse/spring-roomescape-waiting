@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -44,11 +45,11 @@ class ReservationRepositoryTest {
     void save_duplicateReservation_throwsConflictException() {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("테마", "설명", "url");
-        Reservation first = new Reservation("브라운", LocalDate.of(2026, 5, 1), time, theme,
+        Reservation first = new Reservation("브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
                 LocalDate.of(2026, 5, 1).atStartOfDay());
         reservationRepository.save(first);
 
-        Reservation duplicate = new Reservation("브라운", LocalDate.of(2026, 5, 1), time, theme,
+        Reservation duplicate = new Reservation("브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme),
                 LocalDate.of(2026, 5, 1).atStartOfDay());
 
         assertThatThrownBy(() -> reservationRepository.save(duplicate))
@@ -74,10 +75,10 @@ class ReservationRepositoryTest {
         Theme theme = createTheme("테마", "설명", "url");
 
         Reservation saved = reservationRepository.save(
-                new Reservation("브라운", LocalDate.of(2026, 5, 1), time, theme, LocalDate.of(2026, 5, 1).atStartOfDay())
+                new Reservation("브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay())
         );
         reservationRepository.save(
-                new Reservation("포비", LocalDate.of(2026, 5, 2), time, theme, LocalDate.of(2026, 5, 2).atStartOfDay())
+                new Reservation("포비", new ReservationSlot(LocalDate.of(2026, 5, 2), time, theme), LocalDate.of(2026, 5, 2).atStartOfDay())
         );
 
         assertThat(reservationRepository.findAllByName("브라운"))
@@ -106,7 +107,7 @@ class ReservationRepositoryTest {
     private Reservation buildReservation(String name) {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("테마", "설명", "url");
-        return new Reservation(name, LocalDate.of(2026, 5, 1), time, theme, LocalDate.of(2026, 5, 1).atStartOfDay());
+        return new Reservation(name, new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme), LocalDate.of(2026, 5, 1).atStartOfDay());
     }
 
     private ReservationTime createTime(LocalTime time) {

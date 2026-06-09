@@ -22,10 +22,6 @@ public class Reservation {
         validateExpiry(updatedAt);
     }
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
-        this(null, name, new ReservationSlot(date, time, theme), requestTime);
-    }
-
     public Reservation(String name, ReservationSlot reservationSlot, LocalDateTime requestTime) {
         this(null, name, reservationSlot, requestTime);
     }

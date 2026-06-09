@@ -40,7 +40,7 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
     }
 
     public Reservation toReservation(LocalDateTime requestTime) {
-        return new Reservation(name, slot.date(), slot.time(), slot.theme(), requestTime);
+        return new Reservation(name, slot, requestTime);
     }
 
     private void validateOwner(String userName) {

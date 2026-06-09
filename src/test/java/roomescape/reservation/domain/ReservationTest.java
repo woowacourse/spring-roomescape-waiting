@@ -28,7 +28,7 @@ class ReservationTest {
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatCode(() -> new Reservation("브라운", date, reservationTime, theme, requestTime))
+        assertThatCode(() -> new Reservation("브라운", new ReservationSlot(date, reservationTime, theme), requestTime))
                 .doesNotThrowAnyException();
     }
 
@@ -40,7 +40,7 @@ class ReservationTest {
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
-        assertThatThrownBy(() -> new Reservation("브라운", pastDate, reservationTime, theme, requestTime))
+        assertThatThrownBy(() -> new Reservation("브라운", new ReservationSlot(pastDate, reservationTime, theme), requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
@@ -55,7 +55,7 @@ class ReservationTest {
         LocalDateTime requestTime = today.atTime(11, 0);
 
         // when & then
-        assertThatThrownBy(() -> new Reservation("브라운", today, pastTime, theme, requestTime))
+        assertThatThrownBy(() -> new Reservation("브라운", new ReservationSlot(today, pastTime, theme), requestTime))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_TIME.getMessage());
     }
