@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
@@ -22,12 +22,14 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.wating.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.wating.domain.exception.WaitingNotFoundException;
+import roomescape.wating.domain.exception.WaitingNotOwnedException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Time;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
@@ -206,7 +208,7 @@ class WaitingControllerTest {
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
-        final Exception expectedException = new WaitingNotFoundException();
+        final Exception expectedException = new WaitingNotOwnedException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
                 .body("message", is(expectedException.getMessage()));
