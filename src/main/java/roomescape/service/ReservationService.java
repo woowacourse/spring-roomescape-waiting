@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -84,8 +85,12 @@ public class ReservationService {
         Reservation reservation = reservationRequest.toReservation(reservationTimeById, themeById);
         reservation.validatePastDateTime();
 
-        Long generatedId = reservationUpdateDao.insert(reservation);
-        return ReservationResponse.from(reservation.withReservationId(generatedId));
+        try {
+            Long generatedId = reservationUpdateDao.insert(reservation);
+            return ReservationResponse.from(reservation.withReservationId(generatedId));
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationAlreadyExistException();
+        }
     }
 
     public ReservationResponse update(Long id, ReservationRequest reservationRequest) {
@@ -99,7 +104,11 @@ public class ReservationService {
         updatedReservation.validatePastDateTime();
         validateDuplicatedReservation(updatedReservation.getSlot());
 
-        reservationUpdateDao.update(id, updatedReservation);
+        try {
+            reservationUpdateDao.update(id, updatedReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationAlreadyExistException();
+        }
         return ReservationResponse.from(updatedReservation);
     }
 

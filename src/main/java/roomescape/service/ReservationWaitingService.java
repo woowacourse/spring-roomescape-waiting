@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
@@ -12,6 +13,7 @@ import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.repository.ReservationWaitingSequence;
 import roomescape.exception.InvalidInputException;
+import roomescape.exception.ReservationWaitingAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.WaitingNotFoundException;
@@ -57,7 +59,13 @@ public class ReservationWaitingService {
         }
 
         ReservationWaiting reservationWaiting = reservationWaitingReq.toReservationWaiting(reservationTimeById, themeById);
-        Long id = reservationWaitingUpdateDao.create(reservationWaiting);
+
+        Long id;
+        try {
+            id = reservationWaitingUpdateDao.create(reservationWaiting);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationWaitingAlreadyExistException();
+        }
 
         ReservationWaitingSequence createdWaitingSequence = reservationWaitingQueryDao.findReservationWaitingById(id)
                 .orElseThrow(() -> new WaitingNotFoundException(id));

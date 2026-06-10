@@ -57,9 +57,15 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("WAITING_NOT_FOUND", e.getMessage()));
     }
 
+    @ExceptionHandler(ReservationWaitingAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handle(ReservationWaitingAlreadyExistException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("DUPLICATE_WAITING", e.getMessage()));
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handle(DataIntegrityViolationException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("DUPLICATE_RESERVATION", e.getMessage()));
+                .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "요청을 처리할 수 없습니다."));
     }
 }
