@@ -4,9 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
@@ -58,9 +62,16 @@ public class ReservationTimeService {
 
     public List<ReservationTime> findAvailableTimes(final LocalDate date, final long themeId) {
         LocalDateTime requestedAt = LocalDateTime.now();
-        return reservationSlotRepository.findByDateAndTheme(date, themeService.getById(themeId))
+        Theme theme = themeService.getById(themeId);
+        Set<Long> reservedSlotIds = reservationRepository.findByDateAndTheme(date, theme)
                 .stream()
-                .filter(slot -> reservationRepository.findBySlot(slot).isEmpty())
+                .map(Reservation::getSlot)
+                .map(ReservationSlot::getId)
+                .collect(Collectors.toSet());
+
+        return reservationSlotRepository.findByDateAndTheme(date, theme)
+                .stream()
+                .filter(slot -> !reservedSlotIds.contains(slot.getId()))
                 .filter(slot -> !slot.isPast(requestedAt))
                 .map(ReservationSlot::getTime)
                 .toList();

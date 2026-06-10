@@ -3,6 +3,7 @@ package roomescape.repository.reservation;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -133,6 +134,35 @@ public class JdbcReservationRepository implements ReservationRepository {
                 )
                 .stream()
                 .findFirst();
+    }
+
+    @Override
+    public List<Reservation> findByDateAndTheme(final LocalDate date, final Theme theme) {
+        String sql = """
+                SELECT r.id,
+                       r.name AS reservation_name,
+                       r.slot_id,
+                       s.date,
+                       r.created_at,
+                       rt.id AS time_id,
+                       rt.start_at,
+                       t.id AS theme_id,
+                       t.name AS theme_name,
+                       t.description,
+                       t.thumbnail_url
+                FROM reservation AS r
+                INNER JOIN reservation_slot AS s ON r.slot_id = s.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
+                WHERE s.date = ? AND s.theme_id = ?
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                reservationRowMapper,
+                Date.valueOf(date),
+                theme.getId()
+        );
     }
 
     @Override

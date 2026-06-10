@@ -52,11 +52,11 @@ class ReservationTimeServiceTest {
         ReservationTime ten = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
         ReservationTime eleven = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
         LocalDate date = LocalDate.parse("2026-08-06");
-        fixture.saveSlot(date, theme, ten);
+        ReservationSlot reservedSlot = fixture.saveSlot(date, theme, ten);
         fixture.saveSlot(date, theme, eleven);
         fixture.reservationRepository.save(Reservation.createNew(
                 "쿠다",
-                ReservationSlot.createNew(date, theme, ten),
+                reservedSlot,
                 LocalDate.now().atStartOfDay()
         ));
 
