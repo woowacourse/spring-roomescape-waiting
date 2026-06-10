@@ -15,21 +15,30 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationSlot slot;
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+        this(id, name, new ReservationSlot(date, time, theme));
+    }
+
+    public Reservation(Long id, String name, ReservationSlot slot) {
         Objects.requireNonNull(name, "예약자명은 필수값 입니다.");
-        Objects.requireNonNull(date, "예약 날짜는 필수값 입니다.");
-        Objects.requireNonNull(time, "예약 시간은 필수값 입니다.");
-        Objects.requireNonNull(theme, "테마는 필수값 입니다.");
+        Objects.requireNonNull(slot, "예약 슬롯은 필수값 입니다.");
+
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
+        this.date = slot.getDate();
+        this.time = slot.getTime();
+        this.theme = slot.getTheme();
     }
 
     public static Reservation createWithoutId(String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, name, date, time, theme);
+    }
+
+    public static Reservation createWithoutId(String name, ReservationSlot slot) {
+        return new Reservation(null, name, slot);
     }
 
     public void validateCancelable(LocalDateTime now) {
@@ -60,6 +69,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationSlot getSlot(){
+        return slot;
     }
 
     @Override
