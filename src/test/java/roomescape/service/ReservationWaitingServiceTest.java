@@ -50,7 +50,8 @@ class ReservationWaitingServiceTest {
         );
 
         // when
-        ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(command, LocalDateTime.now());
+        ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(command, LocalDateTime.of(2026, 6, 9, 10, 0)
+        );
 
         // then
         assertThat(response)
@@ -144,11 +145,11 @@ class ReservationWaitingServiceTest {
 
         ReservationWaitingResponse first = reservationWaitingService.addReservationWaiting(
                 new CreateReservationWaitingCommand("맥스", date, time.getId(), theme.getId()),
-                LocalDateTime.now()
+                LocalDateTime.of(2026, 6, 9, 10, 0)
         );
         ReservationWaitingResponse second = reservationWaitingService.addReservationWaiting(
                 new CreateReservationWaitingCommand("로지", date, time.getId(), theme.getId()),
-                LocalDateTime.now()
+                LocalDateTime.of(2026, 6, 9, 11, 0)
         );
 
         assertThat(first.order()).isEqualTo(1);
