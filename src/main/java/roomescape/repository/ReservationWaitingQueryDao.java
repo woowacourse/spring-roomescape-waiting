@@ -12,7 +12,6 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservationWaiting.ReservationWaitingSequence;
 
 @Repository
 public class ReservationWaitingQueryDao {
