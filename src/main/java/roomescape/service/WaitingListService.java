@@ -109,8 +109,8 @@ public class WaitingListService {
             }
         } catch (RuntimeException e) {
             failureLog.error(
-                    "예약 대기 승인에 실패했습니다. date={}, timeId={}, themeId={} 에러 원인: {}",
-                    event.date(), event.timeId(), event.themeId(), e.getMessage());
+                    "예약 대기 승인에 실패했습니다. date={}, timeId={}, themeId={}",
+                    event.date(), event.timeId(), event.themeId(), e);
             throw e;
         }
     }
