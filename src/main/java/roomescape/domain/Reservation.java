@@ -51,8 +51,8 @@ public class Reservation {
     }
 
     public Reservation promote() {
-        if (isReserved()) {
-            return this;
+        if (!isWaiting()) {
+            throw new IllegalArgumentException("예약 대기만 확정 예약으로 승급할 수 있습니다.");
         }
         return new Reservation(this.id, this.name, this.slot, this.createdAt, ReservationStatus.RESERVED);
     }

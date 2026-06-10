@@ -118,6 +118,38 @@ class ReservationTest {
                 .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
     }
 
+    @Test
+    @DisplayName("예약 대기는 확정 예약으로 승급할 수 있다.")
+    void 예약_대기_승급() {
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                createSlot(LocalDate.of(2026, 6, 10)),
+                LocalDateTime.of(2026, 6, 1, 10, 0),
+                ReservationStatus.WAITING
+        );
+
+        Reservation promoted = reservation.promote();
+
+        assertThat(promoted.isReserved()).isTrue();
+    }
+
+    @Test
+    @DisplayName("확정된 예약에 대한 승급 요청 시 예외가 발생한다.")
+    void 확정_예약_승급_요청_예외_발생() {
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                createSlot(LocalDate.of(2026, 6, 10)),
+                LocalDateTime.of(2026, 6, 1, 10, 0),
+                ReservationStatus.RESERVED
+        );
+
+        assertThatThrownBy(reservation::promote)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 대기만 확정 예약으로 승급할 수 있습니다.");
+    }
+
     private ReservationSlot createSlot(LocalDate date) {
         return new ReservationSlot(1L, date, TIME_SLOT, THEME);
     }
