@@ -1,7 +1,6 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -9,8 +8,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.PastTimeException;
-
 class ReservationTest {
 
     private static final TimeSlot TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
@@ -86,8 +83,8 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("예약 시작 24시간 전보다 이전에는 예약을 삭제할 수 있다.")
-    void 예약_시작_24시간_전보다_이전_삭제_가능() {
+    @DisplayName("예약 시작 24시간 전보다 이전이면 취소 가능하다.")
+    void 예약_시작_24시간_전보다_이전_취소_가능() {
         LocalDate reservationDate = LocalDate.of(2026, 6, 10);
         Reservation reservation = new Reservation(
                 1L,
@@ -97,13 +94,12 @@ class ReservationTest {
                 ReservationStatus.RESERVED
         );
 
-        assertThatCode(() -> reservation.cancel(LocalDateTime.of(2026, 6, 9, 9, 59)))
-                .doesNotThrowAnyException();
+        assertThat(reservation.isCancelable(LocalDateTime.of(2026, 6, 9, 9, 59))).isTrue();
     }
 
     @Test
-    @DisplayName("예약 시작 24시간 전부터는 예약을 삭제할 수 없다.")
-    void 예약_시작_24시간_전_삭제_예외_발생() {
+    @DisplayName("예약 시작 24시간 전부터는 취소할 수 없다.")
+    void 예약_시작_24시간_전_취소_불가능() {
         LocalDate reservationDate = LocalDate.of(2026, 6, 10);
         Reservation reservation = new Reservation(
                 1L,
@@ -113,9 +109,7 @@ class ReservationTest {
                 ReservationStatus.RESERVED
         );
 
-        assertThatThrownBy(() -> reservation.cancel(LocalDateTime.of(2026, 6, 9, 10, 0)))
-                .isInstanceOf(PastTimeException.class)
-                .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
+        assertThat(reservation.isCancelable(LocalDateTime.of(2026, 6, 9, 10, 0))).isFalse();
     }
 
     private ReservationSlot createSlot(LocalDate date) {

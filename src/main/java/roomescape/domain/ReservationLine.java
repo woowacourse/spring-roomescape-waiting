@@ -5,12 +5,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import roomescape.exception.DuplicateException;
+import roomescape.exception.PastTimeException;
 
 public class ReservationLine {
+
+    private static final String NON_CANCELLABLE_MESSAGE = String.format(
+            "예약 시작 %d시간 전까지만 예약을 삭제할 수 있습니다.",
+            Reservation.CANCEL_DEADLINE_HOURS
+    );
 
     private final ReservationSlot slot;
     private final Reservation reservedReservation;
     private final List<Reservation> waitings;
+
 
     public ReservationLine(ReservationSlot slot, List<Reservation> reservations) {
         validateSlot(slot);
@@ -45,6 +52,22 @@ public class ReservationLine {
             return Optional.empty();
         }
         return Optional.of(waitings.getFirst().promote());
+    }
+
+    public Optional<Reservation> cancel(Reservation target, LocalDateTime now) {
+        validateReservedReservation(target);
+        validateCancelable(target, now);
+
+        return findReservationToPromote(target);
+    }
+
+    public Optional<Reservation> findReservationToPromote(Reservation target) {
+        validateReservedReservation(target);
+
+        if (target.isWaiting()) {
+            return Optional.empty();
+        }
+        return promoteFirstWaiting();
     }
 
     private void validateDuplicated(String name) {
@@ -91,6 +114,25 @@ public class ReservationLine {
                 .anyMatch(waiting -> waiting.isOwner(name));
     }
 
+    private boolean containsReservation(Reservation target) {
+        return isReservedReservation(target) || isWaitingReservation(target);
+    }
+
+    private boolean isReservedReservation(Reservation target) {
+        return reservedReservation != null && reservedReservation.isSameReservation(target);
+    }
+
+    private boolean isWaitingReservation(Reservation target) {
+        return waitings.stream()
+                .anyMatch(waiting -> waiting.isSameReservation(target));
+    }
+
+    private void validateCancelable(Reservation target, LocalDateTime now) {
+        if (!target.isCancelable(now)) {
+            throw new PastTimeException(NON_CANCELLABLE_MESSAGE);
+        }
+    }
+
     private void validateSlot(ReservationSlot slot) {
         if (slot == null) {
             throw new IllegalArgumentException("예약 슬롯은 필수입니다.");
@@ -113,11 +155,22 @@ public class ReservationLine {
     }
 
     private void validateWaitingIndexTarget(Reservation target) {
+        validateSameSlotTarget(target);
+    }
+
+    private void validateReservedReservation(Reservation target) {
+        validateSameSlotTarget(target);
+        if (!containsReservation(target)) {
+            throw new IllegalArgumentException("예약을 찾을 수 없습니다.");
+        }
+    }
+
+    private void validateSameSlotTarget(Reservation target) {
         if (target == null) {
-            throw new IllegalArgumentException("대기 위치 계산을 위해 예약 대기는 필수입니다.");
+            throw new IllegalArgumentException("예약은 필수입니다.");
         }
         if (!target.getSlot().hasSameSlot(slot)) {
-            throw new IllegalArgumentException("대기 위치는 같은 예약 슬롯에 대해서만 계산 가능합니다.");
+            throw new IllegalArgumentException("같은 예약 슬롯의 예약만 처리할 수 있습니다.");
         }
     }
 }

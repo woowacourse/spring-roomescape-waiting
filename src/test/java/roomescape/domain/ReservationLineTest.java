@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.DuplicateException;
+import roomescape.exception.PastTimeException;
 
 public class ReservationLineTest {
 
@@ -133,7 +134,7 @@ public class ReservationLineTest {
 
         assertThatThrownBy(() -> reservationLine.findWaitingIndex(null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("대기 위치 계산을 위해 예약 대기는 필수입니다.");
+                .hasMessage("예약은 필수입니다.");
     }
 
     @Test
@@ -151,7 +152,7 @@ public class ReservationLineTest {
 
         assertThatThrownBy(() -> reservationLine.findWaitingIndex(otherSlot))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("대기 위치는 같은 예약 슬롯에 대해서만 계산 가능합니다.");
+                .hasMessage("같은 예약 슬롯의 예약만 처리할 수 있습니다.");
     }
 
     @Test
@@ -172,6 +173,76 @@ public class ReservationLineTest {
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of());
 
         Optional<Reservation> promoted = reservationLine.promoteFirstWaiting();
+
+        assertThat(promoted).isEmpty();
+    }
+
+    @Test
+    @DisplayName("확정 예약을 취소하면 첫 번째 대기가 승급 대상이 된다.")
+    void 확정_예약_취소시_첫번째_대기_승급() {
+        Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
+
+        Optional<Reservation> promoted = reservationLine.cancel(reserved, DATE.minusDays(1).atTime(9, 0));
+
+        assertThat(promoted).isPresent();
+        assertThat(promoted.get().getId()).isEqualTo(waiting.getId());
+        assertThat(promoted.get().isReserved()).isTrue();
+    }
+
+    @Test
+    @DisplayName("대기 예약을 취소하면 승급 대상이 없다.")
+    void 대기_예약_취소시_승급_대상_없음() {
+        Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
+
+        Optional<Reservation> promoted = reservationLine.cancel(waiting, DATE.minusDays(1).atTime(9, 0));
+
+        assertThat(promoted).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약 시작 24시간 전부터는 예약을 취소할 수 없다.")
+    void 예약_시작_24시간_전_취소_예외_발생() {
+        ReservationSlot slot = new ReservationSlot(1L, LocalDate.of(2026, 6, 10), TIME_SLOT, THEME);
+        Reservation reserved = new Reservation(
+                1L,
+                "예약자",
+                slot,
+                LocalDateTime.of(2026, 6, 3, 10, 0),
+                ReservationStatus.RESERVED
+        );
+        ReservationLine reservationLine = new ReservationLine(slot, List.of(reserved));
+
+        assertThatThrownBy(() -> reservationLine.cancel(reserved, LocalDateTime.of(2026, 6, 9, 10, 0)))
+                .isInstanceOf(PastTimeException.class)
+                .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
+    }
+
+    @Test
+    @DisplayName("확정 예약이 라인을 떠나면 첫 번째 대기가 승급 대상이 된다.")
+    void 확정_예약이_라인을_떠나면_첫번째_대기_승급() {
+        Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
+
+        Optional<Reservation> promoted = reservationLine.findReservationToPromote(reserved);
+
+        assertThat(promoted).isPresent();
+        assertThat(promoted.get().getId()).isEqualTo(waiting.getId());
+        assertThat(promoted.get().isReserved()).isTrue();
+    }
+
+    @Test
+    @DisplayName("대기 예약이 라인을 떠나면 승급 대상이 없다.")
+    void 대기_예약이_라인을_떠나면_승급_대상_없음() {
+        Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
+
+        Optional<Reservation> promoted = reservationLine.findReservationToPromote(waiting);
 
         assertThat(promoted).isEmpty();
     }

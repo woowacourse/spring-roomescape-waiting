@@ -6,7 +6,7 @@ import roomescape.exception.PastTimeException;
 
 public class Reservation {
 
-    private static final int CANCEL_DEADLINE_HOURS = 24;
+    static final int CANCEL_DEADLINE_HOURS = 24;
 
     private final Long id;
     private final String name;
@@ -40,18 +40,11 @@ public class Reservation {
         return new Reservation(this.id, this.name, updateSlot, this.createdAt, this.status);
     }
 
-    public void cancel(LocalDateTime now) {
-        validateCancelable(now);
-    }
-
-    private void validateCancelable(LocalDateTime now) {
+    public boolean isCancelable(LocalDateTime now) {
         LocalDateTime cancelLimitTime = LocalDateTime.of(slot.getDate(), slot.getTimeSlot().getStartAt())
                 .minusHours(CANCEL_DEADLINE_HOURS);
 
-        if (!now.isBefore(cancelLimitTime)) {
-            throw new PastTimeException(
-                    String.format("예약 시작 %d시간 전까지만 예약을 삭제할 수 있습니다.", CANCEL_DEADLINE_HOURS));
-        }
+        return now.isBefore(cancelLimitTime);
     }
 
     public Reservation promote() {

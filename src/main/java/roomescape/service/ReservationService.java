@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,24 +120,20 @@ public class ReservationService {
     private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,
                                                     LocalDateTime requestTime) {
         validateReservationOwner(reservation, requestName);
-        reservation.cancel(requestTime);
 
         ReservationSlot lockedSlot = getLockedReservationSlot(reservation.getSlot());
+        ReservationLine reservationLine = new ReservationLine(
+                lockedSlot,
+                reservationRepository.findBySlotId(lockedSlot.getId())
+        );
+        Optional<Reservation> promotedReservation = reservationLine.cancel(reservation, requestTime);
 
         deleteReservation(reservation);
-        if (reservation.isReserved()) {
-            updatePromotedReservation(lockedSlot);
-        }
+        promotedReservation.ifPresent(reservationRepository::update);
     }
 
     private void deleteReservation(Reservation reservation) {
         reservationRepository.deleteById(reservation.getId());
-    }
-
-    private void updatePromotedReservation(ReservationSlot slot) {
-        ReservationLine reservationLine = new ReservationLine(slot, reservationRepository.findWaitingsBySlotId(slot.getId()));
-        reservationLine.promoteFirstWaiting()
-                .ifPresent(reservationRepository::update);
     }
 
     @Transactional
@@ -155,11 +152,17 @@ public class ReservationService {
 
         lockReservationSlots(nowReservation.getSlot(), updateSlot);
         validateReservedSlot(updateSlot);
+        Optional<Reservation> promotedReservation = findPromotedReservation(nowReservation);
         reservationRepository.update(updateReservation);
+        promotedReservation.ifPresent(reservationRepository::update);
+    }
 
-        if (nowReservation.isReserved()) {
-            updatePromotedReservation(nowReservation.getSlot());
-        }
+    private Optional<Reservation> findPromotedReservation(Reservation reservation) {
+        ReservationLine reservationLine = new ReservationLine(
+                reservation.getSlot(),
+                reservationRepository.findBySlotId(reservation.getSlot().getId())
+        );
+        return reservationLine.findReservationToPromote(reservation);
     }
 
     private ReservationSlot findOrCreateReservationSlot(LocalDate date, long timeId, long themeId) {
