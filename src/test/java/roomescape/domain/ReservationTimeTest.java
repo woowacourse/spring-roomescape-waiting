@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import java.time.LocalTime;
 
@@ -25,15 +23,13 @@ class ReservationTimeTest {
     @Test
     void 시작_시간이_null이면_예외발생() {
         assertThatThrownBy(() -> ReservationTime.create(null, LocalTime.of(11, 0)))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.START_TIME_NULL);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 종료_시간이_null이면_예외발생() {
         assertThatThrownBy(() -> ReservationTime.create(LocalTime.of(10, 0), null))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.END_TIME_NULL);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -42,16 +38,16 @@ class ReservationTimeTest {
         final LocalTime endAt = LocalTime.of(10, 0);
 
         assertThatThrownBy(() -> ReservationTime.create(startAt, endAt))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.START_TIME_AFTER_END_TIME);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 현재_시간보다_이전인지_확인() {
-        final ReservationTime pastTime = ReservationTime.create(LocalTime.now().minusHours(1), LocalTime.now());
-        final ReservationTime futureTime = ReservationTime.create(LocalTime.now().plusHours(1), LocalTime.now().plusHours(2));
+        final LocalTime now = LocalTime.of(11, 0);
+        final ReservationTime pastTime = ReservationTime.create(now.minusHours(1), now);
+        final ReservationTime futureTime = ReservationTime.create(now.plusHours(1), now.plusHours(2));
 
-        assertThat(pastTime.isBefore()).isTrue();
-        assertThat(futureTime.isBefore()).isFalse();
+        assertThat(pastTime.isBefore(now)).isTrue();
+        assertThat(futureTime.isBefore(now)).isFalse();
     }
 }

@@ -5,9 +5,9 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.ClearDbTest;
 import roomescape.dto.ReservationTimeCreateCommand;
 import roomescape.dto.ReservationTimeResult;
+import roomescape.support.SpringBootApiTest;
 
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ClearDbTest
+@SpringBootApiTest
 class ReservationTimeControllerTest {
 
     @Autowired

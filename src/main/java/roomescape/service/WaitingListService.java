@@ -1,10 +1,18 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
@@ -15,37 +23,41 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class WaitingListService {
+
+    private static final Logger failureLog = LoggerFactory.getLogger("waiting.approval.failure");
 
     private final WaitingListRepository waitingListRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public WaitingListResult create(final WaitingListCreateCommand createCommand) {
+    public WaitingListResult create(final WaitingListCreateCommand createCommand, final LocalDate today, final LocalTime now) {
         final ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
         final Theme findTheme = themeRepository.findById(createCommand.themeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
 
         final WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findReservationTime, findTheme);
-        validateFuture(waitingList);
+        validateFuture(waitingList, today, now);
 
-        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waitingList.getReservationDate().date(), findReservationTime.getId(), findTheme.getId()
-            )
+        final LocalDate date = waitingList.getReservationDate().date();
+        final Long timeId = findReservationTime.getId();
+        final Long themeId = findTheme.getId();
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                && !waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)
         ) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
-        if (waitingListRepository.existsByNameAndDateAndTimeAndTheme(
-                waitingList.getName(), waitingList.getReservationDate().date(), findTheme.getId(), findReservationTime.getId()
-            )
-        ) {
+        if (waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(waitingList.getName(), date, timeId, themeId)) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
 
@@ -54,7 +66,7 @@ public class WaitingListService {
         return WaitingListResult.from(savedWaitingList, waitingOrder);
     }
 
-    public void delete(final WaitingListDeleteCommand deleteCommand) {
+    public void delete(final WaitingListDeleteCommand deleteCommand, final LocalDate today, final LocalTime now) {
         final WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
 
@@ -62,11 +74,44 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
 
-        validateFuture(findWaitingList);
+        validateFuture(findWaitingList, today, now);
 
         final boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
         if (!deleted) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
+        }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void promoteWaitingListToReservation(final ReservationAvailableEvent event) {
+        try {
+            final Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
+                    event.date(), event.timeId(), event.themeId());
+
+            if (nextWaiting.isEmpty()) {
+                return;
+            }
+
+            final WaitingList waiting = nextWaiting.get();
+            final Reservation newReservation = Reservation.create(
+                    waiting.getName(),
+                    waiting.getReservationDate().date(),
+                    waiting.getReservationTime(),
+                    waiting.getTheme()
+            );
+
+            reservationRepository.save(newReservation);
+
+            final boolean deleted = waitingListRepository.deleteById(waiting.getId());
+            if (!deleted) {
+                throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
+            }
+        } catch (RuntimeException e) {
+            failureLog.error(
+                    "예약 대기 승인에 실패했습니다. date={}, timeId={}, themeId={}",
+                    event.date(), event.timeId(), event.themeId(), e);
+            throw e;
         }
     }
 
@@ -79,11 +124,12 @@ public class WaitingListService {
                 ).toList();
     }
 
-    private static void validateFuture(final WaitingList waitingList) {
-        if (waitingList.getReservationDate().isPast()) {
+    private static void validateFuture(final WaitingList waitingList, final LocalDate today, final LocalTime now) {
+        if (waitingList.getReservationDate().isPast(today)) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }
-        if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore()) {
+
+        if (waitingList.getReservationDate().isSameDay(today) && waitingList.getReservationTime().isBefore(now)) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }

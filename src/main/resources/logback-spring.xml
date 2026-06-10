@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <appender name="WAITING_FAIL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/waiting-approval-failure.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/waiting-approval-failure.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="waiting.approval.failure" level="ERROR" additivity="false">
+        <appender-ref ref="WAITING_FAIL_FILE"/>
+    </logger>
+
+</configuration>

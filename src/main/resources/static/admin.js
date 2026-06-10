@@ -7,11 +7,6 @@ const ERROR_MESSAGES = {
   'TIME_HAS_RESERVATION': '해당 시간대에 예약된 내역이 있어 삭제할 수 없습니다.',
   'THEME_HAS_RESERVATION': '해당 테마에 예약된 내역이 있어 삭제할 수 없습니다.',
   'INVALID_INPUT_VALUE': '입력 정보가 올바르지 않습니다. 다시 한 번 확인해 주세요.',
-  'START_TIME_NULL': '시작 시간을 입력해 주세요.',
-  'END_TIME_NULL': '종료 시간을 입력해 주세요.',
-  'THEME_NAME_NULL_OR_BLANK': '테마 이름을 입력해 주세요.',
-  'DESCRIPTION_NULL_OR_BLANK': '테마 설명을 입력해 주세요.',
-  'THUMBNAIL_URL_NULL_OR_BLANK': '테마 썸네일 URL을 입력해 주세요.',
   'DEFAULT': '알 수 없는 오류가 발생했습니다. 문제가 지속되면 시스템 관리자에게 문의해주세요.'
 };
 
@@ -64,19 +59,6 @@ function formatTime(t) {
   if (!t) return '';
   if (Array.isArray(t)) return `${String(t[0]).padStart(2,'0')}:${String(t[1]).padStart(2,'0')}`;
   return t.substring(0, 5);
-}
-
-// ===== Panel switching =====
-function switchPanel(panel) {
-  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.admin-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-  $(`admin-panel-${panel}`).classList.add('active');
-  const tab = document.querySelector(`[data-panel="${panel}"]`);
-  if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
-
-  if (panel === 'reservations') loadReservations();
-  if (panel === 'times') loadTimes();
-  if (panel === 'themes') loadThemes();
 }
 
 // ===== Reservations =====
@@ -140,11 +122,11 @@ async function addTime() {
   const endAt = $('new-time-end').value;
 
   if (!startAt) {
-    showToast(ERROR_MESSAGES['START_TIME_NULL'], 'error');
+    showToast('시작 시간을 입력해 주세요.', 'error');
     return;
   }
   if (!endAt) {
-    showToast(ERROR_MESSAGES['END_TIME_NULL'], 'error');
+    showToast('종료 시간을 입력해 주세요.', 'error');
     return;
   }
 
@@ -198,10 +180,10 @@ async function addTheme() {
   const name         = $('new-theme-name').value.trim();
   const description  = $('new-theme-desc').value.trim();
   const thumbnailUrl = $('new-theme-thumb').value.trim();
-  if (!name) { showToast(ERROR_MESSAGES['THEME_NAME_NULL_OR_BLANK'], 'error'); return; }
-  if (!description) { showToast(ERROR_MESSAGES['DESCRIPTION_NULL_OR_BLANK'], 'error'); return; }
-  if (!thumbnailUrl) { showToast(ERROR_MESSAGES['THUMBNAIL_URL_NULL_OR_BLANK'], 'error'); return; }
-  
+  if (!name) { showToast('테마 이름을 입력해 주세요.', 'error'); return; }
+  if (!description) { showToast('테마 설명을 입력해 주세요.', 'error'); return; }
+  if (!thumbnailUrl) { showToast('테마 썸네일 URL을 입력해 주세요.', 'error'); return; }
+
   try {
     await api.post('/themes', { name, description, thumbnailUrl });
     showToast('새로운 테마가 성공적으로 추가되었습니다.', 'success');
@@ -231,5 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-add-time').addEventListener('click', addTime);
   $('btn-add-theme').addEventListener('click', addTheme);
 
-  loadReservations(); // 기본으로 예약 목록 로드
+  loadReservations();
+  loadTimes();
+  loadThemes();
 });

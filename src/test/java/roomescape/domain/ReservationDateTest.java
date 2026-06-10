@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 
@@ -23,8 +21,7 @@ class ReservationDateTest {
     @Test
     void 날짜가_null이면_예외발생() {
         assertThatThrownBy(() -> new ReservationDate(null))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_NULL);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -32,8 +29,8 @@ class ReservationDateTest {
         final ReservationDate today = new ReservationDate(LocalDate.now());
         final ReservationDate tomorrow = new ReservationDate(LocalDate.now().plusDays(1));
 
-        assertThat(today.isToday()).isTrue();
-        assertThat(tomorrow.isToday()).isFalse();
+        assertThat(today.isSameDay(LocalDate.now())).isTrue();
+        assertThat(tomorrow.isSameDay(LocalDate.now())).isFalse();
     }
 
     @Test
@@ -41,7 +38,7 @@ class ReservationDateTest {
         final ReservationDate yesterday = new ReservationDate(LocalDate.now().minusDays(1));
         final ReservationDate today = new ReservationDate(LocalDate.now());
 
-        assertThat(yesterday.isPast()).isTrue();
-        assertThat(today.isPast()).isFalse();
+        assertThat(yesterday.isPast(LocalDate.now())).isTrue();
+        assertThat(today.isPast(LocalDate.now())).isFalse();
     }
 }

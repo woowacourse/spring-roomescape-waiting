@@ -1,8 +1,5 @@
 package roomescape.domain;
 
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
-
 import java.time.LocalDate;
 
 public record ReservationDate(
@@ -15,15 +12,15 @@ public record ReservationDate(
 
     private void validate(final LocalDate date) {
         if (date == null) {
-            throw new BusinessException(ErrorCode.DATE_NULL);
+            throw new IllegalArgumentException("예약 날짜는 비워둘 수 없습니다.");
         }
     }
 
-    public boolean isPast() {
-        return date.isBefore(LocalDate.now());
+    public boolean isPast(final LocalDate date) {
+        return this.date.isBefore(date);
     }
 
-    public boolean isToday() {
-        return date.isEqual(LocalDate.now());
+    public boolean isSameDay(final LocalDate date) {
+        return this.date.isEqual(date);
     }
 }

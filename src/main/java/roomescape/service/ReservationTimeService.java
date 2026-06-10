@@ -9,6 +9,7 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingListRepository waitingListRepository;
 
     public ReservationTimeResult create(final ReservationTimeCreateCommand data) {
         final ReservationTime reservationTime = ReservationTime.create(
@@ -34,6 +36,11 @@ public class ReservationTimeService {
         final boolean hasAnyOngoingReservation = reservationRepository.existsByTimeId(timeId);
         if (hasAnyOngoingReservation) {
             throw new BusinessException(ErrorCode.TIME_HAS_RESERVATION);
+        }
+
+        final boolean hasAnyOngoingWaitingList = waitingListRepository.existsByTimeId(timeId);
+        if (hasAnyOngoingWaitingList) {
+            throw new BusinessException(ErrorCode.TIME_HAS_WAITING_LIST);
         }
 
         final boolean deleted = reservationTimeRepository.delete(timeId);

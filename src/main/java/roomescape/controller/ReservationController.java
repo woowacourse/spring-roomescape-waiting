@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.AvailableDateResult;
 import roomescape.dto.ReservationCreateCommand;
+import roomescape.dto.ReservationDeleteCommand;
+import roomescape.dto.ReservationDeleteRequest;
 import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.ReservationModifyRequest;
 import roomescape.dto.ReservationResult;
@@ -79,9 +81,10 @@ public class ReservationController {
     @DeleteMapping("/{reservation-id}")
     public ResponseEntity<Void> deleteByName(
             @PathVariable("reservation-id") final Long reservationId,
-            @RequestParam("name") final String name
-    ) {
-        reservationService.deleteWithValidation(reservationId, name);
+            @RequestBody final ReservationDeleteRequest reservationDeleteRequest
+            ) {
+        final ReservationDeleteCommand deleteCommand = new ReservationDeleteCommand(reservationId, reservationDeleteRequest.name());
+        reservationService.deleteWithValidation(deleteCommand);
         return ResponseEntity.noContent().build();
     }
 }

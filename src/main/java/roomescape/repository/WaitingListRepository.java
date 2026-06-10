@@ -102,16 +102,20 @@ public class WaitingListRepository {
 
     public int findWaitingOrderByDateAndTimeAndTheme(final WaitingList waitingList) {
         final String sql = """
-                SELECT COUNT(*)
-                FROM waiting_list
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND created_at <= ?
+                SELECT ranking
+                FROM (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at ASC, id ASC) as ranking
+                    FROM waiting_list
+                    WHERE date = ? AND time_id = ? AND theme_id = ?
+                ) as ranked_list
+                WHERE id = ?
                 """;
 
         Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
                 waitingList.getReservationDate().date(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
-                waitingList.getCreatedAt()
+                waitingList.getId()
         );
 
         if (waitingOrder != null) {
@@ -120,7 +124,42 @@ public class WaitingListRepository {
         return 0;
     }
 
-    public boolean existsByNameAndDateAndTimeAndTheme(final String name, final LocalDate date, final Long timeId, final Long themeId) {
+    public Optional<WaitingList> findFirstBySlot(final LocalDate date, final Long timeId, final Long themeId) {
+        final String sql = """
+                SELECT
+                    w.id AS waiting_list_id,
+                    w.name AS waiting_list_name,
+                    w.date AS waiting_list_date,
+                    w.theme_id AS theme_id,
+                    w.created_at,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    t.end_at AS time_end_at,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM waiting_list w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme h ON w.theme_id = h.id 
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.created_at ASC, w.id ASC
+                LIMIT 1
+                """;
+        try {
+            final WaitingList waitingList = jdbcTemplate.queryForObject(
+                    sql,
+                    this::mapToDomain,
+                    date,
+                    timeId,
+                    themeId
+            );
+            return Optional.of(waitingList);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(final String name, final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
@@ -128,6 +167,42 @@ public class WaitingListRepository {
                 """;
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+
+        return count != null && count > 0;
+    }
+
+    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE date = ? AND time_id = ? AND theme_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+
+        return count != null && count > 0;
+    }
+
+    public boolean existsByTimeId(final Long timeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE time_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+
+        return count != null && count > 0;
+    }
+
+    public boolean existsByThemeId(final Long themeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE theme_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
 
         return count != null && count > 0;
     }

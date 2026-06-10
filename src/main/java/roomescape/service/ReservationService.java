@@ -1,12 +1,16 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableDateResult;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.ReservationCreateCommand;
+import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.ReservationTimeStatusResult;
@@ -15,8 +19,10 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +33,8 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingListRepository waitingListRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
 
@@ -47,6 +55,7 @@ public class ReservationService {
         return ReservationResult.from(savedReservation);
     }
 
+    @Transactional
     public ReservationResult modify(final ReservationModifyCommand reservationModifyCommand) {
         final Long reservationId = reservationModifyCommand.reservationId();
         final Reservation originalReservation = getReservation(reservationId);
@@ -74,25 +83,35 @@ public class ReservationService {
         validateAvailable(date, timeId, modifiedReservation.getTheme().getId());
 
         reservationRepository.updateDateAndTime(modifiedReservation);
+        callEventListenerForWaitingListApproval(originalReservation);
         return ReservationResult.from(modifiedReservation);
     }
 
+    @Transactional
     public void delete(final Long reservationId) {
-        final boolean deleted = reservationRepository.deleteById(reservationId);
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
+        final Reservation reservation = getReservation(reservationId);
+        deleteReservation(reservationId);
+        callEventListenerForWaitingListApproval(reservation);
     }
 
-    public void deleteWithValidation(final Long reservationId, final String name) {
-        final Reservation reservation = getReservation(reservationId);
-        validateReservationOwner(reservation, name);
+    @Transactional
+    public void deleteWithValidation(final ReservationDeleteCommand deleteCommand) {
+        final Reservation reservation = getReservation(deleteCommand.reservationId());
+        validateReservationOwner(reservation, deleteCommand.name());
         final LocalDate date = reservation.getDate();
         validateFutureOrPresentDate(date);
         final ReservationTime reservationTime = reservation.getTime();
         validateFutureOrPresentTime(date, reservationTime);
-        delete(reservationId);
+
+        deleteReservation(reservation.getId());
+        callEventListenerForWaitingListApproval(reservation);
+    }
+
+    private void deleteReservation(final Long reservationId) {
+        final boolean deleted = reservationRepository.deleteById(reservationId);
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
     }
 
     public List<ReservationResult> getReservations() {
@@ -127,6 +146,15 @@ public class ReservationService {
                 .toList();
     }
 
+    private void callEventListenerForWaitingListApproval(final Reservation reservation) {
+        eventPublisher.publishEvent(new ReservationAvailableEvent(
+                        reservation.getDate(),
+                        reservation.getTime().getId(),
+                        reservation.getTheme().getId()
+                )
+        );
+    }
+
     private Reservation getReservation(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -151,20 +179,21 @@ public class ReservationService {
 
     private void validateFutureOrPresentTime(final LocalDate date, final ReservationTime reservationTime) {
         final LocalDate today = LocalDate.now();
-        if (date.equals(today) && reservationTime.isBefore()) {
+        final LocalTime now = LocalTime.now();
+        if (date.equals(today) && reservationTime.isBefore(now)) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }
 
     private void validateAvailable(final LocalDate date, final Long timeId, final Long themeId) {
-        final boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                date,
-                timeId,
-                themeId
-        );
-
+        final boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (isAlreadyReserved) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
+        }
+
+        final boolean hasWaitingList = waitingListRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        if (hasWaitingList) {
+            throw new BusinessException(ErrorCode.QUEUED_WAITING_LIST);
         }
     }
 

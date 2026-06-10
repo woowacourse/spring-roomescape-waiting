@@ -1,8 +1,5 @@
 package roomescape.domain;
 
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
-
 public record ThemeName(
         String name
 ) {
@@ -13,7 +10,7 @@ public record ThemeName(
 
     private void validate(final String value) {
         if (value == null || value.isBlank()) {
-            throw new BusinessException(ErrorCode.THEME_NAME_NULL_OR_BLANK);
+            throw new IllegalArgumentException("테마 이름은 비워둘 수 없습니다.");
         }
     }
 }

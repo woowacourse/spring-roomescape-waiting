@@ -3,8 +3,6 @@ package roomescape.domain;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,8 +22,7 @@ class PersonNameTest {
     @NullAndEmptySource
     void 이름이_null이거나_비어있으면_예외발생(final String name) {
         assertThatThrownBy(() -> new PersonName(name))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PERSON_NAME_NULL_OR_BLANK);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

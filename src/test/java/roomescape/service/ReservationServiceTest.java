@@ -6,10 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.dto.ReservationAvailableEvent;
 import roomescape.dto.ReservationCreateCommand;
+import roomescape.dto.ReservationDeleteCommand;
 import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.ReservationStatus;
@@ -20,6 +23,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +48,12 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private WaitingListRepository waitingListRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -109,7 +120,24 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경() {
+    void 예약_대기가_존재하는데_예약_생성을_시도할시_예외발생() {
+        // given
+        ReservationCreateCommand request = new ReservationCreateCommand("오리", futureDate, 1L, 1L);
+
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
+        given(waitingListRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.QUEUED_WAITING_LIST);
+    }
+
+    @Test
+    void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경_및_대기_승인_이벤트_발생() {
         // given
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", futureDate.plusDays(1), 2L);
         Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
@@ -118,6 +146,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, theme.getId())).willReturn(false);
+        given(waitingListRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, theme.getId())).willReturn(false);
 
         // when
         ReservationResult response = reservationService.modify(request);
@@ -126,10 +155,11 @@ class ReservationServiceTest {
         assertThat(response.date()).isEqualTo(request.date());
         assertThat(response.time().id()).isEqualTo(2L);
         verify(reservationRepository).updateDateAndTime(any(Reservation.class));
+        verify(eventPublisher).publishEvent(any(ReservationAvailableEvent.class));
     }
 
     @Test
-    void 변경을_시도하는_사용자명과_예약자명_불일치시_예외발생() {
+    void 변경을_시도하는_사용자명과_예약자명_불일치시_예외발생_및_대기_승인_이벤트_미발생() {
         // given
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "리오", futureDate.plusDays(1), 2L);
         Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
@@ -140,32 +170,78 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.modify(request))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+        verify(eventPublisher, never()).publishEvent(any(ReservationAvailableEvent.class));
     }
 
     @Test
-    void 삭제를_시도하는_사용자명과_예약자명_일치시_예약_삭제() {
+    void 변경을_시도하는_건에_이미_예약이_존재할시_예외발생_및_대기_승인_이벤트_미발생() {
+        // given
+        LocalDate newDate = futureDate.plusDays(1);
+        Long newTimeId = 2L;
+        ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", newDate, newTimeId);
+        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
+        ReservationTime newTime = ReservationTime.createWithId(newTimeId, LocalTime.of(13, 0), LocalTime.of(14, 0));
+        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, newTimeId, theme.getId())).willReturn(true);
+
+        // when & them
+        assertThatThrownBy(() -> reservationService.modify(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
+        verify(eventPublisher, never()).publishEvent(any(ReservationAvailableEvent.class));
+    }
+
+    @Test
+    void 변경을_시도하는_건에_이미_예약대기가_존재할시_예외발생_및_대기_승인_이벤트_미발생() {
+        // given
+        LocalDate newDate = futureDate.plusDays(1);
+        Long newTimeId = 2L;
+        ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", newDate, newTimeId);
+        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
+        ReservationTime newTime = ReservationTime.createWithId(newTimeId, LocalTime.of(13, 0), LocalTime.of(14, 0));
+        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, newTimeId, theme.getId())).willReturn(false);
+        given(waitingListRepository.existsByDateAndTimeIdAndThemeId(newDate, newTimeId, theme.getId())).willReturn(true);
+
+        // when & them
+        assertThatThrownBy(() -> reservationService.modify(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.QUEUED_WAITING_LIST);
+        verify(eventPublisher, never()).publishEvent(any(ReservationAvailableEvent.class));
+    }
+
+    @Test
+    void 삭제를_시도하는_사용자명과_예약자명_일치시_예약_삭제_및_대기_승인_이벤트_발생() {
         // given
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationRepository.deleteById(1L)).willReturn(true);
+        ReservationDeleteCommand correctDeleteCommand = new ReservationDeleteCommand(1L, "오리");
 
         // when
-        reservationService.deleteWithValidation(1L, "오리");
+        reservationService.deleteWithValidation(correctDeleteCommand);
 
         // then
         verify(reservationRepository).deleteById(1L);
+        verify(eventPublisher).publishEvent(any(ReservationAvailableEvent.class));
     }
 
     @Test
-    void 삭제를_시도하는_사용자명과_예약자명_불일치시_예외발생() {
+    void 삭제를_시도하는_사용자명과_예약자명_불일치시_예외발생_및_대기_승인_이벤트_미발생() {
         // given
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        ReservationDeleteCommand wrongDeleteCommand = new ReservationDeleteCommand(1L, "거위");
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteWithValidation(1L, "거위"))
+        assertThatThrownBy(() -> reservationService.deleteWithValidation(wrongDeleteCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+        verify(eventPublisher, never()).publishEvent(any(ReservationAvailableEvent.class));
     }
 
     @Test

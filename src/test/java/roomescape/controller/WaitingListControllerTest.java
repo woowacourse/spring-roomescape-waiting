@@ -5,8 +5,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.ClearDbTest;
 import roomescape.dto.WaitingListResult;
+import roomescape.support.SpringBootApiTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ClearDbTest
+@SpringBootApiTest
 class WaitingListControllerTest {
 
     private static final LocalDate TODAY = LocalDate.now();

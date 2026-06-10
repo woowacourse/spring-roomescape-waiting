@@ -6,11 +6,11 @@ const state = {
   modifyingReservationId: null,
   modifyingThemeId: null,
   modifyingThemeName: null,
-  
+
   selectedDate: null,
   selectedTimeId: null,
   selectedTimeLabel: null,
-  
+
   currentCalendarYear: new Date().getFullYear(),
   currentCalendarMonth: new Date().getMonth(),
 
@@ -31,7 +31,6 @@ const ERROR_MESSAGES = {
   'RESERVATION_NOT_FOUND': '해당 예약 내역을 찾을 수 없습니다. 이미 취소되었거나 정보가 다를 수 있습니다.',
   'TIME_HAS_RESERVATION': '해당 시간에 아직 완료되지 않은 예약이 있습니다.',
   'INVALID_INPUT_VALUE': '입력 정보가 올바르지 않습니다. 다시 확인해 주세요.',
-  'PERSON_NAME_NULL_OR_BLANK': '조회할 예약자의 이름을 입력해 주세요.',
   'DEFAULT': '알 수 없는 오류가 발생했습니다. 문제가 지속되면 관리자에게 문의해주세요.'
 };
 
@@ -67,7 +66,7 @@ const api = {
   get(url) {
     return this.request(url);
   },
-  
+
   patch(url, body) {
     return this.request(url, {
       method: 'PATCH',
@@ -77,7 +76,7 @@ const api = {
   },
 
   del(url, body) {
-    return this.request(url, { 
+    return this.request(url, {
       method: 'DELETE',
       headers: body ? { 'Content-Type': 'application/json' } : undefined,
       body: body ? JSON.stringify(body) : undefined,
@@ -98,7 +97,7 @@ async function loadMetadata() {
       api.get('/themes'),
       api.get('/times')
     ]);
-    
+
     themes.forEach(t => state.themesMap[t.id] = t);
     times.forEach(t => state.timesMap[t.id] = t);
   } catch(e) {
@@ -110,17 +109,17 @@ async function loadMetadata() {
 async function loadMyData() {
   const name = $('search-name').value.trim();
   if (!name) {
-    showToast(ERROR_MESSAGES['PERSON_NAME_NULL_OR_BLANK'], 'error');
+    showToast('조회할 예약자의 이름을 입력해 주세요.', 'error');
     return;
   }
   state.currentName = name;
-  
+
   const resTbody = $('my-reservations-tbody');
   const waitTbody = $('my-waiting-tbody');
-  
+
   resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
   waitTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
-  
+
   try {
     const [reservations, waitingLists] = await Promise.all([
       api.get(`/reservations?name=${encodeURIComponent(name)}`).catch(() => []),
@@ -172,7 +171,7 @@ async function loadMyData() {
 async function deleteReservation(id) {
   if (!confirm('정말 이 예약을 취소하시겠습니까? 취소된 예약은 복구할 수 없습니다.')) return;
   try {
-    await api.del(`/reservations/${id}?name=${encodeURIComponent(state.currentName)}`);
+    await api.del(`/reservations/${id}`, { name: state.currentName });
     showToast('예약이 성공적으로 취소되었습니다.', 'success');
     loadMyData();
   } catch (e) {
@@ -200,10 +199,10 @@ async function openModifyModal(reservationId, themeName, themeId) {
   state.selectedDate = null;
   state.selectedTimeId = null;
   state.selectedTimeLabel = null;
-  
+
   $('modify-modal-theme').textContent = themeName;
   updateModifyCTAInfo();
-  
+
   try {
     const datesData = await api.get('/reservations/available-dates');
     state.availableDates = datesData.dates || datesData || [];
@@ -215,8 +214,8 @@ async function openModifyModal(reservationId, themeName, themeId) {
   }
 }
 
-function closeModifyModal() { 
-  $('modify-modal').classList.remove('open'); 
+function closeModifyModal() {
+  $('modify-modal').classList.remove('open');
 }
 
 function updateModifyCTAInfo() {
@@ -360,7 +359,7 @@ function setupTabs() {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
-      
+
       const tab = e.target.dataset.tab;
       if (tab === 'reservations') {
         $('reservations-tab').style.display = 'block';
@@ -377,9 +376,9 @@ function setupTabs() {
 document.addEventListener('DOMContentLoaded', () => {
   loadMetadata();
   setupTabs();
-  
+
   $('btn-search-reservation').addEventListener('click', loadMyData);
-  
+
   // 엔터로 조회
   $('search-name').addEventListener('keyup', (e) => {
     if (e.key === 'Enter') loadMyData();

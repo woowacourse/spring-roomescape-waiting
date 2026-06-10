@@ -12,6 +12,7 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -31,6 +32,9 @@ class ReservationTimeServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private WaitingListRepository waitingListRepository;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
@@ -59,6 +63,7 @@ class ReservationTimeServiceTest {
         // given
         Long targetTimeId = 1L;
         given(reservationRepository.existsByTimeId(targetTimeId)).willReturn(false);
+        given(waitingListRepository.existsByTimeId(targetTimeId)).willReturn(false);
         given(reservationTimeRepository.delete(targetTimeId)).willReturn(true);
 
         // when
@@ -79,6 +84,21 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.delete(targetTimeId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_HAS_RESERVATION);
+
+        verify(reservationTimeRepository, org.mockito.Mockito.never()).delete(anyLong());
+    }
+
+    @Test
+    void 삭제하려는_시간에_이미_예약_대기가_존재할_경우_예외발생() {
+        // given
+        Long targetTimeId = 1L;
+        given(reservationRepository.existsByTimeId(targetTimeId)).willReturn(false);
+        given(waitingListRepository.existsByTimeId(targetTimeId)).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> reservationTimeService.delete(targetTimeId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_HAS_WAITING_LIST);
 
         verify(reservationTimeRepository, org.mockito.Mockito.never()).delete(anyLong());
     }

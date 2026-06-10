@@ -1,8 +1,5 @@
 package roomescape.domain;
 
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
-
 public record PersonName(
         String name
 ) {
@@ -13,7 +10,7 @@ public record PersonName(
 
     private void validate(final String value) {
         if (value == null || value.isBlank()) {
-            throw new BusinessException(ErrorCode.PERSON_NAME_NULL_OR_BLANK);
+            throw new IllegalArgumentException("이름은 비워둘 수 없습니다.");
         }
     }
 

@@ -1,39 +1,25 @@
 package roomescape.domain;
 
+import lombok.AccessLevel;
 import lombok.Getter;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class Reservation {
 
     private final Long id;
     private final PersonName name;
-    private final LocalDate date;
+    private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
 
-    private Reservation(final Long id, final PersonName name, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this.id = id;
-        this.name = name;
-        validateDate(date);
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-    }
-
     private static void validateId(final Long id) {
         if (id == null) {
-            throw new BusinessException(ErrorCode.RESERVATION_ID_NULL);
-        }
-    }
-
-    private static void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new BusinessException(ErrorCode.DATE_NULL);
+            throw new IllegalArgumentException("예약 ID는 비워둘 수 없습니다.");
         }
     }
 
@@ -41,7 +27,7 @@ public class Reservation {
         return new Reservation(
                 null,
                 new PersonName(name),
-                date,
+                new ReservationDate(date),
                 time,
                 theme
         );
@@ -57,7 +43,7 @@ public class Reservation {
         return new Reservation(
                 id,
                 new PersonName(name),
-                date,
+                new ReservationDate(date),
                 time,
                 theme
         );
@@ -78,7 +64,7 @@ public class Reservation {
         return new Reservation(
                 this.id,
                 this.name,
-                Objects.requireNonNullElse(newDate, this.date),
+                new ReservationDate(newDate),
                 Objects.requireNonNullElse(newReservationTime, this.time),
                 this.theme
         );
@@ -90,5 +76,9 @@ public class Reservation {
 
     public String getName() {
         return this.name.name();
+    }
+
+    public LocalDate getDate() {
+        return this.date.date();
     }
 }

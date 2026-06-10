@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.ClearDbTest;
 import roomescape.dto.ReservationResult;
+import roomescape.support.SpringBootApiTest;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ClearDbTest
+@SpringBootApiTest
 class AdminReservationControllerTest {
 
     @Autowired

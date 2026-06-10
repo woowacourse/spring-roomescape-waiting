@@ -9,6 +9,7 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,6 +20,7 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingListRepository waitingListRepository;
 
     private static final int DATA_RANGE = 7;
 
@@ -38,6 +40,11 @@ public class ThemeService {
         final boolean hasAnyOngoingReservation = reservationRepository.existsByThemeId(themeId);
         if (hasAnyOngoingReservation) {
             throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
+        }
+
+        final boolean hasAnyOngoingWaitingList = waitingListRepository.existsByThemeId(themeId);
+        if (hasAnyOngoingWaitingList) {
+            throw new BusinessException(ErrorCode.THEME_HAS_WAITING_LIST);
         }
 
         final boolean deleted = themeRepository.deleteById(themeId);

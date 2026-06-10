@@ -12,6 +12,7 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,8 +29,12 @@ class ThemeServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private WaitingListRepository waitingListRepository;
 
     @InjectMocks
     private ThemeService themeService;
@@ -56,6 +61,8 @@ class ThemeServiceTest {
     void 테마_삭제() {
         // given
         Long targetThemeId = 1L;
+        given(reservationRepository.existsByThemeId(targetThemeId)).willReturn(false);
+        given(waitingListRepository.existsByThemeId(targetThemeId)).willReturn(false);
         given(themeRepository.deleteById(targetThemeId)).willReturn(true);
 
         // when
@@ -75,6 +82,21 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.delete(targetThemeId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THEME_HAS_RESERVATION);
+
+        verify(themeRepository, org.mockito.Mockito.never()).deleteById(anyLong());
+    }
+
+    @Test
+    void 삭제하려는_테마에_이미_예약_대기가_존재할_경우_예외발생() {
+        // given
+        Long targetThemeId = 1L;
+        given(reservationRepository.existsByThemeId(targetThemeId)).willReturn(false);
+        given(waitingListRepository.existsByThemeId(targetThemeId)).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> themeService.delete(targetThemeId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THEME_HAS_WAITING_LIST);
 
         verify(themeRepository, org.mockito.Mockito.never()).deleteById(anyLong());
     }
