@@ -32,7 +32,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 resultSet.getTime("start_at").toLocalTime()
         );
 
-        ReservationSlot slot = ReservationSlot.of(
+        ReservationSlot slot = new ReservationSlot(
                 resultSet.getLong("slot_id"),
                 resultSet.getDate("date").toLocalDate(),
                 theme,

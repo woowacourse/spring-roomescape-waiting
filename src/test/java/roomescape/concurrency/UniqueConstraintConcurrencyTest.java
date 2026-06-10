@@ -62,7 +62,7 @@ class UniqueConstraintConcurrencyTest {
         Theme theme = themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = reservationTimeService.save(LocalTime.parse("10:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
-        reservationSlotRepository.save(ReservationSlot.createNew(date, theme, time));
+        reservationSlotRepository.save(new ReservationSlot(date, theme, time));
 
         List<Throwable> results = runConcurrently(REQUEST_COUNT, index ->
                 reservationService.save("예약자" + index, date, theme.getId(), time.getId())
@@ -79,7 +79,7 @@ class UniqueConstraintConcurrencyTest {
         Theme theme = themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = reservationTimeService.save(LocalTime.parse("10:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
-        reservationSlotRepository.save(ReservationSlot.createNew(date, theme, time));
+        reservationSlotRepository.save(new ReservationSlot(date, theme, time));
         reservationService.save("예약자", date, theme.getId(), time.getId());
 
         List<Throwable> results = runConcurrently(REQUEST_COUNT, index ->
@@ -97,7 +97,7 @@ class UniqueConstraintConcurrencyTest {
         Theme theme = themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = reservationTimeService.save(LocalTime.parse("10:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
-        reservationSlotRepository.save(ReservationSlot.createNew(date, theme, time));
+        reservationSlotRepository.save(new ReservationSlot(date, theme, time));
         reservationService.save("예약자", date, theme.getId(), time.getId());
 
         List<Throwable> results = runConcurrently(REQUEST_COUNT, index ->

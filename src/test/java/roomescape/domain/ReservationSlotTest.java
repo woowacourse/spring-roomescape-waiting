@@ -17,7 +17,7 @@ class ReservationSlotTest {
     @DisplayName("슬롯 시간이 기준 시각보다 이전이면 과거 슬롯이다")
     @Test
     void isPast() {
-        ReservationSlot slot = ReservationSlot.createNew(
+        ReservationSlot slot = new ReservationSlot(
                 LocalDate.parse("2026-03-08"),
                 createTheme(),
                 ReservationTime.createNew(LocalTime.parse("10:00"))
@@ -34,7 +34,7 @@ class ReservationSlotTest {
         Theme theme = createTheme();
         ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
 
-        assertThatThrownBy(() -> ReservationSlot.createNew(null, theme, time))
+        assertThatThrownBy(() -> new ReservationSlot(null, theme, time))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -44,7 +44,7 @@ class ReservationSlotTest {
         Theme theme = createTheme();
         LocalDate date = LocalDate.parse("2026-03-08");
 
-        assertThatThrownBy(() -> ReservationSlot.createNew(date, theme, null))
+        assertThatThrownBy(() -> new ReservationSlot(date, theme, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -12,21 +12,26 @@ public class ReservationSlot {
     private final Theme theme;
     private final ReservationTime time;
 
-    private ReservationSlot(final Long id, final LocalDate date, final Theme theme, final ReservationTime time) {
+    public ReservationSlot(final LocalDate date, final Theme theme, final ReservationTime time) {
         validate(date, theme, time);
-        this.id = id;
+        this.id = null;
         this.date = date;
         this.theme = theme;
         this.time = time;
     }
 
-    public static ReservationSlot createNew(final LocalDate date, final Theme theme, final ReservationTime time) {
-        return new ReservationSlot(null, date, theme, time);
-    }
-
-    public static ReservationSlot of(final Long id, final LocalDate date, final Theme theme, final ReservationTime time) {
+    public ReservationSlot(
+            final Long id,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time
+    ) {
         validateId(id);
-        return new ReservationSlot(id, date, theme, time);
+        validate(date, theme, time);
+        this.id = id;
+        this.date = date;
+        this.theme = theme;
+        this.time = time;
     }
 
     public boolean isPast(final LocalDateTime standardDateTime) {

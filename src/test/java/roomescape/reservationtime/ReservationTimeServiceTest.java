@@ -112,7 +112,7 @@ class ReservationTimeServiceTest {
         Fixture fixture = new Fixture();
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        ReservationSlot slot = ReservationSlot.createNew(LocalDate.parse("2026-08-06"), theme, time);
+        ReservationSlot slot = new ReservationSlot(LocalDate.parse("2026-08-06"), theme, time);
         fixture.reservationRepository.save(Reservation.createNew("쿠다", slot, LocalDate.now().atStartOfDay()));
 
         assertThrows(ConflictException.class, () -> fixture.reservationTimeService.deleteById(time.getId()));
@@ -178,7 +178,7 @@ class ReservationTimeServiceTest {
         }
 
         private ReservationSlot saveSlot(final LocalDate date, final Theme theme, final ReservationTime time) {
-            return reservationSlotRepository.save(ReservationSlot.createNew(date, theme, time));
+            return reservationSlotRepository.save(new ReservationSlot(date, theme, time));
         }
     }
 }

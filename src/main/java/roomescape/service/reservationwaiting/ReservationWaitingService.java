@@ -43,7 +43,7 @@ public class ReservationWaitingService {
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
         ReservationName waitingName = ReservationName.from(name);
-        ReservationSlot slot = ReservationSlot.createNew(
+        ReservationSlot slot = new ReservationSlot(
                 date,
                 themeService.getById(themeId),
                 reservationTimeService.getById(timeId)

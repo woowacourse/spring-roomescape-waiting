@@ -7,6 +7,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
+import roomescape.exception.InvalidInputException;
 import roomescape.repository.PersistenceConflictException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
@@ -15,16 +16,13 @@ import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 public class ReservationCancellationService {
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationFactory reservationFactory;
 
     public ReservationCancellationService(
             final ReservationRepository reservationRepository,
-            final ReservationWaitingRepository reservationWaitingRepository,
-            final ReservationFactory reservationFactory
+            final ReservationWaitingRepository reservationWaitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
-        this.reservationFactory = reservationFactory;
     }
 
     @Transactional
@@ -49,7 +47,7 @@ public class ReservationCancellationService {
 
     private void savePromotedReservation(final ReservationWaiting firstWaiting, final LocalDateTime requestedAt) {
         try {
-            Reservation promotedReservation = reservationFactory.createNew(
+            Reservation promotedReservation = Reservation.createNew(
                     firstWaiting.getName(),
                     firstWaiting.getReservation().getSlot(),
                     requestedAt
@@ -57,7 +55,17 @@ public class ReservationCancellationService {
             reservationRepository.save(promotedReservation);
         } catch (PersistenceConflictException exception) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
+        } catch (IllegalArgumentException exception) {
+            throw toInvalidInputException(exception);
         }
+    }
+
+    private InvalidInputException toInvalidInputException(final IllegalArgumentException exception) {
+        if (Reservation.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
+            return new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
+        }
+
+        return new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
     }
 
     private void deleteReservation(final Reservation reservation) {

@@ -12,6 +12,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
+import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.PersistenceConflictException;
 import roomescape.repository.reservation.ReservationRepository;
@@ -24,7 +25,6 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationCancellationService reservationCancellationService;
-    private final ReservationFactory reservationFactory;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
@@ -32,14 +32,12 @@ public class ReservationService {
             final ReservationRepository reservationRepository,
             final ReservationSlotRepository reservationSlotRepository,
             final ReservationCancellationService reservationCancellationService,
-            final ReservationFactory reservationFactory,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationSlotRepository = reservationSlotRepository;
         this.reservationCancellationService = reservationCancellationService;
-        this.reservationFactory = reservationFactory;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
     }
@@ -52,14 +50,14 @@ public class ReservationService {
         LocalDateTime requestedAt = LocalDateTime.now();
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
-        ReservationSlot candidateSlot = ReservationSlot.createNew(date, theme, reservationTime);
+        ReservationSlot candidateSlot = new ReservationSlot(date, theme, reservationTime);
 
         if (reservationRepository.findBySlot(candidateSlot).isPresent()) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
         ReservationSlot savedSlot = findExistingSlot(candidateSlot);
-        Reservation reservation = reservationFactory.createNew(name, savedSlot, requestedAt);
+        Reservation reservation = createReservation(name, savedSlot, requestedAt);
 
         try {
             return reservationRepository.save(reservation);
@@ -127,12 +125,8 @@ public class ReservationService {
         validateUpdatable(reservation, requestedAt);
 
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
-        Reservation candidateReservation = reservationFactory.changeDateAndTime(
-                reservation,
-                date,
-                reservationTime,
-                requestedAt
-        );
+        ReservationSlot candidateSlot = new ReservationSlot(date, reservation.getTheme(), reservationTime);
+        Reservation candidateReservation = changeReservationSlot(reservation, candidateSlot, requestedAt);
 
         if (reservationRepository.findBySlot(candidateReservation.getSlot())
                 .filter(conflict -> !conflict.equals(reservation))
@@ -141,7 +135,7 @@ public class ReservationService {
         }
 
         ReservationSlot savedSlot = findExistingSlot(candidateReservation.getSlot());
-        Reservation updatedReservation = reservationFactory.changeSlot(candidateReservation, savedSlot, requestedAt);
+        Reservation updatedReservation = changeReservationSlot(candidateReservation, savedSlot, requestedAt);
 
         try {
             return reservationRepository.save(updatedReservation);
@@ -156,6 +150,38 @@ public class ReservationService {
                         ErrorCode.RESOURCE_NOT_FOUND,
                         "예약 가능한 슬롯이 없습니다."
                 ));
+    }
+
+    private Reservation createReservation(
+            final String name,
+            final ReservationSlot slot,
+            final LocalDateTime requestedAt
+    ) {
+        try {
+            return Reservation.createNew(name, slot, requestedAt);
+        } catch (IllegalArgumentException exception) {
+            throw toInvalidInputException(exception);
+        }
+    }
+
+    private Reservation changeReservationSlot(
+            final Reservation reservation,
+            final ReservationSlot slot,
+            final LocalDateTime requestedAt
+    ) {
+        try {
+            return reservation.withSlot(slot, requestedAt);
+        } catch (IllegalArgumentException exception) {
+            throw toInvalidInputException(exception);
+        }
+    }
+
+    private InvalidInputException toInvalidInputException(final IllegalArgumentException exception) {
+        if (Reservation.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
+            return new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
+        }
+
+        return new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
     }
 
     private void validateCancelable(final Reservation reservation, final LocalDateTime requestedAt) {

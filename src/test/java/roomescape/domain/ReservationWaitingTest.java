@@ -191,7 +191,7 @@ class ReservationWaitingTest {
     private Reservation createReservation(final Long slotId, final LocalDate date, final LocalTime time) {
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime reservationTime = ReservationTime.of(1L, time);
-        ReservationSlot slot = ReservationSlot.of(slotId, date, theme, reservationTime);
+        ReservationSlot slot = new ReservationSlot(slotId, date, theme, reservationTime);
 
         return Reservation.of(1L, "쿠다", slot, date.minusDays(1).atStartOfDay());
     }

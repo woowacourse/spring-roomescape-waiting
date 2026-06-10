@@ -178,7 +178,7 @@ class JdbcReservationWaitingRepositoryTest {
         );
 
         ReservationSlot slot = jdbcReservationSlotRepository.save(
-                ReservationSlot.createNew(LocalDate.parse("2026-08-06"), theme, reservationTime)
+                new ReservationSlot(LocalDate.parse("2026-08-06"), theme, reservationTime)
         );
         return jdbcReservationRepository.save(Reservation.createNew("쿠다", slot, LocalDateTime.now()));
     }

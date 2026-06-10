@@ -49,10 +49,10 @@ class JdbcReservationSlotRepositoryTest {
         ReservationTime eleven = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
         LocalDate date = LocalDate.parse("2026-08-06");
 
-        ReservationSlot first = jdbcReservationSlotRepository.save(ReservationSlot.createNew(date, theme, ten));
-        ReservationSlot second = jdbcReservationSlotRepository.save(ReservationSlot.createNew(date, theme, eleven));
-        jdbcReservationSlotRepository.save(ReservationSlot.createNew(date.plusDays(1), theme, ten));
-        jdbcReservationSlotRepository.save(ReservationSlot.createNew(date, otherTheme, ten));
+        ReservationSlot first = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, ten));
+        ReservationSlot second = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
+        jdbcReservationSlotRepository.save(new ReservationSlot(date.plusDays(1), theme, ten));
+        jdbcReservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
 
         List<ReservationSlot> slots = jdbcReservationSlotRepository.findByDateAndTheme(date, theme);
 

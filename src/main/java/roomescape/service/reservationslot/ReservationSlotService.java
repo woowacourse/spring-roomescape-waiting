@@ -53,7 +53,7 @@ public class ReservationSlotService {
 
     private ReservationSlot createSlot(final LocalDate date, final Theme theme, final ReservationTime time) {
         try {
-            return ReservationSlot.createNew(date, theme, time);
+            return new ReservationSlot(date, theme, time);
         } catch (IllegalArgumentException exception) {
             throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
         }

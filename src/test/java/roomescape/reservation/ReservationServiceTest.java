@@ -17,7 +17,6 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.service.reservation.ReservationCancellationService;
-import roomescape.service.reservation.ReservationFactory;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -224,11 +223,9 @@ class ReservationServiceTest {
         private final FakeReservationSlotRepository reservationSlotRepository = new FakeReservationSlotRepository();
         private final FakeReservationWaitingRepository reservationWaitingRepository = new FakeReservationWaitingRepository();
         private final FakeReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
-        private final ReservationFactory reservationFactory = new ReservationFactory();
         private final ReservationCancellationService reservationCancellationService = new ReservationCancellationService(
                 reservationRepository,
-                reservationWaitingRepository,
-                reservationFactory
+                reservationWaitingRepository
         );
         private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
         private final ReservationTimeService reservationTimeService = new ReservationTimeService(
@@ -241,7 +238,6 @@ class ReservationServiceTest {
                 reservationRepository,
                 reservationSlotRepository,
                 reservationCancellationService,
-                reservationFactory,
                 reservationTimeService,
                 themeService
         );
@@ -268,7 +264,7 @@ class ReservationServiceTest {
         }
 
         private ReservationSlot saveSlot(final LocalDate date, final Theme theme, final ReservationTime time) {
-            return reservationSlotRepository.save(ReservationSlot.createNew(date, theme, time));
+            return reservationSlotRepository.save(new ReservationSlot(date, theme, time));
         }
 
         private Reservation savePastReservation() {

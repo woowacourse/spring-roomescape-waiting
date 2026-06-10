@@ -46,7 +46,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 resultSet.getTime("start_at").toLocalTime()
         );
 
-        return ReservationSlot.of(
+        return new ReservationSlot(
                 resultSet.getLong("id"),
                 resultSet.getDate("date").toLocalDate(),
                 theme,
@@ -119,7 +119,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             throw new IllegalStateException("[ERROR] 예약 슬롯 ID를 생성하지 못했습니다.");
         }
 
-        return ReservationSlot.of(
+        return new ReservationSlot(
                 key.longValue(),
                 reservationSlot.getDate(),
                 reservationSlot.getTheme(),

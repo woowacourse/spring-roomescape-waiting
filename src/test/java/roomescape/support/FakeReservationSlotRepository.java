@@ -47,7 +47,7 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
 
     @Override
     public ReservationSlot save(final ReservationSlot reservationSlot) {
-        ReservationSlot saved = ReservationSlot.of(
+        ReservationSlot saved = new ReservationSlot(
                 sequence++,
                 reservationSlot.getDate(),
                 reservationSlot.getTheme(),

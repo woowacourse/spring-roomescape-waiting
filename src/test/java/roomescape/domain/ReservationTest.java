@@ -99,6 +99,6 @@ class ReservationTest {
     private ReservationSlot createSlot(final LocalDate date, final LocalTime time) {
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime reservationTime = ReservationTime.createNew(time);
-        return ReservationSlot.createNew(date, theme, reservationTime);
+        return new ReservationSlot(date, theme, reservationTime);
     }
 }
