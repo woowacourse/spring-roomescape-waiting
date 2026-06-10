@@ -21,7 +21,14 @@ public record ReservationAndWaitingResponse(
                 TimeResponse.from(reservationAndWaiting.timeSlot()),
                 ThemeResponse.from(reservationAndWaiting.theme()),
                 reservationAndWaiting.isReserved(),
-                reservationAndWaiting.waitingNumber()
+                toWaitingNumber(reservationAndWaiting.waitingIndex())
         );
+    }
+
+    private static Integer toWaitingNumber(Integer waitingIndex) {
+        if (waitingIndex == null) {
+            return null;
+        }
+        return waitingIndex + 1;
     }
 }

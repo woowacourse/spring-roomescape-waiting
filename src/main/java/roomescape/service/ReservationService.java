@@ -15,7 +15,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.UserReservations;
 import roomescape.domain.ReservationLine;
-import roomescape.domain.WaitingNumber;
 import roomescape.domain.WaitingWithNumber;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
@@ -217,7 +216,7 @@ public class ReservationService {
 
         List<Reservation> sameSlotWaitings = waitingsBySlotId.getOrDefault(waiting.getSlot().getId(), List.of());
         ReservationLine reservationLine = new ReservationLine(waiting.getSlot(), sameSlotWaitings);
-        return new WaitingWithNumber(waiting, WaitingNumber.fromIndex(reservationLine.findWaitingIndex(waiting)));
+        return new WaitingWithNumber(waiting, reservationLine.findWaitingIndex(waiting));
     }
 
     private TimeSlot getTimeSlot(long id) {

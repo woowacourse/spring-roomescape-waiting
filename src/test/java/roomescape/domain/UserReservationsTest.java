@@ -21,7 +21,7 @@ class UserReservationsTest {
         Reservation second = createReservation(2L, "브라운", LocalDate.of(2026, 6, 4), 11);
         WaitingWithNumber first = new WaitingWithNumber(
                 createWaiting(3L, "브라운", LocalDate.of(2026, 6, 4), 10),
-                WaitingNumber.fromIndex(0)
+                0
         );
 
         UserReservations userReservations = new UserReservations(
@@ -52,7 +52,7 @@ class UserReservationsTest {
     void 다른_사용자_대기_포함_예외_발생() {
         WaitingWithNumber otherWaiting = new WaitingWithNumber(
                 createWaiting(1L, "브라운", LocalDate.of(2026, 6, 4), 10),
-                WaitingNumber.fromIndex(0)
+                0
         );
 
         assertThatThrownBy(() -> new UserReservations("네오", List.of(), List.of(otherWaiting)))

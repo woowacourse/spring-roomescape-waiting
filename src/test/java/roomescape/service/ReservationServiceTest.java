@@ -253,7 +253,7 @@ class ReservationServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo(secondWaiting.getId());
         assertThat(result.getFirst().isReserved()).isFalse();
-        assertThat(result.getFirst().waitingNumber()).isEqualTo(1);
+        assertThat(result.getFirst().waitingIndex()).isZero();
     }
 
     private Reservation createReservation(String name, LocalDate date, LocalDateTime createdAt) {
