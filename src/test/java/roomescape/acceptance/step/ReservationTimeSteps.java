@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
+import roomescape.domain.ReservationAvailability;
 
 public class ReservationTimeSteps {
 
@@ -26,7 +27,7 @@ public class ReservationTimeSteps {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(expectedSize));
+                .body("items.size()", is(expectedSize));
     }
 
     public static void deleteReservationTime(Long id) {
@@ -36,13 +37,13 @@ public class ReservationTimeSteps {
                 .statusCode(204);
     }
 
-    public static void checkAvailableReservation(String date, Long themeId, boolean expectedAvailable) {
+    public static void checkAvailableReservation(String date, Long themeId, ReservationAvailability availability) {
         RestAssured.given().log().all()
                 .queryParam("date", date)
                 .queryParam("themeId", themeId)
                 .when().get("/times/available")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].available", is(expectedAvailable));
+                .body("items[0].availability", is(availability.name()));
     }
 }

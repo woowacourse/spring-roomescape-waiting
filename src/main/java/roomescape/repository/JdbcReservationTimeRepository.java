@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -37,28 +36,25 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return ReservationTime.of(id, reservationTimeWithoutId);
+        return ReservationTime.withId(id, reservationTimeWithoutId);
     }
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
         String sql = "SELECT * FROM `reservation_time` WHERE `id` = (?)";
 
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(sql, (resultSet, rowNum) -> {
-                        LocalTime startAt = resultSet.getTime("start_at").toLocalTime();
-                        return new ReservationTime(id, startAt);
-                    }, id));
-        } catch (EmptyResultDataAccessException exception) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+            LocalTime startAt = resultSet.getTime("start_at").toLocalTime();
+            return new ReservationTime(id, startAt);
+        }, id).stream().findFirst();
     }
 
     @Override
     public List<ReservationTime> findAll() {
-        String sql = "SELECT * FROM `reservation_time` "
-                + "ORDER BY start_at ASC";
+        String sql = """
+                SELECT * FROM `reservation_time`
+                ORDER BY start_at ASC
+                """;
 
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
             Long id = resultSet.getLong("id");
@@ -74,25 +70,28 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<Long> findReservedTimeIdByDateAndTheme(LocalDate date, Long themeId) {
-        String sql = "SELECT t.id as time_id "
-                + "FROM `reservation_time` t "
-                + "INNER JOIN `reservation` r ON r.time_id = t.id "
-                + "WHERE r.date = (?) AND r.theme_id = (?) ";
+    public List<ReservationTime> findReservedTimesByDateAndTheme(LocalDate date, Long themeId) {
+        String sql = """
+                SELECT t.id as time_id, t.start_at as start_at
+                FROM `reservation_time` t
+                INNER JOIN `reservation` r ON r.time_id = t.id
+                WHERE r.date = (?) AND r.theme_id = (?)
+                """;
 
-        return jdbcTemplate.query(sql,
-                (resultSet, rowNum) ->
-                        resultSet.getLong("time_id"),
-                date,
-                themeId
-        );
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+            Long id = resultSet.getLong("time_id");
+            LocalTime startAt = resultSet.getTime("start_at").toLocalTime();
+            return new ReservationTime(id, startAt);
+        }, date, themeId);
     }
 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
-        String sql = "SELECT EXISTS ("
-                + "SELECT 1 FROM `reservation_time` WHERE `start_at` = (?) "
-                + ") AS exist";
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM `reservation_time` WHERE `start_at` = (?)
+                ) AS exist
+                """;
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, startAt));
     }

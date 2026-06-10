@@ -1,6 +1,5 @@
 package roomescape.controller;
 
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,55 +10,47 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.request.ControllerReservationCreateRequest;
-import roomescape.controller.dto.response.ControllerReservationResponse;
-import roomescape.facade.ReceptionFacade;
-import roomescape.service.dto.response.ServiceReceptionResponse;
+import roomescape.controller.dto.request.ReservationCreateRequest;
+import roomescape.controller.dto.response.ReservationWaitListResponse;
+import roomescape.controller.dto.response.ReservationWaitResponse;
+import roomescape.facade.ReservationFacade;
 
 @RestController
 @RequestMapping(value = "/reservations")
 public class ReservationController {
 
-    private final ReceptionFacade receptionFacade;
+    private final ReservationFacade reservationFacade;
 
-    public ReservationController(ReceptionFacade receptionFacade) {
-        this.receptionFacade = receptionFacade;
+    public ReservationController(ReservationFacade reservationFacade) {
+        this.reservationFacade = reservationFacade;
     }
 
     @PostMapping
-    public ResponseEntity<ControllerReservationResponse> save(
-            @RequestBody ControllerReservationCreateRequest request) {
-        ServiceReceptionResponse serviceResponses = receptionFacade.save(
-                request.toServiceReservationRequest());
-        ControllerReservationResponse controllerResponse = ControllerReservationResponse.from(serviceResponses);
+    public ResponseEntity<ReservationWaitResponse> save(
+            @RequestBody ReservationCreateRequest request) {
+        ReservationWaitResponse response = reservationFacade.save(request);
         return ResponseEntity.
                 status(HttpStatus.CREATED)
-                .body(controllerResponse);
+                .body(response);
     }
 
     @GetMapping(params = "name")
-    public ResponseEntity<List<ControllerReservationResponse>> findByName(
+    public ResponseEntity<ReservationWaitListResponse> findByName(
             @RequestParam("name") String name
     ) {
-        List<ServiceReceptionResponse> serviceResponses = receptionFacade.findByName(name);
-        List<ControllerReservationResponse> controllerResponses = serviceResponses.stream()
-                .map(ControllerReservationResponse::from)
-                .toList();
-        return ResponseEntity.ok(controllerResponses);
+        ReservationWaitListResponse response = reservationFacade.findByName(name);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<ControllerReservationResponse>> findAll() {
-        List<ServiceReceptionResponse> serviceResponses = receptionFacade.findAll();
-        List<ControllerReservationResponse> controllerResponse = serviceResponses.stream()
-                .map(ControllerReservationResponse::from)
-                .toList();
-        return ResponseEntity.ok(controllerResponse);
+    public ResponseEntity<ReservationWaitListResponse> findAll() {
+        ReservationWaitListResponse response = reservationFacade.findAll();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        receptionFacade.deleteReservation(id);
+        reservationFacade.deleteReservation(id);
         return ResponseEntity
                 .noContent()
                 .build();
@@ -67,7 +58,7 @@ public class ReservationController {
 
     @DeleteMapping("/waits/{id}")
     public ResponseEntity<Void> deleteWait(@PathVariable Long id) {
-        receptionFacade.deleteWait(id);
+        reservationFacade.deleteWait(id);
         return ResponseEntity
                 .noContent()
                 .build();

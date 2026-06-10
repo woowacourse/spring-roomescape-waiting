@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -37,24 +36,19 @@ public class JdbcThemeRepository implements ThemeRepository {
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return Theme.of(id, themeWithoutId);
+        return Theme.withId(id, themeWithoutId);
     }
 
     @Override
     public Optional<Theme> findById(Long id) {
         String sql = "SELECT * FROM `theme` WHERE `id` = (?)";
 
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(sql, (resultSet, rowNumber) -> {
-                        String name = resultSet.getString("name");
-                        String description = resultSet.getString("description");
-                        String thumbnailUrl = resultSet.getString("thumbnail_url");
-                        return new Theme(id, name, description, thumbnailUrl);
-                    }, id));
-        } catch (EmptyResultDataAccessException exception) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, (resultSet, rowNumber) -> {
+            String name = resultSet.getString("name");
+            String description = resultSet.getString("description");
+            String thumbnailUrl = resultSet.getString("thumbnail_url");
+            return new Theme(id, name, description, thumbnailUrl);
+        }, id).stream().findAny();
     }
 
     @Override
@@ -74,7 +68,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         String sql = "DELETE FROM theme WHERE id = (?)";
 
         jdbcTemplate.update(sql, id);
@@ -82,15 +76,16 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findRanking(LocalDate startDate, LocalDate endDate, int limit) {
-        String sql = "SELECT th.id AS theme_id, th.name, th.description, "
-                + "th.thumbnail_url, COUNT(r.id) AS reservation_count "
-                + "FROM theme th "
-                + "LEFT JOIN reservation r "
-                + "ON r.theme_id = th.id "
-                + "AND r.date BETWEEN (?) AND (?) "
-                + "GROUP BY th.id, th.name, th.description, th.thumbnail_url "
-                + "ORDER BY reservation_count DESC, th.id ASC "
-                + "LIMIT (?)";
+        String sql = """
+                SELECT th.id AS theme_id, th.name, th.description, th.thumbnail_url, COUNT(r.id) AS reservation_count
+                FROM theme th
+                LEFT JOIN reservation r
+                ON r.theme_id = th.id
+                AND r.date BETWEEN (?) AND (?)
+                GROUP BY th.id, th.name, th.description, th.thumbnail_url
+                ORDER BY reservation_count DESC, th.id ASC
+                LIMIT (?)
+                """;
 
         return jdbcTemplate.query(
                 sql,
@@ -109,9 +104,11 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public boolean existsById(Long id) {
-        String sql = "SELECT EXISTS ("
-                + "SELECT 1 FROM `theme` WHERE `id` = (?) "
-                + ") AS exist";
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM `theme` WHERE `id` = (?)
+                ) AS exist
+                """;
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, id));
     }

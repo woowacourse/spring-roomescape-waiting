@@ -2,8 +2,7 @@ package roomescape.domain;
 
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.InvalidDomainValueException;
 
 public class ReservationTime {
 
@@ -17,18 +16,16 @@ public class ReservationTime {
     }
 
     public ReservationTime(LocalTime startAt) {
-        validate(startAt);
-        this.id = null;
-        this.startAt = startAt;
+        this(null, startAt);
     }
 
-    public static ReservationTime of(Long id, ReservationTime reservationTime) {
+    public static ReservationTime withId(Long id, ReservationTime reservationTime) {
         return new ReservationTime(id, reservationTime.startAt);
     }
 
     private void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_TIME_NULL);
+            throw new InvalidDomainValueException("예약 시간은 비어 있을 수 없습니다.");
         }
     }
 
@@ -50,11 +47,11 @@ public class ReservationTime {
             return false;
         }
         ReservationTime that = (ReservationTime) object;
-        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
+        return Objects.equals(startAt, that.startAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startAt);
+        return Objects.hashCode(startAt);
     }
 }

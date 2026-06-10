@@ -44,14 +44,14 @@ function bindAdminEvents() {
 }
 
 async function loadAdminData() {
-  const [reservations, themes, times] = await Promise.all([
+  const [reservationResponse, themesResponse, timesResponse] = await Promise.all([
     requestJson("/reservations"),
     requestJson("/themes"),
     requestJson("/times"),
   ]);
-  adminState.reservations = reservations;
-  adminState.themes = themes;
-  adminState.times = times;
+  adminState.reservations = reservationResponse.reservations.items;
+  adminState.themes = themesResponse.items;
+  adminState.times = timesResponse.items;
   renderAdminPage();
 }
 

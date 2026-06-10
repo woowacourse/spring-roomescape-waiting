@@ -4,20 +4,20 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.RankingPeriodEndDateBeforeStartDateException;
+import roomescape.exception.custom.RankingPeriodExceedsLimitException;
+import roomescape.exception.custom.RankingPeriodPastDateOnlyException;
+import roomescape.exception.custom.ThemeNotExistsException;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
-@Component
+@Service
 @Transactional(readOnly = true)
 public class ThemeService {
 
-    public static final int RANKING_LIMIT = 10;
+    private static final int RANKING_LIMIT = 10;
     public static final int MAX_RANKING_PERIOD = 366;
 
     private final ThemeRepository themeRepository;
@@ -29,38 +29,33 @@ public class ThemeService {
     }
 
     @Transactional
-    public ServiceThemeResponse save(ServiceThemeCreateRequest requestDto) {
-        Theme theme = requestDto.toEntity();
-        return ServiceThemeResponse.from(themeRepository.save(theme));
+    public Theme save(Theme themeWithoutId) {
+        return themeRepository.save(themeWithoutId);
     }
 
-    public List<ServiceThemeResponse> findAll() {
-        return themeRepository.findAll().stream()
-                .map(ServiceThemeResponse::from)
-                .toList();
+    public List<Theme> findAll() {
+        return themeRepository.findAll();
     }
 
     @Transactional
     public void delete(Long id) {
-        themeRepository.delete(id);
+        themeRepository.deleteById(id);
     }
 
-    public List<ServiceThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
+    public List<Theme> findRanking(LocalDate startDate, LocalDate endDate) {
         validateRankingPeriod(startDate, endDate);
 
-        return themeRepository.findRanking(startDate, endDate, RANKING_LIMIT).stream()
-                .map(ServiceThemeResponse::from)
-                .toList();
+        return themeRepository.findRanking(startDate, endDate, RANKING_LIMIT);
     }
 
     public Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
+                .orElseThrow(ThemeNotExistsException::new);
     }
 
     public void validateExistTheme(Long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME);
+            throw new ThemeNotExistsException();
         }
     }
 
@@ -68,13 +63,13 @@ public class ThemeService {
         LocalDate localDate = LocalDate.now(clock);
 
         if (startDate.isAfter(localDate) || endDate.isAfter(localDate)) {
-            throw new CustomInvalidRequestException(ErrorCode.FUTURE_RANKING_PERIOD);
+            throw new RankingPeriodPastDateOnlyException();
         }
         if (startDate.isAfter(endDate)) {
-            throw new CustomInvalidRequestException(ErrorCode.INVALID_RANKING_PERIOD);
+            throw new RankingPeriodEndDateBeforeStartDateException();
         }
         if (ChronoUnit.DAYS.between(startDate, endDate) > MAX_RANKING_PERIOD) {
-            throw new CustomInvalidRequestException(ErrorCode.LONG_RANKING_PERIOD);
+            throw new RankingPeriodExceedsLimitException();
         }
     }
 }

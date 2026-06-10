@@ -10,33 +10,38 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.request.ThemeCreateRequest;
+import roomescape.controller.dto.response.ThemeListResponse;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ThemeService;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
-import roomescape.service.dto.response.ServiceThemeResponse;
+import roomescape.service.WaitService;
 
 public class ThemeFacadeTest {
 
     private ThemeFacade themeFacade;
     private ReservationService reservationService;
     private ThemeService themeService;
+    private WaitService waitService;
 
     @BeforeEach
     void beforeEach() {
         reservationService = Mockito.mock(ReservationService.class);
         themeService = Mockito.mock(ThemeService.class);
+        waitService = Mockito.mock(WaitService.class);
 
-        themeFacade = new ThemeFacade(reservationService, themeService);
+        themeFacade = new ThemeFacade(reservationService, themeService, waitService);
     }
 
     @Test
     void saveTest() {
-        Theme theme = new Theme(1L, "루크의 모험", "모험 이야기", "url");
-        ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("루크의 모험", "모험 이야기", "url");
-        ServiceThemeResponse response = ServiceThemeResponse.from(theme);
+        Theme themeWithoutId = new Theme("루크의 모험", "모험 이야기", "url");
+        Theme theme = Theme.withId(1L, themeWithoutId);
+        ThemeCreateRequest request = new ThemeCreateRequest("루크의 모험", "모험 이야기", "url");
+        ThemeResponse response = ThemeResponse.from(theme);
 
-        when(themeService.save(request)).thenReturn(response);
+        when(themeService.save(themeWithoutId)).thenReturn(theme);
 
         assertThat(themeFacade.save(request)).isEqualTo(response);
     }
@@ -45,13 +50,12 @@ public class ThemeFacadeTest {
     void findAllTest() {
         Theme themeLuke = new Theme(1L, "루크의 모험", "모험 이야기", "url");
         Theme themeFizz = new Theme(2L, "피즈의 모험", "모험 이야기", "url");
+        List<Theme> themes = List.of(themeLuke, themeFizz);
+        ThemeListResponse response = ThemeListResponse.from(themes);
 
-        List<ServiceThemeResponse> responses = List.of(ServiceThemeResponse.from(themeLuke),
-                ServiceThemeResponse.from(themeFizz));
+        when(themeService.findAll()).thenReturn(themes);
 
-        when(themeService.findAll()).thenReturn(responses);
-
-        assertThat(themeFacade.findAll()).isEqualTo(responses);
+        assertThat(themeFacade.findAll()).isEqualTo(response);
     }
 
     @Test
@@ -61,12 +65,12 @@ public class ThemeFacadeTest {
         LocalDate startDate = LocalDate.of(2026, 4, 20);
         LocalDate endDate = LocalDate.of(2026, 5, 1);
 
-        List<ServiceThemeResponse> responseRanking = List.of(ServiceThemeResponse.from(themeLuke),
-                ServiceThemeResponse.from(themeFizz));
+        List<Theme> themeRanking = List.of(themeLuke, themeFizz);
+        ThemeListResponse response = ThemeListResponse.from(themeRanking);
 
-        when(themeService.findRanking(startDate, endDate)).thenReturn(responseRanking);
+        when(themeService.findRanking(startDate, endDate)).thenReturn(themeRanking);
 
-        assertThat(themeFacade.findRanking(startDate, endDate)).isEqualTo(responseRanking);
+        assertThat(themeFacade.findRanking(startDate, endDate)).isEqualTo(response);
     }
 
     @Test
@@ -76,6 +80,7 @@ public class ThemeFacadeTest {
         themeFacade.delete(theme.getId());
 
         verify(reservationService, times(1)).validateReferencedTheme(theme.getId());
+        verify(waitService, times(1)).validateReferencedTheme(theme.getId());
         verify(themeService, times(1)).delete(theme.getId());
     }
 }

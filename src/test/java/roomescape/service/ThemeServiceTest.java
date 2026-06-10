@@ -5,10 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static roomescape.exception.ErrorCode.FUTURE_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.INVALID_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.LONG_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.NOT_FOUND_THEME;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -19,11 +15,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
+import roomescape.exception.custom.RankingPeriodEndDateBeforeStartDateException;
+import roomescape.exception.custom.RankingPeriodExceedsLimitException;
+import roomescape.exception.custom.RankingPeriodPastDateOnlyException;
+import roomescape.exception.custom.ThemeNotExistsException;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.request.ServiceThemeCreateRequest;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
 public class ThemeServiceTest {
 
@@ -40,42 +38,33 @@ public class ThemeServiceTest {
 
     @Test
     void saveTest() {
-        ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("피즈의 모험", "모험 이야기", "url");
+        ThemeCreateRequest request = new ThemeCreateRequest("피즈의 모험", "모험 이야기", "url");
         Theme themeWithoutId = request.toEntity();
-        Theme theme = Theme.of(1L, themeWithoutId);
-        ServiceThemeResponse response = ServiceThemeResponse.from(theme);
+        Theme theme = Theme.withId(1L, themeWithoutId);
+
         when(themeRepository.save(themeWithoutId)).thenReturn(theme);
 
-        ServiceThemeResponse save = themeService.save(request);
-
-        assertThat(save).isEqualTo(response);
+        assertThat(themeService.save(themeWithoutId)).isEqualTo(theme);
     }
 
     @Test
     void findAllTest() {
         Theme themeFizz = new Theme(1L, "피즈의 모험", "모험 이야기", "url");
         Theme themeLuke = new Theme(2L, "루크의 모험", "모험 이야기", "url");
-        List<ServiceThemeResponse> result = List.of(
-                ServiceThemeResponse.from(themeFizz),
-                ServiceThemeResponse.from(themeLuke)
-        );
-
         List<Theme> themes = List.of(
                 themeFizz, themeLuke
         );
 
         when(themeRepository.findAll()).thenReturn(themes);
 
-        List<ServiceThemeResponse> all = themeService.findAll();
-
-        assertThat(all).isEqualTo(result);
+        assertThat(themeService.findAll()).isEqualTo(themes);
     }
 
     @Test
     void deleteTest() {
         themeService.delete(1L);
 
-        verify(themeRepository, times(1)).delete(1L);
+        verify(themeRepository, times(1)).deleteById(1L);
     }
 
     @Test
@@ -84,20 +73,14 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 5, 1);
         Theme themeFizz = new Theme(1L, "피즈의 모험", "모험 이야기", "url");
         Theme themeLuke = new Theme(2L, "루크의 모험", "모험 이야기", "url");
-        List<ServiceThemeResponse> result = List.of(
-                ServiceThemeResponse.from(themeFizz),
-                ServiceThemeResponse.from(themeLuke)
-        );
 
-        List<Theme> themes = List.of(
+        List<Theme> ranking = List.of(
                 themeFizz, themeLuke
         );
 
-        when(themeRepository.findRanking(startDate, endDate, 10)).thenReturn(themes);
+        when(themeRepository.findRanking(startDate, endDate, 10)).thenReturn(ranking);
 
-        List<ServiceThemeResponse> ranking = themeService.findRanking(startDate, endDate);
-
-        assertThat(ranking).isEqualTo(result);
+        assertThat(themeService.findRanking(startDate, endDate)).isEqualTo(ranking);
     }
 
     @Test
@@ -106,8 +89,7 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 5, 4);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(FUTURE_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RankingPeriodPastDateOnlyException.class);
     }
 
     @Test
@@ -116,8 +98,7 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 4, 3);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(INVALID_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RankingPeriodEndDateBeforeStartDateException.class);
     }
 
     @Test
@@ -126,8 +107,7 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2025, 4, 30);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(LONG_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RankingPeriodExceedsLimitException.class);
     }
 
     @Test
@@ -146,7 +126,7 @@ public class ThemeServiceTest {
         when(themeRepository.findById(theme.getId())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> themeService.findTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(ThemeNotExistsException.class);
     }
 
     @Test
@@ -163,7 +143,6 @@ public class ThemeServiceTest {
         when(themeRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> themeService.validateExistTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(NOT_FOUND_THEME.getMessage());
+                .isInstanceOf(ThemeNotExistsException.class);
     }
 }

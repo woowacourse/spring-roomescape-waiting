@@ -89,11 +89,11 @@ public class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void deleteTest() {
+    void deleteByIdTest() {
         String sql = "INSERT INTO `theme` (`name`, `description`, `thumbnail_url`) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, "방탈출", "설명", "url.jpg");
 
-        themeRepository.delete(1L);
+        themeRepository.deleteById(1L);
 
         String readAllThemeCountSql = "SELECT COUNT(*) FROM `theme`";
         int count = jdbcTemplate.queryForObject(readAllThemeCountSql, Integer.class);

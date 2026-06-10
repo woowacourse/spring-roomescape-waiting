@@ -1,53 +1,37 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.InvalidDomainValueException;
 
 public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Slot slot;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
+    public Reservation(Long id, String name, Slot slot) {
+        validate(name, slot);
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
-        this.id = null;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+    public Reservation(String name, Slot slot) {
+        this(null, name, slot);
     }
 
-    public static Reservation of(Long id, Reservation reservation) {
-        return new Reservation(id, reservation.name, reservation.date, reservation.time, reservation.theme);
+    public Reservation withId(Long id) {
+        return new Reservation(id, name, slot);
     }
 
-    private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
-        if (name == null || name.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_NAME_NULL);
-        }
-        if (date == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_NULL);
-        }
-        if (time == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_TIME_NULL);
-        }
-        if (theme == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
-        }
+    public boolean isSameUser(String name) {
+        return this.name.equals(name);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
     }
 
     public Long getId() {
@@ -58,16 +42,20 @@ public class Reservation {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     @Override
@@ -76,13 +64,20 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) object;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name)
-                && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme);
+        return Objects.equals(name, that.name) && Objects.equals(slot, that.slot);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, date, time, theme);
+        return Objects.hash(name, slot);
+    }
+
+    private void validate(String name, Slot slot) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidDomainValueException("예약자 이름은 비어 있을 수 없습니다.");
+        }
+        if (slot == null) {
+            throw new InvalidDomainValueException("예약 슬롯은 비어 있을 수 없습니다.");
+        }
     }
 }

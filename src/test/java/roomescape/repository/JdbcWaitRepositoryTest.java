@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 
 @JdbcTest
 class JdbcWaitRepositoryTest {
@@ -58,7 +60,7 @@ class JdbcWaitRepositoryTest {
     @Test
     void saveTest() {
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 21, 10, 0), "luke",
-                LocalDate.of(2026, 5, 27), reservationTime, theme);
+                new Slot(LocalDate.of(2026, 5, 27), reservationTime, theme));
 
         Wait wait = waitRepository.save(waitWithoutId);
 
@@ -72,11 +74,20 @@ class JdbcWaitRepositoryTest {
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 1),
+                "fizz", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 2),
+                "neo", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        Optional<Wait> waitId = waitRepository.findById(1L);
+        Optional<Wait> waitLuke = waitRepository.findById(1L);
+        Optional<Wait> waitFizz = waitRepository.findById(2L);
+        Optional<Wait> waitNeo = waitRepository.findById(3L);
 
-        assertThat(waitId).isNotEmpty();
-        assertThat(waitId.get().getId()).isEqualTo(1L);
+        assertThat(waitLuke).isNotEmpty();
+
+        assertThat(waitFizz).isNotEmpty();
+
+        assertThat(waitNeo).isNotEmpty();
     }
 
     @Test
@@ -84,10 +95,15 @@ class JdbcWaitRepositoryTest {
         String createWait = "INSERT INTO `wait`(`created_at`, `name`, `reservation_date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 1),
+                "fizz", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 2),
+                "neo", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        List<Wait> slots = waitRepository.findBySlot(LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        Waits slots = waitRepository.findBySlot(LocalDate.of(2026, 5, 27), reservationTime.getId(),
+                theme.getId());
 
-        assertThat(slots.size()).isEqualTo(1);
+        assertThat(slots.size()).isEqualTo(3);
     }
 
     @Test
@@ -96,13 +112,28 @@ class JdbcWaitRepositoryTest {
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
+                "fizz", LocalDate.of(2026, 5, 28), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 1),
                 "luke", LocalDate.of(2026, 5, 28), reservationTime.getId(), theme.getId());
 
-        List<Wait> waits = waitRepository.findByName("luke");
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
+                "fizz", LocalDate.of(2026, 5, 29), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 1),
+                "neo", LocalDate.of(2026, 5, 29), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 2),
+                "luke", LocalDate.of(2026, 5, 29), reservationTime.getId(), theme.getId());
 
-        assertThat(waits.size()).isEqualTo(2);
-        assertThat(waits.getFirst().getName()).isEqualTo("luke");
+        Waits waits = waitRepository.findByName("luke");
+
+        assertThat(waits.size()).isEqualTo(3);
+
+        assertThat(waits.getWaits().get(0).getName()).isEqualTo("luke");
+
+        assertThat(waits.getWaits().get(1).getName()).isEqualTo("luke");
+
+        assertThat(waits.getWaits().get(2).getName()).isEqualTo("luke");
     }
 
     @Test
@@ -111,12 +142,14 @@ class JdbcWaitRepositoryTest {
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
-        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
-                "fizz", LocalDate.of(2026, 5, 28), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 1),
+                "fizz", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 2),
+                "neo", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        List<Wait> waits = waitRepository.findAll();
+        Waits waits = waitRepository.findAll();
 
-        assertThat(waits.size()).isEqualTo(2);
+        assertThat(waits.size()).isEqualTo(3);
     }
 
     @Test
@@ -125,29 +158,29 @@ class JdbcWaitRepositoryTest {
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
-        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 1),
                 "fizz", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 2),
+                "neo", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        Wait waitLuke = new Wait(1L, LocalDateTime.of(2026, 5, 21, 10, 0), "luke",
-                LocalDate.of(2026, 5, 27), reservationTime, theme);
-        Wait waitFizz = new Wait(2L, LocalDateTime.of(2026, 5, 21, 10, 0), "fizz",
-                LocalDate.of(2026, 5, 27), reservationTime, theme);
+        Slot slot = new Slot(LocalDate.of(2026, 5, 27), reservationTime, theme);
+        Wait waitLuke = new Wait(1L, LocalDateTime.of(2026, 5, 21, 10, 0), "luke", slot);
+        Wait waitFizz = new Wait(2L, LocalDateTime.of(2026, 5, 21, 10, 1), "fizz", slot);
+        Wait waitNeo = new Wait(3L, LocalDateTime.of(2026, 5, 21, 10, 2), "neo", slot);
 
-        Long orderLuke = waitRepository.findOrderByWait(waitLuke);
-        Long orderFizz = waitRepository.findOrderByWait(waitFizz);
-
-        assertThat(orderLuke).isEqualTo(1L);
-        assertThat(orderFizz).isEqualTo(2L);
+        assertThat(waitRepository.findOrderByWait(waitLuke)).isEqualTo(1L);
+        assertThat(waitRepository.findOrderByWait(waitFizz)).isEqualTo(2L);
+        assertThat(waitRepository.findOrderByWait(waitNeo)).isEqualTo(3L);
     }
 
     @Test
-    void deleteTest() {
+    void deleteByIdTest() {
         String createWait = "INSERT INTO `wait`(`created_at`, `name`, `reservation_date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        waitRepository.delete(1L);
+        waitRepository.deleteById(1L);
 
         String findWaitCountSql = "SELECT COUNT(*) FROM `wait`";
         int count = jdbcTemplate.queryForObject(findWaitCountSql, Integer.class);

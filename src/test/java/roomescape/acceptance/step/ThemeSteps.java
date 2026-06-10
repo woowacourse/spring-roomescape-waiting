@@ -28,7 +28,7 @@ public class ThemeSteps {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(expectedSize));
+                .body("items.size()", is(expectedSize));
     }
 
     public static void deleteTheme(Long id) {
@@ -40,11 +40,11 @@ public class ThemeSteps {
 
     public static void checkThemeRanking(String startDate, String endDate, int expectedRanking) {
         RestAssured.given().log().all()
-                .param("start-date", startDate)
-                .param("end-date", endDate)
+                .param("startDate", startDate)
+                .param("endDate", endDate)
                 .when().get("/themes/ranking")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].id", is(expectedRanking));
+                .body("items[0].id", is(expectedRanking));
     }
 }

@@ -1,8 +1,7 @@
 package roomescape.domain;
 
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.InvalidDomainValueException;
 
 public class Theme {
 
@@ -13,7 +12,6 @@ public class Theme {
 
     public Theme(Long id, String name, String description, String thumbnailUrl) {
         validate(name, description, thumbnailUrl);
-
         this.id = id;
         this.name = name;
         this.description = description;
@@ -21,27 +19,22 @@ public class Theme {
     }
 
     public Theme(String name, String description, String thumbnailUrl) {
-        validate(name, description, thumbnailUrl);
-
-        this.id = null;
-        this.name = name;
-        this.description = description;
-        this.thumbnailUrl = thumbnailUrl;
+        this(null, name, description, thumbnailUrl);
     }
 
-    public static Theme of(Long id, Theme theme) {
+    public static Theme withId(Long id, Theme theme) {
         return new Theme(id, theme.name, theme.description, theme.thumbnailUrl);
     }
 
     private void validate(String name, String description, String thumbnailUrl) {
         if (name == null || name.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_NAME_NULL);
+            throw new InvalidDomainValueException("테마 이름은 비어 있을 수 없습니다.");
         }
         if (description == null || description.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DESCRIPTION_NULL);
+            throw new InvalidDomainValueException("테마 설명은 비어 있을 수 없습니다.");
         }
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THUMBNAIL_NULL);
+            throw new InvalidDomainValueException("테마 썸네일은 비어 있을 수 없습니다.");
         }
     }
 
@@ -67,13 +60,12 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) object;
-        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name)
-                && Objects.equals(description, theme.description) && Objects.equals(thumbnailUrl,
-                theme.thumbnailUrl);
+        return Objects.equals(name, theme.name) && Objects.equals(description, theme.description)
+                && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, thumbnailUrl);
+        return Objects.hash(name, description, thumbnailUrl);
     }
 }

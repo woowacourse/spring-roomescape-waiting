@@ -1,60 +1,57 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
+import roomescape.exception.custom.CannotDeleteThemeInUseException;
+import roomescape.exception.custom.ReservationNotExistsException;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.dto.request.ServiceReservationCreateRequest;
-import roomescape.service.dto.response.ServiceReceptionResponse;
+import roomescape.validator.ReservationValidator;
+import roomescape.validator.ReservationValidatorFactory;
 
-@Component
+@Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final Clock clock;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, Clock clock) {
         this.reservationRepository = reservationRepository;
+        this.clock = clock;
     }
 
     @Transactional
-    public Reservation save(ServiceReservationCreateRequest request, ReservationTime reservationTime, Theme theme) {
-        Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
+    public Reservation save(Reservation reservationWithoutId, boolean isAdmin) {
+        ReservationValidator reservationValidator = ReservationValidatorFactory.getValidator(isAdmin);
+        reservationValidator.validateCreate(reservationWithoutId, LocalDateTime.now(clock));
         return reservationRepository.save(reservationWithoutId);
     }
 
-    public List<ServiceReceptionResponse> findByName(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
-
-        return reservations.stream()
-                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED.name()))
-                .toList();
+    public List<Reservation> findByName(String name) {
+        return reservationRepository.findByName(name);
     }
 
-    public List<ServiceReceptionResponse> findAll() {
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        return reservations.stream()
-                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED.name()))
-                .toList();
+    public List<Reservation> findAll() {
+        return reservationRepository.findAll();
     }
 
     public Reservation findReservation(Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION));
+                .orElseThrow(ReservationNotExistsException::new);
     }
 
     @Transactional
-    public void delete(Long id) {
-        reservationRepository.delete(id);
+    public void delete(Reservation reservation, boolean isAdmin) {
+        ReservationValidator reservationValidator = ReservationValidatorFactory.getValidator(isAdmin);
+        reservationValidator.validateDelete(reservation, LocalDateTime.now(clock));
+        reservationRepository.delete(reservation.getId());
     }
 
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
@@ -63,13 +60,13 @@ public class ReservationService {
 
     public void validateReferencedTheme(Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
+            throw new CannotDeleteThemeInUseException();
         }
     }
 
     public void validateReferencedTime(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
+            throw new CannotDeleteReservationTimeInUseException();
         }
     }
 }

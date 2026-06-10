@@ -3,35 +3,45 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+import roomescape.exception.custom.InvalidDomainValueException;
 
 public class Wait {
 
     private final Long id;
     private final LocalDateTime createdAt;
     private final String name;
-    private final LocalDate reservationDate;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Slot slot;
 
-    public Wait(Long id, LocalDateTime createAt, String name, LocalDate reservationDate, ReservationTime time,
-                Theme theme) {
-        validate(createAt, name, reservationDate, time, theme);
+    public Wait(Long id, LocalDateTime createdAt, String name, Slot slot) {
+        validate(createdAt, name, slot);
         this.id = id;
-        this.createdAt = createAt;
+        this.createdAt = createdAt;
         this.name = name;
-        this.reservationDate = reservationDate;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
-    public Wait(LocalDateTime createAt, String name, LocalDate reservationDate, ReservationTime time, Theme theme) {
-        this(null, createAt, name, reservationDate, time, theme);
+    public Wait(LocalDateTime createdAt, String name, Slot slot) {
+        this(null, createdAt, name, slot);
     }
 
-    public static Wait of(Long id, Wait wait) {
-        return new Wait(id, wait.createdAt, wait.name, wait.reservationDate, wait.time, wait.theme);
+    public Wait withId(Long id) {
+        return new Wait(id, createdAt, name, slot);
+    }
+
+    public boolean isSameUser(String name) {
+        return this.name.equals(name);
+    }
+
+    public boolean isSameSlot(Slot otherSlot) {
+        return slot.equals(otherSlot);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
+    }
+
+    public boolean isFastCreatedAt(LocalDateTime otherCreatedAt) {
+        return createdAt.isBefore(otherCreatedAt);
     }
 
     public Long getId() {
@@ -46,34 +56,20 @@ public class Wait {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getReservationDate() {
-        return reservationDate;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
-    }
-
-    private void validate(LocalDateTime createAt, String name, LocalDate date, ReservationTime time, Theme theme) {
-        if (createAt == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_TIME_NULL);
-        }
-        if (name == null || name.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_NAME_NULL);
-        }
-        if (date == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_NULL);
-        }
-        if (time == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_TIME_NULL);
-        }
-        if (theme == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
-        }
+        return slot.getTheme();
     }
 
     @Override
@@ -82,14 +78,24 @@ public class Wait {
             return false;
         }
         Wait wait = (Wait) object;
-        return Objects.equals(id, wait.id) && Objects.equals(createdAt, wait.createdAt)
-                && Objects.equals(name, wait.name) && Objects.equals(reservationDate,
-                wait.reservationDate) && Objects.equals(time, wait.time) && Objects.equals(theme,
-                wait.theme);
+        return Objects.equals(createdAt, wait.createdAt) && Objects.equals(name, wait.name)
+                && Objects.equals(slot, wait.slot);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdAt, name, reservationDate, time, theme);
+        return Objects.hash(createdAt, name, slot);
+    }
+
+    private void validate(LocalDateTime createdAt, String name, Slot slot) {
+        if (createdAt == null) {
+            throw new InvalidDomainValueException("대기 신청 시간은 비어 있을 수 없습니다.");
+        }
+        if (name == null || name.isBlank()) {
+            throw new InvalidDomainValueException("대기자 이름은 비어 있을 수 없습니다.");
+        }
+        if (slot == null) {
+            throw new InvalidDomainValueException("예약 슬롯은 비어 있을 수 없습니다.");
+        }
     }
 }
