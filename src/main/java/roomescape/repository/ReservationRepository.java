@@ -16,9 +16,7 @@ public interface ReservationRepository {
 
     List<Reservation> findBySlotId(long slotId);
 
-    List<Reservation> findWaitingsBySlotId(long slotId);
-
-    List<Reservation> findWaitingsBySlotIds(List<Long> slotIds);
+    List<Reservation> findBySlotIds(List<Long> slotIds);
 
     Reservation save(Reservation reservation);
 

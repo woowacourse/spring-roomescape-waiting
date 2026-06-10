@@ -131,34 +131,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findWaitingsBySlotId(long slotId) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name,
-                    r.created_at,
-                    r.status,
-                    rs.id AS slot_id,
-                    rs.date AS slot_date,
-                    ts.id AS time_id,
-                    ts.start_at,
-                    th.id AS theme_id,
-                    th.name AS theme_name,
-                    th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail_url
-                FROM reservation r
-                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
-                INNER JOIN time_slot ts ON rs.time_id = ts.id
-                INNER JOIN theme th ON rs.theme_id = th.id
-                WHERE r.slot_id = ?
-                  AND r.status = ?
-                ORDER BY r.created_at ASC, r.id ASC
-                """;
-        return jdbcTemplate.query(sql, rowMapper(), slotId, ReservationStatus.WAITING.name());
-    }
-
-    @Override
-    public List<Reservation> findWaitingsBySlotIds(List<Long> slotIds) {
+    public List<Reservation> findBySlotIds(List<Long> slotIds) {
         String sql = """
             SELECT
                 r.id AS r_id,
@@ -178,13 +151,11 @@ public class JdbcReservationRepository implements ReservationRepository {
             INNER JOIN time_slot ts ON rs.time_id = ts.id
             INNER JOIN theme th ON rs.theme_id = th.id
             WHERE r.slot_id IN (:slotIds)
-              AND r.status = :status
-            ORDER BY r.slot_id ASC, r.created_at ASC, r.id ASC
+            ORDER BY r.slot_id ASC, r.status ASC, r.created_at ASC, r.id ASC
             """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("slotIds", slotIds)
-                .addValue("status", ReservationStatus.WAITING.name());
+                .addValue("slotIds", slotIds);
 
         return namedParameterJdbcTemplate.query(sql, params, rowMapper());
     }

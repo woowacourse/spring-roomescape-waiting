@@ -75,20 +75,24 @@ public class ReservationService {
                 .filter(Reservation::isWaiting)
                 .toList();
 
-        Map<Long, List<Reservation>> waitingsBySlotId = findWaitingsBySlotId(waitingsByName);
+        Map<Long, List<Reservation>> reservationsBySlotId = findReservationsBySlotId(waitingsByName);
 
         return waitingsByName.stream()
-                .map(waiting -> createWaitingWithNumber(waiting, waitingsBySlotId))
+                .map(waiting -> createWaitingWithNumber(waiting, reservationsBySlotId))
                 .toList();
     }
 
-    private Map<Long, List<Reservation>> findWaitingsBySlotId(List<Reservation> waitingsByName) {
+    private Map<Long, List<Reservation>> findReservationsBySlotId(List<Reservation> waitingsByName) {
         List<Long> slotIds = waitingsByName.stream()
                 .map(waiting -> waiting.getSlot().getId())
                 .distinct()
                 .toList();
 
-        return reservationRepository.findWaitingsBySlotIds(slotIds).stream()
+        if (slotIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return reservationRepository.findBySlotIds(slotIds).stream()
                 .collect(Collectors.groupingBy(reservation -> reservation.getSlot().getId()));
     }
 
@@ -212,10 +216,10 @@ public class ReservationService {
     }
 
     private WaitingWithNumber createWaitingWithNumber(Reservation waiting,
-                                                      Map<Long, List<Reservation>> waitingsBySlotId) {
+                                                      Map<Long, List<Reservation>> reservationsBySlotId) {
 
-        List<Reservation> sameSlotWaitings = waitingsBySlotId.getOrDefault(waiting.getSlot().getId(), List.of());
-        ReservationLine reservationLine = new ReservationLine(waiting.getSlot(), sameSlotWaitings);
+        List<Reservation> sameSlotReservations = reservationsBySlotId.getOrDefault(waiting.getSlot().getId(), List.of());
+        ReservationLine reservationLine = new ReservationLine(waiting.getSlot(), sameSlotReservations);
         return new WaitingWithNumber(waiting, reservationLine.findWaitingIndex(waiting));
     }
 
