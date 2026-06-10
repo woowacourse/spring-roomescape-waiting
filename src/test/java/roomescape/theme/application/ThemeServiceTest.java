@@ -71,6 +71,21 @@ class ThemeServiceTest {
     }
 
     @Test
+    void 비활성화된_테마는_목록에서_제외된다() {
+        // given
+        Theme activeTheme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Theme inactiveTheme = themeRepository.save(
+                Theme.create("놀이동산테마", "https://image.com/image2.png", "즐거운 테마입니다."));
+        themeRepository.update(inactiveTheme.deactivate());
+
+        // when
+        List<ThemeInfo> responses = themeService.getThemes(0, 10);
+
+        // then
+        assertThat(responses).hasSize(1).extracting(ThemeInfo::id).containsExactly(activeTheme.getId());
+    }
+
+    @Test
     void 예약이_없는_테마를_비활성화한다() {
         // given
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
@@ -121,5 +136,20 @@ class ThemeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
+    }
+
+    @Test
+    void 비활성화된_테마는_인기_테마_목록에서_제외된다() {
+        // given
+        Theme activeTheme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Theme inactiveTheme = themeRepository.save(
+                Theme.create("놀이동산테마", "https://image.com/image2.png", "즐거운 테마입니다."));
+        themeRepository.update(inactiveTheme.deactivate());
+
+        // when
+        List<ThemeInfo> responses = themeService.getWeeksTopThemes(LocalDate.now().minusDays(7), LocalDate.now(), 10);
+
+        // then
+        assertThat(responses).hasSize(1).extracting(ThemeInfo::id).containsExactly(activeTheme.getId());
     }
 }

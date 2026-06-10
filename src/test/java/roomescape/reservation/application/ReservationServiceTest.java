@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -161,6 +162,22 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 승인된_예약_목록을_조회한다() {
+        // given
+        reservationRepository.save(ReservationFixture.createDefaultReservation("바니"));
+        reservationRepository.save(ReservationFixture.createWaitingReservation("포비", ThemeFixture.createThemeWithId(),
+                ReservationTimeFixture.createDefaultReservationTime()));
+
+        // when
+        List<ReservationInfo> responses = reservationService.getReservations(0, 10);
+
+        // then
+        assertThat(responses).hasSize(1)
+                .extracting(ReservationInfo::name, ReservationInfo::status)
+                .containsExactly(tuple("바니", Status.RESERVED));
+    }
+
+    @Test
     void 예약자_이름으로_조회할_때_대기_순번을_반환한다() {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
@@ -238,6 +255,40 @@ class ReservationServiceTest {
 
         // then
         assertThat(response.time().id()).isEqualTo(changedTime.getId());
+    }
+
+    @Test
+    void 수정하려는_예약자_정보가_일치하지_않으면_예외가_발생한다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
+        ReservationChangeCommand command = new ReservationChangeCommand("포비", time.getId(), theme.getId(),
+                reservation.getDate());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.modify(reservation.getId(), command))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void 이미_예약된_일시와_테마로_수정하면_대기_예약이_된다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime reservedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, time));
+        reservationRepository.save(ReservationFixture.createDefaultReservation("포비", theme, reservedTime));
+        ReservationChangeCommand command = new ReservationChangeCommand("바니", reservedTime.getId(), theme.getId(),
+                reservation.getDate());
+
+        // when
+        ReservationInfo response = reservationService.modify(reservation.getId(), command);
+
+        // then
+        assertThat(response.status()).isEqualTo(Status.WAITING);
     }
 
     @Test

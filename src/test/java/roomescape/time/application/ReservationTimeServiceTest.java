@@ -80,6 +80,20 @@ class ReservationTimeServiceTest {
     }
 
     @Test
+    void 비활성화된_예약_시간은_목록에서_제외된다() {
+        // given
+        ReservationTime activeTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime inactiveTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        reservationTimeRepository.update(inactiveTime.deactivate());
+
+        // when
+        List<ReservationTimeInfo> responses = reservationTimeService.getReservationTimes(0, 10);
+
+        // then
+        assertThat(responses).hasSize(1).extracting(ReservationTimeInfo::id).containsExactly(activeTime.getId());
+    }
+
+    @Test
     void 예약이_없는_시간대를_비활성화한다() {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
@@ -137,6 +151,24 @@ class ReservationTimeServiceTest {
 
         // then
         assertThat(response.times()).extracting(ReservationTimeInfo::id).containsExactly(availableTime.getId());
+    }
+
+    @Test
+    void 예약_가능한_시간을_조회할_때_비활성화된_시간은_제외된다() {
+        // given
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        ReservationTime availableTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime inactiveTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        reservationTimeRepository.update(inactiveTime.deactivate());
+        AvailableReservationTimeFindCommand command = new AvailableReservationTimeFindCommand(theme.getId(),
+                LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(1));
+
+        // when
+        AvailableReservationTimeInfo response = reservationTimeService.getAvailableReservationTime(command);
+
+        // then
+        assertThat(response.times()).hasSize(1).extracting(ReservationTimeInfo::id)
+                .containsExactly(availableTime.getId());
     }
 
     @Test

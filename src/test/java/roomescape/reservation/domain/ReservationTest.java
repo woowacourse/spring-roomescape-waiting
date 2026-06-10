@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.InactiveException;
 import roomescape.common.exception.ValidationException;
 import roomescape.reservation.domain.fixture.ReservationFixture;
 import roomescape.time.domain.fixture.ReservationTimeFixture;
@@ -67,6 +69,102 @@ class ReservationTest {
 
         // then
         assertThat(canceledReservation.getStatus()).isEqualTo(Status.CANCELED);
+    }
+
+    @Test
+    void 예약을_수정한다() {
+        // given
+        Reservation reservation = ReservationFixture.createDefaultReservation();
+        LocalDate changedDate = LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(2);
+        ReservationTime changedTime = ReservationTime.create(LocalTime.of(11, 0));
+        Theme changedTheme = Theme.create("추리테마", "https://image.com/other.png", "추리 테마입니다.");
+
+        // when
+        Reservation changedReservation = reservation.modify(changedDate, changedTime, changedTheme, Status.WAITING,
+                ReservationFixture.FIXED_CLOCK);
+
+        // then
+        assertThat(changedReservation).extracting(Reservation::getName, Reservation::getDate, Reservation::getTime,
+                        Reservation::getTheme, Reservation::getStatus, Reservation::getCreatedAt)
+                .containsExactly(reservation.getName(), changedDate, changedTime, changedTheme, Status.WAITING,
+                        reservation.getCreatedAt());
+    }
+
+    @Test
+    void 취소된_예약은_수정할_수_없다() {
+        // given
+        Reservation canceledReservation = ReservationFixture.createDefaultReservation().cancel();
+
+        // when & then
+        assertThatThrownBy(() -> canceledReservation.modify(canceledReservation.getDate(), reservationTime, theme,
+                Status.RESERVED, ReservationFixture.FIXED_CLOCK))
+                .isInstanceOf(ConflictException.class);
+    }
+
+    @Test
+    void 이미_지난_예약은_수정할_수_없다() {
+        // given
+        Reservation reservation = Reservation.restore(1L, "바니", LocalDate.now(ReservationFixture.FIXED_CLOCK),
+                ReservationTime.create(LocalTime.MIN), theme, Status.RESERVED,
+                ReservationFixture.FIXED_CLOCK.instant().atZone(ReservationFixture.FIXED_CLOCK.getZone())
+                        .toLocalDateTime());
+
+        // when & then
+        assertThatThrownBy(() -> reservation.modify(LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(1),
+                reservationTime, theme, Status.RESERVED, ReservationFixture.FIXED_CLOCK))
+                .isInstanceOf(ConflictException.class);
+    }
+
+    @Test
+    void 비활성화된_테마로_예약을_생성하면_예외가_발생한다() {
+        // given
+        Theme inactiveTheme = theme.deactivate();
+        LocalDate date = LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(1);
+
+        // when & then
+        assertThatThrownBy(() -> Reservation.create("바니", date, reservationTime, inactiveTheme, Status.RESERVED,
+                ReservationFixture.FIXED_CLOCK))
+                .isInstanceOf(InactiveException.class);
+    }
+
+    @Test
+    void 비활성화된_시간으로_예약을_생성하면_예외가_발생한다() {
+        // given
+        ReservationTime inactiveTime = reservationTime.deactivate();
+        LocalDate date = LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(1);
+
+        // when & then
+        assertThatThrownBy(() -> Reservation.create("바니", date, inactiveTime, theme, Status.RESERVED,
+                ReservationFixture.FIXED_CLOCK))
+                .isInstanceOf(InactiveException.class);
+    }
+
+    @Test
+    void 예약에_ID를_부여한다() {
+        // given
+        Reservation reservation = ReservationFixture.createDefaultReservation();
+
+        // when
+        Reservation savedReservation = reservation.withId(1L);
+
+        // then
+        assertThat(savedReservation).extracting(Reservation::getId, Reservation::getName, Reservation::getDate,
+                        Reservation::getTime, Reservation::getTheme, Reservation::getStatus)
+                .containsExactly(1L, reservation.getName(), reservation.getDate(), reservation.getTime(),
+                        reservation.getTheme(), reservation.getStatus());
+    }
+
+    @Test
+    void 대기_예약을_승인_상태로_변경한다() {
+        // given
+        Reservation waitingReservation = ReservationFixture.createWaitingReservation("바니", theme, reservationTime);
+
+        // when
+        Reservation reservedReservation = waitingReservation.reserved();
+
+        // then
+        assertThat(reservedReservation.isReserved()).isTrue();
+        assertThat(reservedReservation.isWaiting()).isFalse();
     }
 
     @Test

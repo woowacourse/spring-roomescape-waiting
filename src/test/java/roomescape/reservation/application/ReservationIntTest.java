@@ -8,12 +8,15 @@ import static org.mockito.Mockito.doThrow;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.config.TestTimeConfig;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -23,6 +26,7 @@ import roomescape.support.datasource.ReservationDataSource;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(TestTimeConfig.class)
 class ReservationIntTest {
 
     @Autowired
@@ -58,9 +62,9 @@ class ReservationIntTest {
     @Test
     void 예약_수정_후_대기_승격에_실패하면_기존_예약으로_복구된다() {
         // given
-        doThrow(new RuntimeException())
+        doThrow(new IllegalStateException())
                 .when(reservationRepository)
-                .update(argThat(reservation -> 2L == reservation.getId() && reservation.isReserved()));
+                .update(argThat(reservation -> Objects.equals(2L, reservation.getId()) && reservation.isReserved()));
 
         ReservationChangeCommand command = new ReservationChangeCommand(
                 "바니",
@@ -71,7 +75,7 @@ class ReservationIntTest {
 
         // when
         assertThatThrownBy(() -> reservationService.modify(1L, command))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(IllegalStateException.class);
 
         // then
         Reservation reserved = reservationRepository.getById(1L);
@@ -85,13 +89,13 @@ class ReservationIntTest {
     @Test
     void 예약_취소_후_대기_승격에_실패하면_기존_예약으로_복구된다() {
         // given
-        doThrow(new RuntimeException())
+        doThrow(new IllegalStateException())
                 .when(reservationRepository)
-                .update(argThat(reservation -> 2L == reservation.getId() && reservation.isReserved()));
+                .update(argThat(reservation -> Objects.equals(2L, reservation.getId()) && reservation.isReserved()));
 
         // when
         assertThatThrownBy(() -> reservationService.cancel(1L, "바니"))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(IllegalStateException.class);
 
         // then
         Reservation reserved = reservationRepository.getById(1L);
