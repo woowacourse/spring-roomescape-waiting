@@ -55,15 +55,16 @@ PR: https://github.com/woowacourse/spring-roomescape-waiting/pull/511
 
 ### 서비스 책임과 작업 단위
 
-- [ ] **9. 예약 취소 시 대기 승급 로직을 `ReservationService` private 메서드에 두는 것이 맞는지 검토한다.**
+- [x] **9. 예약 취소 시 대기 승급 로직을 `ReservationService` private 메서드에 두는 것이 맞는지 검토한다.**
   - 받은 리뷰: 예약 취소 시 대기자가 승급되는 로직이 누구의 책임인지 정리하라. 다른 응용 계층이 등장했을 때 private 메서드가 복사되지 않도록 책임 위치를 고민하라.
   - 판단 기준: 예약 취소와 대기 승급은 단순 서비스 보조 로직이 아니라 같은 슬롯의 상태 전이다. 여러 유스케이스에서 재사용될 수 있다면 별도 도메인 서비스나 작업 단위 객체로 분리하는 편이 낫다.
-  - 해결 방향: `ReservationCancellationService`, `ReservationPromotionService` 또는 도메인 서비스로 분리하여 "예약 취소 후 첫 대기 승급"을 하나의 명시적 유스케이스로 만든다. `ReservationService`는 요청 검증과 트랜잭션 경계만 담당하도록 줄인다.
+  - 해결 내용: `ReservationCancellationService`를 추가해 "예약 취소 후 첫 대기 승급" 흐름을 별도 유스케이스로 분리했다. `ReservationService`는 삭제 대상 조회, 이름 검증, 과거 예약 검증처럼 요청 진입점에서 필요한 검증을 처리하고, 실제 취소/승급 작업은 `ReservationCancellationService.cancel()`에 위임하도록 정리했다.
 
-- [ ] **10. `ReservationService`의 private 메서드가 책임 분리 대신 가독성 분리만 하고 있는지 점검한다.**
+- [x] **10. `ReservationService`의 private 메서드가 책임 분리 대신 가독성 분리만 하고 있는지 점검한다.**
   - 받은 리뷰: private 메서드가 많아지는 것이 클래스의 책임 과다 신호일 수 있음을 신경써라. private 메서드로 숨긴 로직을 다른 객체로 옮길 수 있는지 검토하라.
   - 판단 기준: private 메서드가 같은 추상화 수준의 세부 단계라면 괜찮지만, 다른 도메인 개념의 규칙을 숨기고 있다면 분리해야 한다.
-  - 해결 방향: `findExistingSlot`, `cancelReservation`, `promoteFirstWaiting`, `savePromotedReservation`, `validateCancelable`을 역할별로 분류한다. 슬롯 조회, 예약 취소 정책, 대기 승급 정책, 예외 변환 중 서비스에 남길 것과 별도 객체로 옮길 것을 나눈다.
+  - 해결 내용: `cancelReservation`, `promoteFirstWaiting`, `savePromotedReservation`, `deleteReservation`은 취소/승급 유스케이스 책임으로 보고 `ReservationCancellationService`로 분리했다. `createNewReservation`, `updateReservationDateAndTime`, `updateReservationSlot`, 도메인 예외 변환은 예약 객체 생성/변경 보조 책임으로 보고 `ReservationFactory`로 분리했다. `findExistingSlot`, `validateCancelable`, `validateUpdatable`은 현재 요청 흐름의 조회/검증 단계라 `ReservationService`에 남겼다.
+  - 리뷰 답변: private 메서드들을 다시 역할별로 나눠보니 단순히 메서드를 작게 만든 것이 아니라, 예약 취소 후 대기 승급이라는 별도 유스케이스와 예약 객체 생성/변경 보조 책임이 `ReservationService` 안에 함께 들어와 있었습니다. 그래서 취소/승급 흐름은 `ReservationCancellationService`로 분리하고, `Reservation.createNew`, `reservation.withSlot` 호출과 예외 변환은 `ReservationFactory`로 분리했습니다. `ReservationService`에는 요청 대상 조회, 이름 확인, 과거 예약 검증, 슬롯 조회처럼 현재 요청 흐름을 조립하는 책임만 남기도록 정리했습니다.
 
 - [ ] **11. 예약 생성 흐름에 트랜잭션이 필요한지 전체적으로 확인한다.**
   - 받은 리뷰: 예약 생성 메서드에 트랜잭션이 불필요한지 전체적으로 확인하라.
