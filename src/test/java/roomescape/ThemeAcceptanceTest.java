@@ -17,7 +17,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ThemeE2ETest {
+class ThemeAcceptanceTest {
 
     @LocalServerPort
     int port;

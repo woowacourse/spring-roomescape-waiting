@@ -126,6 +126,37 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findFirstWaitingByScheduleForUpdate(Schedule schedule) {
+        String sql = """
+                SELECT w.id AS waiting_id,
+                       w.name AS waiting_name,
+                       w.date AS waiting_date,
+                       t.id AS time_id,
+                       t.start_at AS time_start_at,
+                       th.id AS theme_id,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                        th.thumbnail AS theme_thumbnail
+                FROM waiting w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.id
+                LIMIT 1
+                FOR UPDATE
+                """;
+        try {
+            Waiting waiting = jdbcTemplate.queryForObject(sql, reservationRowsMapper(),
+                    schedule.getDate(),
+                    schedule.getTime().getId(),
+                    schedule.getTheme().getId());
+            return Optional.ofNullable(waiting);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Long findWaitingOrder(Waiting waiting) {
         String sql = """
             SELECT COUNT(*) + 1 FROM waiting

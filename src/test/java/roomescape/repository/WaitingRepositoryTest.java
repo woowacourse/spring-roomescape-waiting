@@ -120,6 +120,21 @@ class WaitingRepositoryTest {
     }
 
     @Test
+    void 같은_일정의_가장_먼저_등록된_예약_대기를_조회한다() {
+        Waiting first = waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
+        waitingRepository.save(new Waiting(null, "밍구", new Schedule(date, time, theme)));
+
+        Optional<Waiting> result = waitingRepository.findFirstWaitingByScheduleForUpdate(new Schedule(date, time, theme));
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(first.getId());
+        assertThat(result.get().getName()).isEqualTo("레서");
+        assertThat(result.get().getSchedule().getDate()).isEqualTo(date);
+        assertThat(result.get().getSchedule().getTime().getId()).isEqualTo(time.getId());
+        assertThat(result.get().getSchedule().getTheme().getId()).isEqualTo(theme.getId());
+    }
+
+    @Test
     void 예약_대기를_삭제한다() {
         Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
 

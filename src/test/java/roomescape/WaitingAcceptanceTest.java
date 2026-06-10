@@ -16,7 +16,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class WaitingE2ETest {
+class WaitingAcceptanceTest {
 
     @LocalServerPort
     int port;

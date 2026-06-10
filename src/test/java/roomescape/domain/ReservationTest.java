@@ -28,31 +28,36 @@ class ReservationTest {
     @Test
     void 예약자_이름이_빈_문자열이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Reservation(1L, "", new Schedule(LocalDate.of(2026, 5, 1), TIME, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약자 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약자_이름이_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Reservation(1L, null, new Schedule(LocalDate.of(2026, 5, 10), TIME, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약자 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약_날짜가_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Reservation(1L, "브라운", new Schedule(null, TIME, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약 날짜는 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약_시간이_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Reservation(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 1), null, THEME)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약 시간은 비어 있을 수 없습니다.");
     }
 
     @Test
     void 예약_테마가_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> new Reservation(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 10), TIME, null)))
-                .isInstanceOf(DomainRuleViolationException.class);
+                .isInstanceOf(DomainRuleViolationException.class)
+                .hasMessage("예약 테마는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -65,7 +70,8 @@ class ReservationTest {
     void 과거_시간으로_예약을_생성하면_도메인_충돌_예외가_발생한다() {
         assertThatThrownBy(
                 () -> Reservation.create("브라운", new Schedule(LocalDate.of(2026, 4, 1), TIME, THEME), NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("지난 시간으로는 예약할 수 없습니다.");
     }
 
     @Test
@@ -92,7 +98,8 @@ class ReservationTest {
 
         assertThatThrownBy(() -> reservation.changeSchedule(
                 LocalDate.of(2026, 5, 11), newTime, "어셔", NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("본인의 예약만 수정할 수 있습니다.");
     }
 
     @Test
@@ -103,7 +110,8 @@ class ReservationTest {
 
         assertThatThrownBy(() -> reservation.changeSchedule(
                 LocalDate.of(2026, 5, 11), newTime, "브라운", NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("지난 예약은 변경할 수 없습니다.");
     }
 
     @Test
@@ -114,7 +122,8 @@ class ReservationTest {
 
         assertThatThrownBy(() -> reservation.changeSchedule(
                 LocalDate.of(2026, 4, 11), newTime, "브라운", NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("과거로는 변경할 수 없습니다.");
     }
 
     @Test
@@ -151,7 +160,8 @@ class ReservationTest {
                 7L, "브라운", new Schedule(LocalDate.of(2026, 5, 10), TIME, THEME));
 
         assertThatThrownBy(() -> reservation.checkCancellable("어셔", NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("본인의 예약만 수정할 수 있습니다.");
     }
 
     @Test
@@ -160,6 +170,7 @@ class ReservationTest {
                 7L, "브라운", new Schedule(LocalDate.of(2026, 4, 10), TIME, THEME));
 
         assertThatThrownBy(() -> reservation.checkCancellable("브라운", NOW))
-                .isInstanceOf(DomainConflictException.class);
+                .isInstanceOf(DomainConflictException.class)
+                .hasMessage("지난 예약은 취소할 수 없습니다.");
     }
 }

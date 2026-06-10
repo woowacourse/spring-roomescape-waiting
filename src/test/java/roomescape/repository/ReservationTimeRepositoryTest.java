@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 
@@ -76,7 +77,7 @@ class ReservationTimeRepositoryTest {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test

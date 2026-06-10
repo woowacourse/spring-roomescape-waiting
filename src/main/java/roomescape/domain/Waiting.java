@@ -31,6 +31,10 @@ public class Waiting {
         return new Waiting(name, schedule);
     }
 
+    public Reservation toReservation(LocalDateTime now) {
+        return Reservation.create(name, schedule, now);
+    }
+
     public void validateCancelableBy(String name) {
         if (!this.name.equals(name)) {
             throw new DomainConflictException("본인의 예약대기만 취소할 수 있습니다.");
