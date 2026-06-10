@@ -38,11 +38,10 @@ public class Waits {
     }
 
     public Wait firstWaitBySlot(Slot slot) {
-        Wait firstWait = waits.stream()
+        return waits.stream()
                 .filter(wait -> wait.isSameSlot(slot))
                 .min(Comparator.comparing(Wait::getCreatedAt))
                 .orElse(null);
-        return new Wait(firstWait.getId(), firstWait.getCreatedAt(), firstWait.getName(), firstWait.getSlot());
     }
 
     public Map<Wait, Long> waitsWithOrder() {
