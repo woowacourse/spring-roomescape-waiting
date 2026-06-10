@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>예약 시간 관리</title>
+    <title>예약 슬롯 관리</title>
     <style>
         :root {
             --bg: #eef4f3;
@@ -23,7 +23,7 @@
             color: var(--text);
         }
         .wrap {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 32px 20px 64px;
         }
@@ -64,7 +64,7 @@
         .hero p { margin: 0 0 24px; color: rgba(32, 48, 47, 0.76); }
         .layout {
             display: grid;
-            grid-template-columns: minmax(280px, 340px) 1fr;
+            grid-template-columns: minmax(280px, 360px) 1fr;
             gap: 20px;
         }
         .card {
@@ -89,7 +89,6 @@
             cursor: pointer;
             font-weight: 700;
         }
-        button.delete { background: var(--danger); }
         .list {
             display: grid;
             gap: 12px;
@@ -103,19 +102,13 @@
             border: 1px solid rgba(214, 40, 40, 0.14);
             background: rgba(250, 255, 255, 0.96);
         }
-        .feedback.hidden {
-            display: none;
-        }
+        .feedback.hidden { display: none; }
         .feedback p,
-        .feedback small {
-            margin: 0;
-        }
-        .feedback small {
-            color: rgba(32, 48, 47, 0.7);
-        }
+        .feedback small { margin: 0; }
+        .feedback small { color: rgba(32, 48, 47, 0.7); }
         .item {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
             align-items: center;
             gap: 12px;
             border: 1px solid var(--line);
@@ -123,8 +116,10 @@
             padding: 14px;
             background: rgba(250,255,255,0.9);
         }
+        .item span { color: rgba(32, 48, 47, 0.72); }
         @media (max-width: 860px) {
             .layout { grid-template-columns: 1fr; }
+            .item { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -133,16 +128,16 @@
     <nav class="nav">
         <a th:href="@{/pages/admin/themes}">관리자 홈</a>
         <a th:href="@{/pages/admin/themes}">테마 관리</a>
-        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
         <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
         <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
+        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
         <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
     </nav>
 
     <section class="hero">
         <span class="eyebrow">ADMIN PAGE</span>
-        <h1>예약 시간 관리</h1>
-        <p>모든 테마가 공통으로 사용하는 전역 시간 슬롯을 추가하고 제거합니다.</p>
+        <h1>예약 슬롯 관리</h1>
+        <p>관리자가 예약 가능한 날짜, 테마, 시간을 열어두면 사용자는 열린 슬롯에 대해서만 예약하거나 대기할 수 있습니다.</p>
     </section>
 
     <section id="page-feedback"
@@ -155,67 +150,81 @@
 
     <section class="layout">
         <article class="card">
-            <h2>시간 슬롯 추가</h2>
-            <form id="reservation-time-create-form" method="post" th:action="@{/pages/admin/reservation-times}">
+            <h2>슬롯 열기</h2>
+            <form id="reservation-slot-create-form" method="post" th:action="@{/pages/admin/reservation-slots}">
                 <label>
-                    시작 시간
-                    <input type="time" id="reservation-time-start-at" name="startAt" required>
+                    날짜
+                    <input type="date" name="date" required>
                 </label>
-                <button type="submit">시간 추가</button>
+                <label>
+                    테마
+                    <select name="themeId" required>
+                        <option value="">테마 선택</option>
+                        <option th:each="theme : ${themes}"
+                                th:value="${theme.id}"
+                                th:text="${theme.name}">미술관의 밤</option>
+                    </select>
+                </label>
+                <label>
+                    시간
+                    <select name="timeId" required>
+                        <option value="">시간 선택</option>
+                        <option th:each="time : ${reservationTimes}"
+                                th:value="${time.id}"
+                                th:text="${time.startAt}">10:00</option>
+                    </select>
+                </label>
+                <button type="submit">슬롯 열기</button>
             </form>
         </article>
 
         <article class="card">
-            <h2>등록된 시간</h2>
-            <div class="list" th:if="${!#lists.isEmpty(reservationTimes)}">
-                <div class="item" th:each="time : ${reservationTimes}">
+            <h2>열린 슬롯</h2>
+            <div class="list" th:if="${!#lists.isEmpty(slots)}">
+                <div class="item" th:each="slot : ${slots}">
+                    <strong th:text="${slot.date}">2026-08-06</strong>
                     <div>
-                        <strong th:text="${time.startAt}">10:00</strong>
-                        <span>공통 시간 슬롯</span>
+                        <span th:text="${slot.theme.name}">미술관의 밤</span>
+                        <span> / </span>
+                        <span th:text="${slot.time.startAt}">10:00</span>
                     </div>
-                    <form method="post"
-                          th:action="@{/pages/admin/reservation-times/{timeId}/delete(timeId=${time.id})}">
-                        <button type="submit" class="delete">삭제</button>
-                    </form>
+                    <span th:text="'#' + ${slot.id}">#1</span>
                 </div>
             </div>
-            <p th:if="${#lists.isEmpty(reservationTimes)}">등록된 시간이 없습니다.</p>
+            <p th:if="${#lists.isEmpty(slots)}">아직 열린 슬롯이 없습니다.</p>
         </article>
     </section>
 </div>
 <script>
-    const reservationTimeServerMessages = {
-        RESERVATION_TIME_DUPLICATED: {
-            title: "같은 시간 슬롯이 이미 있어요",
-            message: "모든 테마가 공통으로 쓰는 시간이기 때문에, 같은 시작 시간을 두 번 만들 필요는 없어요.",
-            hint: "목록에 없는 다른 시간대로 추가해보세요."
+    const reservationSlotServerMessages = {
+        RESERVATION_SLOT_DUPLICATED: {
+            title: "이미 열린 슬롯이에요",
+            message: "같은 날짜, 테마, 시간 조합은 한 번만 열 수 있어요.",
+            hint: "목록에서 기존 슬롯을 확인하거나 다른 시간으로 열어보세요."
         },
-        RESERVATION_TIME_IN_USE: {
-            title: "이 시간은 아직 예약에서 사용 중이에요",
-            message: "이미 예약에 연결된 시간은 바로 삭제하지 않고, 예약을 먼저 정리한 뒤 삭제하는 편이 안전해요.",
-            hint: "예약 현황을 먼저 보고 정리한 다음 다시 삭제를 시도할 수 있어요."
+        THEME_NOT_FOUND: {
+            title: "테마를 찾을 수 없어요",
+            message: "삭제되었거나 존재하지 않는 테마로 슬롯을 열 수 없어요.",
+            hint: "테마 목록을 새로 확인한 뒤 다시 시도해보세요."
         },
-        INTERNAL_SERVER_ERROR: {
-            title: "지금은 시간 관리 작업을 바로 끝내지 못했어요",
-            message: "입력값보다는 시스템 상태 때문에 요청을 즉시 처리하지 못한 상황이에요.",
-            hint: "잠시 후 다시 시도하거나, 같은 현상이 반복되면 서버 상태를 먼저 확인해보세요."
+        RESERVATION_TIME_NOT_FOUND: {
+            title: "시간을 찾을 수 없어요",
+            message: "삭제되었거나 존재하지 않는 시간으로 슬롯을 열 수 없어요.",
+            hint: "시간 목록을 새로 확인한 뒤 다시 시도해보세요."
         },
         INVALID_INPUT: {
-            title: "요청을 처리하지 못했어요",
-            message: "브라우저에서 미리 확인하기 어려운 흐름 문제가 있었어요.",
-            hint: "같은 문제가 반복되면 입력값과 서버 검증 로직을 함께 확인해보세요."
+            title: "슬롯을 열 수 없어요",
+            message: "날짜, 테마, 시간이 모두 선택되어야 해요.",
+            hint: "입력값을 다시 확인해보세요."
+        },
+        INTERNAL_SERVER_ERROR: {
+            title: "지금은 슬롯을 열지 못했어요",
+            message: "입력값보다는 시스템 상태 때문에 요청을 즉시 처리하지 못한 상황이에요.",
+            hint: "잠시 후 다시 시도하거나, 같은 현상이 반복되면 서버 상태를 확인해보세요."
         }
     };
 
-    function showReservationTimeFeedback(title, message, hint) {
-        const feedback = document.getElementById("page-feedback");
-        document.getElementById("feedback-title").textContent = title;
-        document.getElementById("feedback-message").textContent = message;
-        document.getElementById("feedback-hint").textContent = hint;
-        feedback.classList.remove("hidden");
-    }
-
-    function applyReservationTimeFeedback() {
+    function applyReservationSlotFeedback() {
         const feedback = document.getElementById("page-feedback");
         const errorCode = feedback.dataset.errorCode;
 
@@ -223,25 +232,14 @@
             return;
         }
 
-        const message = reservationTimeServerMessages[errorCode] || reservationTimeServerMessages.INVALID_INPUT;
-        showReservationTimeFeedback(message.title, message.message, message.hint);
+        const message = reservationSlotServerMessages[errorCode] || reservationSlotServerMessages.INTERNAL_SERVER_ERROR;
+        document.getElementById("feedback-title").textContent = message.title;
+        document.getElementById("feedback-message").textContent = message.message;
+        document.getElementById("feedback-hint").textContent = message.hint;
+        feedback.classList.remove("hidden");
     }
 
-    function validateReservationTimeCreateForm(event) {
-        const startAt = document.getElementById("reservation-time-start-at").value.trim();
-
-        if (!startAt) {
-            event.preventDefault();
-            showReservationTimeFeedback(
-                "시간을 먼저 선택해 주세요",
-                "비어 있는 시간 값은 브라우저에서 바로 확인할 수 있어서 서버 요청 전에 막았어요.",
-                "입력 칸에서 시작 시간을 선택한 뒤 다시 추가해 주세요."
-            );
-        }
-    }
-
-    document.getElementById("reservation-time-create-form").addEventListener("submit", validateReservationTimeCreateForm);
-    applyReservationTimeFeedback();
+    applyReservationSlotFeedback();
 </script>
 </body>
 </html>
