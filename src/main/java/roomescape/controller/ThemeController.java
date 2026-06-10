@@ -43,9 +43,9 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<ThemeResponses> getPopularThemes(
-            @RequestParam("limit") @Positive
+            @RequestParam(value = "limit", defaultValue = "10") @Positive
             long limit,
-            @RequestParam("days") @Positive
+            @RequestParam(value = "days", defaultValue = "7") @Positive
             long days
     ) {
         return ResponseEntity.ok(ThemeResponses.from(themeService.findPopularThemes(limit, days)));
