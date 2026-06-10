@@ -108,12 +108,6 @@ public class ReservationService {
         return reservationLine.add(name, requestTime);
     }
 
-    private ReservationSlot createReservationSlot(LocalDate date, long timeId, long themeId) {
-        TimeSlot timeSlot = getTimeSlot(timeId);
-        Theme theme = getTheme(themeId);
-        return reservationSlotRepository.save(new ReservationSlot(date, timeSlot, theme));
-    }
-
     @Transactional
     public void removeReservation(long id, String requestName) {
         LocalDateTime requestTime = LocalDateTime.now();
@@ -170,7 +164,22 @@ public class ReservationService {
 
     private ReservationSlot findOrCreateReservationSlot(LocalDate date, long timeId, long themeId) {
         return reservationSlotRepository.findByDateAndTimeIdAndThemeId(date, timeId,
-                themeId).orElseGet(() -> createReservationSlot(date, timeId, themeId));
+                themeId).orElseGet(() -> createOrFindSlot(date, timeId, themeId));
+    }
+
+    private ReservationSlot createOrFindSlot(LocalDate date, long timeId, long themeId) {
+        try {
+            return createReservationSlot(date, timeId, themeId);
+        } catch (DuplicateException e) {
+            return reservationSlotRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                    .orElseThrow(() -> new NotFoundException("해당하는 예약 슬롯을 찾을 수 없습니다."));
+        }
+    }
+
+    private ReservationSlot createReservationSlot(LocalDate date, long timeId, long themeId) {
+        TimeSlot timeSlot = getTimeSlot(timeId);
+        Theme theme = getTheme(themeId);
+        return reservationSlotRepository.save(new ReservationSlot(date, timeSlot, theme));
     }
 
     private void validateReservedSlot(ReservationSlot slot) {

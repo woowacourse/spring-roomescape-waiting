@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.repository.ReservationRepository;
@@ -137,5 +136,38 @@ public class ReservationConcurrencyTest {
         assertThat(reservations.stream().filter(Reservation::isWaiting)).hasSize(1);
         assertThat(promoted.isReserved()).isTrue();
         assertThat(waiting.isWaiting()).isTrue();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 같은 슬롯에 대해 동시에 예약하면 예약 확정은 하나만 생성된다.")
+    void 존재하지_않는_슬롯에_대한_동시_예약_요청() throws Exception {
+        LocalDate date = LocalDate.now().plusDays(300);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        Future<?> first = executorService.submit(() ->
+                reservationService.saveReservation("브라운", date, savedTimeSlot.getId(), savedTheme.getId())
+        );
+
+        Future<?> second = executorService.submit(() ->
+                reservationService.saveReservation("네오", date, savedTimeSlot.getId(), savedTheme.getId())
+        );
+
+        first.get();
+        second.get();
+
+        executorService.shutdown();
+
+        long slotId = reservationSlotRepository.findByDateAndTimeIdAndThemeId(
+                date,
+                savedTimeSlot.getId(),
+                savedTheme.getId())
+                .orElseThrow().getId();
+
+        List<Reservation> reservations = reservationRepository.findBySlotId(slotId);
+
+        assertThat(reservations).hasSize(2);
+        assertThat(reservations.stream().filter(Reservation::isReserved)).hasSize(1);
+        assertThat(reservations.stream().filter(Reservation::isWaiting)).hasSize(1);
     }
 }

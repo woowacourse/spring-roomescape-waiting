@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.exception.DuplicateException;
 
 @Repository
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
@@ -80,13 +82,17 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     public ReservationSlot save(ReservationSlot reservationSlot) {
         SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(reservationSlot);
-        long id = insert.executeAndReturnKey(params).longValue();
-        return new ReservationSlot(
-                id,
-                reservationSlot.getDate(),
-                reservationSlot.getTimeSlot(),
-                reservationSlot.getTheme()
-        );
+        try {
+            long id = insert.executeAndReturnKey(params).longValue();
+            return new ReservationSlot(
+                    id,
+                    reservationSlot.getDate(),
+                    reservationSlot.getTimeSlot(),
+                    reservationSlot.getTheme()
+            );
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException("이미 존재하는 예약 슬롯입니다.");
+        }
     }
 
     private SimpleJdbcInsert createInsert() {
