@@ -9,7 +9,7 @@ import roomescape.exception.DuplicateException;
 public class ReservationLine {
 
     private final ReservationSlot slot;
-    private final Optional<Reservation> reservedReservation;
+    private final Reservation reservedReservation;
     private final List<Reservation> waitings;
 
     public ReservationLine(ReservationSlot slot, List<Reservation> reservations) {
@@ -63,13 +63,13 @@ public class ReservationLine {
     }
 
     private ReservationStatus decideReservationStatus() {
-        if (reservedReservation.isPresent()) {
+        if (hasReservedReservation()) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;
     }
 
-    private Optional<Reservation> findReservedReservation(List<Reservation> reservations) {
+    private Reservation findReservedReservation(List<Reservation> reservations) {
         List<Reservation> reservedReservations = reservations.stream()
                 .filter(Reservation::isReserved)
                 .toList();
@@ -82,8 +82,10 @@ public class ReservationLine {
             throw new IllegalArgumentException("확정 예약 없이 예약 대기만 존재할 수 없습니다.");
         }
 
-        return reservedReservations.stream()
-                .findFirst();
+        if (reservedReservations.isEmpty()) {
+            return null;
+        }
+        return reservedReservations.getFirst();
     }
 
     private boolean hasWaiting(List<Reservation> reservations) {
@@ -100,9 +102,7 @@ public class ReservationLine {
     }
 
     private boolean hasSameReservationOwner(String name) {
-        return reservedReservation
-                .map(reservation -> reservation.isOwner(name))
-                .orElse(false);
+        return hasReservedReservation() && reservedReservation.isOwner(name);
     }
 
     private boolean hasSameWaitingOwner(String name) {
@@ -115,9 +115,11 @@ public class ReservationLine {
     }
 
     private boolean isReservedReservation(Reservation target) {
-        return reservedReservation
-                .map(reservation -> reservation.isSameReservation(target))
-                .orElse(false);
+        return hasReservedReservation() && reservedReservation.isSameReservation(target);
+    }
+
+    private boolean hasReservedReservation() {
+        return reservedReservation != null;
     }
 
     private boolean isWaitingReservation(Reservation target) {
