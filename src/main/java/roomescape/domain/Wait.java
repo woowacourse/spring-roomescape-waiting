@@ -32,6 +32,10 @@ public class Wait {
         return this.name.equals(name);
     }
 
+    public boolean isSameSlot(Slot otherSlot) {
+        return slot.equals(otherSlot);
+    }
+
     public boolean isPast(LocalDateTime now) {
         return slot.isPast(now);
     }

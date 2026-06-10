@@ -12,6 +12,8 @@ import roomescape.controller.dto.response.ReservationTimeListResponse;
 import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.domain.ReservationAvailability;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -71,7 +73,9 @@ public class ReservationTimeFacade {
         if (!reservedTimes.contains(reservationTime)) {
             return ReservationAvailability.RESERVATION_AVAILABLE;
         }
-        if (waitService.findBySlot(date, reservationTime.getId(), themeId).isFullWait()) {
+        Theme theme = themeService.findTheme(themeId);
+        Slot slot = new Slot(date, reservationTime, theme);
+        if (waitService.findBySlot(slot).isFullWaitsBySlot(slot)) {
             return ReservationAvailability.NOTHING_AVAILABLE;
         }
         return ReservationAvailability.WAITING_AVAILABLE;

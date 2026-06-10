@@ -111,9 +111,10 @@ public class ReservationTimeFacadeTest {
         when(reservationTimeService.findReservedTimesByDateAndTheme(reservationDate, theme.getId())).thenReturn(
                 reservedTimes);
         when(reservationTimeService.findAll()).thenReturn(allReservationTimes);
-        when(waitService.findBySlot(reservationDate, secondTime.getId(), theme.getId()))
+        when(waitService.findBySlot(new Slot(reservationDate, secondTime, theme)))
                 .thenReturn(new Waits(List.of()));
-        when(waitService.findBySlot(reservationDate, thirdTime.getId(), theme.getId())).thenReturn(thirdTimeWaits);
+        when(themeService.findTheme(theme.getId())).thenReturn(theme);
+        when(waitService.findBySlot(thirdSlot)).thenReturn(thirdTimeWaits);
 
         assertThat(reservationTimeFacade.findAvailabilityByDateAndTheme(reservationDate, theme.getId())).isEqualTo(
                 response);

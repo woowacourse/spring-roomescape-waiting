@@ -55,7 +55,7 @@ public class ReservationFacade {
                 reservationService.findByName(name));
 
         Waits waits = waitService.findAll();
-        Map<Wait, Long> waitWithOrderByName = waits.waitWithOrderByName(name);
+        Map<Wait, Long> waitWithOrderByName = waits.waitsWithOrderByName(name);
         WaitListResponse waitListResponse = WaitListResponse.from(waitWithOrderByName);
 
         return new ReservationWaitListResponse(reservationListResponse, waitListResponse);
@@ -66,7 +66,7 @@ public class ReservationFacade {
                 reservationService.findAll());
 
         Waits waits = waitService.findAll();
-        Map<Wait, Long> waitWithOrder = waits.waitWithOrder();
+        Map<Wait, Long> waitWithOrder = waits.waitsWithOrder();
         WaitListResponse waitListResponse = WaitListResponse.from(waitWithOrder);
 
         return new ReservationWaitListResponse(reservationListResponse, waitListResponse);
@@ -77,12 +77,12 @@ public class ReservationFacade {
         Reservation reservation = reservationService.findReservation(id);
         reservationService.delete(reservation, false);
 
-        Waits waits = waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
-        if (waits.isEmptyWait()) {
+        Slot slot = new Slot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        Waits waits = waitService.findBySlot(slot);
+        if (waits.isEmptyWaitsBySlot(slot)) {
             return;
         }
-        confirmFirstWait(waits.firstWait());
+        confirmFirstWait(waits.firstWaitBySlot(slot));
     }
 
     @Transactional

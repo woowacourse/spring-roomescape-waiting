@@ -139,11 +139,12 @@ public class WaitServiceTest {
 
         Waits waits = new Waits(List.of(wait1, wait2));
 
-        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
+        when(waitRepository.findBySlot(slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())).thenReturn(
+                waits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(2L);
 
-        assertThat(waitService.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).isEqualTo(waits);
+        assertThat(waitService.findBySlot(slot)).isEqualTo(waits);
     }
 
     @Test

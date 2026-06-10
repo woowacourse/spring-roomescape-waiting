@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,25 +18,34 @@ public class Waits {
         this.waits = waits;
     }
 
-    public void validateCreate(String name) {
+    public void validateCreate(String name, Slot slot) {
         validateNotDuplicated(name);
-        validateWaitIsNotFull();
+        validateWaitsIsNotFull(slot);
     }
 
-    public boolean isFullWait() {
-        return waits.size() >= MAX_WAITING_COUNT;
+    public boolean isFullWaitsBySlot(Slot slot) {
+        List<Wait> waitsBySlot = waits.stream()
+                .filter(wait -> wait.isSameSlot(slot))
+                .toList();
+        return waitsBySlot.size() >= MAX_WAITING_COUNT;
     }
 
-    public boolean isEmptyWait() {
-        return waits.isEmpty();
+    public boolean isEmptyWaitsBySlot(Slot slot) {
+        List<Wait> waitsBySlot = waits.stream()
+                .filter(wait -> wait.isSameSlot(slot))
+                .toList();
+        return waitsBySlot.isEmpty();
     }
 
-    public Wait firstWait() {
-        Wait firstWait = waits.getFirst();
+    public Wait firstWaitBySlot(Slot slot) {
+        Wait firstWait = waits.stream()
+                .filter(wait -> wait.isSameSlot(slot))
+                .min(Comparator.comparing(Wait::getCreatedAt))
+                .orElse(null);
         return new Wait(firstWait.getId(), firstWait.getCreatedAt(), firstWait.getName(), firstWait.getSlot());
     }
 
-    public Map<Wait, Long> waitWithOrder() {
+    public Map<Wait, Long> waitsWithOrder() {
         return waits.stream()
                 .collect(Collectors.toMap(wait -> wait, this::calculateOrder,
                         (oldValue, newValue) -> oldValue,
@@ -43,19 +53,20 @@ public class Waits {
                 ));
     }
 
-    public Map<Wait, Long> waitWithOrderByName(String name) {
-        return waitWithOrder().entrySet().stream()
-                .filter(entry -> entry.getKey().isSameUser(name)) // 1. 이름 필터링 (완벽함)
+    public Map<Wait, Long> waitsWithOrderByName(String name) {
+        return waitsWithOrder().entrySet().stream()
+                .filter(entry -> entry.getKey().isSameUser(name))
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,                 // 2. 새 Map의 Key = 원래 Wait 객체
-                        Map.Entry::getValue,               // 3. 새 Map의 Value = 원래 순번(Long)
-                        (oldValue, newValue) -> oldValue,   // 4. 중복 키 충돌 해결 규칙
-                        LinkedHashMap::new                 // 5. 순서 보장을 위해 LinkedHashMap 사용
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new
                 ));
     }
 
     public Long calculateOrder(Wait myWait) {
         return waits.stream()
+                .filter(wait -> wait.isSameSlot(myWait.getSlot()))
                 .filter(wait -> wait.isFastCreatedAt(myWait.getCreatedAt()))
                 .count() + 1;
     }
@@ -76,8 +87,8 @@ public class Waits {
         }
     }
 
-    private void validateWaitIsNotFull() {
-        if (isFullWait()) {
+    private void validateWaitsIsNotFull(Slot slot) {
+        if (isFullWaitsBySlot(slot)) {
             throw new WaitIsFullException();
         }
     }

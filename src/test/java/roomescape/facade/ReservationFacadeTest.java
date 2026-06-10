@@ -114,7 +114,8 @@ public class ReservationFacadeTest {
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
         when(reservationService.findBySlot(request.date(), request.timeId(), request.themeId())).thenReturn(
                 Optional.empty());
-        when(reservationService.save(reservationWithoutId, false)).thenThrow(new CannotCreatePastReservationException());
+        when(reservationService.save(reservationWithoutId, false)).thenThrow(
+                new CannotCreatePastReservationException());
 
         assertThatThrownBy(() -> reservationFacade.save(request))
                 .isInstanceOf(CannotCreatePastReservationException.class);
@@ -187,8 +188,7 @@ public class ReservationFacadeTest {
         Reservation reservation = new Reservation(1L, "fizz", new Slot(reservationDate, reservationTime, theme));
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
-        when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId())).thenReturn(new Waits(List.of()));
+        when(waitService.findBySlot(reservation.getSlot())).thenReturn(new Waits(List.of()));
 
         reservationFacade.deleteReservation(reservation.getId());
 
@@ -203,8 +203,7 @@ public class ReservationFacadeTest {
                 new Slot(firstWait.getReservationDate(), firstWait.getTime(), firstWait.getTheme()));
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
-        when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId())).thenReturn(new Waits(List.of(firstWait)));
+        when(waitService.findBySlot(reservation.getSlot())).thenReturn(new Waits(List.of(firstWait)));
 
         reservationFacade.deleteReservation(reservation.getId());
 

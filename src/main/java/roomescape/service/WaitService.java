@@ -1,10 +1,10 @@
 package roomescape.service;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Slot;
 import roomescape.domain.Wait;
 import roomescape.domain.Waits;
 import roomescape.exception.custom.CannotDeleteReservationTimeInUseException;
@@ -30,7 +30,7 @@ public class WaitService {
     public Wait save(Wait waitWithoutId) {
         Waits waits = waitRepository.findBySlot(waitWithoutId.getReservationDate(), waitWithoutId.getTime().getId(),
                 waitWithoutId.getTheme().getId());
-        waits.validateCreate(waitWithoutId.getName());
+        waits.validateCreate(waitWithoutId.getName(), waitWithoutId.getSlot());
 
         return waitRepository.save(waitWithoutId);
     }
@@ -52,8 +52,8 @@ public class WaitService {
         waitRepository.deleteById(id);
     }
 
-    public Waits findBySlot(LocalDate localDate, Long timeId, Long themeId) {
-        return waitRepository.findBySlot(localDate, timeId, themeId);
+    public Waits findBySlot(Slot slot) {
+        return waitRepository.findBySlot(slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
     public Wait findWait(Long waitId) {
