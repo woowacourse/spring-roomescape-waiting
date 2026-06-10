@@ -152,6 +152,26 @@ class JdbcReservationRepositoryTest {
         assertThat(found).isEqualTo(saved);
     }
 
+    @Test
+    @DisplayName("예약 시간으로 예약 존재 여부를 확인한다")
+    void existsByTime() {
+        // given
+        LocalDate date = LocalDate.parse("2026-08-06");
+        Theme theme = createTheme("미술관의 밤");
+        ReservationTime reservedTime = jdbcReservationTimeRepository.save(
+                ReservationTime.createNew(LocalTime.parse("10:00"))
+        );
+        ReservationTime emptyTime = jdbcReservationTimeRepository.save(
+                ReservationTime.createNew(LocalTime.parse("11:00"))
+        );
+        ReservationSlot slot = jdbcReservationSlotRepository.save(ReservationSlot.createNew(date, theme, reservedTime));
+        jdbcReservationRepository.save(Reservation.createNew("쿠다", slot, LocalDateTime.now()));
+
+        // when & then
+        assertThat(jdbcReservationRepository.existsByTime(reservedTime)).isTrue();
+        assertThat(jdbcReservationRepository.existsByTime(emptyTime)).isFalse();
+    }
+
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_slot");

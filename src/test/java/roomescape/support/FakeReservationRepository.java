@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservation.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -33,6 +34,14 @@ public class FakeReservationRepository implements ReservationRepository {
                 .filter(reservation -> Objects.equals(reservation.getTheme(), slot.getTheme()))
                 .filter(reservation -> Objects.equals(reservation.getTime(), slot.getTime()))
                 .findFirst();
+    }
+
+    @Override
+    public boolean existsByTime(final ReservationTime time) {
+        return reservations.values()
+                .stream()
+                .map(Reservation::getTime)
+                .anyMatch(reservationTime -> Objects.equals(reservationTime, time));
     }
 
     @Override

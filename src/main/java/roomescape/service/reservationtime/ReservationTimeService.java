@@ -67,10 +67,11 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final long timeId) {
-        if (reservationRepository.findAll().stream()
-                .anyMatch(reservation -> reservation.getTime().getId().equals(timeId))) {
+        ReservationTime reservationTime = getById(timeId);
+        if (reservationRepository.existsByTime(reservationTime)) {
             throw new ConflictException(ErrorCode.RESERVATION_TIME_IN_USE, "이미 예약된 시간은 삭제할 수 없습니다.");
         }
+
         int affectedRowCount;
         try {
             affectedRowCount = reservationTimeRepository.deleteById(timeId);
