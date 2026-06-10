@@ -3,17 +3,29 @@ package roomescape.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import roomescape.repository.ReservationWaitingUpdateDao;
+import roomescape.service.ReservationService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserReservationTest {
+
+    @Autowired
+    private ReservationService reservationService;
+
+    @MockitoSpyBean
+    private ReservationWaitingUpdateDao reservationWaitingUpdateDao;
 
     @Test
     void 사용자_예약__API() {
@@ -392,6 +404,38 @@ public class UserReservationTest {
                 .when().get("/reservations/waitings")
                 .then().statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @Test
+    void 대기_삭제_중_예외가_발생하면_예약_삭제와_대기_승격이_모두_롤백된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        doThrow(new IllegalStateException("예외 발생!!!")).when(reservationWaitingUpdateDao).delete(1L);
+
+        assertThatThrownBy(() -> reservationService.delete(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("예외 발생!!!");
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
+
+        RestAssured.given()
+                .when().get("/reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
     }
 
     @Test
