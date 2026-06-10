@@ -84,32 +84,84 @@ class ReservationWaitingTest {
     }
 
     @Test
-    @DisplayName("예약 대기 줄은 요청 시각과 ID 순서로 순번을 계산한다")
-    void sequenceOf() {
+    @DisplayName("예약 대기 줄은 요청 시각과 ID 순서로 위치를 계산한다")
+    void indexOf() {
+        Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+
         ReservationWaitingLine waitingLine = new ReservationWaitingLine(List.of(
-                new ReservationWaitingLine.ReservationWaitingOrder(
+                ReservationWaiting.of(
                         3L,
+                        reservation,
+                        "아루3",
                         LocalDateTime.parse("2026-08-05T12:01:00")
                 ),
-                new ReservationWaitingLine.ReservationWaitingOrder(
+                ReservationWaiting.of(
                         2L,
+                        reservation,
+                        "아루2",
                         LocalDateTime.parse("2026-08-05T12:00:00")
                 ),
-                new ReservationWaitingLine.ReservationWaitingOrder(
+                ReservationWaiting.of(
                         1L,
+                        reservation,
+                        "아루1",
                         LocalDateTime.parse("2026-08-05T12:00:00")
                 )
         ));
 
-        assertThat(waitingLine.sequenceOf(1L)).isOne();
-        assertThat(waitingLine.sequenceOf(2L)).isEqualTo(2);
-        assertThat(waitingLine.sequenceOf(3L)).isEqualTo(3);
+        assertThat(waitingLine.indexOf(1L)).hasValue(0);
+        assertThat(waitingLine.indexOf(2L)).hasValue(1);
+        assertThat(waitingLine.indexOf(3L)).hasValue(2);
+        assertThat(waitingLine.indexOf(4L)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약 대기 줄은 저장되지 않은 대기를 포함할 수 없다")
+    void rejectUnsavedWaiting() {
+        Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        ReservationWaiting unsavedWaiting = ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        );
+
+        assertThatThrownBy(() -> new ReservationWaitingLine(List.of(unsavedWaiting)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ReservationWaitingLine.UNSAVED_WAITING_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("예약 대기 줄은 서로 다른 슬롯의 대기를 함께 포함할 수 없다")
+    void rejectDifferentSlotWaitings() {
+        Reservation reservation = createReservation(1L, LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        Reservation otherReservation = createReservation(2L, LocalDate.parse("2026-08-06"), LocalTime.parse("11:00"));
+
+        assertThatThrownBy(() -> new ReservationWaitingLine(List.of(
+                ReservationWaiting.of(
+                        1L,
+                        reservation,
+                        "아루1",
+                        LocalDateTime.parse("2026-08-05T12:00:00")
+                ),
+                ReservationWaiting.of(
+                        2L,
+                        otherReservation,
+                        "아루2",
+                        LocalDateTime.parse("2026-08-05T12:01:00")
+                )
+        )))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ReservationWaitingLine.DIFFERENT_SLOT_MESSAGE);
     }
 
     private Reservation createReservation(final LocalDate date, final LocalTime time) {
+        return createReservation(1L, date, time);
+    }
+
+    private Reservation createReservation(final Long slotId, final LocalDate date, final LocalTime time) {
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime reservationTime = ReservationTime.of(1L, time);
-        ReservationSlot slot = ReservationSlot.createNew(date, theme, reservationTime);
+        ReservationSlot slot = ReservationSlot.of(slotId, date, theme, reservationTime);
 
         return Reservation.of(1L, "쿠다", slot, date.minusDays(1).atStartOfDay());
     }

@@ -143,7 +143,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaitingLine waitingLine = jdbcReservationWaitingRepository.findLineBySlot(reservation.getSlot());
 
         assertThat(waitingLine.isEmpty()).isFalse();
-        assertThat(waitingLine.sequenceOf(saved.getId())).isOne();
+        assertThat(waitingLine.indexOf(saved.getId())).hasValue(0);
     }
 
     @Test

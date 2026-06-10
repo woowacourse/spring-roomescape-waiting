@@ -53,7 +53,7 @@
   - 예약은 `ReservationSlot`을 받아 생성하도록 정리, 날짜/테마/시간 조합으로 슬롯을 만드는 책임은 서비스나 테스트 fixture 쪽에서 처리하고, `Reservation`은 이름, 슬롯, 생성 시각을 기준으로 자신의 불변식만 검증
 
 - [X] `ReservationWaitingLine`의 `Map` 사용 이유를 검토하고 표현 계층 요구가 도메인에 들어왔는지 확인한다.
-  - 대기 줄은 요청 시각과 대기 ID 기준으로 정렬된 `List<ReservationWaitingOrder>`를 보관하도록 정리, `waitingId -> sequence` 형태의 `Map`은 제거하고, `sequenceOf`, `containsName`, `isEmpty`는 정렬된 목록에 질문하는 메서드로 제공
+  - 대기 줄은 요청 시각과 대기 ID 기준으로 정렬된 `List<ReservationWaiting>`를 보관하도록 정리, `waitingId -> sequence` 형태의 `Map`은 제거한다. 도메인에서는 `indexOf`, `containsName`, `isEmpty`를 제공하고, 화면 표시용 1-based 순번 계산은 히스토리 조회 조립 객체에서 처리
 
 - [X] `ReservationRepository`가 `Slot` 식별자를 중심으로 상호작용하도록 유지한다.
   - 예약과 대기는 `date/theme/time` 조합이 아니라 `ReservationSlot`을 기준으로 조회, 슬롯 식별자를 중심으로 상호작용하도록 유지

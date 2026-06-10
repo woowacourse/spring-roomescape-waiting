@@ -1,60 +1,76 @@
 package roomescape.domain.reservationwaiting;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservationslot.ReservationSlot;
 
 public class ReservationWaitingLine {
-    private final List<ReservationWaitingOrder> orders;
+    public static final String UNSAVED_WAITING_MESSAGE = "저장되지 않은 대기는 대기 줄에 포함될 수 없습니다.";
+    public static final String DIFFERENT_SLOT_MESSAGE = "서로 다른 슬롯의 대기를 하나의 대기 줄로 묶을 수 없습니다.";
 
-    public ReservationWaitingLine(final List<ReservationWaitingOrder> orders) {
-        this.orders = orders.stream()
-                .sorted(Comparator.comparing(ReservationWaitingOrder::requestedAt)
-                        .thenComparing(ReservationWaitingOrder::waitingId))
+    private final List<ReservationWaiting> waitings;
+
+    public ReservationWaitingLine(final List<ReservationWaiting> waitings) {
+        validate(waitings);
+        this.waitings = waitings.stream()
+                .sorted(Comparator.comparing(ReservationWaiting::getRequestedAt)
+                        .thenComparing(ReservationWaiting::getId))
                 .toList();
     }
 
     public static ReservationWaitingLine fromWaitings(final List<ReservationWaiting> waitings) {
-        return new ReservationWaitingLine(waitings.stream()
-                .map(waiting -> new ReservationWaitingOrder(
-                        waiting.getId(),
-                        waiting.getRequestedAt(),
-                        waiting.getName()
-                ))
-                .toList());
+        return new ReservationWaitingLine(waitings);
     }
 
     public boolean isEmpty() {
-        return orders.isEmpty();
+        return waitings.isEmpty();
     }
 
     public boolean containsName(final ReservationName name) {
-        return orders.stream()
-                .map(ReservationWaitingOrder::name)
-                .filter(Objects::nonNull)
-                .map(waitingName -> ReservationName.from(waitingName).value())
+        return waitings.stream()
+                .map(ReservationWaiting::getName)
                 .anyMatch(name.value()::equals);
     }
 
-    public int sequenceOf(final long waitingId) {
-        for (int index = 0; index < orders.size(); index++) {
-            if (orders.get(index).waitingId() == waitingId) {
-                return index + 1;
+    public OptionalInt indexOf(final long waitingId) {
+        for (int index = 0; index < waitings.size(); index++) {
+            if (waitings.get(index).getId() == waitingId) {
+                return OptionalInt.of(index);
             }
         }
 
-        throw new IllegalArgumentException("대기 순번을 찾을 수 없습니다.");
+        return OptionalInt.empty();
     }
 
-    public record ReservationWaitingOrder(
-            long waitingId,
-            LocalDateTime requestedAt,
-            String name
-    ) {
-        public ReservationWaitingOrder(final long waitingId, final LocalDateTime requestedAt) {
-            this(waitingId, requestedAt, null);
+    private void validate(final List<ReservationWaiting> waitings) {
+        if (waitings.isEmpty()) {
+            return;
         }
+
+        Long slotId = waitingSlotId(waitings.get(0));
+        for (ReservationWaiting waiting : waitings) {
+            validateSaved(waiting);
+            validateSameSlot(slotId, waiting);
+        }
+    }
+
+    private void validateSaved(final ReservationWaiting waiting) {
+        if (waiting.getId() == null || waitingSlotId(waiting) == null) {
+            throw new IllegalArgumentException(UNSAVED_WAITING_MESSAGE);
+        }
+    }
+
+    private void validateSameSlot(final Long slotId, final ReservationWaiting waiting) {
+        if (!Objects.equals(slotId, waitingSlotId(waiting))) {
+            throw new IllegalArgumentException(DIFFERENT_SLOT_MESSAGE);
+        }
+    }
+
+    private Long waitingSlotId(final ReservationWaiting waiting) {
+        ReservationSlot slot = waiting.getReservation().getSlot();
+        return slot.getId();
     }
 }
