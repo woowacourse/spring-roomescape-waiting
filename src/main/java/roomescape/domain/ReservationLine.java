@@ -34,10 +34,6 @@ public class ReservationLine {
                 .map(waitings::indexOf);
     }
 
-    public boolean isEmpty() {
-        return waitings.isEmpty();
-    }
-
     public Optional<Reservation> cancel(Reservation target, LocalDateTime now) {
         validateReservationInLine(target);
         target.validateCancelable(now);
@@ -126,7 +122,7 @@ public class ReservationLine {
     }
 
     private Optional<Reservation> findPromotedFirstWaiting() {
-        if (isEmpty()) {
+        if (waitings.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(waitings.getFirst().promote());
