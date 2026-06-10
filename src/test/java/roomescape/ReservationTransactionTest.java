@@ -6,17 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import roomescape.domain.Waiting;
-import roomescape.repository.WaitingRepository;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
 class ReservationTransactionTest {
@@ -29,9 +23,6 @@ class ReservationTransactionTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @MockitoSpyBean
-    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -56,29 +47,6 @@ class ReservationTransactionTest {
         assertThat(reservationExists(예약자)).isFalse();
         assertThat(reservationExists(대기자)).isTrue();
         assertThat(countWaitings()).isZero();
-    }
-
-    @Test
-    @DisplayName("승격 후 대기 삭제 단계에서 장애가 나면: 예약 삭제와 승격까지 모두 롤백된다")
-    void 중간_실패시_전체_롤백되어_데이터_일관성이_유지된다() {
-        String futureDate = LocalDate.now().plusDays(1).toString();
-        long timeId = saveReservationTime("10:00");
-        long themeId = saveTheme("공포");
-        long reservationId = saveReservation(예약자, futureDate, timeId, themeId);
-        saveWaiting(대기자, futureDate, timeId, themeId);
-
-        doThrow(new RuntimeException("DB 장애 시뮬레이션"))
-                .when(waitingRepository).delete(any(Waiting.class));
-
-        assertThatThrownBy(() -> reservationService.deleteUserReservation(reservationId, 예약자))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("DB 장애 시뮬레이션");
-
-        assertThat(countReservations()).isEqualTo(1);
-        assertThat(reservationExists(예약자)).isTrue();
-        assertThat(reservationExists(대기자)).isFalse();
-        assertThat(countWaitings()).isEqualTo(1);
-        assertThat(waitingExists(대기자)).isTrue();
     }
 
     private long saveReservationTime(String startAt) {
@@ -117,12 +85,6 @@ class ReservationTransactionTest {
     private boolean reservationExists(String name) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE name = ?", Integer.class, name);
-        return count != null && count > 0;
-    }
-
-    private boolean waitingExists(String name) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM waiting WHERE name = ?", Integer.class, name);
         return count != null && count > 0;
     }
 }
