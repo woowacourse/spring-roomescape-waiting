@@ -1,8 +1,13 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ResourceInUseException;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
@@ -18,13 +23,22 @@ public class ReservationFacade {
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
 
+    private final ConcurrentHashMap<String, ReentrantLock> slotLocks = new ConcurrentHashMap<>();
+
     public ReservationFacade(ReservationService reservationService, ReservationTimeService reservationTimeService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
     }
 
     public ReservationCreateResponse createReservation(ReservationRequest request) {
-        return reservationService.create(request);
+        Lock lock = getSlotLock(LocalDate.parse(request.date()), request.timeId(),
+            request.themeId());
+        lock.lock();
+        try {
+            return reservationService.create(request);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void deleteReservationTime(Long id) {
@@ -56,7 +70,20 @@ public class ReservationFacade {
     }
 
     public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
-        reservationService.deleteReservedByNameAndReservationId(name, reservationId);
+        ReservationResponse info = reservationService.findById(reservationId);
+        Lock lock = getSlotLock(info.date(), info.time().id(), info.theme().id());
+        lock.lock();
+        try {
+            Reservation reservation = reservationService.deleteMyReservation(reservationId, name);
+            try {
+                reservationService.promoteFirstWaiting(reservation);
+            } catch (Exception e) {
+                reservationService.restoreReservation(reservation.getId());
+                throw e;
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {
@@ -64,10 +91,33 @@ public class ReservationFacade {
     }
 
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
-        reservationService.updateMyReservation(updateMyReservation, name, reservationId);
+        ReservationResponse info = reservationService.findById(reservationId);
+        Lock newSlotLock = getSlotLock(updateMyReservation.date(), updateMyReservation.timeId(), info.theme().id());
+        newSlotLock.lock();
+        try {
+            Reservation reservation = reservationService.updateMyReservation(updateMyReservation, name, reservationId);
+            try {
+                reservationService.promoteFirstWaiting(reservation);
+            } catch (Exception e) {
+                reservationService.revertReservationUpdate(
+                    reservationId,
+                    reservation.getDate(),
+                    reservation.getTime().getId(),
+                    name
+                );
+                throw e;
+            }
+        } finally {
+            newSlotLock.unlock();
+        }
     }
 
     public List<MyReservationResponse> findReservationsByName(String name) {
         return reservationService.findAllByName(name);
+    }
+
+    private Lock getSlotLock(LocalDate date, Long timeId, Long themeId) {
+        String key = date + ":" + timeId + ":" + themeId;
+        return slotLocks.computeIfAbsent(key, k -> new ReentrantLock(true));
     }
 }

@@ -10,12 +10,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import roomescape.reservation.dao.dto.ReservationWithRank;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.response.MyReservationResponse;
-import roomescape.reservation.dto.response.ThemeSimpleResponse;
-import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.theme.domain.Theme;
 
 @Component
@@ -88,7 +86,8 @@ public class ReservationDao {
         + "th.description as theme_description, th.image_url as theme_image_url "
         + "from reservation r "
         + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th on r.theme_id = th.id";
+        + "inner join theme th on r.theme_id = th.id "
+        + "where r.status in ('RESERVED', 'WAITING')";
 
     return jdbcTemplate.query(sql, reservationRowMapper);
   }
@@ -106,6 +105,10 @@ public class ReservationDao {
   }
 
   public Reservation findById(Long id) {
+    jdbcTemplate.queryForObject(
+        "select id from reservation where id = ? for update",
+        Long.class, id);
+
     String sql = "select r.id, r.name, r.date, r.status, "
         + "t.id as time_id, t.start_at, "
         + "th.id as theme_id, th.name as theme_name, "
@@ -127,7 +130,7 @@ public class ReservationDao {
         + "inner join reservation_time t on r.time_id = t.id "
         + "inner join theme th on r.theme_id = th.id "
         + "where r.date = ? and r.time_id = ? and r.theme_id = ? and r.status = ? "
-        + "order by r.id asc limit 1";
+        + "order by r.id asc limit 1 for update";
 
     List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId, ReservationStatus.WAITING.name());
     return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
@@ -178,7 +181,7 @@ public class ReservationDao {
     return count != null && count > 0;
   }
 
-  public List<MyReservationResponse> findAllByName(String name) {
+  public List<ReservationWithRank> findAllByName(String name) {
     String sql = "with waiting_rank as ( "
         + "  select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank "
         + "  from reservation "
@@ -194,12 +197,14 @@ public class ReservationDao {
         + "left  join waiting_rank wr    on r.id = wr.id "
         + "where r.name = ?";
 
-    return jdbcTemplate.query(sql, (rs, rowNum) -> new MyReservationResponse(
+    return jdbcTemplate.query(sql, (rs, rowNum) -> new ReservationWithRank(
         rs.getLong("id"),
         rs.getString("name"),
         LocalDate.parse(rs.getString("date")),
-        new TimeResponse(rs.getLong("time_id"), LocalTime.parse(rs.getString("start_at"))),
-        new ThemeSimpleResponse(rs.getLong("theme_id"), rs.getString("theme_name")),
+        rs.getLong("time_id"),
+        LocalTime.parse(rs.getString("start_at")),
+        rs.getLong("theme_id"),
+        rs.getString("theme_name"),
         ReservationStatus.valueOf(rs.getString("status")),
         rs.getObject("wait_rank", Long.class)
     ), name);

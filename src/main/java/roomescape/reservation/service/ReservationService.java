@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidReservationStateException;
 import roomescape.exception.UnauthorizedReservationException;
@@ -57,7 +59,6 @@ public class ReservationService {
                         TimeResponse.from(reservation.getTime()),
                         ThemeSimpleResponse.from(reservation.getTheme()),
                     reservation.getStatus()
-
                 )).toList();
     }
 
@@ -70,49 +71,88 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
-        Reservation reservation = reservationDao.findById(id);
-        if (reservation.isReserved()) {
-            reservationDao.findFirstWaitingByDateTimeTheme(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-            ).ifPresent(waiting -> {
-                waiting.promote(ReservationStatus.RESERVED);
-                reservationDao.updateStatus(waiting.getId(), ReservationStatus.RESERVED);
-            });
-        }
         reservationDao.delete(id);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Reservation deleteMyReservation(Long id, String name) {
+        Reservation reservation = reservationDao.findById(id);
+        validateReservationAuthority(name, reservation);
+        validateIsNotReserved(reservation, ReservationStatus.RESERVED, "예약 상태의 예약만 취소할 수 있습니다.");
+        reservationDao.delete(id);
+
+        return reservation;
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void promoteFirstWaiting(Reservation reservation) {
+        boolean slotTaken = reservationDao.findByDateTimeThemeStatus(
+            reservation.getDate().toString(), reservation.getTime().getId(), reservation.getTheme().getId()
+        );
+        if (slotTaken) {
+            throw new IllegalStateException("해당 슬롯에 이미 확정 예약이 존재합니다.");
+        }
+        reservationDao.findFirstWaitingByDateTimeTheme(
+            reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+        ).ifPresent(waiting -> {
+            waiting.promote(ReservationStatus.RESERVED);
+            reservationDao.updateStatus(waiting.getId(), ReservationStatus.RESERVED);
+        });
     }
 
     public boolean existsByTimeId(Long timeId) {
         return reservationDao.existsByTimeId(timeId);
     }
 
-    public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
-        Reservation reservation = reservationDao.findById(reservationId);
-        validateReservationAuthority(name, reservation);
-        if (reservation.getStatus() != ReservationStatus.RESERVED) {
-            throw new InvalidReservationStateException("예약 상태의 예약만 취소할 수 있습니다.");
-        }
-        delete(reservationId);
-    }
-
     public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
-        if (reservation.getStatus() != ReservationStatus.WAITING) {
-            throw new InvalidReservationStateException("대기 상태의 예약만 취소할 수 있습니다.");
-        }
+        validateIsNotReserved(reservation, ReservationStatus.WAITING, "대기 상태의 예약만 취소할 수 있습니다.");
         reservationDao.delete(reservationId);
     }
 
-    public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Reservation updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
         isReservationExists(updateMyReservation.date(), updateMyReservation.timeId(), reservation.getTheme().getId());
         reservationDao.updateReservation(updateMyReservation.date(), updateMyReservation.timeId(), name, reservationId);
+
+        return reservation;
     }
 
     public List<MyReservationResponse> findAllByName(String name) {
-        return reservationDao.findAllByName(name);
+        return reservationDao.findAllByName(name).stream()
+                .map(r -> new MyReservationResponse(
+                        r.id(),
+                        r.name(),
+                        r.date(),
+                        new TimeResponse(r.timeId(), r.startAt()),
+                        new ThemeSimpleResponse(r.themeId(), r.themeName()),
+                        r.status(),
+                        r.waitRank()
+                ))
+                .toList();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void restoreReservation(Long id) {
+        Reservation reservation = reservationDao.findById(id);
+        reservation.restore();
+        reservationDao.updateStatus(id, ReservationStatus.RESERVED);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void revertReservationUpdate(Long reservationId, LocalDate originalDate,
+        Long originalTimeId, String name) {
+        reservationDao.updateReservation(originalDate, originalTimeId, name, reservationId);
+    }
+
+    private static void validateIsNotReserved(Reservation reservation, ReservationStatus reserved,
+        String message) {
+        if (reservation.getStatus() != reserved) {
+            throw new InvalidReservationStateException(message);
+        }
     }
 
     private static void validateReservationAuthority(String name, Reservation reservation) {
