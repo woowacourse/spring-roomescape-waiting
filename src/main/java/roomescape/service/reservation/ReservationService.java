@@ -49,6 +49,7 @@ public class ReservationService {
     }
 
     public Reservation save(final String name, final LocalDate date, final long themeId, final long timeId) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         ReservationSlot candidateSlot = ReservationSlot.createNew(date, theme, reservationTime);
@@ -58,7 +59,7 @@ public class ReservationService {
         }
 
         ReservationSlot savedSlot = findExistingSlot(candidateSlot);
-        Reservation reservation = createNewReservation(name, savedSlot);
+        Reservation reservation = createNewReservation(name, savedSlot, requestedAt);
 
         try {
             return reservationRepository.save(reservation);
@@ -69,17 +70,19 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(final long id) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "삭제된 예약 데이터가 없습니다."
                 ));
 
-        cancelReservation(reservation);
+        cancelReservation(reservation, requestedAt);
     }
 
     @Transactional
     public void deleteByIdAndName(final long id, final String name) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         ReservationName lookupName = ReservationName.from(name);
 
         Reservation reservation = reservationRepository.findById(id)
@@ -95,8 +98,8 @@ public class ReservationService {
             );
         }
 
-        validateCancelable(reservation);
-        cancelReservation(reservation);
+        validateCancelable(reservation, requestedAt);
+        cancelReservation(reservation, requestedAt);
     }
 
     public Reservation updateByIdAndName(
@@ -105,6 +108,7 @@ public class ReservationService {
             final LocalDate date,
             final long timeId
     ) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         ReservationName lookupName = ReservationName.from(name);
 
         Reservation reservation = reservationRepository.findById(id)
@@ -120,10 +124,10 @@ public class ReservationService {
             );
         }
 
-        validateUpdatable(reservation);
+        validateUpdatable(reservation, requestedAt);
 
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
-        Reservation candidateReservation = updateReservationDateAndTime(reservation, date, reservationTime);
+        Reservation candidateReservation = updateReservationDateAndTime(reservation, date, reservationTime, requestedAt);
 
         if (reservationRepository.findBySlot(candidateReservation.getSlot())
                 .filter(conflict -> !conflict.equals(reservation))
@@ -132,7 +136,7 @@ public class ReservationService {
         }
 
         ReservationSlot savedSlot = findExistingSlot(candidateReservation.getSlot());
-        Reservation updatedReservation = updateReservationSlot(candidateReservation, savedSlot);
+        Reservation updatedReservation = updateReservationSlot(candidateReservation, savedSlot, requestedAt);
 
         try {
             return reservationRepository.save(updatedReservation);
@@ -160,25 +164,30 @@ public class ReservationService {
         }
     }
 
-    private void cancelReservation(final Reservation reservation) {
+    private void cancelReservation(final Reservation reservation, final LocalDateTime requestedAt) {
         reservationWaitingRepository.findFirstBySlot(reservation.getSlot())
                 .ifPresentOrElse(
-                        firstWaiting -> promoteFirstWaiting(reservation, firstWaiting),
+                        firstWaiting -> promoteFirstWaiting(reservation, firstWaiting, requestedAt),
                         () -> deleteReservation(reservation)
                 );
     }
 
-    private void promoteFirstWaiting(final Reservation reservation, final ReservationWaiting firstWaiting) {
+    private void promoteFirstWaiting(
+            final Reservation reservation,
+            final ReservationWaiting firstWaiting,
+            final LocalDateTime requestedAt
+    ) {
         deleteReservation(reservation);
-        savePromotedReservation(firstWaiting);
+        savePromotedReservation(firstWaiting, requestedAt);
         reservationWaitingRepository.delete(firstWaiting);
     }
 
-    private void savePromotedReservation(final ReservationWaiting firstWaiting) {
+    private void savePromotedReservation(final ReservationWaiting firstWaiting, final LocalDateTime requestedAt) {
         try {
             Reservation promotedReservation = createNewReservation(
                     firstWaiting.getName(),
-                    firstWaiting.getReservation().getSlot()
+                    firstWaiting.getReservation().getSlot(),
+                    requestedAt
             );
             reservationRepository.save(promotedReservation);
         } catch (PersistenceConflictException exception) {
@@ -186,8 +195,8 @@ public class ReservationService {
         }
     }
 
-    private void validateCancelable(final Reservation reservation) {
-        if (reservation.isPast(LocalDateTime.now())) {
+    private void validateCancelable(final Reservation reservation, final LocalDateTime requestedAt) {
+        if (reservation.isPast(requestedAt)) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_CANCELLED,
                     "이미 지난 예약은 취소할 수 없습니다."
@@ -195,8 +204,8 @@ public class ReservationService {
         }
     }
 
-    private void validateUpdatable(final Reservation reservation) {
-        if (reservation.isPast(LocalDateTime.now())) {
+    private void validateUpdatable(final Reservation reservation, final LocalDateTime requestedAt) {
+        if (reservation.isPast(requestedAt)) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
                     "이미 지난 예약은 변경할 수 없습니다."
@@ -206,10 +215,11 @@ public class ReservationService {
 
     private Reservation createNewReservation(
             final String name,
-            final ReservationSlot slot
+            final ReservationSlot slot,
+            final LocalDateTime requestedAt
     ) {
         try {
-            return Reservation.createNew(name, slot, LocalDateTime.now());
+            return Reservation.createNew(name, slot, requestedAt);
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
@@ -218,11 +228,12 @@ public class ReservationService {
     private Reservation updateReservationDateAndTime(
             final Reservation reservation,
             final LocalDate date,
-            final ReservationTime reservationTime
+            final ReservationTime reservationTime,
+            final LocalDateTime requestedAt
     ) {
         ReservationSlot changedSlot = ReservationSlot.createNew(date, reservation.getTheme(), reservationTime);
         try {
-            return reservation.withSlot(changedSlot, LocalDateTime.now());
+            return reservation.withSlot(changedSlot, requestedAt);
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
@@ -230,10 +241,11 @@ public class ReservationService {
 
     private Reservation updateReservationSlot(
             final Reservation reservation,
-            final ReservationSlot slot
+            final ReservationSlot slot,
+            final LocalDateTime requestedAt
     ) {
         try {
-            return reservation.withSlot(slot, LocalDateTime.now());
+            return reservation.withSlot(slot, requestedAt);
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }

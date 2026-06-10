@@ -57,10 +57,11 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTime> findAvailableTimes(final LocalDate date, final long themeId) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         return reservationSlotRepository.findByDateAndTheme(date, themeService.getById(themeId))
                 .stream()
                 .filter(slot -> reservationRepository.findBySlot(slot).isEmpty())
-                .filter(slot -> !slot.isPast(LocalDateTime.now()))
+                .filter(slot -> !slot.isPast(requestedAt))
                 .map(ReservationSlot::getTime)
                 .toList();
     }

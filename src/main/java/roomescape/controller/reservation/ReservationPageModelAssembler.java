@@ -93,12 +93,18 @@ public class ReservationPageModelAssembler {
         Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
                 .map(reservationTime -> reservationTime.getId())
                 .collect(Collectors.toSet());
+        LocalDateTime requestedAt = LocalDateTime.now();
 
         return reservationTimeService.getAll().stream()
                 .map(reservationTime -> new ReservationTimeSlotResponse(
                         reservationTime.getId(),
                         reservationTime.getStartAt(),
-                        resolveSlotStatus(selectedDate, reservationTime.getStartAt(), availableTimeIds.contains(reservationTime.getId())),
+                        resolveSlotStatus(
+                                selectedDate,
+                                reservationTime.getStartAt(),
+                                availableTimeIds.contains(reservationTime.getId()),
+                                requestedAt
+                        ),
                         findWaitingId(myHistories, selectedDate, selectedThemeId, reservationTime.getId())
                 ))
                 .toList();
@@ -107,9 +113,10 @@ public class ReservationPageModelAssembler {
     private ReservationTimeSlotStatus resolveSlotStatus(
             final LocalDate selectedDate,
             final LocalTime startAt,
-            final boolean reservable
+            final boolean reservable,
+            final LocalDateTime requestedAt
     ) {
-        if (LocalDateTime.of(selectedDate, startAt).isBefore(LocalDateTime.now())) {
+        if (LocalDateTime.of(selectedDate, startAt).isBefore(requestedAt)) {
             return ReservationTimeSlotStatus.PAST;
         }
 
