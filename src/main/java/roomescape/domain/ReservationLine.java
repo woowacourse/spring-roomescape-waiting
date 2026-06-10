@@ -5,14 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import roomescape.exception.DuplicateException;
-import roomescape.exception.PastTimeException;
 
 public class ReservationLine {
-
-    private static final String NON_CANCELLABLE_MESSAGE = String.format(
-            "예약 시작 %d시간 전까지만 예약을 삭제할 수 있습니다.",
-            Reservation.CANCEL_DEADLINE_HOURS
-    );
 
     private final ReservationSlot slot;
     private final Optional<Reservation> reservedReservation;
@@ -48,7 +42,7 @@ public class ReservationLine {
 
     public Optional<Reservation> cancel(Reservation target, LocalDateTime now) {
         validateReservationInLine(target);
-        validateCancelable(target, now);
+        target.validateCancelable(now);
 
         return findReservationToPromote(target);
     }
@@ -136,12 +130,6 @@ public class ReservationLine {
             return Optional.empty();
         }
         return Optional.of(waitings.getFirst().promote());
-    }
-
-    private void validateCancelable(Reservation target, LocalDateTime now) {
-        if (!target.isCancelable(now)) {
-            throw new PastTimeException(NON_CANCELLABLE_MESSAGE);
-        }
     }
 
     private void validateSlot(ReservationSlot slot) {

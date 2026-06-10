@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -96,7 +97,8 @@ class ReservationTest {
                 ReservationStatus.RESERVED
         );
 
-        assertThat(reservation.isCancelable(LocalDateTime.of(2026, 6, 9, 9, 59))).isTrue();
+        assertThatCode(() -> reservation.validateCancelable(LocalDateTime.of(2026, 6, 9, 9, 59)))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -111,7 +113,9 @@ class ReservationTest {
                 ReservationStatus.RESERVED
         );
 
-        assertThat(reservation.isCancelable(LocalDateTime.of(2026, 6, 9, 10, 0))).isFalse();
+        assertThatThrownBy(() -> reservation.validateCancelable(LocalDateTime.of(2026, 6, 9, 10, 0)))
+                .isInstanceOf(PastTimeException.class)
+                .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
     }
 
     private ReservationSlot createSlot(LocalDate date) {
