@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.PastTimeException;
+
 class ReservationTest {
 
     private static final TimeSlot TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));

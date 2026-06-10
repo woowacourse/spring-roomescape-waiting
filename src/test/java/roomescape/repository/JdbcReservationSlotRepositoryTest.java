@@ -11,12 +11,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.exception.DuplicateException;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -90,6 +90,6 @@ class JdbcReservationSlotRepositoryTest {
         reservationSlotRepository.save(new ReservationSlot(date, savedTimeSlot, savedTheme));
 
         assertThatThrownBy(() -> reservationSlotRepository.save(new ReservationSlot(date, savedTimeSlot, savedTheme)))
-                .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(DuplicateException.class);
     }
 }

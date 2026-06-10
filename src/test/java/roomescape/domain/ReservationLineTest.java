@@ -46,9 +46,10 @@ public class ReservationLineTest {
     @Test
     @DisplayName("생성 시각이 빠른 예약 대기가 앞선 위치를 가진다.")
     void 생성_시각_기준_대기_위치_계산() {
+        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
         Reservation first = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
         Reservation second = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(second, first));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, second, first));
 
         assertThat(reservationLine.findWaitingIndex(first)).isZero();
         assertThat(reservationLine.findWaitingIndex(second)).isEqualTo(1);
@@ -111,9 +112,10 @@ public class ReservationLineTest {
     @DisplayName("생성 시각이 같으면 ID가 작은 예약 대기가 앞선 위치를 가진다.")
     void ID_기준_대기_위치_계산() {
         LocalDateTime sameCreatedAt = LocalDateTime.of(2026, 6, 3, 10, 0);
+        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
         Reservation first = createWaiting(1L, "순번1", sameCreatedAt);
         Reservation second = createWaiting(2L, "순번2", sameCreatedAt);
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(second, first));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, second, first));
 
         assertThat(reservationLine.findWaitingIndex(first)).isZero();
         assertThat(reservationLine.findWaitingIndex(second)).isEqualTo(1);
@@ -139,8 +141,9 @@ public class ReservationLineTest {
     @Test
     @DisplayName("null 예약 대기의 위치를 조회하면 예외가 발생한다.")
     void null_예약_대기_위치_조회_예외_발생() {
+        Reservation reserved = createReserved(2L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
         Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(waiting));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
 
         assertThatThrownBy(() -> reservationLine.findWaitingIndex(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -150,6 +153,7 @@ public class ReservationLineTest {
     @Test
     @DisplayName("다른 예약 슬롯의 대기 위치를 조회하면 예외가 발생한다.")
     void 다른_예약_슬롯_대기_위치_조회_예외_발생() {
+        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
         Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
         Reservation otherSlot = new Reservation(
                 2L,
@@ -158,7 +162,7 @@ public class ReservationLineTest {
                 LocalDateTime.of(2026, 6, 3, 10, 1),
                 ReservationStatus.WAITING
         );
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(waiting));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
 
         assertThatThrownBy(() -> reservationLine.findWaitingIndex(otherSlot))
                 .isInstanceOf(IllegalArgumentException.class)

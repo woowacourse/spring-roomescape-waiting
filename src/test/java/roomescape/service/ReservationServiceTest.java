@@ -27,7 +27,7 @@ import roomescape.repository.FakeTimeSlotRepository;
 
 class ReservationServiceTest {
 
-    private static final LocalDateTime REQUEST_TIME = LocalDate.now().atStartOfDay();
+    private static final LocalDateTime REQUEST_TIME = LocalDateTime.now();
 
     private ReservationService reservationService;
     private FakeReservationRepository reservationRepository;

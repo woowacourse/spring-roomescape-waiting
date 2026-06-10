@@ -38,17 +38,8 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findWaitingsBySlotId(long slotId) {
+    public List<Reservation> findBySlotIds(List<Long> slotIds) {
         return storage.values().stream()
-                .filter(Reservation::isWaiting)
-                .filter(reservation -> Objects.equals(reservation.getSlot().getId(), slotId))
-                .toList();
-    }
-
-    @Override
-    public List<Reservation> findWaitingsBySlotIds(List<Long> slotIds) {
-        return storage.values().stream()
-                .filter(Reservation::isWaiting)
                 .filter(reservation -> slotIds.contains(reservation.getSlot().getId()))
                 .toList();
     }
