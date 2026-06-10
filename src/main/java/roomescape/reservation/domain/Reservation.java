@@ -49,6 +49,10 @@ public class Reservation {
         return restore(this.id, this.name, date, time, theme, status, createdAt);
     }
 
+    public Reservation withId(Long id) {
+        return new Reservation(id, name, date, time, theme, status, createdAt);
+    }
+
     public boolean isOwner(String username) {
         return this.name.equals(username);
     }

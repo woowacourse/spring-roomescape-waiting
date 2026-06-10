@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import roomescape.common.exception.DuplicateException;
 import roomescape.support.datasource.ReservationTimeDataSource;
 import roomescape.support.datasource.BaseRepositoryTest;
 
@@ -39,13 +39,13 @@ class ReservationTimeRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    void 동일한_활성_시간으로_저장하면_DB_제약조건_에러가_발생한다() {
+    void 동일한_활성_시간으로_저장하면_중복_예외가_발생한다() {
         // given
         reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
 
         // when & then
         assertThatThrownBy(() -> reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0))))
-                .isInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(DuplicateException.class);
     }
 
     @Test

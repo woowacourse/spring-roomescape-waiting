@@ -31,11 +31,15 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTimeInfo create(ReservationTimeCommand command) {
         if (reservationTimeRepository.existsActiveByStartAt(command.startAt())) {
-            throw new DuplicateException("이미 존재하는 시간입니다.");
+            throw new ConflictException("이미 존재하는 시간입니다.");
         }
 
-        ReservationTime time = reservationTimeRepository.save(command.toEntity());
-        return ReservationTimeInfo.from(time);
+        try {
+            ReservationTime time = reservationTimeRepository.save(command.toEntity());
+            return ReservationTimeInfo.from(time);
+        } catch (DuplicateException e) {
+            throw new ConflictException("이미 존재하는 시간입니다.");
+        }
     }
 
     @Transactional

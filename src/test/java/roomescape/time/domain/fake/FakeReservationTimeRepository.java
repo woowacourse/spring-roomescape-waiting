@@ -16,8 +16,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
-        ReservationTime saved = ReservationTime.restore(counter.getAndIncrement(), reservationTime.getStartAt(),
-                reservationTime.isActive());
+        ReservationTime saved = reservationTime.withId(counter.getAndIncrement());
         reservationTimes.add(saved);
         return saved;
     }

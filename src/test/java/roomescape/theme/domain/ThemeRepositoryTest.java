@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import roomescape.common.exception.DuplicateException;
 import roomescape.theme.domain.fixture.ThemeFixture;
 import roomescape.support.datasource.ThemeDataSource;
 import roomescape.support.datasource.BaseRepositoryTest;
@@ -42,13 +42,13 @@ class ThemeRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    void 동일한_활성_테마_이름으로_저장하면_DB_제약조건_에러가_발생한다() {
+    void 동일한_활성_테마_이름으로_저장하면_중복_예외가_발생한다() {
         // given
         themeRepository.save(ThemeFixture.createDefaultTheme());
 
         // when & then
         assertThatThrownBy(() -> themeRepository.save(ThemeFixture.createDefaultTheme()))
-                .isInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(DuplicateException.class);
     }
 
     @Test

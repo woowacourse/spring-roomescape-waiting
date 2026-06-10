@@ -2,7 +2,6 @@ package roomescape.support.datasource;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.RoomescapeApplication;
 
@@ -11,6 +10,5 @@ import roomescape.RoomescapeApplication;
         BaseRepositoryTest.class,
 }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@ComponentScan(basePackages = "roomescape.support.datasource")
 public class BaseRepositoryTest {
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -13,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DuplicateException;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 
@@ -29,21 +31,25 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
-        String sql = """
-                INSERT INTO reservation_time(start_at, is_active)
-                VALUES(:startAt, :isActive)
-                """;
+        try {
+            String sql = """
+                    INSERT INTO reservation_time(start_at, is_active)
+                    VALUES(:startAt, :isActive)
+                    """;
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("startAt", reservationTime.getStartAt())
-                .addValue("isActive", reservationTime.isActive());
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("startAt", reservationTime.getStartAt())
+                    .addValue("isActive", reservationTime.isActive());
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+            KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
+            jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
 
-        long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-        return ReservationTime.restore(generatedId, reservationTime.getStartAt(), reservationTime.isActive());
+            long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            return reservationTime.withId(generatedId);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException(e.getMessage());
+        }
     }
 
     @Override
@@ -96,17 +102,21 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public void update(ReservationTime time) {
-        String sql = """
-                UPDATE reservation_time
-                SET start_at = :startAt,
-                    is_active = :active
-                WHERE id = :id
-                """;
-        jdbcTemplate.update(sql, Map.of(
-                        "id", time.getId(),
-                        "startAt", time.getStartAt(),
-                        "active", time.isActive()
-                )
-        );
+        try {
+            String sql = """
+                    UPDATE reservation_time
+                    SET start_at = :startAt,
+                        is_active = :active
+                    WHERE id = :id
+                    """;
+            jdbcTemplate.update(sql, Map.of(
+                            "id", time.getId(),
+                            "startAt", time.getStartAt(),
+                            "active", time.isActive()
+                    )
+            );
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException(e.getMessage());
+        }
     }
 }

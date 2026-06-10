@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.fixture.ReservationFixture;
 import roomescape.time.domain.fixture.ReservationTimeFixture;
@@ -14,11 +15,8 @@ import roomescape.theme.domain.fixture.ThemeFixture;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.fake.FakeReservationRepository;
 import roomescape.theme.domain.fake.FakeThemeRepository;
-import roomescape.theme.application.ThemeService;
 import roomescape.theme.application.dto.ThemeCommand;
 import roomescape.theme.application.dto.ThemeInfo;
-import roomescape.theme.application.exception.DuplicateThemeException;
-import roomescape.theme.application.exception.ThemeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -52,11 +50,11 @@ class ThemeServiceTest {
     @Test
     void 이미_존재하는_테마_이름으로_등록하면_예외가_발생한다() {
         // given
-        themeRepository.save(ThemeFixture.createDefaultTheme());
-        ThemeCommand command = new ThemeCommand("공포테마", "https://image.com/image.png", "다른 설명입니다.");
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        ThemeCommand command = new ThemeCommand(theme.getName(), "https://image.com/image.png", "다른 설명입니다.");
 
         // when & then
-        assertThatThrownBy(() -> themeService.create(command)).isInstanceOf(DuplicateThemeException.class);
+        assertThatThrownBy(() -> themeService.create(command)).isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -70,6 +68,21 @@ class ThemeServiceTest {
 
         // then
         assertThat(responses).hasSize(2);
+    }
+
+    @Test
+    void 비활성화된_테마는_목록에서_제외된다() {
+        // given
+        Theme activeTheme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Theme inactiveTheme = themeRepository.save(
+                Theme.create("놀이동산테마", "https://image.com/image2.png", "즐거운 테마입니다."));
+        themeRepository.update(inactiveTheme.deactivate());
+
+        // when
+        List<ThemeInfo> responses = themeService.getThemes(0, 10);
+
+        // then
+        assertThat(responses).hasSize(1).extracting(ThemeInfo::id).containsExactly(activeTheme.getId());
     }
 
     @Test
@@ -98,7 +111,7 @@ class ThemeServiceTest {
                 ReservationTimeFixture.createDefaultReservationTime()));
 
         // when & then
-        assertThatThrownBy(() -> themeService.deactivate(theme.getId())).isInstanceOf(ThemeInUseException.class);
+        assertThatThrownBy(() -> themeService.deactivate(theme.getId())).isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -109,7 +122,7 @@ class ThemeServiceTest {
                 ReservationTimeFixture.createDefaultReservationTime()));
 
         // when & then
-        assertThatThrownBy(() -> themeService.deactivate(theme.getId())).isInstanceOf(ThemeInUseException.class);
+        assertThatThrownBy(() -> themeService.deactivate(theme.getId())).isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -123,5 +136,20 @@ class ThemeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
+    }
+
+    @Test
+    void 비활성화된_테마는_인기_테마_목록에서_제외된다() {
+        // given
+        Theme activeTheme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        Theme inactiveTheme = themeRepository.save(
+                Theme.create("놀이동산테마", "https://image.com/image2.png", "즐거운 테마입니다."));
+        themeRepository.update(inactiveTheme.deactivate());
+
+        // when
+        List<ThemeInfo> responses = themeService.getWeeksTopThemes(LocalDate.now().minusDays(7), LocalDate.now(), 10);
+
+        // then
+        assertThat(responses).hasSize(1).extracting(ThemeInfo::id).containsExactly(activeTheme.getId());
     }
 }

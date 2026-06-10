@@ -1,6 +1,7 @@
 package roomescape.theme.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,51 @@ class ThemeTest {
         // when & then
         assertThatThrownBy(() -> Theme.create("공포테마", thumbnailImageUrl, "설명"))
                 .isInstanceOf(ValidationException.class);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" "})
+    void 테마_설명이_비어있으면_예외가_발생한다(String description) {
+        // when & then
+        assertThatThrownBy(() -> Theme.create("공포테마", "https://image.com/image.png", description))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void 테마를_비활성화한다() {
+        // given
+        Theme theme = Theme.create("공포테마", "https://image.com/image.png", "설명");
+
+        // when
+        Theme inactiveTheme = theme.deactivate();
+
+        // then
+        assertThat(inactiveTheme.isActive()).isFalse();
+    }
+
+    @Test
+    void 테마에_ID를_부여한다() {
+        // given
+        Theme theme = Theme.create("공포테마", "https://image.com/image.png", "설명");
+
+        // when
+        Theme savedTheme = theme.withId(1L);
+
+        // then
+        assertThat(savedTheme).extracting(Theme::getId, Theme::getName, Theme::getThumbnailImageUrl,
+                        Theme::getDescription, Theme::isActive)
+                .containsExactly(1L, theme.getName(), theme.getThumbnailImageUrl(), theme.getDescription(),
+                        theme.isActive());
+    }
+
+    @Test
+    void 활성화된_테마를_검증하면_예외가_발생하지_않는다() {
+        // given
+        Theme theme = Theme.create("공포테마", "https://image.com/image.png", "설명");
+
+        // when & then
+        assertThatCode(theme::validateInactive).doesNotThrowAnyException();
     }
 
     @Test

@@ -34,6 +34,10 @@ public class ReservationTime {
         return restore(id, startAt, false);
     }
 
+    public ReservationTime withId(Long id) {
+        return new ReservationTime(id, startAt, isActive);
+    }
+
     private static void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
             throw new ValidationException("시간은 필수 값입니다.");

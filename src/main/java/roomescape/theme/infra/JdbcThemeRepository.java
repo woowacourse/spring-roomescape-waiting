@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -13,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DuplicateException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -31,28 +33,26 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        String sql = """
-                INSERT INTO theme(name, thumbnail_image_url, description, is_active)
-                VALUES(:name, :thumbnailImageUrl, :description, :isActive)
-                """;
+        try {
+            String sql = """
+                    INSERT INTO theme(name, thumbnail_image_url, description, is_active)
+                    VALUES(:name, :thumbnailImageUrl, :description, :isActive)
+                    """;
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", theme.getName())
-                .addValue("thumbnailImageUrl", theme.getThumbnailImageUrl())
-                .addValue("description", theme.getDescription())
-                .addValue("isActive", theme.isActive());
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("name", theme.getName())
+                    .addValue("thumbnailImageUrl", theme.getThumbnailImageUrl())
+                    .addValue("description", theme.getDescription())
+                    .addValue("isActive", theme.isActive());
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+            KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
-        long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-        return Theme.restore(
-                generatedId,
-                theme.getName(),
-                theme.getThumbnailImageUrl(),
-                theme.getDescription(),
-                theme.isActive()
-        );
+            jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
+            long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            return theme.withId(generatedId);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException(e.getMessage());
+        }
     }
 
     @Override
@@ -117,22 +117,26 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public void update(Theme theme) {
-        String sql = """
-                UPDATE theme
-                SET name = :name,
-                    thumbnail_image_url = :thumbnailImageUrl,
-                    description = :description,
-                    is_active = :isActive
-                WHERE id = :id
-                """;
+        try {
+            String sql = """
+                    UPDATE theme
+                    SET name = :name,
+                        thumbnail_image_url = :thumbnailImageUrl,
+                        description = :description,
+                        is_active = :isActive
+                    WHERE id = :id
+                    """;
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", theme.getId())
-                .addValue("name", theme.getName())
-                .addValue("thumbnailImageUrl", theme.getThumbnailImageUrl())
-                .addValue("description", theme.getDescription())
-                .addValue("isActive", theme.isActive());
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("id", theme.getId())
+                    .addValue("name", theme.getName())
+                    .addValue("thumbnailImageUrl", theme.getThumbnailImageUrl())
+                    .addValue("description", theme.getDescription())
+                    .addValue("isActive", theme.isActive());
 
-        jdbcTemplate.update(sql, params);
+            jdbcTemplate.update(sql, params);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateException(e.getMessage());
+        }
     }
 }

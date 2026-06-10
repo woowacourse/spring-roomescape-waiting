@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.fixture.ReservationFixture;
 import roomescape.theme.domain.fixture.ThemeFixture;
@@ -63,7 +62,7 @@ class ReservationTimeServiceTest {
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.create(command)).isInstanceOf(DuplicateException.class);
+        assertThatThrownBy(() -> reservationTimeService.create(command)).isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -78,6 +77,20 @@ class ReservationTimeServiceTest {
         // then
         assertThat(responses).extracting(ReservationTimeInfo::startAt)
                 .containsExactly(LocalTime.of(10, 0), LocalTime.of(11, 0));
+    }
+
+    @Test
+    void 비활성화된_예약_시간은_목록에서_제외된다() {
+        // given
+        ReservationTime activeTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime inactiveTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        reservationTimeRepository.update(inactiveTime.deactivate());
+
+        // when
+        List<ReservationTimeInfo> responses = reservationTimeService.getReservationTimes(0, 10);
+
+        // then
+        assertThat(responses).hasSize(1).extracting(ReservationTimeInfo::id).containsExactly(activeTime.getId());
     }
 
     @Test
@@ -138,6 +151,24 @@ class ReservationTimeServiceTest {
 
         // then
         assertThat(response.times()).extracting(ReservationTimeInfo::id).containsExactly(availableTime.getId());
+    }
+
+    @Test
+    void 예약_가능한_시간을_조회할_때_비활성화된_시간은_제외된다() {
+        // given
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        ReservationTime availableTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime inactiveTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        reservationTimeRepository.update(inactiveTime.deactivate());
+        AvailableReservationTimeFindCommand command = new AvailableReservationTimeFindCommand(theme.getId(),
+                LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(1));
+
+        // when
+        AvailableReservationTimeInfo response = reservationTimeService.getAvailableReservationTime(command);
+
+        // then
+        assertThat(response.times()).hasSize(1).extracting(ReservationTimeInfo::id)
+                .containsExactly(availableTime.getId());
     }
 
     @Test
