@@ -5,6 +5,8 @@ import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
 
+import static roomescape.global.exception.ErrorCode.FORBIDDEN_RESERVATION_ACCESS;
+
 public class Reservation {
     private Long id;
     private final String name;
@@ -47,9 +49,9 @@ public class Reservation {
         return themeId;
     }
 
-    public void validateSameName(String name, ErrorCode errorCode) {
+    public void validateSameName(String name) {
         if (!this.name.equals(name)) {
-            throw new RoomescapeException(errorCode);
+            throw new RoomescapeException(FORBIDDEN_RESERVATION_ACCESS);
         }
     }
 }

@@ -1,16 +1,20 @@
 package roomescape.theme.service;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import static roomescape.global.exception.ErrorCode.CANNOT_DELETE_RESERVED_THEME;
+import static roomescape.global.exception.ErrorCode.THEME_NOT_FOUND;
+
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ReservationDao reservationDao;
@@ -27,13 +31,14 @@ public class ThemeService {
 
     public Theme findById(Long id) {
         return themeDao.selectById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(THEME_NOT_FOUND));
     }
 
     public List<Theme> findByTrend(LocalDate startDate, LocalDate endDate, int limit) {
         return themeDao.selectTopThemesByReservation(startDate, endDate, limit);
     }
 
+    @Transactional
     public Theme add(String name, String description, String image) {
         Theme theme = new Theme(name, description, image);
         return themeDao.insert(theme);
@@ -48,12 +53,12 @@ public class ThemeService {
 
     private void validateThemeExists(Long id) {
         themeDao.selectById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(THEME_NOT_FOUND));
     }
 
     private void validateNotReservedTheme(Long themeId) {
         if (reservationDao.existsByThemeIdAndAfterDate(themeId, LocalDate.now())) {
-            throw new RoomescapeException(ErrorCode.CANNOT_DELETE_RESERVED_THEME);
+            throw new RoomescapeException(CANNOT_DELETE_RESERVED_THEME);
         }
     }
 }

@@ -442,8 +442,8 @@
         try {
             const isWaiting = button.dataset.cancelType === 'waiting';
             const cancelUrl = isWaiting
-                ? `/reservation-waitings/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`
-                : `/reservations/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`;
+                ? `/reservation-waitings/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`
+                : `/reservations/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`;
             await requestJson(cancelUrl, {method: 'DELETE'});
             setStatus(reservationStatusEl, isWaiting ? '대기를 취소했습니다.' : '예약을 취소했습니다.');
             await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);

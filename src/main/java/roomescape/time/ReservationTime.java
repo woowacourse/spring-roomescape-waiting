@@ -30,4 +30,8 @@ public class ReservationTime {
         }
         return date.equals(LocalDate.now()) && time.getStartAt().isBefore(LocalTime.now());
     }
+
+    public boolean isBeforeNow() {
+        return startAt.isBefore(LocalTime.now());
+    }
 }

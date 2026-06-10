@@ -9,12 +9,16 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
 import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.WaitingForPromotion;
 import roomescape.waiting.dao.ReservationWaitingDao;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static roomescape.global.exception.ErrorCode.*;
+
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
 
     private final ReservationWaitingDao reservationWaitingDao;
@@ -29,7 +33,7 @@ public class ReservationWaitingService {
 
     public ReservationWaiting findById(Long id) {
         return reservationWaitingDao.selectById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
     }
 
     public List<ReservationWaiting> findByName(String name) {
@@ -43,48 +47,55 @@ public class ReservationWaitingService {
         validateDuplicatedWaiting(name, themeId, date, timeId);
 
         ReservationTime reservationTime = timeDao.selectById(timeId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_TIME_NOT_FOUND));
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime);
 
         try {
             return reservationWaitingDao.insert(reservationWaiting);
         } catch (DuplicateKeyException e) {
-            throw new RoomescapeException(ErrorCode.DUPLICATED_RESERVATION_WAITING);
+            throw new RoomescapeException(DUPLICATED_RESERVATION_WAITING);
         }
     }
 
     @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
-        ReservationWaiting originReservationWaiting = reservationWaitingDao.selectById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
+        Long originReservationWaitingId = reservationWaitingDao.lockById(id)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
+
+        WaitingForPromotion originReservationWaiting = reservationWaitingDao.selectByIdForPromotion(originReservationWaitingId)
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_WAITING_NOT_FOUND));
 
         originReservationWaiting.validateSameName(name);
-        validateDateTime(originReservationWaiting.getDate(), originReservationWaiting.getTime());
+        validateDateTime(originReservationWaiting.date(), originReservationWaiting.time());
         reservationWaitingDao.deleteById(id);
     }
 
     private void validateReservationExists(Long themeId, LocalDate date, Long timeId) {
-        if (!reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)) {
-            throw new RoomescapeException(ErrorCode.CANNOT_WAIT_WITHOUT_RESERVATION);
+        if (!reservationDao.existsByThemeIdAndDateAndTimeIdForUpdate(themeId, date, timeId)) {
+            throw new RoomescapeException(CANNOT_WAIT_WITHOUT_RESERVATION);
         }
     }
 
     private void validateAlreadyReserved(String name, Long themeId, LocalDate date, Long timeId) {
         if (reservationDao.existsByNameAndThemeIdAndDateAndTimeId(name, themeId, date, timeId)) {
-            throw new RoomescapeException(ErrorCode.RESERVATION_ALREADY_EXISTS);
+            throw new RoomescapeException(RESERVATION_ALREADY_EXISTS);
         }
     }
 
     private void validateDuplicatedWaiting(String name, Long themeId, LocalDate date, Long timeId) {
         if (reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId)) {
-            throw new RoomescapeException(ErrorCode.DUPLICATED_RESERVATION_WAITING);
+            throw new RoomescapeException(DUPLICATED_RESERVATION_WAITING);
         }
     }
 
     private void validateDateTime(LocalDate date, ReservationTime time) {
-        if (time.isBeforeDateTime(date, time)) {
-            throw new RoomescapeException(ErrorCode.CANNOT_CANCEL_PAST_RESERVATION_WAITING);
+        if (date.isBefore(LocalDate.now())) {
+            throw new RoomescapeException(CANNOT_CANCEL_PAST_RESERVATION_WAITING);
+        }
+
+        if (date.isEqual(LocalDate.now()) && time.isBeforeNow()) {
+            throw new RoomescapeException(CANNOT_CANCEL_PAST_RESERVATION_WAITING);
         }
     }
 }

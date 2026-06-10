@@ -10,10 +10,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.WaitingForPromotion;
 
 @Repository
 public class ReservationWaitingDao {
-    private static final RowMapper<ReservationWaiting> rowMapper = (rs, rowNum) ->
+    private static final RowMapper<ReservationWaiting> MAPPER = (rs, rowNum) ->
             new ReservationWaiting(
                     rs.getLong("id"),
                     rs.getString("name"),
@@ -22,6 +23,17 @@ public class ReservationWaitingDao {
                     new ReservationTime(rs.getLong("time_id"),
                             rs.getTime("start_at").toLocalTime()),
                     rs.getLong("waiting_number")
+            );
+
+    // 대기 번호(waiting_number) 계산이 필요 없는 락 조회 전용 매퍼
+    private static final RowMapper<WaitingForPromotion> PROMOTION_MAPPER = (rs, rowNum) ->
+            new WaitingForPromotion(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getLong("theme_id"),
+                    rs.getDate("date").toLocalDate(),
+                    new ReservationTime(rs.getLong("time_id"),
+                            rs.getTime("start_at").toLocalTime())
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -47,7 +59,53 @@ public class ReservationWaitingDao {
                 where id = ?
                 """;
 
-        List<ReservationWaiting> results = jdbcTemplate.query(sql, rowMapper, id);
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER, id);
+        return results.stream().findFirst();
+    }
+
+    public Optional<Long> lockById(Long id) {
+        String sql = "select id from reservation_waiting where id = ? for update";
+        List<Long> results = jdbcTemplate.queryForList(sql, Long.class, id);
+        return results.stream().findFirst();
+    }
+
+    public Optional<WaitingForPromotion> selectByIdForPromotion(Long id) {
+        String sql = """
+                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
+                from reservation_waiting w
+                join reservation_time t on w.time_id = t.id
+                where w.id = ?
+                """;
+
+        List<WaitingForPromotion> results = jdbcTemplate.query(sql, PROMOTION_MAPPER, id);
+        return results.stream().findFirst();
+    }
+
+    public Optional<Long> lockFirstByThemeAndDateAndTime(Long themeId, LocalDate date, ReservationTime time) {
+        String sql = """
+                select id
+                from reservation_waiting w
+                where w.theme_id = ? and w.date = ? and w.time_id = ?
+                order by w.id
+                limit 1
+                for update
+                """;
+
+        List<Long> results = jdbcTemplate.queryForList(sql, Long.class, themeId, date, time.getId());
+        return results.stream().findFirst();
+    }
+
+    public Optional<WaitingForPromotion> selectFirstByThemeAndDateAndTime(Long themeId, LocalDate date, ReservationTime time) {
+        String sql = """
+                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at
+                from reservation_waiting w
+                join reservation_time t on w.time_id = t.id
+                where w.theme_id = ? and w.date = ? and w.time_id = ?
+                order by w.id
+                limit 1
+                """;
+
+        List<WaitingForPromotion> results = jdbcTemplate.query(sql, PROMOTION_MAPPER, themeId, date, time.getId());
         return results.stream().findFirst();
     }
 
@@ -64,7 +122,7 @@ public class ReservationWaitingDao {
                 where name = ?
                 """;
 
-        return jdbcTemplate.query(sql, rowMapper, name);
+        return jdbcTemplate.query(sql, MAPPER, name);
     }
 
     public boolean existsByNameAndDateAndThemeIdAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {

@@ -1,6 +1,7 @@
 package roomescape.reservation.dao;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,9 +14,9 @@ import roomescape.time.ReservationTime;
 
 @Repository
 public class ReservationDao {
-    private static final RowMapper<Reservation> rowMapper = (rs, rowNum) ->
+    private static final RowMapper<Reservation> MAPPER = (rs, rowNum) ->
             new Reservation(
-                    rs.getLong("reservation_id"),
+                    rs.getLong("id"),
                     rs.getString("name"),
                     rs.getLong("theme_id"),
                     rs.getDate("date").toLocalDate(),
@@ -35,49 +36,29 @@ public class ReservationDao {
 
     public List<Reservation> selectAll() {
         String sql =
-                "select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id "
+                "select r.id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id "
                         + "from reservation r "
                         + "inner join reservation_time t "
                         + "on r.time_id = t.id";
-        return jdbcTemplate.query(sql, rowMapper);
+        return jdbcTemplate.query(sql, MAPPER);
+    }
+
+    public Optional<Long> lockById(Long id) {
+        String sql = "SELECT id FROM reservation r WHERE r.id = ? FOR UPDATE";
+        List<Long> result = jdbcTemplate.queryForList(sql, Long.class, id);
+        return result.stream().findFirst();
     }
 
     public Optional<Reservation> selectById(Long id) {
-        String sql =
-                """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
-                        from reservation r
-                        inner join reservation_time t
-                        on r.time_id = t.id
-                        where r.id = ?
-                        """;
-        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, id);
-        return reservations.stream().findFirst();
-    }
-
-    public List<Reservation> selectByThemeIdAndDate(Long themeId, LocalDate date) {
-        String sql =
-                """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
-                        from reservation r
-                        inner join reservation_time t
-                        on r.time_id = t.id
-                        where r.theme_id = ?
-                        and r.date = ?
-                        """;
-        return jdbcTemplate.query(sql, rowMapper, themeId, date);
-    }
-
-    public List<Reservation> selectByTimeId(Long timeId) {
-        String sql =
-                """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
-                        from reservation r
-                        inner join reservation_time t
-                        on r.time_id = t.id
-                        where r.time_id = ?
-                        """;
-        return jdbcTemplate.query(sql, rowMapper, timeId);
+        String sql = """
+            SELECT r.id, r.name, r.theme_id, r.date, t.id as time_id, t.start_at as start_at
+            FROM reservation r
+            inner join reservation_time t
+            on r.time_id = t.id
+            WHERE r.id = ?
+            """;
+        List<Reservation> result = jdbcTemplate.query(sql, MAPPER, id);
+        return result.stream().findFirst();
     }
 
     public List<Long> selectTimeIdByThemeIdAndDate(Long themeId, LocalDate date) {
@@ -94,13 +75,13 @@ public class ReservationDao {
     public List<Reservation> selectByName(String name) {
         String sql =
                 """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
+                        select r.id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
                         from reservation r
                         inner join reservation_time t
                         on r.time_id = t.id
                         where r.name = ?
                         """;
-        return jdbcTemplate.query(sql, rowMapper, name);
+        return jdbcTemplate.query(sql, MAPPER, name);
     }
 
     public Reservation insert(Reservation reservation) {
@@ -134,6 +115,20 @@ public class ReservationDao {
         return count > 0;
     }
 
+    public boolean existsUpcomingByTimeId(Long timeId, LocalDate today, LocalTime now) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation r
+                    JOIN reservation_time t ON r.time_id = t.id
+                    WHERE r.time_id = ?
+                      AND (r.date > ? OR (r.date = ? AND t.start_at >= ?))
+                )
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, timeId, today, today, now) == Boolean.TRUE;
+    }
+
     public boolean existsByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
         String sql = """
             SELECT EXISTS (
@@ -144,6 +139,22 @@ public class ReservationDao {
             """;
 
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId, date, timeId) == Boolean.TRUE;
+    }
+
+    public boolean existsByThemeIdAndDateAndTimeIdForUpdate(Long themeId, LocalDate date, Long timeId) {
+        String sql = """
+            SELECT 1
+            FROM reservation
+            WHERE theme_id = ? AND date = ? AND time_id = ?
+            FOR UPDATE
+            """;
+
+        List<Integer> result = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getInt(1),
+                themeId, date, timeId
+        );
+        return !result.isEmpty();
     }
 
     public boolean existsByNameAndThemeIdAndDateAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {
