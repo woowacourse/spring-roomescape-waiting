@@ -75,6 +75,15 @@ public class ReservationSlotDao {
         }
     }
 
+    public Optional<ReservationSlot> selectById(long slotId) {
+        try {
+            String sql = baseSelectSql() + " WHERE rs.id = ?";
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, slotId));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
     private String baseSelectSql() {
         return """
                 SELECT rs.id,
