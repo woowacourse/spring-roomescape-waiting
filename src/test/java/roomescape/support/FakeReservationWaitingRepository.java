@@ -1,10 +1,9 @@
 package roomescape.support;
 
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
@@ -29,15 +28,6 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
     @Override
     public Optional<ReservationWaiting> findById(final Long id) {
         return Optional.ofNullable(waitings.get(id));
-    }
-
-    @Override
-    public Optional<ReservationWaiting> findFirstBySlot(final ReservationSlot slot) {
-        return waitings.values()
-                .stream()
-                .filter(waiting -> Objects.equals(waiting.getReservation().getSlot().getId(), slot.getId()))
-                .min(Comparator.comparing(ReservationWaiting::getRequestedAt)
-                        .thenComparing(ReservationWaiting::getId));
     }
 
     @Override

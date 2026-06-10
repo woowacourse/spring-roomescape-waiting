@@ -3,6 +3,7 @@ package roomescape.domain.reservationwaiting;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -33,6 +34,11 @@ public class ReservationWaitingLine {
         return waitings.stream()
                 .map(ReservationWaiting::getName)
                 .anyMatch(name.value()::equals);
+    }
+
+    public Optional<ReservationWaiting> first() {
+        return waitings.stream()
+                .findFirst();
     }
 
     public OptionalInt indexOf(final long waitingId) {

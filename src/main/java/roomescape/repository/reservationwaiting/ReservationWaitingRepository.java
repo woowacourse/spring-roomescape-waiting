@@ -8,7 +8,6 @@ import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 public interface ReservationWaitingRepository {
     ReservationWaiting save(ReservationWaiting reservationWaiting);
     Optional<ReservationWaiting> findById(Long id);
-    Optional<ReservationWaiting> findFirstBySlot(ReservationSlot slot);
     ReservationWaitingLine findLineBySlot(ReservationSlot slot);
     void delete(ReservationWaiting reservationWaiting);
 }

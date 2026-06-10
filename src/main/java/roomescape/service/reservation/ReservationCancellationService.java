@@ -29,7 +29,8 @@ public class ReservationCancellationService {
 
     @Transactional
     public void cancel(final Reservation reservation, final LocalDateTime requestedAt) {
-        reservationWaitingRepository.findFirstBySlot(reservation.getSlot())
+        reservationWaitingRepository.findLineBySlot(reservation.getSlot())
+                .first()
                 .ifPresentOrElse(
                         firstWaiting -> promoteFirstWaiting(reservation, firstWaiting, requestedAt),
                         () -> deleteReservation(reservation)

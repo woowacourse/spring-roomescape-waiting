@@ -31,10 +31,11 @@ PR: https://github.com/woowacourse/spring-roomescape-waiting/pull/511
   - 판단 기준: 이 문제는 `ReservationWaitingLine`을 히스토리 순번 계산에 재사용하면서 생긴 파생 문제다.
   - 해결 내용: 3번에서 `ReservationWaitingLine`과 `MyWaitingLines`의 책임을 분리하면서 `ReservationWaitingOrder`를 제거했으므로 함께 해결했다.
 
-- [ ] **5. 대기 순서 규칙을 SQL과 도메인 중 한 곳으로 모은다.**
+- [x] **5. 대기 순서 규칙을 SQL과 도메인 중 한 곳으로 모은다.**
   - 받은 리뷰: `findFirstBySlot`의 `ORDER BY requested_at, id`와 `ReservationWaitingLine`의 정렬 규칙이 중복되어 있다. 대기 순서 규칙의 주인을 한 곳으로 모아라.
   - 판단 기준: 대기 순서가 도메인 규칙이라면 한 곳에서 관리되어야 한다. 같은 정렬 기준이 SQL과 도메인에 중복되면 변경 시 불일치가 생길 수 있다.
-  - 해결 방향: Repository는 해당 슬롯의 대기 목록을 조회하고, 첫 번째 대기 선택은 `ReservationWaitingLine.first()` 같은 도메인 메서드로 처리하는 방향을 검토한다. 성능상 SQL 정렬이 필요하다면 도메인 정렬과 SQL 정렬의 역할을 명확히 문서화한다.
+  - 해결 내용: `ReservationWaitingRepository.findFirstBySlot()`을 제거하고, Repository는 `findLineBySlot()`으로 해당 슬롯의 대기 목록만 조회하도록 정리했다. 첫 번째 대기 선택은 `ReservationWaitingLine.first()`에서 처리하도록 변경해 요청 시각과 ID 기준 정렬 규칙을 도메인 객체에 모았다.
+  - 리뷰 답변: 말씀해주신 것처럼 `findFirstBySlot`의 SQL 정렬과 `ReservationWaitingLine`의 정렬 기준이 중복되어 있었습니다. 대기 순서는 조회 최적화보다 도메인 규칙에 가까운 개념이라고 판단해서, Repository에서는 슬롯의 대기 목록만 조회하고 첫 번째 대기 선택은 `ReservationWaitingLine.first()`가 담당하도록 변경했습니다. 이를 통해 대기 순서 기준이 바뀌더라도 `ReservationWaitingLine`만 확인하면 되도록 정리했습니다.
 
 ### 슬롯 도메인과 테이블 승격
 

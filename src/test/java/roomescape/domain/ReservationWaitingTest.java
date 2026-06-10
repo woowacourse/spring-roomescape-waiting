@@ -116,6 +116,36 @@ class ReservationWaitingTest {
     }
 
     @Test
+    @DisplayName("예약 대기 줄은 요청 시각과 ID 순서로 첫 번째 대기를 찾는다")
+    void first() {
+        Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        ReservationWaiting firstWaiting = ReservationWaiting.of(
+                1L,
+                reservation,
+                "아루1",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        );
+
+        ReservationWaitingLine waitingLine = new ReservationWaitingLine(List.of(
+                ReservationWaiting.of(
+                        3L,
+                        reservation,
+                        "아루3",
+                        LocalDateTime.parse("2026-08-05T12:01:00")
+                ),
+                ReservationWaiting.of(
+                        2L,
+                        reservation,
+                        "아루2",
+                        LocalDateTime.parse("2026-08-05T12:00:00")
+                ),
+                firstWaiting
+        ));
+
+        assertThat(waitingLine.first()).contains(firstWaiting);
+    }
+
+    @Test
     @DisplayName("예약 대기 줄은 저장되지 않은 대기를 포함할 수 없다")
     void rejectUnsavedWaiting() {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));

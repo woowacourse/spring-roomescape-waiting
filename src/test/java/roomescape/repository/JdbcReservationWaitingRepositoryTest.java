@@ -147,8 +147,8 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("슬롯의 첫 번째 대기를 조회한다")
-    void findFirstBySlot() {
+    @DisplayName("대기 줄에서 첫 번째 대기를 찾는다")
+    void findLineBySlotFirst() {
         Reservation reservation = createReservation();
         ReservationWaiting second = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
@@ -161,7 +161,8 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        ReservationWaiting found = jdbcReservationWaitingRepository.findFirstBySlot(reservation.getSlot())
+        ReservationWaiting found = jdbcReservationWaitingRepository.findLineBySlot(reservation.getSlot())
+                .first()
                 .orElseThrow();
 
         assertThat(found).isEqualTo(first);
