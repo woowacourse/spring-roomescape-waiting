@@ -5,7 +5,6 @@ import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 
 public class Reservation {
@@ -33,8 +32,7 @@ public class Reservation {
     }
 
     public Reservation withUpdatedDateAndTime(LocalDate date, ReservationTime time) {
-        ReservationSlot updatedSlot = new ReservationSlot(date, time, slot.getTheme());
-        return new Reservation(id, this.name, updatedSlot, this.createdAt);
+        return new Reservation(id, this.name, slot.withDateAndTime(date, time), this.createdAt);
     }
 
     public Long getId() {
@@ -43,6 +41,10 @@ public class Reservation {
 
     public String getName() {
         return name;
+    }
+
+    public ReservationSlot getSlot() {
+        return slot;
     }
 
     public LocalDate getDate() {
@@ -73,12 +75,7 @@ public class Reservation {
     }
 
     public void validatePastDateTime() {
-        validateNoPast(this.slot.getDate(), this.slot.getTime());
+        slot.validateNoPast();
     }
 
-    public static void validateNoPast(LocalDate date, ReservationTime time) {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new ExpiredDateTimeException();
-        }
-    }
 }

@@ -1,13 +1,12 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 
 @Repository
 public class ReservationWaitingUpdateDao {

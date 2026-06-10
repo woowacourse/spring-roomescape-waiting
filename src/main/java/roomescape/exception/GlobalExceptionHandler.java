@@ -1,5 +1,6 @@
 package roomescape.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -54,5 +55,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(WaitingNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("WAITING_NOT_FOUND", e.getMessage()));
+    }
+
+    @ExceptionHandler(ReservationWaitingAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handle(ReservationWaitingAlreadyExistException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("DUPLICATE_WAITING", e.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handle(DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "요청을 처리할 수 없습니다."));
     }
 }

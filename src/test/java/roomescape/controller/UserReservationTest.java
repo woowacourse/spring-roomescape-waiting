@@ -3,17 +3,29 @@ package roomescape.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import roomescape.repository.ReservationWaitingUpdateDao;
+import roomescape.service.ReservationService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserReservationTest {
+
+    @Autowired
+    private ReservationService reservationService;
+
+    @MockitoSpyBean
+    private ReservationWaitingUpdateDao reservationWaitingUpdateDao;
 
     @Test
     void 사용자_예약__API() {
@@ -95,7 +107,7 @@ public class UserReservationTest {
 
         Map<String, String> reservations = new HashMap<>();
         reservations.put("name", "브라운");
-        reservations.put("date", "2026-06-04");
+        reservations.put("date", "2026-07-04");
         reservations.put("timeId", "1");
         reservations.put("themeId", "1");
 
@@ -107,7 +119,7 @@ public class UserReservationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times?date=2026-06-04&themeId=1")
+                .when().get("/times?date=2026-07-04&themeId=1")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
@@ -308,6 +320,152 @@ public class UserReservationTest {
                 .statusCode(400)
                 .body("errorCode", is("INVALID_INPUT"))
                 .body("message", is("[name] 필드가 비어있습니다."));
+    }
+
+    @Test
+    void 예약_취소_후_대기자가_예약자로_승격된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/1").then().statusCode(204);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
+    }
+
+    @Test
+    void 대기_있는_예약_취소시_예약삭제_예약생성_대기삭제가_함께_진행된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/1").then().statusCode(204);
+
+        RestAssured.given()
+                .when().get("/reservations/1")
+                .then().statusCode(404);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
+
+        RestAssured.given()
+                .when().get("reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(0));
+    }
+
+    @Test
+    void 존재하지_않는_예약_취소시_데이터가_그대로_유지된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/999")
+                .then().statusCode(404);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
+
+        RestAssured.given()
+                .when().get("/reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(1));
+    }
+
+    @Test
+    void 대기_삭제_중_예외가_발생하면_예약_삭제와_대기_승격이_모두_롤백된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        doThrow(new IllegalStateException("예외 발생!!!")).when(reservationWaitingUpdateDao).delete(1L);
+
+        assertThatThrownBy(() -> reservationService.delete(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("예외 발생!!!");
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
+
+        RestAssured.given()
+                .when().get("/reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
+    }
+
+    @Test
+    void 본인이_아닌_사람이_대기_취소하면_데이터가_그대로_유지된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/waitings/1?name=다른사람")
+                .then().statusCode(400);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
+
+        RestAssured.given()
+                .when().get("/reservations/waitings")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
     }
 
     private void createTheme() {

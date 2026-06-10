@@ -10,7 +10,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -24,11 +24,10 @@ public class ReservationWaitingTest {
     @Test
     void 예약_대기가_제대로_생성되었는지_확인한다() {
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.now(), reservationTime,
-                theme), 1L,
+                theme),
                 LocalDateTime.now());
 
         assertThat(reservationWaiting.getId()).isEqualTo(1L);
-        assertThat(reservationWaiting.getSequence()).isEqualTo(1L);
     }
 
     @ParameterizedTest
@@ -37,7 +36,7 @@ public class ReservationWaitingTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(time));
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(day), reservationTime,
-                theme), 1L,
+                theme),
                 LocalDateTime.now());
 
         assertThatCode(reservationWaiting::validatePastDateTime).doesNotThrowAnyException();
@@ -49,7 +48,7 @@ public class ReservationWaitingTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(time));
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(day), reservationTime,
-                theme), 1L,
+                theme),
                 LocalDateTime.now());
 
         assertThatThrownBy(reservationWaiting::validatePastDateTime)

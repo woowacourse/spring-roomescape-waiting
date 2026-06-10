@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -73,7 +73,6 @@ public class ReservationWaitingUpdateDaoTest {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 slot,
-                resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );
     };

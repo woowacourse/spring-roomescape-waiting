@@ -15,13 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
+import roomescape.repository.ReservationWaitingSequence;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationTimeNotFoundException;
@@ -62,16 +63,16 @@ public class ReservationWaitingServiceTest {
     @Test
     void 예약_대기열이_정상_생성된다() {
         ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", now, 1L, 1L);
-        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), 1L, LocalDateTime.now());
+        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), LocalDateTime.now());
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
         when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(false);
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
         when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(createdWaiting));
+        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(new ReservationWaitingSequence(createdWaiting, 1L)));
 
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingRequest);
 
@@ -109,7 +110,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(pastDate, reservationTime, theme))).thenReturn(Optional.of(pastReservation));
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(pastDate, reservationTime, theme))).thenReturn(Optional.of(pastReservation));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(ExpiredDateTimeException.class);
@@ -121,7 +122,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.empty()
         );
 
@@ -135,7 +136,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(now, reservationTime, theme)))
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(now, reservationTime, theme)))
                 .thenReturn(Optional.of(new Reservation("테스트", new ReservationSlot(now, reservationTime, theme))));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
@@ -144,16 +145,16 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기열이_정상_삭제된다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), 1L, LocalDateTime.now());
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), LocalDateTime.now());
+        when(reservationWaitingQueryingDao.findById(1L)).thenReturn(Optional.of(new ReservationWaiting(1L, reservationWaiting.getName(), new ReservationSlot(now, reservationTime, theme), LocalDateTime.now())));
 
         assertThatCode(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트")).doesNotThrowAnyException();
     }
 
     @Test
     void 과거_예약_대기열_삭제를_시도하면_예외가_발생한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), 1L, LocalDateTime.now());
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), LocalDateTime.now());
+        when(reservationWaitingQueryingDao.findById(1L)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트"))
                 .isInstanceOf(ExpiredDateTimeException.class);
@@ -161,7 +162,7 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 존재하지_않는_예약_대기열_삭제를_시도하면_예외가_발생한다() {
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.empty());
+        when(reservationWaitingQueryingDao.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "테스트"))
                 .isInstanceOf(WaitingNotFoundException.class);
@@ -173,7 +174,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlotForUpdate(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
         when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(true);

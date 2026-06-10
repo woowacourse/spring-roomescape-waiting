@@ -1,12 +1,12 @@
-package roomescape.domain.reservatinWaiting;
+package roomescape.domain.reservationwaiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 
 public class ReservationWaiting {
@@ -14,7 +14,6 @@ public class ReservationWaiting {
     private Long id;
     private final String name;
     private final ReservationSlot slot;
-    private Long sequence;
     private final LocalDateTime createdAt;
 
     public ReservationWaiting(String name, ReservationSlot slot) {
@@ -23,17 +22,11 @@ public class ReservationWaiting {
         this.createdAt = LocalDateTime.now();
     }
 
-    public ReservationWaiting(Long id, String name, ReservationSlot slot, Long sequence, LocalDateTime createdAt) {
+    public ReservationWaiting(Long id, String name, ReservationSlot slot, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.slot = slot;
-        this.sequence = sequence;
         this.createdAt = createdAt;
-    }
-
-    public ReservationWaiting withReservationWaitingId(Long id) {
-        ReservationSlot reservationSlot = new ReservationSlot(slot.getDate(), slot.getTime(), slot.getTheme());
-        return new ReservationWaiting(id, this.name, reservationSlot, this.sequence, this.createdAt);
     }
 
     public Long getId() {
@@ -56,23 +49,21 @@ public class ReservationWaiting {
         return slot.getTheme();
     }
 
-    public Long getSequence() {
-        return sequence;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void validatePastDateTime() {
-        if(LocalDateTime.of(slot.getDate(), slot.getTime().getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new ExpiredDateTimeException();
-        }
+        slot.validateNoPast();
     }
 
     public void validateOwner(String name) {
         if (!this.name.equals(name)) {
             throw new InvalidInputException("본인의 대기만 취소할 수 있습니다.");
         }
+    }
+
+    public Reservation promoteToReservation() {
+        return new Reservation(this.name, this.slot);
     }
 }

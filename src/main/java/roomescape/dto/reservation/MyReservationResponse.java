@@ -1,6 +1,6 @@
 package roomescape.dto.reservation;
 
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
@@ -38,7 +38,7 @@ public class MyReservationResponse {
         );
     }
 
-    public static MyReservationResponse fromWaiting(ReservationWaiting reservationWaiting) {
+    public static MyReservationResponse fromWaiting(ReservationWaiting reservationWaiting, Long sequence) {
         return new MyReservationResponse(
                 null,
                 reservationWaiting.getId(),
@@ -46,7 +46,7 @@ public class MyReservationResponse {
                 ReservationTimeResponse.from(reservationWaiting.getTime()),
                 ThemeResponse.from(reservationWaiting.getTheme()),
                 ReservationStatus.WAITING,
-                reservationWaiting.getSequence()
+                sequence
         );
     }
 

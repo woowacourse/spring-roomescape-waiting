@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -49,7 +49,54 @@ public class ReservationWaitingQueryDao {
                 ) as ranked ON w.id = ranked.id
                 """;
 
-    private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (resultSet, rowNum) -> {
+    private static final String SELECT_RESERVATION_WAITING_BY_ID_SQL = """
+                select
+                    w.id,
+                    w.name,
+                    w.date,
+                    w.created_at,
+                    t.id       as time_id,
+                    t.start_at as time_start_at,
+                    th.id       as theme_id,
+                    th.name        as theme_name,
+                    th.description as theme_description,
+                    th.url       as theme_url
+                from waiting w
+                join reservation_time t  ON w.time_id  = t.id
+                join theme th            ON w.theme_id = th.id
+                where w.id = ?
+    """;
+
+    private final RowMapper<ReservationWaitingSequence> reservationWaitingRowMapper = (resultSet, rowNum) -> {
+        ReservationTime reservationTime = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getObject("time_start_at", LocalTime.class)
+        );
+
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("theme_description"),
+                resultSet.getString("theme_url")
+        );
+
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class),
+                reservationTime,
+                theme
+        );
+
+        ReservationWaiting reservationWaiting = new ReservationWaiting(
+                resultSet.getLong("id"),
+                resultSet.getString("name"),
+                slot,
+                resultSet.getObject("created_at", LocalDateTime.class)
+        );
+
+        return new ReservationWaitingSequence(reservationWaiting, resultSet.getLong("sequence"));
+    };
+
+    private final RowMapper<ReservationWaiting> reservationWaitingByIdRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
                 resultSet.getObject("time_start_at", LocalTime.class)
@@ -72,7 +119,6 @@ public class ReservationWaitingQueryDao {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 slot,
-                resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );
     };
@@ -91,19 +137,33 @@ public class ReservationWaitingQueryDao {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId()));
     }
 
-    public Optional<ReservationWaiting> findReservationWaitingById(long id) {
+    public Optional<ReservationWaitingSequence> findReservationWaitingById(long id) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.id = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, id)
                 .stream()
                 .findFirst();
     }
 
-    public List<ReservationWaiting> findAllReservationWaiting() {
+    public Optional<ReservationWaiting> findById(long id) {
+        return jdbcTemplate.query(SELECT_RESERVATION_WAITING_BY_ID_SQL, reservationWaitingByIdRowMapper, id)
+                .stream()
+                .findFirst();
+    }
+
+    public List<ReservationWaitingSequence> findAllReservationWaiting() {
         return jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL, reservationWaitingRowMapper);
     }
 
-    public List<ReservationWaiting> findAllByName(String name) {
+    public List<ReservationWaitingSequence> findAllByName(String name) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.name = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, name);
+    }
+
+    public Optional<ReservationWaiting> findFirstWaitingBySlot(ReservationSlot slot) {
+        String sql = SELECT_RESERVATION_WAITING_SQL + "where w.date = ? and w.time_id = ? and w.theme_id = ? and ranked.sequence = 1";
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, slot.getDate(), slot.getTimeId(), slot.getThemeId())
+                .stream()
+                .findFirst()
+                .map(ReservationWaitingSequence::reservationWaiting);
     }
 }
