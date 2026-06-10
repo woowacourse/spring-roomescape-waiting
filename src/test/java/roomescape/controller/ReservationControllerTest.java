@@ -89,7 +89,8 @@ class ReservationControllerTest {
     @DisplayName("유효한 데이터로 예약을 생성하고 201 상태 코드와 Location 헤더를 반환한다.")
     void 예약_생성() throws Exception {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now(), 1L, 1L);
-        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong())).willReturn(createMockReservation());
+        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong(), any()))
+                .willReturn(createMockReservation());
         performPost("/reservations", request).andExpect(status().isCreated()).andExpect(header().exists("Location"));
     }
 
@@ -132,7 +133,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("권한이 없는 예약 제어 시 403 예외와 커스텀 코드를 반환한다.")
     void 예약_소유자_불일치_예외_발생() throws Exception {
-        doThrow(new NotOwnerException()).when(reservationService).removeReservation(anyLong(), any());
+        doThrow(new NotOwnerException()).when(reservationService).removeReservation(anyLong(), any(), any());
         performDelete("/reservations/1", "해커")
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("NOT_OWNER"));
@@ -141,7 +142,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("도메인 검증 실패(IllegalArgument) 시 400 상태 코드를 반환한다.")
     void 예약_생성_도메인_검증_예외_발생() throws Exception {
-        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong()))
+        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong(), any()))
                 .willThrow(new IllegalArgumentException("테스트용 에러 메시지"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
                 .andExpect(status().isBadRequest())

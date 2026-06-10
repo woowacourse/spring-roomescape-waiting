@@ -94,8 +94,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation saveReservation(String name, LocalDate date, long timeId, long themeId) {
-        LocalDateTime requestTime = LocalDateTime.now();
+    public Reservation saveReservation(String name, LocalDate date, long timeId, long themeId,
+                                       LocalDateTime requestTime) {
         Reservation reservation = createReservation(name, date, timeId, themeId, requestTime);
         return reservationRepository.save(reservation);
     }
@@ -110,8 +110,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void removeReservation(long id, String requestName) {
-        LocalDateTime requestTime = LocalDateTime.now();
+    public void removeReservation(long id, String requestName, LocalDateTime requestTime) {
         reservationRepository.findById(id)
                 .ifPresent(reservation ->
                         deleteReservationAndPromoteWaiting(reservation, requestName, requestTime));
@@ -137,8 +136,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(long id, String requestName, LocalDate date, long timeId) {
-        LocalDateTime requestTime = LocalDateTime.now();
+    public void updateReservation(long id, String requestName, LocalDate date, long timeId,
+                                  LocalDateTime requestTime) {
         Reservation nowReservation = getReservationById(id);
         validateReservationOwner(nowReservation, requestName);
 

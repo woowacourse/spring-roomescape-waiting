@@ -3,6 +3,7 @@ package roomescape.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +26,8 @@ import roomescape.service.ReservationService;
 
 @SpringBootTest
 public class ReservationConcurrencyTest {
+
+    private static final LocalDateTime REQUEST_TIME = LocalDate.now().atStartOfDay();
 
     private final ReservationService reservationService;
     private final ReservationRepository reservationRepository;
@@ -70,11 +73,11 @@ public class ReservationConcurrencyTest {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         Future<?> first = executorService.submit(() ->
-                reservationService.saveReservation("브라운", date, savedTimeSlot.getId(), savedTheme.getId())
+                reservationService.saveReservation("브라운", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME)
         );
 
         Future<?> second = executorService.submit(() ->
-                reservationService.saveReservation("네오", date, savedTimeSlot.getId(), savedTheme.getId())
+                reservationService.saveReservation("네오", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME)
         );
 
         first.get();
@@ -98,21 +101,21 @@ public class ReservationConcurrencyTest {
                 new ReservationSlot(date, savedTimeSlot, savedTheme)
         );
         Reservation reserved1 = reservationService.saveReservation(
-                "브라운", date, savedTimeSlot.getId(), savedTheme.getId()
+                "브라운", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
 
         Reservation reserved2 = reservationService.saveReservation(
-                "네오", date, savedTimeSlot.getId(), savedTheme.getId()
+                "네오", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         Future<?> remove = executorService.submit(() ->
-                reservationService.removeReservation(reserved1.getId(), "브라운")
+                reservationService.removeReservation(reserved1.getId(), "브라운", REQUEST_TIME)
         );
 
         Future<?> save = executorService.submit(() ->
-                reservationService.saveReservation("대길", date, savedTimeSlot.getId(), savedTheme.getId())
+                reservationService.saveReservation("대길", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME)
         );
 
         remove.get();
@@ -146,11 +149,11 @@ public class ReservationConcurrencyTest {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         Future<?> first = executorService.submit(() ->
-                reservationService.saveReservation("브라운", date, savedTimeSlot.getId(), savedTheme.getId())
+                reservationService.saveReservation("브라운", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME)
         );
 
         Future<?> second = executorService.submit(() ->
-                reservationService.saveReservation("네오", date, savedTimeSlot.getId(), savedTheme.getId())
+                reservationService.saveReservation("네오", date, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME)
         );
 
         first.get();

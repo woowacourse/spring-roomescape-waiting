@@ -27,6 +27,8 @@ import roomescape.repository.FakeTimeSlotRepository;
 
 class ReservationServiceTest {
 
+    private static final LocalDateTime REQUEST_TIME = LocalDate.now().atStartOfDay();
+
     private ReservationService reservationService;
     private FakeReservationRepository reservationRepository;
     private FakeReservationSlotRepository reservationSlotRepository;
@@ -55,7 +57,7 @@ class ReservationServiceTest {
     void 예약_저장() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
-                savedTheme.getId());
+                savedTheme.getId(), REQUEST_TIME);
         assertThat(reservation.getTimeSlot().getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
@@ -63,10 +65,10 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 슬롯에 예약을 생성하면 대기로 저장된다.")
     void 중복_예약은_대기로_저장() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
-        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId());
+        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME);
 
         Reservation waiting = reservationService.saveReservation("네오", futureDate, savedTimeSlot.getId(),
-                savedTheme.getId());
+                savedTheme.getId(), REQUEST_TIME);
 
         assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
@@ -75,10 +77,10 @@ class ReservationServiceTest {
     @DisplayName("같은 사용자가 같은 슬롯에 중복으로 예약하거나 대기할 수 없다.")
     void 같은_사용자_같은_슬롯_중복_예외_발생() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
-        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId());
+        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME);
 
         assertThatThrownBy(
-                () -> reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()))
+                () -> reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 예약 또는 대기 중인 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
@@ -88,15 +90,15 @@ class ReservationServiceTest {
     void 예약_삭제() {
         LocalDate futureDate = LocalDate.now().plusDays(2);
         Reservation reservation = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
-                savedTheme.getId());
-        reservationService.removeReservation(reservation.getId(), "브라운");
+                savedTheme.getId(), REQUEST_TIME);
+        reservationService.removeReservation(reservation.getId(), "브라운", REQUEST_TIME);
         assertThat(reservationService.findAllReservations()).isEmpty();
     }
 
     @Test
     @DisplayName("존재하지 않는 예약을 삭제해도 예외가 발생하지 않는다.")
     void 존재하지_않는_예약_삭제() {
-        assertThatCode(() -> reservationService.removeReservation(999L, "브라운"))
+        assertThatCode(() -> reservationService.removeReservation(999L, "브라운", REQUEST_TIME))
                 .doesNotThrowAnyException();
     }
 
@@ -104,7 +106,7 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 목록을 조회하여 반환한다.")
     void 전체_예약_조회() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
-        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId());
+        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME);
         List<Reservation> reservations = reservationService.findAllReservations();
         assertThat(reservations).hasSize(1);
     }
@@ -114,7 +116,7 @@ class ReservationServiceTest {
     void 식별자로_예약_조회() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation savedReservation = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
-                savedTheme.getId());
+                savedTheme.getId(), REQUEST_TIME);
         Reservation foundReservation = reservationService.getReservationById(savedReservation.getId());
         assertThat(foundReservation.getName()).isEqualTo("브라운");
     }
@@ -125,7 +127,7 @@ class ReservationServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
 
         assertThatThrownBy(
-                () -> reservationService.saveReservation("브라운", pastDate, savedTimeSlot.getId(), savedTheme.getId()))
+                () -> reservationService.saveReservation("브라운", pastDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME))
                 .isInstanceOf(PastTimeException.class)
                 .hasMessage("지난 날짜/시간으로 예약하실 수 없습니다.");
     }
@@ -138,7 +140,7 @@ class ReservationServiceTest {
         TimeSlot pastTimeSlot = timeSlotRepository.save(new TimeSlot(pastTime));
 
         assertThatThrownBy(
-                () -> reservationService.saveReservation("브라운", today, pastTimeSlot.getId(), savedTheme.getId()))
+                () -> reservationService.saveReservation("브라운", today, pastTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME))
                 .isInstanceOf(PastTimeException.class)
                 .hasMessage("지난 날짜/시간으로 예약하실 수 없습니다.");
     }
@@ -151,7 +153,7 @@ class ReservationServiceTest {
                 createReservation("브라운", pastDate, pastDate.minusDays(1).atStartOfDay())
         );
 
-        assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운"))
+        assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운", REQUEST_TIME))
                 .isInstanceOf(PastTimeException.class)
                 .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
     }
@@ -165,7 +167,7 @@ class ReservationServiceTest {
         );
 
         assertThatThrownBy(() -> reservationService.updateReservation(
-                pastReservation.getId(), "브라운", LocalDate.now().plusDays(1), savedTimeSlot.getId()
+                pastReservation.getId(), "브라운", LocalDate.now().plusDays(1), savedTimeSlot.getId(), REQUEST_TIME
         )).isInstanceOf(PastTimeException.class)
                 .hasMessage("이미 지난 예약은 수정할 수 없습니다.");
     }
@@ -178,7 +180,7 @@ class ReservationServiceTest {
                 createReservation("브라운", futureDate, LocalDateTime.now())
         );
 
-        assertThatThrownBy(() -> reservationService.removeReservation(savedReservation.getId(), "네오"))
+        assertThatThrownBy(() -> reservationService.removeReservation(savedReservation.getId(), "네오", REQUEST_TIME))
                 .isInstanceOf(NotOwnerException.class)
                 .hasMessage("본인의 예약만 제어할 수 있습니다.");
     }
@@ -188,12 +190,12 @@ class ReservationServiceTest {
     void 중복_시간_예약_수정_예외_발생() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation target = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
-                savedTheme.getId());
+                savedTheme.getId(), REQUEST_TIME);
         TimeSlot otherTime = timeSlotRepository.save(new TimeSlot(LocalTime.of(13, 0)));
-        reservationService.saveReservation("네오", futureDate, otherTime.getId(), savedTheme.getId());
+        reservationService.saveReservation("네오", futureDate, otherTime.getId(), savedTheme.getId(), REQUEST_TIME);
 
         assertThatThrownBy(() -> reservationService.updateReservation(
-                target.getId(), "브라운", futureDate, otherTime.getId()
+                target.getId(), "브라운", futureDate, otherTime.getId(), REQUEST_TIME
         )).isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
@@ -203,9 +205,9 @@ class ReservationServiceTest {
     void 같은_날짜_시간_예약_수정_검증() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation target = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
-                savedTheme.getId());
+                savedTheme.getId(), REQUEST_TIME);
 
-        reservationService.updateReservation(target.getId(), "브라운", futureDate, savedTimeSlot.getId());
+        reservationService.updateReservation(target.getId(), "브라운", futureDate, savedTimeSlot.getId(), REQUEST_TIME);
 
         Reservation reservation = reservationService.getReservationById(target.getId());
         assertThat(reservation.getName()).isEqualTo("브라운");
@@ -218,13 +220,13 @@ class ReservationServiceTest {
     void 예약_취소시_첫번째_대기_승급() {
         LocalDate futureDate = LocalDate.now().plusDays(2);
         Reservation reservation = reservationService.saveReservation(
-                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
         Reservation firstWaiting = reservationService.saveReservation(
-                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
 
-        reservationService.removeReservation(reservation.getId(), "브라운");
+        reservationService.removeReservation(reservation.getId(), "브라운", REQUEST_TIME);
 
         Reservation promoted = reservationService.getReservationById(firstWaiting.getId());
         assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED);
@@ -235,16 +237,16 @@ class ReservationServiceTest {
     void 예약_취소_후_두번째_대기_순번_1번_반() {
         LocalDate futureDate = LocalDate.now().plusDays(2);
         Reservation reservation = reservationService.saveReservation(
-                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
         reservationService.saveReservation(
-                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
         Reservation secondWaiting = reservationService.saveReservation(
-                "대길", futureDate, savedTimeSlot.getId(), savedTheme.getId()
+                "대길", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
         );
 
-        reservationService.removeReservation(reservation.getId(), "브라운");
+        reservationService.removeReservation(reservation.getId(), "브라운", REQUEST_TIME);
 
         List<ReservationAndWaiting> result = reservationService.findReservationAndWaitingByName("대길");
 
