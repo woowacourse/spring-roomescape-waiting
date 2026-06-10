@@ -10,6 +10,7 @@ import roomescape.domain.ReservationSlotInfo;
 
 public interface ReservationSlotRepository {
     ReservationSlot findById(Long id);
+    ReservationSlot findByIdForUpdate(Long reservationSlotId);
     ReservationSlot findByReservationId(Long reservationId);
     List<ReservationSlotInfo> findAll();
     Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);

@@ -65,6 +65,12 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return new ReservationSlot(slot, reservations);
     }
 
+    public ReservationSlot findByIdForUpdate(Long id) {
+        ReservationSlotInfo slot = findSlotByIdForUpdate(id);
+        List<Reservation> reservations = findActiveReservationsBySlotId(id);
+        return new ReservationSlot(slot, reservations);
+    }
+
     @Override
     public ReservationSlot findByReservationId(Long reservationId) {
         Long reservationSlotId = findReservationSlotIdByReservationId(reservationId);
@@ -96,6 +102,25 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 INNER JOIN theme th
                     ON rs.theme_id = th.id
                 WHERE rs.id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, slotRowMapper, id);
+    }
+
+    private ReservationSlotInfo findSlotByIdForUpdate(Long id) {
+        String sql = """
+                SELECT rs.id,
+                       rs.date,
+                       t.id AS time_id,
+                       t.start_at AS time_value,
+                       th.id AS theme_id,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail
+                FROM reservation_slot rs
+                JOIN reservation_time t ON rs.time_id = t.id
+                JOIN theme th ON rs.theme_id = th.id
+                WHERE rs.id = ?
+                FOR UPDATE
                 """;
         return jdbcTemplate.queryForObject(sql, slotRowMapper, id);
     }

@@ -31,12 +31,11 @@ public class ReservationService {
     @Transactional
     public ReservationResponse save(LocalDateTime now, ReservationRequest request) {
         Long reservationSlotId = getOrCreateReservationSlotId(request);
-        ReservationSlot reservationSlot = reservationSlotRepository.findById(reservationSlotId);
 
+        ReservationSlot reservationSlot = reservationSlotRepository.findByIdForUpdate(reservationSlotId);
         Reservation newReservation = reservationSlot.reserve(request.name(), now);
-        newReservation = reservationSlotRepository.saveReservation(newReservation);
         int order = reservationSlot.calculateOrder(newReservation);
-
+        newReservation = reservationSlotRepository.saveReservation(newReservation);
         return ReservationResponse.from(newReservation, reservationSlot.getSlot(), order);
     }
 
