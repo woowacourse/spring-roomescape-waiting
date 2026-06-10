@@ -87,6 +87,16 @@ public class ReservationLineTest {
     }
 
     @Test
+    @DisplayName("확정 예약 없이 대기만 있으면 예외가 발생한다.")
+    void 확정_예약_없이_대기만_있을_경우_예외() {
+        Reservation waiting = createWaiting(1L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 0));
+
+        assertThatThrownBy(() -> new ReservationLine(createSlot(), List.of(waiting)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("확정 예약 없이 예약 대기만 존재할 수 없습니다.");
+    }
+
+    @Test
     @DisplayName("같은 슬롯에 이미 예약 또는 대기 중이면 추가할 수 없다.")
     void 같은_슬롯_중복_추가_예외() {
         Reservation reserved = createReserved(1L, "브라운", LocalDateTime.of(2026, 6, 3, 10, 0));
@@ -153,28 +163,6 @@ public class ReservationLineTest {
         assertThatThrownBy(() -> reservationLine.findWaitingIndex(otherSlot))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("같은 예약 슬롯의 예약만 처리할 수 있습니다.");
-    }
-
-    @Test
-    @DisplayName("대기자가 있으면 첫 대기자를 승격한다.")
-    void 첫_대기자_승격() {
-        Reservation waiting = createWaiting(1L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 0));
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(waiting));
-
-        Optional<Reservation> promoted = reservationLine.promoteFirstWaiting();
-
-        assertThat(promoted).isPresent();
-        assertThat(promoted.get().isReserved()).isTrue();
-    }
-
-    @Test
-    @DisplayName("대기자가 없으면 승격 대상이 없다.")
-    void 빈_대기열_승격_대상_없음() {
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of());
-
-        Optional<Reservation> promoted = reservationLine.promoteFirstWaiting();
-
-        assertThat(promoted).isEmpty();
     }
 
     @Test

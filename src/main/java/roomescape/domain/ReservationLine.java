@@ -15,9 +15,8 @@ public class ReservationLine {
     );
 
     private final ReservationSlot slot;
-    private final Reservation reservedReservation;
+    private final Optional<Reservation> reservedReservation;
     private final List<Reservation> waitings;
-
 
     public ReservationLine(ReservationSlot slot, List<Reservation> reservations) {
         validateSlot(slot);
@@ -47,27 +46,20 @@ public class ReservationLine {
         return waitings.isEmpty();
     }
 
-    public Optional<Reservation> promoteFirstWaiting() {
-        if (isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(waitings.getFirst().promote());
-    }
-
     public Optional<Reservation> cancel(Reservation target, LocalDateTime now) {
-        validateReservedReservation(target);
+        validateReservationInLine(target);
         validateCancelable(target, now);
 
         return findReservationToPromote(target);
     }
 
     public Optional<Reservation> findReservationToPromote(Reservation target) {
-        validateReservedReservation(target);
+        validateReservationInLine(target);
 
         if (target.isWaiting()) {
             return Optional.empty();
         }
-        return promoteFirstWaiting();
+        return findPromotedFirstWaiting();
     }
 
     private void validateDuplicated(String name) {
@@ -77,13 +69,13 @@ public class ReservationLine {
     }
 
     private ReservationStatus decideReservationStatus() {
-        if (reservedReservation != null) {
+        if (reservedReservation.isPresent()) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;
     }
 
-    private Reservation findReservedReservation(List<Reservation> reservations) {
+    private Optional<Reservation> findReservedReservation(List<Reservation> reservations) {
         List<Reservation> reservedReservations = reservations.stream()
                 .filter(Reservation::isReserved)
                 .toList();
@@ -92,9 +84,17 @@ public class ReservationLine {
             throw new IllegalArgumentException("하나의 예약 슬롯에는 확정 예약이 하나만 존재할 수 있습니다.");
         }
 
+        if (reservedReservations.isEmpty() && hasWaiting(reservations)) {
+            throw new IllegalArgumentException("확정 예약 없이 예약 대기만 존재할 수 없습니다.");
+        }
+
         return reservedReservations.stream()
-                .findFirst()
-                .orElse(null);
+                .findFirst();
+    }
+
+    private boolean hasWaiting(List<Reservation> reservations) {
+        return reservations.stream()
+                .anyMatch(Reservation::isWaiting);
     }
 
     private List<Reservation> findWaitings(List<Reservation> reservations) {
@@ -106,7 +106,9 @@ public class ReservationLine {
     }
 
     private boolean hasSameReservationOwner(String name) {
-        return reservedReservation != null && reservedReservation.isOwner(name);
+        return reservedReservation
+                .map(reservation -> reservation.isOwner(name))
+                .orElse(false);
     }
 
     private boolean hasSameWaitingOwner(String name) {
@@ -119,12 +121,21 @@ public class ReservationLine {
     }
 
     private boolean isReservedReservation(Reservation target) {
-        return reservedReservation != null && reservedReservation.isSameReservation(target);
+        return reservedReservation
+                .map(reservation -> reservation.isSameReservation(target))
+                .orElse(false);
     }
 
     private boolean isWaitingReservation(Reservation target) {
         return waitings.stream()
                 .anyMatch(waiting -> waiting.isSameReservation(target));
+    }
+
+    private Optional<Reservation> findPromotedFirstWaiting() {
+        if (isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(waitings.getFirst().promote());
     }
 
     private void validateCancelable(Reservation target, LocalDateTime now) {
@@ -158,7 +169,7 @@ public class ReservationLine {
         validateSameSlotTarget(target);
     }
 
-    private void validateReservedReservation(Reservation target) {
+    private void validateReservationInLine(Reservation target) {
         validateSameSlotTarget(target);
         if (!containsReservation(target)) {
             throw new IllegalArgumentException("예약을 찾을 수 없습니다.");
