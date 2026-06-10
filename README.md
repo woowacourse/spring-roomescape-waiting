@@ -8,7 +8,7 @@
     {
         "status": 400,
         "errorType": "BAD_REQUEST",
-        "message": "[ERROR] (~ 이유)"
+        "message": "(~ 이유)"
     }
     ```
 
@@ -18,7 +18,7 @@
     {
         "status": 400,
         "errorType": "BAD_REQUEST",
-        "message": "[ERROR] 요청 본문(JSON)의 형식이 올바르지 않거나 읽을 수 없습니다."
+        "message": "요청 본문(JSON)의 형식이 올바르지 않거나 읽을 수 없습니다."
     }
     ```
 
@@ -28,7 +28,7 @@
     {
         "status": 400,
         "errorType": "BAD_REQUEST",
-        "message": "[ERROR] 요청 파라미터 또는 경로 변수의 타입이 올바르지 않습니다."
+        "message": "요청 파라미터 또는 경로 변수의 타입이 올바르지 않습니다."
     }
     ```
 
@@ -38,7 +38,7 @@
     {
         "status": 400,
         "errorType": "BAD_REQUEST",
-        "message": "[ERROR] 이미 존재하는 데이터이거나 유효하지 않은 값이 포함되어 있습니다."
+        "message": "이미 존재하는 데이터이거나 유효하지 않은 값이 포함되어 있습니다."
     }
     ```
 
@@ -48,7 +48,7 @@
     {
         "status": 404,
         "errorType": "NOT_FOUND",
-        "message": "[ERROR] 잘못된 경로입니다."
+        "message": "잘못된 경로입니다."
     }
     ```
 
@@ -58,7 +58,7 @@
     {
         "status": 405,
         "errorType": "METHOD_NOT_ALLOWED",
-        "message": "[ERROR] 지원하지 않는 메서드입니다."
+        "message": "지원하지 않는 메서드입니다."
     }
     ```
 
@@ -68,7 +68,7 @@
     {
         "status": 500,
         "errorType": "INTERNAL_SERVER_ERROR",
-        "message": "[ERROR] 서버 내부에서 에러가 발생했습니다."
+        "message": "서버 내부에서 에러가 발생했습니다."
     }
     ```
 
@@ -107,7 +107,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 예약/대기에서 사용 중인 테마는 삭제할 수 없습니다."
+              "message": "예약/대기에서 사용 중인 테마는 삭제할 수 없습니다."
           }
           ```
 
@@ -170,7 +170,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 랭킹 조회는 오늘 날짜 이전까지만 가능합니다."
+              "message": "랭킹 조회는 오늘 날짜 이전까지만 가능합니다."
           }
           ```
 
@@ -179,7 +179,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 랭킹 조회 기간의 종료 날짜는 시작 날짜보다 빠를 수 없습니다."
+              "message": "랭킹 조회 기간의 종료 날짜는 시작 날짜보다 빠를 수 없습니다."
           }
           ```
 
@@ -188,7 +188,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 랭킹 조회 기간이 최대 기간(366일)을 초과했습니다."
+              "message": "랭킹 조회 기간이 최대 기간(366일)을 초과했습니다."
           }
           ```
 
@@ -254,7 +254,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 해당 테마가 존재하지 않습니다."
+              "message": "해당 테마가 존재하지 않습니다."
           }
           ```
 
@@ -263,7 +263,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 해당 예약 시간이 존재하지 않습니다."
+              "message": "해당 예약 시간이 존재하지 않습니다."
           }
           ```
 
@@ -272,7 +272,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 이미 해당 슬롯에 예약을 신청했습니다."
+              "message": "이미 해당 슬롯에 예약을 신청했습니다."
           }
           ```
 
@@ -281,7 +281,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 이미 해당 슬롯에 예약 대기를 신청했습니다."
+              "message": "이미 해당 슬롯에 예약 대기를 신청했습니다."
           }
           ```
 
@@ -290,7 +290,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 해당 슬롯에 대기 인원이 마감되었습니다."
+              "message": "해당 슬롯에 대기 인원이 마감되었습니다."
           }
           ```
 
@@ -299,7 +299,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 지나간 시간의 예약은 생성할 수 없습니다."
+              "message": "지나간 시간의 예약은 생성할 수 없습니다."
           }
           ```
 
@@ -418,7 +418,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 해당 예약이 존재하지 않습니다."
+              "message": "해당 예약이 존재하지 않습니다."
           }
           ```
 
@@ -427,7 +427,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 지나간 시간의 예약은 삭제할 수 없습니다."
+              "message": "지나간 시간의 예약은 삭제할 수 없습니다."
           }
           ```
 
@@ -442,7 +442,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 해당 대기가 존재하지 않습니다."
+              "message": "해당 대기가 존재하지 않습니다."
           }
           ```
 
@@ -451,7 +451,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 지나간 시간의 대기는 삭제할 수 없습니다."
+              "message": "지나간 시간의 대기는 삭제할 수 없습니다."
           }
           ```
 
@@ -480,7 +480,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 이미 중복된 예약 시간이 존재합니다."
+              "message": "이미 중복된 예약 시간이 존재합니다."
           }
           ```
 
@@ -550,7 +550,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 해당 테마가 존재하지 않습니다."
+              "message": "해당 테마가 존재하지 않습니다."
           }
           ```
 
@@ -559,7 +559,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 지나간 날짜의 예약 가능 시간은 조회할 수 없습니다."
+              "message": "지나간 날짜의 예약 가능 시간은 조회할 수 없습니다."
           }
           ```
 
@@ -574,7 +574,7 @@
           {
               "status": 400,
               "errorType": "BAD_REQUEST",
-              "message": "[ERROR] 예약/대기에서 사용 중인 예약 시간은 삭제할 수 없습니다."
+              "message": "예약/대기에서 사용 중인 예약 시간은 삭제할 수 없습니다."
           }
           ```
 
