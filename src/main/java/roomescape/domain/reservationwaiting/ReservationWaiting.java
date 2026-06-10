@@ -63,6 +63,10 @@ public class ReservationWaiting {
         return this.name.value().equals(ReservationName.from(name).value());
     }
 
+    public Reservation toReservation(final LocalDateTime requestedAt) {
+        return Reservation.createNew(name.value(), reservation.getSlot(), requestedAt);
+    }
+
     public LocalDateTime getRequestedAt() {
         return requestedAt;
     }

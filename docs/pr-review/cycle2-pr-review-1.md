@@ -49,13 +49,13 @@ PR: https://github.com/woowacourse/spring-roomescape-waiting/pull/511
 
 - [x] **8. 예약 취소 시 대기 승급 로직의 책임 위치를 검토한다.**
   - 받은 리뷰: 예약 취소 시 대기자가 승급되는 로직이 누구의 책임인지 정리하라. 다른 응용 계층이 등장했을 때 private 메서드가 복사되지 않도록 책임 위치를 고민하라.
-  - 판단 기준: 예약 취소와 대기 승급은 같은 슬롯의 상태를 바꾸는 하나의 작업 단위다. 단순히 private 메서드로 감추기보다, 여러 진입점에서 재사용될 수 있는 유스케이스로 분리하는 편이 낫다고 판단한다.
-  - 해결 내용: `ReservationCancellationService`를 추가해 "예약 취소 후 첫 대기 승급" 흐름을 별도 유스케이스로 분리했다. `ReservationService`는 삭제 대상 조회, 이름 검증, 과거 예약 검증처럼 요청 진입점에서 필요한 검증을 처리하고, 실제 취소/승급 작업은 `ReservationCancellationService.cancel()`에 위임하도록 정리했다.
+  - 판단 기준: 예약 취소와 대기 승급은 같은 슬롯의 상태를 바꾸는 하나의 작업 단위다. 다만 현재 요구사항 안에서는 별도 응용 서비스로 재사용되는 지점이 아직 없으므로, 서비스를 추가하는 것보다 `ReservationService`의 트랜잭션 흐름 안에서 읽히도록 두는 편이 단순하다고 판단한다. 대신 첫 대기 선택과 승급 예약 생성처럼 도메인 객체가 말할 수 있는 책임은 도메인으로 옮긴다.
+  - 해결 내용: `ReservationCancellationService`를 제거하고 예약 취소/승급 흐름을 `ReservationService`의 트랜잭션 메서드 안으로 되돌렸다. 첫 번째 대기 선택은 `ReservationWaitingLine.first()`가 담당하고, 대기자가 예약으로 승급될 때 생성되는 예약은 `ReservationWaiting.toReservation()`으로 만들도록 정리했다.
 
 - [x] **9. 리뷰 반영으로 구조가 더 복잡해지지 않았는지 점검한다.**
   - 받은 리뷰: private 메서드를 다른 객체로 옮기는 과정에서 구조가 더 복잡해지는 방향을 경계하라. Factory나 별도 Cancel Service가 정말 필요한 상황인지 검토하라.
-  - 판단 기준: 별도 객체는 역할이 분명할 때만 유지한다. `ReservationFactory`는 도메인 객체 생성과 예외 변환만 감싸고 있어 독립된 빈으로 둘 만큼의 책임이 부족하다고 판단한다. 반면 예약 취소와 대기 승급은 트랜잭션으로 묶이는 작업 단위이므로 별도 유스케이스 서비스로 남긴다.
-  - 해결 내용: `ReservationFactory`를 제거하고, 예약 생성/변경 시 필요한 도메인 객체 생성과 예외 변환은 해당 유스케이스를 처리하는 서비스 내부로 되돌렸다. `ReservationCancellationService`는 예약 삭제, 첫 대기 승급, 승인된 대기 삭제를 하나의 작업 단위로 묶는 책임이 있어 유지했다.
+  - 판단 기준: 별도 객체는 역할이 분명할 때만 유지한다. `ReservationFactory`는 도메인 객체 생성과 예외 변환만 감싸고 있어 독립된 빈으로 둘 만큼의 책임이 부족하다고 판단한다. `ReservationCancellationService` 역시 현재 단계에서는 실제 재사용 지점이 없고, 오히려 흐름을 따라가기 어렵게 만들 수 있다고 판단한다.
+  - 해결 내용: `ReservationFactory`와 `ReservationCancellationService`를 제거했다. 예약 생성/변경 시 필요한 예외 변환은 해당 유스케이스를 처리하는 `ReservationService` 내부에 남겼고, 대기 승급 예약 생성은 `ReservationWaiting.toReservation()`으로 옮겨 도메인 객체가 자신의 상태를 기반으로 예약을 만들 수 있도록 했다.
 
 - [x] **10. 예약 생성 흐름에 트랜잭션이 필요한지 전체적으로 확인한다.**
   - 받은 리뷰: 예약 생성 메서드에 트랜잭션이 불필요한지 전체적으로 확인하라.

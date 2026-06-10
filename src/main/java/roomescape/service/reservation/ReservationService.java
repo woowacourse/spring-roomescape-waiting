@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -17,6 +18,7 @@ import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.PersistenceConflictException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationslot.ReservationSlotRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
@@ -24,20 +26,20 @@ import roomescape.service.theme.ThemeService;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
-    private final ReservationCancellationService reservationCancellationService;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationSlotRepository reservationSlotRepository,
-            final ReservationCancellationService reservationCancellationService,
+            final ReservationWaitingRepository reservationWaitingRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationSlotRepository = reservationSlotRepository;
-        this.reservationCancellationService = reservationCancellationService;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
     }
@@ -75,7 +77,7 @@ public class ReservationService {
                         "삭제된 예약 데이터가 없습니다."
                 ));
 
-        reservationCancellationService.cancel(reservation, requestedAt);
+        cancel(reservation, requestedAt);
     }
 
     @Transactional
@@ -97,7 +99,7 @@ public class ReservationService {
         }
 
         validateCancelable(reservation, requestedAt);
-        reservationCancellationService.cancel(reservation, requestedAt);
+        cancel(reservation, requestedAt);
     }
 
     public Reservation updateByIdAndName(
@@ -150,6 +152,46 @@ public class ReservationService {
                         ErrorCode.RESOURCE_NOT_FOUND,
                         "예약 가능한 슬롯이 없습니다."
                 ));
+    }
+
+    private void cancel(final Reservation reservation, final LocalDateTime requestedAt) {
+        reservationWaitingRepository.findLineBySlot(reservation.getSlot())
+                .first()
+                .ifPresentOrElse(
+                        firstWaiting -> promoteFirstWaiting(reservation, firstWaiting, requestedAt),
+                        () -> deleteReservation(reservation)
+                );
+    }
+
+    private void promoteFirstWaiting(
+            final Reservation reservation,
+            final ReservationWaiting firstWaiting,
+            final LocalDateTime requestedAt
+    ) {
+        deleteReservation(reservation);
+        savePromotedReservation(firstWaiting, requestedAt);
+        reservationWaitingRepository.delete(firstWaiting);
+    }
+
+    private void savePromotedReservation(final ReservationWaiting firstWaiting, final LocalDateTime requestedAt) {
+        try {
+            reservationRepository.save(firstWaiting.toReservation(requestedAt));
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
+        } catch (IllegalArgumentException exception) {
+            throw toInvalidInputException(exception);
+        }
+    }
+
+    private void deleteReservation(final Reservation reservation) {
+        try {
+            reservationRepository.delete(reservation);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_HAS_WAITING,
+                    "예약 대기가 존재하는 예약은 바로 삭제할 수 없습니다."
+            );
+        }
     }
 
     private Reservation createReservation(
