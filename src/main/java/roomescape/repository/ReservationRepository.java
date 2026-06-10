@@ -14,6 +14,25 @@ import roomescape.domain.Theme;
 
 @Repository
 public class ReservationRepository {
+
+    private static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (rs, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime());
+        Theme theme = new Theme(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("description"),
+                rs.getString("url"));
+        return new Reservation(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme,
+                rs.getTimestamp("requested_at").toLocalDateTime());
+    };
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
@@ -32,23 +51,7 @@ public class ReservationRepository {
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
                     WHERE r.id = ?
-                """, (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getTime("start_at").toLocalTime());
-            Theme theme = new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("description"),
-                    rs.getString("url"));
-            return new Reservation(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getDate("date").toLocalDate(),
-                    time,
-                    theme,
-                    rs.getTimestamp("requested_at").toLocalDateTime());
-        }, id);
+                """, RESERVATION_ROW_MAPPER, id);
     }
 
     public List<Reservation> findByName(String name) {
@@ -84,23 +87,7 @@ public class ReservationRepository {
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id;
-                """, (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getTime("start_at").toLocalTime());
-            Theme theme = new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("description"),
-                    rs.getString("url"));
-            return new Reservation(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getDate("date").toLocalDate(),
-                    time,
-                    theme,
-                    rs.getTimestamp("requested_at").toLocalDateTime());
-        });
+                """, RESERVATION_ROW_MAPPER);
     }
 
     public boolean existsBy(LocalDate date, Theme theme, ReservationTime time) {
@@ -141,21 +128,5 @@ public class ReservationRepository {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
 
-    private static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (rs, rowNum) -> {
-        ReservationTime time = new ReservationTime(
-                rs.getLong("time_id"),
-                rs.getTime("start_at").toLocalTime());
-        Theme theme = new Theme(
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("description"),
-                rs.getString("url"));
-        return new Reservation(
-                rs.getLong("id"),
-                rs.getString("name"),
-                rs.getDate("date").toLocalDate(),
-                time,
-                theme,
-                rs.getTimestamp("requested_at").toLocalDateTime());
-    };
+
 }
