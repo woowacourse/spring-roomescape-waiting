@@ -262,31 +262,18 @@
                 return;
             }
 
-            if (selectedTimeIsBooked) {
-                fetch('/api/waiting', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({themeId: Number(themeId), name, date, timeId: selectedTimeId})
+            fetch('/api/reservations', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({themeId: Number(themeId), name, date, timeId: selectedTimeId})
+            })
+                .then(handleResponse)
+                .then(reservation => {
+                    const waiting = reservation.status === 'WAITING';
+                    showMessage(waiting ? '대기 신청이 완료되었습니다.' : '예약이 완료되었습니다.', true);
+                    setTimeout(() => window.location.href = '/', 1500);
                 })
-                    .then(handleResponse)
-                    .then(() => {
-                        showMessage('대기 신청이 완료되었습니다.', true);
-                        setTimeout(() => window.location.href = '/', 1500);
-                    })
-                    .catch(error => showMessage(toErrorMessage(error, '대기 신청에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
-            } else {
-                fetch('/api/reservations', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({themeId: Number(themeId), name, date, timeId: selectedTimeId})
-                })
-                    .then(handleResponse)
-                    .then(() => {
-                        showMessage('예약이 완료되었습니다.', true);
-                        setTimeout(() => window.location.href = '/', 1500);
-                    })
-                    .catch(error => showMessage(toErrorMessage(error, '예약에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
-            }
+                .catch(error => showMessage(toErrorMessage(error, '요청에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
         });
 
         function loadBookedTimes() {
