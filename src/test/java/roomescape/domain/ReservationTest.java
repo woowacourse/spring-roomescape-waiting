@@ -43,6 +43,20 @@ class ReservationTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @DisplayName("예약자 이름은 값 객체 기준으로 정규화된다")
+    @Test
+    void normalizeName() {
+        // given
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+
+        // when
+        Reservation reservation = Reservation.createNew(" 쿠다 ", slot, LocalDateTime.now());
+
+        // then
+        assertThat(reservation.getName()).isEqualTo("쿠다");
+        assertThat(reservation.hasName("쿠다")).isTrue();
+    }
+
     @DisplayName("예약 슬롯 null 예외")
     @Test
     void validateSlot_ThrowsException() {

@@ -92,7 +92,8 @@ PR: https://github.com/woowacourse/spring-roomescape-waiting/pull/511
 
 ### 기타 도메인 검증
 
-- [ ] **15. `Reservation`에서 검증용으로만 쓰는 값 객체를 필드로 가질 수 있는지 검토한다.**
+- [x] **15. `Reservation`에서 검증용으로만 쓰는 값 객체를 필드로 가질 수 있는지 검토한다.**
   - 받은 리뷰: 이름 값 객체를 검증용으로만 사용하는지 확인하라. 도메인 필드로 가질 수는 없는지 검토하라.
   - 판단 기준: 값 객체가 단순 검증 도구가 아니라 도메인 의미를 가진다면 필드로 보관하는 편이 일관적이다. 다만 응답/저장 계층에서 문자열이 반복적으로 필요해지는 비용도 고려해야 한다.
-  - 해결 방향: `Reservation.name`을 `String`으로 둘지 `ReservationName`으로 둘지 결정한다. `ReservationWaiting`은 `ReservationName`을 필드로 가지므로 두 객체의 이름 처리 기준을 맞춘다.
+  - 해결 내용: `ReservationWaiting`과 동일하게 `Reservation`도 `ReservationName`을 필드로 가지도록 변경했다. 응답 DTO와 Repository에서는 문자열 값이 필요하므로 `getName()`은 기존처럼 `String`을 반환하되, 도메인 내부의 상태는 값 객체로 보관하도록 정리했다.
+  - 리뷰 답변: 말씀해주신 것처럼 `ReservationName`을 생성 시 검증에만 사용하고 다시 `String`으로 풀어 저장하고 있어 값 객체를 검증 도구처럼 사용하고 있었습니다. 예약자 이름은 예약과 대기 모두에서 같은 도메인 의미를 가지므로, `Reservation`도 `ReservationName`을 필드로 보관하도록 수정했습니다. 다만 응답과 저장 계층에서는 문자열 값이 필요해 `getName()`은 기존처럼 문자열을 반환하도록 유지했습니다.

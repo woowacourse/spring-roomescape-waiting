@@ -11,7 +11,7 @@ public class Reservation {
     public static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
 
     private final Long id;
-    private final String name;
+    private final ReservationName name;
     private final ReservationSlot slot;
     private final LocalDateTime createdAt;
 
@@ -21,10 +21,9 @@ public class Reservation {
             final ReservationSlot slot,
             final LocalDateTime createdAt
     ) {
-        ReservationName reservationName = ReservationName.from(name);
         validate(createdAt);
         this.id = id;
-        this.name = reservationName.value();
+        this.name = ReservationName.from(name);
         this.slot = slot;
         this.createdAt = createdAt;
     }
@@ -50,7 +49,7 @@ public class Reservation {
 
     public Reservation withId(final Long id) {
         validateId(id);
-        return new Reservation(id, this.name, this.slot, this.createdAt);
+        return new Reservation(id, this.name.value(), this.slot, this.createdAt);
     }
 
     public Reservation withSlot(
@@ -58,11 +57,11 @@ public class Reservation {
             final LocalDateTime standardDateTime
     ) {
         validateReservable(slot, standardDateTime);
-        return new Reservation(this.id, this.name, slot, this.createdAt);
+        return new Reservation(this.id, this.name.value(), slot, this.createdAt);
     }
 
     public boolean hasName(final String name) {
-        return this.name.equals(ReservationName.from(name).value());
+        return this.name.value().equals(ReservationName.from(name).value());
     }
 
     public boolean isPast(final LocalDateTime standardDateTime) {
@@ -112,7 +111,7 @@ public class Reservation {
     }
 
     public String getName() {
-        return this.name;
+        return this.name.value();
     }
 
     public LocalDate getDate() {
