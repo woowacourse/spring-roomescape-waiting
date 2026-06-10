@@ -128,7 +128,10 @@ public class ReservationService {
                 lockedSlot,
                 reservationRepository.findBySlotId(lockedSlot.getId())
         );
-        Optional<Reservation> promotedReservation = reservationLine.cancel(reservation, requestTime);
+        Optional<Reservation> promotedReservation = reservationLine.findPromotedReservationAfterCancel(
+                reservation,
+                requestTime
+        );
 
         deleteReservation(reservation);
         promotedReservation.ifPresent(reservationRepository::update);

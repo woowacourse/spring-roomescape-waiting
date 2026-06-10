@@ -181,13 +181,16 @@ public class ReservationLineTest {
     }
 
     @Test
-    @DisplayName("확정 예약을 취소하면 첫 번째 대기가 승급 대상이 된다.")
-    void 확정_예약_취소시_첫번째_대기_승급() {
+    @DisplayName("확정 예약 취소 시 첫 번째 대기가 승급 대상이 된다.")
+    void 확정_예약_취소시_승급_대상_계산() {
         Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
         Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
 
-        Optional<Reservation> promoted = reservationLine.cancel(reserved, DATE.minusDays(1).atTime(9, 0));
+        Optional<Reservation> promoted = reservationLine.findPromotedReservationAfterCancel(
+                reserved,
+                DATE.minusDays(1).atTime(9, 0)
+        );
 
         assertThat(promoted).isPresent();
         assertThat(promoted.get().getId()).isEqualTo(waiting.getId());
@@ -195,13 +198,16 @@ public class ReservationLineTest {
     }
 
     @Test
-    @DisplayName("대기 예약을 취소하면 승급 대상이 없다.")
-    void 대기_예약_취소시_승급_대상_없음() {
+    @DisplayName("대기 예약 취소 시 승급 대상이 없다.")
+    void 대기_예약_취소시_승급_대상_계산() {
         Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
         Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
 
-        Optional<Reservation> promoted = reservationLine.cancel(waiting, DATE.minusDays(1).atTime(9, 0));
+        Optional<Reservation> promoted = reservationLine.findPromotedReservationAfterCancel(
+                waiting,
+                DATE.minusDays(1).atTime(9, 0)
+        );
 
         assertThat(promoted).isEmpty();
     }
@@ -219,7 +225,10 @@ public class ReservationLineTest {
         );
         ReservationLine reservationLine = new ReservationLine(slot, List.of(reserved));
 
-        assertThatThrownBy(() -> reservationLine.cancel(reserved, LocalDateTime.of(2026, 6, 9, 10, 0)))
+        assertThatThrownBy(() -> reservationLine.findPromotedReservationAfterCancel(
+                reserved,
+                LocalDateTime.of(2026, 6, 9, 10, 0)
+        ))
                 .isInstanceOf(PastTimeException.class)
                 .hasMessage("예약 시작 24시간 전까지만 예약을 삭제할 수 있습니다.");
     }

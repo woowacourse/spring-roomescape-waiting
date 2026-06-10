@@ -34,16 +34,20 @@ public class ReservationLine {
                 .map(waitings::indexOf);
     }
 
-    public Optional<Reservation> cancel(Reservation target, LocalDateTime now) {
+    public Optional<Reservation> findPromotedReservationAfterCancel(Reservation target, LocalDateTime now) {
         validateReservationInLine(target);
         target.validateCancelable(now);
 
-        return findReservationToPromote(target);
+        return findPromotedReservation(target);
     }
 
     public Optional<Reservation> findReservationToPromote(Reservation target) {
         validateReservationInLine(target);
 
+        return findPromotedReservation(target);
+    }
+
+    private Optional<Reservation> findPromotedReservation(Reservation target) {
         if (target.isWaiting()) {
             return Optional.empty();
         }
