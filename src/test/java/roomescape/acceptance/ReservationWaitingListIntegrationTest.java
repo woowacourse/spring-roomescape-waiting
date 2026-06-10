@@ -84,7 +84,7 @@ class ReservationWaitingListIntegrationTest {
 
             String errorMessage = "예약 대기 승인에 실패했습니다.";
             doThrow(new RuntimeException(errorMessage))
-                    .when(waitingListService).handleReservationCanceled(any(ReservationAvailableEvent.class));
+                    .when(waitingListService).promoteWaitingListToReservation(any(ReservationAvailableEvent.class));
 
             // when
             reservationService.delete(RESERVATION_ID);
@@ -148,7 +148,7 @@ class ReservationWaitingListIntegrationTest {
 
             String errorMessage = "예약 대기 승인에 실패했습니다.";
             doThrow(new RuntimeException(errorMessage))
-                    .when(waitingListService).handleReservationCanceled(any(ReservationAvailableEvent.class));
+                    .when(waitingListService).promoteWaitingListToReservation(any(ReservationAvailableEvent.class));
 
             // when
             reservationService.modify(modifyCommand);

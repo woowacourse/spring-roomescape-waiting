@@ -84,7 +84,7 @@ public class WaitingListService {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleReservationCanceled(final ReservationAvailableEvent event) {
+    public void promoteWaitingListToReservation(final ReservationAvailableEvent event) {
         try {
             final Optional<WaitingList> nextWaiting = waitingListRepository.findFirstBySlot(
                     event.date(), event.timeId(), event.themeId());

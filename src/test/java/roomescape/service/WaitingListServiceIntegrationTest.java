@@ -62,7 +62,7 @@ class WaitingListServiceIntegrationTest {
         ReservationAvailableEvent event = new ReservationAvailableEvent(RESERVATION_DATE, RESERVATION_TIME_ID, THEME_ID);
 
         // when
-        waitingListService.handleReservationCanceled(event);
+        waitingListService.promoteWaitingListToReservation(event);
 
         // then
         Integer countForReservation = jdbcTemplate.queryForObject("SELECT count(*) from reservation", Integer.class);
@@ -81,7 +81,7 @@ class WaitingListServiceIntegrationTest {
                 .when(reservationRepository).save(any(Reservation.class));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.handleReservationCanceled(event))
+        assertThatThrownBy(() -> waitingListService.promoteWaitingListToReservation(event))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(errorMessage);
 
@@ -99,7 +99,7 @@ class WaitingListServiceIntegrationTest {
                 .when(waitingListRepository).deleteById(1L);
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.handleReservationCanceled(event))
+        assertThatThrownBy(() -> waitingListService.promoteWaitingListToReservation(event))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(errorMessage);
 
@@ -122,7 +122,7 @@ class WaitingListServiceIntegrationTest {
                 .when(reservationRepository).save(any(Reservation.class));
 
         // when & then
-        assertThatThrownBy(() -> waitingListService.handleReservationCanceled(event))
+        assertThatThrownBy(() -> waitingListService.promoteWaitingListToReservation(event))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(errorMessage)
                 .satisfies(e -> {

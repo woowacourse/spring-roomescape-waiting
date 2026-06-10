@@ -382,7 +382,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.deleteById(1L)).willReturn(true);
 
         // when
-        waitingListService.handleReservationCanceled(event);
+        waitingListService.promoteWaitingListToReservation(event);
 
         // then
         verify(reservationRepository).save(any(Reservation.class));
@@ -397,7 +397,7 @@ class WaitingListServiceTest {
         given(waitingListRepository.findFirstBySlot(date, 1L, 1L)).willReturn(Optional.empty());
 
         // when
-        waitingListService.handleReservationCanceled(event);
+        waitingListService.promoteWaitingListToReservation(event);
 
         // then
         verify(reservationRepository, never()).save(any(Reservation.class));
