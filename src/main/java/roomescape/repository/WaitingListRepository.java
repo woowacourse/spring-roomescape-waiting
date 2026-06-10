@@ -102,16 +102,19 @@ public class WaitingListRepository {
 
     public int findWaitingOrderByDateAndTimeAndTheme(final WaitingList waitingList) {
         final String sql = """
-                SELECT COUNT(*)
-                FROM waiting_list
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND created_at <= ? AND id <= ?
+                SELECT ranking
+                FROM (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at ASC, id ASC) as ranking
+                    FROM waiting_list
+                    WHERE date = ? AND time_id = ? AND theme_id = ?
+                ) as ranked_list
+                WHERE id = ?
                 """;
 
         Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
                 waitingList.getReservationDate().date(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
-                waitingList.getCreatedAt(),
                 waitingList.getId()
         );
 
