@@ -73,9 +73,8 @@ public class ReservationWaitingService {
     }
 
     public void delete(Long id, String name) {
-        ReservationWaiting reservationWaiting = reservationWaitingQueryDao.findReservationWaitingById(id)
-                .orElseThrow(() -> new WaitingNotFoundException(id))
-                .reservationWaiting();
+        ReservationWaiting reservationWaiting = reservationWaitingQueryDao.findById(id)
+                .orElseThrow(() -> new WaitingNotFoundException(id));
 
         reservationWaiting.validateOwner(name);
         reservationWaiting.validatePastDateTime();

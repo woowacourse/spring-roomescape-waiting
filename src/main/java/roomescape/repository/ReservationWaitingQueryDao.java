@@ -49,6 +49,24 @@ public class ReservationWaitingQueryDao {
                 ) as ranked ON w.id = ranked.id
                 """;
 
+    private static final String SELECT_RESERVATION_WAITING_BY_ID_SQL = """
+                select
+                    w.id,
+                    w.name,
+                    w.date,
+                    w.created_at,
+                    t.id       as time_id,
+                    t.start_at as time_start_at,
+                    th.id       as theme_id,
+                    th.name        as theme_name,
+                    th.description as theme_description,
+                    th.url       as theme_url
+                from waiting w
+                join reservation_time t  ON w.time_id  = t.id
+                join theme th            ON w.theme_id = th.id
+                where w.id = ?
+    """;
+
     private final RowMapper<ReservationWaitingSequence> reservationWaitingRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
@@ -78,6 +96,33 @@ public class ReservationWaitingQueryDao {
         return new ReservationWaitingSequence(reservationWaiting, resultSet.getLong("sequence"));
     };
 
+    private final RowMapper<ReservationWaiting> reservationWaitingByIdRowMapper = (resultSet, rowNum) -> {
+        ReservationTime reservationTime = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getObject("time_start_at", LocalTime.class)
+        );
+
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("theme_description"),
+                resultSet.getString("theme_url")
+        );
+
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class),
+                reservationTime,
+                theme
+        );
+
+        return new ReservationWaiting(
+                resultSet.getLong("id"),
+                resultSet.getString("name"),
+                slot,
+                resultSet.getObject("created_at", LocalDateTime.class)
+        );
+    };
+
     public boolean isExistByNameAndSlot(String name, ReservationSlot slot) {
         String sql = """
             SELECT EXISTS (
@@ -95,6 +140,12 @@ public class ReservationWaitingQueryDao {
     public Optional<ReservationWaitingSequence> findReservationWaitingById(long id) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.id = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, id)
+                .stream()
+                .findFirst();
+    }
+
+    public Optional<ReservationWaiting> findById(long id) {
+        return jdbcTemplate.query(SELECT_RESERVATION_WAITING_BY_ID_SQL, reservationWaitingByIdRowMapper, id)
                 .stream()
                 .findFirst();
     }
