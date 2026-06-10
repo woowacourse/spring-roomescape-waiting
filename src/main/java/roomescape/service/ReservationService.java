@@ -220,7 +220,10 @@ public class ReservationService {
 
         List<Reservation> sameSlotReservations = reservationsBySlotId.getOrDefault(waiting.getSlot().getId(), List.of());
         ReservationLine reservationLine = new ReservationLine(waiting.getSlot(), sameSlotReservations);
-        return new WaitingWithNumber(waiting, reservationLine.findWaitingIndex(waiting));
+
+        int waitingIndex = reservationLine.findWaitingIndex(waiting)
+                .orElseThrow(() -> new IllegalArgumentException("예약 대기 순번을 계산할 수 없습니다."));
+        return new WaitingWithNumber(waiting, waitingIndex);
     }
 
     private TimeSlot getTimeSlot(long id) {

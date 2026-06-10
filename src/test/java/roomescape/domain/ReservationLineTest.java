@@ -51,8 +51,8 @@ public class ReservationLineTest {
         Reservation second = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, second, first));
 
-        assertThat(reservationLine.findWaitingIndex(first)).isZero();
-        assertThat(reservationLine.findWaitingIndex(second)).isEqualTo(1);
+        assertThat(reservationLine.findWaitingIndex(first)).contains(0);
+        assertThat(reservationLine.findWaitingIndex(second)).contains(1);
     }
 
     @Test
@@ -117,8 +117,19 @@ public class ReservationLineTest {
         Reservation second = createWaiting(2L, "순번2", sameCreatedAt);
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, second, first));
 
-        assertThat(reservationLine.findWaitingIndex(first)).isZero();
-        assertThat(reservationLine.findWaitingIndex(second)).isEqualTo(1);
+        assertThat(reservationLine.findWaitingIndex(first)).contains(0);
+        assertThat(reservationLine.findWaitingIndex(second)).contains(1);
+    }
+
+    @Test
+    @DisplayName("대기 목록에 없는 예약의 위치를 조회하면 빈 값을 반환한다.")
+    void 없는_예약_대기_위치_조회시_빈_값_반환() {
+        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
+        Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
+        Reservation otherWaiting = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
+        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
+
+        assertThat(reservationLine.findWaitingIndex(otherWaiting)).isEmpty();
     }
 
     @Test

@@ -26,14 +26,12 @@ public class ReservationLine {
         return new Reservation(name, slot, now, decideReservationStatus());
     }
 
-    public int findWaitingIndex(Reservation target) {
+    public Optional<Integer> findWaitingIndex(Reservation target) {
         validateWaitingIndexTarget(target);
-        for (int index = 0; index < waitings.size(); index++) {
-            if (waitings.get(index).isSameReservation(target)) {
-                return index;
-            }
-        }
-        throw new IllegalArgumentException("예약 대기를 찾을 수 없습니다.");
+        return waitings.stream()
+                .filter(waiting -> waiting.isSameReservation(target))
+                .findFirst()
+                .map(waitings::indexOf);
     }
 
     public boolean isEmpty() {
