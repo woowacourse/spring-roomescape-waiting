@@ -28,10 +28,6 @@ public record ReservationOrderProjection(Reservation reservation, Long order) {
         return reservation.getTheme();
     }
 
-    public ReservationStatus getStatus() {
-        return reservation.getStatus();
-    }
-
     public Long getOrder() {
         return order;
     }

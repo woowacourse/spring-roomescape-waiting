@@ -178,13 +178,15 @@
         try {
             const list = await fetchJson("/reservations");
             if (!list || !list.length) {
-                reservationsBody.innerHTML = '<tr><td colspan="5">예약이 없습니다.</td></tr>';
+                reservationsBody.innerHTML = '<tr><td colspan="6">예약이 없습니다.</td></tr>';
                 return;
             }
             list.forEach((r) => {
                 const tr = document.createElement("tr");
                 const timeVal = r.timeResponse?.startAt;
-                const cells = [r.id, r.name, r.date, formatTime(timeVal), r.themeResponse?.name || "—"];
+                // order 0 = 예약 확정, 1 이상 = 대기 N번
+                const statusText = (r.order ?? 0) > 0 ? `대기 ${r.order}번` : "예약 확정";
+                const cells = [r.id, r.name, r.date, formatTime(timeVal), r.themeResponse?.name || "—", statusText];
                 cells.forEach(text => {
                     const td = document.createElement("td");
                     td.textContent = text;

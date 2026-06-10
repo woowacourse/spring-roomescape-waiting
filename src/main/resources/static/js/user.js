@@ -464,7 +464,7 @@
         }
 
         myReservations.forEach((r) => {
-            const isWaiting = r.status === "WAITING";
+            const isWaiting = (r.order ?? 0) > 0;
             const themeName = r.themeResponse?.name ?? "—";
             const timeVal = r.timeResponse?.startAt ?? null;
             const timeText = timeVal ? String(timeVal).slice(0, 5) : "—";
@@ -561,7 +561,7 @@
     });
 
     async function onCancel(r) {
-        const isWaiting = r.status === "WAITING";
+        const isWaiting = (r.order ?? 0) > 0;
         const confirmMsg = isWaiting
             ? "대기 신청을 취소하시겠습니까?"
             : "예약을 취소하시겠습니까?";
