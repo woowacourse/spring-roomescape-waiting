@@ -1,33 +1,39 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.NotFoundException;
-import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.SlotRepository;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
+    private final Clock clock;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final SlotRepository slotRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+    public ReservationTimeService(
+            Clock clock,
+            ReservationTimeRepository reservationTimeRepository,
+            SlotRepository slotRepository
+    ) {
+        this.clock = clock;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.slotRepository = slotRepository;
     }
 
     @Transactional
     public ReservationTime create(ReservationTimeCreateRequest request) {
-        ReservationTime reservationTime = ReservationTime.of(request.getStartAt());
+        ReservationTime reservationTime = ReservationTime.create(request.getStartAt());
         return reservationTimeRepository.save(reservationTime);
     }
 
@@ -35,9 +41,11 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
-    public List<ReservationTime> findAvailable(AvailableTimeFindRequest request, LocalDate now) {
+    public List<ReservationTime> findAvailable(AvailableTimeFindRequest request) {
+        LocalDate now = LocalDate.now(clock);
+
         if (now.isAfter(request.getDate())) {
-            throw new UnprocessableException("기준 날짜는 과거일 수 없습니다. 오늘 이후 날짜를 입력해 주세요");
+            throw new RoomEscapeException(DomainErrorCode.PAST_DATE, "지나간 날짜는 조회할 수 없습니다: " + request.getDate());
         }
 
         return reservationTimeRepository.findByDateAndTheme(request.getDate(), request.getThemeId());
@@ -46,11 +54,11 @@ public class ReservationTimeService {
     @Transactional
     public void delete(long reservationTimeId) {
         if (!reservationTimeRepository.existsById(reservationTimeId)) {
-            throw new NotFoundException("존재하지 않는 시간입니다. 입력을 확인해 주세요.");
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "해당 예약 시간을 찾을 수 없습니다: " + reservationTimeId);
         }
 
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
-            throw new ConflictException("시간을 사용하는 예약이 존재합니다. 관련 예약을 지우고 요청해 주세요.");
+        if (slotRepository.existsByTimeId(reservationTimeId)) {
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, "해당 예약 시간은 사용 중이라 삭제할 수 없습니다: " + reservationTimeId);
         }
 
         reservationTimeRepository.delete(reservationTimeId);

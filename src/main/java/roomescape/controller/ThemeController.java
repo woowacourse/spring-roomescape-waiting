@@ -1,23 +1,26 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.util.List;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.controller.dto.request.ThemeCreateRequest;
-import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.controller.dto.response.ThemeResponses;
 import roomescape.domain.theme.Theme;
 import roomescape.service.ThemeService;
+
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 public class ThemeController {
@@ -29,36 +32,43 @@ public class ThemeController {
     }
 
     @PostMapping("/admin/themes")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ThemeResponse create(@Valid @RequestBody ThemeCreateRequest request) {
+    public ResponseEntity<ThemeResponse> create(
+            @Valid @RequestBody ThemeCreateRequest request
+    ) {
         Theme theme = themeService.create(request);
-        return ThemeResponse.toDto(theme);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(theme.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(ThemeResponse.toDto(theme));
     }
 
     @GetMapping("/themes/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ThemeResponse find(@PathVariable Long id) {
+    public ResponseEntity<ThemeResponse> find(@PathVariable long id) {
         Theme theme = themeService.find(id);
-        return ThemeResponse.toDto(theme);
+        return ResponseEntity.ok(ThemeResponse.toDto(theme));
     }
 
     @GetMapping("/themes/famous")
-    @ResponseStatus(HttpStatus.OK)
-    public ThemeResponses findFamous(@Valid @ModelAttribute ThemeFamousFindRequest request) {
-        List<Theme> themes = themeService.findFamous(request, LocalDate.now());
-        return ThemeResponses.toDto(themes);
+    public ResponseEntity<ThemeResponses> findFamous(
+            @RequestParam(defaultValue = "10") @Min(1) @Max(15) int limit,
+            @RequestParam(defaultValue = "7") @Min(1) @Max(10) int days,
+            @RequestParam(required = false) LocalDate date
+    ) {
+        List<Theme> themes = themeService.findFamous(limit, days, date);
+        return ResponseEntity.ok(ThemeResponses.toDto(themes));
     }
 
     @GetMapping("/themes")
-    @ResponseStatus(HttpStatus.OK)
-    public ThemeResponses findAll() {
+    public ResponseEntity<ThemeResponses> findAll() {
         List<Theme> themes = themeService.findAll();
-        return ThemeResponses.toDto(themes);
+        return ResponseEntity.ok(ThemeResponses.toDto(themes));
     }
 
     @DeleteMapping({"/admin/themes/{id}"})
-    @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable long id) {
+    public ResponseEntity<Void> delete(@PathVariable long id) {
         themeService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

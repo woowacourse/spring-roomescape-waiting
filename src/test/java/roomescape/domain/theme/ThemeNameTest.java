@@ -2,7 +2,7 @@ package roomescape.domain.theme;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import roomescape.common.exception.RoomEscapeException;
+import roomescape.domain.RoomEscapeException;
 
 public class ThemeNameTest {
     private static final String UNDER_SIZE_NAME = "";
@@ -10,7 +10,7 @@ public class ThemeNameTest {
 
     @Test
     void NULL이_입력되면_예외가_발생한다() {
-        Assertions.assertThatThrownBy(() -> new ThemeName(null)).isInstanceOf(NullPointerException.class);
+        Assertions.assertThatThrownBy(() -> new ThemeName(null)).isInstanceOf(RoomEscapeException.class);
     }
 
     @Test

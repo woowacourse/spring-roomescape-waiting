@@ -1,18 +1,18 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.NotFoundException;
 import roomescape.controller.dto.request.ThemeCreateRequest;
-import roomescape.controller.dto.request.ThemeFamousFindRequest;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
+import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.theme.ThumbnailUrl;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,53 +21,47 @@ public class ThemeService {
     private static final long DEFAULT_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final SlotRepository slotRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(
+            ThemeRepository themeRepository,
+            SlotRepository slotRepository
+    ) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+        this.slotRepository = slotRepository;
     }
 
     @Transactional
     public Theme create(ThemeCreateRequest request) {
-        Theme theme = Theme.create(new ThemeName(request.getName()), request.getDescription(),
-                new ThumbnailUrl(request.getThumbnailUrl()));
+        Theme theme = Theme.create(
+                new ThemeName(request.getName()),
+                request.getDescription(),
+                new ThumbnailUrl(request.getThumbnailUrl())
+        );
+
         return themeRepository.save(theme);
     }
 
     public Theme find(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요."));
+        return themeRepository.getById(themeId);
     }
 
     public List<Theme> findAll() {
         return themeRepository.findAll();
     }
 
-    public List<Theme> findFamous(ThemeFamousFindRequest request, LocalDate now) {
-        Long days = request.getDays();
-        LocalDate date = request.getDate();
-        Long limit = request.getLimit();
-
-        if (days == null) {
-            days = DEFAULT_DAYS;
-        }
-        if (limit == null) {
-            limit = DEFAULT_LIMIT;
-        }
-        if (date == null) {
-            date = now;
-        }
+    public List<Theme> findFamous(int limit, int days, LocalDate date) {
         return themeRepository.findFamous(days, date, limit);
     }
 
     @Transactional
     public void delete(long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요.");
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "해당 테마를 찾을 수 없습니다: " + themeId);
         }
 
-        if (reservationRepository.existsByThemeId(themeId)) {
-            throw new ConflictException("테마를 사용하는 예약이 존재합니다. 관련 예약을 지우고 요청해 주세요");
+        if (slotRepository.existsByThemeId(themeId)) {
+            throw new RoomEscapeException(DomainErrorCode.RESOURCE_IN_USE, "해당 테마는 사용 중이라 삭제할 수 없습니다: " + themeId);
         }
 
         themeRepository.deleteById(themeId);

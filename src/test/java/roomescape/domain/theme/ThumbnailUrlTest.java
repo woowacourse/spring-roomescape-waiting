@@ -2,7 +2,7 @@ package roomescape.domain.theme;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import roomescape.common.exception.RoomEscapeException;
+import roomescape.domain.RoomEscapeException;
 
 public class ThumbnailUrlTest {
     @Test
@@ -12,7 +12,7 @@ public class ThumbnailUrlTest {
 
     @Test
     void NULL이_입력된_경우_예외가_발생한다() {
-        Assertions.assertThatThrownBy(() -> new ThumbnailUrl(null)).isInstanceOf(NullPointerException.class);
+        Assertions.assertThatThrownBy(() -> new ThumbnailUrl(null)).isInstanceOf(RoomEscapeException.class);
     }
 
     @Test

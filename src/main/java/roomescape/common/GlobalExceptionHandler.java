@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.common.exception.ExceptionType;
-import roomescape.common.exception.RoomEscapeException;
+import roomescape.domain.RoomEscapeException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RoomEscapeException.class)
     public ProblemDetail roomEscapeExceptionHandle(RoomEscapeException e) {
         log.info("도메인 관련 오류가 발생했습니다.", e);
-        return ProblemDetail.forStatusAndDetail(ExceptionType.resolveStatus(e), e.getMessage());
+        return ProblemDetail.forStatusAndDetail(ExceptionType.resolveStatus(e.code()), e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

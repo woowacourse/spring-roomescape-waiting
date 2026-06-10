@@ -1,104 +1,93 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import roomescape.domain.DomainErrorCode;
+import roomescape.domain.RoomEscapeException;
 
-import roomescape.common.exception.UnprocessableException;
-import roomescape.domain.theme.Theme;
+import java.time.LocalDateTime;
 
 public class Reservation {
     private final Long id;
-    private final ReservationName reservationName;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationName name;
     private final Status status;
-    private final Integer rank;
+    private final Slot slot;
+    private final Rank rank;
 
-    private Reservation(Long id,
-                        ReservationName reservationName,
-                        ReservationDate date, ReservationTime time,
-                        Theme theme,
-                        Status status, Integer rank) {
+    public Reservation(Long id, ReservationName name, Status status, Slot slot) {
+        this(id, name, status, slot, null);
+    }
+
+    public Reservation(Long id, ReservationName name, Status status, Slot slot, Rank rank) {
         this.id = id;
-        this.reservationName = Objects.requireNonNull(reservationName);
-        this.date = Objects.requireNonNull(date);
-        this.time = Objects.requireNonNull(time);
-        this.theme = Objects.requireNonNull(theme);
-        this.status = Objects.requireNonNull(status);
+        this.name = name;
+        this.status = status;
+        this.slot = slot;
         this.rank = rank;
     }
 
-    public static Reservation load(Long id,
-                                   ReservationName reservationName,
-                                   ReservationDate date, ReservationTime time,
-                                   Theme theme, Status status, int rank) {
-        return new Reservation(id, reservationName, date, time, theme, status, rank);
+    public static Reservation load(Long id, String name, String status, Slot slot) {
+        return new Reservation(id, new ReservationName(name), Status.from(status), slot);
     }
 
-    public static Reservation create(
-            ReservationName reservationName,
-            ReservationDate date, ReservationTime time,
-            Theme theme,
-            LocalDateTime now,
-            Status status
-    ) {
-        Reservation reservation = new Reservation(null, reservationName, date, time, theme, status, null);
-        reservation.ensureNotPast(now);
-        return reservation;
+    public static Reservation create(String name, Slot slot) {
+        return new Reservation(null, new ReservationName(name), Status.WAITING, slot);
     }
 
-    private void ensureNotPast(LocalDateTime now) {
-        LocalDateTime requestDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
-
-        if (requestDateTime.isBefore(now)) {
-            throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
-        }
+    public Reservation withId(Long id) {
+        return new Reservation(id, name, status, slot, rank);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return LocalDateTime.of(date.getDate(), time.getStartAt()).isBefore(now);
+    public Reservation withStatus(Status status) {
+        return new Reservation(id, name, status, slot, rank);
     }
 
-    public boolean isSameName(String name) {
-        return reservationName.isSame(name);
+    public Reservation withRank(Rank rank) {
+        return new Reservation(id, name, status, slot, rank);
     }
 
     public boolean isApproved() {
         return status == Status.APPROVED;
     }
 
-
-    public boolean isSlotChanged(Reservation updated) {
-        return !time.equals(updated.getTime()) || !theme.equals(updated.getTheme()) || !date.equals(updated.getDate());
+    public boolean isWaiting() {
+        return status == Status.WAITING;
     }
 
-    public long getId() {
+    public boolean isSameName(Reservation other) {
+        return name.isSame(other.name);
+    }
+
+    public void validateCancellable(LocalDateTime now) {
+        slot.validateNotPast(now);
+    }
+
+    public void validateOwner(String ownerName) {
+        if (!name.isSame(new ReservationName(ownerName))) {
+            throw new RoomEscapeException(DomainErrorCode.FORBIDDEN, "본인의 예약만 취소할 수 있습니다.");
+        }
+    }
+
+    public Long getId() {
         return id;
     }
 
     public ReservationName getName() {
-        return reservationName;
-    }
-
-    public ReservationDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
+        return name;
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public Integer getRank() {
+    public Rank getRank() {
         return rank;
+    }
+
+    public Slot getSlot() {
+        return slot;
+    }
+
+    public Long getSlotId() {
+        return slot.getId();
     }
 
     @Override

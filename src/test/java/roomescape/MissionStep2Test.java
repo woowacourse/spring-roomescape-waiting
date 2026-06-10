@@ -1,25 +1,22 @@
 package roomescape;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationResponses;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -48,9 +45,8 @@ public class MissionStep2Test {
 
     @Test
     void DB_조회_API_전환() {
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운",
-                "2023-08-05",
-                1, 1);
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)", "2023-08-05", 1, 1);
+        jdbcTemplate.update("INSERT INTO reservation (slot_id, name, status) VALUES (?, ?, ?)", 1, "브라운", "APPROVED");
 
         ReservationResponses reservations = RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -60,7 +56,7 @@ public class MissionStep2Test {
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
-        assertSoftly(softly ->{
+        assertSoftly(softly -> {
             softly.assertThat(reservations.getReservations()).isNotNull();
             softly.assertThat(reservations.getReservations().size()).isEqualTo(count);
         });

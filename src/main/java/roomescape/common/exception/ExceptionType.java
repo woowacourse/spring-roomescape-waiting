@@ -1,39 +1,36 @@
 package roomescape.common.exception;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
+import roomescape.domain.DomainErrorCode;
 
 public enum ExceptionType {
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, BadRequestException.class),
-    NOT_FOUND(HttpStatus.NOT_FOUND, NotFoundException.class),
-    CONFLICT(HttpStatus.CONFLICT, ConflictException.class),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, UnauthorizedException.class),
-    UNPROCESSABLE(HttpStatus.UNPROCESSABLE_ENTITY, UnprocessableException.class);
-
-    private static final Map<Class<? extends RoomEscapeException>, HttpStatus> STATUS_MAP =
-            Arrays.stream(values())
-                    .collect(Collectors.toMap(ExceptionType::getExceptionClass, ExceptionType::getStatus));
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, DomainErrorCode.RESOURCE_NOT_FOUND),
+    ALREADY_EXISTS(HttpStatus.CONFLICT, DomainErrorCode.ALREADY_EXISTS),
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, DomainErrorCode.INVALID_INPUT),
+    PAST_DATE(HttpStatus.UNPROCESSABLE_ENTITY, DomainErrorCode.PAST_DATE),
+    FORBIDDEN(HttpStatus.UNAUTHORIZED, DomainErrorCode.FORBIDDEN),
+    RESOURCE_IN_USE(HttpStatus.CONFLICT, DomainErrorCode.RESOURCE_IN_USE);
 
     private final HttpStatus status;
-    private final Class<? extends RoomEscapeException> exception;
+    private final DomainErrorCode domainErrorCode;
 
-    ExceptionType(HttpStatus status, Class<? extends RoomEscapeException> exception) {
+    ExceptionType(HttpStatus status, DomainErrorCode domainErrorCode) {
         this.status = status;
-        this.exception = exception;
+        this.domainErrorCode = domainErrorCode;
     }
 
-    public static HttpStatus resolveStatus(RoomEscapeException e) {
-        return STATUS_MAP.getOrDefault(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public static HttpStatus resolveStatus(DomainErrorCode code) {
+        return switch (code) {
+            case RESOURCE_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case INVALID_INPUT -> HttpStatus.BAD_REQUEST;
+            case PAST_DATE -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case RESOURCE_IN_USE -> HttpStatus.CONFLICT;
+        };
     }
 
     public HttpStatus getStatus() {
         return status;
     }
-
-    public Class<? extends RoomEscapeException> getExceptionClass() {
-        return exception;
-    }
-
 }

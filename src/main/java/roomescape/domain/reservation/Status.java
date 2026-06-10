@@ -10,6 +10,14 @@ public enum Status {
         this.koreanName = koreanName;
     }
 
+    public static Status from(String value) {
+        try {
+            return Status.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("알 수 없는 status 값: " + value, e);
+        }
+    }
+
     public String getKoreanName() {
         return koreanName;
     }

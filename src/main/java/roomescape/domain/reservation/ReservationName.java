@@ -1,34 +1,33 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.BadRequestException;
-
 import java.util.Objects;
 
+import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.DomainPreconditions.require;
+import static roomescape.domain.DomainPreconditions.requireNonBlank;
+
 public class ReservationName {
-    private static final int MIN_NAME_LENGTH = 1;
     private static final int MAX_NAME_LENGTH = 20;
 
     private final String value;
 
     public ReservationName(String value) {
-        Objects.requireNonNull(value);
+        requireNonBlank(value, INVALID_INPUT, "예약자 이름은 비어있을 수 없습니다.");
         String striped = value.strip();
-        validateLength(striped);
+        require(isValidLength(striped), INVALID_INPUT, "이름 길이는 1자 ~ 20자 사이여야 합니다.");
         this.value = striped;
     }
 
-    public void validateLength(String value) {
-        if (value.length() < MIN_NAME_LENGTH || value.length() > MAX_NAME_LENGTH) {
-            throw new BadRequestException("이름 길이는 1자 ~ 20자 사이여야 합니다.");
-        }
+    private boolean isValidLength(String value) {
+        return value.length() <= MAX_NAME_LENGTH;
     }
 
     public String getValue() {
         return value;
     }
 
-    public boolean isSame(String other) {
-        return value.equals(other);
+    public boolean isSame(ReservationName other) {
+        return value.equals(other.value);
     }
 
     @Override

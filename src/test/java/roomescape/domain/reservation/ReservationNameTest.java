@@ -1,12 +1,12 @@
 package roomescape.domain.reservation;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import roomescape.common.exception.RoomEscapeException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.domain.RoomEscapeException;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 public class ReservationNameTest {
     private static final String UNDER_SIZE_NAME = "";
@@ -27,7 +27,7 @@ public class ReservationNameTest {
     @Test
     void null이_입력되면_예외가_발생한다() {
         String name = null;
-        Assertions.assertThatThrownBy(() -> new ReservationName(name)).isInstanceOf(NullPointerException.class);
+        Assertions.assertThatThrownBy(() -> new ReservationName(name)).isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -35,8 +35,8 @@ public class ReservationNameTest {
         String source = "zeze";
         ReservationName zeze = new ReservationName(source);
         assertSoftly(softly -> {
-            softly.assertThat(zeze.isSame(source)).isTrue();
-            softly.assertThat(zeze.isSame("diff")).isFalse();
+            softly.assertThat(zeze.isSame(zeze)).isTrue();
+            softly.assertThat(zeze.isSame(new ReservationName("diff"))).isFalse();
         });
     }
 }
