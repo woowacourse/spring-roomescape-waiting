@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.domain.ReservationWaiting;
 import roomescape.dto.command.CreateReservationWaitingCommand;
@@ -25,6 +26,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -233,6 +235,68 @@ class ReservationWaitingServiceTest {
         assertThat(responses)
                 .extracting(ReservationWaitingResponse::order)
                 .containsExactlyInAnyOrder(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    }
+
+    @Test
+    void 같은_사용자가_같은_슬롯에_동시에_대기를_신청하면_하나만_성공한다() throws InterruptedException {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 20);
+
+        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
+
+        int threadCount = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+        List<Throwable> unexpectedExceptions = Collections.synchronizedList(new ArrayList<>());
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    readyLatch.countDown();
+                    startLatch.await();
+
+                    CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
+                            "맥스",
+                            date,
+                            time.getId(),
+                            theme.getId()
+                    );
+
+                    reservationWaitingService.addReservationWaiting(
+                            command,
+                            LocalDateTime.of(2026, 6, 19, 10, 0)
+                    );
+
+                    successCount.incrementAndGet();
+                } catch (RoomEscapeException exception) {
+                    if (exception.getErrorCode() == ReservationWaitingErrorCode.DUPLICATE) {
+                        duplicateCount.incrementAndGet();
+                    } else {
+                        unexpectedExceptions.add(exception);
+                    }
+                } catch (Throwable throwable) {
+                    unexpectedExceptions.add(throwable);
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        startLatch.countDown();
+        assertThat(doneLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        executorService.shutdown();
+
+        assertThat(unexpectedExceptions).isEmpty();
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(duplicateCount.get()).isEqualTo(threadCount - 1);
+        assertThat(reservationWaitingDao.select()).hasSize(1);
     }
 
     private ReservationTime saveTime(int hour, int minute) {
