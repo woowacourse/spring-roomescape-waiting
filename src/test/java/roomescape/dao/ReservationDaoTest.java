@@ -144,39 +144,6 @@ class ReservationDaoTest {
     }
 
     @Test
-    void 날짜_시간_테마가_모두_같은_예약이_존재하면_true를_반환한다() {
-        // given
-        ReservationTime time = saveTime(10, 0);
-        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        LocalDate date = LocalDate.of(2026, 5, 5);
-        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
-
-        // when
-        boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(
-                new ReservationSlot(date, time, theme)
-        );
-
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void 날짜_시간_테마가_모두_같은_예약이_없으면_false를_반환한다() {
-        // given
-        ReservationTime time = saveTime(10, 0);
-        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        LocalDate date = LocalDate.of(2026, 5, 5);
-
-        // when
-        boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(
-                new ReservationSlot(date, time, theme)
-        );
-
-        // then
-        assertThat(result).isFalse();
-    }
-
-    @Test
     void 예약을_수정한다() {
         // given
         ReservationTime time1 = saveTime(10, 0);

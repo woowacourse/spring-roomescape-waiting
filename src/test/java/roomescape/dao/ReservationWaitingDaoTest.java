@@ -65,40 +65,6 @@ class ReservationWaitingDaoTest {
     }
 
     @Test
-    void 특정_날짜_테마_시간_사용자_이름에_예약_대기가_존재하면_true를_반환한다() {
-        // given
-        ReservationTime savedTime = saveTime(10, 0);
-        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        reservationWaitingDao.insert(reservationWaiting);
-
-        // when
-        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
-                reservationWaiting.getName(),
-                new ReservationSlot(reservationWaiting.getReservationDate(), savedTime, savedTheme)
-        );
-
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void 특정_날짜_테마_시간_사용자_이름에_예약_대기가_존재하지_않으면_false를_반환한다() {
-        ReservationTime notSavedTime = new ReservationTime(999L, LocalTime.of(10, 0));
-        Theme notSavedTheme = new Theme(999L, "존재하지 않는 테마", "설명", "https://thumb.com");
-
-        // when
-        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
-                "맥스",
-                new ReservationSlot(LocalDate.of(2026, 6, 10), notSavedTime, notSavedTheme)
-        );
-
-        // then
-        assertThat(result).isFalse();
-    }
-
-    @Test
     void 전체_대기_목록을_조회한다() {
         // given
         ReservationTime savedTime = saveTime(10, 0);

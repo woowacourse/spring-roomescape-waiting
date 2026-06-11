@@ -105,22 +105,6 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
-    public boolean existsByDateAndTimeIdAndThemeId(ReservationSlot slot) {
-        String sql = """
-                SELECT COUNT(*) > 0
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId());
-    }
-
-    public boolean existsDuplicateExcluding(ReservationSlot slot, long reservationId) {
-        String sql = """
-                SELECT COUNT(*) > 0
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), reservationId);
-    }
-
     public boolean existsBySlotIdExcluding(long slotId, long reservationId){
         String sql = """
                 SELECT COUNT(*) > 0
@@ -138,16 +122,6 @@ public class ReservationDao {
                 WHERE slot_id = ? 
                 """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, slotId);
-    }
-
-    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, ReservationSlot slot) {
-        String sql = """
-                SELECT COUNT(*) > 0 
-                FROM reservation 
-                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
     }
 
     public boolean existsByNameAndSlotId(String name, long slotId) {

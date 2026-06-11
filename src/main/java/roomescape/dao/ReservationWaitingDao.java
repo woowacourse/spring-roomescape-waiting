@@ -75,18 +75,6 @@ public class ReservationWaitingDao {
         );
     }
 
-    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, ReservationSlot slot) {
-        String sql = """
-                SELECT COUNT(*) > 0
-                FROM reservation_waiting
-                WHERE name = ?
-                AND reservation_date = ?
-                AND time_id = ? 
-                AND theme_id = ?
-                """;
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
-    }
-
     public boolean existsByNameAndSlotId(String name, long slotId) {
         String sql = """
             SELECT COUNT(*) > 0
