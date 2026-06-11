@@ -260,3 +260,40 @@ Repository 테스트, API 테스트, 서비스 테스트 fixture는 현재 `rese
 테스트 전용 Fake나 Mock으로 Repository 중간 호출에서 예외를 던지게 만들면 실패 주입은 가능하다. 하지만 Fake는 실제 DB 트랜잭션 롤백을 검증하지 못하고, Repository Mock은 이번 테스트 전략에서 피하기로 한 방향이다. Spring 테스트에서 Spy나 테스트 전용 Bean으로 실패를 주입하는 방법도 있지만, 현재 미션 범위에서는 테스트 장치의 복잡도가 검증 이득보다 커질 수 있다고 판단했다.
 
 그래서 이번 단계에서는 정상 전환 통합 테스트로 결과 상태를 검증하고, 트랜잭션 경계는 코드에 명시하는 수준으로 둔다. 추후 외부 부수효과, 실패 가능한 협력자, 또는 더 복잡한 상태 전이가 추가되어 자연스러운 실패 지점이 생기면 롤백 테스트를 보강한다.
+
+## N+1 쿼리 문제를 알게 된 지점
+
+이번 리뷰에서 `findAvailableTimes()`가 쿼리를 몇 번 실행하는지 확인해보라는 코멘트를 받았다.
+
+처음에는 단순히 슬롯 목록을 가져온 뒤 각 슬롯마다 예약이 있는지 확인하는 흐름이라고 생각했다. 하지만 이 구조가 N+1 쿼리 문제가 될 수 있다는 것을 이번에 알게 되었다.
+
+N+1 쿼리는 먼저 목록을 조회하는 쿼리 1번을 실행한 뒤, 그 목록의 각 항목마다 추가 쿼리 N번이 반복되는 상황을 말한다.
+
+현재 코드에서는 다음 흐름이 그 예시였다.
+
+```java
+reservationSlotRepository.findByDateAndTheme(date, themeService.getById(themeId))
+        .stream()
+        .filter(slot -> reservationRepository.findBySlot(slot).isEmpty())
+        .filter(slot -> !slot.isPast(requestedAt))
+        .map(ReservationSlot::getTime)
+        .toList();
+```
+
+여기서 `findByDateAndTheme()`가 해당 날짜와 테마의 슬롯 목록을 한 번 조회한다. 이후 각 슬롯마다 `reservationRepository.findBySlot(slot)`을 호출한다.
+
+따라서 슬롯이 10개라면 슬롯 목록 조회 1번 + 예약 여부 확인 10번으로 총 11번의 쿼리가 발생할 수 있다. 슬롯이 많아질수록 쿼리 수도 같이 늘어난다.
+
+이번 문제의 핵심은 예약 가능 시간 조회의 목적이 "특정 날짜와 테마에서 아직 예약되지 않은 슬롯을 찾는 것"이라는 점이다.
+
+처음에는 Repository에서 예약이 없는 슬롯을 한 번에 조회하는 방법을 생각했다. 하지만 다시 보면 "예약이 없는 슬롯"은 곧 "예약 가능한 슬롯"이라는 유스케이스 판단에 가깝다. 이 판단을 Repository에 넣으면 Repository가 단순 컬렉션 조회를 넘어 예약 가능 정책을 알게 된다.
+
+지금까지 Repository를 컬렉션처럼 쓰려고 했던 방향을 고려하면, Repository에는 필요한 컬렉션을 조회하는 책임만 두고 예약 가능 여부 판단은 서비스에서 하는 편이 더 자연스럽다.
+
+해결 방향은 다음과 같다.
+
+- `ReservationSlotRepository`는 특정 날짜와 테마의 슬롯 목록을 한 번 조회한다.
+- `ReservationRepository`는 같은 날짜와 테마의 예약 목록을 한 번 조회한다.
+- 서비스는 예약 목록에서 예약된 `slotId`를 `Set`으로 만든 뒤, 슬롯 목록에서 해당 id를 제외한다.
+
+이렇게 하면 쿼리는 슬롯 목록 조회 1번 + 예약 목록 조회 1번으로 고정된다. 동시에 "예약 가능한 슬롯"이라는 판단은 서비스에 남고, Repository는 조건에 맞는 컬렉션을 반환하는 역할을 유지할 수 있다.
