@@ -54,7 +54,7 @@ class ReservationTest {
         Slot slot = RoomEscapeFixture.slot().date(RoomEscapeFixture.PAST_DATE).build();
         Reservation past = RoomEscapeFixture.reservation().slot(slot).build();
 
-        Assertions.assertThatThrownBy(() -> past.isPastFrom(LocalDateTime.now()))
+        Assertions.assertThatThrownBy(() -> past.ensureNotPast(LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -63,6 +63,6 @@ class ReservationTest {
         Slot slot = RoomEscapeFixture.slot().date(RoomEscapeFixture.FUTURE_DATE).build();
         Reservation future = RoomEscapeFixture.reservation().slot(slot).build();
 
-        Assertions.assertThatCode(() -> future.isPastFrom(LocalDateTime.now()));
+        Assertions.assertThatCode(() -> future.ensureNotPast(LocalDateTime.now()));
     }
 }

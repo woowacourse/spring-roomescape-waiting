@@ -58,7 +58,7 @@ public class ReservationService {
     @Transactional
     public RankedReservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation originReservation = findReservationById(id);
-        originReservation.isPastFrom(now);
+        originReservation.ensureNotPast(now);
 
         Slot updateSlot = slotService.findOrCreate(request.getDate(), request.getTimeId(), request.getThemeId());
         slotService.lockSlot(updateSlot);
@@ -83,7 +83,7 @@ public class ReservationService {
     @Transactional
     public void cancel(long reservationId, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
-        reservation.isPastFrom(now);
+        reservation.ensureNotPast(now);
 
         reservationRepository.deleteById(reservationId);
 

@@ -30,11 +30,11 @@ public class Reservation {
     public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
         Reservation reservation = new Reservation(TRANSIENT, reservationName, slot, status, now);
-        reservation.isPastFrom(now);
+        reservation.ensureNotPast(now);
         return reservation;
     }
 
-    public void isPastFrom(LocalDateTime now) {
+    public void ensureNotPast(LocalDateTime now) {
         if (slot.isBefore(now)) {
             throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
         }
