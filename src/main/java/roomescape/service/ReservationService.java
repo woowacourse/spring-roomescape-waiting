@@ -43,11 +43,12 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);
         ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
+        ReservationSlot lockSlot = lockSlot(savedSlot);
 
-        savedSlot.validateNotPast(now);
-        validateUniqueReservation(savedSlot);
+        lockSlot.validateNotPast(now);
+        validateUniqueReservation(lockSlot);
 
-        Reservation reservation = Reservation.createWithoutId(command.name(), savedSlot);
+        Reservation reservation = Reservation.createWithoutId(command.name(), lockSlot);
 
         try {
             Reservation savedReservation = reservationDao.insert(reservation);
@@ -94,12 +95,13 @@ public class ReservationService {
         Theme theme = reservation.getTheme();
         ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
         ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
+        ReservationSlot lockedSlot = lockSlot(savedSlot);
 
-        savedSlot.validateNotPast(now);
-        validateUniqueExcludingSelf(savedSlot, reservationId);
+        lockedSlot.validateNotPast(now);
+        validateUniqueExcludingSelf(lockedSlot, reservationId);
 
         try {
-            Reservation updateReservation = reservationDao.update(reservationId, savedSlot);
+            Reservation updateReservation = reservationDao.update(reservationId, lockedSlot);
             return ReservationResponse.from(updateReservation);
         } catch (DuplicateKeyException exception) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
@@ -117,10 +119,12 @@ public class ReservationService {
     @Transactional
     public void cancel(Long reservationId, LocalDateTime now) {
         Reservation reservation = getReservation(reservationId);
+        ReservationSlot lockedSlot = lockSlot(reservation.getSlot());
+
         reservation.validateCancelable(now);
 
         ReservationWaitingQueue waitings = new ReservationWaitingQueue(
-                reservationWaitingDao.selectBySlot(reservation.getSlot())
+                reservationWaitingDao.selectBySlot(lockedSlot)
         );
 
         delete(reservationId);
@@ -163,5 +167,10 @@ public class ReservationService {
 
         reservationDao.insert(promotedReservation);
         reservationWaitingDao.delete(waiting.getId());
+    }
+
+    private ReservationSlot lockSlot(ReservationSlot slot){
+        return reservationSlotDao.selectByIdForUpdate(slot.getId())
+                .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
     }
 }

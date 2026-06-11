@@ -34,11 +34,12 @@ public class ReservationWaitingService {
     public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationSlot slot = createReservationSlot(command);
         ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
+        ReservationSlot lockedSlot = lockSlot(savedSlot);
 
-        validateWaitingCreatable(command.name(), savedSlot, now);
+        validateWaitingCreatable(command.name(), lockedSlot, now);
 
-        ReservationWaiting savedWaiting = saveReservationWaiting(command.name(), now, savedSlot);
-        int order = calculateWaitingOrder(savedSlot, savedWaiting);
+        ReservationWaiting savedWaiting = saveReservationWaiting(command.name(), now, lockedSlot);
+        int order = calculateWaitingOrder(lockedSlot, savedWaiting);
 
         return ReservationWaitingResponse.from(savedWaiting, order);
     }
@@ -112,5 +113,10 @@ public class ReservationWaitingService {
     private int calculateWaitingOrder(ReservationSlot slot, ReservationWaiting savedWaiting) {
         ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
         return waitings.orderOf(savedWaiting);
+    }
+
+    private ReservationSlot lockSlot(ReservationSlot slot) {
+        return reservationSlotDao.selectByIdForUpdate(slot.getId())
+                .orElseThrow(() -> new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND));
     }
 }

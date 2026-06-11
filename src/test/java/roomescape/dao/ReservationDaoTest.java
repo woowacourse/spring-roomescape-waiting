@@ -160,7 +160,9 @@ class ReservationDaoTest {
         // then
         assertAll(
                 () -> assertThat(updated.getDate()).isEqualTo(LocalDate.of(2026, 5, 6)),
-                () -> assertThat(updated.getTime().getId()).isEqualTo(time2.getId())
+                () -> assertThat(updated.getTime().getId()).isEqualTo(time2.getId()),
+                () -> assertThat(updated.getTheme().getId()).isEqualTo(theme.getId()),
+                () -> assertThat(updated.getSlot().getId()).isNotNull()
         );
     }
 

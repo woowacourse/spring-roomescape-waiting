@@ -105,7 +105,7 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
-    public boolean existsBySlotIdExcluding(long slotId, long reservationId){
+    public boolean existsBySlotIdExcluding(long slotId, long reservationId) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation 
@@ -126,18 +126,18 @@ public class ReservationDao {
 
     public boolean existsByNameAndSlotId(String name, long slotId) {
         String sql = """
-            SELECT COUNT(*) > 0
-            FROM reservation
-            WHERE name = ? AND slot_id = ?
-            """;
+                SELECT COUNT(*) > 0
+                FROM reservation
+                WHERE name = ? AND slot_id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, slotId);
     }
 
     public Reservation update(Long reservationId, ReservationSlot slot) {
         ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
 
-        String sql = "UPDATE reservation SET date = ?, time_id = ?, slot_id = ?  WHERE id = ?";
-        jdbcTemplate.update(sql, savedSlot.getDate(), savedSlot.getTimeId(), savedSlot.getId(), reservationId);
+        String sql = "UPDATE reservation SET date = ?, time_id = ?, theme_id = ?, slot_id = ?  WHERE id = ?";
+        jdbcTemplate.update(sql, savedSlot.getDate(), savedSlot.getTimeId(), savedSlot.getThemeId(), savedSlot.getId(), reservationId);
         return selectById(reservationId).get();
     }
 
@@ -148,20 +148,20 @@ public class ReservationDao {
 
     private String baseSelectSql() {
         return """
-            SELECT r.id,
-                   r.name as reservation_name,
-                   rs.id as slot_id,
-                   rs.date as reservation_date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   t.id as theme_id,
-                   t.name as theme_name,
-                   t.description,
-                   t.thumbnail
-            FROM reservation AS r
-            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
-            INNER JOIN reservation_time AS rt ON rs.time_id = rt.id
-            INNER JOIN theme AS t ON rs.theme_id = t.id
-            """;
+                SELECT r.id,
+                       r.name as reservation_name,
+                       rs.id as slot_id,
+                       rs.date as reservation_date,
+                       rt.id as time_id,
+                       rt.start_at,
+                       t.id as theme_id,
+                       t.name as theme_name,
+                       t.description,
+                       t.thumbnail
+                FROM reservation AS r
+                INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+                INNER JOIN reservation_time AS rt ON rs.time_id = rt.id
+                INNER JOIN theme AS t ON rs.theme_id = t.id
+                """;
     }
 }
