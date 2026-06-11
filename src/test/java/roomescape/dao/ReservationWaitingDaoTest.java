@@ -103,7 +103,7 @@ class ReservationWaitingDaoTest {
                 ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), date, otherTime, theme)
         );
 
-        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        ReservationSlot slot = waiting1.getSlot();
 
         // when
         List<ReservationWaiting> result = reservationWaitingDao.selectBySlot(slot);
