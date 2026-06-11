@@ -30,7 +30,7 @@ public class ReservationDao {
 
         ReservationSlot slot = new ReservationSlot(
                 resultSet.getLong("slot_id"),
-                resultSet.getDate("date").toLocalDate(),
+                resultSet.getDate("reservation_date").toLocalDate(),
                 reservationTime,
                 theme
         );
@@ -91,7 +91,7 @@ public class ReservationDao {
     }
 
     public List<Reservation> selectByThemeIdAndDate(long themeId, LocalDate date) {
-        String sql = baseSelectSql() + " WHERE r.theme_id = ? AND r.date = ?";
+        String sql = baseSelectSql() + " WHERE rs.theme_id = ? AND rs.date = ?";
         return jdbcTemplate.query(sql, ROW_MAPPER, themeId, date);
     }
 
@@ -148,19 +148,20 @@ public class ReservationDao {
 
     private String baseSelectSql() {
         return """
-                SELECT r.id,
-                       r.name as reservation_name,
-                       r.date,
-                       r.slot_id,
-                       rt.id as time_id,
-                       rt.start_at,
-                       t.id as theme_id,
-                       t.name as theme_name,
-                       t.description,
-                       t.thumbnail
-                FROM reservation AS r
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
-                """;
+            SELECT r.id,
+                   r.name as reservation_name,
+                   rs.id as slot_id,
+                   rs.date as reservation_date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   t.id as theme_id,
+                   t.name as theme_name,
+                   t.description,
+                   t.thumbnail
+            FROM reservation AS r
+            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+            INNER JOIN reservation_time AS rt ON rs.time_id = rt.id
+            INNER JOIN theme AS t ON rs.theme_id = t.id
+            """;
     }
 }

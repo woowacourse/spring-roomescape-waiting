@@ -95,10 +95,10 @@ public class ReservationWaitingDao {
         }
 
         String sql = baseSelectSql() + """
-                WHERE rw.reservation_date = ?
-                AND rw.time_id = ?
-                AND rw.theme_id = ?
-                """;
+            WHERE rs.date = ?
+            AND rs.time_id = ?
+            AND rs.theme_id = ?
+            """;
 
         return jdbcTemplate.query(
                 sql,
@@ -126,22 +126,24 @@ public class ReservationWaitingDao {
 
     private String baseSelectSql() {
         return """
-                SELECT rw.id, 
-                       rw.name as waiting_name, 
-                       rw.created_at, 
-                       rw.reservation_date, 
-                       rw.slot_id,
-                       rt.id as time_id, 
-                       rt.start_at,
-                       t.id as theme_id,
-                       t.name as theme_name, 
-                       t.description,
-                       t.thumbnail
-                FROM reservation_waiting as rw
-                INNER JOIN reservation_time as rt 
-                ON rw.time_id = rt.id
-                INNER JOIN theme as t 
-                ON rw.theme_id = t.id 
-                """;
+            SELECT rw.id,
+                   rw.name as waiting_name,
+                   rw.created_at,
+                   rs.id as slot_id,
+                   rs.date as reservation_date,
+                   rt.id as time_id,
+                   rt.start_at,
+                   t.id as theme_id,
+                   t.name as theme_name,
+                   t.description,
+                   t.thumbnail
+            FROM reservation_waiting as rw
+            INNER JOIN reservation_slot as rs
+            ON rw.slot_id = rs.id
+            INNER JOIN reservation_time as rt
+            ON rs.time_id = rt.id
+            INNER JOIN theme as t
+            ON rs.theme_id = t.id
+            """;
     }
 }
