@@ -173,6 +173,33 @@ class ReservationWaitingDaoTest {
         assertThat(result).containsExactly(waiting1, waiting2);
     }
 
+    @Test
+    void 이름과_슬롯_아이디에_해당하는_예약_대기가_존재하면_true를_반환한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+
+        ReservationWaiting waiting = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId(
+                        "맥스",
+                        LocalDateTime.now(),
+                        LocalDate.of(2026, 6, 10),
+                        time,
+                        theme
+                )
+        );
+
+        boolean result = reservationWaitingDao.existsByNameAndSlotId("맥스", waiting.getSlot().getId());
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void 이름과_슬롯_아이디에_해당하는_예약_대기가_없으면_false를_반환한다() {
+        boolean result = reservationWaitingDao.existsByNameAndSlotId("맥스", 999L);
+
+        assertThat(result).isFalse();
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }

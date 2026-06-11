@@ -121,6 +121,25 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), reservationId);
     }
 
+    public boolean existsBySlotIdExcluding(long slotId, long reservationId){
+        String sql = """
+                SELECT COUNT(*) > 0
+                FROM reservation 
+                WHERE slot_id = ? AND id != ?
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slotId, reservationId);
+    }
+
+
+    public boolean existsBySlotId(long slotId) {
+        String sql = """
+                SELECT COUNT(*) > 0 
+                FROM reservation 
+                WHERE slot_id = ? 
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slotId);
+    }
+
     public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0 
@@ -129,6 +148,15 @@ public class ReservationDao {
                 """;
 
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
+    }
+
+    public boolean existsByNameAndSlotId(String name, long slotId) {
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM reservation
+            WHERE name = ? AND slot_id = ?
+            """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slotId);
     }
 
     public Reservation update(Long reservationId, ReservationSlot slot) {

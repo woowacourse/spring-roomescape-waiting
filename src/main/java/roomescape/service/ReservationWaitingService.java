@@ -62,21 +62,21 @@ public class ReservationWaitingService {
     }
 
     private void validateReservationExists(ReservationSlot slot) {
-        boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(slot);
+        boolean exists = reservationDao.existsBySlotId(slot.getId());
         if (!exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 
     private void validateUniqueReservationWaiting(String name, ReservationSlot slot) {
-        boolean exists = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(name, slot);
+        boolean exists = reservationWaitingDao.existsByNameAndSlotId(name, slot.getId());
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
         }
     }
 
     private void validateNotReservedBySameUser(String name, ReservationSlot slot) {
-        if (reservationDao.existsByNameAndDateAndTimeIdAndThemeId(name, slot)) {
+        if (reservationDao.existsByNameAndSlotId(name, slot.getId())) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }

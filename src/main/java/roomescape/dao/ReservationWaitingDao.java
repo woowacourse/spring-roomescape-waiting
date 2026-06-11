@@ -87,6 +87,15 @@ public class ReservationWaitingDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
     }
 
+    public boolean existsByNameAndSlotId(String name, long slotId) {
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM reservation_waiting
+            WHERE name = ? AND slot_id = ?
+            """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slotId);
+    }
+
     public int delete(Long reservationWaitingId) {
         String sql = "DELETE FROM reservation_waiting WHERE id = ?";
         return jdbcTemplate.update(sql, reservationWaitingId);

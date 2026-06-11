@@ -140,14 +140,14 @@ public class ReservationService {
     }
 
     private void validateUniqueReservation(ReservationSlot slot) {
-        boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(slot);
+        boolean exists = reservationDao.existsBySlotId(slot.getId());
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
     }
 
     private void validateUniqueExcludingSelf(ReservationSlot slot, long id) {
-        boolean exists = reservationDao.existsDuplicateExcluding(slot, id);
+        boolean exists = reservationDao.existsBySlotIdExcluding(slot.getId(), id);
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }

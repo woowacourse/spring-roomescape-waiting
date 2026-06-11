@@ -212,6 +212,58 @@ class ReservationDaoTest {
         assertThat(reservationDao.select()).isEmpty();
     }
 
+    @Test
+    void 슬롯_아이디에_예약이_존재하면_true를_반환한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = reservationDao.insert(
+                Reservation.createWithoutId("브라운", LocalDate.of(2026, 6, 10), time, theme)
+        );
+
+        boolean result = reservationDao.existsBySlotId(reservation.getSlot().getId());
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void 슬롯_아이디에_예약이_존재하지_않으면_false를_반환한다() {
+        boolean result = reservationDao.existsBySlotId(999L);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void 본인을_제외하고_같은_슬롯_예약이_존재하면_true를_반환한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        Reservation first = reservationDao.insert(
+                Reservation.createWithoutId("브라운", date, time, theme)
+        );
+
+        Reservation second = reservationDao.insert(
+                Reservation.createWithoutId("로지", LocalDate.of(2026, 6, 11), time, theme)
+        );
+
+        boolean result = reservationDao.existsBySlotIdExcluding(first.getSlot().getId(), second.getId());
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void 이름과_슬롯_아이디에_해당하는_예약이_존재하면_true를_반환한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        Reservation reservation = reservationDao.insert(
+                Reservation.createWithoutId("브라운", LocalDate.of(2026, 6, 10), time, theme)
+        );
+
+        boolean result = reservationDao.existsByNameAndSlotId("브라운", reservation.getSlot().getId());
+
+        assertThat(result).isTrue();
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
