@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,7 +38,7 @@ import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.waiting.domain.exception.NoReservationForWaitingException;
 import roomescape.waiting.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
-import roomescape.waiting.domain.exception.WaitingSlotDuplicateException;
+import roomescape.waiting.domain.exception.WaitingAlreadyExistsException;
 
 @Sql("/clear.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -182,7 +181,7 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
             //then
-            final Exception expectedException = new WaitingSlotDuplicateException();
+            final Exception expectedException = new WaitingAlreadyExistsException();
             response.then().log().all()
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body("message", is(expectedException.getMessage()));

@@ -96,6 +96,16 @@ public class FakeReservationRepository implements ReservationRepository  {
                     && reservation.getTheme().getId() == themeId);
     }
 
+    @Override
+    public Optional<Reservation> findBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
+        return reservations.stream()
+            .filter(reservation ->
+                reservation.getDate().isEqual(date)
+                    && reservation.getTime().getId() == timeId
+                    && reservation.getTheme().getId() == themeId)
+            .findFirst();
+    }
+
     public Reservation savedReservation() {
         return savedReservation;
     }

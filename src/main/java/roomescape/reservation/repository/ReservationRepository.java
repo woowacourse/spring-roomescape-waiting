@@ -26,4 +26,6 @@ public interface ReservationRepository {
     List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now);
 
     boolean existsBySlot(LocalDate date, long reservationTimeId, long themeId);
+
+    Optional<Reservation> findBySlotForUpdate(LocalDate date, long timeId, long themeId);
 }

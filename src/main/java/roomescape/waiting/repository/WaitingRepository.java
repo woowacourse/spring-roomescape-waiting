@@ -15,7 +15,11 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long id);
 
-    Optional<Waiting> findEarliestBySlot(LocalDate date, long timeId, long themeId);
+    Optional<Waiting> findEarliestBySlotForUpdate(LocalDate date, long timeId, long themeId);
 
     List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(String customerName, LocalDateTime now);
+
+    boolean existsBySlot(LocalDate reservationDate, long timeId, long themeId);
+
+    List<WaitingWithRank> findAllWithRank();
 }

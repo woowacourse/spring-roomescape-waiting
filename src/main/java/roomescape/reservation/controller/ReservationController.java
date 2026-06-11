@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationApplicationService;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
@@ -21,13 +21,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationApplicationService reservationApplicationService;
 
     @GetMapping(params = "customer-name")
     public ResponseEntity<ReservationsAndWaitingsResponse> findReservationsByCustomerName(
         @RequestParam("customer-name") String customerName
     ) {
-        final ReservationsAndWaitingsResponse response = reservationService.findReservationsAndWaitingsByCustomerName(customerName);
+        final ReservationsAndWaitingsResponse response = reservationApplicationService
+            .findReservationsAndWaitingsByCustomerName(customerName);
         return ResponseEntity.ok(response);
     }
 
@@ -36,13 +37,13 @@ public class ReservationController {
             @RequestParam(value = "date") LocalDate date,
             @RequestParam(value = "themeId") Long themeId
     ) {
-        final List<ReservationTimesWithStatus> results = reservationService.getReservationTimeStatuses(date, themeId);
+        final List<ReservationTimesWithStatus> results = reservationApplicationService.findReservationTimeStatuses(date, themeId);
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("/date-and-theme")
     public ResponseEntity<ReservationOptionResponse> getReservationOptions() {
-        final ReservationOptionResponse results = reservationService.getReservationOptions();
+        final ReservationOptionResponse results = reservationApplicationService.getReservationOptions();
         return ResponseEntity.ok(results);
     }
 
@@ -50,7 +51,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> create(
             @Valid @RequestBody ReservationCreateRequest request
     ) {
-        final ReservationResponse result = reservationService.create(request);
+        final ReservationResponse result = reservationApplicationService.create(request);
         return ResponseEntity.created(URI.create("/reservations"))
                 .body(result);
     }
@@ -60,7 +61,7 @@ public class ReservationController {
             @PathVariable("reservation-id") Long reservationId,
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
-        final ReservationResponse result = reservationService.updateByCustomer(reservationId, request);
+        final ReservationResponse result = reservationApplicationService.updateByCustomer(reservationId, request);
         return ResponseEntity.ok(result);
     }
 
@@ -68,7 +69,7 @@ public class ReservationController {
     public ResponseEntity<Void> cancel(
             @PathVariable("reservation-id") Long reservationId
     ) {
-        reservationService.cancel(reservationId);
+        reservationApplicationService.cancelReservationByIdAndPromoteWaiting(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
