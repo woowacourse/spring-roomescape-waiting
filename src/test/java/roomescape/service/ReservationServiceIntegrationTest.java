@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.RoomEscapeFixture;
@@ -21,7 +19,7 @@ import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.Status;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceIntegrationTest {
     @Autowired
@@ -30,12 +28,8 @@ class ReservationServiceIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @LocalServerPort
-    int port;
-
     @BeforeEach
     void init() {
-        RestAssured.port = port;
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");

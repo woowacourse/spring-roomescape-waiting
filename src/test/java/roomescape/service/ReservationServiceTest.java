@@ -1,248 +1,277 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
+import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
+import roomescape.repository.ThemeRepository;
 
-@ExtendWith(MockitoExtension.class)
-class ReservationServiceTest {
-    private static final String NAME = "제제";
-    private static final LocalDateTime NOW = LocalDateTime.of(2026, 5, 10, 10, 0, 0);
-    private static final Slot SLOT = RoomEscapeFixture.slot().build();
-    private static final Reservation DUMMY = RoomEscapeFixture.reservation().name(NAME).createdAt(NOW).build();
-    private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
-    private static final long EXISTS_ID = 1L;
-
-    @Mock
-    private ReservationRepository reservationRepository;
-
-    @Mock
-    private SlotService slotService;
-
-    @InjectMocks
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
+@Transactional
+public class ReservationServiceTest {
+    @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private SlotRepository slotRepository;
+
     @Nested
-    @DisplayName("reserve")
+    @DisplayName("예약 생성시")
     class Reserve {
+        @Test
+        @DisplayName("이미 승인 예약이 있는 슬롯에 예약하면 대기로 생성된다")
+        void waiting_when_slot_already_has_approved() {
+            Slot slot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            String name = "zeze";
+            saveReservation(slot, name, Status.APPROVED);
+
+            String newCustomerName = "dalsu";
+
+            ReservationCreateRequest request = createRequestTo(newCustomerName, slot);
+
+            RankedReservation reserved = reservationService.reserve(request, LocalDateTime.now());
+
+            Reservation saved = reservationRepository.findById(reserved.getReservation().getId()).get();
+            assertThat(saved.getStatus()).isEqualTo(Status.WAITING);
+            assertThat(saved.getName().getValue()).isEqualTo(newCustomerName);
+        }
 
         @Test
-        void 슬롯_조회_실패시_예외가_발생한다() {
-            given(slotService.findOrCreate(any(), anyLong(), anyLong()))
-                    .willThrow(new RoomEscapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
+        @DisplayName("같은 슬롯에 같은 이름으로 예약하면 예외가 발생한다")
+        void reject_duplicate_name_in_same_slot() {
+            Slot slot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME, RoomEscapeFixture.FUTURE_DATE);
+            String duplicatedName = "zeze";
 
-            ReservationCreateRequest request = RoomEscapeFixture.reservationCreateRequest();
+            saveReservation(slot, duplicatedName, Status.APPROVED);
 
-            Assertions.assertThatThrownBy(() -> reservationService.reserve(request, NOW))
+            ReservationCreateRequest request = createRequestTo(duplicatedName, slot);
+
+            assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.now())).isInstanceOf(
+                    RoomEscapeException.class);
+        }
+
+        private static ReservationCreateRequest createRequestTo(String name, Slot slot) {
+            return new ReservationCreateRequest(name,
+                    slot.getDate().getValue(), slot.getTime().getId(),
+                    slot.getTheme().getId());
+        }
+    }
+
+    @Nested
+    @DisplayName("예약 삭제시")
+    class Cancel {
+        @Test
+        @DisplayName("ID를 찾을 수 없으면 예외가 발생한다")
+        void throw_when_id_not_found() {
+            assertThatThrownBy(() -> reservationService.cancel(999L, LocalDateTime.now())).isInstanceOf(
+                    RoomEscapeException.class);
+        }
+
+        @Test
+        @DisplayName("과거 예약을 삭제하면 예외가 발생한다")
+        void throw_when_cancel_past_reservation() {
+            Slot pastSlot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME, RoomEscapeFixture.PAST_DATE);
+            Reservation pastTarget = saveReservation(pastSlot, "zeze", Status.APPROVED);
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.cancel(pastTarget.getId(), LocalDateTime.MAX))
                     .isInstanceOf(RoomEscapeException.class);
         }
 
         @Test
-        void 슬롯에_예약이_없으면_APPROVED로_예약된다() {
-            given(slotService.findOrCreate(any(), anyLong(), anyLong())).willReturn(SLOT);
-            given(reservationRepository.findAllBySlot(any()))
-                    .willReturn(List.of())
-                    .willReturn(List.of(DUMMY));
-            given(reservationRepository.save(any())).willReturn(DUMMY);
+        @DisplayName("승인 예약이 삭제되면 첫 대기 예약이 승격된다")
+        void promote_first_waiting_when_approved_canceled() {
+            // given
+            Slot slot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            Reservation approvedTarget = saveReservation(slot, "zeze", Status.APPROVED);
+            Reservation firstWaiting = saveReservation(slot, "dalsu", Status.WAITING);
 
-            ReservationCreateRequest request = new ReservationCreateRequest(NAME,
-                    LocalDate.of(2099, 11, 11), 1L, 1L);
+            // when
+            reservationService.cancel(approvedTarget.getId(), LocalDateTime.MIN);
 
-            RankedReservation result = reservationService.reserve(request, NOW);
-
-            Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.APPROVED);
+            // then
+            assertThat(reservationRepository.findById(approvedTarget.getId())).isNotPresent();
+            assertThat(reservationRepository.findById(firstWaiting.getId()).get().getStatus()).isEqualTo(
+                    Status.APPROVED);
         }
 
         @Test
-        void APPROVED가_이미_있으면_WAITING으로_예약된다() {
-            Reservation existing = RoomEscapeFixture.reservation().name("기존").createdAt(NOW).build();
-            Reservation waitingSaved = RoomEscapeFixture.reservation().id(2L).name("달수")
-                    .status(Status.WAITING).createdAt(NOW).build();
+        @DisplayName("대기 예약이 삭제되면 남은 대기 예약은 그대로여야 한다")
+        void keep_remaining_waiting_when_waiting_canceled() {
+            // given
+            Slot slot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            saveReservation(slot, "zeze", Status.APPROVED);
 
-            given(slotService.findOrCreate(any(), anyLong(), anyLong())).willReturn(SLOT);
-            given(reservationRepository.findAllBySlot(any()))
-                    .willReturn(List.of(existing))
-                    .willReturn(List.of(existing, waitingSaved));
-            given(reservationRepository.save(any())).willReturn(waitingSaved);
+            Reservation canceledWaiting = saveReservation(slot, "dalsu", Status.WAITING);
+            Reservation remainingWaiting = saveReservation(slot, "mingu", Status.WAITING);
 
-            ReservationCreateRequest request = new ReservationCreateRequest("달수",
-                    LocalDate.of(2099, 11, 11), 1L, 1L);
+            // when
+            reservationService.cancel(canceledWaiting.getId(), LocalDateTime.MIN);
 
-            RankedReservation result = reservationService.reserve(request, NOW);
-
-            Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.WAITING);
+            // then
+            assertThat(reservationRepository.findById(canceledWaiting.getId())).isNotPresent();
+            assertThat(reservationRepository.findById(remainingWaiting.getId()).get().getStatus()).isEqualTo(
+                    Status.WAITING);
         }
     }
 
     @Nested
-    @DisplayName("find")
-    class Find {
-
-        @Test
-        void 존재하는_ID면_결과를_반환한다() {
-            given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
-            given(reservationRepository.findAllBySlot(any())).willReturn(List.of(DUMMY));
-
-            RankedReservation result = reservationService.find(EXISTS_ID);
-
-            Assertions.assertThat(result.getReservation().getId()).isEqualTo(EXISTS_ID);
-            Assertions.assertThat(result.getRank().getValue()).isZero();
-        }
-
-        @Test
-        void 존재하지_않는_ID면_예외가_발생한다() {
-            given(reservationRepository.findById(NOT_EXISTS_ID)).willReturn(Optional.empty());
-
-            Assertions.assertThatThrownBy(() -> reservationService.find(NOT_EXISTS_ID))
-                    .isInstanceOf(RoomEscapeException.class)
-                    .hasMessage(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
-        }
-    }
-
-    @Nested
-    @DisplayName("findList")
-    class FindList {
-
-        @Test
-        void 이름_없이_목록_조회시_전체_예약을_반환한다() {
-            given(reservationRepository.findAll()).willReturn(List.of(DUMMY));
-
-            List<RankedReservation> results = reservationService.findList(null);
-
-            Assertions.assertThat(results).hasSize(1);
-        }
-
-        @Test
-        void 이름으로_목록_조회시_해당_이름의_예약만_반환한다() {
-            given(reservationRepository.findAll()).willReturn(List.of(DUMMY));
-
-            List<RankedReservation> results = reservationService.findList(NAME);
-
-            Assertions.assertThat(results).hasSize(1);
-            Assertions.assertThat(results.getFirst().getReservation().getName().getValue()).isEqualTo(NAME);
-        }
-    }
-
-    @Nested
-    @DisplayName("update")
+    @DisplayName("예약 수정시")
     class Update {
 
         @Test
-        void ID가_없으면_예외가_발생한다() {
-            given(reservationRepository.findById(NOT_EXISTS_ID)).willReturn(Optional.empty());
-
-            ReservationUpdateRequest request = new ReservationUpdateRequest("zeze",
-                    LocalDate.of(2099, 4, 6), 1L, 1L);
-
-            Assertions.assertThatThrownBy(() -> reservationService.update(request, NOT_EXISTS_ID, NOW))
-                    .isInstanceOf(RoomEscapeException.class)
-                    .hasMessage(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
+        @DisplayName("ID를 찾을 수 없으면 예외가 발생한다")
+        void throw_when_id_not_found() {
+            ReservationUpdateRequest request = RoomEscapeFixture.reservationUpdateRequest();
+            assertThatThrownBy(() -> reservationService.update(request, 999L, LocalDateTime.now()))
+                    .isInstanceOf(RoomEscapeException.class);
         }
 
         @Test
-        void 과거_날짜의_예약이면_예외가_발생한다() {
-            given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
+        @DisplayName("과거 예약을 수정하면 예외가 발생한다")
+        void throw_when_update_past_reservation() {
+            // given
+            String approvedName = "zeze";
 
-            ReservationUpdateRequest request = new ReservationUpdateRequest("zeze",
-                    LocalDate.of(2000, 4, 6), 1L, 1L);
+            Slot futureSlot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            Reservation approvedReservation = saveReservation(futureSlot, approvedName, Status.APPROVED);
 
-            Assertions.assertThatThrownBy(() -> reservationService.update(request, EXISTS_ID, LocalDateTime.MAX))
-                    .isInstanceOf(RoomEscapeException.class)
-                    .hasMessage(ErrorCode.PAST_RESERVATION_NOT_ALLOWED.getMessage());
+            ReservationUpdateRequest request = RoomEscapeFixture.reservationUpdateRequest();
+
+            // when & then
+            assertThatThrownBy(
+                    () -> reservationService.update(request, approvedReservation.getId(), LocalDateTime.MAX))
+                    .isInstanceOf(RoomEscapeException.class);
         }
 
         @Test
-        void WAITING_예약을_수정하면_승격이_발생하지_않는다() {
-            Reservation waiting = RoomEscapeFixture.reservation().id(2L).name("대기자")
-                    .status(Status.WAITING).createdAt(NOW).build();
-            Reservation updated = RoomEscapeFixture.reservation().id(2L).name("대기자")
-                    .status(Status.WAITING).createdAt(NOW).build();
+        @DisplayName("승인된 예약이 변경되면 대기 중인 예약이 승격되어야 한다")
+        void promote_waiting_reservation_if_approved() {
+            // given
+            Slot origin = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            String approvedName = "zeze";
+            String waitingName = "dalsu";
 
-            given(reservationRepository.findById(2L)).willReturn(Optional.of(waiting));
-            given(slotService.findOrCreate(any(), anyLong(), anyLong())).willReturn(SLOT);
-            given(reservationRepository.findAllBySlot(any()))
-                    .willReturn(List.of())
-                    .willReturn(List.of(updated));
-            given(reservationRepository.update(anyLong(), any())).willReturn(updated);
+            Reservation approvedTarget = saveReservation(origin, approvedName, Status.APPROVED);
+            Reservation firstWaiting = saveReservation(origin, waitingName, Status.WAITING);
 
-            ReservationUpdateRequest request = new ReservationUpdateRequest("대기자",
-                    LocalDate.of(2099, 11, 11), 1L, 1L);
+            ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.MAX,
+                    origin.getTime().getId(),
+                    origin.getTheme().getId());
 
-            reservationService.update(request, 2L, LocalDateTime.MIN);
+            // when
+            RankedReservation updated = reservationService.update(request, approvedTarget.getId(),
+                    LocalDateTime.now());
 
-            verify(reservationRepository, times(0)).updateStatus(anyLong(), any());
+            // then
+            assertThat(updated.getRank().getValue()).isEqualTo(0);
+            assertThat(updated.getReservation().getStatus()).isEqualTo(Status.APPROVED);
+            assertThat(reservationRepository.findById(firstWaiting.getId()).get().getStatus())
+                    .isEqualTo(Status.APPROVED);
+
+        }
+
+        @Test
+        @DisplayName("대기 예약이 옮겨지면 남은 대기 예약은 그대로다")
+        void keep_remaining_waiting_when_waiting_moved_out() {
+            // given
+            Slot origin = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            saveReservation(origin, "zeze", Status.APPROVED);
+
+            String waitingName = "dalsu";
+            String waitingName2 = "mingu";
+
+            Reservation waitingTarget = saveReservation(origin, waitingName, Status.WAITING);
+            Reservation remainingWaiting = saveReservation(origin, waitingName2, Status.WAITING);
+
+            ReservationUpdateRequest request = new ReservationUpdateRequest(waitingName, LocalDate.MAX,
+                    origin.getTime().getId(),
+                    origin.getTheme().getId());
+
+            // when
+            RankedReservation updated = reservationService.update(request, waitingTarget.getId(),
+                    LocalDateTime.now());
+
+            // then
+            assertThat(updated.getRank().getValue()).isEqualTo(0);
+            assertThat(updated.getReservation().getStatus()).isEqualTo(Status.APPROVED);
+            assertThat(reservationRepository.findById(remainingWaiting.getId()).get().getStatus())
+                    .isEqualTo(Status.WAITING);
+        }
+
+        @Test
+        @DisplayName("승인 예약이 빈 슬롯으로 옮겨지면 첫 대기 예약이 승격된다")
+        void promote_first_waiting_when_approved_moved_out() {
+            // given
+            LocalDate targetDate = LocalDate.MAX;
+            Slot futureSlot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    RoomEscapeFixture.FUTURE_DATE);
+            Slot targetSlot = saveSlot(RoomEscapeFixture.theme(), RoomEscapeFixture.TIME,
+                    new ReservationDate(targetDate));
+
+            String approvedName = "zeze";
+            String targetSlotName = "dalsu";
+
+            Reservation approvedReservation = saveReservation(futureSlot, approvedName, Status.APPROVED);
+            Reservation targetSlotReservation = saveReservation(targetSlot, targetSlotName, Status.APPROVED);
+
+            ReservationUpdateRequest request = new ReservationUpdateRequest(approvedName, targetDate,
+                    targetSlot.getTime().getId(),
+                    targetSlot.getTheme().getId());
+
+            // when
+            RankedReservation updated = reservationService.update(request, approvedReservation.getId(),
+                    LocalDateTime.now());
+
+            // then
+            assertThat(updated.getRank().getValue()).isEqualTo(1);
+            assertThat(updated.getReservation().getStatus()).isEqualTo(Status.WAITING);
         }
     }
 
-    @Nested
-    @DisplayName("cancel")
-    class Cancel {
+    private Reservation saveReservation(Slot slot, String name, Status status) {
+        return reservationRepository.save(
+                RoomEscapeFixture.reservation().name(name).slot(slot).status(status).build());
+    }
 
-        @Test
-        void 정상_취소시_삭제된다() {
-            given(reservationRepository.findById(EXISTS_ID))
-                    .willReturn(Optional.of(RoomEscapeFixture.reservation().build()));
-            given(reservationRepository.findFirstWaitingBySlot(any())).willReturn(Optional.empty());
-
-            assertThatCode(() -> reservationService.cancel(EXISTS_ID, NOW)).doesNotThrowAnyException();
-        }
-
-        @Test
-        void APPROVED_예약_취소_시_첫번째_WAITING_예약이_승격된다() {
-            Reservation waiting = RoomEscapeFixture.reservation().id(2L).name("대기자")
-                    .status(Status.WAITING).createdAt(NOW).build();
-            given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
-            given(reservationRepository.findFirstWaitingBySlot(any())).willReturn(Optional.of(waiting));
-
-            reservationService.cancel(EXISTS_ID, LocalDateTime.MIN);
-
-            verify(reservationRepository).updateStatus(2L, Status.APPROVED);
-        }
-
-        @Test
-        void WAITING_예약_취소_시_승격이_발생하지_않는다() {
-            Reservation waiting = RoomEscapeFixture.reservation().id(2L).name("대기자")
-                    .status(Status.WAITING).createdAt(NOW).build();
-            given(reservationRepository.findById(2L)).willReturn(Optional.of(waiting));
-
-            reservationService.cancel(2L, LocalDateTime.MIN);
-
-            verify(reservationRepository).deleteById(2L);
-            org.mockito.Mockito.verifyNoMoreInteractions(reservationRepository);
-        }
-
-        @Test
-        void 존재하지_않는_예약_취소시_예외_발생() {
-            given(reservationRepository.findById(NOT_EXISTS_ID)).willReturn(Optional.empty());
-
-            Assertions.assertThatThrownBy(() -> reservationService.cancel(NOT_EXISTS_ID, NOW))
-                    .isInstanceOf(RoomEscapeException.class);
-        }
+    private Slot saveSlot(Theme theme, ReservationTime time, ReservationDate date) {
+        Theme targetTheme = themeRepository.save(theme);
+        ReservationTime targetTime = reservationTimeRepository.save(time);
+        return slotRepository.save(
+                RoomEscapeFixture.slot().time(targetTime).theme(targetTheme).date(date).build());
     }
 }
