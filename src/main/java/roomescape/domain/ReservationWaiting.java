@@ -11,23 +11,32 @@ public class ReservationWaiting {
     private final LocalDate reservationDate;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationSlot slot;
 
-    public ReservationWaiting(Long id, String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
+    public ReservationWaiting(Long id, String name, LocalDateTime createdAt, ReservationSlot slot) {
         Objects.requireNonNull(name, "예약 대기자명은 필수값 입니다.");
         Objects.requireNonNull(createdAt, "예약 대기 생성일자는 필수값 입니다.");
-        Objects.requireNonNull(reservationDate, "예약 일자는 필수값 입니다.");
-        Objects.requireNonNull(time, "예약 대기할 시간은 필수값 입니다.");
-        Objects.requireNonNull(theme, "예약 대기할 테마는 필수값 입니다.");
+        Objects.requireNonNull(slot, "예약 대기 슬롯은 필수값 입니다.");
+
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;
-        this.reservationDate = reservationDate;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
+        this.reservationDate = slot.getDate();
+        this.time = slot.getTime();
+        this.theme = slot.getTheme();
+    }
+
+    public ReservationWaiting(Long id, String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
+        this(id, name, createdAt, new ReservationSlot(reservationDate, time, theme));
     }
 
     public static ReservationWaiting createWithoutId(String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
         return new ReservationWaiting(null, name, createdAt, reservationDate, time, theme);
+    }
+
+    public static ReservationWaiting createWithoutId(String name, LocalDateTime createdAt, ReservationSlot slot) {
+        return new ReservationWaiting(null, name, createdAt, slot);
     }
 
     public Reservation promoteToReservation() {
@@ -56,6 +65,10 @@ public class ReservationWaiting {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationSlot getSlot() {
+        return slot;
     }
 
     @Override
