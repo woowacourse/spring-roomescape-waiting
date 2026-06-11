@@ -35,3 +35,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+processResources {
+    from('src/main/webapp') {
+        into 'META-INF/resources'
+    }
+}
