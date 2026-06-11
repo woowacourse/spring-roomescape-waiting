@@ -28,42 +28,50 @@ public class ReservationWaitingDao {
                 resultSet.getString("thumbnail")
         );
 
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getLong("slot_id"),
+                resultSet.getDate("reservation_date").toLocalDate(),
+                reservationTime,
+                theme
+        );
+
         return new ReservationWaiting(
                 resultSet.getLong("id"),
                 resultSet.getString("waiting_name"),
                 resultSet.getTimestamp("created_at").toLocalDateTime(),
-                resultSet.getDate("reservation_date").toLocalDate(),
-                reservationTime,
-                theme
+                slot
         );
     };
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
+    private final ReservationSlotDao reservationSlotDao;
 
-    public ReservationWaitingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationWaitingDao(JdbcTemplate jdbcTemplate, ReservationSlotDao reservationSlotDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.reservationSlotDao = reservationSlotDao;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
                 .usingGeneratedKeyColumns("id");
     }
 
     public ReservationWaiting insert(ReservationWaiting reservationWaiting) {
+        ReservationSlot slot = findOrCreateSlot(reservationWaiting.getSlot());
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservationWaiting.getName());
         parameters.put("created_at", reservationWaiting.getCreatedAt());
-        parameters.put("reservation_date", reservationWaiting.getReservationDate());
-        parameters.put("time_id", reservationWaiting.getTime().getId());
-        parameters.put("theme_id", reservationWaiting.getTheme().getId());
+        parameters.put("reservation_date", slot.getDate());
+        parameters.put("time_id", slot.getTimeId());
+        parameters.put("theme_id", slot.getThemeId());
+        parameters.put("slot_id", slot.getId());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
         return new ReservationWaiting(
                 generatedId.longValue(),
                 reservationWaiting.getName(),
                 reservationWaiting.getCreatedAt(),
-                reservationWaiting.getReservationDate(),
-                reservationWaiting.getTime(),
-                reservationWaiting.getTheme()
+                slot
         );
     }
 
@@ -109,12 +117,18 @@ public class ReservationWaitingDao {
         return jdbcTemplate.query(sql, ROW_MAPPER, name);
     }
 
+    private ReservationSlot findOrCreateSlot(ReservationSlot slot) {
+        return reservationSlotDao.selectByDateAndTimeIdAndThemeId(slot)
+                .orElseGet(() -> reservationSlotDao.insert(slot));
+    }
+
     private String baseSelectSql() {
         return """
                 SELECT rw.id, 
                        rw.name as waiting_name, 
                        rw.created_at, 
                        rw.reservation_date, 
+                       rw.slot_id,
                        rt.id as time_id, 
                        rt.start_at,
                        t.id as theme_id,

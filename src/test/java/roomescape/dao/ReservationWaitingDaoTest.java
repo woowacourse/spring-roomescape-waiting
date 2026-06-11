@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JdbcTest
-@Import({ReservationWaitingDao.class, ReservationTimeDao.class, ThemeDao.class})
+@Import({ReservationWaitingDao.class, ReservationSlotDao.class, ReservationTimeDao.class, ThemeDao.class})
 class ReservationWaitingDaoTest {
 
     @Autowired
@@ -41,6 +41,8 @@ class ReservationWaitingDaoTest {
         ReservationWaiting saved = reservationWaitingDao.insert(reservationWaiting);
 
         // then
+        assertThat(saved.getSlot().getId()).isNotNull();
+
         assertThat(saved)
                 .extracting(ReservationWaiting::getName, ReservationWaiting::getCreatedAt, ReservationWaiting::getReservationDate, ReservationWaiting::getTime, ReservationWaiting::getTheme)
                 .containsExactly(reservationWaiting.getName(), reservationWaiting.getCreatedAt(), reservationWaiting.getReservationDate(), reservationWaiting.getTime(), reservationWaiting.getTheme());
@@ -118,7 +120,7 @@ class ReservationWaitingDaoTest {
     }
 
     @Test
-    void 특정_슬롯의_예약_대기_목록을_조회한다(){
+    void 특정_슬롯의_예약_대기_목록을_조회한다() {
         // given
         ReservationTime time = saveTime(10, 0);
         ReservationTime otherTime = saveTime(11, 0);
