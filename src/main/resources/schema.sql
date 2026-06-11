@@ -30,7 +30,7 @@ CREATE TABLE reservation
 (
     id       BIGINT      NOT NULL AUTO_INCREMENT,
     name     VARCHAR(10) NOT NULL,
-    `date`   DATE        NOT NULL,
+    `date`   DATE,
     time_id  BIGINT,
     theme_id BIGINT,
     slot_id  BIGINT      NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE reservation_waiting
     id               BIGINT      NOT NULL AUTO_INCREMENT,
     name             VARCHAR(10) NOT NULL,
     created_at       DATETIME    NOT NULL,
-    reservation_date DATE        NOT NULL,
+    reservation_date DATE,
     time_id          BIGINT,
     theme_id         BIGINT,
     slot_id          BIGINT      NOT NULL,

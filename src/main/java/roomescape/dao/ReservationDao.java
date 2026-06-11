@@ -59,9 +59,6 @@ public class ReservationDao {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
-        parameters.put("date", slot.getDate());
-        parameters.put("time_id", slot.getTimeId());
-        parameters.put("theme_id", slot.getThemeId());
         parameters.put("slot_id", slot.getId());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
@@ -146,8 +143,9 @@ public class ReservationDao {
     public Reservation update(Long reservationId, ReservationSlot slot) {
         ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
 
-        String sql = "UPDATE reservation SET date = ?, time_id = ?, theme_id = ?, slot_id = ?  WHERE id = ?";
-        jdbcTemplate.update(sql, savedSlot.getDate(), savedSlot.getTimeId(), savedSlot.getThemeId(), savedSlot.getId(), reservationId);
+        String sql = "UPDATE reservation SET slot_id = ? WHERE id = ?";
+        jdbcTemplate.update(sql, savedSlot.getId(), reservationId);
+
         return selectById(reservationId).get();
     }
 

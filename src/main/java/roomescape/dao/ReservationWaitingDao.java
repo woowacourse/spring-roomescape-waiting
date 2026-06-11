@@ -63,9 +63,6 @@ public class ReservationWaitingDao {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservationWaiting.getName());
         parameters.put("created_at", reservationWaiting.getCreatedAt());
-        parameters.put("reservation_date", slot.getDate());
-        parameters.put("time_id", slot.getTimeId());
-        parameters.put("theme_id", slot.getThemeId());
         parameters.put("slot_id", slot.getId());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
