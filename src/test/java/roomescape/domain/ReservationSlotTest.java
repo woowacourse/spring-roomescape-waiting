@@ -11,6 +11,8 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import roomescape.domain.vo.ReservationDeletion;
+import roomescape.domain.vo.ReservationSlotInfo;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
@@ -104,9 +106,9 @@ class ReservationSlotTest {
         Reservation reservation = createReservation(1L, "브라운", Status.RESERVED, now);
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(reservation)));
 
-        Reservation deletedReservation = reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(1));
+        ReservationDeletion deletedReservation = reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(1));
 
-        assertThat(deletedReservation.getStatus()).isEqualTo(Status.CANCELED);
+        assertThat(deletedReservation.deletedReservation().getStatus()).isEqualTo(Status.CANCELED);
     }
 
     @Test
