@@ -64,6 +64,75 @@ public class ReservationService {
         return userReservations.getReservationAndWaitings();
     }
 
+    @Transactional
+    public Reservation saveReservation(String name, LocalDate date, long timeId, long themeId,
+                                       LocalDateTime requestTime) {
+        Reservation reservation = createReservation(name, date, timeId, themeId, requestTime);
+        return reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public void removeReservation(long id, String requestName, LocalDateTime requestTime) {
+        reservationRepository.findById(id)
+                .ifPresent(reservation ->
+                        deleteReservationAndPromoteWaiting(reservation, requestName, requestTime));
+    }
+
+    @Transactional
+    public void updateReservation(long id, String requestName, LocalDate date, long timeId,
+                                  LocalDateTime requestTime) {
+
+        Reservation nowReservation = getValidatedReservation(id, requestName);
+        ReservationSlot updateSlot = findOrCreateReservationSlot(date, timeId, nowReservation.getTheme().getId());
+
+        lockReservationSlots(nowReservation.getSlot(), updateSlot);
+        ReservationLine nowReservationLine = createReservationLine(nowReservation.getSlot());
+
+        if (nowReservationLine.validateAndCheckSameSlot(nowReservation, updateSlot, requestTime)) {
+            return;
+        }
+
+        moveReservation(nowReservation, updateSlot, requestTime, nowReservationLine);
+    }
+
+    private Reservation createReservation(String name, LocalDate date, long timeId, long themeId,
+                                          LocalDateTime requestTime) {
+        ReservationSlot reservationSlot = findOrCreateReservationSlot(date, timeId, themeId);
+        ReservationSlot lockedSlot = getLockedReservationSlot(reservationSlot);
+        ReservationLine reservationLine = createReservationLine(lockedSlot);
+
+        return reservationLine.add(name, requestTime);
+    }
+
+    private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,
+                                                    LocalDateTime requestTime) {
+        validateReservationOwner(reservation, requestName);
+
+        ReservationSlot lockedSlot = getLockedReservationSlot(reservation.getSlot());
+        ReservationLine reservationLine = createReservationLine(lockedSlot);
+        Optional<Reservation> promotedReservation = reservationLine.findPromotedReservationAfterCancel(
+                reservation,
+                requestTime
+        );
+
+        deleteReservation(reservation);
+        promotedReservation.ifPresent(reservationRepository::update);
+    }
+
+    private void deleteReservation(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+    }
+
+    private void moveReservation(Reservation nowReservation, ReservationSlot updateSlot, LocalDateTime requestTime,
+                                 ReservationLine nowReservationLine) {
+        ReservationLine updateReservationLine = createReservationLine(updateSlot);
+        Reservation updateReservation = updateReservationLine.move(nowReservation, requestTime);
+        Optional<Reservation> promotedReservation = nowReservationLine.findNextToPromote(nowReservation);
+
+        reservationRepository.update(updateReservation);
+        promotedReservation.ifPresent(reservationRepository::update);
+    }
+
     private List<Reservation> findReservedReservations(List<Reservation> reservations) {
         return reservations.stream()
                 .filter(Reservation::isReserved)
@@ -96,78 +165,14 @@ public class ReservationService {
                 .collect(Collectors.groupingBy(reservation -> reservation.getSlot().getId()));
     }
 
-    @Transactional
-    public Reservation saveReservation(String name, LocalDate date, long timeId, long themeId,
-                                       LocalDateTime requestTime) {
-        Reservation reservation = createReservation(name, date, timeId, themeId, requestTime);
-        return reservationRepository.save(reservation);
+    private ReservationLine createReservationLine(ReservationSlot slot) {
+        return new ReservationLine(slot, reservationRepository.findBySlotId(slot.getId()));
     }
 
-    private Reservation createReservation(String name, LocalDate date, long timeId, long themeId,
-                                          LocalDateTime requestTime) {
-        ReservationSlot reservationSlot = findOrCreateReservationSlot(date, timeId, themeId);
-        ReservationSlot lockedSlot = getLockedReservationSlot(reservationSlot);
-        ReservationLine reservationLine = new ReservationLine(lockedSlot, reservationRepository.findBySlotId(lockedSlot.getId()));
-
-        return reservationLine.add(name, requestTime);
-    }
-
-    @Transactional
-    public void removeReservation(long id, String requestName, LocalDateTime requestTime) {
-        reservationRepository.findById(id)
-                .ifPresent(reservation ->
-                        deleteReservationAndPromoteWaiting(reservation, requestName, requestTime));
-    }
-
-    private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,
-                                                    LocalDateTime requestTime) {
+    private Reservation getValidatedReservation(long id, String requestName) {
+        Reservation reservation = getReservationById(id);
         validateReservationOwner(reservation, requestName);
-
-        ReservationSlot lockedSlot = getLockedReservationSlot(reservation.getSlot());
-        ReservationLine reservationLine = new ReservationLine(
-                lockedSlot,
-                reservationRepository.findBySlotId(lockedSlot.getId())
-        );
-        Optional<Reservation> promotedReservation = reservationLine.findPromotedReservationAfterCancel(
-                reservation,
-                requestTime
-        );
-
-        deleteReservation(reservation);
-        promotedReservation.ifPresent(reservationRepository::update);
-    }
-
-    private void deleteReservation(Reservation reservation) {
-        reservationRepository.deleteById(reservation.getId());
-    }
-
-    @Transactional
-    public void updateReservation(long id, String requestName, LocalDate date, long timeId,
-                                  LocalDateTime requestTime) {
-        Reservation nowReservation = getReservationById(id);
-        validateReservationOwner(nowReservation, requestName);
-
-        long themeId = nowReservation.getTheme().getId();
-        ReservationSlot updateSlot = findOrCreateReservationSlot(date, timeId, themeId);
-        Reservation updateReservation = nowReservation.updateSlot(updateSlot, requestTime);
-
-        if (nowReservation.hasSameDateAndTime(updateReservation)) {
-            return;
-        }
-
-        lockReservationSlots(nowReservation.getSlot(), updateSlot);
-        validateReservedSlot(updateSlot);
-        Optional<Reservation> promotedReservation = findPromotedReservation(nowReservation);
-        reservationRepository.update(updateReservation);
-        promotedReservation.ifPresent(reservationRepository::update);
-    }
-
-    private Optional<Reservation> findPromotedReservation(Reservation reservation) {
-        ReservationLine reservationLine = new ReservationLine(
-                reservation.getSlot(),
-                reservationRepository.findBySlotId(reservation.getSlot().getId())
-        );
-        return reservationLine.findReservationToPromote(reservation);
+        return reservation;
     }
 
     private ReservationSlot findOrCreateReservationSlot(LocalDate date, long timeId, long themeId) {
@@ -188,12 +193,6 @@ public class ReservationService {
         TimeSlot timeSlot = getTimeSlot(timeId);
         Theme theme = getTheme(themeId);
         return reservationSlotRepository.save(new ReservationSlot(date, timeSlot, theme));
-    }
-
-    private void validateReservedSlot(ReservationSlot slot) {
-        if (reservationRepository.existsReservedBySlotId(slot.getId())) {
-            throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
-        }
     }
 
     private void validateReservationOwner(Reservation reservation, String requestName) {

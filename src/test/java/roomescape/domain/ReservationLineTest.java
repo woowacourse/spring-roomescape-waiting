@@ -240,7 +240,7 @@ public class ReservationLineTest {
         Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
 
-        Optional<Reservation> promoted = reservationLine.findReservationToPromote(reserved);
+        Optional<Reservation> promoted = reservationLine.findNextToPromote(reserved);
 
         assertThat(promoted).isPresent();
         assertThat(promoted.get().getId()).isEqualTo(waiting.getId());
@@ -254,7 +254,7 @@ public class ReservationLineTest {
         Reservation waiting = createWaiting(2L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
         ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
 
-        Optional<Reservation> promoted = reservationLine.findReservationToPromote(waiting);
+        Optional<Reservation> promoted = reservationLine.findNextToPromote(waiting);
 
         assertThat(promoted).isEmpty();
     }

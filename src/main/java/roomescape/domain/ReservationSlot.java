@@ -31,7 +31,7 @@ public class ReservationSlot {
         return this.date.equals(updateDate) && this.timeSlot.equals(updateTime);
     }
 
-    public boolean hasSameSlot(ReservationSlot other) {
+    public boolean isSameSlot(ReservationSlot other) {
         return other != null
                 && this.date.equals(other.date)
                 && this.timeSlot.getId().equals(other.timeSlot.getId())

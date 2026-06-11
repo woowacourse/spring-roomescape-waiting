@@ -30,14 +30,18 @@ public class Reservation {
         this(null, name, reservationSlot, createdAt, status);
     }
 
-    public Reservation updateSlot(ReservationSlot updateSlot, LocalDateTime now) {
-        validateNotPast(now, "이미 지난 예약은 수정할 수 없습니다.");
-        validateUpdateSlot(updateSlot, now);
+    public Reservation updateSlot(ReservationSlot updateSlot, LocalDateTime now, ReservationStatus updateStatus) {
+        validateUpdatable(updateSlot, now);
 
         if (this.slot.isSameDateAndTime(updateSlot.getDate(), updateSlot.getTimeSlot())) {
             return this;
         }
-        return new Reservation(this.id, this.name, updateSlot, this.createdAt, this.status);
+        return new Reservation(this.id, this.name, updateSlot, this.createdAt, updateStatus);
+    }
+
+    public void validateUpdatable(ReservationSlot updateSlot, LocalDateTime now) {
+        validateNotPast(now, "이미 지난 예약은 수정할 수 없습니다.");
+        validateUpdateSlot(updateSlot, now);
     }
 
     public void validateCancelable(LocalDateTime now) {
@@ -55,10 +59,6 @@ public class Reservation {
             throw new IllegalArgumentException("예약 대기만 확정 예약으로 승급할 수 있습니다.");
         }
         return new Reservation(this.id, this.name, this.slot, this.createdAt, ReservationStatus.RESERVED);
-    }
-
-    public boolean hasSameDateAndTime(Reservation other) {
-        return this.slot.isSameDateAndTime(other.getDate(), other.getTimeSlot());
     }
 
     public boolean isSameReservation(Reservation other) {

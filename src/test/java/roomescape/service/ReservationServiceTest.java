@@ -186,18 +186,36 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 이미 예약된 다른 시간으로 수정하려 하면 예외가 발생한다.")
-    void 중복_시간_예약_수정_예외_발생() {
+    @DisplayName("예약을 이미 예약된 다른 시간으로 수정하면 대기로 변경된다.")
+    void 중복_시간_예약_수정시_대기로_변경() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation target = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
                 savedTheme.getId(), REQUEST_TIME);
         TimeSlot otherTime = timeSlotRepository.save(new TimeSlot(LocalTime.of(13, 0)));
         reservationService.saveReservation("네오", futureDate, otherTime.getId(), savedTheme.getId(), REQUEST_TIME);
 
-        assertThatThrownBy(() -> reservationService.updateReservation(
-                target.getId(), "브라운", futureDate, otherTime.getId(), REQUEST_TIME
-        )).isInstanceOf(DuplicateException.class)
-                .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
+        reservationService.updateReservation(target.getId(), "브라운", futureDate, otherTime.getId(), REQUEST_TIME);
+
+        Reservation updatedReservation = reservationService.getReservationById(target.getId());
+        assertThat(updatedReservation.getTimeSlot()).isEqualTo(otherTime);
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("대기를 예약이 없는 시간으로 수정하면 예약으로 변경된다.")
+    void 대기_예약을_빈_시간으로_수정시_예약으로_변경() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
+                savedTheme.getId(), REQUEST_TIME);
+        Reservation waiting = reservationService.saveReservation("네오", futureDate, savedTimeSlot.getId(),
+                savedTheme.getId(), REQUEST_TIME);
+        TimeSlot emptyTime = timeSlotRepository.save(new TimeSlot(LocalTime.of(13, 0)));
+
+        reservationService.updateReservation(waiting.getId(), "네오", futureDate, emptyTime.getId(), REQUEST_TIME);
+
+        Reservation updatedReservation = reservationService.getReservationById(waiting.getId());
+        assertThat(updatedReservation.getTimeSlot()).isEqualTo(emptyTime);
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
     @Test
