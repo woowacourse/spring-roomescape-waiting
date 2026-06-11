@@ -41,7 +41,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservationTime
         );
 
-        return Reservation.of(
+        return new Reservation(
                 resultSet.getLong("id"),
                 resultSet.getString("reservation_name"),
                 slot,

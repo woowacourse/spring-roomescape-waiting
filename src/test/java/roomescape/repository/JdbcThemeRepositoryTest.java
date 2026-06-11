@@ -177,6 +177,6 @@ class JdbcThemeRepositoryTest {
             final ReservationTime reservationTime
     ) {
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        return Reservation.createNew(name, slot, date.minusDays(1).atStartOfDay());
+        return new Reservation(name, slot, date.minusDays(1).atStartOfDay());
     }
 }

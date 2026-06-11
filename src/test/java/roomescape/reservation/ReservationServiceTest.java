@@ -266,7 +266,7 @@ class ReservationServiceTest {
             Theme theme = saveTheme();
             ReservationTime time = saveTime("10:00");
             ReservationSlot slot = saveSlot(LocalDate.now().minusDays(1), theme, time);
-            return reservationRepository.save(Reservation.of(
+            return reservationRepository.save(new Reservation(
                     1L,
                     "쿠다",
                     slot,

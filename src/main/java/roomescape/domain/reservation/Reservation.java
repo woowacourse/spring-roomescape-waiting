@@ -15,12 +15,14 @@ public class Reservation {
     private final ReservationSlot slot;
     private final LocalDateTime createdAt;
 
-    private Reservation(
+    public Reservation(
             final Long id,
             final String name,
             final ReservationSlot slot,
             final LocalDateTime createdAt
     ) {
+        validateId(id);
+        validateSlot(slot);
         validate(createdAt);
         this.id = id;
         this.name = ReservationName.from(name);
@@ -28,23 +30,17 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public static Reservation createNew(
+    public Reservation(
             final String name,
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
         validateReservable(slot, standardDateTime);
-        return new Reservation(null, name, slot, standardDateTime);
-    }
-
-    public static Reservation of(
-            final Long id,
-            final String name,
-            final ReservationSlot slot,
-            final LocalDateTime createdAt
-    ) {
-        validateId(id);
-        return new Reservation(id, name, slot, createdAt);
+        validate(standardDateTime);
+        this.id = null;
+        this.name = ReservationName.from(name);
+        this.slot = slot;
+        this.createdAt = standardDateTime;
     }
 
     public Reservation withId(final Long id) {
@@ -72,11 +68,15 @@ public class Reservation {
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
-        if (slot == null) {
-            throw new IllegalArgumentException("예약 슬롯은 비어있으면 안됩니다.");
-        }
+        validateSlot(slot);
         if (slot.isPast(standardDateTime)) {
             throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
+        }
+    }
+
+    private static void validateSlot(final ReservationSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯은 비어있으면 안됩니다.");
         }
     }
 

@@ -193,6 +193,6 @@ class ReservationWaitingTest {
         ReservationTime reservationTime = ReservationTime.of(1L, time);
         ReservationSlot slot = new ReservationSlot(slotId, date, theme, reservationTime);
 
-        return Reservation.of(1L, "쿠다", slot, date.minusDays(1).atStartOfDay());
+        return new Reservation(1L, "쿠다", slot, date.minusDays(1).atStartOfDay());
     }
 }

@@ -200,7 +200,7 @@ public class ReservationService {
             final LocalDateTime requestedAt
     ) {
         try {
-            return Reservation.createNew(name, slot, requestedAt);
+            return new Reservation(name, slot, requestedAt);
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }

@@ -39,7 +39,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 reservationTime
         );
 
-        Reservation reservation = Reservation.of(
+        Reservation reservation = new Reservation(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 slot,

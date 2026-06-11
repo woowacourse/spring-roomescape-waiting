@@ -26,7 +26,7 @@ class ReservationTest {
         ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         // when & then
-        assertThatCode(() -> Reservation.createNew(name, slot, LocalDateTime.now()))
+        assertThatCode(() -> new Reservation(name, slot, LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
@@ -39,7 +39,7 @@ class ReservationTest {
         ReservationSlot slot = createSlot(LocalDate.parse("2026-03-08"), LocalTime.parse("10:00"));
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, slot, LocalDateTime.now()))
+        assertThatThrownBy(() -> new Reservation(name, slot, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -50,7 +50,7 @@ class ReservationTest {
         ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         // when
-        Reservation reservation = Reservation.createNew(" 쿠다 ", slot, LocalDateTime.now());
+        Reservation reservation = new Reservation(" 쿠다 ", slot, LocalDateTime.now());
 
         // then
         assertThat(reservation.getName()).isEqualTo("쿠다");
@@ -64,7 +64,7 @@ class ReservationTest {
         String name = "쿠다";
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, null, LocalDateTime.now()))
+        assertThatThrownBy(() -> new Reservation(name, null, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -77,7 +77,7 @@ class ReservationTest {
         LocalDateTime standardDateTime = LocalDateTime.parse("2026-03-08T10:01:00");
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, slot, standardDateTime))
+        assertThatThrownBy(() -> new Reservation(name, slot, standardDateTime))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(Reservation.PAST_RESERVATION_MESSAGE);
     }
@@ -87,7 +87,7 @@ class ReservationTest {
     void isPastReservation() {
         // given
         ReservationSlot slot = createSlot(LocalDate.parse("2026-03-08"), LocalTime.parse("10:00"));
-        Reservation reservation = Reservation.of(1L, "쿠다", slot, LocalDateTime.now());
+        Reservation reservation = new Reservation(1L, "쿠다", slot, LocalDateTime.now());
 
         // when
         boolean past = reservation.isPast(LocalDateTime.parse("2026-03-08T10:01:00"));

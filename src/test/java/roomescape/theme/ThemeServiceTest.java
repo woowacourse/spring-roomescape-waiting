@@ -72,7 +72,7 @@ class ThemeServiceTest {
         );
         ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
         ReservationSlot slot = new ReservationSlot(LocalDate.parse("2026-08-06"), theme, time);
-        fixture.reservationRepository.save(Reservation.createNew("쿠다", slot, LocalDate.now().atStartOfDay()));
+        fixture.reservationRepository.save(new Reservation("쿠다", slot, LocalDate.now().atStartOfDay()));
 
         assertThrows(ConflictException.class, () -> fixture.themeService.deleteById(theme.getId()));
     }
