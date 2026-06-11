@@ -37,7 +37,7 @@ public class AdminTimeService {
                 .toList();
     }
 
-    public void delete(Long id) {
+    public void delete(long id) {
         try {
             timeRepository.delete(id);
         } catch (DataIntegrityViolationException e) {

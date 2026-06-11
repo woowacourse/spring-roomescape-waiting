@@ -8,5 +8,5 @@ import roomescape.domain.Time;
 public interface TimeRepository {
     List<Time> findAll();
     Long save(LocalTime startAt);
-    void delete(Long id);
+    void delete(long id);
 }

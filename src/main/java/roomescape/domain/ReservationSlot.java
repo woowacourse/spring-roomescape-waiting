@@ -40,7 +40,7 @@ public class ReservationSlot {
         return reservation;
     }
 
-    public ReservationUpdate moveOut(Long reservationId, String name, LocalDateTime now) {
+    public ReservationUpdate moveOut(long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(reservation, name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
@@ -71,7 +71,7 @@ public class ReservationSlot {
         return Optional.of(nextReservation);
     }
 
-    public ReservationDeletion deleteReservation(Long reservationId, String name, LocalDateTime now) {
+    public ReservationDeletion deleteReservation(long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(reservation, name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
@@ -92,7 +92,7 @@ public class ReservationSlot {
                 .count() + 1;
     }
 
-    private Reservation findReservation(Long reservationId) {
+    private Reservation findReservation(long reservationId) {
         return reservations.stream()
                 .filter(r -> r.getId().equals(reservationId))
                 .findFirst()
@@ -120,12 +120,6 @@ public class ReservationSlot {
         if (duplicated) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_RESERVATION);
         }
-    }
-
-    public Optional<Reservation> getReservedReservation() {
-        return reservations.stream()
-                .filter(r -> r.getStatus() == Status.RESERVED)
-                .findFirst();
     }
 
     public ReservationSlotInfo getSlot() {

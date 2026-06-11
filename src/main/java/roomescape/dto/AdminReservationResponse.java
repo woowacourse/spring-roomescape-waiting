@@ -10,7 +10,7 @@ import roomescape.domain.Time;
 import roomescape.domain.vo.ReservationSlotInfo;
 
 public record AdminReservationResponse(
-        Long id,
+        long id,
         LocalDate date,
         String themeName,
 

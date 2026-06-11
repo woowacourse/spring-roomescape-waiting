@@ -11,7 +11,7 @@ import roomescape.domain.Time;
 import roomescape.domain.vo.ReservationSlotInfo;
 
 public record ReservationResponse(
-        Long reservationId,
+        long reservationId,
         String name,
         String status,
         LocalDate date,

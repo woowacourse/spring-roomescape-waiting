@@ -37,7 +37,7 @@ public class JdbcTimeRepository implements TimeRepository {
         return jdbcInsert.executeAndReturnKey(Map.of("start_at", startAt)).longValue();
     }
 
-    public void delete(Long id) {
+    public void delete(long id) {
         jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
     }
 }

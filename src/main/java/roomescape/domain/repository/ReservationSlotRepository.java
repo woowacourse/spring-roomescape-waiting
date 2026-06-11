@@ -9,12 +9,12 @@ import roomescape.domain.ReservationSlot;
 import roomescape.domain.vo.ReservationSlotInfo;
 
 public interface ReservationSlotRepository {
-    ReservationSlot findByIdForUpdate(Long reservationSlotId);
-    ReservationSlot findByReservationIdForUpdate(Long reservationId);
+    ReservationSlot findByIdForUpdate(long reservationSlotId);
+    ReservationSlot findByReservationIdForUpdate(long reservationId);
     List<ReservationSlotInfo> findAll();
-    Long findSlotIdByReservationId(Long reservationId);
-    Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-    Long save(LocalDate date, Long timeId, Long themeId);
+    Long findSlotIdByReservationId(long reservationId);
+    Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    Long save(LocalDate date, long timeId, long themeId);
     Reservation saveReservation(Reservation reservation);
     void updateReservation(Reservation reservation);
 }

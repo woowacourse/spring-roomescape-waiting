@@ -59,20 +59,20 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public ReservationSlot findByIdForUpdate(Long id) {
+    public ReservationSlot findByIdForUpdate(long id) {
         ReservationSlotInfo slot = findSlotByIdForUpdate(id);
         List<Reservation> reservations = findActiveReservationsBySlotId(id);
         return new ReservationSlot(slot, reservations);
     }
 
     @Override
-    public ReservationSlot findByReservationIdForUpdate(Long reservationId) {
+    public ReservationSlot findByReservationIdForUpdate(long reservationId) {
         Long reservationSlotId = findReservationSlotIdByReservationId(reservationId);
         return findByIdForUpdate(reservationSlotId);
     }
 
     @Override
-    public Long findSlotIdByReservationId(Long reservationId) {
+    public Long findSlotIdByReservationId(long reservationId) {
         String sql = """
                 SELECT reservation_slot_id
                 FROM reservation
@@ -81,7 +81,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return jdbcTemplate.queryForObject(sql, Long.class, reservationId);
     }
 
-    private Long findReservationSlotIdByReservationId(Long reservationId) {
+    private Long findReservationSlotIdByReservationId(long reservationId) {
         String sql = """
                 SELECT reservation_slot_id
                 FROM reservation
@@ -90,7 +90,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return jdbcTemplate.queryForObject(sql, Long.class, reservationId);
     }
 
-    private ReservationSlotInfo findSlotByIdForUpdate(Long id) {
+    private ReservationSlotInfo findSlotByIdForUpdate(long id) {
         String sql = """
                 SELECT rs.id,
                        rs.date,
@@ -109,7 +109,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return jdbcTemplate.queryForObject(sql, slotRowMapper, id);
     }
 
-    private List<Reservation> findActiveReservationsBySlotId(Long slotId) {
+    private List<Reservation> findActiveReservationsBySlotId(long slotId) {
         String sql = """
                 SELECT id,
                        name,
@@ -125,7 +125,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId
+    public Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId
     ) {
         String sql = """
                 SELECT r.id
@@ -163,7 +163,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Long save(LocalDate date, Long timeId, Long themeId) {
+    public Long save(LocalDate date, long timeId, long themeId) {
         return reservationSlotInsert.executeAndReturnKey(Map.of(
                 "date", date,
                 "time_id", timeId,
