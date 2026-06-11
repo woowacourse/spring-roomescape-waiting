@@ -35,10 +35,7 @@ CREATE TABLE reservation
     theme_id BIGINT,
     slot_id  BIGINT      NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
-    CONSTRAINT uk_reservation UNIQUE (`date`, time_id, theme_id),
     CONSTRAINT uk_reservation_slot_id UNIQUE (slot_id)
 );
 
@@ -52,9 +49,6 @@ CREATE TABLE reservation_waiting
     theme_id         BIGINT,
     slot_id          BIGINT      NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
-    CONSTRAINT uk_reservation_waiting UNIQUE (name, reservation_date, time_id, theme_id),
     CONSTRAINT uk_reservation_waiting_slot_id_name UNIQUE (name, slot_id)
 )
