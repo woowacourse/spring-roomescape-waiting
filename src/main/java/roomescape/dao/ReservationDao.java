@@ -28,40 +28,53 @@ public class ReservationDao {
                 resultSet.getString("thumbnail")
         );
 
-        return new Reservation(
-                resultSet.getLong("id"),
-                resultSet.getString("reservation_name"),
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getLong("slot_id"),
                 resultSet.getDate("date").toLocalDate(),
                 reservationTime,
                 theme
+        );
+
+        return new Reservation(
+                resultSet.getLong("id"),
+                resultSet.getString("reservation_name"),
+                slot
         );
     };
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
+    private final ReservationSlotDao reservationSlotDao;
 
-    public ReservationDao(JdbcTemplate jdbcTemplate) {
+    public ReservationDao(JdbcTemplate jdbcTemplate, ReservationSlotDao reservationSlotDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.reservationSlotDao = reservationSlotDao;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
     }
 
     public Reservation insert(Reservation reservation) {
+        ReservationSlot slot = findOrCreateSlot(reservation.getSlot());
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
         parameters.put("date", reservation.getDate());
         parameters.put("time_id", reservation.getTime().getId());
         parameters.put("theme_id", reservation.getTheme().getId());
+        parameters.put("slot_id", slot.getId());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
         return new Reservation(
                 generatedId.longValue(),
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
+                slot
         );
+    }
+
+    public ReservationSlot findOrCreateSlot(ReservationSlot slot) {
+        return reservationSlotDao.selectByDateAndTimeIdAndThemeId(slot)
+                .orElseGet(() -> reservationSlotDao.insert(slot));
     }
 
     public List<Reservation> select() {
@@ -123,9 +136,11 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
     }
 
-    public Reservation update(Long reservationId, LocalDate date, long timeId) {
-        String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, date, timeId, reservationId);
+    public Reservation update(Long reservationId, ReservationSlot slot) {
+        ReservationSlot savedSlot = findOrCreateSlot(slot);
+
+        String sql = "UPDATE reservation SET date = ?, time_id = ?, slot_id = ?  WHERE id = ?";
+        jdbcTemplate.update(sql, savedSlot.getDate(), savedSlot.getTimeId(), savedSlot.getId(), reservationId);
         return selectById(reservationId).get();
     }
 
@@ -139,6 +154,7 @@ public class ReservationDao {
                 SELECT r.id,
                        r.name as reservation_name,
                        r.date,
+                       r.slot_id,
                        rt.id as time_id,
                        rt.start_at,
                        t.id as theme_id,

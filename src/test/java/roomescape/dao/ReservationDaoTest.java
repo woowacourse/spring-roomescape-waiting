@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -16,7 +17,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class})
+@Import({ReservationDao.class, ReservationSlotDao.class, ReservationTimeDao.class, ThemeDao.class})
 class ReservationDaoTest {
 
     @Autowired
@@ -27,6 +28,8 @@ class ReservationDaoTest {
 
     @Autowired
     private ThemeDao themeDao;
+    @Autowired
+    private ReservationSlotDao reservationSlotDao;
 
     @Test
     void 예약을_생성한다() {
@@ -182,8 +185,10 @@ class ReservationDaoTest {
         Reservation saved = reservationDao.insert(
                 Reservation.createWithoutId("브라운", LocalDate.of(2026, 5, 5), time1, theme));
 
+        ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 5, 6), time2, theme);
+
         // when
-        Reservation updated = reservationDao.update(saved.getId(), LocalDate.of(2026, 5, 6), time2.getId());
+        Reservation updated = reservationDao.update(saved.getId(), slot);
 
         // then
         assertAll(

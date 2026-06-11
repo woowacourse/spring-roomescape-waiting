@@ -101,7 +101,7 @@ public class ReservationService {
         slot.validateNotPast(now);
         validateUniqueExcludingSelf(slot, reservationId);
 
-        Reservation updateReservation = reservationDao.update(reservationId, command.date(), command.timeId());
+        Reservation updateReservation = reservationDao.update(reservationId, slot);
         return ReservationResponse.from(updateReservation);
     }
 
