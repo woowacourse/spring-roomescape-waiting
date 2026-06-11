@@ -56,6 +56,11 @@ public class ReservationSlotDao {
         return new ReservationSlot(generatedId.longValue(), slot.getDate(), slot.getTime(), slot.getTheme());
     }
 
+    public ReservationSlot findOrCreate(ReservationSlot slot) {
+        return selectByDateAndTimeIdAndThemeId(slot)
+                .orElseGet(() -> insert(slot));
+    }
+
     public Optional<ReservationSlot> selectByDateAndTimeIdAndThemeId(ReservationSlot slot) {
         try {
             String sql = baseSelectSql() + """

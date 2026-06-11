@@ -76,6 +76,31 @@ public class ReservationSlotDaoTest {
         assertThat(found).isEmpty();
     }
 
+    @Test
+    void 예약_슬롯이_없으면_생성한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        ReservationSlot slot = ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme);
+
+        ReservationSlot saved = reservationSlotDao.findOrCreate(slot);
+
+        assertThat(saved.getId()).isNotNull();
+        assertThat(reservationSlotDao.selectById(saved.getId())).contains(saved);
+    }
+
+    @Test
+    void 예약_슬롯이_있으면_기존_슬롯을_반환한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        ReservationSlot slot = ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme);
+
+        ReservationSlot saved = reservationSlotDao.insert(slot);
+        ReservationSlot found = reservationSlotDao.findOrCreate(slot);
+
+        assertThat(found).isEqualTo(saved);
+
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }

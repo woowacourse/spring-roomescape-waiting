@@ -56,7 +56,7 @@ public class ReservationWaitingDao {
     }
 
     public ReservationWaiting insert(ReservationWaiting reservationWaiting) {
-        ReservationSlot slot = findOrCreateSlot(reservationWaiting.getSlot());
+        ReservationSlot slot = reservationSlotDao.findOrCreate(reservationWaiting.getSlot());
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservationWaiting.getName());
@@ -115,11 +115,6 @@ public class ReservationWaitingDao {
     public List<ReservationWaiting> selectByName(String name) {
         String sql = baseSelectSql() + "WHERE rw.name = ?";
         return jdbcTemplate.query(sql, ROW_MAPPER, name);
-    }
-
-    private ReservationSlot findOrCreateSlot(ReservationSlot slot) {
-        return reservationSlotDao.selectByDateAndTimeIdAndThemeId(slot)
-                .orElseGet(() -> reservationSlotDao.insert(slot));
     }
 
     private String baseSelectSql() {

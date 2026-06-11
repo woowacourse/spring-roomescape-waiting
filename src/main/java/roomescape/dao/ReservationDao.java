@@ -55,7 +55,7 @@ public class ReservationDao {
     }
 
     public Reservation insert(Reservation reservation) {
-        ReservationSlot slot = findOrCreateSlot(reservation.getSlot());
+        ReservationSlot slot = reservationSlotDao.findOrCreate(reservation.getSlot());
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
@@ -70,11 +70,6 @@ public class ReservationDao {
                 reservation.getName(),
                 slot
         );
-    }
-
-    public ReservationSlot findOrCreateSlot(ReservationSlot slot) {
-        return reservationSlotDao.selectByDateAndTimeIdAndThemeId(slot)
-                .orElseGet(() -> reservationSlotDao.insert(slot));
     }
 
     public List<Reservation> select() {
@@ -137,7 +132,7 @@ public class ReservationDao {
     }
 
     public Reservation update(Long reservationId, ReservationSlot slot) {
-        ReservationSlot savedSlot = findOrCreateSlot(slot);
+        ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
 
         String sql = "UPDATE reservation SET date = ?, time_id = ?, slot_id = ?  WHERE id = ?";
         jdbcTemplate.update(sql, savedSlot.getDate(), savedSlot.getTimeId(), savedSlot.getId(), reservationId);
