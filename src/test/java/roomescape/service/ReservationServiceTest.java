@@ -566,6 +566,85 @@ class ReservationServiceTest {
                 .isEmpty();
     }
 
+    @Test
+    void 서로_다른_예약을_같은_슬롯으로_동시에_변경하면_하나만_성공한다() throws InterruptedException {
+        ReservationTime originalTime = saveTime(10, 0);
+        ReservationTime targetTime = saveTime(11, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+
+        Reservation firstReservation = saveReservation(
+                "브라운",
+                LocalDate.of(2026, 6, 20),
+                originalTime,
+                theme
+        );
+        Reservation secondReservation = saveReservation(
+                "로지",
+                LocalDate.of(2026, 6, 21),
+                originalTime,
+                theme
+        );
+
+        LocalDate targetDate = LocalDate.of(2026, 6, 22);
+        UpdateReservationCommand command = new UpdateReservationCommand(targetDate, targetTime.getId());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        CountDownLatch readyLatch = new CountDownLatch(2);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(2);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+        List<Throwable> unexpectedExceptions = Collections.synchronizedList(new ArrayList<>());
+
+        List<Long> reservationIds = List.of(firstReservation.getId(), secondReservation.getId());
+
+        for (Long reservationId : reservationIds) {
+            executorService.submit(() -> {
+                try {
+                    readyLatch.countDown();
+                    startLatch.await();
+
+                    reservationService.update(
+                            reservationId,
+                            command,
+                            LocalDateTime.of(2026, 6, 19, 10, 0)
+                    );
+
+                    successCount.incrementAndGet();
+                } catch (RoomEscapeException exception) {
+                    if (exception.getErrorCode() == ReservationErrorCode.DUPLICATE) {
+                        duplicateCount.incrementAndGet();
+                    } else {
+                        unexpectedExceptions.add(exception);
+                    }
+                } catch (Throwable throwable) {
+                    unexpectedExceptions.add(throwable);
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        startLatch.countDown();
+        assertThat(doneLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        executorService.shutdown();
+
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+
+        assertThat(unexpectedExceptions).isEmpty();
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(duplicateCount.get()).isEqualTo(1);
+        assertThat(reservations).hasSize(2);
+        assertThat(reservations)
+                .filteredOn(response ->
+                        response.date().equals(targetDate)
+                                && response.time().id().equals(targetTime.getId())
+                )
+                .hasSize(1);
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
