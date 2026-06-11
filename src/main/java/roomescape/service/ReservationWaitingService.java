@@ -7,10 +7,7 @@ import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.*;
 import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
@@ -23,21 +20,25 @@ public class ReservationWaitingService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final ReservationDao reservationDao;
+    private final ReservationSlotDao reservationSlotDao;
 
-    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, ReservationDao reservationDao) {
+    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, ReservationDao reservationDao, ReservationSlotDao reservationSlotDao) {
         this.reservationWaitingDao = reservationWaitingDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.reservationDao = reservationDao;
+        this.reservationSlotDao = reservationSlotDao;
     }
 
     @Transactional
     public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationSlot slot = createReservationSlot(command);
-        validateWaitingCreatable(command.name(), slot, now);
+        ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
 
-        ReservationWaiting savedWaiting = saveReservationWaiting(command.name(), now, slot);
-        int order = calculateWaitingOrder(slot, savedWaiting);
+        validateWaitingCreatable(command.name(), savedSlot, now);
+
+        ReservationWaiting savedWaiting = saveReservationWaiting(command.name(), now, savedSlot);
+        int order = calculateWaitingOrder(savedSlot, savedWaiting);
 
         return ReservationWaitingResponse.from(savedWaiting, order);
     }
@@ -98,9 +99,7 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(
                 name,
                 now,
-                slot.getDate(),
-                slot.getTime(),
-                slot.getTheme()
+                slot
         );
 
         try {
@@ -110,7 +109,7 @@ public class ReservationWaitingService {
         }
     }
 
-    private int calculateWaitingOrder(ReservationSlot slot, ReservationWaiting savedWaiting){
+    private int calculateWaitingOrder(ReservationSlot slot, ReservationWaiting savedWaiting) {
         ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
         return waitings.orderOf(savedWaiting);
     }
