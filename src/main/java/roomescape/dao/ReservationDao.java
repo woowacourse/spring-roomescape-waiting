@@ -96,12 +96,22 @@ public class ReservationDao {
     }
 
     public boolean existsByTimeId(long timeId) {
-        String sql = "SELECT COUNT(*) > 0 FROM reservation WHERE time_id = ?";
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM reservation AS r
+            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+            WHERE rs.time_id = ?
+            """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
     }
 
     public boolean existsByThemeId(long themeId) {
-        String sql = "SELECT COUNT(*) > 0 FROM reservation WHERE theme_id = ?";
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM reservation AS r
+            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+            WHERE rs.theme_id = ?
+            """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
