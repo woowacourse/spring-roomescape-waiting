@@ -69,7 +69,6 @@ class ReservationsTest {
         assertThat(result.getName()).isEqualTo(NAME);
     }
 
-
     @Test
     void 같은_슬롯에서_먼저_예약한_사람이_rank_0이다() {
         Reservation first = RoomEscapeFixture.reservation()

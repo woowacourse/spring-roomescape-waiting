@@ -5,8 +5,13 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.controller.dto.request.ReservationCreateRequest;
+import roomescape.domain.reservation.RankedReservation;
+import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservation.Status;
+import roomescape.service.ReservationService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -22,6 +32,9 @@ class RoomescapeApplicationTest {
     private static final String AVAILABLE_DATE = "2099-06-01";
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ReservationService reservationService;
 
     @LocalServerPort
     int port;
@@ -268,6 +281,49 @@ class RoomescapeApplicationTest {
     @Test
     void 존재하지_않는_테마로_예약시_404를_반환한다() {
         reserve("zeze", "2099-06-01", 1L, 999L, 404);
+    }
+
+
+    @Test
+    void 동시에_10명이_첫_예약_요청시_1명만_승인상태가_된다() throws Exception {
+        // 한 슬롯에 Approve된 예약은 반드시 1건 이하여야 한다.
+        int threads = 10;
+        var ready = new CountDownLatch(threads);
+        var start = new CountDownLatch(1);
+        var done = new CountDownLatch(threads);
+        var approved = new AtomicInteger();
+        var waiting = new AtomicInteger();
+
+        var pool = Executors.newFixedThreadPool(threads);
+
+        for (int i = 0; i < threads; i++) {
+            ReservationCreateRequest request = RoomEscapeFixture.reservationCreateRequestWithName(
+                    new ReservationName(i + ""));
+            pool.submit(() -> {
+                ready.countDown();
+                try {
+                    start.await();
+                    RankedReservation result = reservationService.reserve(request, LocalDateTime.now());
+
+                    if (result.getReservation().getStatus() == Status.APPROVED) {
+                        approved.incrementAndGet();
+                    }
+                    if (result.getReservation().getStatus() == Status.WAITING) {
+                        waiting.incrementAndGet();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+        ready.await();
+        start.countDown();
+        done.await();
+
+        AssertionsForClassTypes.assertThat(approved.get()).isEqualTo(1);
+        AssertionsForClassTypes.assertThat(waiting.get()).isEqualTo(9);
     }
 
     private int reserveAndGetId(String name, String date, Long timeId, Long themeId) {

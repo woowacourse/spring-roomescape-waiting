@@ -52,8 +52,8 @@ public class Reservation {
         return slot.isSame(target.slot);
     }
 
-    public boolean hasSameSlot(Slot slot) {
-        return slot.isSame(slot);
+    public boolean hasSameSlot(Slot target) {
+        return slot.isSame(target);
     }
 
     public boolean isSameSlot(Slot target) {
@@ -65,7 +65,7 @@ public class Reservation {
     }
 
     public boolean hasSameName(ReservationName name) {
-        return name.equals(name);
+        return this.name.equals(name);
     }
 
     public Reservation withId(long id) {

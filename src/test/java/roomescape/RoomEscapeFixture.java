@@ -48,36 +48,12 @@ public class RoomEscapeFixture {
         return new ThemeFamousFindRequest(7L, FUTURE_DATE.getValue(), 10L);
     }
 
-    public static ReservationCreateRequest reservationCreateRequest() {
-        return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
-    }
-
     public static ReservationCreateRequest reservationCreateRequestWithName(ReservationName name) {
         return new ReservationCreateRequest(name.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
     }
 
-    public static ReservationCreateRequest reservationCreateRequestWithNullName() {
-        return new ReservationCreateRequest(null, FUTURE_DATE.getValue(), 1L, 1L);
-    }
-
-    public static ReservationCreateRequest reservationCreateRequestWithNullDate() {
-        return new ReservationCreateRequest(NAME.getValue(), null, 1L, 1L);
-    }
-
-    public static ReservationCreateRequest reservationCreateRequestWithNullTimeId() {
-        return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getValue(), null, 1L);
-    }
-
-    public static ReservationCreateRequest reservationCreateRequestWithPastDate() {
-        return new ReservationCreateRequest(NAME.getValue(), PAST_DATE.getValue(), 1L, 1L);
-    }
-
     public static ReservationUpdateRequest reservationUpdateRequest() {
         return new ReservationUpdateRequest(NAME.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
-    }
-
-    public static ReservationUpdateRequest reservationUpdateRequestWithPastDate() {
-        return new ReservationUpdateRequest(NAME.getValue(), PAST_DATE.getValue(), 1L, 1L);
     }
 
     public static class SlotBuilder {
