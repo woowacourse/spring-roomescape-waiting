@@ -53,7 +53,7 @@ public class Reservation {
     }
 
     public boolean isApproved() {
-        return status.isApproved();
+        return status == Status.APPROVED;
     }
 
     public Reservation withId(long id) {
