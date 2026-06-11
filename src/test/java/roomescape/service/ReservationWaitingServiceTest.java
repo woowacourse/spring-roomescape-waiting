@@ -18,6 +18,13 @@ import roomescape.domain.Theme;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -168,6 +175,64 @@ class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 같은_슬롯에_동시에_대기를_신청해도_순번이_중복되지_않는다() throws InterruptedException {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 20);
+
+        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
+
+        int threadCount = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        List<ReservationWaitingResponse> responses = Collections.synchronizedList(new ArrayList<>());
+        List<Throwable> unexpectedExceptions = Collections.synchronizedList(new ArrayList<>());
+
+        for (int i = 0; i < threadCount; i++) {
+            int index = i;
+
+            executorService.submit(() -> {
+                try {
+                    readyLatch.countDown();
+                    startLatch.await();
+
+                    CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
+                            "사용자" + index,
+                            date,
+                            time.getId(),
+                            theme.getId()
+                    );
+
+                    ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(
+                            command,
+                            LocalDateTime.of(2026, 6, 19, 10, 0)
+                    );
+
+                    responses.add(response);
+                } catch (Throwable throwable) {
+                    unexpectedExceptions.add(throwable);
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        startLatch.countDown();
+        assertThat(doneLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        executorService.shutdown();
+
+        assertThat(unexpectedExceptions).isEmpty();
+        assertThat(responses).hasSize(threadCount);
+        assertThat(responses)
+                .extracting(ReservationWaitingResponse::order)
+                .containsExactlyInAnyOrder(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
     private ReservationTime saveTime(int hour, int minute) {
