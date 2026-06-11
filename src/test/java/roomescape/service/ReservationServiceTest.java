@@ -26,6 +26,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -423,6 +427,62 @@ class ReservationServiceTest {
         assertThat(waitingResponses.getFirst().status()).isEqualTo(ReservationStatus.WAITING);
         assertThat(waitingResponses.getFirst().order()).isEqualTo(1);
 
+    }
+
+    @Test
+    void 같은_슬롯에_동시에_예약하면_하나만_성공한다() throws InterruptedException {
+        // given
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 20);
+
+        int threadCount = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+
+        // when
+        for (int i = 0; i < threadCount; i++) {
+            int index = i;
+            executorService.submit(() -> {
+                try {
+                    readyLatch.countDown();
+                    startLatch.await();
+
+                    CreateReservationCommand command = new CreateReservationCommand(
+                            "사용자" + index,
+                            date,
+                            time.getId(),
+                            theme.getId()
+                    );
+
+                    reservationService.addReservation(command, LocalDateTime.of(2026, 6, 19, 10, 0));
+                    successCount.incrementAndGet();
+                } catch (RoomEscapeException exception) {
+                    if (exception.getErrorCode() == ReservationErrorCode.DUPLICATE) {
+                        duplicateCount.incrementAndGet();
+                    }
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+        executorService.shutdown();
+
+        // then
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(duplicateCount.get()).isEqualTo(threadCount - 1);
+        assertThat(reservationService.getAllReservations()).hasSize(1);
     }
 
     private ReservationTime saveTime(int hour, int minute) {
