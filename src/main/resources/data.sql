@@ -25,192 +25,204 @@ VALUES ('공포의 저택', '오래된 저택에서 탈출하세요', '/images/t
        ('미스터리 호텔', '호텔에서 벌어진 사건을 해결하세요', '/images/themes/mystery-hotel.jpg'),
        ('지하 벙커', '폐쇄된 지하 벙커에서 탈출하세요', '/images/themes/bunker.jpg');
 
--- reservation
--- theme_id 1: 12건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-06-10', 1, 1),
-       ('예약자2', '2026-06-12', 2, 1),
-       ('예약자3', '2026-06-12', 3, 1),
-       ('예약자4', '2026-06-12', 4, 1),
-       ('예약자5', '2026-06-12', 5, 1),
-       ('예약자6', '2026-06-11', 1, 1),
-       ('예약자7', '2026-06-11', 2, 1),
-       ('예약자8', '2026-06-10', 3, 1),
-       ('예약자9', '2026-06-10', 4, 1),
-       ('예약자10', '2026-06-10', 5, 1),
-       ('예약자11', '2026-06-10', 6, 1),
-       ('예약자12', '2026-06-09', 7, 1);
-
--- theme_id 2: 10건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-12', 1, 2),
-       ('예약자2', '2026-05-12', 2, 2),
-       ('예약자3', '2026-05-12', 3, 2),
-       ('예약자4', '2026-05-12', 4, 2),
-       ('예약자5', '2026-05-12', 5, 2),
-       ('예약자6', '2026-05-12', 6, 2),
-       ('예약자7', '2026-05-12', 7, 2),
-       ('예약자8', '2026-05-12', 8, 2),
-       ('예약자9', '2026-05-12', 9, 2);
-
--- theme_id 3: 9건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-09', 1, 3),
-       ('예약자2', '2026-05-09', 2, 3),
-       ('예약자3', '2026-05-09', 3, 3),
-       ('예약자4', '2026-05-09', 4, 3),
-       ('예약자5', '2026-05-09', 5, 3),
-       ('예약자6', '2026-05-09', 6, 3),
-       ('예약자7', '2026-05-09', 7, 3),
-       ('예약자8', '2026-04-09', 8, 3),
-       ('예약자9', '2026-04-09', 9, 3);
-
--- theme_id 4: 8건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-08', 1, 4),
-       ('예약자2', '2026-05-08', 2, 4),
-       ('예약자3', '2026-05-08', 3, 4),
-       ('예약자4', '2026-05-08', 4, 4),
-       ('예약자5', '2026-05-08', 5, 4),
-       ('예약자6', '2026-05-08', 6, 4),
-       ('예약자7', '2026-05-08', 7, 4),
-       ('예약자8', '2026-05-08', 8, 4);
-
--- theme_id 5: 7건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-04', 1, 5),
-       ('예약자2', '2026-05-04', 2, 5),
-       ('예약자3', '2026-05-04', 3, 5),
-       ('예약자4', '2026-05-04', 4, 5),
-       ('예약자5', '2026-05-04', 5, 5),
-       ('예약자6', '2026-05-04', 6, 5),
-       ('예약자7', '2026-05-04', 7, 5);
-
--- theme_id 6: 6건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-03', 1, 6),
-       ('예약자2', '2026-05-03', 2, 6),
-       ('예약자3', '2026-05-03', 3, 6),
-       ('예약자4', '2026-05-03', 4, 6),
-       ('예약자5', '2026-05-03', 5, 6),
-       ('예약자6', '2026-05-03', 6, 6);
-
--- theme_id 7: 5건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-05', 1, 7),
-       ('예약자2', '2026-05-04', 2, 7),
-       ('예약자3', '2026-05-03', 3, 7),
-       ('예약자4', '2026-05-02', 4, 7),
-       ('예약자5', '2026-05-01', 5, 7);
-
--- theme_id 8: 4건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-05', 1, 8),
-       ('예약자2', '2026-05-04', 2, 8),
-       ('예약자3', '2026-05-03', 3, 8),
-       ('예약자4', '2026-05-02', 4, 8);
-
--- theme_id 9: 3건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-05', 1, 9),
-       ('예약자2', '2026-05-04', 2, 9),
-       ('예약자3', '2026-05-03', 3, 9);
-
--- theme_id 10: 2건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-05', 1, 10),
-       ('예약자2', '2026-05-04', 2, 10);
-
--- theme_id 11: 1건
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-05-05', 1, 11);
-
--- 인기 테마 조회용: 2026-05-27 기준 최근 7일 이내 데이터
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('인기1', '2026-05-26', 1, 2),
-       ('인기2', '2026-05-26', 2, 2),
-       ('인기3', '2026-05-25', 3, 2),
-       ('인기4', '2026-05-24', 4, 2),
-       ('인기5', '2026-05-23', 5, 2),
-       ('인기6', '2026-05-26', 1, 3),
-       ('인기7', '2026-05-25', 2, 3),
-       ('인기8', '2026-05-24', 3, 3),
-       ('인기9', '2026-05-23', 4, 3),
-       ('인기10', '2026-05-26', 1, 5),
-       ('인기11', '2026-05-25', 2, 5),
-       ('인기12', '2026-05-24', 3, 5),
-       ('인기13', '2026-05-26', 1, 7),
-       ('인기14', '2026-05-25', 2, 7),
-       ('인기15', '2026-05-26', 1, 9);
-
--- theme_id 12: 최근 7일 밖 데이터라 인기 순위에 포함되면 안 되는 데이터
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('예약자1', '2026-04-20', 1, 12),
-       ('예약자2', '2026-04-20', 2, 12),
-       ('예약자3', '2026-04-20', 3, 12),
-       ('예약자4', '2026-04-20', 4, 12),
-       ('예약자5', '2026-04-20', 5, 12),
-       ('예약자6', '2026-04-20', 6, 12),
-       ('예약자7', '2026-04-20', 7, 12),
-       ('예약자8', '2026-04-20', 8, 12),
-       ('예약자9', '2026-04-20', 9, 12);
-
--- reservation_waiting
--- theme_id 1, date 2026-06-10, time_id 1 → 예약자1이 예약한 슬롯에 대기
-INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
-VALUES ('대기자1', '2026-05-27 10:00:00', '2026-06-10', 1, 1),
-       ('대기자2', '2026-05-27 11:00:00', '2026-06-10', 1, 1),
-       ('대기자3', '2026-05-27 12:00:00', '2026-06-10', 1, 1);
-
--- theme_id 1, date 2026-06-11, time_id 1 → 예약자6이 예약한 슬롯에 대기
-INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
-VALUES ('대기자4', '2026-05-27 10:00:00', '2026-06-11', 1, 1),
-       ('대기자5', '2026-05-27 11:00:00', '2026-06-11', 1, 1);
-
--- theme_id 2, date 2026-05-12, time_id 1 → 예약자1이 예약한 슬롯에 대기
-INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
-VALUES ('대기자6', '2026-05-27 10:00:00', '2026-05-12', 1, 2),
-       ('대기자7', '2026-05-27 11:00:00', '2026-05-12', 1, 2);
-
--- 내 예약/대기 조회 테스트용 - 브라운이 예약도 있고 대기도 있는 케이스
--- 브라운 예약 (theme_id 3, date 2026-06-15, time_id 1)
-INSERT INTO reservation (name, `date`, time_id, theme_id)
-VALUES ('브라운', '2026-06-15', 1, 3);
-
--- 브라운 대기 (이미 예약자1이 예약한 슬롯 - theme_id 1, date 2026-06-10, time_id 1)
-INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
-VALUES ('브라운', '2026-05-27 13:00:00', '2026-06-10', 1, 1);
-
 -- reservation_slot
 INSERT INTO reservation_slot (`date`, time_id, theme_id)
-SELECT DISTINCT `date`, time_id, theme_id
-FROM reservation;
+VALUES
+       ('2026-06-10', 1, 1),
+       ('2026-06-12', 2, 1),
+       ('2026-06-12', 3, 1),
+       ('2026-06-12', 4, 1),
+       ('2026-06-12', 5, 1),
+       ('2026-06-11', 1, 1),
+       ('2026-06-11', 2, 1),
+       ('2026-06-10', 3, 1),
+       ('2026-06-10', 4, 1),
+       ('2026-06-10', 5, 1),
+       ('2026-06-10', 6, 1),
+       ('2026-06-09', 7, 1),
+       ('2026-05-12', 1, 2),
+       ('2026-05-12', 2, 2),
+       ('2026-05-12', 3, 2),
+       ('2026-05-12', 4, 2),
+       ('2026-05-12', 5, 2),
+       ('2026-05-12', 6, 2),
+       ('2026-05-12', 7, 2),
+       ('2026-05-12', 8, 2),
+       ('2026-05-12', 9, 2),
+       ('2026-05-09', 1, 3),
+       ('2026-05-09', 2, 3),
+       ('2026-05-09', 3, 3),
+       ('2026-05-09', 4, 3),
+       ('2026-05-09', 5, 3),
+       ('2026-05-09', 6, 3),
+       ('2026-05-09', 7, 3),
+       ('2026-04-09', 8, 3),
+       ('2026-04-09', 9, 3),
+       ('2026-05-08', 1, 4),
+       ('2026-05-08', 2, 4),
+       ('2026-05-08', 3, 4),
+       ('2026-05-08', 4, 4),
+       ('2026-05-08', 5, 4),
+       ('2026-05-08', 6, 4),
+       ('2026-05-08', 7, 4),
+       ('2026-05-08', 8, 4),
+       ('2026-05-04', 1, 5),
+       ('2026-05-04', 2, 5),
+       ('2026-05-04', 3, 5),
+       ('2026-05-04', 4, 5),
+       ('2026-05-04', 5, 5),
+       ('2026-05-04', 6, 5),
+       ('2026-05-04', 7, 5),
+       ('2026-05-03', 1, 6),
+       ('2026-05-03', 2, 6),
+       ('2026-05-03', 3, 6),
+       ('2026-05-03', 4, 6),
+       ('2026-05-03', 5, 6),
+       ('2026-05-03', 6, 6),
+       ('2026-05-05', 1, 7),
+       ('2026-05-04', 2, 7),
+       ('2026-05-03', 3, 7),
+       ('2026-05-02', 4, 7),
+       ('2026-05-01', 5, 7),
+       ('2026-05-05', 1, 8),
+       ('2026-05-04', 2, 8),
+       ('2026-05-03', 3, 8),
+       ('2026-05-02', 4, 8),
+       ('2026-05-05', 1, 9),
+       ('2026-05-04', 2, 9),
+       ('2026-05-03', 3, 9),
+       ('2026-05-05', 1, 10),
+       ('2026-05-04', 2, 10),
+       ('2026-05-05', 1, 11),
+       ('2026-05-26', 1, 2),
+       ('2026-05-26', 2, 2),
+       ('2026-05-25', 3, 2),
+       ('2026-05-24', 4, 2),
+       ('2026-05-23', 5, 2),
+       ('2026-05-26', 1, 3),
+       ('2026-05-25', 2, 3),
+       ('2026-05-24', 3, 3),
+       ('2026-05-23', 4, 3),
+       ('2026-05-26', 1, 5),
+       ('2026-05-25', 2, 5),
+       ('2026-05-24', 3, 5),
+       ('2026-05-26', 1, 7),
+       ('2026-05-25', 2, 7),
+       ('2026-05-26', 1, 9),
+       ('2026-04-20', 1, 12),
+       ('2026-04-20', 2, 12),
+       ('2026-04-20', 3, 12),
+       ('2026-04-20', 4, 12),
+       ('2026-04-20', 5, 12),
+       ('2026-04-20', 6, 12),
+       ('2026-04-20', 7, 12),
+       ('2026-04-20', 8, 12),
+       ('2026-04-20', 9, 12),
+       ('2026-06-15', 1, 3);
 
-INSERT INTO reservation_slot (`date`, time_id, theme_id)
-SELECT DISTINCT rw.reservation_date, rw.time_id, rw.theme_id
-FROM reservation_waiting rw
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM reservation_slot rs
-    WHERE rs.`date` = rw.reservation_date
-      AND rs.time_id = rw.time_id
-      AND rs.theme_id = rw.theme_id
-);
+-- reservation
+INSERT INTO reservation (name, slot_id)
+VALUES
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 1 AND theme_id = 1)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-12' AND time_id = 2 AND theme_id = 1)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-12' AND time_id = 3 AND theme_id = 1)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-12' AND time_id = 4 AND theme_id = 1)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-12' AND time_id = 5 AND theme_id = 1)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-11' AND time_id = 1 AND theme_id = 1)),
+       ('예약자7', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-11' AND time_id = 2 AND theme_id = 1)),
+       ('예약자8', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 3 AND theme_id = 1)),
+       ('예약자9', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 4 AND theme_id = 1)),
+       ('예약자10', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 5 AND theme_id = 1)),
+       ('예약자11', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 6 AND theme_id = 1)),
+       ('예약자12', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-09' AND time_id = 7 AND theme_id = 1)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 1 AND theme_id = 2)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 2 AND theme_id = 2)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 3 AND theme_id = 2)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 4 AND theme_id = 2)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 5 AND theme_id = 2)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 6 AND theme_id = 2)),
+       ('예약자7', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 7 AND theme_id = 2)),
+       ('예약자8', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 8 AND theme_id = 2)),
+       ('예약자9', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 9 AND theme_id = 2)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 1 AND theme_id = 3)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 2 AND theme_id = 3)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 3 AND theme_id = 3)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 4 AND theme_id = 3)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 5 AND theme_id = 3)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 6 AND theme_id = 3)),
+       ('예약자7', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-09' AND time_id = 7 AND theme_id = 3)),
+       ('예약자8', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-09' AND time_id = 8 AND theme_id = 3)),
+       ('예약자9', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-09' AND time_id = 9 AND theme_id = 3)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 1 AND theme_id = 4)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 2 AND theme_id = 4)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 3 AND theme_id = 4)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 4 AND theme_id = 4)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 5 AND theme_id = 4)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 6 AND theme_id = 4)),
+       ('예약자7', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 7 AND theme_id = 4)),
+       ('예약자8', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-08' AND time_id = 8 AND theme_id = 4)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 1 AND theme_id = 5)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 2 AND theme_id = 5)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 3 AND theme_id = 5)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 4 AND theme_id = 5)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 5 AND theme_id = 5)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 6 AND theme_id = 5)),
+       ('예약자7', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 7 AND theme_id = 5)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 1 AND theme_id = 6)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 2 AND theme_id = 6)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 3 AND theme_id = 6)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 4 AND theme_id = 6)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 5 AND theme_id = 6)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 6 AND theme_id = 6)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-05' AND time_id = 1 AND theme_id = 7)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 2 AND theme_id = 7)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 3 AND theme_id = 7)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-02' AND time_id = 4 AND theme_id = 7)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-01' AND time_id = 5 AND theme_id = 7)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-05' AND time_id = 1 AND theme_id = 8)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 2 AND theme_id = 8)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 3 AND theme_id = 8)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-02' AND time_id = 4 AND theme_id = 8)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-05' AND time_id = 1 AND theme_id = 9)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 2 AND theme_id = 9)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-03' AND time_id = 3 AND theme_id = 9)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-05' AND time_id = 1 AND theme_id = 10)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-04' AND time_id = 2 AND theme_id = 10)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-05' AND time_id = 1 AND theme_id = 11)),
+       ('인기1', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-26' AND time_id = 1 AND theme_id = 2)),
+       ('인기2', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-26' AND time_id = 2 AND theme_id = 2)),
+       ('인기3', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-25' AND time_id = 3 AND theme_id = 2)),
+       ('인기4', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-24' AND time_id = 4 AND theme_id = 2)),
+       ('인기5', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-23' AND time_id = 5 AND theme_id = 2)),
+       ('인기6', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-26' AND time_id = 1 AND theme_id = 3)),
+       ('인기7', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-25' AND time_id = 2 AND theme_id = 3)),
+       ('인기8', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-24' AND time_id = 3 AND theme_id = 3)),
+       ('인기9', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-23' AND time_id = 4 AND theme_id = 3)),
+       ('인기10', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-26' AND time_id = 1 AND theme_id = 5)),
+       ('인기11', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-25' AND time_id = 2 AND theme_id = 5)),
+       ('인기12', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-24' AND time_id = 3 AND theme_id = 5)),
+       ('인기13', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-26' AND time_id = 1 AND theme_id = 7)),
+       ('인기14', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-25' AND time_id = 2 AND theme_id = 7)),
+       ('인기15', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-26' AND time_id = 1 AND theme_id = 9)),
+       ('예약자1', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 1 AND theme_id = 12)),
+       ('예약자2', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 2 AND theme_id = 12)),
+       ('예약자3', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 3 AND theme_id = 12)),
+       ('예약자4', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 4 AND theme_id = 12)),
+       ('예약자5', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 5 AND theme_id = 12)),
+       ('예약자6', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 6 AND theme_id = 12)),
+       ('예약자7', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 7 AND theme_id = 12)),
+       ('예약자8', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 8 AND theme_id = 12)),
+       ('예약자9', (SELECT id FROM reservation_slot WHERE `date` = '2026-04-20' AND time_id = 9 AND theme_id = 12)),
+       ('브라운', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-15' AND time_id = 1 AND theme_id = 3));
 
-UPDATE reservation r
-SET slot_id = (
-    SELECT rs.id
-    FROM reservation_slot rs
-    WHERE rs.`date` = r.`date`
-      AND rs.time_id = r.time_id
-      AND rs.theme_id = r.theme_id
-);
-
-UPDATE reservation_waiting rw
-SET slot_id = (
-    SELECT rs.id
-    FROM reservation_slot rs
-    WHERE rs.`date` = rw.reservation_date
-      AND rs.time_id = rw.time_id
-      AND rs.theme_id = rw.theme_id
-);
+-- reservation_waiting
+INSERT INTO reservation_waiting (name, created_at, slot_id)
+VALUES
+       ('대기자1', '2026-05-27 10:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 1 AND theme_id = 1)),
+       ('대기자2', '2026-05-27 11:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 1 AND theme_id = 1)),
+       ('대기자3', '2026-05-27 12:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 1 AND theme_id = 1)),
+       ('대기자4', '2026-05-27 10:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-11' AND time_id = 1 AND theme_id = 1)),
+       ('대기자5', '2026-05-27 11:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-11' AND time_id = 1 AND theme_id = 1)),
+       ('대기자6', '2026-05-27 10:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 1 AND theme_id = 2)),
+       ('대기자7', '2026-05-27 11:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-05-12' AND time_id = 1 AND theme_id = 2)),
+       ('브라운', '2026-05-27 13:00:00', (SELECT id FROM reservation_slot WHERE `date` = '2026-06-10' AND time_id = 1 AND theme_id = 1));
