@@ -8,11 +8,14 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import roomescape.domain.vo.LockedReservationSlots;
 import roomescape.domain.Reservation;
+import roomescape.domain.vo.ReservationDeletion;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
+import roomescape.domain.vo.ReservationUpdate;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.CustomException;
@@ -41,29 +44,29 @@ public class ReservationService {
 
     @Transactional
     public void update(Long reservationId, LocalDateTime now, ReservationRequest request) {
-        ReservationSlot currentSlot = reservationSlotRepository.findByReservationId(reservationId);
-
+        Long currentSlotId = reservationSlotRepository.findSlotIdByReservationId(reservationId);
         Long newSlotId = getOrCreateReservationSlotId(request);
-        ReservationSlot newSlot = reservationSlotRepository.findById(newSlotId);
+
+        LockedReservationSlots lockedSlots = findBothSlotsForUpdate(currentSlotId, newSlotId);
+
+        ReservationSlot currentSlot = lockedSlots.currentSlot();
+        ReservationSlot newSlot = lockedSlots.newSlot();
 
         validateSameTheme(currentSlot.getSlot().theme(), newSlot.getSlot().theme());
 
-        Reservation movedReservation = currentSlot.moveOut(reservationId, request.name(), now);
-        Reservation updatedReservation = newSlot.moveIn(movedReservation, request.name(), now);
+        ReservationUpdate promotedReservation = currentSlot.moveOut(reservationId, request.name(), now);
+        Reservation updatedReservation = newSlot.moveIn(promotedReservation.updatedReservation(), request.name(), now);
 
         reservationSlotRepository.updateReservation(updatedReservation);
-        currentSlot.getReservedReservation()
-                .ifPresent(reservationSlotRepository::updateReservation);
-        newSlot.getReservedReservation()
-                .ifPresent(reservationSlotRepository::updateReservation);
+        promotedReservation.promotedReservation().ifPresent(reservationSlotRepository::updateReservation);
     }
 
+    @Transactional
     public void delete(LocalDateTime now, Long reservationId, String name) {
-        ReservationSlot currentSlot = reservationSlotRepository.findByReservationId(reservationId);
-        Reservation deletedReservation = currentSlot.deleteReservation(reservationId, name, now);
-        reservationSlotRepository.updateReservation(deletedReservation);
-        currentSlot.getReservedReservation()
-                .ifPresent(reservationSlotRepository::updateReservation);
+        ReservationSlot currentSlot = reservationSlotRepository.findByReservationIdForUpdate(reservationId);
+        ReservationDeletion promotedReservation = currentSlot.deleteReservation(reservationId, name, now);
+        reservationSlotRepository.updateReservation(promotedReservation.deletedReservation());
+        promotedReservation.promotedReservation().ifPresent(reservationSlotRepository::updateReservation);
     }
 
     public List<ReservationResponse> findAllByName(String username) {
@@ -85,5 +88,19 @@ public class ReservationService {
         if (!reservationTheme.equals(newReservationTheme)) {
             throw new CustomException(ErrorCode.UNALLOWED_CHANGE_RESERVATION_THEME);
         }
+    }
+
+    private LockedReservationSlots findBothSlotsForUpdate(Long currentSlotId, Long newSlotId) {
+        Long firstLockId = Math.min(currentSlotId, newSlotId);
+        Long secondLockId = Math.max(currentSlotId, newSlotId);
+
+        ReservationSlot first = reservationSlotRepository.findByIdForUpdate(firstLockId);
+        ReservationSlot second = reservationSlotRepository.findByIdForUpdate(secondLockId);
+
+        if (currentSlotId.equals(firstLockId)) {
+            return new LockedReservationSlots(first, second);
+        }
+
+        return new LockedReservationSlots(second, first);
     }
 }

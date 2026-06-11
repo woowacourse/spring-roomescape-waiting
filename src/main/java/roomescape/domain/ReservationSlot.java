@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import roomescape.domain.vo.ReservationDeletion;
+import roomescape.domain.vo.ReservationSlotInfo;
+import roomescape.domain.vo.ReservationUpdate;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
@@ -34,19 +37,17 @@ public class ReservationSlot {
 
         reservation.update(now, slot.slotId(), calculateStatus());
         reservations.add(reservation);
-
         return reservation;
     }
 
-    public Reservation moveOut(Long reservationId, String name, LocalDateTime now) {
+    public ReservationUpdate moveOut(Long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(reservation, name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
 
-        promoteReservation(reservation);
+        Optional<Reservation> promotedReservation = promoteReservation(reservation);
         reservations.remove(reservation);
-
-        return reservation;
+        return new ReservationUpdate(reservation,promotedReservation);
     }
 
     private Status calculateStatus() {
@@ -56,24 +57,29 @@ public class ReservationSlot {
         return Status.WAITING;
     }
 
-    private void promoteReservation(Reservation reservation) {
-        if (reservation.isReserved()) {
-            reservations.stream()
-                    .filter(Reservation::isWaiting)
-                    .min((r1, r2) -> r1.getUpdateAt().compareTo(r2.getUpdateAt()))
-                    .ifPresent(Reservation::promote);
+    private Optional<Reservation> promoteReservation(Reservation reservation) {
+        if (!reservation.isReserved()) {
+            return Optional.empty();
         }
+
+        if (reservations.size() < 2) {
+            return Optional.empty();
+        }
+        // ReservationSlot의 reservations는 update_at을 기준으로 정렬되어있다.
+        Reservation nextReservation = reservations.get(1);
+        nextReservation.promote();
+        return Optional.of(nextReservation);
     }
 
-    public Reservation deleteReservation(Long reservationId, String name, LocalDateTime now) {
+    public ReservationDeletion deleteReservation(Long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(reservation, name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
 
-        promoteReservation(reservation);
+        Optional<Reservation> promotedReservation = promoteReservation(reservation);
         reservation.cancel(now);
         reservations.remove(reservation);
-        return reservation;
+        return new ReservationDeletion(reservation, promotedReservation);
     }
 
     public int calculateOrder(Reservation reservation) {

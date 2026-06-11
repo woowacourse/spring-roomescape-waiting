@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
-import roomescape.domain.ReservationSlotInfo;
+import roomescape.domain.vo.ReservationSlotInfo;
 
 public record ReservationResponse(
         Long reservationId,

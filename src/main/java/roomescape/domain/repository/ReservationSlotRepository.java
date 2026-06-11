@@ -6,13 +6,13 @@ import java.util.Optional;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationSlotInfo;
+import roomescape.domain.vo.ReservationSlotInfo;
 
 public interface ReservationSlotRepository {
-    ReservationSlot findById(Long id);
     ReservationSlot findByIdForUpdate(Long reservationSlotId);
-    ReservationSlot findByReservationId(Long reservationId);
+    ReservationSlot findByReservationIdForUpdate(Long reservationId);
     List<ReservationSlotInfo> findAll();
+    Long findSlotIdByReservationId(Long reservationId);
     Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
     Long save(LocalDate date, Long timeId, Long themeId);
     Reservation saveReservation(Reservation reservation);

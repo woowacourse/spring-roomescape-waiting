@@ -13,11 +13,11 @@ import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationSlotInfo;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.repository.ReservationSlotRepository;
+import roomescape.domain.vo.ReservationSlotInfo;
 
 @Repository
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
@@ -59,12 +59,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public ReservationSlot findById(Long id) {
-        ReservationSlotInfo slot = findSlotById(id);
-        List<Reservation> reservations = findActiveReservationsBySlotId(id);
-        return new ReservationSlot(slot, reservations);
-    }
-
     public ReservationSlot findByIdForUpdate(Long id) {
         ReservationSlotInfo slot = findSlotByIdForUpdate(id);
         List<Reservation> reservations = findActiveReservationsBySlotId(id);
@@ -72,9 +66,19 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public ReservationSlot findByReservationId(Long reservationId) {
+    public ReservationSlot findByReservationIdForUpdate(Long reservationId) {
         Long reservationSlotId = findReservationSlotIdByReservationId(reservationId);
-        return findById(reservationSlotId);
+        return findByIdForUpdate(reservationSlotId);
+    }
+
+    @Override
+    public Long findSlotIdByReservationId(Long reservationId) {
+        String sql = """
+                SELECT reservation_slot_id
+                FROM reservation
+                WHERE id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, Long.class, reservationId);
     }
 
     private Long findReservationSlotIdByReservationId(Long reservationId) {
@@ -84,26 +88,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 WHERE id = ?
                 """;
         return jdbcTemplate.queryForObject(sql, Long.class, reservationId);
-    }
-
-    private ReservationSlotInfo findSlotById(Long id) {
-        String sql = """
-                SELECT rs.id,
-                       rs.date,
-                       t.id AS time_id,
-                       t.start_at AS time_value,
-                       th.id AS theme_id,
-                       th.name AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail_url AS theme_thumbnail
-                FROM reservation_slot rs
-                INNER JOIN reservation_time t
-                    ON rs.time_id = t.id
-                INNER JOIN theme th
-                    ON rs.theme_id = th.id
-                WHERE rs.id = ?
-                """;
-        return jdbcTemplate.queryForObject(sql, slotRowMapper, id);
     }
 
     private ReservationSlotInfo findSlotByIdForUpdate(Long id) {
