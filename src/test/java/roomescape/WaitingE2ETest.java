@@ -46,6 +46,11 @@ class WaitingE2ETest {
     void createWaiting() {
         String futureDate = LocalDate.now().plusDays(1).toString();
 
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", "브라운", "date", futureDate, "timeId", 1, "themeId", 1))
+                .when().post("/reservations");
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of(

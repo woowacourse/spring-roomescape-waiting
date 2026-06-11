@@ -12,6 +12,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.WaitingResult;
 import roomescape.service.exception.BusinessConflictException;
+import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
 
@@ -47,6 +48,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
+        checkReservationExists(date, timeId, themeId);
         checkDuplicatedWaiting(date, timeId, themeId, name);
         checkDuplicatedReservation(date, timeId, themeId, name);
 
@@ -88,6 +90,13 @@ public class WaitingService {
 
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void checkReservationExists(LocalDate date, long timeId, long themeId) {
+        boolean exists = reservationRepository.findBySchedule(date, timeId, themeId).isPresent();
+        if (!exists) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 
