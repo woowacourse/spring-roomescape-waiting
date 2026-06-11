@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS reservation;
+DROP TABLE IF EXISTS reservation_slot;
+DROP TABLE IF EXISTS theme;
+DROP TABLE IF EXISTS reservation_time;
+
 CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
@@ -35,11 +40,11 @@ CREATE TABLE IF NOT EXISTS reservation
     id              BIGINT       NOT NULL AUTO_INCREMENT,
     name            VARCHAR(255) NOT NULL,
     reservation_slot_id  BIGINT       NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'RESERVED',
+    status VARCHAR(20) NOT NULL,
     updated_at DATETIME NOT NULL,
     PRIMARY KEY (id),
 
-    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','CANCELED')),
+    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','WAITING','CANCELED')),
 
     FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id)
 );

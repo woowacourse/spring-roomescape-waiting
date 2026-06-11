@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infrastructure;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,10 +11,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Theme;
+import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.AvailableTimeResponse;
 
 @Repository
-public class ThemeDao {
+public class JdbcThemeRepository implements ThemeRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
@@ -33,21 +34,14 @@ public class ThemeDao {
                     rs.getInt("waiting_count")
             );
 
-    public ThemeDao(JdbcTemplate jdbcTemplate) {
+    public JdbcThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Long save(String name, String description, String thumbnailUrl) {
-        return jdbcInsert.executeAndReturnKey(Map.of(
-                "name", name,
-                "description", description,
-                "thumbnail_url", thumbnailUrl
-        )).longValue();
-    }
-
+    @Override
     public List<Theme> findPopularThemes(int size, LocalDate from, LocalDate to) {
         final String sql = """
                 SELECT
@@ -69,7 +63,7 @@ public class ThemeDao {
         return jdbcTemplate.query(sql, themeRowMapper, from, to, size);
     }
 
-
+    @Override
     public List<AvailableTimeResponse> findAvailableTimeById(long themeId, String date) {
         final String sql = """
                 SELECT
@@ -80,7 +74,7 @@ public class ThemeDao {
                         WHEN COUNT(res.id) = 0 THEN TRUE
                         ELSE FALSE
                     END AS available,
-
+                
                     GREATEST(COUNT(res.id) - 1, 0) AS waiting_count
                 
                 FROM reservation_time rt
@@ -92,7 +86,7 @@ public class ThemeDao {
                 
                 LEFT JOIN reservation res
                     ON res.reservation_slot_id = rs.id
-                    AND res.status = 'RESERVED'
+                    AND res.status != 'CANCELED'
                 
                 GROUP BY rt.id, rt.start_at
                 ORDER BY rt.start_at
@@ -100,11 +94,21 @@ public class ThemeDao {
         return jdbcTemplate.query(sql, availableReservationTimeRowMapper, themeId, date);
     }
 
+    @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query("SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
     }
 
+    @Override
+    public Long save(String name, String description, String thumbnailUrl) {
+        return jdbcInsert.executeAndReturnKey(Map.of(
+                "name", name,
+                "description", description,
+                "thumbnail_url", thumbnailUrl
+        )).longValue();
+    }
 
+    @Override
     public void delete(long id) {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }

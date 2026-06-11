@@ -152,3 +152,126 @@ https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r33
 - [x] GlobalExceptionHandler에 Exception 처리 로직 추가
 - MethodArgumentTypeMismatchException 예외 처리 추가
 - HttpMessageNotReadableException 예외 처리 추가
+
+-----
+
+# 사이클 2
+
+안녕하세요 매트.
+기존 사이클 1의 코드 구조로는 예약 자동 승인이 이미 구현이 되어있어서, 이번 사이클 2에서는 다른 설계를 시도해보았습니다.
+```text
+#변경사항
+1. DAO 대신 Respository 인터페이스를 사용
+2. SQL 쿼리와 서비스에서 수행하던 일부 책임을 도메인으로 이동
+3. ReservationSlot을 Aggregate Root로 사용(ReservationSlot을 통해서만 Reservation 추가 및 수정 가능)
+4. 기존 : Reserved만 사용 → 변경 : Reserved와 Waiting을 구분
+```
+
+이번 사이클의 목표는 크게 두 가지였습니다.
+
+1. 비즈니스 규칙을 Service나 SQL이 아닌 도메인으로 옮겨보기 (레벨 1처럼)
+2. Reserved와 Waiting을 구분하는 구조를 직접 구현해보며 장단점을 경험해보기
+
+사이클 1에서 ReservationSlot과 Reservation에 대해 객체 생명주기 관점에서 리뷰를 주신 내용을 적용해보고 싶어서,
+ReservationSlot이 aggregate root가 되어 Reservation을 관리하는 구조를 사용해보았습니다.
+(기존 구조보다 aggregate root를 사용하는 것이 코드 복잡성이 커진다고 생각하지만, 장단점을 체감해보고 싶어서 시도해보았습니다!)
+
+사이클 1에서는 예약 확정과 예약 대기를 모두 Reserved 상태로 저장한 뒤, 순서로만 구분했습니다.
+1번째 예약 -> 예약 확정
+2번째 예약 -> 대기 1번
+3번째 예약 -> 대기 2번
+이 방식에서는 ReservationSlot을 거치지 않고 Reservation을 직접 추가하더라도 데이터 정합성이 크게 깨지지 않았습니다.
+
+반면 이번에는 Reserved와 Waiting을 별도의 상태로 구분하면서,
+첫 번째 예약은 반드시 Reserved여야 한다.
+Waiting은 Reserved 뒤에만 존재할 수 있다.
+수정 및 취소 시 Waiting -> Reserved 승격이 발생한다.
+와 같은 규칙들이 생겼고, 이러한 규칙을 보장하기 위해 ReservationSlot을 Aggregate Root로 사용해볼만 하다고 생각했습니다.
+
+또한 레벨 1에서 고민했던 객체 간 관계와 책임을 다시 한번 적용해보고 싶다는 의도도 있었습니다.
+
+변경된 구조로 제가 느낀 점은 아래와 같습니다.
+장점 :
+1. Reservation은 ReservationSlot을 통해서만 생성/수정될 수 있기 때문에,
+`Reservation이 존재하려면 ReservationSlot이 먼저 존재해야 한다.`와 같은 규칙을 도메인에서 표현할 수 있었습니다.
+2. 기존에 SQL이나 Service가 수행하던 일부 비즈니스 로직을 도메인 객체 내부로 이동시킬 수 있었습니다.
+3. Waiting → Reserved 승격 규칙을 ReservationSlot 내부에서 관리할 수 있어 관련 책임이 한 곳으로 모였습니다.
+
+단점 : 
+1. ReservationSlot을 aggreagate root로 사용하면서, 객체를 저장하고 수정하는 과정이 이전보다 복잡해졌습니다.
+2. Reserved와 Waiting을 분리하면서 자동 승격 로직, 취소 로직, 순서 관리 로직 등이 추가되어 전체 구현 난이도가 많이 올라갔습니다.
+
+이번에는 불편함과 복잡함을 많이 경험해보려고 구조를 많이 변경했는데, 그러다보니 코드가 아직 부족한 점이 많은 것 같습니다. 😅
+리뷰 잘 부탁드립니다. 🙂
+
+### 변경 사항 (260608)
+- [x] refactor: 예약 관련 기능 리팩토링
+- DAO에서 Respository 사용하는 구조로 변경
+- ReservationSlot을 aggregate root로 사용
+- [x] 응답 형식에 name 필드 추가
+
+### 질문 사항
+1. 구조에 대한 피드백
+Repository를 사용하면서 DAO의 SQL이나 Service에 있던 일부 책임을 도메인으로 이동시켜 보았습니다.
+그러다 보니 "어떤 로직은 SQL에서 수행하고, 어떤 로직은 도메인에서 수행해야 하는가?"에 대한 고민이 생겼습니다.
+현재 Reservation 관련 규칙은 최대한 도메인으로 이동하려고 했지만, 아래와 같은 기능은 여전히 SQL에서 수행하고 있습니다.
+```text
+예약 가능한 시간 조회
+인기 있는 테마 조회
+```
+이 기능들은 집계가 중심이기 때문에 DB가 계산하는 것이 더 자연스럽다고 판단했습니다.
+
+반면 아래와 같은 규칙은 도메인에서 처리하고 있습니다.
+```text
+첫 번째 예약은 Reserved여야 한다.
+Waiting 취소 시 다음 Waiting을 승격한다.
+같은 사용자는 동일 슬롯에 중복 예약할 수 없다.
+```
+현재는 "복잡한 집계는 SQL에서, 비즈니스 규칙은 도메인에서" 정도로 생각하고 있는데, 이 기준이 적절한지 궁금합니다.
+매트는 `도메인에서 계산할 것인가?`, `SQL에서 계산할 것인가?`를 판단하시는 기준이 있으신지 궁금합니다!
+
+또한, 현재 구조에서 Reservation, ReservationSlot, ReservationService가 각각 책임 분리가 제대로 되어있는지, 
+ReservationSlot이 aggregate로 적절하게 사용되고 있는건지 피드백 받고 싶습니다.
+
+2. Aggregate Root와 동시성
+ReservationSlot을 Aggregate Root로 사용하면 Reservation과 ReservationSlot을 각각 관리하는 대신 ReservationSlot 하나를 중심으로 상태를 관리할 수 있다는 장점이 있습니다.
+그래서, 예약 생성, 취소, Waiting 승격 등의 작업이 모두 ReservationSlot을 통해 수행되도록 변경했습니다.
+
+여기서 궁금한 점은, Aggregate Root를 사용하면 실제로 동시성 문제를 다루기가 상대적으로 쉬워진다고 볼 수 있는지 궁금합니다.
+
+제가 이해한 바로는
+```text
+기존:
+Reservation + ReservationSlot 둘 다 고려
+
+현재:
+ReservationSlot 하나를 기준으로 관리
+```
+정도로 생각하고 있는데, 이 이해가 맞는지 궁금합니다!
+이처럼 Aggregate Root를 사용하면 일관성을 관리해야 하는 범위가 더 좁고 명확해지는데, 실제로도 동시성 문제를 다루는 데 도움이 된다고 볼 수 있을까요?
+
+또한, 동시성 처리를 위해 락을 적용해보려고 했으나, 아직 락에 대한 이해가 부족해 구현해해보지는 못했습니다.
+현재 구조에서는 ReservationSlot을 기준으로 락을 걸면 될 것 같다고 생각했는데, 이러한 접근이 적절한지 궁금합니다.
+
+추가로 현재 구조에서 가장 단순하게 시도해볼 수 있는 동시성 제어 방식이나 테스트 방식이 있다면 조언 부탁드립니다! (특히 테스트가 어렵습니다. 🥲)
+
+-----
+
+안녕하세요 매트.     
+여러가지로 고민하다보니, 리뷰 요청이 늦어졌네요. 🥲     
+리뷰 주신 내용을 바탕으로 동시성 처리 로직을 추가하고, CountDownLatch를 이용해서 테스트해봤습니다.    
+(CountDownLatch는 처음 접하다보니, AI로 테스트를 작성하고 이해하는 방식으로 진행했습니다.)    
+또한, 저의 생각을 정리해서 코멘트에 적어두었는데, 혹시 잘못 생각한 점이 있다면 코멘트 부탁드립니다!   
+리뷰 잘 부탁드립니다!
+
+### 변경 사항 (260611)
+
+- [x] 예약 저장 관련 동시성 처리 추가
+- [x] 예약 수정 및 취소 동시성 처리 추가
+- [x] CountDownLatch를 이용한 동시성 테스트 추가 
+- [x] 계층별 long/Long 타입 사용 기준 적용
+
+### 질문
+1. 모니터링
+https://github.com/woowacourse/spring-roomescape-waiting/pull/510#discussion_r3393603770
+

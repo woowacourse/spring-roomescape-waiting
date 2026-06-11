@@ -330,7 +330,7 @@
       margin-bottom: 24px;
     }
 
-    .time-slot {
+    .time-reservationSlotInfo {
       padding: 10px 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -343,7 +343,7 @@
       text-align: center;
     }
 
-    .time-slot small {
+    .time-reservationSlotInfo small {
       display: block;
       margin-top: 4px;
       font-size: 11px;
@@ -351,34 +351,34 @@
       opacity: 0.82;
     }
 
-    .time-slot:hover:not(.unavailable) {
+    .time-reservationSlotInfo:hover:not(.unavailable) {
       border-color: var(--accent);
       background: var(--accent-dim);
       color: var(--accent);
     }
 
-    .time-slot.selected {
+    .time-reservationSlotInfo.selected {
       border-color: var(--accent);
       background: var(--accent);
       color: #0a0d1a;
       font-weight: 700;
     }
 
-    .time-slot.unavailable {
+    .time-reservationSlotInfo.unavailable {
       opacity: 0.72;
       cursor: pointer;
       text-decoration: line-through;
       color: var(--muted);
     }
 
-    .time-slot.unavailable:hover {
+    .time-reservationSlotInfo.unavailable:hover {
       border-color: var(--muted);
       background: rgba(255,255,255,0.04);
       color: var(--text);
       text-decoration: line-through;
     }
 
-    .time-slot.unavailable.selected {
+    .time-reservationSlotInfo.unavailable.selected {
       border-color: var(--accent);
       background: var(--accent-dim);
       color: var(--accent);
@@ -441,7 +441,7 @@
       border-color: var(--danger);
     }
 
-    .reservationSlot-actions {
+    .reservationSlotInfo-actions {
       display: flex;
       gap: 8px;
       flex-shrink: 0;
@@ -449,14 +449,14 @@
     }
 
     /* Reservation list */
-    .reservationSlot-list {
+    .reservationSlotInfo-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
       max-width: 700px;
     }
 
-    .reservationSlot-item {
+    .reservationSlotInfo-item {
       background: var(--card);
       border: 1px solid var(--border);
       border-left-width: 4px;
@@ -467,11 +467,11 @@
       gap: 16px;
     }
 
-    .reservationSlot-item.status-confirmed { border-left-color: #22c55e; }
-    .reservationSlot-item.status-waiting { border-left-color: #f59e0b; }
-    .reservationSlot-item.status-canceled { border-left-color: var(--danger); }
+    .reservationSlotInfo-item.status-confirmed { border-left-color: #22c55e; }
+    .reservationSlotInfo-item.status-waiting { border-left-color: #f59e0b; }
+    .reservationSlotInfo-item.status-canceled { border-left-color: var(--danger); }
 
-    .reservationSlot-item img {
+    .reservationSlotInfo-item img {
       width: 56px;
       height: 40px;
       object-fit: cover;
@@ -479,15 +479,15 @@
       flex-shrink: 0;
     }
 
-    .reservationSlot-info { flex: 1; }
+    .reservationSlotInfo-info { flex: 1; }
 
-    .reservationSlot-theme {
+    .reservationSlotInfo-theme {
       font-size: 15px;
       font-weight: 700;
       margin-bottom: 4px;
     }
 
-    .reservationSlot-meta {
+    .reservationSlotInfo-meta {
       font-size: 13px;
       color: var(--muted);
     }
@@ -763,7 +763,7 @@
             <span>예약자</span><span id="confirm-name">-</span>
           </div>
           <div class="btn-row" id="confirm-actions" style="margin-top:20px">
-            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
+            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlotInfo-btn">예약 확정</button>
             <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
           </div>
         </div>
@@ -775,7 +775,7 @@
       <h2 class="section-title">📋 내 예약</h2>
       <p class="section-desc">나의 예약 내역을 확인하고 관리하세요.</p>
       <div class="loading-center" id="my-loading"><div class="spinner"></div></div>
-      <div class="reservationSlot-list" id="my-list" style="display:none"></div>
+      <div class="reservationSlotInfo-list" id="my-list" style="display:none"></div>
       <div class="empty-state" id="my-empty" style="display:none">
         <div class="icon">📭</div>
         <p>예약 내역이 없습니다.</p>
@@ -926,8 +926,8 @@
       getThemes(),
       getAdminReservationsSafely()
     ]);
-    const counts = reservations.reduce((acc, reservationSlot) => {
-      acc[reservationSlot.themeName] = (acc[reservationSlot.themeName] || 0) + 1;
+    const counts = reservations.reduce((acc, reservationSlotInfo) => {
+      acc[reservationSlotInfo.themeName] = (acc[reservationSlotInfo.themeName] || 0) + 1;
       return acc;
     }, {});
 
@@ -976,7 +976,7 @@
     document.getElementById('confirm-box-title').textContent = editing ? '수정 확인' : '예약 확인';
     document.getElementById('confirm-id-row').style.display = 'none';
     document.getElementById('confirm-actions').innerHTML = `
-      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">${editing ? '수정 완료' : '예약 확정'}</button>
+      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlotInfo-btn">${editing ? '수정 완료' : '예약 확정'}</button>
       <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
     `;
   }
@@ -1043,11 +1043,13 @@
     document.getElementById('times-loading').style.display = 'none';
     const container = document.getElementById('time-slots');
     container.innerHTML = times.map(t => {
-      const waitLabel = !t.isAvailable && t.waitNumber > 0 ? `<small>대기 ${t.waitNumber}명</small>` : '';
+      const isAvailable = t.isAvailable ?? t.available;
+      const waitNumber = Number(t.waitNumber ?? t.waitingCount ?? 0);
+      const waitLabel = isAvailable ? '' : `<small>예약됨 · 대기 ${waitNumber}명</small>`;
       return `
-        <div class="time-slot ${t.isAvailable ? '' : 'unavailable'}"
-             onclick="${t.isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}')`}"
-             id="slot-${t.id}">
+        <div class="time-reservationSlotInfo ${isAvailable ? '' : 'unavailable'}"
+             onclick="${isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}')`}"
+             id="reservationSlotInfo-${t.id}">
           <span>${t.startAt}</span>${waitLabel}
         </div>
       `;
@@ -1062,8 +1064,8 @@
   function pickTime(id, startAt) {
     selectedTime = { id, startAt };
     selectedWaitingTarget = null;
-    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-    document.getElementById(`slot-${id}`).classList.add('selected');
+    document.querySelectorAll('.time-reservationSlotInfo').forEach(s => s.classList.remove('selected'));
+    document.getElementById(`reservationSlotInfo-${id}`).classList.add('selected');
     document.getElementById('confirm-time-btn').disabled = false;
     document.getElementById('confirm-time-btn').style.display = 'inline-flex';
     document.getElementById('wait-time-btn').style.display = 'none';
@@ -1072,8 +1074,8 @@
   function pickWaitingTime(id, startAt) {
     selectedTime = { id, startAt };
     selectedWaitingTarget = { id, startAt };
-    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-    document.getElementById(`slot-${id}`).classList.add('selected');
+    document.querySelectorAll('.time-reservationSlotInfo').forEach(s => s.classList.remove('selected'));
+    document.getElementById(`reservationSlotInfo-${id}`).classList.add('selected');
     document.getElementById('confirm-time-btn').disabled = true;
     document.getElementById('confirm-time-btn').style.display = 'none';
     document.getElementById('wait-time-btn').style.display = 'inline-flex';
@@ -1111,19 +1113,19 @@
     goToStep(4);
   }
 
-  function renderReservationSummary(reservationSlot) {
-    document.getElementById('confirm-theme').textContent = reservationSlot.themeName;
-    document.getElementById('confirm-date').textContent = formatDate(reservationSlot.date);
-    document.getElementById('confirm-time').textContent = reservationSlot.time;
-    document.getElementById('confirm-name').textContent = reservationSlot.name || username;
+  function renderReservationSummary(reservationSlotInfo) {
+    document.getElementById('confirm-theme').textContent = reservationSlotInfo.themeName;
+    document.getElementById('confirm-date').textContent = formatDate(reservationSlotInfo.date);
+    document.getElementById('confirm-time').textContent = reservationSlotInfo.time;
+    document.getElementById('confirm-name').textContent = reservationSlotInfo.name || username;
   }
 
-  function showReservationComplete(reservationSlot) {
+  function showReservationComplete(reservationSlotInfo) {
     document.getElementById('booking-title').textContent = '예약 완료';
     document.getElementById('booking-desc').textContent = '예약이 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 완료';
     document.getElementById('confirm-id-row').style.display = 'none';
-    renderReservationSummary(reservationSlot);
+    renderReservationSummary(reservationSlotInfo);
     document.getElementById('confirm-actions').innerHTML = `
       <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
       <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
@@ -1277,13 +1279,13 @@
 
       const list = document.getElementById('my-list');
       list.innerHTML = reservations.map(r => `
-        <div class="reservationSlot-item status-${reservationState(r)}" id="res-${r.reservationId}">
+        <div class="reservationSlotInfo-item status-${reservationState(r)}" id="res-${r.reservationId}">
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
-          <div class="reservationSlot-info">
-            <div class="reservationSlot-theme">${r.themeName}</div>
-            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
+          <div class="reservationSlotInfo-info">
+            <div class="reservationSlotInfo-theme">${r.themeName}</div>
+            <div class="reservationSlotInfo-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
           </div>
-          <div class="reservationSlot-actions">${reservationActions(r)}</div>
+          <div class="reservationSlotInfo-actions">${reservationActions(r)}</div>
         </div>
       `).join('');
       list.style.display = 'flex';
@@ -1293,32 +1295,32 @@
     }
   }
 
-  async function startReservationEdit(reservationSlot) {
+  async function startReservationEdit(reservationSlotInfo) {
     try {
       const themes = await getThemes();
-      const theme = themes.find(t => t.name === reservationSlot.themeName);
+      const theme = themes.find(t => t.name === reservationSlotInfo.themeName);
 
       if (!theme) {
         showToast('수정할 예약의 테마 정보를 찾을 수 없습니다.', 'error');
         return;
       }
 
-      editingReservationId = reservationSlot.reservationId;
+      editingReservationId = reservationSlotInfo.reservationId;
       selectedTheme = theme;
-      selectedDate = reservationSlot.date;
+      selectedDate = reservationSlotInfo.date;
       selectedTime = null;
 
       const themeInfoHtml = `
-        <img src="${reservationSlot.themeThumbnailUrl}" alt="${reservationSlot.themeName}" onerror="this.style.background='#1f2937'">
+        <img src="${reservationSlotInfo.themeThumbnailUrl}" alt="${reservationSlotInfo.themeName}" onerror="this.style.background='#1f2937'">
         <div>
-          <h3>${reservationSlot.themeName}</h3>
-          <p>${reservationSlot.themeDescription}</p>
+          <h3>${reservationSlotInfo.themeName}</h3>
+          <p>${reservationSlotInfo.themeDescription}</p>
         </div>
       `;
       document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
       document.getElementById('selected-theme-info-2').innerHTML = themeInfoHtml;
       document.getElementById('booking-date').removeAttribute('min');
-      document.getElementById('booking-date').value = reservationSlot.date;
+      document.getElementById('booking-date').value = reservationSlotInfo.date;
 
       setBookingMode('edit');
       showBookingSection();

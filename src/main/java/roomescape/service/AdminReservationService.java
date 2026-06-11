@@ -1,22 +1,24 @@
 package roomescape.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
+import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.dto.AdminReservationResponse;
-import roomescape.repository.ReservationSlotDao;
 
 @Service
 public class AdminReservationService {
 
-    private final ReservationSlotDao reservationSlotDao;
+    private final ReservationSlotRepository reservationSlotRepository;
 
-    public AdminReservationService(ReservationSlotDao reservationSlotDao) {
-        this.reservationSlotDao = reservationSlotDao;
+    public AdminReservationService(ReservationSlotRepository reservationSlotRepository) {
+        this.reservationSlotRepository = reservationSlotRepository;
     }
 
     public List<AdminReservationResponse> getAllReservations() {
-        return reservationSlotDao.findAll().stream()
-                .map(r -> AdminReservationResponse.from(r, r.getTheme()))
+        return reservationSlotRepository.findAll().stream()
+                .map(AdminReservationResponse::from)
                 .toList();
     }
 }

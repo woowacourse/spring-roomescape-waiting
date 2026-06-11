@@ -12,30 +12,30 @@ public class Theme {
     private final String thumbnailUrl;
 
     public Theme(Long id, String name, String description, String thumbnailUrl) {
-        validateName(name);
-        validateDescription(description);
-        validateThumbnailUrl(thumbnailUrl);
+        validateNameLength(name);
+        validateDescriptionLength(description);
+        validateThumbnailUrlLength(thumbnailUrl);
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new CustomException(ErrorCode.THEME_NAME_BLANK);
+    private void validateNameLength(String name) {
+        if (name.length() > 255) {
+            throw new CustomException(ErrorCode.THEME_NAME_TOO_LONG);
         }
     }
 
-    private void validateDescription(String description) {
-        if (description == null || description.isBlank()) {
-            throw new CustomException(ErrorCode.THEME_DESCRIPTION_BLANK);
+    private void validateDescriptionLength(String description) {
+        if (description.length() > 255) {
+            throw new CustomException(ErrorCode.THEME_DESCRIPTION_TOO_LONG);
         }
     }
 
-    private void validateThumbnailUrl(String thumbnailUrl) {
-        if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new CustomException(ErrorCode.THEME_THUMBNAIL_URL_BLANK);
+    private void validateThumbnailUrlLength(String thumbnailUrl) {
+        if (thumbnailUrl.length() > 255) {
+            throw new CustomException(ErrorCode.THEME_THUMBNAIL_TOO_LONG);
         }
     }
 
