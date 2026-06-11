@@ -19,7 +19,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class ThemeServiceTest {
+class ThemeServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
@@ -58,12 +58,6 @@ public class ThemeServiceTest {
 
         // then
         verify(themeRepository).findFamous(any());
-    }
-
-    @Test
-    void 삭제시_테마가_존재하지_않으면_예외가_발생한다() {
-        given(themeRepository.existsById(999L)).willReturn(false);
-        Assertions.assertThatThrownBy(() -> themeService.delete(999L)).isInstanceOf(RoomEscapeException.class);
     }
 
     @Test

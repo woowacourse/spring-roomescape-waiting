@@ -23,7 +23,7 @@ import roomescape.controller.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class MissionStep2Test {
+class MissionStep2Test {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -55,9 +55,9 @@ public class MissionStep2Test {
 
     @Test
     void DB_조회_API_전환() {
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운",
-                "2023-08-05",
-                1, 1);
+        jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)",
+                "2023-08-05", 1, 1);
+        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES (?, ?)", "브라운", 1);
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .when().get("/reservations")

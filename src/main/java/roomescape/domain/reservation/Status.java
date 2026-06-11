@@ -13,4 +13,8 @@ public enum Status {
     public String getKoreanName() {
         return koreanName;
     }
+
+    public boolean isApproved() {
+        return this == APPROVED;
+    }
 }

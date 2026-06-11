@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class ReservationNameTest {
+class ReservationNameTest {
     private static final String UNDER_SIZE_NAME = "";
     private static final String OVER_SIZE_NAME = "---------------------";
 

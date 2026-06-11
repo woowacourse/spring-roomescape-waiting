@@ -9,48 +9,54 @@ import roomescape.domain.theme.Theme;
 public class Reservation {
     private final long id;
     private final ReservationName name;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Slot slot;
     private final Status status;
     private final LocalDateTime createdAt;
 
-    private Reservation(long id, ReservationName name, ReservationDate date, ReservationTime time,
-                        Theme theme, Status status, LocalDateTime createdAt) {
+    private Reservation(long id, ReservationName name, Slot slot, Status status, LocalDateTime createdAt) {
         this.id = id;
         this.name = Objects.requireNonNull(name);
-        this.date = Objects.requireNonNull(date);
-        this.time = Objects.requireNonNull(time);
-        this.theme = Objects.requireNonNull(theme);
+        this.slot = Objects.requireNonNull(slot);
         this.status = Objects.requireNonNull(status);
         this.createdAt = Objects.requireNonNull(createdAt);
     }
 
-    public static Reservation load(long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                                   Theme theme, Status status, LocalDateTime dateTime) {
-        return new Reservation(id, reservationName, date, time, theme, status, dateTime);
+    public static Reservation load(long id, ReservationName reservationName, Slot slot, Status status,
+                                   LocalDateTime createdAt) {
+        return new Reservation(id, reservationName, slot, status, createdAt);
     }
 
-    public static Reservation reserve(
-            ReservationName reservationName,
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme,
-            Status status,
-            LocalDateTime now
-    ) {
+    public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(0L, reservationName, date, time, theme, status, now);
-        reservation.ensureNotPast(now);
+        Reservation reservation = new Reservation(0L, reservationName, slot, status, now);
+        reservation.isPastFrom(now);
         return reservation;
     }
 
-    public void ensureNotPast(LocalDateTime now) {
-        LocalDateTime requestDateTime = LocalDateTime.of(date.getValue(), time.getStartAt());
-
-        if (requestDateTime.isBefore(now)) {
+    public void isPastFrom(LocalDateTime now) {
+        if (slot.isBefore(now)) {
             throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
         }
+    }
+
+    public boolean isEarlierThan(Reservation target) {
+        int byTime = createdAt.compareTo(target.getCreatedAt());
+        if (byTime != 0) {
+            return byTime < 0;
+        }
+        return id < target.getId();
+    }
+
+    public boolean isSameSlot(Slot target) {
+        return slot.isSame(target);
+    }
+
+    public boolean isApproved() {
+        return status.isApproved();
+    }
+
+    public Reservation withId(long id) {
+        return new Reservation(id, name, slot, status, createdAt);
     }
 
     public long getId() {
@@ -61,16 +67,20 @@ public class Reservation {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public ReservationDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public Status getStatus() {
@@ -79,20 +89,5 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return id == that.id && Objects.equals(name, that.name) && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, date, time, theme);
     }
 }

@@ -47,6 +47,9 @@ docker-compose up
 - [x] 같은 슬롯에 대한 대기는 신청 순서대로 순번이 부여된다.
 - [x] 같은 사용자가 같은 슬롯에 중복 대기할 수 없다.
 - [x] 사용자는 본인의 대기를 취소할 수 있다.
+- [x] 예약 취소 시 대기 중인 예약이 자동으로 승인으로 변경된다.
+- [x] 대기가 예약으로 전환되면 해당 슬롯의 나머지 대기 순번이 재정렬된다.
+- [x] 예약이 취소되면 해당 슬롯의 대기 순번이 재정렬된다.
 
 ### 예약 조회
 
@@ -75,18 +78,18 @@ docker-compose up
 
 ### 사용자 API
 
-| 기능       | 메서드 / URL                   | 요청 본문                                               | 쿼리 파라미터                                            | 응답                                                                                     |
-|----------|-----------------------------|-----------------------------------------------------|----------------------------------------------------|----------------------------------------------------------------------------------------|
-| 예약 목록 조회 | `GET /reservations`         | -                                                   | reservationName - optional                         | `200 OK` <br> `[{reservationId, reservationName, date, theme, time}, ...]`             |
-| 예약 단건 조회 | `GET /reservations/{id}`    | -                                                   | -                                                  | `200 OK` <br> `{reservationId, reservationName, date, theme, time}`                    |
-| 예약 추가    | `POST /reservations`        | `{reservationName, themeId, date, timeId}`          | -                                                  | `201 Created` <br> `{reservationId, reservationName, theme: {...}, date, time: {...}}` |
-| 예약 취소    | `DELETE /reservations/{id}` | -                                                   | -                                                  | `200 OK` <br> `{reservationId, reservationName, theme: {...}, date, time: {...}}`      |
-| 예약 변경    | `PUT /reservations/{id}`    | `{reservationName, theme: {...}, date, time: {...}` | -                                                  | `200 OK` <br> `{reservationId, reservationName, theme: {...}, date, time: {...}}`      |
-| 시간 조회    | `GET /times`                | -                                                   | -                                                  | `200 OK` <br> `[{timeId, startAt}, ...]`                                               |
-| 시간 조회    | `GET /times/available`      | -                                                   | `date`, `themeId`                                  | `200 OK` <br> `[{timeId, startAt}, ...]`                                               |
-| 테마 목록 조회 | `GET /themes`               | -                                                   | -                                                  | `200 OK` <br> `[{themeId, reservationName, description, url}, ...]`                    |
-| 테마 단건 조회 | `GET /themes/{id}`          | -                                                   | -                                                  | `200 OK` <br> `{themeId, reservationName, description, url}`                           |
-| 인기 테마 조회 | GET /themes/famous          | -                                                   | days - optional, date - optional, limit - optional | `200 OK` <br> `[{themeId, reservationName, description, url}, ...]`                    |
+| 기능       | 메서드 / URL                   | 요청 본문                                               | 쿼리 파라미터                                                      | 응답                                                                                     |
+|----------|-----------------------------|-----------------------------------------------------|--------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| 예약 목록 조회 | `GET /reservations`         | -                                                   | reservationName - optional                                   | `200 OK` <br> `[{reservationId, reservationName, date, theme, time}, ...]`             |
+| 예약 단건 조회 | `GET /reservations/{id}`    | -                                                   | -                                                            | `200 OK` <br> `{reservationId, reservationName, date, theme, time}`                    |
+| 예약 추가    | `POST /reservations`        | `{reservationName, themeId, date, timeId}`          | -                                                            | `201 Created` <br> `{reservationId, reservationName, theme: {...}, date, time: {...}}` |
+| 예약 취소    | `DELETE /reservations/{id}` | -                                                   | -                                                            | `200 OK` <br> `{reservationId, reservationName, theme: {...}, date, time: {...}}`      |
+| 예약 변경    | `PUT /reservations/{id}`    | `{reservationName, theme: {...}, date, time: {...}` | -                                                            | `200 OK` <br> `{reservationId, reservationName, theme: {...}, date, time: {...}}`      |
+| 시간 조회    | `GET /times`                | -                                                   | -                                                            | `200 OK` <br> `[{timeId, startAt}, ...]`                                               |
+| 시간 조회    | `GET /times/available`      | -                                                   | `date`, `themeId`                                            | `200 OK` <br> `[{timeId, startAt}, ...]`                                               |
+| 테마 목록 조회 | `GET /themes`               | -                                                   | -                                                            | `200 OK` <br> `[{themeId, reservationName, description, url}, ...]`                    |
+| 테마 단건 조회 | `GET /themes/{id}`          | -                                                   | -                                                            | `200 OK` <br> `{themeId, reservationName, description, url}`                           |
+| 인기 테마 조회 | GET /themes/famous          | -                                                   | recentDays - optional, baseDate - optional, limit - optional | `200 OK` <br> `[{themeId, reservationName, description, url}, ...]`                    |
 
 ### 어드민 API
 
@@ -101,10 +104,12 @@ docker-compose up
 
 ### 상태 코드 분류 기준
 
-| 상태 코드             | 의미                | 사용 예시            |
-|-------------------|-------------------|------------------|
-| `400 Bad Request` | 요청 형식 또는 필수값이 잘못됨 | 필수 필드 누락, 타입 불일치 |
-| `404 Not Found`   | 요청한 리소스가 존재하지 않음  | 존재하지 않는 예약 ID 조회 |
+| 상태 코드                      | 의미                | 사용 예시                 |
+|----------------------------|-------------------|-----------------------|
+| `400 Bad Request`          | 요청 형식 또는 필수값이 잘못됨 | 필수 필드 누락, 타입 불일치      |
+| `404 Not Found`            | 요청한 리소스가 존재하지 않음  | 존재하지 않는 예약 ID 조회      |
+| `409 Conflict`             | DB 제약조건 위반        | 중복 예약, 참조되고 있는 리소스 삭제 |
+| `422 Unprocessable Entity` | 비즈니스 규칙 위반        | 과거 날짜 예약, 운영 시간 외 예약  |
 
 ### 응답 본문 형식
 

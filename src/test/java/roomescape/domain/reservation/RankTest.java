@@ -13,7 +13,7 @@ class RankTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, -1})
+    @ValueSource(ints = {-999, -1})
     void 잘못된_입력은_예외가_발생한다(int value) {
         Assertions.assertThatException().isThrownBy(() -> new Rank(value)).isInstanceOf(RoomEscapeException.class);
     }

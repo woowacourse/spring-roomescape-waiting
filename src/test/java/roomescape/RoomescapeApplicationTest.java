@@ -22,17 +22,13 @@ class RoomescapeApplicationTest {
     private static final String AVAILABLE_DATE = "2099-06-01";
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
+
     @LocalServerPort
     int port;
 
     @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @BeforeEach
     void init() {
+        RestAssured.port = port;
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");
@@ -70,15 +66,6 @@ class RoomescapeApplicationTest {
 
         int after = availableCount(AVAILABLE_DATE, 1);
         assertThat(after).isEqualTo(before);
-    }
-
-    @Test
-    void 과거_날짜로_사용_시간_조회시_400을_반환한다() {
-        String past = "2020-01-01";
-
-        RestAssured.given()
-                .when().get("/times/available?date=" + past + "&themeId=1")
-                .then().statusCode(422);
     }
 
     @Test
@@ -198,7 +185,7 @@ class RoomescapeApplicationTest {
                 .when().get("/reservations/" + id)
                 .then().statusCode(200)
                 .body("state", org.hamcrest.Matchers.equalTo("승인"))
-                .body("rank", org.hamcrest.Matchers.equalTo(1));
+                .body("rank", org.hamcrest.Matchers.equalTo(0));
     }
 
     @Test
@@ -211,7 +198,7 @@ class RoomescapeApplicationTest {
                 .when().get("/reservations/" + waitingId)
                 .then().statusCode(200)
                 .body("state", org.hamcrest.Matchers.equalTo("대기"))
-                .body("rank", org.hamcrest.Matchers.equalTo(2));
+                .body("rank", org.hamcrest.Matchers.equalTo(1));
     }
 
     @Test

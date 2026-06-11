@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
-import roomescape.domain.reservation.ReservationResult;
+import roomescape.domain.reservation.RankedReservation;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -30,7 +30,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse create(@Valid @RequestBody ReservationCreateRequest request) {
-        ReservationResult reservation = reservationService.reserve(request, LocalDateTime.now());
+        RankedReservation reservation = reservationService.reserve(request, LocalDateTime.now());
 
         return ReservationResponse.from(reservation);
     }
@@ -38,7 +38,7 @@ public class ReservationController {
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationResponse> findList(@RequestParam(required = false) String name) {
-        List<ReservationResult> reservations = reservationService.findList(name);
+        List<RankedReservation> reservations = reservationService.findList(name);
 
         return reservations.stream()
                 .map(ReservationResponse::from)
@@ -48,7 +48,7 @@ public class ReservationController {
     @GetMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse find(@PathVariable long id) {
-        ReservationResult reservation = reservationService.find(id);
+        RankedReservation reservation = reservationService.find(id);
         return ReservationResponse.from(reservation);
     }
 
@@ -61,7 +61,7 @@ public class ReservationController {
     @PutMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse update(@Valid @RequestBody ReservationUpdateRequest request, @PathVariable long id) {
-        ReservationResult updated = reservationService.update(request, id, LocalDateTime.now());
+        RankedReservation updated = reservationService.update(request, id, LocalDateTime.now());
         return ReservationResponse.from(updated);
     }
 }

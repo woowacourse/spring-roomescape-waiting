@@ -4,7 +4,7 @@ import common.exception.RoomEscapeException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ThemeNameTest {
+class ThemeNameTest {
     private static final String UNDER_SIZE_NAME = "";
     private static final String OVER_SIZE_NAME = "-------------------------------";
 

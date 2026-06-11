@@ -20,25 +20,15 @@ public class ReservationTime {
         return new ReservationTime(0L, startAt);
     }
 
+    public ReservationTime withId(long id) {
+        return new ReservationTime(id, startAt);
+    }
+
     public long getId() {
         return id;
     }
 
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ReservationTime that = (ReservationTime) o;
-        return id == that.id && Objects.equals(startAt, that.startAt);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, startAt);
     }
 }

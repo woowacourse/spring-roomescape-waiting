@@ -23,6 +23,10 @@ public class Theme {
         return new Theme(0L, name, description, thumbnailUrl);
     }
 
+    public Theme withId(long id) {
+        return new Theme(id, name, description, thumbnailUrl);
+    }
+
     public long getId() {
         return id;
     }
@@ -37,20 +41,5 @@ public class Theme {
 
     public ThumbnailUrl getThumbnailUrl() {
         return thumbnailUrl;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Theme theme = (Theme) o;
-        return id == theme.id && Objects.equals(name, theme.name) && Objects.equals(description,
-                theme.description) && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, description, thumbnailUrl);
     }
 }

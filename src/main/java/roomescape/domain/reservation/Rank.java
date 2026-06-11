@@ -2,9 +2,10 @@ package roomescape.domain.reservation;
 
 import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
+import java.util.Objects;
 
 public class Rank {
-    private static final int MIN_RANK_VALUE = 1;
+    private static final int MIN_RANK_VALUE = 0;
 
     private final int value;
 
@@ -21,5 +22,19 @@ public class Rank {
 
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Rank rank = (Rank) o;
+        return value == rank.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
     }
 }
