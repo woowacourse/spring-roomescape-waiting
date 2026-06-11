@@ -28,12 +28,9 @@ CREATE TABLE reservation_slot
 
 CREATE TABLE reservation
 (
-    id       BIGINT      NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(10) NOT NULL,
-    `date`   DATE,
-    time_id  BIGINT,
-    theme_id BIGINT,
-    slot_id  BIGINT      NOT NULL,
+    id      BIGINT      NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(10) NOT NULL,
+    slot_id BIGINT      NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
     CONSTRAINT uk_reservation_slot_id UNIQUE (slot_id)
@@ -41,13 +38,10 @@ CREATE TABLE reservation
 
 CREATE TABLE reservation_waiting
 (
-    id               BIGINT      NOT NULL AUTO_INCREMENT,
-    name             VARCHAR(10) NOT NULL,
-    created_at       DATETIME    NOT NULL,
-    reservation_date DATE,
-    time_id          BIGINT,
-    theme_id         BIGINT,
-    slot_id          BIGINT      NOT NULL,
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    name       VARCHAR(10) NOT NULL,
+    created_at DATETIME    NOT NULL,
+    slot_id    BIGINT      NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
     CONSTRAINT uk_reservation_waiting_slot_id_name UNIQUE (name, slot_id)
