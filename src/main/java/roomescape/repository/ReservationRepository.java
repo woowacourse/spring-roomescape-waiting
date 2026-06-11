@@ -26,8 +26,6 @@ public interface ReservationRepository {
 
     void update(Reservation reservation);
 
-    boolean existsReservedBySlotId(long slotId);
-
     boolean existsByThemeId(long themeId);
 
     boolean existsByTimeId(long timeId);

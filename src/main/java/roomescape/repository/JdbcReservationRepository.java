@@ -223,13 +223,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedBySlotId(long slotId) {
-        String sql = "SELECT count(*) FROM reservation WHERE slot_id = ? AND status = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slotId, ReservationStatus.RESERVED.name());
-        return count != null && count > 0;
-    }
-
-    @Override
     public boolean existsByThemeId(long themeId) {
         String sql = """
                 SELECT count(*)

@@ -80,13 +80,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedBySlotId(long slotId) {
-        return storage.values().stream()
-                .filter(Reservation::isReserved)
-                .anyMatch(reservation -> Objects.equals(reservation.getSlot().getId(), slotId));
-    }
-
-    @Override
     public boolean existsByThemeId(long themeId) {
         return storage.values().stream()
                 .anyMatch(reservation -> reservation.getTheme().getId().equals(themeId));
