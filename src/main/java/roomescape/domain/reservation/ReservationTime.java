@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 public class ReservationTime {
+    private static final long TRANSIENT = 0L;
     private final long id;
     private final LocalTime startAt;
 
@@ -17,7 +18,7 @@ public class ReservationTime {
     }
 
     public static ReservationTime of(LocalTime startAt) {
-        return new ReservationTime(0L, startAt);
+        return new ReservationTime(TRANSIENT, startAt);
     }
 
     public ReservationTime withId(long id) {

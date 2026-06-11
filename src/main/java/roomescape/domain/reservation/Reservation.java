@@ -7,6 +7,7 @@ import java.util.Objects;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
+    private static final long TRANSIENT = 0L;
     private final long id;
     private final ReservationName name;
     private final Slot slot;
@@ -28,7 +29,7 @@ public class Reservation {
 
     public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(0L, reservationName, slot, status, now);
+        Reservation reservation = new Reservation(TRANSIENT, reservationName, slot, status, now);
         reservation.isPastFrom(now);
         return reservation;
     }

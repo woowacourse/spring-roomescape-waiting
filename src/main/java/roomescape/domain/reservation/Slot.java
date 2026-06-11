@@ -5,6 +5,7 @@ import java.util.Objects;
 import roomescape.domain.theme.Theme;
 
 public class Slot {
+    private static final int TRANSIENT = 0;
     private final long id;
     private final ReservationDate date;
     private final ReservationTime time;
@@ -22,7 +23,7 @@ public class Slot {
     }
 
     public static Slot create(ReservationDate date, ReservationTime time, Theme theme) {
-        return new Slot(0, date, time, theme);
+        return new Slot(TRANSIENT, date, time, theme);
     }
 
     public Slot withId(long id) {
