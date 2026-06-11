@@ -70,11 +70,7 @@ public class ReservationService {
 
         List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()
                 .map(waiting -> {
-                    ReservationSlot slot = new ReservationSlot(
-                            waiting.getReservationDate(),
-                            waiting.getTime(),
-                            waiting.getTheme()
-                    );
+                    ReservationSlot slot = waiting.getSlot();
 
                     ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
                     int order = waitings.orderOf(waiting);
@@ -118,8 +114,9 @@ public class ReservationService {
         Reservation reservation = getReservation(reservationId);
         reservation.validateCancelable(now);
 
-        ReservationSlot slot = new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
+        ReservationWaitingQueue waitings = new ReservationWaitingQueue(
+                reservationWaitingDao.selectBySlot(reservation.getSlot())
+        );
 
         delete(reservationId);
 
