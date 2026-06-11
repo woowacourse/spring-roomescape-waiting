@@ -29,7 +29,6 @@ public class ReservationSlot {
         return newReservation;
     }
 
-
     public Reservation moveIn(Reservation reservation, String name, LocalDateTime now) {
         validateReservationOwner(reservation, name);
         validateUniqueReservation(name);
