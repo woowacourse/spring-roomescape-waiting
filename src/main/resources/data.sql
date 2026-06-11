@@ -180,3 +180,37 @@ VALUES ('브라운', '2026-06-15', 1, 3);
 -- 브라운 대기 (이미 예약자1이 예약한 슬롯 - theme_id 1, date 2026-06-10, time_id 1)
 INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
 VALUES ('브라운', '2026-05-27 13:00:00', '2026-06-10', 1, 1);
+
+-- reservation_slot
+INSERT INTO reservation_slot (`date`, time_id, theme_id)
+SELECT DISTINCT `date`, time_id, theme_id
+FROM reservation;
+
+INSERT INTO reservation_slot (`date`, time_id, theme_id)
+SELECT DISTINCT rw.reservation_date, rw.time_id, rw.theme_id
+FROM reservation_waiting rw
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM reservation_slot rs
+    WHERE rs.`date` = rw.reservation_date
+      AND rs.time_id = rw.time_id
+      AND rs.theme_id = rw.theme_id
+);
+
+UPDATE reservation r
+SET slot_id = (
+    SELECT rs.id
+    FROM reservation_slot rs
+    WHERE rs.`date` = r.`date`
+      AND rs.time_id = r.time_id
+      AND rs.theme_id = r.theme_id
+);
+
+UPDATE reservation_waiting rw
+SET slot_id = (
+    SELECT rs.id
+    FROM reservation_slot rs
+    WHERE rs.`date` = rw.reservation_date
+      AND rs.time_id = rw.time_id
+      AND rs.theme_id = rw.theme_id
+);
