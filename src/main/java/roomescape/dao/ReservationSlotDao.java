@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -58,7 +59,16 @@ public class ReservationSlotDao {
 
     public ReservationSlot findOrCreate(ReservationSlot slot) {
         return selectByDateAndTimeIdAndThemeId(slot)
-                .orElseGet(() -> insert(slot));
+                .orElseGet(() -> insertOrSelect(slot));
+    }
+
+    private ReservationSlot insertOrSelect(ReservationSlot slot) {
+        try {
+            return insert(slot);
+        } catch (DuplicateKeyException exception) {
+            return selectByDateAndTimeIdAndThemeId(slot)
+                    .orElseThrow(() -> exception);
+        }
     }
 
     public Optional<ReservationSlot> selectByDateAndTimeIdAndThemeId(ReservationSlot slot) {
