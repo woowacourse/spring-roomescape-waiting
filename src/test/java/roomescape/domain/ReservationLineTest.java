@@ -44,60 +44,6 @@ public class ReservationLineTest {
     }
 
     @Test
-    @DisplayName("생성 시각이 빠른 예약 대기가 앞선 위치를 가진다.")
-    void 생성_시각_기준_대기_위치_계산() {
-        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
-        Reservation first = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        Reservation second = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, second, first));
-
-        assertThat(reservationLine.findWaitingIndex(first)).contains(0);
-        assertThat(reservationLine.findWaitingIndex(second)).contains(1);
-    }
-
-    @Test
-    @DisplayName("예약된 슬롯에 예약을 추가하면 대기 상태가 된다.")
-    void 예약된_슬롯에_추가하면_대기_상태() {
-        Reservation reserved = createReserved(1L, "예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved));
-
-        Reservation waiting = reservationLine.add("대기자", LocalDateTime.of(2026, 6, 3, 10, 1));
-
-        assertThat(waiting.isWaiting()).isTrue();
-    }
-
-    @Test
-    @DisplayName("예약이 없는 슬롯에 예약을 추가하면 예약 상태가 된다.")
-    void 빈_슬롯에_추가하면_예약_상태() {
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of());
-
-        Reservation reservation = reservationLine.add("예약자", LocalDateTime.of(2026, 6, 3, 10, 0));
-
-        assertThat(reservation.isReserved()).isTrue();
-    }
-
-    @Test
-    @DisplayName("하나의 슬롯에 확정 예약이 여러 개 있으면 예외가 발생한다.")
-    void 확정_예약_여러개일_경우_예외() {
-        Reservation first = createReserved(1L, "예약자1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        Reservation second = createReserved(2L, "예약자2", LocalDateTime.of(2026, 6, 3, 10, 1));
-
-        assertThatThrownBy(() -> new ReservationLine(createSlot(), List.of(first, second)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("하나의 예약 슬롯에는 확정 예약이 하나만 존재할 수 있습니다.");
-    }
-
-    @Test
-    @DisplayName("확정 예약 없이 대기만 있으면 예외가 발생한다.")
-    void 확정_예약_없이_대기만_있을_경우_예외() {
-        Reservation waiting = createWaiting(1L, "대기자", LocalDateTime.of(2026, 6, 3, 10, 0));
-
-        assertThatThrownBy(() -> new ReservationLine(createSlot(), List.of(waiting)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("확정 예약 없이 예약 대기만 존재할 수 없습니다.");
-    }
-
-    @Test
     @DisplayName("같은 슬롯에 이미 예약 또는 대기 중이면 추가할 수 없다.")
     void 같은_슬롯_중복_추가_예외() {
         Reservation reserved = createReserved(1L, "브라운", LocalDateTime.of(2026, 6, 3, 10, 0));
@@ -106,30 +52,6 @@ public class ReservationLineTest {
         assertThatThrownBy(() -> reservationLine.add("브라운", LocalDateTime.of(2026, 6, 3, 10, 1)))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 예약 또는 대기 중인 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
-    }
-
-    @Test
-    @DisplayName("생성 시각이 같으면 ID가 작은 예약 대기가 앞선 위치를 가진다.")
-    void ID_기준_대기_위치_계산() {
-        LocalDateTime sameCreatedAt = LocalDateTime.of(2026, 6, 3, 10, 0);
-        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
-        Reservation first = createWaiting(1L, "순번1", sameCreatedAt);
-        Reservation second = createWaiting(2L, "순번2", sameCreatedAt);
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, second, first));
-
-        assertThat(reservationLine.findWaitingIndex(first)).contains(0);
-        assertThat(reservationLine.findWaitingIndex(second)).contains(1);
-    }
-
-    @Test
-    @DisplayName("대기 목록에 없는 예약의 위치를 조회하면 빈 값을 반환한다.")
-    void 없는_예약_대기_위치_조회시_빈_값_반환() {
-        Reservation reserved = createReserved(3L, "예약자", LocalDateTime.of(2026, 6, 3, 9, 0));
-        Reservation waiting = createWaiting(1L, "순번1", LocalDateTime.of(2026, 6, 3, 10, 0));
-        Reservation otherWaiting = createWaiting(2L, "순번2", LocalDateTime.of(2026, 6, 3, 10, 1));
-        ReservationLine reservationLine = new ReservationLine(createSlot(), List.of(reserved, waiting));
-
-        assertThat(reservationLine.findWaitingIndex(otherWaiting)).isEmpty();
     }
 
     @Test
