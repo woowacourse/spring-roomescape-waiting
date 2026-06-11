@@ -48,12 +48,24 @@ public class Reservation {
         return id < target.getId();
     }
 
+    public boolean hasSameSlot(Reservation target) {
+        return slot.isSame(target.slot);
+    }
+
+    public boolean hasSameSlot(Slot slot) {
+        return slot.isSame(slot);
+    }
+
     public boolean isSameSlot(Slot target) {
         return slot.isSame(target);
     }
 
     public boolean isApproved() {
         return status == Status.APPROVED;
+    }
+
+    public boolean hasSameName(ReservationName name) {
+        return name.equals(name);
     }
 
     public Reservation withId(long id) {

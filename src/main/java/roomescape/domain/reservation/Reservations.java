@@ -22,17 +22,21 @@ public class Reservations {
     }
 
     private void validateNoDuplicate(ReservationName reservationName, Slot slot) {
-        if (reservations.stream()
-                .filter(reservation -> reservation.getSlot().equals(slot))
-                .anyMatch(reservation -> reservation.getName().equals(reservationName))) {
+        if (hasNameAndSlot(reservationName, slot)) {
             throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    private boolean hasNameAndSlot(ReservationName reservationName, Slot slot) {
+        return reservations.stream()
+                .filter(reservation -> reservation.hasSameSlot(slot))
+                .anyMatch(reservation -> reservation.hasSameName(reservationName));
     }
 
     private Status decideStatusFor(Slot slot) {
         if (reservations.stream()
                 .filter(reservation -> reservation.isSameSlot(slot))
-                .anyMatch(reservation -> reservation.getStatus().equals(Status.APPROVED))) {
+                .anyMatch(reservation -> reservation.isApproved())) {
             return Status.WAITING;
         }
         return Status.APPROVED;
@@ -48,7 +52,7 @@ public class Reservations {
 
     private List<Reservation> findByName(String name) {
         return reservations.stream()
-                .filter(reservation -> reservation.getName().equals(new ReservationName(name)))
+                .filter(reservation -> reservation.hasSameName(new ReservationName(name)))
                 .toList();
     }
 
@@ -60,7 +64,7 @@ public class Reservations {
 
     private RankedReservation toRankedReservation(Reservation target) {
         List<Reservation> sameSlots = reservations.stream()
-                .filter(reservation -> reservation.isSameSlot(target.getSlot()))
+                .filter(reservation -> reservation.hasSameSlot(target))
                 .toList();
 
         return RankedReservation.decideRankFrom(target, sameSlots);
