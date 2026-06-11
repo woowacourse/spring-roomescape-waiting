@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -10,6 +11,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
 import roomescape.service.dto.UserReservation;
+import roomescape.service.event.ReservationCancelledEvent;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -23,27 +25,27 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
     private final UserReservationRepository userReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ReservationService(
-            WaitingService waitingService,
             ReservationRepository reservationRepository,
             UserReservationRepository userReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            Clock clock
+            Clock clock,
+            ApplicationEventPublisher eventPublisher
     ) {
-        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
         this.userReservationRepository = userReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<Reservation> findReservations(int page, int size) {
@@ -89,14 +91,9 @@ public class ReservationService {
         reservation.checkCancellable(name, LocalDateTime.now(clock));
         reservationRepository.delete(reservation);
 
-        waitingService.findFirstWaiting(reservation.getDate(), reservation.getTime().getId(),
-                        reservation.getTheme().getId())
-                .ifPresent(waiting -> {
-                    waitingService.promoteWaiting(waiting);
-                    reservationRepository.save(
-                            Reservation.create(waiting.getName(), waiting.getDate(), waiting.getTime(),
-                                    waiting.getTheme(), LocalDateTime.now(clock)));
-                });
+        eventPublisher.publishEvent(
+                new ReservationCancelledEvent(id, reservation.getDate(), reservation.getTime().getId(),
+                        reservation.getTheme().getId()));
     }
 
     private void checkDuplicated(Reservation reservation) {
