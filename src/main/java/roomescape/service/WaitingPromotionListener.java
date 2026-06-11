@@ -12,7 +12,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
-import roomescape.domain.Reservation;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.event.ReservationCancelledEvent;
 
@@ -38,10 +37,8 @@ public class WaitingPromotionListener {
     public void onReservationCancelled(ReservationCancelledEvent event) {
         waitingService.findFirstWaiting(event.getDate(), event.getTimeId(), event.getThemeId())
                 .ifPresent(waiting -> {
-                    waitingService.promoteWaiting(waiting);
-                    reservationRepository.save(
-                            Reservation.create(waiting.getName(), waiting.getDate(), waiting.getTime(),
-                                    waiting.getTheme(), LocalDateTime.now(clock)));
+                    waitingService.deleteForPromotion(waiting);
+                    reservationRepository.save(waiting.promote(LocalDateTime.now(clock)));
                 });
     }
 

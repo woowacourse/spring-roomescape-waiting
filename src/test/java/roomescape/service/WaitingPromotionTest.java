@@ -61,7 +61,7 @@ public class WaitingPromotionTest {
         listener.onReservationCancelled(event);
 
         // then
-        verify(waitingService).promoteWaiting(waiting);
+        verify(waitingService).deleteForPromotion(waiting);
 
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         verify(reservationRepository).save(captor.capture());
@@ -85,7 +85,7 @@ public class WaitingPromotionTest {
         listener.onReservationCancelled(event);
 
         // then
-        verify(waitingService, never()).promoteWaiting(any(Waiting.class));
+        verify(waitingService, never()).deleteForPromotion(any(Waiting.class));
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
 }

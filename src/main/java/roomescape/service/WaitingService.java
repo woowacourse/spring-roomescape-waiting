@@ -59,6 +59,7 @@ public class WaitingService {
         return WaitingResult.of(waiting, order);
     }
 
+    @Transactional
     public void deleteWaiting(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -68,7 +69,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void promoteWaiting(Waiting waiting) {
+    public void deleteForPromotion(Waiting waiting) {
         waitingRepository.delete(waiting);
     }
 

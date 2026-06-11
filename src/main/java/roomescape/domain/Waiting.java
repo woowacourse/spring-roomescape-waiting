@@ -51,6 +51,10 @@ public class Waiting {
         }
     }
 
+    public Reservation promote(LocalDateTime now) {
+        return Reservation.create(this.name, this.date, this.time, this.theme, now);
+    }
+
     public boolean isSameName(String name) {
         return this.name.equals(name);
     }
