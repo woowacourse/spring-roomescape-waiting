@@ -137,7 +137,6 @@ class ReservationConcurrencyTest {
         ));
 
 
-
         System.out.println("reserved인 행 수 : " + countReservations(date, timeId, themeId, "RESERVED"));
         System.out.println("waiting인 행 수 : " + countReservations(date, timeId, themeId, "WAITING"));
 

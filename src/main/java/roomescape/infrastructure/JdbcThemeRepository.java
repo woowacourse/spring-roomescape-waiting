@@ -74,7 +74,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                         WHEN COUNT(res.id) = 0 THEN TRUE
                         ELSE FALSE
                     END AS available,
-
+                
                     GREATEST(COUNT(res.id) - 1, 0) AS waiting_count
                 
                 FROM reservation_time rt
