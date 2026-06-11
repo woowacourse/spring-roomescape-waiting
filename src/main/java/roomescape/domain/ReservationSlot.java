@@ -59,7 +59,7 @@ public class ReservationSlot {
         return theme.getId();
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

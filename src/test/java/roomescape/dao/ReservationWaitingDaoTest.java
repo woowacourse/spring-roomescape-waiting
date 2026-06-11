@@ -146,6 +146,33 @@ class ReservationWaitingDaoTest {
         assertThat(result).containsExactly(waiting1, waiting2);
     }
 
+    @Test
+    void 슬롯_아이디로_예약_대기_목록을_조회한다() {
+        // given
+        ReservationTime time = saveTime(10, 0);
+        ReservationTime otherTime = saveTime(11, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        ReservationWaiting waiting1 = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(), date, time, theme)
+        );
+        ReservationWaiting waiting2 = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), date, time, theme)
+        );
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), date, otherTime, theme)
+        );
+
+        Long slotId = waiting1.getSlot().getId();
+
+        // when
+        List<ReservationWaiting> result = reservationWaitingDao.selectBySlotId(slotId);
+
+        // then
+        assertThat(result).containsExactly(waiting1, waiting2);
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }

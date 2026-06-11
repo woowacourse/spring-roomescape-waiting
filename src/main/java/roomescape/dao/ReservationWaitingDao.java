@@ -93,6 +93,10 @@ public class ReservationWaitingDao {
     }
 
     public List<ReservationWaiting> selectBySlot(ReservationSlot slot) {
+        if (slot.getId() != null) {
+            return selectBySlotId(slot.getId());
+        }
+
         String sql = baseSelectSql() + """
                 WHERE rw.reservation_date = ?
                 AND rw.time_id = ?
@@ -106,6 +110,12 @@ public class ReservationWaitingDao {
                 slot.getTimeId(),
                 slot.getThemeId()
         );
+    }
+
+    public List<ReservationWaiting> selectBySlotId(long slotId) {
+        String sql = baseSelectSql() + " WHERE rw.slot_id = ?";
+
+        return jdbcTemplate.query(sql, ROW_MAPPER, slotId);
     }
 
     public List<ReservationWaiting> select() {
