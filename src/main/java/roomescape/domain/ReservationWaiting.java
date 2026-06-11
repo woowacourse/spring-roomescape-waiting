@@ -8,9 +8,6 @@ public class ReservationWaiting {
     private final Long id;
     private final String name;
     private final LocalDateTime createdAt;
-    private final LocalDate reservationDate;
-    private final ReservationTime time;
-    private final Theme theme;
     private final ReservationSlot slot;
 
     public ReservationWaiting(Long id, String name, LocalDateTime createdAt, ReservationSlot slot) {
@@ -22,17 +19,6 @@ public class ReservationWaiting {
         this.name = name;
         this.createdAt = createdAt;
         this.slot = slot;
-        this.reservationDate = slot.getDate();
-        this.time = slot.getTime();
-        this.theme = slot.getTheme();
-    }
-
-    public ReservationWaiting(Long id, String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
-        this(id, name, createdAt, new ReservationSlot(reservationDate, time, theme));
-    }
-
-    public static ReservationWaiting createWithoutId(String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
-        return new ReservationWaiting(null, name, createdAt, reservationDate, time, theme);
     }
 
     public static ReservationWaiting createWithoutId(String name, LocalDateTime createdAt, ReservationSlot slot) {
@@ -40,7 +26,7 @@ public class ReservationWaiting {
     }
 
     public Reservation promoteToReservation() {
-        return Reservation.createWithoutId(name, reservationDate, time, theme);
+        return Reservation.createWithoutId(name, slot);
     }
 
     public Long getId() {
@@ -56,15 +42,15 @@ public class ReservationWaiting {
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public LocalDate getReservationDate() {
-        return reservationDate;
+        return slot.getDate();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public ReservationSlot getSlot() {
@@ -82,8 +68,8 @@ public class ReservationWaiting {
             return Objects.equals(id, reservationWaiting.id);
         }
         return Objects.equals(name, reservationWaiting.name)
-                && Objects.equals(createdAt, reservationWaiting.createdAt) && Objects.equals(reservationDate, reservationWaiting.reservationDate)
-                && Objects.equals(time, reservationWaiting.time) && Objects.equals(theme, reservationWaiting.theme);
+                && Objects.equals(createdAt, reservationWaiting.createdAt)
+                && Objects.equals(slot, reservationWaiting.slot);
     }
 
     @Override
@@ -91,6 +77,6 @@ public class ReservationWaiting {
         if (id != null) {
             return Objects.hash(id);
         }
-        return Objects.hash(name, createdAt, reservationDate, time, theme);
+        return Objects.hash(name, createdAt, slot);
     }
 }

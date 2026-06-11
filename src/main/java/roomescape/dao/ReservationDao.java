@@ -44,18 +44,16 @@ public class ReservationDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
-    private final ReservationSlotDao reservationSlotDao;
 
-    public ReservationDao(JdbcTemplate jdbcTemplate, ReservationSlotDao reservationSlotDao) {
+    public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.reservationSlotDao = reservationSlotDao;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
     }
 
     public Reservation insert(Reservation reservation) {
-        ReservationSlot slot = reservationSlotDao.findOrCreate(reservation.getSlot());
+        ReservationSlot slot = reservation.getSlot();
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
@@ -141,10 +139,8 @@ public class ReservationDao {
     }
 
     public Reservation update(Long reservationId, ReservationSlot slot) {
-        ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
-
         String sql = "UPDATE reservation SET slot_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, savedSlot.getId(), reservationId);
+        jdbcTemplate.update(sql, slot.getId(), reservationId);
 
         return selectById(reservationId).get();
     }

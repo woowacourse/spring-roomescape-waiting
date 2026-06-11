@@ -53,7 +53,7 @@ public class ReservationWaitingQueueTest {
     }
 
     private ReservationWaiting waiting(Long id, String name, LocalDateTime createdAt) {
-        return new ReservationWaiting(id, name, createdAt, RESERVATION_DATE, TIME, THEME);
+        ReservationSlot slot = new ReservationSlot(RESERVATION_DATE, TIME, THEME);
+        return new ReservationWaiting(id, name, createdAt, slot);
     }
-
 }

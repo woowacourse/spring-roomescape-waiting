@@ -28,10 +28,6 @@ public class ReservationSlot {
         this(null, date, time, theme);
     }
 
-    public static ReservationSlot createWithoutId(LocalDate date, ReservationTime time, Theme theme) {
-        return new ReservationSlot(date, time, theme);
-    }
-
     public void validateNotPast(LocalDateTime now) {
         Objects.requireNonNull(now, "현재 시간은 필수값 입니다.");
         if (time.isPast(date, now)) {

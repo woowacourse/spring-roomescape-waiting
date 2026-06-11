@@ -5,16 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.domain.ReservationWaiting;
+import roomescape.dao.*;
+import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
-import roomescape.dao.ReservationDao;
-import roomescape.domain.Reservation;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.domain.ReservationTime;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,19 +35,22 @@ class ReservationWaitingServiceTest {
 
     @Autowired
     private ReservationWaitingService reservationWaitingService;
+
     @Autowired
     private ReservationWaitingDao reservationWaitingDao;
+
     @Autowired
     private ReservationDao reservationDao;
+
+    @Autowired
+    private ReservationSlotDao reservationSlotDao;
 
     @Test
     void 예약_대기를_추가한다() {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId(
-                "브라운", LocalDate.of(2026, 6, 10), time, theme
-        ));
+        saveReservation("브라운", LocalDate.of(2026, 6, 10), time, theme);
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         );
@@ -72,8 +69,7 @@ class ReservationWaitingServiceTest {
     void 예약_대기를_취소한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(), LocalDate.of(2026, 5, 5), time, theme);
-        ReservationWaiting saved = reservationWaitingDao.insert(reservationWaiting);
+        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2026, 5, 5), time, theme);
 
         assertThatNoException().isThrownBy(() -> reservationWaitingService.delete(saved.getId()));
     }
@@ -117,8 +113,8 @@ class ReservationWaitingServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 6, 10);
-        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
-        reservationWaitingDao.insert(ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), date, time, theme));
+        saveReservation("브라운", date, time, theme);
+        saveReservationWaiting("맥스", date, time, theme);
 
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", date, time.getId(), theme.getId()
@@ -133,7 +129,7 @@ class ReservationWaitingServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 6, 10);
-        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
+        saveReservation("브라운", date, time, theme);
 
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", date, time.getId(), theme.getId()
@@ -150,7 +146,7 @@ class ReservationWaitingServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 6, 10);
-        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
+        saveReservation("브라운", date, time, theme);
 
         ReservationWaitingResponse first = reservationWaitingService.addReservationWaiting(
                 new CreateReservationWaitingCommand("맥스", date, time.getId(), theme.getId()),
@@ -171,7 +167,7 @@ class ReservationWaitingServiceTest {
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 6, 10);
 
-        reservationDao.insert(Reservation.createWithoutId("맥스", date, time, theme));
+        saveReservation("맥스", date, time, theme);
 
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand("맥스", date, time.getId(), theme.getId());
 
@@ -185,7 +181,7 @@ class ReservationWaitingServiceTest {
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 6, 20);
 
-        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
+        saveReservation("브라운", date, time, theme);
 
         int threadCount = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
@@ -243,7 +239,7 @@ class ReservationWaitingServiceTest {
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 6, 20);
 
-        reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
+        saveReservation("브라운", date, time, theme);
 
         int threadCount = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
@@ -305,5 +301,19 @@ class ReservationWaitingServiceTest {
 
     private Theme saveTheme(String name, String description, String thumbnail) {
         return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+    }
+
+    private ReservationSlot saveSlot(LocalDate date, ReservationTime time, Theme theme) {
+        return reservationSlotDao.findOrCreate(new ReservationSlot(date, time, theme));
+    }
+
+    private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        ReservationSlot slot = saveSlot(date, time, theme);
+        return reservationDao.insert(Reservation.createWithoutId(name, slot));
+    }
+
+    private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
+        ReservationSlot slot = saveSlot(date, time, theme);
+        return reservationWaitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(), slot));
     }
 }

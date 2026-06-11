@@ -9,19 +9,12 @@ import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
-import roomescape.dao.ReservationDao;
-import roomescape.domain.Reservation;
+import roomescape.dao.*;
+import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.domain.ReservationStatus;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.domain.ReservationWaiting;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.domain.ReservationTime;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,6 +43,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ThemeDao themeDao;
+
+    @Autowired
+    private ReservationSlotDao reservationSlotDao;
 
     @MockitoSpyBean
     private ReservationDao reservationDao;
@@ -579,10 +575,16 @@ class ReservationServiceTest {
     }
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationDao.insert(Reservation.createWithoutId(name, date, time, theme));
+        ReservationSlot slot = saveSlot(date, time, theme);
+        return reservationDao.insert(Reservation.createWithoutId(name, slot));
     }
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return waitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(), date, time, theme));
+        ReservationSlot slot = saveSlot(date, time, theme);
+        return waitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(), slot));
+    }
+
+    private ReservationSlot saveSlot(LocalDate date, ReservationTime time, Theme theme) {
+        return reservationSlotDao.findOrCreate(new ReservationSlot(date, time, theme));
     }
 }

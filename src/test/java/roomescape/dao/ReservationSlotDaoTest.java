@@ -32,7 +32,7 @@ public class ReservationSlotDaoTest {
     void 예약_슬롯을_생성한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationSlot slot = ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme);
+        ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme);
 
         ReservationSlot saved = reservationSlotDao.insert(slot);
 
@@ -49,7 +49,7 @@ public class ReservationSlotDaoTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         ReservationSlot saved = reservationSlotDao.insert(
-                ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme)
+                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)
         );
 
         Optional<ReservationSlot> found = reservationSlotDao.selectById(saved.getId());
@@ -61,7 +61,7 @@ public class ReservationSlotDaoTest {
     void 날짜_시간_테마로_예약_슬롯을_조회한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationSlot slot = ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme);
+        ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme);
         ReservationSlot saved = reservationSlotDao.insert(slot);
 
         Optional<ReservationSlot> found = reservationSlotDao.selectByDateAndTimeIdAndThemeId(slot);
@@ -80,7 +80,7 @@ public class ReservationSlotDaoTest {
     void 예약_슬롯이_없으면_생성한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationSlot slot = ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme);
+        ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme);
 
         ReservationSlot saved = reservationSlotDao.findOrCreate(slot);
 
@@ -92,7 +92,7 @@ public class ReservationSlotDaoTest {
     void 예약_슬롯이_있으면_기존_슬롯을_반환한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationSlot slot = ReservationSlot.createWithoutId(LocalDate.of(2026, 6, 10), time, theme);
+        ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme);
 
         ReservationSlot saved = reservationSlotDao.insert(slot);
         ReservationSlot found = reservationSlotDao.findOrCreate(slot);

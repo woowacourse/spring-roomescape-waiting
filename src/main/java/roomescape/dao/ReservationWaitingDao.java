@@ -47,18 +47,16 @@ public class ReservationWaitingDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
-    private final ReservationSlotDao reservationSlotDao;
 
-    public ReservationWaitingDao(JdbcTemplate jdbcTemplate, ReservationSlotDao reservationSlotDao) {
+    public ReservationWaitingDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.reservationSlotDao = reservationSlotDao;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
                 .usingGeneratedKeyColumns("id");
     }
 
     public ReservationWaiting insert(ReservationWaiting reservationWaiting) {
-        ReservationSlot slot = reservationSlotDao.findOrCreate(reservationWaiting.getSlot());
+        ReservationSlot slot = reservationWaiting.getSlot();
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservationWaiting.getName());
