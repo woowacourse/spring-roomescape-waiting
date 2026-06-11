@@ -19,22 +19,6 @@ import roomescape.exception.DuplicateException;
 @Repository
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
 
-    private static final String FIND_BY_ID_SQL = """
-            SELECT
-                rs.id AS slot_id,
-                rs.date AS slot_date,
-                ts.id AS time_id,
-                ts.start_at,
-                th.id AS theme_id,
-                th.name AS theme_name,
-                th.description AS theme_description,
-                th.thumbnail_url AS theme_thumbnail_url
-            FROM reservation_slot rs
-            INNER JOIN time_slot ts ON rs.time_id = ts.id
-            INNER JOIN theme th ON rs.theme_id = th.id
-            WHERE rs.id = ?
-            """;
-
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcReservationSlotRepository(JdbcTemplate jdbcTemplate) {
@@ -43,16 +27,39 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     @Override
     public Optional<ReservationSlot> findById(long id) {
-        String sql = FIND_BY_ID_SQL;
+        String sql = """
+                SELECT
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
+                    ts.start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url
+                FROM reservation_slot rs
+                INNER JOIN time_slot ts ON rs.time_id = ts.id
+                INNER JOIN theme th ON rs.theme_id = th.id
+                WHERE rs.id = ?
+                """;
         List<ReservationSlot> reservationSlots = jdbcTemplate.query(sql, rowMapper(), id);
         return Optional.ofNullable(DataAccessUtils.singleResult(reservationSlots));
     }
 
     @Override
     public Optional<ReservationSlot> findByIdWithLock(long id) {
-        String sql = FIND_BY_ID_SQL + "\nFOR UPDATE";
-        List<ReservationSlot> reservationSlots = jdbcTemplate.query(sql, rowMapper(), id);
-        return Optional.ofNullable(DataAccessUtils.singleResult(reservationSlots));
+        String sql = """
+                SELECT id
+                FROM reservation_slot
+                WHERE id = ?
+                FOR UPDATE;
+            """;
+
+        List<Long> slotIds = jdbcTemplate.queryForList(sql, Long.class, id);
+        if (slotIds.isEmpty()) {
+            return Optional.empty();
+        }
+        return findById(id);
     }
 
     @Override
