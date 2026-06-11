@@ -46,10 +46,18 @@ public class ReservationWaitingService {
 
     @Transactional
     public void delete(Long reservationWaitingId) {
+        ReservationWaiting reservationWaiting = getReservationWaiting(reservationWaitingId);
+        lockSlot(reservationWaiting.getSlot());
+
         int deleted = reservationWaitingDao.delete(reservationWaitingId);
         if (deleted == 0) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_WAITING_NOT_FOUND);
         }
+    }
+
+    private ReservationWaiting getReservationWaiting(Long reservationWaitingId) {
+        return reservationWaitingDao.selectById(reservationWaitingId)
+                .orElseThrow(() -> new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_WAITING_NOT_FOUND));
     }
 
     private ReservationTime getTime(long timeId) {

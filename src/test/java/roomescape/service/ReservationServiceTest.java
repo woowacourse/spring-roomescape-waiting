@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationErrorCode;
+import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
 import roomescape.dto.command.CreateReservationCommand;
@@ -25,10 +26,13 @@ import roomescape.domain.Theme;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
@@ -55,6 +59,9 @@ class ReservationServiceTest {
 
     @Autowired
     private DatabaseInitializer databaseInitializer;
+
+    @Autowired
+    private ReservationWaitingService reservationWaitingService;
 
     @BeforeEach
     void setUp() {
@@ -483,6 +490,84 @@ class ReservationServiceTest {
         assertThat(successCount.get()).isEqualTo(1);
         assertThat(duplicateCount.get()).isEqualTo(threadCount - 1);
         assertThat(reservationService.getAllReservations()).hasSize(1);
+    }
+
+    @Test
+    void 예약_취소와_대기_취소가_동시에_실행되어도_대기가_중복_처리되지_않는다() throws InterruptedException {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 20);
+
+        Reservation reservation = saveReservation("브라운", date, time, theme);
+        ReservationWaiting waiting = saveReservationWaiting("맥스", date, time, theme);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        CountDownLatch readyLatch = new CountDownLatch(2);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(2);
+
+        AtomicInteger cancelSuccessCount = new AtomicInteger();
+        AtomicInteger waitingDeleteSuccessCount = new AtomicInteger();
+        AtomicInteger waitingNotFoundCount = new AtomicInteger();
+        List<Throwable> unexpectedExceptions = Collections.synchronizedList(new ArrayList<>());
+
+        executorService.submit(() -> {
+            try {
+                readyLatch.countDown();
+                startLatch.await();
+
+                reservationService.cancel(reservation.getId(), LocalDateTime.of(2026, 6, 19, 10, 0));
+                cancelSuccessCount.incrementAndGet();
+            } catch (Throwable throwable) {
+                unexpectedExceptions.add(throwable);
+            } finally {
+                doneLatch.countDown();
+            }
+        });
+
+        executorService.submit(() -> {
+            try {
+                readyLatch.countDown();
+                startLatch.await();
+
+                reservationWaitingService.delete(waiting.getId());
+                waitingDeleteSuccessCount.incrementAndGet();
+            } catch (RoomEscapeException exception) {
+                if (exception.getErrorCode() == ReservationWaitingErrorCode.RESERVATION_WAITING_NOT_FOUND) {
+                    waitingNotFoundCount.incrementAndGet();
+                } else {
+                    unexpectedExceptions.add(exception);
+                }
+            } catch (Throwable throwable) {
+                unexpectedExceptions.add(throwable);
+            } finally {
+                doneLatch.countDown();
+            }
+        });
+
+        assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        startLatch.countDown();
+        assertThat(doneLatch.await(5, TimeUnit.SECONDS)).isTrue();
+        executorService.shutdown();
+
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+        List<MyReservationResponse> waitingResponses = reservationService.getMyReservations("맥스");
+
+        assertThat(unexpectedExceptions).isEmpty();
+        assertThat(cancelSuccessCount.get()).isEqualTo(1);
+        assertThat(waitingDeleteSuccessCount.get() + waitingNotFoundCount.get()).isEqualTo(1);
+
+        assertThat(reservations)
+                .extracting(ReservationResponse::name)
+                .doesNotContain("브라운");
+
+        assertThat(reservations).hasSizeLessThanOrEqualTo(1);
+        assertThat(reservations)
+                .allSatisfy(response -> assertThat(response.name()).isEqualTo("맥스"));
+
+        assertThat(waitingResponses)
+                .filteredOn(response -> response.status() == ReservationStatus.WAITING)
+                .isEmpty();
     }
 
     private ReservationTime saveTime(int hour, int minute) {

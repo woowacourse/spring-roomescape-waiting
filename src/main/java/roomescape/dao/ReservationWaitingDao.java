@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -12,6 +13,7 @@ import roomescape.domain.Theme;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class ReservationWaitingDao {
@@ -77,10 +79,10 @@ public class ReservationWaitingDao {
 
     public boolean existsByNameAndSlotId(String name, long slotId) {
         String sql = """
-            SELECT COUNT(*) > 0
-            FROM reservation_waiting
-            WHERE name = ? AND slot_id = ?
-            """;
+                SELECT COUNT(*) > 0
+                FROM reservation_waiting
+                WHERE name = ? AND slot_id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, slotId);
     }
 
@@ -89,16 +91,25 @@ public class ReservationWaitingDao {
         return jdbcTemplate.update(sql, reservationWaitingId);
     }
 
+    public Optional<ReservationWaiting> selectById(Long reservationWaitingId) {
+        try {
+            String sql = baseSelectSql() + " WHERE rw.id = ?";
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, reservationWaitingId));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
     public List<ReservationWaiting> selectBySlot(ReservationSlot slot) {
         if (slot.getId() != null) {
             return selectBySlotId(slot.getId());
         }
 
         String sql = baseSelectSql() + """
-            WHERE rs.date = ?
-            AND rs.time_id = ?
-            AND rs.theme_id = ?
-            """;
+                WHERE rs.date = ?
+                AND rs.time_id = ?
+                AND rs.theme_id = ?
+                """;
 
         return jdbcTemplate.query(
                 sql,
@@ -126,24 +137,24 @@ public class ReservationWaitingDao {
 
     private String baseSelectSql() {
         return """
-            SELECT rw.id,
-                   rw.name as waiting_name,
-                   rw.created_at,
-                   rs.id as slot_id,
-                   rs.date as reservation_date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   t.id as theme_id,
-                   t.name as theme_name,
-                   t.description,
-                   t.thumbnail
-            FROM reservation_waiting as rw
-            INNER JOIN reservation_slot as rs
-            ON rw.slot_id = rs.id
-            INNER JOIN reservation_time as rt
-            ON rs.time_id = rt.id
-            INNER JOIN theme as t
-            ON rs.theme_id = t.id
-            """;
+                SELECT rw.id,
+                       rw.name as waiting_name,
+                       rw.created_at,
+                       rs.id as slot_id,
+                       rs.date as reservation_date,
+                       rt.id as time_id,
+                       rt.start_at,
+                       t.id as theme_id,
+                       t.name as theme_name,
+                       t.description,
+                       t.thumbnail
+                FROM reservation_waiting as rw
+                INNER JOIN reservation_slot as rs
+                ON rw.slot_id = rs.id
+                INNER JOIN reservation_time as rt
+                ON rs.time_id = rt.id
+                INNER JOIN theme as t
+                ON rs.theme_id = t.id
+                """;
     }
 }
