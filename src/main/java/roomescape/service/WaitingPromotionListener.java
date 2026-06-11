@@ -13,7 +13,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.event.ReservationCancelledEvent;
+import roomescape.service.event.ReservationSlotReleasedEvent;
 
 @Component
 public class WaitingPromotionListener {
@@ -34,7 +34,7 @@ public class WaitingPromotionListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000))
-    public void onReservationCancelled(ReservationCancelledEvent event) {
+    public void onSlotReleased(ReservationSlotReleasedEvent event) {
         waitingService.findFirstWaiting(event.getDate(), event.getTimeId(), event.getThemeId())
                 .ifPresent(waiting -> {
                     waitingService.deleteForPromotion(waiting);
@@ -43,7 +43,7 @@ public class WaitingPromotionListener {
     }
 
     @Recover
-    public void recover(Exception e, ReservationCancelledEvent event) {
+    public void recover(Exception e, ReservationSlotReleasedEvent event) {
         log.error("대기 승격 최종 실패 - reservationId: {}", event.getReservationId());
     }
 }

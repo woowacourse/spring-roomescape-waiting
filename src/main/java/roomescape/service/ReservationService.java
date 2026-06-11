@@ -11,7 +11,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
 import roomescape.service.dto.UserReservation;
-import roomescape.service.event.ReservationCancelledEvent;
+import roomescape.service.event.ReservationSlotReleasedEvent;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -80,6 +80,11 @@ public class ReservationService {
         Reservation updated = reservation.changeSchedule(date, time, name, LocalDateTime.now(clock));
         checkDuplicated(updated);
         reservationRepository.update(updated);
+
+        eventPublisher.publishEvent(
+                new ReservationSlotReleasedEvent(id, reservation.getDate(), reservation.getTime().getId(),
+                        reservation.getTheme().getId()));
+
         return updated;
     }
 
@@ -92,7 +97,7 @@ public class ReservationService {
         reservationRepository.delete(reservation);
 
         eventPublisher.publishEvent(
-                new ReservationCancelledEvent(id, reservation.getDate(), reservation.getTime().getId(),
+                new ReservationSlotReleasedEvent(id, reservation.getDate(), reservation.getTime().getId(),
                         reservation.getTheme().getId()));
     }
 

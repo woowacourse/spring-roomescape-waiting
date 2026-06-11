@@ -19,7 +19,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
 import roomescape.service.dto.UserReservation;
-import roomescape.service.event.ReservationCancelledEvent;
+import roomescape.service.event.ReservationSlotReleasedEvent;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
@@ -280,7 +280,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약_취소_시_취소_이벤트가_발행된다() {
+    void 예약_취소_시_이벤트가_발행된다() {
         //given
         Reservation reservation = new Reservation(
                 1L,
@@ -296,9 +296,41 @@ class ReservationServiceTest {
         reservationService.deleteUserReservation(1L, "브라운");
 
         //then
-        ArgumentCaptor<ReservationCancelledEvent> captor = ArgumentCaptor.forClass(ReservationCancelledEvent.class);
+        ArgumentCaptor<ReservationSlotReleasedEvent> captor = ArgumentCaptor.forClass(
+                ReservationSlotReleasedEvent.class);
         verify(eventPublisher).publishEvent(captor.capture());
-        ReservationCancelledEvent event = captor.getValue();
+        ReservationSlotReleasedEvent event = captor.getValue();
+
+        assertThat(event.getReservationId()).isEqualTo(1L);
+        assertThat(event.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
+        assertThat(event.getTimeId()).isEqualTo(1L);
+        assertThat(event.getThemeId()).isEqualTo(1L);
+    }
+
+    @Test
+    void 예약_변경_시_이벤트가_발행된다() {
+        //given
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(12, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(newTime));
+
+        //when
+        reservationService.updateReservation(1L, "브라운", LocalDate.of(2026, 5, 11), 2L);
+
+        //then
+        ArgumentCaptor<ReservationSlotReleasedEvent> captor = ArgumentCaptor.forClass(
+                ReservationSlotReleasedEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        ReservationSlotReleasedEvent event = captor.getValue();
 
         assertThat(event.getReservationId()).isEqualTo(1L);
         assertThat(event.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));

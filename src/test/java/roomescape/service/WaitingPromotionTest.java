@@ -23,7 +23,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.event.ReservationCancelledEvent;
+import roomescape.service.event.ReservationSlotReleasedEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class WaitingPromotionTest {
@@ -52,13 +52,13 @@ public class WaitingPromotionTest {
                 new Theme(1L, "공포방", "무서운방입니다.", "image-url")
         );
 
-        ReservationCancelledEvent event = new ReservationCancelledEvent(1L, LocalDate.of(2026, 5, 10), 1L, 1L);
+        ReservationSlotReleasedEvent event = new ReservationSlotReleasedEvent(1L, LocalDate.of(2026, 5, 10), 1L, 1L);
 
         when(waitingService.findFirstWaiting(event.getDate(), event.getTimeId(), event.getThemeId()))
                 .thenReturn(Optional.of(waiting));
 
         // when
-        listener.onReservationCancelled(event);
+        listener.onSlotReleased(event);
 
         // then
         verify(waitingService).deleteForPromotion(waiting);
@@ -76,13 +76,13 @@ public class WaitingPromotionTest {
     @Test
     void 이벤트_수신_시_대기가_없으면_승격하지_않는다() {
         // given
-        ReservationCancelledEvent event = new ReservationCancelledEvent(1L, LocalDate.of(2026, 5, 10), 1L, 1L);
+        ReservationSlotReleasedEvent event = new ReservationSlotReleasedEvent(1L, LocalDate.of(2026, 5, 10), 1L, 1L);
 
         when(waitingService.findFirstWaiting(event.getDate(), event.getTimeId(), event.getThemeId()))
                 .thenReturn(Optional.empty());
 
         // when
-        listener.onReservationCancelled(event);
+        listener.onSlotReleased(event);
 
         // then
         verify(waitingService, never()).deleteForPromotion(any(Waiting.class));
