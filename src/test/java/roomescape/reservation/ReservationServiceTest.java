@@ -26,6 +26,7 @@ import roomescape.support.FakeReservationWaitingRepository;
 import roomescape.support.FakeThemeRepository;
 
 class ReservationServiceTest {
+    private static final LocalDateTime REQUESTED_AT = LocalDateTime.parse("2026-08-05T12:00:00");
 
     @Test
     @DisplayName("예약을 저장한다")
@@ -36,7 +37,7 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.parse("2026-08-06");
         fixture.saveSlot(date, theme, time);
 
-        Reservation saved = fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
+        Reservation saved = fixture.reservationService.save("쿠다", date, theme.getId(), time.getId(), REQUESTED_AT);
 
         assertThat(saved.getId()).isEqualTo(1L);
         assertThat(fixture.reservationRepository.findById(saved.getId())).contains(saved);
@@ -50,11 +51,11 @@ class ReservationServiceTest {
         ReservationTime time = fixture.saveTime("10:00");
         LocalDate date = LocalDate.parse("2026-08-06");
         fixture.saveSlot(date, theme, time);
-        fixture.reservationService.save("쿠다", date, theme.getId(), time.getId());
+        fixture.reservationService.save("쿠다", date, theme.getId(), time.getId(), REQUESTED_AT);
 
         assertThrows(
                 ConflictException.class,
-                () -> fixture.reservationService.save("아루", date, theme.getId(), time.getId())
+                () -> fixture.reservationService.save("아루", date, theme.getId(), time.getId(), REQUESTED_AT)
         );
     }
 
@@ -69,7 +70,7 @@ class ReservationServiceTest {
 
         assertThrows(
                 InvalidInputException.class,
-                () -> fixture.reservationService.save("쿠다", pastDate, theme.getId(), time.getId())
+                () -> fixture.reservationService.save("쿠다", pastDate, theme.getId(), time.getId(), REQUESTED_AT)
         );
     }
 
@@ -85,7 +86,7 @@ class ReservationServiceTest {
 
         assertThrows(
                 InvalidInputException.class,
-                () -> fixture.reservationService.save("쿠다", LocalDate.now(), theme.getId(), time.getId())
+                () -> fixture.reservationService.save("쿠다", LocalDate.now(), theme.getId(), time.getId(), LocalDateTime.now())
         );
     }
 
@@ -95,7 +96,7 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
 
-        fixture.reservationService.deleteById(reservation.getId());
+        fixture.reservationService.deleteById(reservation.getId(), REQUESTED_AT);
 
         assertThat(fixture.reservationRepository.findById(reservation.getId())).isEmpty();
     }
@@ -105,7 +106,7 @@ class ReservationServiceTest {
     void deleteByIdNotFound() {
         Fixture fixture = new Fixture();
 
-        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.deleteById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.deleteById(1L, REQUESTED_AT));
     }
 
     @Test
@@ -114,17 +115,17 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
         ReservationWaiting firstWaiting = fixture.reservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
         ReservationWaiting secondWaiting = fixture.reservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "도기",
                 LocalDateTime.parse("2026-08-05T12:01:00")
         ));
 
-        fixture.reservationService.deleteById(reservation.getId());
+        fixture.reservationService.deleteById(reservation.getId(), REQUESTED_AT);
 
         assertThat(fixture.reservationRepository.findById(reservation.getId())).isEmpty();
         assertThat(fixture.reservationRepository.findAll())
@@ -142,7 +143,7 @@ class ReservationServiceTest {
 
         assertThrows(
                 ConflictException.class,
-                () -> fixture.reservationService.deleteByIdAndName(reservation.getId(), "쿠다")
+                () -> fixture.reservationService.deleteByIdAndName(reservation.getId(), "쿠다", LocalDateTime.now())
         );
     }
 
@@ -154,7 +155,7 @@ class ReservationServiceTest {
 
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> fixture.reservationService.deleteByIdAndName(reservation.getId(), "아루")
+                () -> fixture.reservationService.deleteByIdAndName(reservation.getId(), "아루", REQUESTED_AT)
         );
     }
 
@@ -170,7 +171,8 @@ class ReservationServiceTest {
                 reservation.getId(),
                 "쿠다",
                 LocalDate.parse("2026-08-07"),
-                secondTime.getId()
+                secondTime.getId(),
+                REQUESTED_AT
         );
 
         assertThat(updated.getDate()).isEqualTo(LocalDate.parse("2026-08-07"));
@@ -185,7 +187,13 @@ class ReservationServiceTest {
         Reservation reservation = fixture.saveReservation("쿠다", "2026-08-06", "10:00");
         ReservationTime secondTime = fixture.saveTime("11:00");
         fixture.saveSlot(LocalDate.parse("2026-08-06"), reservation.getTheme(), secondTime);
-        fixture.reservationService.save("아루", LocalDate.parse("2026-08-06"), reservation.getTheme().getId(), secondTime.getId());
+        fixture.reservationService.save(
+                "아루",
+                LocalDate.parse("2026-08-06"),
+                reservation.getTheme().getId(),
+                secondTime.getId(),
+                REQUESTED_AT
+        );
 
         assertThrows(
                 ConflictException.class,
@@ -193,7 +201,8 @@ class ReservationServiceTest {
                         reservation.getId(),
                         "쿠다",
                         LocalDate.parse("2026-08-06"),
-                        secondTime.getId()
+                        secondTime.getId(),
+                        REQUESTED_AT
                 )
         );
     }
@@ -211,7 +220,8 @@ class ReservationServiceTest {
                         reservation.getId(),
                         "쿠다",
                         LocalDate.now().plusDays(1),
-                        secondTime.getId()
+                        secondTime.getId(),
+                        LocalDateTime.now()
                 )
         );
     }
@@ -255,7 +265,7 @@ class ReservationServiceTest {
             ReservationTime time = saveTime(startAt);
             saveSlot(LocalDate.parse(date), theme, time);
 
-            return reservationService.save(name, LocalDate.parse(date), theme.getId(), time.getId());
+            return reservationService.save(name, LocalDate.parse(date), theme.getId(), time.getId(), REQUESTED_AT);
         }
 
         private ReservationSlot saveSlot(final LocalDate date, final Theme theme, final ReservationTime time) {

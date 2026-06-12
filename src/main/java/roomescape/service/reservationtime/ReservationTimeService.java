@@ -60,8 +60,11 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ReservationTime> findAvailableTimes(final LocalDate date, final long themeId) {
-        LocalDateTime requestedAt = LocalDateTime.now();
+    public List<ReservationTime> findAvailableTimes(
+            final LocalDate date,
+            final long themeId,
+            final LocalDateTime requestedAt
+    ) {
         Theme theme = themeService.getById(themeId);
         Set<Long> reservedSlotIds = reservationRepository.findByDateAndTheme(date, theme)
                 .stream()

@@ -1,21 +1,21 @@
 package roomescape.controller.reservationwaiting.dto;
 
 import java.time.LocalDateTime;
-import roomescape.controller.reservation.dto.ReservationResponse;
+import roomescape.controller.reservationslot.dto.ReservationSlotResponse;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 
 public record ReservationWaitingResponse(
         Long id,
         String name,
         LocalDateTime requestedAt,
-        ReservationResponse reservationResponse
+        ReservationSlotResponse slotResponse
 ) {
     public static ReservationWaitingResponse from(final ReservationWaiting reservationWaiting) {
         return new ReservationWaitingResponse(
                 reservationWaiting.getId(),
                 reservationWaiting.getName(),
                 reservationWaiting.getRequestedAt(),
-                ReservationResponse.from(reservationWaiting.getReservation())
+                ReservationSlotResponse.from(reservationWaiting.getSlot())
         );
     }
 }

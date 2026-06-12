@@ -51,7 +51,7 @@ class JdbcReservationWaitingRepositoryTest {
     void save() {
         Reservation reservation = createReservation();
         ReservationWaiting waiting = ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
@@ -75,18 +75,18 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("같은 예약에 같은 이름으로 중복 대기를 저장할 수 없다")
-    void saveDuplicateNameForReservation() {
+    @DisplayName("같은 슬롯에 같은 이름으로 중복 대기를 저장할 수 없다")
+    void saveDuplicateNameForSlot() {
         Reservation reservation = createReservation();
 
         jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
         assertThrows(PersistenceConflictException.class, () -> jdbcReservationWaitingRepository.save(
-                ReservationWaiting.createNew(reservation, "아루", LocalDateTime.parse("2026-08-05T12:01:00"))
+                ReservationWaiting.createNew(reservation.getSlot(), "아루", LocalDateTime.parse("2026-08-05T12:01:00"))
         ));
     }
 
@@ -95,7 +95,7 @@ class JdbcReservationWaitingRepositoryTest {
     void findById() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
@@ -105,7 +105,7 @@ class JdbcReservationWaitingRepositoryTest {
 
         assertThat(found).isEqualTo(saved);
         assertThat(found.getName()).isEqualTo("아루");
-        assertThat(found.getReservation()).isEqualTo(reservation);
+        assertThat(found.getSlot().getId()).isEqualTo(reservation.getSlot().getId());
         assertThat(found.getRequestedAt()).isEqualTo(LocalDateTime.parse("2026-08-05T12:00:00"));
     }
 
@@ -114,7 +114,7 @@ class JdbcReservationWaitingRepositoryTest {
     void deleteById() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
@@ -135,7 +135,7 @@ class JdbcReservationWaitingRepositoryTest {
     void findLineBySlot() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
@@ -151,12 +151,12 @@ class JdbcReservationWaitingRepositoryTest {
     void findLineBySlotFirst() {
         Reservation reservation = createReservation();
         ReservationWaiting second = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "도기",
                 LocalDateTime.parse("2026-08-05T12:01:00")
         ));
         ReservationWaiting first = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));

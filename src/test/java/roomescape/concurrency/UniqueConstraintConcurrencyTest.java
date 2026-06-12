@@ -3,6 +3,7 @@ package roomescape.concurrency;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -32,6 +33,7 @@ import roomescape.service.theme.ThemeService;
 class UniqueConstraintConcurrencyTest {
 
     private static final int REQUEST_COUNT = 5;
+    private static final LocalDateTime REQUESTED_AT = LocalDateTime.parse("2026-08-05T12:00:00");
 
     @Autowired
     private ReservationService reservationService;
@@ -65,7 +67,7 @@ class UniqueConstraintConcurrencyTest {
         reservationSlotRepository.save(new ReservationSlot(date, theme, time));
 
         List<Throwable> results = runConcurrently(REQUEST_COUNT, index ->
-                reservationService.save("예약자" + index, date, theme.getId(), time.getId())
+                reservationService.save("예약자" + index, date, theme.getId(), time.getId(), REQUESTED_AT)
         );
 
         assertThat(results).filteredOn(throwable -> throwable == null).hasSize(1);
@@ -80,10 +82,10 @@ class UniqueConstraintConcurrencyTest {
         ReservationTime time = reservationTimeService.save(LocalTime.parse("10:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
         reservationSlotRepository.save(new ReservationSlot(date, theme, time));
-        reservationService.save("예약자", date, theme.getId(), time.getId());
+        reservationService.save("예약자", date, theme.getId(), time.getId(), REQUESTED_AT);
 
         List<Throwable> results = runConcurrently(REQUEST_COUNT, index ->
-                reservationWaitingService.save("아루", date, theme.getId(), time.getId())
+                reservationWaitingService.save("아루", date, theme.getId(), time.getId(), REQUESTED_AT)
         );
 
         assertThat(results).filteredOn(throwable -> throwable == null).hasSize(1);
@@ -98,10 +100,10 @@ class UniqueConstraintConcurrencyTest {
         ReservationTime time = reservationTimeService.save(LocalTime.parse("10:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
         reservationSlotRepository.save(new ReservationSlot(date, theme, time));
-        reservationService.save("예약자", date, theme.getId(), time.getId());
+        reservationService.save("예약자", date, theme.getId(), time.getId(), REQUESTED_AT);
 
         List<Throwable> results = runConcurrently(REQUEST_COUNT, index ->
-                reservationWaitingService.save("대기자" + index, date, theme.getId(), time.getId())
+                reservationWaitingService.save("대기자" + index, date, theme.getId(), time.getId(), REQUESTED_AT)
         );
 
         assertThat(results).allMatch(throwable -> throwable == null);

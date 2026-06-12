@@ -34,7 +34,7 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
     public ReservationWaitingLine findLineBySlot(final ReservationSlot slot) {
         return ReservationWaitingLine.fromWaitings(waitings.values()
                 .stream()
-                .filter(waiting -> Objects.equals(waiting.getReservation().getSlot().getId(), slot.getId()))
+                .filter(waiting -> Objects.equals(waiting.getSlot().getId(), slot.getId()))
                 .toList());
     }
 

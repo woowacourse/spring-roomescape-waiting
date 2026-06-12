@@ -2,6 +2,7 @@ package roomescape.controller.reservationwaiting;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,8 @@ public class ReservationWaitingController {
                         reservationWaitingRequest.name(),
                         reservationWaitingRequest.date(),
                         reservationWaitingRequest.themeId(),
-                        reservationWaitingRequest.timeId()
+                        reservationWaitingRequest.timeId(),
+                        LocalDateTime.now()
                 ));
 
         return ResponseEntity.created(URI.create("/waitings/" + reservationWaiting.id()))

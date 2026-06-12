@@ -1,6 +1,7 @@
 package roomescape.controller.reservationtime;
 
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,11 @@ public class ReservationTimeController {
             @Valid @ModelAttribute final AvailableReservationTimeRequest availableReservationTimeRequest
     ) {
         return ResponseEntity.ok()
-                .body(reservationTimeService.findAvailableTimes(availableReservationTimeRequest.date(), themeId).stream()
+                .body(reservationTimeService.findAvailableTimes(
+                                availableReservationTimeRequest.date(),
+                                themeId,
+                                LocalDateTime.now()
+                        ).stream()
                         .map(ReservationTimeResponse::from)
                         .toList());
     }

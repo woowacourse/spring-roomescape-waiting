@@ -55,10 +55,9 @@ class ReservationWaitingApiTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("아루"))
                 .andExpect(jsonPath("$.requestedAt", notNullValue()))
-                .andExpect(jsonPath("$.reservationResponse.id").value(1))
-                .andExpect(jsonPath("$.reservationResponse.name").value("쿠다"))
-                .andExpect(jsonPath("$.reservationResponse.theme.id").value(1))
-                .andExpect(jsonPath("$.reservationResponse.time.id").value(1));
+                .andExpect(jsonPath("$.slotResponse.id").value(1))
+                .andExpect(jsonPath("$.slotResponse.theme.id").value(1))
+                .andExpect(jsonPath("$.slotResponse.time.id").value(1));
 
         Integer waitingCount = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE slot_id = 1 AND name = '아루'",

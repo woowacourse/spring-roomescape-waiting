@@ -1,5 +1,6 @@
 package roomescape.controller.reservation;
 
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +42,7 @@ public class ReservationAdminPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.deleteById(id);
+            reservationService.deleteById(id, LocalDateTime.now());
         } catch (ApiException exception) {
             redirectAttributes.addAttribute("errorCode", exception.getCode());
             return "redirect:/pages/admin/reservations";

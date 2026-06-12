@@ -41,7 +41,13 @@ public class ReservationWaitingService {
         this.reservationTimeService = reservationTimeService;
     }
 
-    public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
+    public ReservationWaiting save(
+            final String name,
+            final LocalDate date,
+            final long themeId,
+            final long timeId,
+            final LocalDateTime requestedAt
+    ) {
         ReservationName waitingName = ReservationName.from(name);
         ReservationSlot slot = new ReservationSlot(
                 date,
@@ -57,9 +63,7 @@ public class ReservationWaitingService {
 
         validateWaitableName(savedSlot, reservation, waitingName);
 
-        LocalDateTime requestedAt = LocalDateTime.now();
-
-        ReservationWaiting nonIdReservationWaiting = createNewWaiting(reservation, waitingName, requestedAt);
+        ReservationWaiting nonIdReservationWaiting = createNewWaiting(savedSlot, waitingName, requestedAt);
         try {
             return reservationWaitingRepository.save(nonIdReservationWaiting);
         } catch (PersistenceConflictException exception) {
@@ -101,12 +105,12 @@ public class ReservationWaitingService {
     }
 
     private ReservationWaiting createNewWaiting(
-            final Reservation reservation,
+            final ReservationSlot slot,
             final ReservationName waitingName,
             final LocalDateTime requestedAt
     ) {
         try {
-            return ReservationWaiting.createNew(reservation, waitingName.value(), requestedAt);
+            return ReservationWaiting.createNew(slot, waitingName.value(), requestedAt);
         } catch (IllegalArgumentException exception) {
             throw new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
         }

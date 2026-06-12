@@ -76,7 +76,7 @@ public class ReservationWaitingLine {
     }
 
     private Long waitingSlotId(final ReservationWaiting waiting) {
-        ReservationSlot slot = waiting.getReservation().getSlot();
+        ReservationSlot slot = waiting.getSlot();
         return slot.getId();
     }
 }

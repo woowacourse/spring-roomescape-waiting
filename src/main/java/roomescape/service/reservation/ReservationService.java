@@ -49,8 +49,14 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public Reservation save(final String name, final LocalDate date, final long themeId, final long timeId) {
-        LocalDateTime requestedAt = LocalDateTime.now();
+    @Transactional
+    public Reservation save(
+            final String name,
+            final LocalDate date,
+            final long themeId,
+            final long timeId,
+            final LocalDateTime requestedAt
+    ) {
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         ReservationSlot candidateSlot = new ReservationSlot(date, theme, reservationTime);
@@ -70,8 +76,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(final long id) {
-        LocalDateTime requestedAt = LocalDateTime.now();
+    public void deleteById(final long id, final LocalDateTime requestedAt) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
@@ -82,8 +87,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteByIdAndName(final long id, final String name) {
-        LocalDateTime requestedAt = LocalDateTime.now();
+    public void deleteByIdAndName(final long id, final String name, final LocalDateTime requestedAt) {
         ReservationName lookupName = ReservationName.from(name);
 
         Reservation reservation = reservationRepository.findById(id)
@@ -107,9 +111,9 @@ public class ReservationService {
             final long id,
             final String name,
             final LocalDate date,
-            final long timeId
+            final long timeId,
+            final LocalDateTime requestedAt
     ) {
-        LocalDateTime requestedAt = LocalDateTime.now();
         ReservationName lookupName = ReservationName.from(name);
 
         Reservation reservation = reservationRepository.findById(id)

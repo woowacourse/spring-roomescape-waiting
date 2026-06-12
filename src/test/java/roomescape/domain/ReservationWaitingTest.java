@@ -25,7 +25,7 @@ class ReservationWaitingTest {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         assertThatCode(() -> ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         )).doesNotThrowAnyException();
@@ -37,7 +37,7 @@ class ReservationWaitingTest {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         assertThatThrownBy(() -> ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-06T10:01:00")
         ))
@@ -51,13 +51,13 @@ class ReservationWaitingTest {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
         ReservationWaiting waiting = ReservationWaiting.of(
                 1L,
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
         ReservationWaiting sameIdWaiting = ReservationWaiting.of(
                 1L,
-                reservation,
+                reservation.getSlot(),
                 "다른이름",
                 LocalDateTime.parse("2026-08-05T12:01:00")
         );
@@ -70,12 +70,12 @@ class ReservationWaitingTest {
     void notEqualsWithoutId() {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
         ReservationWaiting waiting = ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
         ReservationWaiting sameValuesWaiting = ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
@@ -91,19 +91,19 @@ class ReservationWaitingTest {
         ReservationWaitingLine waitingLine = new ReservationWaitingLine(List.of(
                 ReservationWaiting.of(
                         3L,
-                        reservation,
+                        reservation.getSlot(),
                         "아루3",
                         LocalDateTime.parse("2026-08-05T12:01:00")
                 ),
                 ReservationWaiting.of(
                         2L,
-                        reservation,
+                        reservation.getSlot(),
                         "아루2",
                         LocalDateTime.parse("2026-08-05T12:00:00")
                 ),
                 ReservationWaiting.of(
                         1L,
-                        reservation,
+                        reservation.getSlot(),
                         "아루1",
                         LocalDateTime.parse("2026-08-05T12:00:00")
                 )
@@ -121,7 +121,7 @@ class ReservationWaitingTest {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
         ReservationWaiting firstWaiting = ReservationWaiting.of(
                 1L,
-                reservation,
+                reservation.getSlot(),
                 "아루1",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
@@ -129,13 +129,13 @@ class ReservationWaitingTest {
         ReservationWaitingLine waitingLine = new ReservationWaitingLine(List.of(
                 ReservationWaiting.of(
                         3L,
-                        reservation,
+                        reservation.getSlot(),
                         "아루3",
                         LocalDateTime.parse("2026-08-05T12:01:00")
                 ),
                 ReservationWaiting.of(
                         2L,
-                        reservation,
+                        reservation.getSlot(),
                         "아루2",
                         LocalDateTime.parse("2026-08-05T12:00:00")
                 ),
@@ -150,7 +150,7 @@ class ReservationWaitingTest {
     void rejectUnsavedWaiting() {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
         ReservationWaiting unsavedWaiting = ReservationWaiting.createNew(
-                reservation,
+                reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
@@ -169,13 +169,13 @@ class ReservationWaitingTest {
         assertThatThrownBy(() -> new ReservationWaitingLine(List.of(
                 ReservationWaiting.of(
                         1L,
-                        reservation,
+                        reservation.getSlot(),
                         "아루1",
                         LocalDateTime.parse("2026-08-05T12:00:00")
                 ),
                 ReservationWaiting.of(
                         2L,
-                        otherReservation,
+                        otherReservation.getSlot(),
                         "아루2",
                         LocalDateTime.parse("2026-08-05T12:01:00")
                 )

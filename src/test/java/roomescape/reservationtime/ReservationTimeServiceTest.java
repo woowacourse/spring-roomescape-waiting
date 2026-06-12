@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,7 @@ import roomescape.support.FakeReservationTimeRepository;
 import roomescape.support.FakeThemeRepository;
 
 class ReservationTimeServiceTest {
+    private static final LocalDateTime REQUESTED_AT = LocalDateTime.parse("2026-08-05T12:00:00");
 
     @Test
     @DisplayName("예약 시간을 저장한다")
@@ -60,7 +62,11 @@ class ReservationTimeServiceTest {
                 LocalDate.now().atStartOfDay()
         ));
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(date, theme.getId());
+        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(
+                date,
+                theme.getId(),
+                REQUESTED_AT
+        );
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -78,7 +84,11 @@ class ReservationTimeServiceTest {
         fixture.saveSlot(pastDate, theme, ten);
         fixture.saveSlot(pastDate, theme, eleven);
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(pastDate, theme.getId());
+        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(
+                pastDate,
+                theme.getId(),
+                LocalDateTime.now()
+        );
 
         assertThat(availableTimes).isEmpty();
     }
@@ -98,7 +108,11 @@ class ReservationTimeServiceTest {
         fixture.saveSlot(LocalDate.now(), theme, past);
         fixture.saveSlot(LocalDate.now(), theme, future);
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(LocalDate.now(), theme.getId());
+        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(
+                LocalDate.now(),
+                theme.getId(),
+                LocalDateTime.now()
+        );
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)

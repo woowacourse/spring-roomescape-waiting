@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
@@ -39,16 +38,9 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 reservationTime
         );
 
-        Reservation reservation = new Reservation(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("reservation_name"),
-                slot,
-                resultSet.getTimestamp("created_at").toLocalDateTime()
-        );
-
         return ReservationWaiting.of(
                 resultSet.getLong("id"),
-                reservation,
+                slot,
                 resultSet.getString("waiting_name"),
                 resultSet.getTimestamp("requested_at").toLocalDateTime()
         );
@@ -69,7 +61,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         try {
             jdbcTemplate.update(connection -> {
                 PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-                preparedStatement.setLong(1, reservationWaiting.getReservation().getSlot().getId());
+                preparedStatement.setLong(1, reservationWaiting.getSlot().getId());
                 preparedStatement.setString(2, reservationWaiting.getName());
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(reservationWaiting.getRequestedAt()));
                 return preparedStatement;
@@ -92,11 +84,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 SELECT rw.id,
                        rw.name AS waiting_name,
                        rw.requested_at,
-                       r.id AS reservation_id,
-                       r.name AS reservation_name,
                        rw.slot_id,
                        s.date,
-                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,
@@ -105,7 +94,6 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                        t.thumbnail_url
                 FROM reservation_waiting AS rw
                 INNER JOIN reservation_slot AS s ON rw.slot_id = s.id
-                INNER JOIN reservation AS r ON r.slot_id = s.id
                 INNER JOIN reservation_time AS rt ON s.time_id = rt.id
                 INNER JOIN theme AS t ON s.theme_id = t.id
                 WHERE rw.id = ?
@@ -122,11 +110,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 SELECT rw.id,
                        rw.name AS waiting_name,
                        rw.requested_at,
-                       r.id AS reservation_id,
-                       r.name AS reservation_name,
                        rw.slot_id,
                        s.date,
-                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,
@@ -135,7 +120,6 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                        t.thumbnail_url
                 FROM reservation_waiting AS rw
                 INNER JOIN reservation_slot AS s ON rw.slot_id = s.id
-                INNER JOIN reservation AS r ON r.slot_id = s.id
                 INNER JOIN reservation_time AS rt ON s.time_id = rt.id
                 INNER JOIN theme AS t ON s.theme_id = t.id
                 WHERE rw.slot_id = ?

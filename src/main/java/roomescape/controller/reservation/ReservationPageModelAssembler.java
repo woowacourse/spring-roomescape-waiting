@@ -52,7 +52,8 @@ public class ReservationPageModelAssembler {
             final String reservationName,
             final int period,
             final int limit,
-            final String errorCode
+            final String errorCode,
+            final LocalDateTime requestedAt
     ) {
         model.addAttribute("themes", themeService.getAll().stream()
                 .map(ThemeResponse::from)
@@ -75,7 +76,8 @@ public class ReservationPageModelAssembler {
                 selectedThemeId,
                 selectedTheme,
                 selectedDate,
-                myHistories
+                myHistories,
+                requestedAt
         ));
         model.addAttribute("myHistories", myHistories);
     }
@@ -84,16 +86,17 @@ public class ReservationPageModelAssembler {
             final Long selectedThemeId,
             final ThemeResponse selectedTheme,
             final LocalDate selectedDate,
-            final List<HistoryResponse> myHistories
+            final List<HistoryResponse> myHistories,
+            final LocalDateTime requestedAt
     ) {
         if (selectedTheme == null || selectedDate == null) {
             return List.of();
         }
 
-        Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
+        Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId, requestedAt)
+                .stream()
                 .map(reservationTime -> reservationTime.getId())
                 .collect(Collectors.toSet());
-        LocalDateTime requestedAt = LocalDateTime.now();
 
         return reservationTimeService.getAll().stream()
                 .map(reservationTime -> new ReservationTimeSlotResponse(

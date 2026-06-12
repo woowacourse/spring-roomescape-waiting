@@ -4,55 +4,56 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservationslot.ReservationSlot;
 
 public class ReservationWaiting {
     public static final String PAST_WAITING_MESSAGE = "지난 예약에는 대기를 생성할 수 없습니다.";
 
     private final Long id;
-    private final Reservation reservation;
+    private final ReservationSlot slot;
     private final ReservationName name;
     private final LocalDateTime requestedAt;
 
     private ReservationWaiting(
             final Long id,
-            final Reservation reservation,
+            final ReservationSlot slot,
             final String name,
             final LocalDateTime requestedAt
     ) {
         this.id = id;
-        this.reservation = reservation;
+        this.slot = slot;
         this.name = ReservationName.from(name);
         this.requestedAt = requestedAt;
         validateWaitable();
     }
 
     public static ReservationWaiting createNew(
-            final Reservation reservation,
+            final ReservationSlot slot,
             final String name,
             final LocalDateTime requestedAt
     ) {
-        return new ReservationWaiting(null, reservation, name, requestedAt);
+        return new ReservationWaiting(null, slot, name, requestedAt);
     }
 
     public static ReservationWaiting of(
             final Long id,
-            final Reservation reservation,
+            final ReservationSlot slot,
             final String name,
             final LocalDateTime requestedAt
     ) {
-        return new ReservationWaiting(id, reservation, name, requestedAt);
+        return new ReservationWaiting(id, slot, name, requestedAt);
     }
 
     public ReservationWaiting withId(final Long id) {
-        return ReservationWaiting.of(id, this.reservation, this.name.value(), this.requestedAt);
+        return ReservationWaiting.of(id, this.slot, this.name.value(), this.requestedAt);
     }
 
     public Long getId() {
         return id;
     }
 
-    public Reservation getReservation() {
-        return reservation;
+    public ReservationSlot getSlot() {
+        return slot;
     }
 
     public String getName() {
@@ -64,7 +65,7 @@ public class ReservationWaiting {
     }
 
     public Reservation toReservation(final LocalDateTime requestedAt) {
-        return Reservation.reserve(name.value(), reservation.getSlot(), requestedAt);
+        return Reservation.reserve(name.value(), slot, requestedAt);
     }
 
     public LocalDateTime getRequestedAt() {
@@ -72,7 +73,10 @@ public class ReservationWaiting {
     }
 
     private void validateWaitable() {
-        if (reservation.isPast(requestedAt)) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯은 비어있으면 안됩니다.");
+        }
+        if (slot.isPast(requestedAt)) {
             throw new IllegalArgumentException(PAST_WAITING_MESSAGE);
         }
     }
