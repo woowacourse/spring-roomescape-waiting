@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationCancellation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.PastReservationException;
-import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservation.ReservationSlotBooking;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -160,27 +162,18 @@ public class ReservationService {
     }
 
     private void cancel(final Reservation reservation, final LocalDateTime requestedAt) {
-        reservationWaitingRepository.findLineBySlot(reservation.getSlot())
-                .first()
-                .ifPresentOrElse(
-                        firstWaiting -> promoteFirstWaiting(reservation, firstWaiting, requestedAt),
-                        () -> deleteReservation(reservation)
-                );
+        ReservationWaitingLine waitingLine = reservationWaitingRepository.findLineBySlot(reservation.getSlot());
+        ReservationSlotBooking booking = new ReservationSlotBooking(reservation, waitingLine);
+        ReservationCancellation cancellation = booking.cancel(requestedAt);
+
+        deleteReservation(cancellation.cancelledReservation());
+        cancellation.promotedReservation().ifPresent(this::savePromotedReservation);
+        cancellation.promotedWaiting().ifPresent(reservationWaitingRepository::delete);
     }
 
-    private void promoteFirstWaiting(
-            final Reservation reservation,
-            final ReservationWaiting firstWaiting,
-            final LocalDateTime requestedAt
-    ) {
-        deleteReservation(reservation);
-        savePromotedReservation(firstWaiting, requestedAt);
-        reservationWaitingRepository.delete(firstWaiting);
-    }
-
-    private void savePromotedReservation(final ReservationWaiting firstWaiting, final LocalDateTime requestedAt) {
+    private void savePromotedReservation(final Reservation promotedReservation) {
         try {
-            reservationRepository.save(firstWaiting.toReservation(requestedAt));
+            reservationRepository.save(promotedReservation);
         } catch (PersistenceConflictException exception) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         } catch (IllegalArgumentException exception) {
@@ -232,19 +225,23 @@ public class ReservationService {
     }
 
     private void validateCancelable(final Reservation reservation, final LocalDateTime requestedAt) {
-        if (reservation.isPast(requestedAt)) {
+        try {
+            reservation.validateCancelable(requestedAt);
+        } catch (PastReservationException exception) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_CANCELLED,
-                    "이미 지난 예약은 취소할 수 없습니다."
+                    exception.getMessage()
             );
         }
     }
 
     private void validateUpdatable(final Reservation reservation, final LocalDateTime requestedAt) {
-        if (reservation.isPast(requestedAt)) {
+        try {
+            reservation.validateUpdatable(requestedAt);
+        } catch (PastReservationException exception) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
-                    "이미 지난 예약은 변경할 수 없습니다."
+                    exception.getMessage()
             );
         }
     }

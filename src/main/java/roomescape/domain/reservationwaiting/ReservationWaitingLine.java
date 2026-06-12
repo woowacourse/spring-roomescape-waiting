@@ -33,6 +33,17 @@ public class ReservationWaitingLine {
         return waitings.isEmpty();
     }
 
+    public boolean isForSlot(final ReservationSlot slot) {
+        if (waitings.isEmpty()) {
+            return true;
+        }
+
+        Long slotId = slot.getId();
+        return waitings.stream()
+                .map(waiting -> waiting.getSlot().getId())
+                .allMatch(waitingSlotId -> Objects.equals(waitingSlotId, slotId));
+    }
+
     public boolean containsName(final ReservationName name) {
         return waitings.stream()
                 .map(ReservationWaiting::getName)

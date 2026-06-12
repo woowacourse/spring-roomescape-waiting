@@ -9,6 +9,8 @@ import roomescape.domain.theme.Theme;
 
 public class Reservation {
     private static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
+    private static final String PAST_CANCEL_MESSAGE = "이미 지난 예약은 취소할 수 없습니다.";
+    private static final String PAST_UPDATE_MESSAGE = "이미 지난 예약은 변경할 수 없습니다.";
 
     private final Long id;
     private final ReservationName name;
@@ -92,6 +94,18 @@ public class Reservation {
 
     public boolean isPast(final LocalDateTime standardDateTime) {
         return slot.isPast(standardDateTime);
+    }
+
+    public void validateCancelable(final LocalDateTime standardDateTime) {
+        if (isPast(standardDateTime)) {
+            throw new PastReservationException(PAST_CANCEL_MESSAGE);
+        }
+    }
+
+    public void validateUpdatable(final LocalDateTime standardDateTime) {
+        if (isPast(standardDateTime)) {
+            throw new PastReservationException(PAST_UPDATE_MESSAGE);
+        }
     }
 
     private static void validateReservable(
