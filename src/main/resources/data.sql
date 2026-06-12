@@ -43,7 +43,12 @@ INSERT INTO reservation_time (id, start_at)
 VALUES (1, '10:00:00'),
        (2, '11:00:00'),
        (3, '12:00:00'),
-       (4, '13:00:00');
+       (4, '13:00:00'),
+       (5, '14:00:00'),
+       (6, '15:00:00'),
+       (7, '16:00:00'),
+       (8, '17:00:00'),
+       (9, '18:00:00');
 
 ALTER TABLE reservation_time
     ALTER COLUMN id RESTART WITH 10;

@@ -9,7 +9,7 @@
     <style>
         .user-layout { min-height: 100vh; display: flex; flex-direction: column; }
         .top-nav { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 0 36px; min-height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 16px; }
-        .top-nav-logo { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #5b7fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .top-nav-logo { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #5b7fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; border: none; cursor: pointer; padding: 0; }
         .top-nav-links { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .user-main { flex: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px; width: 100%; }
         .steps { display: flex; align-items: center; gap: 0; margin-bottom: 36px; }
@@ -30,51 +30,31 @@
         .summary-key { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .summary-val { font-size: 15px; font-weight: 600; color: var(--text-primary); }
         .summary-val.empty { color: var(--text-muted); font-weight: 400; font-style: italic; }
-        .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; }
         .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; align-items:center; justify-content:center; }
         .modal-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; width:100%; max-width:480px; margin:0 16px; }
+        .login-required-notice { background: rgba(91,127,255,0.08); border: 1px solid rgba(91,127,255,0.2); border-radius: var(--radius); padding: 20px 24px; text-align: center; }
+        .login-required-notice p { color: var(--text-secondary); font-size: 14px; margin-bottom: 14px; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: var(--accent-soft); border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
+        .user-chip:hover { background: rgba(91,127,255,0.18); box-shadow: 0 0 0 2px rgba(91,127,255,0.3); }
     </style>
 </head>
 <body>
 <div class="user-layout">
     <nav class="top-nav">
-        <div class="top-nav-logo">🔐 RoomEscape</div>
+        <button class="top-nav-logo" id="logo-btn" type="button">🔐 RoomEscape</button>
         <div class="top-nav-links">
-            <span class="auth-status" id="member-status"></span>
-            <button class="btn btn-ghost btn-sm" id="logout-btn" type="button">로그아웃</button>
-            <a class="btn btn-ghost btn-sm" href="/admin/reservation.html">🛠 관리자</a>
+            <span class="user-chip" id="member-status" style="display:none;" title="내 예약 · 대기 목록 보기"></span>
+            <button class="btn btn-ghost btn-sm" id="logout-btn" style="display:none;" type="button">로그아웃</button>
+            <button class="btn btn-ghost btn-sm" id="admin-nav-btn" type="button">🛠 관리자</button>
+            <button class="btn btn-ghost btn-sm" id="nav-login-btn" type="button">로그인</button>
+            <button class="btn btn-primary btn-sm" id="nav-signup-btn" type="button">회원가입</button>
         </div>
     </nav>
 
     <main class="user-main">
         <div style="text-align: center; margin-bottom: 32px;">
             <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">방탈출 예약</h1>
-            <p style="color: var(--text-secondary); font-size: 16px;">로그인하고 테마와 시간을 골라 예약하세요.</p>
-        </div>
-
-        <div class="card" id="auth-card" style="margin-bottom:24px;">
-            <div class="card-header">
-                <span class="card-title">계정</span>
-            </div>
-            <div class="login-grid">
-                <div class="form-group">
-                    <label for="auth-username">아이디</label>
-                    <input id="auth-username" placeholder="admin" type="text" autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label for="auth-password">비밀번호</label>
-                    <input id="auth-password" placeholder="비밀번호" type="password">
-                </div>
-                <div class="form-group">
-                    <label for="auth-name">이름</label>
-                    <input id="auth-name" placeholder="회원가입 시 입력" type="text">
-                </div>
-                <div class="auth-actions">
-                    <button class="btn btn-primary" id="login-btn" type="button">로그인</button>
-                    <button class="btn btn-ghost" id="register-btn" type="button">회원가입</button>
-                </div>
-            </div>
-            <p class="auth-message" id="auth-message"></p>
+            <p style="color: var(--text-secondary); font-size: 16px;">테마와 시간을 골라 예약하세요.</p>
         </div>
 
         <div class="steps" id="steps">
@@ -137,14 +117,16 @@
                     <button class="btn btn-ghost btn-sm" id="back-step-2" type="button">← 뒤로</button>
                 </div>
                 <div id="confirm-summary" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;"></div>
-                <button class="btn btn-primary btn-full" id="submit-reservation-btn" style="max-width: 300px;" type="button">🎟 예약 확정</button>
+                <div id="submit-area">
+                    <button class="btn btn-primary btn-full" id="submit-reservation-btn" style="max-width: 300px;" type="button">🎟 예약 확정</button>
+                </div>
             </div>
         </div>
 
         <div class="card" style="margin-top: 32px;">
             <div class="card-header">
                 <span class="card-title">📋 내 예약 조회 · 수정 · 취소</span>
-                <button class="btn btn-primary btn-sm" id="my-res-refresh-btn" type="button">조회</button>
+                <button class="btn btn-ghost btn-sm" id="my-res-refresh-btn" type="button">새로고침</button>
             </div>
             <div id="my-res-section"></div>
         </div>
@@ -179,6 +161,50 @@
     </main>
 </div>
 
+<!-- 로그인/회원가입 모달 -->
+<div class="modal-backdrop" id="auth-modal-backdrop">
+    <div class="modal-card" style="max-width:440px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div style="display:flex;gap:20px;">
+                <button class="auth-tab active" id="tab-login" type="button">로그인</button>
+                <button class="auth-tab" id="tab-signup" type="button">회원가입</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="auth-modal-close" type="button">✕</button>
+        </div>
+        <div id="auth-modal-notice" style="display:none;" class="auth-notice"></div>
+
+        <div id="auth-login-panel">
+            <div class="form-group" style="margin-bottom:12px;">
+                <label for="auth-username">아이디</label>
+                <input id="auth-username" placeholder="아이디 입력" type="text" autocomplete="username">
+            </div>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label for="auth-password">비밀번호</label>
+                <input id="auth-password" placeholder="비밀번호 입력" type="password" autocomplete="current-password">
+            </div>
+            <button class="btn btn-primary btn-full" id="login-btn" type="button">로그인</button>
+        </div>
+
+        <div id="auth-signup-panel" style="display:none;">
+            <div class="form-group" style="margin-bottom:12px;">
+                <label for="signup-username">아이디</label>
+                <input id="signup-username" placeholder="아이디 입력" type="text" autocomplete="username">
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label for="signup-password">비밀번호</label>
+                <input id="signup-password" placeholder="비밀번호 입력" type="password" autocomplete="new-password">
+            </div>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label for="signup-name">이름</label>
+                <input id="signup-name" placeholder="실명 입력" type="text">
+            </div>
+            <button class="btn btn-primary btn-full" id="register-btn" type="button">회원가입</button>
+        </div>
+
+        <p class="auth-message" id="auth-message"></p>
+    </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script src="app.js"></script>
@@ -186,6 +212,8 @@
     const R = Roomescape;
     const state = {selectedTheme: null, selectedDate: null, selectedTime: null, themes: [], isWaiting: false};
     const themePageState = {page: 0, hasNext: false};
+
+    let pendingReturnTo = null;
 
     function tokenInfo() {
         return R.decodeToken(R.auth.getMemberToken());
@@ -197,21 +225,62 @@
         return false;
     }
 
+    function openAuthModal(tab = 'login', notice = '', noticeType = '') {
+        const backdrop = R.byId('auth-modal-backdrop');
+        const noticeEl = R.byId('auth-modal-notice');
+        R.byId('auth-message').textContent = '';
+        if (notice) {
+            noticeEl.textContent = notice;
+            noticeEl.className = 'auth-notice' + (noticeType === 'warning' ? ' warning' : '');
+            noticeEl.style.display = '';
+        } else {
+            noticeEl.style.display = 'none';
+        }
+        switchAuthTab(tab);
+        backdrop.style.display = 'flex';
+        setTimeout(() => {
+            const input = tab === 'login' ? R.byId('auth-username') : R.byId('signup-username');
+            if (input) input.focus();
+        }, 80);
+    }
+
+    function closeAuthModal() {
+        R.byId('auth-modal-backdrop').style.display = 'none';
+        R.byId('auth-message').textContent = '';
+        R.byId('auth-modal-notice').style.display = 'none';
+    }
+
+    function switchAuthTab(tab) {
+        const isLogin = tab === 'login';
+        R.byId('tab-login').classList.toggle('active', isLogin);
+        R.byId('tab-signup').classList.toggle('active', !isLogin);
+        R.byId('auth-login-panel').style.display = isLogin ? '' : 'none';
+        R.byId('auth-signup-panel').style.display = isLogin ? 'none' : '';
+        R.byId('auth-message').textContent = '';
+    }
+
     function updateAuthUi() {
         const token = R.auth.getMemberToken();
         const info = R.decodeToken(token);
         const status = R.byId('member-status');
-        R.clear(status);
+        const logoutBtn = R.byId('logout-btn');
+        const loginBtn = R.byId('nav-login-btn');
+        const signupBtn = R.byId('nav-signup-btn');
+
         if (token && (info?.username || info?.sub)) {
-            status.appendChild(R.h('span', {text: `${info.username || info.sub} 로그인 중`}));
-            R.byId('logout-btn').style.display = '';
-            R.byId('auth-card').style.display = 'none';
+            status.textContent = info.username || info.sub;
+            status.style.display = 'flex';
+            logoutBtn.style.display = '';
+            loginBtn.style.display = 'none';
+            signupBtn.style.display = 'none';
         } else {
-            status.appendChild(R.h('span', {text: '로그인이 필요합니다'}));
-            R.byId('logout-btn').style.display = 'none';
-            R.byId('auth-card').style.display = '';
+            status.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            loginBtn.style.display = '';
+            signupBtn.style.display = '';
         }
         updateSummary();
+        updateStepThreeArea();
     }
 
     async function loginMember() {
@@ -226,25 +295,35 @@
             R.auth.setMemberToken(token);
             R.byId('auth-password').value = '';
             R.byId('auth-message').textContent = '';
+            closeAuthModal();
             updateAuthUi();
             R.toast('로그인되었습니다.', 'success');
             await loadMyReservations();
+
+            const info = R.decodeToken(token);
+            if (pendingReturnTo && info?.role === 'MANAGER') {
+                window.location.href = pendingReturnTo;
+            }
+            pendingReturnTo = null;
         } catch (e) {
             R.byId('auth-message').textContent = e.message;
         }
     }
 
     async function registerMember() {
-        const username = R.byId('auth-username').value.trim();
-        const password = R.byId('auth-password').value;
-        const name = R.byId('auth-name').value.trim();
+        const username = R.byId('signup-username').value.trim();
+        const password = R.byId('signup-password').value;
+        const name = R.byId('signup-name').value.trim();
         if (!username || !password || !name) {
-            R.byId('auth-message').textContent = '회원가입에는 아이디, 비밀번호, 이름이 모두 필요합니다.';
+            R.byId('auth-message').textContent = '아이디, 비밀번호, 이름을 모두 입력해주세요.';
             return;
         }
         try {
             await R.api('POST', '/users', {body: {username, password, name}});
-            R.toast('회원가입이 완료되었습니다. 바로 로그인할게요.', 'success');
+            R.toast('회원가입이 완료되었습니다. 로그인할게요.', 'success');
+            R.byId('auth-username').value = username;
+            R.byId('auth-password').value = password;
+            switchAuthTab('login');
             await loginMember();
         } catch (e) {
             R.byId('auth-message').textContent = e.message;
@@ -271,6 +350,33 @@
         setVal('sum-name', info?.username || info?.sub);
     }
 
+    function updateStepThreeArea() {
+        const area = R.byId('submit-area');
+        if (!area) return;
+        R.clear(area);
+        if (!R.auth.getMemberToken()) {
+            const notice = R.h('div', {className: 'login-required-notice'}, [
+                R.h('p', {text: '예약을 완료하려면 로그인이 필요합니다.'}),
+                R.button('btn btn-primary', '로그인하기', () => openAuthModal('login')),
+            ]);
+            area.appendChild(notice);
+        } else {
+            const btn = R.h('button', {
+                className: 'btn btn-primary btn-full',
+                id: 'submit-reservation-btn',
+                type: 'button',
+                style: {maxWidth: '300px'},
+                text: state.isWaiting ? '🕐 대기 신청' : '🎟 예약 확정',
+                on: {click: submitReservation},
+            });
+            if (state.isWaiting) {
+                btn.style.background = '#eab308';
+                btn.style.color = '#0d0f1a';
+            }
+            area.appendChild(btn);
+        }
+    }
+
     function goToStep(n) {
         for (let i = 1; i <= 3; i++) {
             R.byId(`panel-${i}`).classList.toggle('visible', i === n);
@@ -279,10 +385,11 @@
             step.classList.toggle('done', i < n);
         }
         updateSummary();
+        if (n === 3) updateStepThreeArea();
     }
 
     function renderThemeCard(theme) {
-        const card = R.h('button', {
+        return R.h('button', {
             className: 'theme-card',
             type: 'button',
             id: `theme-card-${theme.id}`,
@@ -296,7 +403,6 @@
                 R.h('div', {className: 'theme-card-desc', text: theme.description || '설명 없음'}),
             ]),
         ]);
-        return card;
     }
 
     async function loadThemes(reset = true) {
@@ -393,17 +499,22 @@
                 container.appendChild(R.emptyState('가용 시간이 없습니다.', '⏰'));
                 return;
             }
+            const now = new Date();
             const grid = R.h('div', {className: 'time-grid'});
             times.forEach(time => {
+                const slotDateTime = new Date(`${date}T${time.startAt}`);
+                const isPast = slotDateTime < now;
+                const slotClass = isPast ? 'past' : (time.isReserved ? 'reserved' : 'available');
+                const label = isPast ? '지난 시간' : (time.isReserved ? '예약됨 · 대기 신청 가능' : '예약 가능');
                 grid.appendChild(R.h('button', {
-                    className: `time-slot ${time.isReserved ? 'reserved' : 'available'}`,
+                    className: `time-slot ${slotClass}`,
                     type: 'button',
                     id: `ts-${time.id}`,
-                    style: time.isReserved ? {cursor: 'pointer', opacity: '0.9'} : {},
-                    on: {click: () => selectTime(time, time.isReserved)},
+                    disabled: isPast,
+                    on: isPast ? {} : {click: () => selectTime(time, time.isReserved)},
                 }, [
                     R.h('div', {text: time.startAt}),
-                    R.h('div', {className: 'time-slot-label', text: time.isReserved ? '🕐 대기 신청' : '선택 가능'}),
+                    R.h('div', {className: 'time-slot-label', text: label}),
                 ]));
             });
             container.appendChild(grid);
@@ -414,22 +525,13 @@
     }
 
     function selectTime(time, isWaiting = false) {
-        if (isWaiting && !requireLogin()) return;
         state.selectedTime = time;
         state.isWaiting = !!isWaiting;
         document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
         R.byId(`ts-${time.id}`)?.classList.add('selected');
         updateSummary();
         buildConfirmSummary();
-        updateStepThreeButton();
         goToStep(3);
-    }
-
-    function updateStepThreeButton() {
-        const btn = R.byId('submit-reservation-btn');
-        btn.textContent = state.isWaiting ? '🕐 대기 신청' : '🎟 예약 확정';
-        btn.style.background = state.isWaiting ? '#eab308' : '';
-        btn.style.color = state.isWaiting ? '#0d0f1a' : '';
     }
 
     function buildConfirmSummary() {
@@ -494,7 +596,6 @@
             state.selectedTime = null;
             state.isWaiting = false;
             updateSummary();
-            updateStepThreeButton();
             goToStep(1);
             await loadThemes(true);
             await loadMyReservations();
@@ -650,32 +751,98 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // 로고 클릭 → Step 1 초기화
+        R.byId('logo-btn').addEventListener('click', () => {
+            state.selectedTheme = null;
+            state.selectedDate = null;
+            state.selectedTime = null;
+            state.isWaiting = false;
+            updateSummary();
+            goToStep(1);
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+
+        // 로그인/회원가입 모달
+        R.byId('nav-login-btn').addEventListener('click', () => openAuthModal('login'));
+        R.byId('nav-signup-btn').addEventListener('click', () => openAuthModal('signup'));
+        R.byId('auth-modal-close').addEventListener('click', closeAuthModal);
+        R.byId('auth-modal-backdrop').addEventListener('click', e => {
+            if (e.target === R.byId('auth-modal-backdrop')) closeAuthModal();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeAuthModal();
+                closeEditModal();
+            }
+        });
+        R.byId('tab-login').addEventListener('click', () => switchAuthTab('login'));
+        R.byId('tab-signup').addEventListener('click', () => switchAuthTab('signup'));
         R.byId('login-btn').addEventListener('click', loginMember);
         R.byId('register-btn').addEventListener('click', registerMember);
+        R.byId('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') loginMember(); });
+        R.byId('signup-password').addEventListener('keydown', e => { if (e.key === 'Enter') registerMember(); });
+
+        // 관리자 링크 권한 체크
+        R.byId('admin-nav-btn').addEventListener('click', () => {
+            const token = R.auth.getMemberToken();
+            const info = R.decodeToken(token);
+            if (!token) {
+                pendingReturnTo = '/admin/reservation.html';
+                openAuthModal('login', '관리자 페이지는 로그인 후 이용 가능합니다.');
+                return;
+            }
+            if (info?.role !== 'MANAGER') {
+                R.toast('관리자 권한이 없습니다.', 'error');
+                return;
+            }
+            window.location.href = '/admin/reservation.html';
+        });
+
+        // 이름 클릭 → 내 예약 섹션으로 스크롤
+        R.byId('member-status').addEventListener('click', async () => {
+            const myResCard = R.byId('my-res-section').closest('.card');
+            await loadMyReservations();
+            myResCard.scrollIntoView({behavior: 'smooth', block: 'start'});
+        });
+
+        // 로그아웃
         R.byId('logout-btn').addEventListener('click', logoutMember);
+
+        // 예약 흐름
         R.byId('theme-refresh-btn').addEventListener('click', () => loadThemes(true));
         R.byId('theme-load-more-btn').addEventListener('click', loadThemeMore);
         R.byId('popular-load-btn').addEventListener('click', loadPopular);
         R.byId('back-step-1').addEventListener('click', () => {
             state.isWaiting = false;
-            updateStepThreeButton();
             goToStep(1);
         });
         R.byId('back-step-2').addEventListener('click', () => goToStep(2));
         R.byId('book-date').addEventListener('change', loadAvailableTimes);
-        R.byId('submit-reservation-btn').addEventListener('click', submitReservation);
         R.byId('my-res-refresh-btn').addEventListener('click', loadMyReservations);
+
+        // 예약 수정 모달
         R.byId('edit-close-btn').addEventListener('click', closeEditModal);
         R.byId('edit-cancel-btn').addEventListener('click', closeEditModal);
         R.byId('edit-save-btn').addEventListener('click', submitEdit);
         R.byId('edit-theme').addEventListener('change', loadEditTimes);
         R.byId('edit-date').addEventListener('change', loadEditTimes);
-        R.byId('edit-modal-backdrop').addEventListener('click', event => {
-            if (event.target === R.byId('edit-modal-backdrop')) closeEditModal();
+        R.byId('edit-modal-backdrop').addEventListener('click', e => {
+            if (e.target === R.byId('edit-modal-backdrop')) closeEditModal();
         });
-        R.byId('auth-password').addEventListener('keydown', event => {
-            if (event.key === 'Enter') loginMember();
-        });
+
+        // URL 파라미터 처리 (관리자 리다이렉트 후 복귀)
+        const params = new URLSearchParams(window.location.search);
+        const authError = params.get('authError');
+        const returnTo = params.get('returnTo');
+        if (returnTo) pendingReturnTo = returnTo;
+        if (authError) {
+            const msg = authError === 'forbidden'
+                ? '관리자 권한이 필요합니다. 관리자 계정으로 로그인해주세요.'
+                : '로그인이 필요합니다.';
+            openAuthModal('login', msg, authError === 'forbidden' ? 'warning' : '');
+            history.replaceState(null, '', '/');
+        }
+
         R.byId('book-date').value = new Date().toISOString().split('T')[0];
         R.byId('popular-section').appendChild(R.emptyState('조회 버튼을 눌러 확인하세요.'));
         updateAuthUi();

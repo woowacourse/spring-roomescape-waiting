@@ -628,7 +628,28 @@ tbody tr:last-child td {
     border-color: var(--border);
     color: var(--text-muted);
     background: rgba(74, 80, 128, 0.08);
+    cursor: pointer;
+}
+
+.time-slot.reserved:hover {
+    background: rgba(234, 179, 8, 0.12);
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--warning);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(250, 204, 21, 0.15);
+}
+
+.time-slot.past {
+    border-color: var(--border);
+    color: var(--text-muted);
+    background: rgba(74, 80, 128, 0.05);
     cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.time-slot.past:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 .time-slot-label {
@@ -715,6 +736,45 @@ tbody tr:last-child td {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
+}
+
+/* ── Auth modal tabs ── */
+.auth-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 2px 8px;
+    transition: all var(--transition);
+}
+
+.auth-tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent);
+}
+
+.auth-tab:hover:not(.active) {
+    color: var(--text-secondary);
+}
+
+.auth-notice {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(91, 127, 255, 0.1);
+    border: 1px solid rgba(91, 127, 255, 0.25);
+    color: var(--accent-hover);
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.auth-notice.warning {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: rgba(250, 204, 21, 0.25);
+    color: var(--warning);
 }
 
 /* ── Responsive ── */
