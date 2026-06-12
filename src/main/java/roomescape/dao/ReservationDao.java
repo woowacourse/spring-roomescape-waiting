@@ -11,10 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 
 @Repository
 public class ReservationDao {
@@ -31,12 +28,17 @@ public class ReservationDao {
                 resultSet.getString("thumbnail")
         );
 
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getLong("slot_id"),
+                resultSet.getDate("reservation_date").toLocalDate(),
+                reservationTime,
+                theme
+        );
+
         return new Reservation(
                 resultSet.getLong("id"),
                 resultSet.getString("reservation_name"),
-                resultSet.getDate("date").toLocalDate(),
-                reservationTime,
-                theme
+                slot
         );
     };
 
@@ -51,19 +53,17 @@ public class ReservationDao {
     }
 
     public Reservation insert(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
-        parameters.put("date", reservation.getDate());
-        parameters.put("time_id", reservation.getTime().getId());
-        parameters.put("theme_id", reservation.getTheme().getId());
+        parameters.put("slot_id", slot.getId());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
         return new Reservation(
                 generatedId.longValue(),
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
+                slot
         );
     }
 
@@ -86,39 +86,62 @@ public class ReservationDao {
     }
 
     public List<Reservation> selectByThemeIdAndDate(long themeId, LocalDate date) {
-        String sql = baseSelectSql() + " WHERE r.theme_id = ? AND r.date = ?";
+        String sql = baseSelectSql() + " WHERE rs.theme_id = ? AND rs.date = ?";
         return jdbcTemplate.query(sql, ROW_MAPPER, themeId, date);
     }
 
     public boolean existsByTimeId(long timeId) {
-        String sql = "SELECT COUNT(*) > 0 FROM reservation WHERE time_id = ?";
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM reservation AS r
+            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+            WHERE rs.time_id = ?
+            """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
     }
 
     public boolean existsByThemeId(long themeId) {
-        String sql = "SELECT COUNT(*) > 0 FROM reservation WHERE theme_id = ?";
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM reservation AS r
+            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+            WHERE rs.theme_id = ?
+            """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
-    public boolean existsByDateAndTimeIdAndThemeId(ReservationSlot slot) {
+    public boolean existsBySlotIdExcluding(long slotId, long reservationId) {
+        String sql = """
+                SELECT COUNT(*) > 0
+                FROM reservation 
+                WHERE slot_id = ? AND id != ?
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slotId, reservationId);
+    }
+
+
+    public boolean existsBySlotId(long slotId) {
+        String sql = """
+                SELECT COUNT(*) > 0 
+                FROM reservation 
+                WHERE slot_id = ? 
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slotId);
+    }
+
+    public boolean existsByNameAndSlotId(String name, long slotId) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId());
+                WHERE name = ? AND slot_id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slotId);
     }
 
-    public boolean existsDuplicateExcluding(ReservationSlot slot, long reservationId) {
-        String sql = """
-                SELECT COUNT(*) > 0
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), reservationId);
-    }
+    public Reservation update(Long reservationId, ReservationSlot slot) {
+        String sql = "UPDATE reservation SET slot_id = ? WHERE id = ?";
+        jdbcTemplate.update(sql, slot.getId(), reservationId);
 
-    public Reservation update(Long reservationId, LocalDate date, long timeId) {
-        String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, date, timeId, reservationId);
         return selectById(reservationId).get();
     }
 
@@ -131,7 +154,8 @@ public class ReservationDao {
         return """
                 SELECT r.id,
                        r.name as reservation_name,
-                       r.date,
+                       rs.id as slot_id,
+                       rs.date as reservation_date,
                        rt.id as time_id,
                        rt.start_at,
                        t.id as theme_id,
@@ -139,8 +163,9 @@ public class ReservationDao {
                        t.description,
                        t.thumbnail
                 FROM reservation AS r
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
+                INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+                INNER JOIN reservation_time AS rt ON rs.time_id = rt.id
+                INNER JOIN theme AS t ON rs.theme_id = t.id
                 """;
     }
 }

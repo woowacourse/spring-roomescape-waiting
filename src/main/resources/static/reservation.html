@@ -158,6 +158,47 @@
             align-items: start;
         }
 
+        .policy-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            border: 1px solid rgba(49, 130, 246, 0.22);
+            border-left: 5px solid var(--blue);
+            border-radius: 8px;
+            background: var(--white);
+            box-shadow: 0 10px 28px rgba(49, 130, 246, 0.08);
+            margin-bottom: 24px;
+            padding: 18px 20px;
+        }
+
+        .policy-banner-badge {
+            display: inline-flex;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: var(--blue);
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 900;
+            padding: 6px 9px;
+        }
+
+        .policy-banner-content {
+            display: grid;
+            gap: 6px;
+        }
+
+        .policy-banner-content strong {
+            color: var(--gray-900);
+            font-size: 15px;
+        }
+
+        .policy-banner-content p {
+            margin: 0;
+            color: var(--gray-700);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
         .section {
             border: 1px solid var(--gray-200);
             border-radius: 8px;
@@ -382,6 +423,28 @@
             line-height: 1.5;
         }
 
+        .policy-box {
+            display: grid;
+            gap: 7px;
+            border: 1px solid rgba(49, 130, 246, 0.18);
+            border-radius: 8px;
+            background: var(--blue-soft);
+            color: var(--gray-700);
+            margin-bottom: 16px;
+            padding: 15px 16px;
+        }
+
+        .policy-box strong {
+            color: var(--gray-900);
+            font-size: 14px;
+        }
+
+        .policy-box p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .submit-button {
             width: 100%;
             height: 54px;
@@ -544,6 +607,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .policy-banner {
+                flex-direction: column;
+            }
+
             .section,
             .primary-card,
             .summary-card,
@@ -570,7 +637,7 @@
     <section class="hero">
         <div class="hero-copy">
             <h1>원하는 시간은 예약하고,<br>가득 찬 시간은 대기하세요.</h1>
-            <p>날짜와 테마를 고르면 예약 가능한 시간과 이미 예약된 시간을 함께 보여드립니다. 예약된 슬롯도 바로 대기 신청할 수 있어요.</p>
+            <p>날짜와 테마를 고르면 예약 가능한 시간과 이미 예약된 시간을 함께 보여드립니다. 예약된 슬롯에 대기하면 빈자리가 생길 때 순번대로 자동 확정됩니다.</p>
         </div>
         <aside class="summary-card">
             <p class="summary-title">선택한 일정</p>
@@ -579,6 +646,14 @@
             <div class="summary-line"><span>시간</span><strong id="summary-time">-</strong></div>
             <div class="summary-line"><span>진행</span><strong id="summary-action">예약 또는 대기</strong></div>
         </aside>
+    </section>
+
+    <section class="policy-banner" aria-label="대기 자동 확정 정책">
+        <span class="policy-banner-badge">자동 확정</span>
+        <div class="policy-banner-content">
+            <strong>대기 신청은 빈자리가 생기면 예약으로 자동 전환될 수 있습니다.</strong>
+            <p>현재 서비스에는 결제나 관리자 승인 단계가 없으므로, 대기를 신청하면 1순위가 되었을 때 별도 승인 없이 예약 확정으로 전환됩니다.</p>
+        </div>
     </section>
 
     <section class="layout">
@@ -621,7 +696,7 @@
                         <span class="eyebrow">STEP 3</span>
                         <h2>시간 선택</h2>
                     </div>
-                    <p class="hint">예약됨 슬롯은 대기 신청으로 진행됩니다.</p>
+                    <p class="hint">예약됨 슬롯은 대기 신청으로 진행되고, 취소 발생 시 순번대로 자동 확정됩니다.</p>
                 </div>
                 <div class="time-grid" id="time-list">
                     <div class="empty">테마와 날짜를 먼저 선택해주세요.</div>
@@ -639,7 +714,11 @@
                     </div>
                 </div>
                 <div class="action-box">
-                    <p id="action-message">예약 가능 시간은 즉시 예약하고, 이미 예약된 시간은 대기 순번을 받을 수 있습니다.</p>
+                    <p id="action-message">예약 가능 시간은 즉시 예약하고, 이미 예약된 시간은 대기 순번을 받을 수 있습니다. 대기는 빈자리가 생기면 자동으로 예약 확정됩니다.</p>
+                </div>
+                <div class="policy-box" aria-label="대기 자동 확정 안내">
+                    <strong>대기 신청은 자동 확정에 동의한 것으로 처리됩니다.</strong>
+                    <p>앞선 예약이 취소되면 대기 순번 1번이 별도 승인 없이 예약 확정으로 전환됩니다.</p>
                 </div>
                 <button class="submit-button" disabled id="submit-button">예약 또는 대기 신청</button>
             </section>
@@ -770,7 +849,7 @@
         }
 
         list.innerHTML = times.map(time => {
-            const actionText = time.isNotReserved ? '예약 가능' : '대기 가능';
+            const actionText = time.isNotReserved ? '예약 가능' : '대기 가능 · 자동 확정';
             const badgeClass = time.isNotReserved ? 'available' : 'waiting';
             return `
                 <button class="time-slot" data-time-id="${time.id}" data-action="${time.isNotReserved ? 'reservation' : 'waiting'}" type="button">
@@ -798,7 +877,7 @@
         $('#summary-time').textContent = state.selectedTime ? state.selectedTime.startAt : '-';
         $('#summary-action').textContent = isWaiting ? '대기 신청' : '예약';
         $('#action-message').textContent = isWaiting
-            ? '이미 예약된 슬롯입니다. 신청하면 대기 순번을 받고, 내 예약 화면에서 취소할 수 있습니다.'
+            ? '이미 예약된 슬롯입니다. 신청하면 대기 순번을 받고, 앞선 예약이 취소될 때 자동으로 예약 확정될 수 있습니다.'
             : '예약 가능한 슬롯입니다. 신청하면 바로 예약 확정 상태로 등록됩니다.';
         $('#submit-button').textContent = isWaiting ? '대기 신청하기' : '예약 확정하기';
     }
@@ -840,7 +919,7 @@
     function openResultModal(data, isWaiting) {
         $('#modal-title').textContent = isWaiting ? '대기 신청이 완료되었습니다' : '예약이 확정되었습니다';
         $('#modal-description').textContent = isWaiting
-            ? '내 예약 화면에서 대기 순번과 취소를 관리할 수 있습니다.'
+            ? '내 예약 화면에서 대기 순번을 확인할 수 있습니다. 앞선 예약이 취소되면 자동으로 예약 확정됩니다.'
             : '내 예약 화면에서 예약 변경과 취소를 관리할 수 있습니다.';
         $('#modal-details').innerHTML = `
             <div><span>ID</span><strong>${data.id}</strong></div>
@@ -862,7 +941,7 @@
         state.actionType = null;
         $('#summary-time').textContent = '-';
         $('#summary-action').textContent = '예약 또는 대기';
-        $('#action-message').textContent = '예약 가능 시간은 즉시 예약하고, 이미 예약된 시간은 대기 순번을 받을 수 있습니다.';
+        $('#action-message').textContent = '예약 가능 시간은 즉시 예약하고, 이미 예약된 시간은 대기 순번을 받을 수 있습니다. 대기는 빈자리가 생기면 자동으로 예약 확정됩니다.';
         $('#submit-button').textContent = '예약 또는 대기 신청';
         updateSubmitState();
     }

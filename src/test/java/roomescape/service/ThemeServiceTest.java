@@ -14,7 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationSlotDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.dao.ThemeDao;
@@ -39,6 +41,9 @@ class ThemeServiceTest {
 
     @Autowired
     private ReservationDao reservationDao;
+
+    @Autowired
+    private ReservationSlotDao reservationSlotDao;
 
     @BeforeEach
     void setUp() {
@@ -90,10 +95,10 @@ class ThemeServiceTest {
         LocalDate today = LocalDate.now();
         ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
-        reservationDao.insert(Reservation.createWithoutId("예약자", today.minusDays(1), time, popularTheme));
-        reservationDao.insert(Reservation.createWithoutId("예약자", today.minusDays(2), time, popularTheme));
-        reservationDao.insert(Reservation.createWithoutId("예약자", today.minusDays(3), time, popularTheme));
-        reservationDao.insert(Reservation.createWithoutId("예약자", today.minusDays(1), time, normalTheme));
+        saveReservation("예약자", today.minusDays(1), time, popularTheme);
+        saveReservation("예약자", today.minusDays(2), time, popularTheme);
+        saveReservation("예약자", today.minusDays(3), time, popularTheme);
+        saveReservation("예약자", today.minusDays(1), time, normalTheme);
 
         List<ThemeResponse> responses = themeService.getPopularThemes(today);
 
@@ -121,7 +126,7 @@ class ThemeServiceTest {
         // given
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        reservationDao.insert(Reservation.createWithoutId("브라운", LocalDate.of(2026, 5, 5), time, theme));
+        saveReservation("브라운", LocalDate.of(2026, 5, 5), time, theme);
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
@@ -130,5 +135,14 @@ class ThemeServiceTest {
 
     private Theme saveTheme(String name, String description, String thumbnail) {
         return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+    }
+
+    private ReservationSlot saveSlot(LocalDate date, ReservationTime time, Theme theme) {
+        return reservationSlotDao.findOrCreate(new ReservationSlot(date, time, theme));
+    }
+
+    private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        ReservationSlot slot = saveSlot(date, time, theme);
+        reservationDao.insert(Reservation.createWithoutId(name, slot));
     }
 }

@@ -7,10 +7,7 @@ import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.*;
 import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
@@ -29,13 +26,15 @@ public class ReservationService {
     private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final ReservationSlotDao reservationSlotDao;
 
     public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao,
-                              ThemeDao themeDao) {
+                              ThemeDao themeDao, ReservationSlotDao reservationSlotDao) {
         this.reservationDao = reservationDao;
         this.reservationWaitingDao = reservationWaitingDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
+        this.reservationSlotDao = reservationSlotDao;
     }
 
     @Transactional
@@ -43,11 +42,13 @@ public class ReservationService {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);
+        ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
+        ReservationSlot lockSlot = lockSlot(savedSlot);
 
-        slot.validateNotPast(now);
-        validateUniqueReservation(slot);
+        lockSlot.validateNotPast(now);
+        validateUniqueReservation(lockSlot);
 
-        Reservation reservation = Reservation.createWithoutId(command.name(), command.date(), reservationTime, theme);
+        Reservation reservation = Reservation.createWithoutId(command.name(), lockSlot);
 
         try {
             Reservation savedReservation = reservationDao.insert(reservation);
@@ -70,11 +71,7 @@ public class ReservationService {
 
         List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()
                 .map(waiting -> {
-                    ReservationSlot slot = new ReservationSlot(
-                            waiting.getReservationDate(),
-                            waiting.getTime(),
-                            waiting.getTheme()
-                    );
+                    ReservationSlot slot = waiting.getSlot();
 
                     ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
                     int order = waitings.orderOf(waiting);
@@ -97,12 +94,18 @@ public class ReservationService {
         ReservationTime time = getTime(command.timeId());
         Theme theme = reservation.getTheme();
         ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
+        ReservationSlot savedSlot = reservationSlotDao.findOrCreate(slot);
+        ReservationSlot lockedSlot = lockSlot(savedSlot);
 
-        slot.validateNotPast(now);
-        validateUniqueExcludingSelf(slot, reservationId);
+        lockedSlot.validateNotPast(now);
+        validateUniqueExcludingSelf(lockedSlot, reservationId);
 
-        Reservation updateReservation = reservationDao.update(reservationId, command.date(), command.timeId());
-        return ReservationResponse.from(updateReservation);
+        try {
+            Reservation updateReservation = reservationDao.update(reservationId, lockedSlot);
+            return ReservationResponse.from(updateReservation);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
+        }
     }
 
     @Transactional
@@ -111,6 +114,23 @@ public class ReservationService {
         if (deleted == 0) {
             throw new RoomEscapeException(ReservationErrorCode.NOT_FOUND);
         }
+    }
+
+    @Transactional
+    public void cancel(Long reservationId, LocalDateTime now) {
+        Reservation reservation = getReservation(reservationId);
+        ReservationSlot lockedSlot = lockSlot(reservation.getSlot());
+
+        reservation.validateCancelable(now);
+
+        ReservationWaitingQueue waitings = new ReservationWaitingQueue(
+                reservationWaitingDao.selectBySlot(lockedSlot)
+        );
+
+        delete(reservationId);
+
+        waitings.first()
+                .ifPresent(this::promoteWaitingToReservation);
     }
 
     private ReservationTime getTime(long timeId) {
@@ -124,14 +144,14 @@ public class ReservationService {
     }
 
     private void validateUniqueReservation(ReservationSlot slot) {
-        boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(slot);
+        boolean exists = reservationDao.existsBySlotId(slot.getId());
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
     }
 
     private void validateUniqueExcludingSelf(ReservationSlot slot, long id) {
-        boolean exists = reservationDao.existsDuplicateExcluding(slot, id);
+        boolean exists = reservationDao.existsBySlotIdExcluding(slot.getId(), id);
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
@@ -139,6 +159,18 @@ public class ReservationService {
 
     private Reservation getReservation(Long reservationId) {
         return reservationDao.selectById(reservationId)
+                .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
+    }
+
+    private void promoteWaitingToReservation(ReservationWaiting waiting) {
+        Reservation promotedReservation = waiting.promoteToReservation();
+
+        reservationDao.insert(promotedReservation);
+        reservationWaitingDao.delete(waiting.getId());
+    }
+
+    private ReservationSlot lockSlot(ReservationSlot slot){
+        return reservationSlotDao.selectByIdForUpdate(slot.getId())
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
     }
 }

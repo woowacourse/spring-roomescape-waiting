@@ -31,9 +31,10 @@ class ReservationWaitingControllerTest {
     void 예약을_추가한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
-        createReservation("로지", LocalDate.of(2026, 6, 10).toString(), timeId, themeId).statusCode(201);
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        createReservation("로지", reservationDate.toString(), timeId, themeId).statusCode(201);
 
-        createReservationWaiting("브라운", LocalDate.of(2026, 6, 10), timeId, themeId)
+        createReservationWaiting("브라운", reservationDate, timeId, themeId)
                 .statusCode(201)
                 .body("id", notNullValue())
                 .header("Location", "/waitings/1");
@@ -43,8 +44,9 @@ class ReservationWaitingControllerTest {
     void 예약을_삭제한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
-        createReservation("로지", LocalDate.of(2026, 6, 10).toString(), timeId, themeId).statusCode(201);
-        int reservationWaitingId = createReservationWaiting("브라운", LocalDate.of(2026, 6, 10), timeId, themeId)
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        createReservation("로지", reservationDate.toString(), timeId, themeId).statusCode(201);
+        int reservationWaitingId = createReservationWaiting("브라운", reservationDate, timeId, themeId)
                 .statusCode(201)
                 .extract().path("id");
 

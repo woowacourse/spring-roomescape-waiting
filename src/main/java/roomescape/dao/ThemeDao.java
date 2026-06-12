@@ -75,18 +75,20 @@ public class ThemeDao {
 
     public List<Theme> selectPopularThemesByPeriod(LocalDate startDate, LocalDate endDate) {
         String sql = """
-                SELECT t.id,
-                       t.name,
-                       t.description,
-                       t.thumbnail
-                FROM reservation AS r
-                INNER JOIN theme AS t 
-                ON r.theme_id = t.id
-                WHERE r.date BETWEEN ? AND ?
-                GROUP BY t.id, t.name, t.description, t.thumbnail
-                ORDER BY COUNT(r.id) DESC
-                LIMIT 10
-                """;
+            SELECT t.id,
+                   t.name,
+                   t.description,
+                   t.thumbnail
+            FROM reservation AS r
+            INNER JOIN reservation_slot AS rs
+            ON r.slot_id = rs.id
+            INNER JOIN theme AS t
+            ON rs.theme_id = t.id
+            WHERE rs.date BETWEEN ? AND ?
+            GROUP BY t.id, t.name, t.description, t.thumbnail
+            ORDER BY COUNT(r.id) DESC
+            LIMIT 10
+            """;
         return jdbcTemplate.query(sql, ROW_MAPPER, startDate, endDate);
     }
 
