@@ -73,6 +73,7 @@ class MyHistoriesTest {
     ) {
         return new MyWaitingOrder(
                 reservationId,
+                reservationId,
                 waitingId,
                 LocalDateTime.parse(requestedAt)
         );

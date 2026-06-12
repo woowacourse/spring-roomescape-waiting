@@ -28,6 +28,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
 
     private static final RowMapper<MyWaitingOrder> waitingOrderRowMapper = (resultSet, rowNumber) -> new MyWaitingOrder(
             resultSet.getLong("reservation_id"),
+            resultSet.getLong("slot_id"),
             resultSet.getLong("waiting_id"),
             resultSet.getTimestamp("requested_at").toLocalDateTime()
     );
@@ -94,6 +95,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
         String placeholders = String.join(",", Collections.nCopies(reservationIds.size(), "?"));
         String sql = """
                 SELECT r.id AS reservation_id,
+                       rw.slot_id,
                        rw.id AS waiting_id,
                        rw.requested_at
                 FROM reservation_waiting AS rw
