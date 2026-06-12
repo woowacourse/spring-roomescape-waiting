@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ProblemDetailsAdvice {
+public class GlobalExceptionHandler {
 
     private final Map<Class<? extends RoomescapeException>, HttpStatus> exceptionHttpStatusMap = new ConcurrentHashMap<>();
 
-    public ProblemDetailsAdvice() {
+    public GlobalExceptionHandler() {
         exceptionHttpStatusMap.put(DuplicateException.class, HttpStatus.CONFLICT);
         exceptionHttpStatusMap.put(NotOwnerException.class, HttpStatus.FORBIDDEN);
         exceptionHttpStatusMap.put(PastTimeException.class, HttpStatus.BAD_REQUEST);

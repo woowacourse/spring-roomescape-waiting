@@ -9,7 +9,7 @@ public record ReservationAndWaiting(
         TimeSlot timeSlot,
         Theme theme,
         boolean isReserved,
-        Integer waitingNumber
+        Integer waitingIndex
 ) {
 
     public static ReservationAndWaiting fromReservation(Reservation reservation) {
@@ -18,8 +18,8 @@ public record ReservationAndWaiting(
     }
 
     public static ReservationAndWaiting fromWaiting(WaitingWithNumber waitingWithNumber) {
-        Waiting waiting = waitingWithNumber.waiting();
+        Reservation waiting = waitingWithNumber.waiting();
         return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), waiting.getTimeSlot(),
-                waiting.getTheme(), false, waitingWithNumber.number());
+                waiting.getTheme(), false, waitingWithNumber.waitingIndex());
     }
 }

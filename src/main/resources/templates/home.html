@@ -922,7 +922,7 @@
         .then(data => renderThemeIntroGrid(data.themeResponses ?? []))
         .catch(() => renderThemeIntroGrid(dummyThemes));
 
-    fetch('/themes?limit=10&days=7')
+    fetch('/themes/popular?limit=10&days=7')
         .then(res => res.json())
         .then(data => renderPopularList(data.themeResponses ?? []))
         .catch(() => renderPopularList(dummyThemes));

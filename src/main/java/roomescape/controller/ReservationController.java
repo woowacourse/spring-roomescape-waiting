@@ -10,6 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 
 @Validated
 @RestController
@@ -29,7 +30,7 @@ public class ReservationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponse> getReservationById(@PathVariable long id) {
-        Reservation reservation = reservationService.findReservationById(id);
+        Reservation reservation = reservationService.getReservationById(id);
         return ResponseEntity.ok(ReservationResponse.from(reservation));
     }
 
@@ -41,8 +42,9 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request) {
+        LocalDateTime requestTime = LocalDateTime.now();
         Reservation reservation = reservationService.saveReservation(
-                request.name(), request.date(), request.timeId(), request.themeId()
+                request.name(), request.date(), request.timeId(), request.themeId(), requestTime
         );
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
                 .body(ReservationResponse.from(reservation));
@@ -55,7 +57,8 @@ public class ReservationController {
             @RequestParam @NotBlank
             String userName
     ) {
-        reservationService.removeReservation(id, userName);
+        LocalDateTime requestTime = LocalDateTime.now();
+        reservationService.removeReservation(id, userName, requestTime);
         return ResponseEntity.noContent().build();
     }
 
@@ -68,12 +71,14 @@ public class ReservationController {
             @RequestParam @NotBlank
             String userName
     ) {
+        LocalDateTime requestTime = LocalDateTime.now();
         reservationService.updateReservation(
                 id,
                 userName,
                 request.date(),
-                request.timeId()
+                request.timeId(),
+                requestTime
         );
-        return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
+        return ResponseEntity.ok(ReservationResponse.from(reservationService.getReservationById(id)));
     }
 }

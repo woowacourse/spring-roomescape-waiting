@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 
 import java.time.LocalDate;
@@ -62,7 +63,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findPopularThemes(Long limit, LocalDate startDate, LocalDate endDate) {
+    public List<Theme> findPopularThemes(long limit, LocalDate startDate, LocalDate endDate) {
         String sql = """
                 SELECT
                     t.id,
@@ -70,14 +71,13 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.description,
                     t.thumbnail_url,
                     count(*) as reservation_count
-                FROM (
-                    SELECT *
-                    FROM reservation
-                    WHERE date BETWEEN ? AND ?
-                ) as r
-                
+                FROM reservation r
+                INNER JOIN reservation_slot rs
+                ON r.slot_id = rs.id
                 INNER JOIN theme t
-                ON r.theme_id = t.id
+                ON rs.theme_id = t.id
+                WHERE rs.date BETWEEN ? AND ?
+                AND r.status = ?
                 GROUP BY t.id
                 ORDER BY reservation_count DESC
                 LIMIT ?
@@ -88,6 +88,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 rowMapper(),
                 startDate,
                 endDate,
+                ReservationStatus.RESERVED.name(),
                 limit
         );
     }

@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 
-@Repository
 public interface ReservationRepository {
 
     List<Reservation> findAll();
@@ -15,17 +14,19 @@ public interface ReservationRepository {
 
     List<Reservation> findByName(String name);
 
+    List<Reservation> findBySlotId(long slotId);
+
+    List<Reservation> findBySlotIds(List<Long> slotIds);
+
     Reservation save(Reservation reservation);
 
     void deleteById(long id);
 
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findReservedBySlot(LocalDate date, long timeId, long themeId);
 
-    int update(Reservation reservation);
+    void update(Reservation reservation);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId);
+    boolean existsByThemeId(long themeId);
 
-    boolean existsByThemeId(Long themeId);
-
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTimeId(long timeId);
 }

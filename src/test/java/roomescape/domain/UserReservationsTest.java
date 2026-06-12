@@ -21,7 +21,7 @@ class UserReservationsTest {
         Reservation second = createReservation(2L, "브라운", LocalDate.of(2026, 6, 4), 11);
         WaitingWithNumber first = new WaitingWithNumber(
                 createWaiting(3L, "브라운", LocalDate.of(2026, 6, 4), 10),
-                1
+                0
         );
 
         UserReservations userReservations = new UserReservations(
@@ -52,7 +52,7 @@ class UserReservationsTest {
     void 다른_사용자_대기_포함_예외_발생() {
         WaitingWithNumber otherWaiting = new WaitingWithNumber(
                 createWaiting(1L, "브라운", LocalDate.of(2026, 6, 4), 10),
-                1
+                0
         );
 
         assertThatThrownBy(() -> new UserReservations("네오", List.of(), List.of(otherWaiting)))
@@ -69,18 +69,16 @@ class UserReservationsTest {
     }
 
     private Reservation createReservation(Long id, String name, LocalDate date, int hour) {
-        return new Reservation(id, name, date, new TimeSlot(1L, LocalTime.of(hour, 0)), THEME,
-                LocalDateTime.of(2026, 6, 3, 10, 0));
+        return new Reservation(id, name, createSlot(id, date, hour), LocalDateTime.of(2026, 6, 3, 10, 0),
+                ReservationStatus.RESERVED);
     }
 
-    private Waiting createWaiting(Long id, String name, LocalDate date, int hour) {
-        return new Waiting(
-                id,
-                name,
-                date,
-                new TimeSlot(1L, LocalTime.of(hour, 0)),
-                THEME,
-                LocalDateTime.of(2026, 6, 3, 10, 0)
-        );
+    private Reservation createWaiting(Long id, String name, LocalDate date, int hour) {
+        return new Reservation(id, name, createSlot(id, date, hour), LocalDateTime.of(2026, 6, 3, 10, 0),
+                ReservationStatus.WAITING);
+    }
+
+    private ReservationSlot createSlot(Long id, LocalDate date, int hour) {
+        return new ReservationSlot(id, date, new TimeSlot(1L, LocalTime.of(hour, 0)), THEME);
     }
 }

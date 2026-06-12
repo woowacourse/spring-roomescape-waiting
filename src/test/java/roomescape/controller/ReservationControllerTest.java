@@ -28,15 +28,17 @@ import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.UpdateReservationRequest;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
-import roomescape.exception.ProblemDetailsAdvice;
+import roomescape.exception.GlobalExceptionHandler;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(ReservationController.class)
-@Import(ProblemDetailsAdvice.class)
+@Import(GlobalExceptionHandler.class)
 class ReservationControllerTest {
 
     @Autowired
@@ -60,8 +62,11 @@ class ReservationControllerTest {
     @Test
     @DisplayName("식별자를 통해 단건 예약을 조회하고 200 상태 코드를 반환한다.")
     void 식별자로_예약_조회() throws Exception {
-        given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
-        mockMvc.perform(get("/reservations/1")).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("브라운"));
+        given(reservationService.getReservationById(anyLong())).willReturn(createMockReservation());
+        mockMvc.perform(get("/reservations/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("브라운"))
+                .andExpect(jsonPath("$.status").value("RESERVED"));
     }
 
     @Test
@@ -84,7 +89,8 @@ class ReservationControllerTest {
     @DisplayName("유효한 데이터로 예약을 생성하고 201 상태 코드와 Location 헤더를 반환한다.")
     void 예약_생성() throws Exception {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now(), 1L, 1L);
-        given(reservationService.saveReservation(any(), any(), any(), any())).willReturn(createMockReservation());
+        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong(), any()))
+                .willReturn(createMockReservation());
         performPost("/reservations", request).andExpect(status().isCreated()).andExpect(header().exists("Location"));
     }
 
@@ -102,7 +108,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("존재하지 않는 자원 요청 시 404 예외와 커스텀 코드를 반환한다.")
     void 존재하지_않는_예약_조회_예외_발생() throws Exception {
-        given(reservationService.findReservationById(anyLong()))
+        given(reservationService.getReservationById(anyLong()))
                 .willThrow(new NotFoundException("해당 예약을 찾을 수 없습니다."));
         mockMvc.perform(get("/reservations/999"))
                 .andExpect(status().isNotFound())
@@ -114,7 +120,7 @@ class ReservationControllerTest {
     @DisplayName("예약 날짜와 시간을 수정하고 200 상태 코드를 반환한다.")
     void 예약_날짜_시간_수정() throws Exception {
         UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.now(), 1L);
-        given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
+        given(reservationService.getReservationById(anyLong())).willReturn(createMockReservation());
         performReschedule("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
 
@@ -127,7 +133,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("권한이 없는 예약 제어 시 403 예외와 커스텀 코드를 반환한다.")
     void 예약_소유자_불일치_예외_발생() throws Exception {
-        doThrow(new NotOwnerException()).when(reservationService).removeReservation(anyLong(), any());
+        doThrow(new NotOwnerException()).when(reservationService).removeReservation(anyLong(), any(), any());
         performDelete("/reservations/1", "해커")
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("NOT_OWNER"));
@@ -136,7 +142,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("도메인 검증 실패(IllegalArgument) 시 400 상태 코드를 반환한다.")
     void 예약_생성_도메인_검증_예외_발생() throws Exception {
-        given(reservationService.saveReservation(any(), any(), any(), any()))
+        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong(), any()))
                 .willThrow(new IllegalArgumentException("테스트용 에러 메시지"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
                 .andExpect(status().isBadRequest())
@@ -165,6 +171,7 @@ class ReservationControllerTest {
     private Reservation createMockReservation() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        return new Reservation(1L, "브라운", LocalDate.now(), timeSlot, theme, LocalDate.now().atStartOfDay());
+        ReservationSlot slot = new ReservationSlot(1L, LocalDate.now(), timeSlot, theme);
+        return new Reservation(1L, "브라운", slot, LocalDate.now().atStartOfDay(), ReservationStatus.RESERVED);
     }
 }

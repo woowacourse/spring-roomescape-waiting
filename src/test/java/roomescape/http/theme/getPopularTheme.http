@@ -1,2 +1,2 @@
-GET localhost:8080/themes?limit=10&days=10 HTTP/1.1
+GET localhost:8080/themes/popular?limit=10&days=10 HTTP/1.1
 Content-Type: application/json

@@ -83,7 +83,18 @@ class JdbcThemeRepositoryTest {
 
     private void insertReservation(long themeId) {
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "10:00:00");
-        String sql = "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, "test", LocalDate.now(), LocalDate.now().atStartOfDay(), 1L, themeId);
+        Long timeId = jdbcTemplate.queryForObject("SELECT id FROM time_slot WHERE start_at = ?", Long.class,
+                "10:00:00");
+        jdbcTemplate.update("INSERT INTO reservation_slot (date, time_id, theme_id) VALUES (?, ?, ?)",
+                LocalDate.now(), timeId, themeId);
+        Long slotId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Long.class,
+                LocalDate.now(),
+                timeId,
+                themeId
+        );
+        String sql = "INSERT INTO reservation (name, slot_id, created_at, status) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, "test", slotId, LocalDate.now().atStartOfDay(), "RESERVED");
     }
 }

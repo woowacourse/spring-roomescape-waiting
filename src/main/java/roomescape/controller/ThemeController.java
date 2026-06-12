@@ -32,21 +32,21 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<ThemeResponses> getThemes() {
-        return ResponseEntity.ok(ThemeResponses.from(themeService.allTheme()));
+        return ResponseEntity.ok(ThemeResponses.from(themeService.findAllThemes()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ThemeResponse> getTheme(@PathVariable long id) {
-        Theme theme = themeService.findThemeById(id);
+        Theme theme = themeService.getThemeById(id);
         return ResponseEntity.ok(ThemeResponse.from(theme));
     }
 
-    @GetMapping(params = {"limit", "days"})
+    @GetMapping("/popular")
     public ResponseEntity<ThemeResponses> getPopularThemes(
-            @RequestParam("limit") @Positive
-            Long limit,
-            @RequestParam("days") @Positive
-            Long days
+            @RequestParam(value = "limit", defaultValue = "10") @Positive
+            long limit,
+            @RequestParam(value = "days", defaultValue = "7") @Positive
+            long days
     ) {
         return ResponseEntity.ok(ThemeResponses.from(themeService.findPopularThemes(limit, days)));
     }

@@ -9,9 +9,13 @@ import java.util.Optional;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 
@@ -19,9 +23,11 @@ import roomescape.domain.TimeSlot;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
 
     @Override
@@ -30,17 +36,20 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT 
                     r.id AS r_id, 
                     r.name, 
-                    r.date, 
                     r.created_at,
-                    t.id AS t_id, 
-                    t.start_at,
-                    theme.id AS theme_id,
-                    theme.name AS theme_name,
-                    theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
+                    r.status,
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
+                    ts.start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r 
-                INNER JOIN time_slot t ON r.time_id = t.id 
-                INNER JOIN theme theme  ON r.theme_id = theme.id
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN time_slot ts ON rs.time_id = ts.id 
+                INNER JOIN theme th ON rs.theme_id = th.id
                 """;
         return jdbcTemplate.query(sql, rowMapper());
     }
@@ -51,17 +60,20 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT
                     r.id AS r_id,
                     r.name,
-                    r.date,
                     r.created_at,
-                    ts.id AS t_id,
+                    r.status,
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
                     ts.start_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
-                INNER JOIN time_slot ts ON r.time_id = ts.id
-                INNER JOIN theme th ON r.theme_id = th.id
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN time_slot ts ON rs.time_id = ts.id
+                INNER JOIN theme th ON rs.theme_id = th.id
                 WHERE r.id = ?
                 """;
         List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper(), reservationId);
@@ -74,20 +86,78 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT
                     r.id AS r_id,
                     r.name,
-                    r.date,
                     r.created_at,
-                    t.id AS t_id,
-                    t.start_at,
+                    r.status,
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
+                    ts.start_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
-                INNER JOIN time_slot t ON r.time_id = t.id
-                INNER JOIN theme th ON r.theme_id = th.id
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN time_slot ts ON rs.time_id = ts.id
+                INNER JOIN theme th ON rs.theme_id = th.id
                 WHERE r.name = ?
                 """;
         return jdbcTemplate.query(sql, rowMapper(), name);
+    }
+
+    @Override
+    public List<Reservation> findBySlotId(long slotId) {
+        String sql = """
+                SELECT
+                    r.id AS r_id,
+                    r.name,
+                    r.created_at,
+                    r.status,
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
+                    ts.start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url
+                FROM reservation r
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN time_slot ts ON rs.time_id = ts.id
+                INNER JOIN theme th ON rs.theme_id = th.id
+                WHERE r.slot_id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper(), slotId);
+    }
+
+    @Override
+    public List<Reservation> findBySlotIds(List<Long> slotIds) {
+        String sql = """
+            SELECT
+                r.id AS r_id,
+                r.name,
+                r.created_at,
+                r.status,
+                rs.id AS slot_id,
+                rs.date AS slot_date,
+                ts.id AS time_id,
+                ts.start_at,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.description AS theme_description,
+                th.thumbnail_url AS theme_thumbnail_url
+            FROM reservation r
+            INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+            INNER JOIN time_slot ts ON rs.time_id = ts.id
+            INNER JOIN theme th ON rs.theme_id = th.id
+            WHERE r.slot_id IN (:slotIds)
+            ORDER BY r.slot_id ASC, r.status ASC, r.created_at ASC, r.id ASC
+            """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("slotIds", slotIds);
+
+        return namedParameterJdbcTemplate.query(sql, params, rowMapper());
     }
 
     @Override
@@ -98,10 +168,9 @@ public class JdbcReservationRepository implements ReservationRepository {
         return new Reservation(
                 reservationId,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTimeSlot(),
-                reservation.getTheme(),
-                reservation.getCreatedAt()
+                reservation.getSlot(),
+                reservation.getCreatedAt(),
+                reservation.getStatus()
         );
     }
 
@@ -112,61 +181,67 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findReservedBySlot(LocalDate date, long timeId, long themeId) {
         String sql = """
                 SELECT
                     r.id AS r_id,
                     r.name,
-                    r.date,
                     r.created_at,
-                    ts.id AS t_id,
+                    r.status,
+                    rs.id AS slot_id,
+                    rs.date AS slot_date,
+                    ts.id AS time_id,
                     ts.start_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
-                INNER JOIN time_slot ts ON r.time_id = ts.id
-                INNER JOIN theme th ON r.theme_id = th.id
-                WHERE r.date = ? 
-                  AND r.time_id = ? 
-                  AND r.theme_id = ?
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN time_slot ts ON rs.time_id = ts.id
+                INNER JOIN theme th ON rs.theme_id = th.id
+                WHERE rs.date = ? 
+                  AND rs.time_id = ? 
+                  AND rs.theme_id = ?
+                  AND r.status = ?
                 """;
-        return jdbcTemplate.query(sql, rowMapper(), date, timeId, themeId)
+        return jdbcTemplate.query(sql, rowMapper(), date, timeId, themeId, ReservationStatus.RESERVED.name())
                 .stream()
                 .findAny();
     }
 
     @Override
-    public int update(Reservation reservation) {
-        String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
-        return jdbcTemplate.update(
+    public void update(Reservation reservation) {
+        String sql = "UPDATE reservation SET name = ?, slot_id = ?, status = ? WHERE id = ?";
+        jdbcTemplate.update(
                 sql,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTimeSlot().getId(),
-                reservation.getTheme().getId(),
+                reservation.getSlot().getId(),
+                reservation.getStatus().name(),
                 reservation.getId()
         );
     }
 
     @Override
-    public boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
-        String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existsByThemeId(Long themeId) {
-        String sql = "SELECT count(*) FROM reservation WHERE theme_id = ?";
+    public boolean existsByThemeId(long themeId) {
+        String sql = """
+                SELECT count(*)
+                FROM reservation r
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                WHERE rs.theme_id = ?
+                """;
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
         return count != null && count > 0;
     }
 
     @Override
-    public boolean existsByTimeId(Long timeId) {
-        String sql = "SELECT count(*) FROM reservation WHERE time_id = ?";
+    public boolean existsByTimeId(long timeId) {
+        String sql = """
+                SELECT count(*)
+                FROM reservation r
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                WHERE rs.time_id = ?
+                """;
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
         return count != null && count > 0;
     }
@@ -174,16 +249,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingColumns("name", "slot_id", "created_at", "status")
                 .usingGeneratedKeyColumns("id");
     }
 
     private Map<String, Object> createParams(Reservation reservation) {
         return Map.of(
                 "name", reservation.getName(),
-                "date", reservation.getDate(),
-                "time_id", reservation.getTimeSlot().getId(),
-                "theme_id", reservation.getTheme().getId(),
-                "created_at", reservation.getCreatedAt()
+                "slot_id", reservation.getSlot().getId(),
+                "created_at", reservation.getCreatedAt(),
+                "status", reservation.getStatus().name()
         );
     }
 
@@ -191,17 +266,22 @@ public class JdbcReservationRepository implements ReservationRepository {
         return (rs, rowNum) -> new Reservation(
                 rs.getLong("r_id"),
                 rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                new TimeSlot(
-                        rs.getLong("t_id"),
-                        rs.getObject("start_at", LocalTime.class)),
-                new Theme(
-                        rs.getLong("theme_id"),
-                        rs.getString("theme_name"),
-                        rs.getString("theme_description"),
-                        rs.getString("theme_thumbnail_url")
+                new ReservationSlot(
+                        rs.getLong("slot_id"),
+                        rs.getObject("slot_date", LocalDate.class),
+                        new TimeSlot(
+                                rs.getLong("time_id"),
+                                rs.getObject("start_at", LocalTime.class)
+                        ),
+                        new Theme(
+                                rs.getLong("theme_id"),
+                                rs.getString("theme_name"),
+                                rs.getString("theme_description"),
+                                rs.getString("theme_thumbnail_url")
+                        )
                 ),
-                rs.getObject("created_at", LocalDateTime.class)
+                rs.getObject("created_at", LocalDateTime.class),
+                ReservationStatus.valueOf(rs.getString("status"))
         );
     }
 }

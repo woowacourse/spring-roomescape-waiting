@@ -23,11 +23,11 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<Theme> allTheme() {
+    public List<Theme> findAllThemes() {
         return themeRepository.findAll();
     }
 
-    public Theme findThemeById(long id) {
+    public Theme getThemeById(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
@@ -40,12 +40,12 @@ public class ThemeService {
 
     @Transactional
     public void removeTheme(long themeId) {
-        findThemeById(themeId);
+        getThemeById(themeId);
         validateThemeDeletable(themeId);
         themeRepository.deleteById(themeId);
     }
 
-    public List<Theme> findPopularThemes(Long limit, Long days) {
+    public List<Theme> findPopularThemes(long limit, long days) {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = LocalDate.now().minusDays(days);
         return themeRepository.findPopularThemes(limit, startDate, endDate);
