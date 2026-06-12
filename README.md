@@ -49,7 +49,7 @@ Java 21
 
 ## 2단계 - 내 예약 목록 조회 (상태 구분)
 
-- [x] `GET /reservations?customer-name=` 응답에 예약 목록과 대기 목록이 분리되어 함께 반환된다
+- [x] `GET /reservations?customer-name=&customer-email=` 응답에 예약 목록과 대기 목록이 분리되어 함께 반환된다
 - [x] 대기에는 본인의 대기 순번도 함께 보여준다
 
 ---
@@ -63,18 +63,17 @@ Java 21
 
 | Method | URL | Request | Success | 설명 |
 |--------|-----|---------|---------|------|
-| `GET` | `/reservations?customer-name={customer-name}` | Query | `200 OK` | 예약자 이름으로 예약·대기 목록 조회 |
+| `GET` | `/reservations?customer-name={customer-name}&customer-email={customer-email}` | Query | `200 OK` | 예약자 이름과 이메일로 예약·대기 목록 조회 |
 | `GET` | `/reservations/date-and-theme` | - | `200 OK` | 예약 가능 날짜와 테마 조회 |
 | `GET` | `/reservations/available-times?date={date}&themeId={themeId}` | Query | `200 OK` | 날짜와 테마별 예약 가능 시간 조회 |
 | `POST` | `/reservations` | Body | `201 Created` | 예약 생성 |
-| `PUT` | `/reservations/{reservation-id}` | Body | `200 OK` | 사용자 예약 일정 변경 |
-| `DELETE` | `/reservations/{reservation-id}` | Path | `204 No Content` | 사용자 예약 취소 |
+| `DELETE` | `/reservations/{reservation-id}?customer-name={customer-name}&customer-email={customer-email}` | Path + Query | `204 No Content` | 사용자 예약 취소 |
 
 <details>
-<summary>예약자 이름으로 예약·대기 목록 조회 (<code>GET /reservations?customer-name={customer-name}</code>)</summary>
+<summary>예약자 이름과 이메일로 예약·대기 목록 조회 (<code>GET /reservations?customer-name={customer-name}&customer-email={customer-email}</code>)</summary>
 
 ```http
-GET /reservations?customer-name=홍길동
+GET /reservations?customer-name=홍길동&customer-email=hong@example.com
 ```
 
 ```json
@@ -83,6 +82,7 @@ GET /reservations?customer-name=홍길동
     {
       "id": 1,
       "name": "홍길동",
+      "email": "hong@example.com",
       "date": "2026-08-05",
       "time": {
         "id": 1,
@@ -100,10 +100,9 @@ GET /reservations?customer-name=홍길동
     {
       "id": 1,
       "customerName": "홍길동",
+      "customerEmail": "hong@example.com",
       "date": "2026-08-05",
-      "time": {
-        "startAt": "10:00:00"
-      },
+      "startAt": "10:00:00",
       "theme": {
         "name": "링",
         "description": "공포 테마",
@@ -176,6 +175,7 @@ Content-Type: application/json
 
 {
   "name": "홍길동",
+  "email": "hong@example.com",
   "date": "2026-08-05",
   "timeId": 1,
   "themeId": 1
@@ -186,6 +186,7 @@ Content-Type: application/json
 {
   "id": 1,
   "name": "홍길동",
+  "email": "hong@example.com",
   "date": "2026-08-05",
   "time": {
     "id": 1,
@@ -203,43 +204,10 @@ Content-Type: application/json
 </details>
 
 <details>
-<summary>사용자 예약 일정 변경 (<code>PUT /reservations/{reservation-id}</code>)</summary>
+<summary>사용자 예약 취소 (<code>DELETE /reservations/{reservation-id}?customer-name={customer-name}&customer-email={customer-email}</code>)</summary>
 
 ```http
-PUT /reservations/1
-Content-Type: application/json
-
-{
-  "date": "2026-08-06",
-  "timeId": 2
-}
-```
-
-```json
-{
-  "id": 1,
-  "name": "홍길동",
-  "date": "2026-08-06",
-  "time": {
-    "id": 2,
-    "startAt": "11:00:00"
-  },
-  "theme": {
-    "id": 1,
-    "name": "링",
-    "description": "공포 테마",
-    "thumbnailUrl": "http:~"
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>사용자 예약 취소 (<code>DELETE /reservations/{reservation-id}</code>)</summary>
-
-```http
-DELETE /reservations/1
+DELETE /reservations/1?customer-name=홍길동&customer-email=hong@example.com
 ```
 
 ```http
@@ -254,11 +222,10 @@ DELETE /reservations/1
 | 상황 | Status | Message |
 |------|--------|---------|
 | 필수 값 누락, 날짜 형식 오류 | `400 Bad Request` | `잘못된 요청입니다.` 또는 검증 메시지 |
-| 과거 시간 예약/변경 | `400 Bad Request` | `과거 시간으로는 예약할 수 없습니다.` |
+| 과거 시간 예약/관리자 변경 | `400 Bad Request` | `과거 시간으로는 예약할 수 없습니다.` |
 | 예약, 예약 시간, 테마 없음 | `404 Not Found` | `존재하지 않는 ...입니다.` |
 | 이미 예약된 시간 | `409 Conflict` | `이미 예약된 시간입니다.` |
 | 예약 옵션 상태 변경 | `409 Conflict` | `예약 가능한 시간 또는 테마 상태가 변경되었습니다.` |
-| 당일 사용자 변경 | `409 Conflict` | `당일 예약은 변경할 수 없습니다.` |
 | 당일 사용자 취소 | `409 Conflict` | `당일 예약은 취소할 수 없습니다.` |
 
 ```json
@@ -289,6 +256,7 @@ GET /admin/reservations
   {
     "id": 1,
     "name": "홍길동",
+    "email": "hong@example.com",
     "date": "2026-08-05",
     "time": {
       "id": 1,
@@ -323,6 +291,7 @@ Content-Type: application/json
 {
   "id": 1,
   "name": "홍길동",
+  "email": "hong@example.com",
   "date": "2026-08-06",
   "time": {
     "id": 2,
@@ -337,7 +306,7 @@ Content-Type: application/json
 }
 ```
 
-관리자 변경/삭제는 사용자 당일 변경·취소 제한을 적용하지 않습니다.
+관리자 변경/삭제는 사용자 당일 취소 제한을 적용하지 않습니다.
 
 </details>
 
@@ -511,35 +480,7 @@ DELETE /themes/1
 | Method | URL | Request | Success | 설명 |
 |--------|-----|---------|---------|------|
 | `POST` | `/waitings` | Body | `201 Created` | 대기 신청 |
-| `DELETE` | `/waitings/{id}?customer-name={customer-name}` | Path | `204 No Content` | 대기 취소 |
-
-<details>
-<summary>예약자 이름으로 대기 목록 조회 (<code>GET /waitings?customer-name={customer-name}</code>)</summary>
-
-```http
-GET /waitings?customer-name=홍길동
-```
-
-```json
-[
-  {
-    "id": 1,
-    "customerName": "홍길동",
-    "date": "2026-08-05",
-    "time": {
-      "startAt": "10:00:00"
-    },
-    "theme": {
-      "name": "링",
-      "description": "공포 테마",
-      "thumbnailUrl": "http:~"
-    },
-    "rank": 2
-  }
-]
-```
-
-</details>
+| `DELETE` | `/waitings/{id}?customer-name={customer-name}&customer-email={customer-email}` | Path + Query | `204 No Content` | 대기 취소 |
 
 <details>
 <summary>대기 신청 (<code>POST /waitings</code>)</summary>
@@ -549,7 +490,8 @@ POST /waitings
 Content-Type: application/json
 
 {
-  "customerName": "홍길동",
+  "name": "홍길동",
+  "email": "hong@example.com",
   "date": "2026-08-05",
   "timeId": 1,
   "themeId": 1
@@ -565,10 +507,10 @@ Content-Type: application/json
 </details>
 
 <details>
-<summary>대기 취소 (<code>DELETE /waitings/{id}?customer-name={customer-name}</code>)</summary>
+<summary>대기 취소 (<code>DELETE /waitings/{id}?customer-name={customer-name}&customer-email={customer-email}</code>)</summary>
 
 ```http
-DELETE /waitings/1?customer-name=재키
+DELETE /waitings/1?customer-name=재키&customer-email=jaekkii@example.com
 ```
 
 ```http
