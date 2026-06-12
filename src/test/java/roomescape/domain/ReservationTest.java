@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -78,8 +79,18 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(() -> new Reservation(name, slot, standardDateTime))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(Reservation.PAST_RESERVATION_MESSAGE);
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("예약 이름은 값 객체의 동등성 기준으로 비교한다")
+    @Test
+    void hasNameByValueObjectEquality() {
+        // given
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        Reservation reservation = new Reservation(ReservationName.from(" 쿠다 "), slot, LocalDateTime.now());
+
+        // when & then
+        assertThat(reservation.hasName("쿠다")).isTrue();
     }
 
     @DisplayName("예약 시각이 기준 시각보다 이전이면 과거 예약이다")

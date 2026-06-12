@@ -8,7 +8,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
-    public static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
+    private static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
 
     private final Long id;
     private final ReservationName name;
@@ -21,11 +21,21 @@ public class Reservation {
             final ReservationSlot slot,
             final LocalDateTime createdAt
     ) {
+        this(id, ReservationName.from(name), slot, createdAt);
+    }
+
+    public Reservation(
+            final Long id,
+            final ReservationName name,
+            final ReservationSlot slot,
+            final LocalDateTime createdAt
+    ) {
         validateId(id);
+        validateName(name);
         validateSlot(slot);
         validate(createdAt);
         this.id = id;
-        this.name = ReservationName.from(name);
+        this.name = name;
         this.slot = slot;
         this.createdAt = createdAt;
     }
@@ -35,17 +45,26 @@ public class Reservation {
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
+        this(ReservationName.from(name), slot, standardDateTime);
+    }
+
+    public Reservation(
+            final ReservationName name,
+            final ReservationSlot slot,
+            final LocalDateTime standardDateTime
+    ) {
+        validateName(name);
         validateReservable(slot, standardDateTime);
         validate(standardDateTime);
         this.id = null;
-        this.name = ReservationName.from(name);
+        this.name = name;
         this.slot = slot;
         this.createdAt = standardDateTime;
     }
 
     public Reservation withId(final Long id) {
         validateId(id);
-        return new Reservation(id, this.name.value(), this.slot, this.createdAt);
+        return new Reservation(id, this.name, this.slot, this.createdAt);
     }
 
     public Reservation withSlot(
@@ -53,11 +72,11 @@ public class Reservation {
             final LocalDateTime standardDateTime
     ) {
         validateReservable(slot, standardDateTime);
-        return new Reservation(this.id, this.name.value(), slot, this.createdAt);
+        return new Reservation(this.id, this.name, slot, this.createdAt);
     }
 
     public boolean hasName(final String name) {
-        return this.name.value().equals(ReservationName.from(name).value());
+        return this.name.equals(ReservationName.from(name));
     }
 
     public boolean isPast(final LocalDateTime standardDateTime) {
@@ -70,13 +89,19 @@ public class Reservation {
     ) {
         validateSlot(slot);
         if (slot.isPast(standardDateTime)) {
-            throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
+            throw new PastReservationException(PAST_RESERVATION_MESSAGE);
         }
     }
 
     private static void validateSlot(final ReservationSlot slot) {
         if (slot == null) {
             throw new IllegalArgumentException("예약 슬롯은 비어있으면 안됩니다.");
+        }
+    }
+
+    private static void validateName(final ReservationName name) {
+        if (name == null) {
+            throw new IllegalArgumentException("예약자 이름은 필수입니다.");
         }
     }
 

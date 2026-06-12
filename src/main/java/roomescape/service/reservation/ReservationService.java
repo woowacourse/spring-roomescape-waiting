@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservation.PastReservationException;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -219,7 +220,7 @@ public class ReservationService {
     }
 
     private InvalidInputException toInvalidInputException(final IllegalArgumentException exception) {
-        if (Reservation.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
+        if (exception instanceof PastReservationException) {
             return new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
         }
 
