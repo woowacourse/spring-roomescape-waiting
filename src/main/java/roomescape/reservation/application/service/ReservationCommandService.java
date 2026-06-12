@@ -76,7 +76,7 @@ public class ReservationCommandService {
         );
     }
 
-    public void delete(Long reservationId, LocalDateTime now) {
+    public void cancel(Long reservationId, LocalDateTime now) {
         ReservationSlot slot = reservationRepository.findSlotById(reservationId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 
@@ -96,11 +96,15 @@ public class ReservationCommandService {
         );
 
         validateNoDuplicateReservationSlot(updatedReservation);
-        if (reservationRepository.update(updatedReservation.getId(), updatedReservation.getSlot()) == 0) {
+        if (isUpdateFailed(updatedReservation)) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
 
         return updatedReservation;
+    }
+
+    private boolean isUpdateFailed(Reservation updatedReservation) {
+        return reservationRepository.update(updatedReservation.getId(), updatedReservation.getSlot()) == 0;
     }
 
     private void promoteFirstWaitingToReservation(ReservationSlot slot) {

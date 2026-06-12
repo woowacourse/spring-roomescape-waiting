@@ -59,7 +59,7 @@ public class WaitingCommandService {
         );
     }
 
-    public void delete(Long id, LocalDateTime now) {
+    public void cancel(Long id, LocalDateTime now) {
         ReservationSlot slot = waitingRepository.findSlotById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
 

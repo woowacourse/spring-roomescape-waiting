@@ -69,10 +69,10 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
+    public ResponseEntity<Void> cancelReservation(
             @PathVariable Long id
     ) {
-        reservationCommandService.delete(id, LocalDateTime.now());
+        reservationCommandService.cancel(id, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }

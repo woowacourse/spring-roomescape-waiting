@@ -55,10 +55,10 @@ public class WaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaiting(
+    public ResponseEntity<Void> cancelWaiting(
             @PathVariable Long id
     ) {
-        waitingCommandService.delete(id, LocalDateTime.now());
+        waitingCommandService.cancel(id, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }
