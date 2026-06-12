@@ -34,8 +34,7 @@ public class ReservationSlotService {
         return reservationSlotRepository.findAll();
     }
 
-    public ReservationSlot open(final LocalDate date, final Long themeId, final Long timeId) {
-        validateReferenceIds(themeId, timeId);
+    public ReservationSlot open(final LocalDate date, final long themeId, final long timeId) {
         Theme theme = themeService.getById(themeId);
         ReservationTime time = reservationTimeService.getById(timeId);
         ReservationSlot slot = createSlot(date, theme, time);
@@ -59,9 +58,4 @@ public class ReservationSlotService {
         }
     }
 
-    private void validateReferenceIds(final Long themeId, final Long timeId) {
-        if (themeId == null || timeId == null) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "테마와 예약 시간은 필수입니다.");
-        }
-    }
 }

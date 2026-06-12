@@ -62,6 +62,7 @@ public class ReservationSlotAdminPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
+            validateReferenceIds(themeId, timeId);
             reservationSlotService.open(parseDate(date), themeId, timeId);
         } catch (ApiException exception) {
             redirectAttributes.addAttribute("errorCode", exception.getCode());
@@ -72,6 +73,12 @@ public class ReservationSlotAdminPageController {
         }
 
         return "redirect:/pages/admin/reservation-slots";
+    }
+
+    private void validateReferenceIds(final Long themeId, final Long timeId) {
+        if (themeId == null || timeId == null) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "테마와 예약 시간은 필수입니다.");
+        }
     }
 
     private LocalDate parseDate(final String date) {
