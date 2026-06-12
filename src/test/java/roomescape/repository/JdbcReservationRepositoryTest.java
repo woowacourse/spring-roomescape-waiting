@@ -55,7 +55,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        Reservation reservation = new Reservation(name, slot, createdAt);
+        Reservation reservation = Reservation.reserve(name, slot, createdAt);
         //when
         Reservation result = jdbcReservationRepository.save(reservation);
         Reservation saved = jdbcReservationRepository.findById(result.getId())
@@ -79,8 +79,8 @@ class JdbcReservationRepositoryTest {
         // when & then
         assertThrows(PersistenceConflictException.class, () -> {
             ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-            jdbcReservationRepository.save(new Reservation("쿠다", slot, LocalDateTime.now()));
-            jdbcReservationRepository.save(new Reservation("아루", slot, LocalDateTime.now()));
+            jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+            jdbcReservationRepository.save(Reservation.reserve("아루", slot, LocalDateTime.now()));
         });
     }
 
@@ -94,7 +94,7 @@ class JdbcReservationRepositoryTest {
 
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        jdbcReservationRepository.save(new Reservation("쿠다", slot, LocalDateTime.now()));
+        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         //when
         List<Reservation> reservations = jdbcReservationRepository.findAll();
@@ -114,7 +114,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        jdbcReservationRepository.save(new Reservation("쿠다", slot, LocalDateTime.now()));
+        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         int beforeSize = jdbcReservationRepository.findAll().size();
 
@@ -142,7 +142,7 @@ class JdbcReservationRepositoryTest {
                 ReservationTime.createNew(LocalTime.parse("10:00"))
         );
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        Reservation saved = jdbcReservationRepository.save(new Reservation("쿠다", slot, LocalDateTime.now()));
+        Reservation saved = jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         // when
         Reservation found = jdbcReservationRepository.findBySlot(new ReservationSlot(date, theme, reservationTime))
@@ -164,11 +164,11 @@ class JdbcReservationRepositoryTest {
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, ten));
         ReservationSlot otherTimeSlot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
         ReservationSlot otherThemeSlot = jdbcReservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
-        Reservation expected = jdbcReservationRepository.save(new Reservation("쿠다", slot, LocalDateTime.now()));
+        Reservation expected = jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
         Reservation sameThemeReservation = jdbcReservationRepository.save(
-                new Reservation("아루", otherTimeSlot, LocalDateTime.now())
+                Reservation.reserve("아루", otherTimeSlot, LocalDateTime.now())
         );
-        jdbcReservationRepository.save(new Reservation("도기", otherThemeSlot, LocalDateTime.now()));
+        jdbcReservationRepository.save(Reservation.reserve("도기", otherThemeSlot, LocalDateTime.now()));
 
         // when
         List<Reservation> reservations = jdbcReservationRepository.findByDateAndTheme(date, theme);
@@ -190,7 +190,7 @@ class JdbcReservationRepositoryTest {
                 ReservationTime.createNew(LocalTime.parse("11:00"))
         );
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservedTime));
-        jdbcReservationRepository.save(new Reservation("쿠다", slot, LocalDateTime.now()));
+        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         // when & then
         assertThat(jdbcReservationRepository.existsByTime(reservedTime)).isTrue();

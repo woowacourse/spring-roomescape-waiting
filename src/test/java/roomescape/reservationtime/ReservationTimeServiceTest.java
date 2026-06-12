@@ -54,7 +54,7 @@ class ReservationTimeServiceTest {
         LocalDate date = LocalDate.parse("2026-08-06");
         ReservationSlot reservedSlot = fixture.saveSlot(date, theme, ten);
         fixture.saveSlot(date, theme, eleven);
-        fixture.reservationRepository.save(new Reservation(
+        fixture.reservationRepository.save(Reservation.reserve(
                 "쿠다",
                 reservedSlot,
                 LocalDate.now().atStartOfDay()
@@ -113,7 +113,7 @@ class ReservationTimeServiceTest {
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
         ReservationSlot slot = new ReservationSlot(LocalDate.parse("2026-08-06"), theme, time);
-        fixture.reservationRepository.save(new Reservation("쿠다", slot, LocalDate.now().atStartOfDay()));
+        fixture.reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDate.now().atStartOfDay()));
 
         assertThrows(ConflictException.class, () -> fixture.reservationTimeService.deleteById(time.getId()));
     }

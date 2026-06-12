@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
-import roomescape.repository.reservation.JdbcReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
 import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
@@ -25,7 +23,6 @@ import roomescape.repository.theme.JdbcThemeRepository;
 class JdbcThemeRepositoryTest {
 
     private JdbcThemeRepository jdbcThemeRepository;
-    private JdbcReservationRepository jdbcReservationRepository;
     private JdbcReservationSlotRepository jdbcReservationSlotRepository;
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
 
@@ -36,7 +33,6 @@ class JdbcThemeRepositoryTest {
     void setup() {
         clearTables();
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
-        jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
         jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
         jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
     }
@@ -136,15 +132,15 @@ class JdbcThemeRepositoryTest {
         ReservationTime secondThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
         ReservationTime thirdThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("12:00")));
 
-        jdbcReservationRepository.save(createHistoricalReservation("쿠다", today.minusDays(1), firstTheme, firstThemeTime));
-        jdbcReservationRepository.save(createHistoricalReservation("아루", today.minusDays(2), firstTheme, firstThemeTime));
-        jdbcReservationRepository.save(createHistoricalReservation("도기", today.minusDays(3), firstTheme, firstThemeTime));
+        insertHistoricalReservation("쿠다", today.minusDays(1), firstTheme, firstThemeTime);
+        insertHistoricalReservation("아루", today.minusDays(2), firstTheme, firstThemeTime);
+        insertHistoricalReservation("도기", today.minusDays(3), firstTheme, firstThemeTime);
 
-        jdbcReservationRepository.save(createHistoricalReservation("포비", today.minusDays(1), secondTheme, secondThemeTime));
-        jdbcReservationRepository.save(createHistoricalReservation("솔라", today.minusDays(2), secondTheme, secondThemeTime));
+        insertHistoricalReservation("포비", today.minusDays(1), secondTheme, secondThemeTime);
+        insertHistoricalReservation("솔라", today.minusDays(2), secondTheme, secondThemeTime);
 
-        jdbcReservationRepository.save(createHistoricalReservation("레오", today.minusDays(1), thirdTheme, thirdThemeTime));
-        jdbcReservationRepository.save(createHistoricalReservation("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime));
+        insertHistoricalReservation("레오", today.minusDays(1), thirdTheme, thirdThemeTime);
+        insertHistoricalReservation("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime);
 
         List<Theme> popularThemes = jdbcThemeRepository.findPopularThemes(7, 2);
 
@@ -170,13 +166,18 @@ class JdbcThemeRepositoryTest {
         );
     }
 
-    private Reservation createHistoricalReservation(
+    private void insertHistoricalReservation(
             final String name,
             final LocalDate date,
             final Theme theme,
             final ReservationTime reservationTime
     ) {
         ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        return new Reservation(name, slot, date.minusDays(1).atStartOfDay());
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, slot_id, created_at) VALUES (?, ?, ?)",
+                name,
+                slot.getId(),
+                date.minusDays(1).atStartOfDay()
+        );
     }
 }

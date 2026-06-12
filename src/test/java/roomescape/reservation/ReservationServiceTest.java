@@ -266,12 +266,13 @@ class ReservationServiceTest {
             Theme theme = saveTheme();
             ReservationTime time = saveTime("10:00");
             ReservationSlot slot = saveSlot(LocalDate.now().minusDays(1), theme, time);
-            return reservationRepository.save(new Reservation(
+            Reservation pastReservation = new Reservation(
                     1L,
                     "쿠다",
                     slot,
                     LocalDateTime.now().minusDays(2)
-            ));
+            );
+            return reservationRepository.save(pastReservation);
         }
     }
 }

@@ -27,7 +27,7 @@ class ReservationTest {
         ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         // when & then
-        assertThatCode(() -> new Reservation(name, slot, LocalDateTime.now()))
+        assertThatCode(() -> Reservation.reserve(name, slot, LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
@@ -40,7 +40,7 @@ class ReservationTest {
         ReservationSlot slot = createSlot(LocalDate.parse("2026-03-08"), LocalTime.parse("10:00"));
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(name, slot, LocalDateTime.now()))
+        assertThatThrownBy(() -> Reservation.reserve(name, slot, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -51,7 +51,7 @@ class ReservationTest {
         ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         // when
-        Reservation reservation = new Reservation(" 쿠다 ", slot, LocalDateTime.now());
+        Reservation reservation = Reservation.reserve(" 쿠다 ", slot, LocalDateTime.now());
 
         // then
         assertThat(reservation.getName()).isEqualTo("쿠다");
@@ -65,7 +65,7 @@ class ReservationTest {
         String name = "쿠다";
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(name, null, LocalDateTime.now()))
+        assertThatThrownBy(() -> Reservation.reserve(name, null, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -78,7 +78,7 @@ class ReservationTest {
         LocalDateTime standardDateTime = LocalDateTime.parse("2026-03-08T10:01:00");
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(name, slot, standardDateTime))
+        assertThatThrownBy(() -> Reservation.reserve(name, slot, standardDateTime))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -87,7 +87,7 @@ class ReservationTest {
     void hasNameByValueObjectEquality() {
         // given
         ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
-        Reservation reservation = new Reservation(ReservationName.from(" 쿠다 "), slot, LocalDateTime.now());
+        Reservation reservation = Reservation.reserve(ReservationName.from(" 쿠다 "), slot, LocalDateTime.now());
 
         // when & then
         assertThat(reservation.hasName("쿠다")).isTrue();

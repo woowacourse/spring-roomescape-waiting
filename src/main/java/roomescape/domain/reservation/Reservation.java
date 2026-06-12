@@ -40,15 +40,15 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public Reservation(
+    public static Reservation reserve(
             final String name,
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
-        this(ReservationName.from(name), slot, standardDateTime);
+        return reserve(ReservationName.from(name), slot, standardDateTime);
     }
 
-    public Reservation(
+    public static Reservation reserve(
             final ReservationName name,
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
@@ -56,10 +56,21 @@ public class Reservation {
         validateName(name);
         validateReservable(slot, standardDateTime);
         validate(standardDateTime);
+        return new Reservation(name, slot, standardDateTime);
+    }
+
+    private Reservation(
+            final ReservationName name,
+            final ReservationSlot slot,
+            final LocalDateTime createdAt
+    ) {
+        validateName(name);
+        validateSlot(slot);
+        validate(createdAt);
         this.id = null;
         this.name = name;
         this.slot = slot;
-        this.createdAt = standardDateTime;
+        this.createdAt = createdAt;
     }
 
     public Reservation withId(final Long id) {
@@ -111,7 +122,7 @@ public class Reservation {
         }
     }
 
-    private void validate(final LocalDateTime createdAt) {
+    private static void validate(final LocalDateTime createdAt) {
         if (createdAt == null) {
             throw new IllegalArgumentException("예약 생성 시각은 비어있으면 안됩니다.");
         }
