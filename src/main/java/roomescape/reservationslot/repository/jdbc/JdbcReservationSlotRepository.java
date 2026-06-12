@@ -8,16 +8,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationNotFoundException;
 import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.reservationslot.domain.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.repository.ReservationSlotRepository;
 import roomescape.reservationslot.repository.entity.ReservationSlotEntity;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.wating.domain.Waiting;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -29,32 +24,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
 
-    private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> mapToDomain(rs);
-    private static final RowMapper<Waiting> WAITING_ROW_MAPPER = (rs, rowNum) -> {
-        final ReservationTime reservationTime = ReservationTime.of(
-                rs.getLong("time_id"),
-                rs.getTime("time_start_at").toLocalTime()
-        );
-        final Theme theme = Theme.of(
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("theme_description"),
-                rs.getString("theme_thumbnail_url")
-        );
-        final ReservationSlot slot = ReservationSlot.of(
-                rs.getLong("slot_id"),
-                rs.getDate("reservation_date").toLocalDate(),
-                reservationTime,
-                theme
-        );
+    private static final String GENERATED_SLOT_ID_NOT_FOUND_MESSAGE = "생성된 예약 슬롯 id를 가져오지 못했습니다.";
 
-        return Waiting.of(
-                rs.getLong("waiting_id"),
-                rs.getString("waiting_customer_name"),
-                slot,
-                rs.getTimestamp("waiting_created_at").toLocalDateTime()
-        );
-    };
+    private static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> mapToDomain(rs);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -134,20 +106,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         }
     }
 
-    @Override
-    @Transactional
-    public void deleteReservationAndPromoteWaiting(final Reservation reservation) {
-        final ReservationSlot slot = findByIdForUpdate(reservation.getSlotId())
-                .orElseThrow(ReservationSlotNotFoundException::new);
-
-        if (!deleteCurrentReservation(reservation.getId(), slot.getId())) {
-            throw new ReservationNotFoundException();
-        }
-
-        findEarliestWaitingBySlotId(slot.getId())
-                .ifPresent(this::promoteWaiting);
-    }
-
     private ReservationSlot createSlot(final java.time.LocalDate date, final ReservationTime time, final Theme theme) {
         try {
             return save(ReservationSlot.create(date, time, theme));
@@ -192,7 +150,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         );
     }
 
-    private Optional<ReservationSlot> findByIdForUpdate(final Long slotId) {
+    @Override
+    public Optional<ReservationSlot> findByIdForUpdate(final Long slotId) {
         final String sql = """
                 SELECT
                     s.id AS slot_id,
@@ -215,67 +174,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
-    }
-
-    private boolean deleteCurrentReservation(final Long reservationId, final Long slotId) {
-        final String sql = """
-                DELETE FROM reservation
-                WHERE id = ? AND slot_id = ?
-                """;
-
-        return jdbcTemplate.update(sql, reservationId, slotId) > 0;
-    }
-
-    private Optional<Waiting> findEarliestWaitingBySlotId(final Long slotId) {
-        final String sql = """
-                SELECT
-                    w.id AS waiting_id,
-                    w.customer_name AS waiting_customer_name,
-                    w.created_at AS waiting_created_at,
-                    s.id AS slot_id,
-                    s.reservation_date,
-                    t.id AS time_id,
-                    t.start_at AS time_start_at,
-                    h.id AS theme_id,
-                    h.name AS theme_name,
-                    h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
-                FROM waiting w
-                JOIN reservation_slot s ON w.slot_id = s.id
-                JOIN reservation_time t ON s.time_id = t.id
-                JOIN theme h ON s.theme_id = h.id
-                WHERE w.slot_id = ?
-                ORDER BY w.created_at ASC, w.id ASC
-                LIMIT 1
-                """;
-
-        return jdbcTemplate.query(sql, WAITING_ROW_MAPPER, slotId)
-                .stream()
-                .findFirst();
-    }
-
-    private void promoteWaiting(final Waiting waiting) {
-        final String reservationSql = """
-                INSERT INTO reservation (customer_name, slot_id)
-                VALUES (?, ?)
-                """;
-
-        jdbcTemplate.update(
-                reservationSql,
-                waiting.getCustomerName().name(),
-                waiting.getSlotId()
-        );
-
-        deleteWaitingById(waiting.getId());
-    }
-
-    private boolean deleteWaitingById(final long waitingId) {
-        final String sql = """
-                DELETE FROM waiting
-                WHERE id = ?
-                """;
-
-        return jdbcTemplate.update(sql, waitingId) > 0;
     }
 
     private static ReservationSlot mapToDomain(final ResultSet resultSet) throws SQLException {
@@ -310,7 +208,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
 
     private long generatedIdFrom(final KeyHolder keyHolder) {
         if (keyHolder.getKey() == null) {
-            throw new IllegalStateException("생성된 예약 슬롯 id를 가져오지 못했습니다.");
+            throw new IllegalStateException(GENERATED_SLOT_ID_NOT_FOUND_MESSAGE);
         }
 
         return keyHolder.getKey().longValue();

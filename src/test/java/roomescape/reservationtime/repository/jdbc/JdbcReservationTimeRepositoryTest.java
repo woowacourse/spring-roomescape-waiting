@@ -97,8 +97,9 @@ class JdbcReservationTimeRepositoryTest {
                 1L
         );
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 "브라운",
+                "brown@example.com",
                 1L
         );
 

@@ -8,22 +8,19 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.jdbc.JdbcReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Sql("/clear.sql")
-@Import({
-        JdbcReservationSlotRepository.class,
-        JdbcReservationRepository.class
-})
+@Import(JdbcReservationSlotRepository.class)
 class JdbcReservationSlotRepositoryTest {
 
     @Autowired
@@ -32,77 +29,58 @@ class JdbcReservationSlotRepositoryTest {
     @Autowired
     private JdbcReservationSlotRepository reservationSlotRepository;
 
-    @Autowired
-    private JdbcReservationRepository reservationRepository;
-
     @Test
-    @DisplayName("예약을 삭제하고 첫 번째 대기를 예약으로 승격한다")
-    void deleteReservationAndPromoteFirstWaiting() {
+    @DisplayName("예약 슬롯을 조회한다")
+    void findReservationSlot() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
-        Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
-        insertReservation("브라운", slotId);
-        insertWaiting("코로구", slotId, LocalDateTime.of(2026, 8, 1, 10, 0));
-        insertWaiting("재키", slotId, LocalDateTime.of(2026, 8, 1, 10, 1));
+        insertReservationSlot("2026-08-05", 1L, 1L);
 
-        Reservation reservation = reservationRepository.findById(1L).get();
-
-        reservationSlotRepository.deleteReservationAndPromoteWaiting(reservation);
-
-        String promotedCustomerName = jdbcTemplate.queryForObject(
-                "SELECT customer_name FROM reservation WHERE slot_id = ?",
-                String.class,
-                slotId
+        Optional<ReservationSlot> slot = reservationSlotRepository.findByDateAndTimeIdAndThemeId(
+                LocalDate.of(2026, 8, 5),
+                1L,
+                1L
         );
-        Integer waitingCount = jdbcTemplate.queryForObject("SELECT count(1) FROM waiting", Integer.class);
-        Integer slotCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation_slot", Integer.class);
 
-        assertThat(promotedCustomerName).isEqualTo("코로구");
-        assertThat(waitingCount).isEqualTo(1);
-        assertThat(slotCount).isEqualTo(1);
+        assertThat(slot).isPresent();
+        assertThat(slot.get().getDate()).isEqualTo(LocalDate.of(2026, 8, 5));
     }
 
     @Test
-    @DisplayName("예약과 대기가 모두 없어져도 슬롯은 유지한다")
-    void keepSlotWhenReservationAndWaitingDoNotExist() {
+    @DisplayName("같은 날짜, 시간, 테마의 슬롯이 이미 있으면 기존 슬롯을 반환한다")
+    void findExistingSlotWhenCreatingDuplicatedSlot() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
-        Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
-        insertReservation("브라운", slotId);
+        Long savedSlotId = insertReservationSlot("2026-08-05", 1L, 1L);
 
-        Reservation reservation = reservationRepository.findById(1L).get();
+        ReservationSlot slot = reservationSlotRepository.findOrCreate(
+                LocalDate.of(2026, 8, 5),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Theme.of(1L, "링", "공포 테마", "http:~")
+        );
 
-        reservationSlotRepository.deleteReservationAndPromoteWaiting(reservation);
-
-        Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
-        Integer slotCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation_slot", Integer.class);
-
-        assertThat(reservationCount).isZero();
-        assertThat(slotCount).isEqualTo(1);
+        assertThat(slot.getId()).isEqualTo(savedSlotId);
     }
 
     @Test
-    @DisplayName("이미 삭제된 예약으로 다시 삭제하면 승격된 예약은 삭제하지 않는다")
-    void doNotDeletePromotedReservationWhenDeletingAlreadyDeletedReservationAgain() {
+    @DisplayName("예약 슬롯을 id로 조회하면서 잠근다")
+    void findReservationSlotByIdForUpdate() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
-        Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
-        insertReservation("브라운", slotId);
-        insertWaiting("코로구", slotId, LocalDateTime.of(2026, 8, 1, 10, 0));
+        Long savedSlotId = insertReservationSlot("2026-08-05", 1L, 1L);
 
-        Reservation deletedReservation = reservationRepository.findById(1L).get();
-        reservationSlotRepository.deleteReservationAndPromoteWaiting(deletedReservation);
+        Optional<ReservationSlot> slot = reservationSlotRepository.findByIdForUpdate(savedSlotId);
 
-        assertThatThrownBy(() -> reservationSlotRepository.deleteReservationAndPromoteWaiting(deletedReservation))
-                .isInstanceOf(ReservationNotFoundException.class);
+        assertThat(slot).isPresent();
+        assertThat(slot.get().getId()).isEqualTo(savedSlotId);
+    }
 
-        String promotedCustomerName = jdbcTemplate.queryForObject(
-                "SELECT customer_name FROM reservation WHERE slot_id = ?",
-                String.class,
-                slotId
-        );
+    @Test
+    @DisplayName("존재하지 않는 예약 슬롯을 id로 조회하면 empty를 반환한다")
+    void returnEmptyWhenFindingNonExistingReservationSlotByIdForUpdate() {
+        Optional<ReservationSlot> slot = reservationSlotRepository.findByIdForUpdate(999L);
 
-        assertThat(promotedCustomerName).isEqualTo("코로구");
+        assertThat(slot).isEmpty();
     }
 
     private void insertReservationTime(final String startAt) {
@@ -118,23 +96,6 @@ class JdbcReservationSlotRepositoryTest {
                 name,
                 description,
                 thumbnailUrl
-        );
-    }
-
-    private void insertReservation(final String name, final Long slotId) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
-                name,
-                slotId
-        );
-    }
-
-    private void insertWaiting(final String name, final Long slotId, final LocalDateTime createdAt) {
-        jdbcTemplate.update(
-                "INSERT INTO waiting (customer_name, slot_id, created_at) VALUES (?, ?, ?)",
-                name,
-                slotId,
-                Timestamp.valueOf(createdAt)
         );
     }
 

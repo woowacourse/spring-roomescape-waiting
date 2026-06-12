@@ -6,11 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.request.ReservationCreateRequest;
-import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationResponse;
-import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
+import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -23,11 +22,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @GetMapping(params = "customer-name")
-    public ResponseEntity<ReservationsAndWaitingsResponse> getReservationsByCustomerName(
-            @RequestParam("customer-name") String customerName
+    @GetMapping(params = {"customer-name", "customer-email"})
+    public ResponseEntity<ReservationsAndWaitingsResponse> getReservationsByCustomer(
+            @RequestParam("customer-name") String customerName,
+            @RequestParam("customer-email") String customerEmail
     ) {
-        final ReservationsAndWaitingsResponse results = reservationService.getReservationsByCustomerName(customerName);
+        final ReservationsAndWaitingsResponse results = reservationService.getReservationsByCustomer(customerName, customerEmail);
         return ResponseEntity.ok(results);
     }
 
@@ -55,20 +55,13 @@ public class ReservationController {
                 .body(result);
     }
 
-    @PutMapping("/{reservation-id}")
-    public ResponseEntity<ReservationResponse> update(
-            @PathVariable("reservation-id") Long reservationId,
-            @Valid @RequestBody ReservationUpdateRequest request
-    ) {
-        final ReservationResponse result = reservationService.updateByCustomer(reservationId, request);
-        return ResponseEntity.ok(result);
-    }
-
     @DeleteMapping("/{reservation-id}")
     public ResponseEntity<Void> cancel(
-            @PathVariable("reservation-id") Long reservationId
+            @PathVariable("reservation-id") Long reservationId,
+            @RequestParam("customer-name") String customerName,
+            @RequestParam("customer-email") String customerEmail
     ) {
-        reservationService.cancelByCustomer(reservationId);
+        reservationService.cancelByCustomer(reservationId, customerName, customerEmail);
         return ResponseEntity.noContent().build();
     }
 }

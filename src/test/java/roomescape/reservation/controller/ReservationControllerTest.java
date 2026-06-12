@@ -12,8 +12,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -130,6 +130,7 @@ class ReservationControllerTest {
 
         ReservationsAndWaitingsResponse responses = RestAssured.given().log().all()
                 .queryParam("customer-name", "초코칩")
+                .queryParam("customer-email", emailFromName("초코칩"))
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
@@ -154,6 +155,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 1
@@ -166,176 +168,14 @@ class ReservationControllerTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(countAfterDelete).isEqualTo(0);
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("예약 일정을 수정한다")
-    void updateReservationSchedule() {
-        final String futureDate = LocalDate.now().plusDays(1).toString();
-        final String changedFutureDate = LocalDate.now().plusDays(2).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", futureDate, 1L, 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "date", changedFutureDate,
-                        "timeId", 2
-                ))
-                .when().put("/reservations/1")
-                .then().log().all()
-                .statusCode(200)
-                .body("id", org.hamcrest.Matchers.is(1))
-                .body("name", org.hamcrest.Matchers.is("브라운"))
-                .body("date", org.hamcrest.Matchers.is(changedFutureDate))
-                .body("time.id", org.hamcrest.Matchers.is(2))
-                .body("theme.id", org.hamcrest.Matchers.is(1));
-
-        Map<String, Object> updatedReservation = jdbcTemplate.queryForMap(
-                """
-                        SELECT s.reservation_date, s.time_id
-                        FROM reservation r
-                        JOIN reservation_slot s ON r.slot_id = s.id
-                        WHERE r.id = ?
-                        """,
-                1L
-        );
-        assertThat(updatedReservation.get("RESERVATION_DATE").toString()).isEqualTo(changedFutureDate);
-        assertThat(updatedReservation.get("TIME_ID")).isEqualTo(2L);
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("존재하지 않는 예약을 수정하면 404를 응답한다")
-    void respondNotFoundWhenUpdatingNonExistingReservation() {
-        final String futureDate = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "date", futureDate,
-                        "timeId", 1
-                ))
-                .when().put("/reservations/999")
-                .then().log().all()
-                .statusCode(404)
-                .body("message", org.hamcrest.Matchers.is("존재하지 않는 예약입니다."));
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("존재하지 않는 예약 시간으로 수정하면 404를 응답한다")
-    void respondNotFoundWhenUpdatingWithNonExistingReservationTime() {
-        final String futureDate = LocalDate.now().plusDays(1).toString();
-        final String changedFutureDate = LocalDate.now().plusDays(2).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", futureDate, 1L, 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "date", changedFutureDate,
-                        "timeId", 999
-                ))
-                .when().put("/reservations/1")
-                .then().log().all()
-                .statusCode(404)
-                .body("message", org.hamcrest.Matchers.is("존재하지 않는 예약 시간입니다."));
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("예약 수정시 예약일을 입력하지 않으면 400을 응답한다")
-    void respondBadRequestWhenReservationDateIsMissingOnUpdate() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "timeId", 1
-                ))
-                .when().put("/reservations/1")
-                .then().log().all()
-                .statusCode(400)
-                .body("message", org.hamcrest.Matchers.is("예약일을 입력해야 합니다."));
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("과거 시간으로 예약을 수정하면 400을 응답한다")
-    void respondBadRequestWhenUpdatingReservationToPastTime() {
-        final String futureDate = LocalDate.now().plusDays(1).toString();
-        final String yesterday = LocalDate.now().minusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", futureDate, 1L, 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "date", yesterday,
-                        "timeId", 2
-                ))
-                .when().put("/reservations/1")
-                .then().log().all()
-                .statusCode(400)
-                .body("message", org.hamcrest.Matchers.is("과거 시간으로는 예약할 수 없습니다."));
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("이미 예약된 시간으로 수정하면 409를 응답한다")
-    void respondConflictWhenUpdatingToAlreadyReservedTime() {
-        final String futureDate = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", futureDate, 1L, 1L);
-        insertReservation("재키", futureDate, 2L, 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "date", futureDate,
-                        "timeId", 2
-                ))
-                .when().put("/reservations/1")
-                .then().log().all()
-                .statusCode(409)
-                .body("message", org.hamcrest.Matchers.is("이미 예약된 시간입니다."));
-    }
-
-    @Test
-    @Sql("/clear.sql")
-    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 수정할 수 없다")
-    void customerCannotUpdateReservationOnReservationDateBeforeStartTime() {
-        final String today = LocalDate.now().toString();
-        final String tomorrow = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        insertReservation("브라운", today, 1L, 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "date", tomorrow,
-                        "timeId", 2
-                ))
-                .when().put("/reservations/1")
-                .then().log().all()
-                .statusCode(409)
-                .body("message", org.hamcrest.Matchers.is("당일 예약은 변경할 수 없습니다."));
     }
 
     @Test
@@ -348,6 +188,8 @@ class ReservationControllerTest {
         insertReservation("브라운", today, 1L, 1L);
 
         RestAssured.given().log().all()
+                .queryParam("customer-name", "브라운")
+                .queryParam("customer-email", emailFromName("브라운"))
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(409)
@@ -365,6 +207,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 999,
                         "themeId", 1
@@ -385,6 +228,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "themeId", 1
                 ))
@@ -418,6 +262,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "브라운",
+                        "email", emailFromName("브라운"),
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 999
@@ -439,6 +284,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "",
+                        "email", "brown@example.com",
                         "date", futureDate,
                         "timeId", 1,
                         "themeId", 1
@@ -469,8 +315,9 @@ class ReservationControllerTest {
     private void insertReservation(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
     }
@@ -478,10 +325,15 @@ class ReservationControllerTest {
     private void insertWaiting(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO waiting (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final String date, final long timeId, final long themeId) {

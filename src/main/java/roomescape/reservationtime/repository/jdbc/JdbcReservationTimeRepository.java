@@ -21,6 +21,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
+    private static final String GENERATED_ID_NOT_FOUND_MESSAGE = "생성된 id를 가져오지 못했습니다.";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -103,7 +105,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     private long generatedIdFrom(final KeyHolder keyHolder) {
         if (keyHolder.getKey() == null) {
-            throw new IllegalStateException("생성된 id를 가져오지 못했습니다.");
+            throw new IllegalStateException(GENERATED_ID_NOT_FOUND_MESSAGE);
         }
 
         return keyHolder.getKey().longValue();

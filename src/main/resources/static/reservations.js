@@ -283,6 +283,7 @@ function openModal() {
   $('modal-theme').textContent = state.selectedThemeName;
   $('modal-time').textContent  = state.selectedTimeLabel;
   $('booking-name').value = '';
+  $('booking-email').value = '';
   $('modal-title-text').textContent = '예약 확인';
   $('confirm-booking-btn').textContent = '예약하기';
   $('booking-modal').classList.add('open');
@@ -295,6 +296,7 @@ function openWaitingModal() {
   $('modal-theme').textContent = state.selectedThemeName;
   $('modal-time').textContent  = state.selectedTimeLabel;
   $('booking-name').value = '';
+  $('booking-email').value = '';
   $('modal-title-text').textContent = '대기 신청';
   $('confirm-booking-btn').textContent = '대기 신청하기';
   $('booking-modal').classList.add('open');
@@ -305,7 +307,9 @@ function closeModal() { $('booking-modal').classList.remove('open'); }
 
 async function submitBooking() {
   const name = $('booking-name').value.trim();
+  const email = $('booking-email').value.trim();
   if (!name) { showToast('이름을 입력해주세요.', 'error'); return; }
+  if (!email) { showToast('이메일을 입력해주세요.', 'error'); return; }
 
   const btn = $('confirm-booking-btn');
   const isWaiting = state.waitingMode;
@@ -318,6 +322,7 @@ async function submitBooking() {
       // POST /waitings
       await api.post('/waitings', {
         name,
+        email,
         date: state.selectedDate,
         timeId: state.selectedTimeId,
         themeId: state.selectedThemeId,
@@ -327,7 +332,7 @@ async function submitBooking() {
     } else {
       // POST /reservations
       await api.post('/reservations', {
-        name, date: state.selectedDate,
+        name, email, date: state.selectedDate,
         timeId: state.selectedTimeId, themeId: state.selectedThemeId,
       });
       closeModal();

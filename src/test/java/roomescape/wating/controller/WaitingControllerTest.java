@@ -10,24 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeNotFoundException;
-import roomescape.wating.domain.exception.PastReservationWaitingCancellationException;
-import roomescape.wating.domain.exception.WaitingNotFoundException;
-import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Time;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
@@ -58,6 +54,7 @@ class WaitingControllerTest {
         insertReservation("브라운", futureDate, time.getId(), theme.getId());
         Map<String, String> body = Map.of(
                 "name", "재키",
+                "email", emailFromName("재키"),
                 "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", theme.getId().toString()
@@ -84,6 +81,7 @@ class WaitingControllerTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
         Map<String, String> body = Map.of(
                 "name", "재키",
+                "email", emailFromName("재키"),
                 "date", futureDate.toString(),
                 "timeId", unSavedTime.getId().toString(),
                 "themeId", theme.getId().toString()
@@ -96,10 +94,9 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
         //then
-        final Exception expectedException = new ReservationTimeNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 예약 시간입니다."));
     }
 
     @Test
@@ -111,6 +108,7 @@ class WaitingControllerTest {
         Theme unSavedTheme = Theme.of(999L, "name", "des", "url");
         Map<String, String> body = Map.of(
                 "name", "재키",
+                "email", emailFromName("재키"),
                 "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", unSavedTheme.getId().toString()
@@ -123,10 +121,9 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
         //then
-        final Exception expectedException = new ThemeNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 테마입니다."));
     }
 
     @Test
@@ -143,6 +140,7 @@ class WaitingControllerTest {
 
         Map<String, String> body = Map.of(
                 "name", customerName,
+                "email", emailFromName(customerName),
                 "date", futureDate.toString(),
                 "timeId", time.getId().toString(),
                 "themeId", theme.getId().toString()
@@ -155,10 +153,9 @@ class WaitingControllerTest {
                 .when().post("/waitings");
 
         //then
-        final Exception expectedException = new WaitingSlotDuplicateException();
         response.then().log().all()
                 .statusCode(HttpStatus.CONFLICT.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("해당 시간에 이미 대기가 존재합니다."));
     }
 
     @Test
@@ -175,6 +172,7 @@ class WaitingControllerTest {
         //when
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", customerName)
+                .queryParam("customer-email", emailFromName(customerName))
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
@@ -197,13 +195,13 @@ class WaitingControllerTest {
         final String invalidCustomerName = "재키";
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", invalidCustomerName)
+                .queryParam("customer-email", emailFromName(invalidCustomerName))
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
-        final Exception expectedException = new WaitingNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 대기입니다."));
     }
 
     @Test
@@ -216,13 +214,13 @@ class WaitingControllerTest {
         //when
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", customerName)
+                .queryParam("customer-email", emailFromName(customerName))
                 .when().delete("/waitings/{id}", unsavedWaitingId);
 
         //then
-        final Exception expectedException = new WaitingNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("존재하지 않는 대기입니다."));
     }
 
     @Test
@@ -239,13 +237,13 @@ class WaitingControllerTest {
         //when
         final Response response = RestAssured.given().log().all()
                 .queryParam("customer-name", customerName)
+                .queryParam("customer-email", emailFromName(customerName))
                 .when().delete("/waitings/{id}", savedWaitingId);
 
         //then
-        final Exception expectedException = new PastReservationWaitingCancellationException();
         response.then().log().all()
                 .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                .body("message", is(expectedException.getMessage()));
+                .body("message", is("과거 시간 예약의 대기를 삭제할 수 없습니다."));
     }
 
     private ReservationTime insertReservationTime(final String startAt) {
@@ -275,8 +273,9 @@ class WaitingControllerTest {
     ) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation(customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation(customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                emailFromName(name),
                 slotId
         );
         return slotId;
@@ -290,15 +289,16 @@ class WaitingControllerTest {
     ) {
         Long slotId = insertReservationSlot(reservationDate, timeId, themeId);
         final String sql = """
-                INSERT INTO waiting(customer_name, slot_id)
-                VALUES (?, ?)
+                INSERT INTO waiting(customer_name, customer_email, slot_id)
+                VALUES (?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, name);
-            ps.setLong(2, slotId);
+            ps.setString(2, emailFromName(name));
+            ps.setLong(3, slotId);
             return ps;
         }, keyHolder);
 
@@ -307,6 +307,10 @@ class WaitingControllerTest {
             throw new IllegalStateException("대기 생성에 실패했습니다.");
         }
         return key.longValue();
+    }
+
+    private String emailFromName(final String name) {
+        return "customer" + Math.abs(name.hashCode()) + "@example.com";
     }
 
     private Long insertReservationSlot(final LocalDate reservationDate, final long timeId, final long themeId) {

@@ -16,11 +16,11 @@ VALUES (1, CURRENT_DATE, 2, 1),
 
 -- 대기 데이터
 -- 포함돼야 하는 케이스
-INSERT INTO waiting (customer_name, slot_id) VALUES ('재키', 1); -- 오늘 + 아직 안 지난 시간
-INSERT INTO waiting (customer_name, slot_id) VALUES ('재키', 2); -- 미래 날짜
+INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES ('재키', 'jaekkii@example.com', 1); -- 오늘 + 아직 안 지난 시간
+INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES ('재키', 'jaekkii@example.com', 2); -- 미래 날짜
 
 -- 포함되지 않아야 하는 케이스
-INSERT INTO waiting (customer_name, slot_id) VALUES ('재키', 3); -- 오늘 + 이미 지난 시간 (09:00)
-INSERT INTO waiting (customer_name, slot_id) VALUES ('재키', 4); -- 오늘 + 이미 지난 시간 (10:00)
-INSERT INTO waiting (customer_name, slot_id) VALUES ('재키', 5); -- 과거 날짜
-INSERT INTO waiting (customer_name, slot_id) VALUES ('코로구', 2); -- 다른 사람
+INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES ('재키', 'jaekkii@example.com', 3); -- 오늘 + 이미 지난 시간 (09:00)
+INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES ('재키', 'jaekkii@example.com', 4); -- 오늘 + 이미 지난 시간 (10:00)
+INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES ('재키', 'jaekkii@example.com', 5); -- 과거 날짜
+INSERT INTO waiting (customer_name, customer_email, slot_id) VALUES ('코로구', 'korogoo@example.com', 2); -- 다른 사람

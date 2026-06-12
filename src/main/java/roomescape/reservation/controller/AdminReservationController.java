@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
 
 import java.util.List;
 

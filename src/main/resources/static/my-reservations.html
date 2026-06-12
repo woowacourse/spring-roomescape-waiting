@@ -30,7 +30,7 @@
 
     <div class="my-res-header">
       <h1 class="my-res-title">내 예약</h1>
-      <p class="my-res-sub">예약자 이름으로 예약 및 대기 내역을 확인하고 변경 또는 취소할 수 있습니다.</p>
+      <p class="my-res-sub">예약자 이름과 이메일로 예약 및 대기 내역을 확인하고 변경 또는 취소할 수 있습니다.</p>
     </div>
 
     <!-- 검색 폼 -->
@@ -41,6 +41,13 @@
         id="search-name"
         placeholder="예약자 이름 입력 (예: 홍길동)"
         autocomplete="name"
+      />
+      <input
+        class="form-input my-res-search-input"
+        type="email"
+        id="search-email"
+        placeholder="예약자 이메일 입력"
+        autocomplete="email"
       />
       <button class="btn-primary my-res-search-btn" id="search-btn">조회</button>
     </div>
@@ -97,62 +104,6 @@
   </div>
 </main>
 
-<!-- ── 예약 변경 모달 ─────────────────────────────────────── -->
-<div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
-  <div class="modal modal-edit">
-    <div class="modal-header">
-      <h2 class="modal-title" id="edit-modal-title">예약 변경</h2>
-      <button class="modal-close" id="edit-modal-close-btn" aria-label="닫기">&times;</button>
-    </div>
-    <div class="modal-body">
-
-      <!-- 변경 불가 정보 -->
-      <div class="edit-fixed-info">
-        <div class="edit-fixed-item">
-          <span class="summary-item-label">예약자</span>
-          <span class="summary-item-value" id="edit-modal-name">—</span>
-        </div>
-        <div class="edit-fixed-item">
-          <span class="summary-item-label">테마</span>
-          <span class="summary-item-value" id="edit-modal-theme">—</span>
-        </div>
-      </div>
-
-      <div class="edit-section-label">변경할 날짜 선택</div>
-
-      <!-- 달력 -->
-      <div class="edit-calendar-wrap">
-        <div class="calendar-nav">
-          <button class="calendar-nav-btn" id="edit-cal-prev" aria-label="이전 달">&#8249;</button>
-          <span class="calendar-month-label" id="edit-cal-month-label"></span>
-          <button class="calendar-nav-btn" id="edit-cal-next" aria-label="다음 달">&#8250;</button>
-        </div>
-        <div class="calendar-grid edit-calendar-grid" id="edit-calendar-grid">
-          <div class="calendar-day-label">일</div>
-          <div class="calendar-day-label">월</div>
-          <div class="calendar-day-label">화</div>
-          <div class="calendar-day-label">수</div>
-          <div class="calendar-day-label">목</div>
-          <div class="calendar-day-label">금</div>
-          <div class="calendar-day-label">토</div>
-        </div>
-      </div>
-
-      <div class="edit-section-label" style="margin-top:18px">변경할 시간 선택</div>
-
-      <!-- 시간 슬롯 -->
-      <div id="edit-time-slots-wrap">
-        <div class="empty-state edit-empty-state">날짜를 먼저 선택하세요.</div>
-      </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" id="edit-modal-cancel-btn">취소</button>
-      <button class="btn-primary" id="confirm-edit-btn" disabled>변경하기</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── 대기 취소 모달 ─────────────────────────────────────── -->
 <div class="modal-overlay" id="cancel-waiting-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-waiting-modal-title">
   <div class="modal">
@@ -170,7 +121,11 @@
       <div class="form-group">
         <label class="form-label" for="cancel-waiting-name">본인 이름 입력</label>
         <input class="form-input" type="text" id="cancel-waiting-name" placeholder="홍길동" autocomplete="name" />
-        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">본인 확인을 위해 이름을 입력해주세요.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cancel-waiting-email">본인 이메일 입력</label>
+        <input class="form-input" type="email" id="cancel-waiting-email" placeholder="hong@example.com" autocomplete="email" />
+        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">본인 확인을 위해 이름과 이메일을 입력해주세요.</p>
       </div>
     </div>
     <div class="modal-footer">

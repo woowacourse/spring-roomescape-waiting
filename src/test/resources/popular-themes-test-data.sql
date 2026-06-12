@@ -96,8 +96,8 @@ INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id)
 SELECT id, reservation_date, time_id, theme_id
 FROM reservation_seed;
 
-INSERT INTO reservation (id, customer_name, slot_id)
-SELECT id, customer_name, id
+INSERT INTO reservation (id, customer_name, customer_email, slot_id)
+SELECT id, customer_name, CONCAT('customer', id, '@example.com'), id
 FROM reservation_seed;
 
 DROP TABLE reservation_seed;

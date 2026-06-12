@@ -19,6 +19,12 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String BAD_REQUEST_MESSAGE = "잘못된 요청입니다.";
+    private static final String NO_RESOURCE_FOUND_MESSAGE = "존재하지 않는 경로입니다.";
+    private static final String METHOD_NOT_SUPPORTED_MESSAGE = "지원하지 않는 HTTP 메서드입니다.";
+    private static final String MEDIA_TYPE_NOT_SUPPORTED_MESSAGE = "지원하지 않는 Content-Type입니다.";
+    private static final String INTERNAL_SERVER_ERROR_MESSAGE = "서버 내부 오류가 발생했습니다.";
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
     public ErrorResponse handleNotFoundException(final NotFoundException exception) {
@@ -45,7 +51,7 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException.class
     })
     public ErrorResponse handleBadRequestException(final Exception exception) {
-        return new ErrorResponse("잘못된 요청입니다.");
+        return new ErrorResponse(BAD_REQUEST_MESSAGE);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -56,7 +62,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
-                .orElse("잘못된 요청입니다.");
+                .orElse(BAD_REQUEST_MESSAGE);
 
         return new ErrorResponse(message);
     }
@@ -76,19 +82,19 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoResourceFoundException.class)
     public ErrorResponse handleNoResourceFoundException(final NoResourceFoundException exception) {
-        return new ErrorResponse("존재하지 않는 경로입니다.");
+        return new ErrorResponse(NO_RESOURCE_FOUND_MESSAGE);
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ErrorResponse handleHttpRequestMethodNotSupportedException(final HttpRequestMethodNotSupportedException exception) {
-        return new ErrorResponse("지원하지 않는 HTTP 메서드입니다.");
+        return new ErrorResponse(METHOD_NOT_SUPPORTED_MESSAGE);
     }
 
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ErrorResponse handleHttpMediaTypeNotSupportedException(final HttpMediaTypeNotSupportedException exception) {
-        return new ErrorResponse("지원하지 않는 Content-Type입니다.");
+        return new ErrorResponse(MEDIA_TYPE_NOT_SUPPORTED_MESSAGE);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -101,6 +107,6 @@ public class GlobalExceptionHandler {
                 exception
         );
 
-        return new ErrorResponse("서버 내부 오류가 발생했습니다.");
+        return new ErrorResponse(INTERNAL_SERVER_ERROR_MESSAGE);
     }
 }

@@ -586,64 +586,6 @@ main { padding: 48px 0 100px; }
   letter-spacing: 0.04em;
 }
 
-/* 변경 / 취소 버튼 */
-.btn-edit {
-  padding: 4px 12px;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  cursor: pointer;
-  transition: all var(--tr);
-}
-.btn-edit:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ===== 예약 변경 모달 ===== */
-.modal-edit { width: 520px; }
-
-.edit-fixed-info {
-  display: flex;
-  gap: 32px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 13px 16px;
-  margin-bottom: 20px;
-}
-.edit-fixed-item { display: flex; flex-direction: column; gap: 3px; }
-
-.edit-section-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text-muted);
-  margin-bottom: 10px;
-}
-
-/* 변경 모달 달력 래퍼 */
-.edit-calendar-wrap {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-}
-.edit-calendar-grid {
-  margin-top: 2px;
-}
-/* 변경 모달 달력 셀 — 모달 너비에 맞게 compact */
-.edit-calendar-grid .calendar-day {
-  aspect-ratio: unset;
-  height: 30px;
-  font-size: 11px;
-}
-
-/* 시간 슬롯 빈 상태 (모달 안) */
-.edit-empty-state {
-  text-align: center; color: var(--text-muted); font-size: 12px;
-  padding: 24px 8px;
-}
-
-.time-slot.selected .time-slot-badge { color: var(--text); }
-
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .booking-layout { grid-template-columns: 220px 1fr 200px; }
@@ -654,6 +596,4 @@ main { padding: 48px 0 100px; }
   .theme-grid2 { grid-template-columns: 1fr 1fr; }
   .col-body-scroll { max-height: none; }
   .my-res-search-wrap { flex-direction: column; }
-  .modal-edit { width: 100%; }
-  .edit-fixed-info { flex-direction: column; gap: 12px; }
 }

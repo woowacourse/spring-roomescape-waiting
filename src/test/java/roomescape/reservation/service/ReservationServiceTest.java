@@ -1,121 +1,99 @@
 package roomescape.reservation.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
+import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationslot.repository.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
-import roomescape.reservation.domain.exception.ReservationCancellationException;
-import roomescape.reservation.domain.exception.ReservationModificationException;
-import roomescape.reservation.domain.exception.ReservationOptionChangedException;
-import roomescape.reservation.service.dto.request.ReservationCreateRequest;
-import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationResponse;
-import roomescape.reservation.service.support.FakeReservationRepository;
-import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
-import roomescape.reservationslot.service.support.FakeReservationSlotRepository;
-import roomescape.theme.service.support.FakeThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.wating.domain.Waiting;
-import roomescape.wating.service.support.FakeWaitingRepository;
+import roomescape.wating.repository.WaitingRepository;
 
-import java.sql.Date;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest
+@Sql("/clear.sql")
 class ReservationServiceTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    @Autowired
+    ReservationService reservationService;
 
-    private FakeReservationRepository reservationRepository;
-    private FakeReservationTimeRepository reservationTimeRepository;
-    private FakeThemeRepository themeRepository;
-    private FakeReservationSlotRepository reservationSlotRepository;
-    private FakeWaitingRepository waitingRepository;
-    private ReservationService reservationService;
+    @Autowired
+    ReservationTimeRepository reservationTimeRepository;
 
-    @BeforeEach
-    void setUp() {
-        reservationRepository = new FakeReservationRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        themeRepository = new FakeThemeRepository();
-        waitingRepository = new FakeWaitingRepository();
-        reservationSlotRepository = new FakeReservationSlotRepository(reservationRepository, waitingRepository);
-        reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                reservationSlotRepository,
-                waitingRepository
-        );
-    }
+    @Autowired
+    ThemeRepository themeRepository;
+
+    @Autowired
+    ReservationSlotRepository reservationSlotRepository;
+
+    @Autowired
+    ReservationRepository reservationRepository;
+
+    @Autowired
+    WaitingRepository waitingRepository;
 
     @Test
     @DisplayName("예약을 생성한다")
     void createReservation() {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(11, 0)));
-        themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
 
         // when
         ReservationResponse response = reservationService.create(
-                new ReservationCreateRequest("브라운", tomorrow, 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", tomorrow, timeId, themeId)
         );
 
         // then
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.name()).isEqualTo("브라운");
-        assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("브라운");
+        assertThat(response.date()).isEqualTo(tomorrow);
+        assertThat(reservationRepository.findAll()).hasSize(1);
     }
 
     @Test
     @DisplayName("예약자 이름으로 현재 시간 이후의 예약 및 대기 목록을 조회한다")
     void findReservationsAndWaitingsAfterNowByCustomerName() {
         // given
-        final LocalDateTime oneHourBefore = NOW.minusHours(1);
-        final LocalDateTime oneHourAfter = NOW.plusHours(1);
+        final long pastTimeId = insertReservationTime("09:00:00");
+        final long futureTimeId = insertReservationTime("23:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final LocalDate yesterday = LocalDate.now().minusDays(1);
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
 
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                oneHourBefore.toLocalDate(),
-                ReservationTime.of(1L, oneHourBefore.toLocalTime()),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationRepository.add(Reservation.of(
-                2L,
-                "브라운",
-                oneHourAfter.toLocalDate(),
-                ReservationTime.of(2L, oneHourAfter.toLocalTime()),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
+        insertReservation("브라운", "customer@example.com", yesterday, pastTimeId, themeId);
+        insertReservation("브라운", "customer@example.com", tomorrow, futureTimeId, themeId);
 
-        waitingRepository.add(Waiting.of(
-                1L,
-                "브라운",
-                Date.valueOf(oneHourBefore.toLocalDate()),
-                NOW,
-                ReservationTime.of(1L, oneHourBefore.toLocalTime()),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        waitingRepository.add(Waiting.of(
-                1L,
-                "브라운",
-                Date.valueOf(oneHourAfter.toLocalDate()),
-                NOW,
-                ReservationTime.of(1L, oneHourAfter.toLocalTime()),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
+        final long waitingSlotId = insertReservationSlot(tomorrow, pastTimeId, themeId);
+        insertReservation("예약자", "owner@example.com", waitingSlotId);
+        insertWaiting("브라운", "customer@example.com", waitingSlotId, LocalDateTime.now().minusMinutes(1));
 
         // when
-        ReservationsAndWaitingsResponse responses = reservationService.getReservationsByCustomerName("브라운");
+        ReservationsAndWaitingsResponse responses = reservationService.getReservationsByCustomer(
+                "브라운",
+                "customer@example.com"
+        );
 
         // then
         assertThat(responses.reservations()).hasSize(1);
@@ -131,12 +109,12 @@ class ReservationServiceTest {
     void throwExceptionWhenCreatingReservationBeforeNow() {
         // given
         final LocalDate yesterday = LocalDate.now().minusDays(1);
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(10, 0)));
-        themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
+        final long timeId = insertReservationTime("10:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", yesterday, 1L, 1L)
+                new ReservationCreateRequest("브라운", "customer@example.com", yesterday, timeId, themeId)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -144,9 +122,19 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간으로 예약하면 예외가 발생한다")
     void throwExceptionWhenCreatingReservationWithNonExistingReservationTime() {
+        // given
+        final long unsavedTimeId = 999L;
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest(
+                        "브라운",
+                        "customer@example.com",
+                        LocalDate.now().plusDays(1),
+                        unsavedTimeId,
+                        themeId
+                )
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -155,11 +143,18 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 테마로 예약하면 예외가 발생한다")
     void throwExceptionWhenCreatingReservationWithNonExistingTheme() {
         // given
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(10, 0)));
+        final long timeId = insertReservationTime("10:00:00");
+        final long unsavedThemeId = 999L;
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest(
+                        "브라운",
+                        "customer@example.com",
+                        LocalDate.now().plusDays(1),
+                        timeId,
+                        unsavedThemeId
+                )
         ))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -168,141 +163,104 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 시간으로 예약하면 예외가 발생한다")
     void throwExceptionWhenCreatingReservationAtAlreadyReservedTime() {
         // given
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(11, 0)));
-        themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
-        reservationRepository.failToSaveByDuplicatedReservation();
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        reservationService.create(new ReservationCreateRequest(
+                "브라운",
+                "brown@example.com",
+                tomorrow,
+                timeId,
+                themeId
+        ));
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
+                new ReservationCreateRequest("재키", "jaekkii@example.com", tomorrow, timeId, themeId)
         ))
-                .isInstanceOf(ReservationAlreadyExistsException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
     }
 
     @Test
-    @DisplayName("예약 옵션이 변경된 상태로 예약하면 예외가 발생한다")
-    void throwExceptionWhenCreatingReservationAfterOptionChanged() {
-        // given
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(11, 0)));
-        themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
-        reservationRepository.failToSaveByChangedOption();
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.create(
-                new ReservationCreateRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L)
-        ))
-                .isInstanceOf(ReservationOptionChangedException.class);
-    }
-
-    @Test
-    @DisplayName("예약 일정을 수정한다")
+    @DisplayName("관리자가 예약 일정을 수정한다")
     void updateReservationSchedule() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                futureDate,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(11, 0)));
+        final long originTimeId = insertReservationTime("10:00:00");
+        final long changedTimeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, originTimeId, themeId);
 
         // when
-        ReservationResponse response = reservationService.updateByCustomer(
-                1L,
-                new ReservationUpdateRequest(changedFutureDate, 2L)
+        ReservationResponse response = reservationService.updateByAdmin(
+                reservationId,
+                new ReservationUpdateRequest(changedFutureDate, changedTimeId)
         );
 
         // then
-        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.id()).isEqualTo(reservationId);
         assertThat(response.name()).isEqualTo("브라운");
         assertThat(response.date()).isEqualTo(changedFutureDate);
-        assertThat(response.time().id()).isEqualTo(2L);
-        assertThat(response.theme().id()).isEqualTo(1L);
-        assertThat(reservationRepository.findById(1L).get().getTime().getId()).isEqualTo(2L);
+        assertThat(response.time().id()).isEqualTo(changedTimeId);
+        assertThat(response.theme().id()).isEqualTo(themeId);
+        assertThat(reservationRepository.findById(reservationId))
+                .get()
+                .satisfies(reservation -> {
+                    assertThat(reservation.getDate()).isEqualTo(changedFutureDate);
+                    assertThat(reservation.getTime().getId()).isEqualTo(changedTimeId);
+                });
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 수정하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 예약을 관리자가 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingNonExistingReservation() {
         // given
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(11, 0)));
+        final long timeId = insertReservationTime("11:00:00");
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
                 1L,
-                new ReservationUpdateRequest(LocalDate.now().plusDays(1), 1L)
+                new ReservationUpdateRequest(LocalDate.now().plusDays(1), timeId)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 시간으로 수정하면 예외가 발생한다")
+    @DisplayName("존재하지 않는 예약 시간으로 관리자가 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingWithNonExistingReservationTime() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                futureDate,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
+        final long timeId = insertReservationTime("10:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, timeId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
-                1L,
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
+                reservationId,
                 new ReservationUpdateRequest(futureDate, 999L)
         ))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    @DisplayName("현재 이전 시간으로 예약 일정을 수정하면 예외가 발생한다")
+    @DisplayName("현재 이전 시간으로 관리자가 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleBeforeNow() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final LocalDate yesterday = LocalDate.now().minusDays(1);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                futureDate,
-                ReservationTime.of(2L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(1L, LocalTime.of(10, 0)));
+        final long originTimeId = insertReservationTime("11:00:00");
+        final long changedTimeId = insertReservationTime("10:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, originTimeId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
-                1L,
-                new ReservationUpdateRequest(yesterday, 1L)
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
+                reservationId,
+                new ReservationUpdateRequest(yesterday, changedTimeId)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약 일정을 수정할 수 없다")
-    void customerCannotUpdateReservationScheduleOnReservationDateBeforeStartTime() {
-        // given
-        final LocalDate today = LocalDate.now();
-        final LocalDate tomorrow = today.plusDays(1);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                today,
-                ReservationTime.of(1L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(12, 0)));
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
-                1L,
-                new ReservationUpdateRequest(tomorrow, 2L)
-        ))
-                .isInstanceOf(ReservationModificationException.class);
     }
 
     @Test
@@ -311,72 +269,41 @@ class ReservationServiceTest {
         // given
         final LocalDate today = LocalDate.now();
         final LocalDate tomorrow = today.plusDays(1);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                today,
-                ReservationTime.of(1L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(12, 0)));
+        final long originTimeId = insertReservationTime("11:00:00");
+        final long changedTimeId = insertReservationTime("12:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", today, originTimeId, themeId);
 
         // when
         ReservationResponse response = reservationService.updateByAdmin(
-                1L,
-                new ReservationUpdateRequest(tomorrow, 2L)
+                reservationId,
+                new ReservationUpdateRequest(tomorrow, changedTimeId)
         );
 
         // then
         assertThat(response.date()).isEqualTo(tomorrow);
-        assertThat(response.time().id()).isEqualTo(2L);
+        assertThat(response.time().id()).isEqualTo(changedTimeId);
     }
 
     @Test
-    @DisplayName("이미 예약된 시간으로 예약 일정을 수정하면 예외가 발생한다")
+    @DisplayName("이미 예약된 시간으로 관리자가 예약 일정을 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingReservationScheduleToAlreadyReservedTime() {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                futureDate,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(11, 0)));
-        reservationRepository.failToUpdateByDuplicatedReservation();
+        final long originTimeId = insertReservationTime("10:00:00");
+        final long changedTimeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "brown@example.com", futureDate, originTimeId, themeId);
+        insertReservation("재키", "jaekkii@example.com", changedFutureDate, changedTimeId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
-                1L,
-                new ReservationUpdateRequest(changedFutureDate, 2L)
+        assertThatThrownBy(() -> reservationService.updateByAdmin(
+                reservationId,
+                new ReservationUpdateRequest(changedFutureDate, changedTimeId)
         ))
-                .isInstanceOf(ReservationAlreadyExistsException.class);
-    }
-
-    @Test
-    @DisplayName("예약 옵션이 변경된 상태로 예약 일정을 수정하면 예외가 발생한다")
-    void throwExceptionWhenUpdatingReservationScheduleAfterOptionChanged() {
-        // given
-        final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                futureDate,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
-        reservationTimeRepository.add(ReservationTime.of(2L, LocalTime.of(11, 0)));
-        reservationRepository.failToUpdateByChangedOption();
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.updateByCustomer(
-                1L,
-                new ReservationUpdateRequest(changedFutureDate, 2L)
-        ))
-                .isInstanceOf(ReservationOptionChangedException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
     }
 
     @Test
@@ -384,7 +311,7 @@ class ReservationServiceTest {
     void findReservableDatesAndThemes() {
         // given
         final LocalDate today = LocalDate.now();
-        themeRepository.add(Theme.of(1L, "링", "공포 테마", "http:~"));
+        insertTheme("링", "공포 테마", "http:~");
 
         // when
         ReservationOptionResponse response = reservationService.getReservationOptions();
@@ -402,8 +329,23 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약을 고객이 취소하면 예외가 발생한다")
     void throwExceptionWhenCustomerCancelsNonExistingReservation() {
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L, "브라운", "customer@example.com"))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("본인이 소유하지 않은 예약을 고객이 취소하면 예외가 발생한다")
+    void throwExceptionWhenCustomerCancelsNotOwnedReservation() {
+        // given
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+        final long timeId = insertReservationTime("10:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", tomorrow, timeId, themeId);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(reservationId, "재키", "other@example.com"))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다.");
     }
 
     @Test
@@ -411,17 +353,14 @@ class ReservationServiceTest {
     void customerCannotCancelReservationOnReservationDateBeforeStartTime() {
         // given
         final LocalDate today = LocalDate.now();
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                today,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
+        final long timeId = insertReservationTime("10:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", today, timeId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
-                .isInstanceOf(ReservationCancellationException.class);
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(reservationId, "브라운", "customer@example.com"))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("당일 예약은 취소할 수 없습니다.");
     }
 
     @Test
@@ -429,19 +368,15 @@ class ReservationServiceTest {
     void adminCanCancelReservationOnReservationDate() {
         // given
         final LocalDate today = LocalDate.now();
-        reservationRepository.add(Reservation.of(
-                1L,
-                "브라운",
-                today,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
-        ));
+        final long timeId = insertReservationTime("10:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long reservationId = insertReservation("브라운", "customer@example.com", today, timeId, themeId);
 
         // when
-        reservationService.cancelByAdmin(1L);
+        reservationService.cancelByAdmin(reservationId);
 
         // then
-        assertThat(reservationRepository.findById(1L)).isEmpty();
+        assertThat(reservationRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -456,16 +391,21 @@ class ReservationServiceTest {
     @DisplayName("대기 순위는 같은 슬롯 내 createdAt 순서로 계산된다")
     void calculateWaitingRankByCreatedAtInSameSlot() {
         // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final long slotId = insertReservationSlot(futureDate, timeId, themeId);
+        insertReservation("예약자", "owner@example.com", slotId);
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
-        waitingRepository.add(Waiting.of(3L, "브라운", Date.valueOf(futureDate), NOW, time, theme));
+        insertWaiting("코로구", "korogoo@example.com", slotId, LocalDateTime.now().minusMinutes(2));
+        insertWaiting("재키", "jaekkii@example.com", slotId, LocalDateTime.now().minusMinutes(1));
+        insertWaiting("브라운", "customer@example.com", slotId, LocalDateTime.now());
 
         // when
-        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomerName("브라운");
+        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomer(
+                "브라운",
+                "customer@example.com"
+        );
 
         // then
         assertThat(response.waitings()).hasSize(1);
@@ -476,16 +416,22 @@ class ReservationServiceTest {
     @DisplayName("대기 순위는 createdAt이 같으면 id 순서로 계산된다")
     void calculateWaitingRankByIdWhenCreatedAtIsSame() {
         // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final long slotId = insertReservationSlot(futureDate, timeId, themeId);
+        insertReservation("예약자", "owner@example.com", slotId);
+        final LocalDateTime sameCreatedAt = LocalDateTime.now();
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(3L, "영이", Date.valueOf(futureDate), NOW, time, theme));
+        insertWaiting("코로구", "korogoo@example.com", slotId, sameCreatedAt);
+        insertWaiting("재키", "jaekkii@example.com", slotId, sameCreatedAt);
+        insertWaiting("영이", "customer@example.com", slotId, sameCreatedAt);
 
         // when
-        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomerName("영이");
+        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomer(
+                "영이",
+                "customer@example.com"
+        );
 
         // then
         assertThat(response.waitings()).hasSize(1);
@@ -496,57 +442,152 @@ class ReservationServiceTest {
     @DisplayName("예약 취소 시 해당 슬롯의 가장 빠른 대기가 예약으로 전환된다")
     void promoteEarliestWaitingInSlotOnReservationCancel() {
         // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final long slotId = insertReservationSlot(futureDate, timeId, themeId);
+        final long reservationId = insertReservation("브라운", "brown@example.com", slotId);
 
-        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
-
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+        final long firstWaitingId = insertWaiting(
+                "코로구",
+                "korogoo@example.com",
+                slotId,
+                LocalDateTime.now().minusMinutes(2)
+        );
+        final long secondWaitingId = insertWaiting(
+                "재키",
+                "jaekkii@example.com",
+                slotId,
+                LocalDateTime.now().minusMinutes(1)
+        );
 
         // when
-        reservationService.cancelByCustomer(1L);
+        reservationService.cancelByCustomer(reservationId, "브라운", "brown@example.com");
 
         // then
-        assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+        assertThat(findReservationBySlotId(slotId).getCustomerName()).isEqualTo("코로구");
+        assertThat(waitingRepository.findById(firstWaitingId)).isEmpty();
+        assertThat(waitingRepository.findById(secondWaitingId)).isPresent();
     }
 
     @Test
     @DisplayName("예약 취소 시 createdAt이 같으면 id가 작은 대기가 예약으로 전환된다")
     void promoteWaitingWithSmallerIdWhenCreatedAtIsSameOnReservationCancel() {
         // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final long slotId = insertReservationSlot(futureDate, timeId, themeId);
+        final long reservationId = insertReservation("브라운", "brown@example.com", slotId);
+        final LocalDateTime sameCreatedAt = LocalDateTime.now();
 
-        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
-
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
+        final long firstWaitingId = insertWaiting("코로구", "korogoo@example.com", slotId, sameCreatedAt);
+        final long secondWaitingId = insertWaiting("재키", "jaekkii@example.com", slotId, sameCreatedAt);
 
         // when
-        reservationService.cancelByCustomer(1L);
+        reservationService.cancelByCustomer(reservationId, "브라운", "brown@example.com");
 
         // then
-        assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+        assertThat(findReservationBySlotId(slotId).getCustomerName()).isEqualTo("코로구");
+        assertThat(waitingRepository.findById(firstWaitingId)).isEmpty();
+        assertThat(waitingRepository.findById(secondWaitingId)).isPresent();
     }
 
     @Test
     @DisplayName("예약 취소 시 대기가 없으면 예약만 삭제된다")
     void deleteOnlyReservationWhenNoWaitingOnReservationCancel() {
         // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~");
         final LocalDate futureDate = LocalDate.now().plusDays(1);
-
-        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+        final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, timeId, themeId);
 
         // when
-        reservationService.cancelByCustomer(1L);
+        reservationService.cancelByCustomer(reservationId, "브라운", "customer@example.com");
 
         // then
-        assertThat(reservationRepository.findById(1L)).isEmpty();
+        assertThat(reservationRepository.findAll()).isEmpty();
+    }
+
+    private long insertReservationTime(final String startAt) {
+        return reservationTimeRepository.save(ReservationTime.create(LocalTime.parse(startAt)))
+                .getId();
+    }
+
+    private long insertTheme(
+            final String name,
+            final String description,
+            final String thumbnailUrl
+    ) {
+        return themeRepository.save(Theme.create(name, description, thumbnailUrl))
+                .getId();
+    }
+
+    private long insertReservation(
+            final String customerName,
+            final String customerEmail,
+            final LocalDate date,
+            final long timeId,
+            final long themeId
+    ) {
+        final long slotId = insertReservationSlot(date, timeId, themeId);
+        return insertReservation(customerName, customerEmail, slotId);
+    }
+
+    private long insertReservation(
+            final String customerName,
+            final String customerEmail,
+            final long slotId
+    ) {
+        final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(slotId)
+                .orElseThrow();
+
+        return reservationRepository.save(Reservation.of(
+                null,
+                customerName,
+                customerEmail,
+                slot
+        )).getId();
+    }
+
+    private long insertReservationSlot(
+            final LocalDate reservationDate,
+            final long timeId,
+            final long themeId
+    ) {
+        final ReservationTime time = reservationTimeRepository.findById(timeId)
+                .orElseThrow();
+        final Theme theme = themeRepository.findById(themeId)
+                .orElseThrow();
+
+        return reservationSlotRepository.findOrCreate(reservationDate, time, theme)
+                .getId();
+    }
+
+    private long insertWaiting(
+            final String customerName,
+            final String customerEmail,
+            final long slotId,
+            final LocalDateTime createdAt
+    ) {
+        final ReservationSlot slot = reservationSlotRepository.findByIdForUpdate(slotId)
+                .orElseThrow();
+
+        return waitingRepository.save(Waiting.of(
+                null,
+                customerName,
+                customerEmail,
+                slot,
+                createdAt
+        ));
+    }
+
+    private Reservation findReservationBySlotId(final long slotId) {
+        return reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> reservation.getSlotId().equals(slotId))
+                .findFirst()
+                .orElseThrow();
     }
 
 }

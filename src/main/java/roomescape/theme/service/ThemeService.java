@@ -3,12 +3,12 @@ package roomescape.theme.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeInUseException;
-import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.dto.request.ThemeCreateRequest;
-import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.theme.controller.dto.request.ThemeCreateRequest;
+import roomescape.theme.controller.dto.response.ThemeResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,6 +18,9 @@ import java.util.List;
 public class ThemeService {
 
     private static final int POPULAR_THEME_PERIOD_DAYS = 7;
+    private static final String THEME_NOT_FOUND_MESSAGE = "존재하지 않는 테마입니다.";
+    private static final String THEME_IN_USE_MESSAGE = "해당 테마에 예약이 존재하여 삭제할 수 없습니다.";
+
     private final ThemeRepository themeRepository;
 
     public ThemeResponse create(final ThemeCreateRequest request) {
@@ -36,7 +39,7 @@ public class ThemeService {
         boolean deleted = deleteTheme(themeId);
 
         if (!deleted) {
-            throw new ThemeNotFoundException();
+            throw new NotFoundException(THEME_NOT_FOUND_MESSAGE);
         }
     }
 
@@ -54,7 +57,7 @@ public class ThemeService {
         try {
             return themeRepository.deleteById(themeId);
         } catch (DataIntegrityViolationException exception) {
-            throw new ThemeInUseException(exception);
+            throw new ConflictException(THEME_IN_USE_MESSAGE, exception);
         }
     }
 }

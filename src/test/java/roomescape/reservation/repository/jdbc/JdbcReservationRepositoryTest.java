@@ -45,6 +45,7 @@ class JdbcReservationRepositoryTest {
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
         Reservation reservation = Reservation.create(
                 "브라운",
+                "customer@example.com",
                 ReservationSlot.of(
                         slotId,
                         LocalDate.of(2026, 8, 5),
@@ -71,6 +72,7 @@ class JdbcReservationRepositoryTest {
         insertTheme("링", "공포 테마", "http:~");
         Reservation reservation = Reservation.create(
                 "브라운",
+                "customer@example.com",
                 ReservationSlot.of(
                         999L,
                         LocalDate.of(2026, 8, 5),
@@ -109,6 +111,7 @@ class JdbcReservationRepositoryTest {
         boolean updated = reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 ReservationSlot.of(
                         changedSlotId,
                         LocalDate.of(2026, 8, 6),
@@ -133,6 +136,7 @@ class JdbcReservationRepositoryTest {
         boolean updated = reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 ReservationSlot.of(
                         999L,
                         LocalDate.of(2026, 8, 5),
@@ -157,6 +161,7 @@ class JdbcReservationRepositoryTest {
         assertThatThrownBy(() -> reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 ReservationSlot.of(
                         duplicatedSlotId,
                         LocalDate.of(2026, 8, 5),
@@ -176,6 +181,7 @@ class JdbcReservationRepositoryTest {
         assertThatThrownBy(() -> reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
+                "customer@example.com",
                 ReservationSlot.of(
                         999L,
                         LocalDate.of(2026, 8, 5),
@@ -183,6 +189,36 @@ class JdbcReservationRepositoryTest {
                         Theme.of(1L, "링", "공포 테마", "http:~")
                 )
         ))).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("예약을 id와 슬롯 id로 삭제한다")
+    void deleteReservationByIdAndSlotId() {
+        insertReservationTime("10:00");
+        insertTheme("링", "공포 테마", "http:~");
+        Long slotId = insertReservation("브라운", "2026-08-05", 1L, 1L);
+
+        boolean deleted = reservationRepository.deleteByIdAndSlotId(1L, slotId);
+
+        Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+        assertThat(deleted).isTrue();
+        assertThat(reservationCount).isZero();
+    }
+
+    @Test
+    @DisplayName("예약 id와 슬롯 id가 함께 일치하지 않으면 삭제하지 않는다")
+    void returnFalseWhenDeletingReservationWithDifferentSlotId() {
+        insertReservationTime("10:00");
+        insertReservationTime("11:00");
+        insertTheme("링", "공포 테마", "http:~");
+        insertReservation("브라운", "2026-08-05", 1L, 1L);
+        Long otherSlotId = insertReservationSlot("2026-08-05", 2L, 1L);
+
+        boolean deleted = reservationRepository.deleteByIdAndSlotId(1L, otherSlotId);
+
+        Integer reservationCount = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
+        assertThat(deleted).isFalse();
+        assertThat(reservationCount).isEqualTo(1);
     }
 
     @Test
@@ -194,7 +230,11 @@ class JdbcReservationRepositoryTest {
         insertReservation("초코칩", "2026-08-05", 1L, 1L);
         insertReservation("재키", "2026-08-05", 2L, 1L);
 
-        List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter("초코칩", NOW);
+        List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
+                "초코칩",
+                "customer@example.com",
+                NOW
+        );
 
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getCustomerName()).isEqualTo("초코칩");
@@ -237,13 +277,15 @@ class JdbcReservationRepositoryTest {
         );
     }
 
-    private void insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
+    private Long insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
                 name,
+                "customer@example.com",
                 slotId
         );
+        return slotId;
     }
 
     private Long insertReservationSlot(final String date, final Long timeId, final Long themeId) {
