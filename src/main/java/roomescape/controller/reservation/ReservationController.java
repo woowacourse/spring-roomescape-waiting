@@ -3,6 +3,7 @@ package roomescape.controller.reservation;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +44,8 @@ public class ReservationController {
                 reservationRequest.name(),
                 reservationRequest.date(),
                 reservationRequest.themeId(),
-                reservationRequest.timeId()
+                reservationRequest.timeId(),
+                LocalDateTime.now()
         ));
 
         return ResponseEntity.created(URI.create("/reservations/" + reservation.id()))
@@ -55,7 +57,7 @@ public class ReservationController {
             @PathVariable final Long id,
             @RequestParam final String name
     ) {
-        reservationService.deleteByIdAndName(id, name);
+        reservationService.deleteByIdAndName(id, name, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }

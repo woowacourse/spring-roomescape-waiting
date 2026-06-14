@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
@@ -17,10 +19,12 @@ import roomescape.exception.ResourceNotFoundException;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 import roomescape.support.FakeReservationRepository;
+import roomescape.support.FakeReservationSlotRepository;
 import roomescape.support.FakeReservationTimeRepository;
 import roomescape.support.FakeThemeRepository;
 
 class ReservationTimeServiceTest {
+    private static final LocalDateTime REQUESTED_AT = LocalDateTime.parse("2026-08-05T12:00:00");
 
     @Test
     @DisplayName("예약 시간을 저장한다")
@@ -50,9 +54,19 @@ class ReservationTimeServiceTest {
         ReservationTime ten = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
         ReservationTime eleven = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
         LocalDate date = LocalDate.parse("2026-08-06");
-        fixture.reservationRepository.save(Reservation.createNew("쿠다", date, theme, ten));
+        ReservationSlot reservedSlot = fixture.saveSlot(date, theme, ten);
+        fixture.saveSlot(date, theme, eleven);
+        fixture.reservationRepository.save(Reservation.reserve(
+                "쿠다",
+                reservedSlot,
+                LocalDate.now().atStartOfDay()
+        ));
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(date, theme.getId());
+        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(
+                date,
+                theme.getId(),
+                REQUESTED_AT
+        );
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -65,10 +79,16 @@ class ReservationTimeServiceTest {
         Fixture fixture = new Fixture();
         Theme theme = fixture.saveTheme();
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationTime ten = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTime eleven = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        fixture.saveSlot(pastDate, theme, ten);
+        fixture.saveSlot(pastDate, theme, eleven);
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(pastDate, theme.getId());
+        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(
+                pastDate,
+                theme.getId(),
+                LocalDateTime.now()
+        );
 
         assertThat(availableTimes).isEmpty();
     }
@@ -85,8 +105,14 @@ class ReservationTimeServiceTest {
         LocalTime futureTime = now.plusMinutes(1);
         ReservationTime past = fixture.reservationTimeRepository.save(ReservationTime.createNew(pastTime));
         ReservationTime future = fixture.reservationTimeRepository.save(ReservationTime.createNew(futureTime));
+        fixture.saveSlot(LocalDate.now(), theme, past);
+        fixture.saveSlot(LocalDate.now(), theme, future);
 
-        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(LocalDate.now(), theme.getId());
+        List<ReservationTime> availableTimes = fixture.reservationTimeService.findAvailableTimes(
+                LocalDate.now(),
+                theme.getId(),
+                LocalDateTime.now()
+        );
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -100,12 +126,8 @@ class ReservationTimeServiceTest {
         Fixture fixture = new Fixture();
         Theme theme = fixture.saveTheme();
         ReservationTime time = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        fixture.reservationRepository.save(Reservation.createNew(
-                "쿠다",
-                LocalDate.parse("2026-08-06"),
-                theme,
-                time
-        ));
+        ReservationSlot slot = new ReservationSlot(LocalDate.parse("2026-08-06"), theme, time);
+        fixture.reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDate.now().atStartOfDay()));
 
         assertThrows(ConflictException.class, () -> fixture.reservationTimeService.deleteById(time.getId()));
     }
@@ -153,11 +175,13 @@ class ReservationTimeServiceTest {
     private static class Fixture {
         private final FakeThemeRepository themeRepository = new FakeThemeRepository();
         private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
+        private final FakeReservationSlotRepository reservationSlotRepository = new FakeReservationSlotRepository();
         private final FakeReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
         private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
         private final ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
+                reservationSlotRepository,
                 themeService
         );
 
@@ -165,6 +189,10 @@ class ReservationTimeServiceTest {
             return themeRepository.save(
                     Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
             );
+        }
+
+        private ReservationSlot saveSlot(final LocalDate date, final Theme theme, final ReservationTime time) {
+            return reservationSlotRepository.save(new ReservationSlot(date, theme, time));
         }
     }
 }

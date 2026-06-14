@@ -74,6 +74,7 @@ class ReservationPageApiTest {
         createReservation("brown", LocalDate.now().plusDays(1), 1L, 1L);
 
         LocalDate changedDate = LocalDate.now().plusDays(2);
+        createReservationSlot(changedDate, 1L, 2L);
 
         RestAssured.given().log().all()
                 .redirects().follow(false)
@@ -87,11 +88,21 @@ class ReservationPageApiTest {
                 .header("Location", containsString("reservationName=brown"));
 
         String updatedDate = jdbcTemplate.queryForObject(
-                "SELECT date FROM reservation WHERE id = 1",
+                """
+                        SELECT rs.date
+                        FROM reservation r
+                        JOIN reservation_slot rs ON r.slot_id = rs.id
+                        WHERE r.id = 1
+                        """,
                 String.class
         );
         Long updatedTimeId = jdbcTemplate.queryForObject(
-                "SELECT time_id FROM reservation WHERE id = 1",
+                """
+                        SELECT rs.time_id
+                        FROM reservation r
+                        JOIN reservation_slot rs ON r.slot_id = rs.id
+                        WHERE r.id = 1
+                        """,
                 Long.class
         );
 
@@ -154,7 +165,7 @@ class ReservationPageApiTest {
                 .header("Location", containsString("reservationName=aru"));
 
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1 AND name = 'aru'",
+                "SELECT count(1) FROM reservation_waiting WHERE slot_id = 1 AND name = 'aru'",
                 Integer.class
         );
         org.assertj.core.api.Assertions.assertThat(count).isOne();
@@ -203,9 +214,30 @@ class ReservationPageApiTest {
             final long themeId,
             final long timeId
     ) {
+        Long slotId = createReservationSlot(date, themeId, timeId);
+
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, slot_id) VALUES (?, ?)",
                 name,
+                slotId
+        );
+    }
+
+    private Long createReservationSlot(
+            final LocalDate date,
+            final long themeId,
+            final long timeId
+    ) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_slot (date, theme_id, time_id) VALUES (?, ?, ?)",
+                Date.valueOf(date),
+                themeId,
+                timeId
+        );
+
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE date = ? AND theme_id = ? AND time_id = ?",
+                Long.class,
                 Date.valueOf(date),
                 themeId,
                 timeId
@@ -215,10 +247,12 @@ class ReservationPageApiTest {
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }

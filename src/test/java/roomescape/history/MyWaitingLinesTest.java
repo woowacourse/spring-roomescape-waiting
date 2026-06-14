@@ -34,6 +34,7 @@ class MyWaitingLinesTest {
     ) {
         return new MyWaitingOrder(
                 reservationId,
+                reservationId,
                 waitingId,
                 LocalDateTime.parse(requestedAt)
         );

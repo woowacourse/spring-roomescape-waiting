@@ -2,79 +2,77 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
-    public static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
+    private static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
+    private static final String PAST_CANCEL_MESSAGE = "이미 지난 예약은 취소할 수 없습니다.";
+    private static final String PAST_UPDATE_MESSAGE = "이미 지난 예약은 변경할 수 없습니다.";
 
     private final Long id;
-    private final String name;
+    private final ReservationName name;
     private final ReservationSlot slot;
     private final LocalDateTime createdAt;
 
-    private Reservation(
+    public Reservation(
             final Long id,
             final String name,
             final ReservationSlot slot,
             final LocalDateTime createdAt
     ) {
-        ReservationName reservationName = ReservationName.from(name);
-        validate(createdAt);
-        this.id = id;
-        this.name = reservationName.value();
-        this.slot = slot;
-        this.createdAt = createdAt;
+        this(id, ReservationName.from(name), slot, createdAt);
     }
 
-    public static Reservation createNew(final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return createNew(name, new ReservationSlot(date, theme, time), LocalDateTime.now());
-    }
-
-    public static Reservation createNew(
-            final String name,
-            final LocalDate date,
-            final Theme theme,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return createNew(name, new ReservationSlot(date, theme, time), standardDateTime);
-    }
-
-    public static Reservation createNew(
-            final String name,
-            final ReservationSlot slot,
-            final LocalDateTime standardDateTime
-    ) {
-        validateReservable(slot, standardDateTime);
-        return new Reservation(null, name, slot, standardDateTime);
-    }
-
-    public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return of(id, name, new ReservationSlot(date, theme, time), LocalDateTime.now());
-    }
-
-    public static Reservation of(
+    public Reservation(
             final Long id,
-            final String name,
-            final LocalDate date,
-            final Theme theme,
-            final ReservationTime time,
-            final LocalDateTime createdAt
-    ) {
-        return of(id, name, new ReservationSlot(date, theme, time), createdAt);
-    }
-
-    public static Reservation of(
-            final Long id,
-            final String name,
+            final ReservationName name,
             final ReservationSlot slot,
             final LocalDateTime createdAt
     ) {
         validateId(id);
-        return new Reservation(id, name, slot, createdAt);
+        validateName(name);
+        validateSlot(slot);
+        validate(createdAt);
+        this.id = id;
+        this.name = name;
+        this.slot = slot;
+        this.createdAt = createdAt;
+    }
+
+    public static Reservation reserve(
+            final String name,
+            final ReservationSlot slot,
+            final LocalDateTime standardDateTime
+    ) {
+        return reserve(ReservationName.from(name), slot, standardDateTime);
+    }
+
+    public static Reservation reserve(
+            final ReservationName name,
+            final ReservationSlot slot,
+            final LocalDateTime standardDateTime
+    ) {
+        validateName(name);
+        validateReservable(slot, standardDateTime);
+        validate(standardDateTime);
+        return new Reservation(name, slot, standardDateTime);
+    }
+
+    private Reservation(
+            final ReservationName name,
+            final ReservationSlot slot,
+            final LocalDateTime createdAt
+    ) {
+        validateName(name);
+        validateSlot(slot);
+        validate(createdAt);
+        this.id = null;
+        this.name = name;
+        this.slot = slot;
+        this.createdAt = createdAt;
     }
 
     public Reservation withId(final Long id) {
@@ -82,58 +80,53 @@ public class Reservation {
         return new Reservation(id, this.name, this.slot, this.createdAt);
     }
 
-    public Reservation withDateAndTime(final LocalDate date, final ReservationTime time) {
-        return new Reservation(this.id, this.name, new ReservationSlot(date, this.slot.theme(), time), this.createdAt);
-    }
-
-    public Reservation withDateAndTime(
-            final LocalDate date,
-            final ReservationTime time,
+    public Reservation withSlot(
+            final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
-        ReservationSlot changedSlot = new ReservationSlot(date, this.slot.theme(), time);
-        validateReservable(changedSlot, standardDateTime);
-        return new Reservation(this.id, this.name, changedSlot, this.createdAt);
+        validateReservable(slot, standardDateTime);
+        return new Reservation(this.id, this.name, slot, this.createdAt);
     }
 
     public boolean hasName(final String name) {
-        return this.name.equals(ReservationName.from(name).value());
+        return this.name.equals(ReservationName.from(name));
     }
 
     public boolean isPast(final LocalDateTime standardDateTime) {
         return slot.isPast(standardDateTime);
     }
 
-    public static boolean isReservable(
-            final LocalDate date,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return ReservationSlot.isReservable(date, time, standardDateTime);
+    public void validateCancelable(final LocalDateTime standardDateTime) {
+        if (isPast(standardDateTime)) {
+            throw new PastReservationException(PAST_CANCEL_MESSAGE);
+        }
     }
 
-    public static boolean isPast(
-            final LocalDate date,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return ReservationSlot.isPast(date, time, standardDateTime);
-    }
-
-    public static boolean isPast(
-            final LocalDate date,
-            final LocalTime startAt,
-            final LocalDateTime standardDateTime
-    ) {
-        return ReservationSlot.isPast(date, startAt, standardDateTime);
+    public void validateUpdatable(final LocalDateTime standardDateTime) {
+        if (isPast(standardDateTime)) {
+            throw new PastReservationException(PAST_UPDATE_MESSAGE);
+        }
     }
 
     private static void validateReservable(
             final ReservationSlot slot,
             final LocalDateTime standardDateTime
     ) {
+        validateSlot(slot);
         if (slot.isPast(standardDateTime)) {
-            throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
+            throw new PastReservationException(PAST_RESERVATION_MESSAGE);
+        }
+    }
+
+    private static void validateSlot(final ReservationSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯은 비어있으면 안됩니다.");
+        }
+    }
+
+    private static void validateName(final ReservationName name) {
+        if (name == null) {
+            throw new IllegalArgumentException("예약자 이름은 필수입니다.");
         }
     }
 
@@ -143,7 +136,7 @@ public class Reservation {
         }
     }
 
-    private void validate(final LocalDateTime createdAt) {
+    private static void validate(final LocalDateTime createdAt) {
         if (createdAt == null) {
             throw new IllegalArgumentException("예약 생성 시각은 비어있으면 안됩니다.");
         }
@@ -168,19 +161,19 @@ public class Reservation {
     }
 
     public String getName() {
-        return this.name;
+        return this.name.value();
     }
 
     public LocalDate getDate() {
-        return this.slot.date();
+        return this.slot.getDate();
     }
 
     public Theme getTheme() {
-        return this.slot.theme();
+        return this.slot.getTheme();
     }
 
     public ReservationTime getTime() {
-        return this.slot.time();
+        return this.slot.getTime();
     }
 
     public ReservationSlot getSlot() {

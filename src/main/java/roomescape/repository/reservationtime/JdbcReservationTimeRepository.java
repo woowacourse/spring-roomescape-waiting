@@ -5,12 +5,14 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.repository.PersistenceConflictException;
 
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
@@ -38,11 +40,15 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = "INSERT INTO reservation_time (start_at) VALUES (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-            preparedStatement.setTime(1, Time.valueOf(reservationTime.getStartAt()));
-            return preparedStatement;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
+                preparedStatement.setTime(1, Time.valueOf(reservationTime.getStartAt()));
+                return preparedStatement;
+            }, keyHolder);
+        } catch (DataIntegrityViolationException exception) {
+            throw new PersistenceConflictException(exception);
+        }
 
         Number key = keyHolder.getKey();
         if (key == null) {
@@ -71,7 +77,11 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public int deleteById(final long timeId) {
         String sql = "DELETE FROM reservation_time WHERE id = ?";
-        return jdbcTemplate.update(sql, timeId);
+        try {
+            return jdbcTemplate.update(sql, timeId);
+        } catch (DataIntegrityViolationException exception) {
+            throw new PersistenceConflictException(exception);
+        }
     }
 
     @Override

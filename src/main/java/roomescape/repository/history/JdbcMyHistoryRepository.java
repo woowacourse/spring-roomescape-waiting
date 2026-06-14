@@ -28,6 +28,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
 
     private static final RowMapper<MyWaitingOrder> waitingOrderRowMapper = (resultSet, rowNumber) -> new MyWaitingOrder(
             resultSet.getLong("reservation_id"),
+            resultSet.getLong("slot_id"),
             resultSet.getLong("waiting_id"),
             resultSet.getTimestamp("requested_at").toLocalDateTime()
     );
@@ -45,7 +46,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        r.id AS reservation_id,
                        NULL AS waiting_id,
                        r.name AS history_name,
-                       r.date,
+                       s.date,
                        t.id AS theme_id,
                        t.name AS theme_name,
                        t.description,
@@ -54,8 +55,9 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        rt.start_at,
                        CAST(NULL AS TIMESTAMP) AS requested_at
                 FROM reservation AS r
-                INNER JOIN theme AS t ON r.theme_id = t.id
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
+                INNER JOIN reservation_slot AS s ON r.slot_id = s.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
                 WHERE r.name = ?
 
                 UNION ALL
@@ -64,7 +66,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        r.id AS reservation_id,
                        rw.id AS waiting_id,
                        rw.name AS history_name,
-                       r.date,
+                       s.date,
                        t.id AS theme_id,
                        t.name AS theme_name,
                        t.description,
@@ -73,9 +75,10 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        rt.start_at,
                        rw.requested_at
                 FROM reservation_waiting AS rw
-                INNER JOIN reservation AS r ON rw.reservation_id = r.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
+                INNER JOIN reservation_slot AS s ON rw.slot_id = s.id
+                INNER JOIN reservation AS r ON r.slot_id = s.id
+                INNER JOIN theme AS t ON s.theme_id = t.id
+                INNER JOIN reservation_time AS rt ON s.time_id = rt.id
                 WHERE rw.name = ?
                 ORDER BY date, start_at, status
                 """;
@@ -91,11 +94,13 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
 
         String placeholders = String.join(",", Collections.nCopies(reservationIds.size(), "?"));
         String sql = """
-                SELECT reservation_id,
-                       id AS waiting_id,
-                       requested_at
-                FROM reservation_waiting
-                WHERE reservation_id IN (%s)
+                SELECT r.id AS reservation_id,
+                       rw.slot_id,
+                       rw.id AS waiting_id,
+                       rw.requested_at
+                FROM reservation_waiting AS rw
+                INNER JOIN reservation AS r ON rw.slot_id = r.slot_id
+                WHERE r.id IN (%s)
                 """.formatted(placeholders);
 
         return jdbcTemplate.query(sql, waitingOrderRowMapper, reservationIds.toArray());

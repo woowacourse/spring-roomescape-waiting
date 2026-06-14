@@ -12,8 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ConflictException;
-import roomescape.exception.ErrorCode;
+import roomescape.repository.PersistenceConflictException;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {
@@ -53,7 +52,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         try {
             return jdbcTemplate.update(sql, id);
         } catch (DataIntegrityViolationException exception) {
-            throw new ConflictException(ErrorCode.THEME_IN_USE, "이미 예약된 테마는 삭제할 수 없습니다.");
+            throw new PersistenceConflictException(exception);
         }
     }
 
@@ -71,7 +70,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 return preparedStatement;
             }, keyHolder);
         } catch (DataIntegrityViolationException exception) {
-            throw new ConflictException(ErrorCode.THEME_NAME_DUPLICATED, "테마 이름 중복은 불가능합니다.");
+            throw new PersistenceConflictException(exception);
         }
 
         Number key = keyHolder.getKey();
@@ -101,8 +100,9 @@ public class JdbcThemeRepository implements ThemeRepository {
                        t.description,
                        t.thumbnail_url
                 FROM reservation r
-                INNER JOIN theme t ON r.theme_id = t.id
-                WHERE r.date >= ? AND r.date <= ?
+                INNER JOIN reservation_slot s ON r.slot_id = s.id
+                INNER JOIN theme t ON s.theme_id = t.id
+                WHERE s.date >= ? AND s.date <= ?
                 GROUP BY t.id, t.name, t.description, t.thumbnail_url
                 ORDER BY COUNT(*) DESC, t.id ASC
                 LIMIT ?

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 슬롯 관리</title>
+    <style>
+        :root {
+            --bg: #eef4f3;
+            --card: #ffffff;
+            --line: #c8d7d5;
+            --text: #20302f;
+            --point: #0f766e;
+            --danger: #d62828;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            background:
+                linear-gradient(160deg, rgba(15,118,110,0.12), transparent 35%),
+                linear-gradient(180deg, #f5faf9 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.75);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 14px;
+        }
+        .nav {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255,255,255,0.84);
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 999px;
+        }
+        .user-link {
+            margin-left: auto;
+            color: var(--point) !important;
+            border-color: rgba(15,118,110,0.24) !important;
+            background: rgba(15,118,110,0.08) !important;
+            font-weight: 700;
+        }
+        .hero h1 { margin: 0 0 8px; font-size: 38px; }
+        .hero p { margin: 0 0 24px; color: rgba(32, 48, 47, 0.76); }
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(280px, 360px) 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(15, 118, 110, 0.08);
+        }
+        form { display: grid; gap: 12px; }
+        label { display: grid; gap: 6px; font-weight: 600; }
+        input, button, select {
+            font: inherit;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            padding: 12px 14px;
+        }
+        button {
+            border: 0;
+            background: var(--point);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .list {
+            display: grid;
+            gap: 12px;
+        }
+        .feedback {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(214, 40, 40, 0.14);
+            background: rgba(250, 255, 255, 0.96);
+        }
+        .feedback.hidden { display: none; }
+        .feedback p,
+        .feedback small { margin: 0; }
+        .feedback small { color: rgba(32, 48, 47, 0.7); }
+        .item {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            background: rgba(250,255,255,0.9);
+        }
+        .item span { color: rgba(32, 48, 47, 0.72); }
+        @media (max-width: 860px) {
+            .layout { grid-template-columns: 1fr; }
+            .item { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav class="nav">
+        <a th:href="@{/pages/admin/themes}">관리자 홈</a>
+        <a th:href="@{/pages/admin/themes}">테마 관리</a>
+        <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
+        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
+        <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
+    </nav>
+
+    <section class="hero">
+        <span class="eyebrow">ADMIN PAGE</span>
+        <h1>예약 슬롯 관리</h1>
+        <p>관리자가 예약 가능한 날짜, 테마, 시간을 열어두면 사용자는 열린 슬롯에 대해서만 예약하거나 대기할 수 있습니다.</p>
+    </section>
+
+    <section id="page-feedback"
+             class="feedback hidden"
+             th:attr="data-error-code=${errorCode}">
+        <strong id="feedback-title"></strong>
+        <p id="feedback-message"></p>
+        <small id="feedback-hint"></small>
+    </section>
+
+    <section class="layout">
+        <article class="card">
+            <h2>슬롯 열기</h2>
+            <form id="reservation-slot-create-form" method="post" th:action="@{/pages/admin/reservation-slots}">
+                <label>
+                    날짜
+                    <input type="date" name="date" required>
+                </label>
+                <label>
+                    테마
+                    <select name="themeId" required>
+                        <option value="">테마 선택</option>
+                        <option th:each="theme : ${themes}"
+                                th:value="${theme.id}"
+                                th:text="${theme.name}">미술관의 밤</option>
+                    </select>
+                </label>
+                <label>
+                    시간
+                    <select name="timeId" required>
+                        <option value="">시간 선택</option>
+                        <option th:each="time : ${reservationTimes}"
+                                th:value="${time.id}"
+                                th:text="${time.startAt}">10:00</option>
+                    </select>
+                </label>
+                <button type="submit">슬롯 열기</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>열린 슬롯</h2>
+            <div class="list" th:if="${!#lists.isEmpty(slots)}">
+                <div class="item" th:each="slot : ${slots}">
+                    <strong th:text="${slot.date}">2026-08-06</strong>
+                    <div>
+                        <span th:text="${slot.theme.name}">미술관의 밤</span>
+                        <span> / </span>
+                        <span th:text="${slot.time.startAt}">10:00</span>
+                    </div>
+                    <span th:text="'#' + ${slot.id}">#1</span>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(slots)}">아직 열린 슬롯이 없습니다.</p>
+        </article>
+    </section>
+</div>
+<script>
+    const reservationSlotServerMessages = {
+        RESERVATION_SLOT_DUPLICATED: {
+            title: "이미 열린 슬롯이에요",
+            message: "같은 날짜, 테마, 시간 조합은 한 번만 열 수 있어요.",
+            hint: "목록에서 기존 슬롯을 확인하거나 다른 시간으로 열어보세요."
+        },
+        THEME_NOT_FOUND: {
+            title: "테마를 찾을 수 없어요",
+            message: "삭제되었거나 존재하지 않는 테마로 슬롯을 열 수 없어요.",
+            hint: "테마 목록을 새로 확인한 뒤 다시 시도해보세요."
+        },
+        RESERVATION_TIME_NOT_FOUND: {
+            title: "시간을 찾을 수 없어요",
+            message: "삭제되었거나 존재하지 않는 시간으로 슬롯을 열 수 없어요.",
+            hint: "시간 목록을 새로 확인한 뒤 다시 시도해보세요."
+        },
+        INVALID_INPUT: {
+            title: "슬롯을 열 수 없어요",
+            message: "날짜, 테마, 시간이 모두 선택되어야 해요.",
+            hint: "입력값을 다시 확인해보세요."
+        },
+        INTERNAL_SERVER_ERROR: {
+            title: "지금은 슬롯을 열지 못했어요",
+            message: "입력값보다는 시스템 상태 때문에 요청을 즉시 처리하지 못한 상황이에요.",
+            hint: "잠시 후 다시 시도하거나, 같은 현상이 반복되면 서버 상태를 확인해보세요."
+        }
+    };
+
+    function applyReservationSlotFeedback() {
+        const feedback = document.getElementById("page-feedback");
+        const errorCode = feedback.dataset.errorCode;
+
+        if (!errorCode) {
+            return;
+        }
+
+        const message = reservationSlotServerMessages[errorCode] || reservationSlotServerMessages.INTERNAL_SERVER_ERROR;
+        document.getElementById("feedback-title").textContent = message.title;
+        document.getElementById("feedback-message").textContent = message.message;
+        document.getElementById("feedback-hint").textContent = message.hint;
+        feedback.classList.remove("hidden");
+    }
+
+    applyReservationSlotFeedback();
+</script>
+</body>
+</html>

@@ -4,40 +4,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine.ReservationWaitingOrder;
 import roomescape.repository.history.MyWaitingOrder;
 
 public class MyWaitingLines {
 
-    private final Map<Long, ReservationWaitingLine> waitingLinesByReservationId;
+    private final Map<Long, List<ReservationWaitingOrder>> waitingOrdersByReservationId;
 
-    private MyWaitingLines(final Map<Long, ReservationWaitingLine> waitingLinesByReservationId) {
-        this.waitingLinesByReservationId = waitingLinesByReservationId;
+    private MyWaitingLines(final Map<Long, List<ReservationWaitingOrder>> waitingOrdersByReservationId) {
+        this.waitingOrdersByReservationId = waitingOrdersByReservationId;
     }
 
     public static MyWaitingLines from(final List<MyWaitingOrder> waitingOrders) {
-        Map<Long, ReservationWaitingLine> waitingLinesByReservationId = waitingOrders.stream()
+        Map<Long, List<ReservationWaitingOrder>> waitingOrdersByReservationId = waitingOrders.stream()
                 .collect(Collectors.groupingBy(
                         MyWaitingOrder::reservationId,
-                        Collectors.collectingAndThen(
-                                Collectors.toList(),
-                                MyWaitingLines::toWaitingLine
-                        )
+                        Collectors.mapping(MyWaitingLines::toWaitingOrder, Collectors.toList())
                 ));
 
-        return new MyWaitingLines(waitingLinesByReservationId);
+        return new MyWaitingLines(waitingOrdersByReservationId);
     }
 
     public int sequenceOf(final long reservationId, final long waitingId) {
-        return waitingLinesByReservationId.get(reservationId)
-                .sequenceOf(waitingId);
+        return ReservationWaitingLine.indexOf(
+                        waitingOrdersByReservationId.getOrDefault(reservationId, List.of()),
+                        waitingId
+                )
+                .orElseThrow(() -> new IllegalArgumentException("대기 순번을 찾을 수 없습니다."))
+                + 1;
     }
 
-    private static ReservationWaitingLine toWaitingLine(final List<MyWaitingOrder> waitingOrders) {
-        return new ReservationWaitingLine(waitingOrders.stream()
-                .map(order -> new ReservationWaitingLine.ReservationWaitingOrder(
-                        order.waitingId(),
-                        order.requestedAt()
-                ))
-                .toList());
+    private static ReservationWaitingOrder toWaitingOrder(final MyWaitingOrder waitingOrder) {
+        return new ReservationWaitingOrder(
+                waitingOrder.waitingId(),
+                waitingOrder.slotId(),
+                waitingOrder.requestedAt()
+        );
     }
 }

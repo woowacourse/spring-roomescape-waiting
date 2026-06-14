@@ -7,6 +7,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.domain.theme.Theme;
+import roomescape.repository.PersistenceConflictException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.theme.ThemeRepository;
 
@@ -36,7 +37,11 @@ public class ThemeService {
             throw new ConflictException(ErrorCode.THEME_NAME_DUPLICATED, "테마 이름 중복은 불가능합니다.");
         }
 
-        return themeRepository.save(nonIdTheme);
+        try {
+            return themeRepository.save(nonIdTheme);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(ErrorCode.THEME_NAME_DUPLICATED, "테마 이름 중복은 불가능합니다.");
+        }
     }
 
     public List<Theme> getAll() {
@@ -54,7 +59,12 @@ public class ThemeService {
             throw new ConflictException(ErrorCode.THEME_IN_USE, "이미 예약된 테마는 삭제할 수 없습니다.");
         }
 
-        int affectedRowCount = themeRepository.deleteById(themeId);
+        int affectedRowCount;
+        try {
+            affectedRowCount = themeRepository.deleteById(themeId);
+        } catch (PersistenceConflictException exception) {
+            throw new ConflictException(ErrorCode.THEME_IN_USE, "이미 예약된 테마는 삭제할 수 없습니다.");
+        }
 
         if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND, "삭제된 테마 데이터가 없습니다.");

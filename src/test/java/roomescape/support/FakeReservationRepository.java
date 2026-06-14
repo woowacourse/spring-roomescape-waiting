@@ -1,5 +1,6 @@
 package roomescape.support;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.repository.reservation.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -29,10 +32,27 @@ public class FakeReservationRepository implements ReservationRepository {
     public Optional<Reservation> findBySlot(final ReservationSlot slot) {
         return reservations.values()
                 .stream()
-                .filter(reservation -> Objects.equals(reservation.getDate(), slot.date()))
-                .filter(reservation -> Objects.equals(reservation.getTheme(), slot.theme()))
-                .filter(reservation -> Objects.equals(reservation.getTime(), slot.time()))
+                .filter(reservation -> Objects.equals(reservation.getDate(), slot.getDate()))
+                .filter(reservation -> Objects.equals(reservation.getTheme(), slot.getTheme()))
+                .filter(reservation -> Objects.equals(reservation.getTime(), slot.getTime()))
                 .findFirst();
+    }
+
+    @Override
+    public List<Reservation> findByDateAndTheme(final LocalDate date, final Theme theme) {
+        return reservations.values()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getDate(), date))
+                .filter(reservation -> Objects.equals(reservation.getTheme(), theme))
+                .toList();
+    }
+
+    @Override
+    public boolean existsByTime(final ReservationTime time) {
+        return reservations.values()
+                .stream()
+                .map(Reservation::getTime)
+                .anyMatch(reservationTime -> Objects.equals(reservationTime, time));
     }
 
     @Override

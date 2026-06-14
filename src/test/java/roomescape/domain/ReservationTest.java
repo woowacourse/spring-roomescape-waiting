@@ -12,6 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -22,12 +24,10 @@ class ReservationTest {
     void createReservation_Success() {
         // given
         String name = "쿠다";
-        LocalDate date = LocalDate.parse("2026-08-06");
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
         // when & then
-        assertThatCode(() -> Reservation.createNew(name, date, theme, time))
+        assertThatCode(() -> Reservation.reserve(name, slot, LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
@@ -37,38 +37,35 @@ class ReservationTest {
     @ValueSource(strings = {" ", "   "})
     void validateName_ThrowsException(String name) {
         // given
-        LocalDate date = LocalDate.parse("2026-03-08");
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-03-08"), LocalTime.parse("10:00"));
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, date, theme, time))
+        assertThatThrownBy(() -> Reservation.reserve(name, slot, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("예약 날짜 null 예외")
+    @DisplayName("예약자 이름은 값 객체 기준으로 정규화된다")
     @Test
-    void validateDate_ThrowsException() {
+    void normalizeName() {
         // given
-        String name = "쿠다";
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
 
-        // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, null, theme, time))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        Reservation reservation = Reservation.reserve(" 쿠다 ", slot, LocalDateTime.now());
+
+        // then
+        assertThat(reservation.getName()).isEqualTo("쿠다");
+        assertThat(reservation.hasName("쿠다")).isTrue();
     }
 
-    @DisplayName("예약 시간 null 예외")
+    @DisplayName("예약 슬롯 null 예외")
     @Test
-    void validateTime_ThrowsException() {
+    void validateSlot_ThrowsException() {
         // given
         String name = "쿠다";
-        LocalDate date = LocalDate.parse("2026-03-08");
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, date, theme, null))
+        assertThatThrownBy(() -> Reservation.reserve(name, null, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -77,30 +74,42 @@ class ReservationTest {
     void createPastDateTime_ThrowsException() {
         // given
         String name = "쿠다";
-        LocalDate date = LocalDate.parse("2026-03-08");
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-03-08"), LocalTime.parse("10:00"));
         LocalDateTime standardDateTime = LocalDateTime.parse("2026-03-08T10:01:00");
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew(name, date, theme, time, standardDateTime))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(Reservation.PAST_RESERVATION_MESSAGE);
+        assertThatThrownBy(() -> Reservation.reserve(name, slot, standardDateTime))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("예약 이름은 값 객체의 동등성 기준으로 비교한다")
+    @Test
+    void hasNameByValueObjectEquality() {
+        // given
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        Reservation reservation = Reservation.reserve(ReservationName.from(" 쿠다 "), slot, LocalDateTime.now());
+
+        // when & then
+        assertThat(reservation.hasName("쿠다")).isTrue();
     }
 
     @DisplayName("예약 시각이 기준 시각보다 이전이면 과거 예약이다")
     @Test
     void isPastReservation() {
         // given
-        LocalDate date = LocalDate.parse("2026-03-08");
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
-        Reservation reservation = Reservation.of(1L, "쿠다", date, theme, time);
+        ReservationSlot slot = createSlot(LocalDate.parse("2026-03-08"), LocalTime.parse("10:00"));
+        Reservation reservation = new Reservation(1L, "쿠다", slot, LocalDateTime.now());
 
         // when
         boolean past = reservation.isPast(LocalDateTime.parse("2026-03-08T10:01:00"));
 
         // then
         assertThat(past).isTrue();
+    }
+
+    private ReservationSlot createSlot(final LocalDate date, final LocalTime time) {
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime reservationTime = ReservationTime.createNew(time);
+        return new ReservationSlot(date, theme, reservationTime);
     }
 }

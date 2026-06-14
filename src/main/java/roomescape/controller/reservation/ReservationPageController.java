@@ -1,6 +1,7 @@
 package roomescape.controller.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +47,7 @@ public class ReservationPageController {
             @RequestParam(required = false) final String errorCode,
             final Model model
     ) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         ThemeResponse selectedTheme = null;
         String resolvedErrorCode = errorCode;
 
@@ -63,7 +65,8 @@ public class ReservationPageController {
                 reservationName,
                 period,
                 limit,
-                resolvedErrorCode
+                resolvedErrorCode,
+                requestedAt
         );
 
         return "reservation/list";
@@ -78,12 +81,14 @@ public class ReservationPageController {
             @RequestParam(required = false) final Long timeId,
             final RedirectAttributes redirectAttributes
     ) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         try {
             reservationService.save(
                     name,
                     date,
                     requireId(themeId, "themeId는 필수입니다."),
-                    requireId(timeId, "timeId는 필수입니다.")
+                    requireId(timeId, "timeId는 필수입니다."),
+                    requestedAt
             );
             addReservationNameAttribute(redirectAttributes, name);
         } catch (ApiException exception) {
@@ -124,12 +129,14 @@ public class ReservationPageController {
             @RequestParam(required = false) final Long timeId,
             final RedirectAttributes redirectAttributes
     ) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         try {
             reservationWaitingService.save(
                     name,
                     date,
                     requireId(themeId, "themeId는 필수입니다."),
-                    requireId(timeId, "timeId는 필수입니다.")
+                    requireId(timeId, "timeId는 필수입니다."),
+                    requestedAt
             );
             addReservationNameAttribute(redirectAttributes, name);
             addThemeIdAttribute(redirectAttributes, themeId);
@@ -212,8 +219,9 @@ public class ReservationPageController {
             @RequestParam(required = false) final String reservationName,
             final RedirectAttributes redirectAttributes
     ) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         try {
-            reservationService.deleteByIdAndName(id, reservationName);
+            reservationService.deleteByIdAndName(id, reservationName, requestedAt);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
@@ -253,12 +261,14 @@ public class ReservationPageController {
             @RequestParam(required = false) final Long timeId,
             final RedirectAttributes redirectAttributes
     ) {
+        LocalDateTime requestedAt = LocalDateTime.now();
         try {
             reservationService.updateByIdAndName(
                     id,
                     reservationName,
                     date,
-                    requireId(timeId, "timeId는 필수입니다.")
+                    requireId(timeId, "timeId는 필수입니다."),
+                    requestedAt
             );
         } catch (ApiException exception) {
             return redirectReservationPageWithError(

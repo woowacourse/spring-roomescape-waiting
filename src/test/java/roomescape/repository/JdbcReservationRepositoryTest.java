@@ -12,13 +12,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.repository.reservation.JdbcReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
+import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.theme.JdbcThemeRepository;
 
@@ -26,6 +26,7 @@ import roomescape.repository.theme.JdbcThemeRepository;
 class JdbcReservationRepositoryTest {
 
     private JdbcReservationRepository jdbcReservationRepository;
+    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
     private JdbcThemeRepository jdbcThemeRepository;
 
@@ -36,6 +37,7 @@ class JdbcReservationRepositoryTest {
     void setup() {
         clearTables();
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
         jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
     }
@@ -52,7 +54,8 @@ class JdbcReservationRepositoryTest {
 
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
-        Reservation reservation = Reservation.createNew(name, date, theme, reservationTime, createdAt);
+        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        Reservation reservation = Reservation.reserve(name, slot, createdAt);
         //when
         Reservation result = jdbcReservationRepository.save(reservation);
         Reservation saved = jdbcReservationRepository.findById(result.getId())
@@ -74,13 +77,10 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
         // when & then
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            jdbcReservationRepository.save(
-                    Reservation.createNew("쿠다", date, theme, reservationTime)
-            );
-            jdbcReservationRepository.save(
-                    Reservation.createNew("아루", date, theme, reservationTime)
-            );
+        assertThrows(PersistenceConflictException.class, () -> {
+            ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+            jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+            jdbcReservationRepository.save(Reservation.reserve("아루", slot, LocalDateTime.now()));
         });
     }
 
@@ -93,7 +93,8 @@ class JdbcReservationRepositoryTest {
         Theme theme = createTheme("미술관의 밤");
 
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
-        jdbcReservationRepository.save(Reservation.createNew("쿠다", date, theme, reservationTime));
+        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         //when
         List<Reservation> reservations = jdbcReservationRepository.findAll();
@@ -112,7 +113,8 @@ class JdbcReservationRepositoryTest {
 
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
-        jdbcReservationRepository.save(Reservation.createNew("쿠다", date, theme, reservationTime));
+        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         int beforeSize = jdbcReservationRepository.findAll().size();
 
@@ -139,9 +141,8 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(
                 ReservationTime.createNew(LocalTime.parse("10:00"))
         );
-        Reservation saved = jdbcReservationRepository.save(
-                Reservation.createNew("쿠다", date, theme, reservationTime)
-        );
+        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        Reservation saved = jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         // when
         Reservation found = jdbcReservationRepository.findBySlot(new ReservationSlot(date, theme, reservationTime))
@@ -151,11 +152,58 @@ class JdbcReservationRepositoryTest {
         assertThat(found).isEqualTo(saved);
     }
 
+    @Test
+    @DisplayName("날짜와 테마로 예약 목록을 조회한다")
+    void findByDateAndTheme() {
+        // given
+        LocalDate date = LocalDate.parse("2026-08-06");
+        Theme theme = createTheme("미술관의 밤");
+        Theme otherTheme = createTheme("잠실의 밤");
+        ReservationTime ten = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTime eleven = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, ten));
+        ReservationSlot otherTimeSlot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
+        ReservationSlot otherThemeSlot = jdbcReservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
+        Reservation expected = jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        Reservation sameThemeReservation = jdbcReservationRepository.save(
+                Reservation.reserve("아루", otherTimeSlot, LocalDateTime.now())
+        );
+        jdbcReservationRepository.save(Reservation.reserve("도기", otherThemeSlot, LocalDateTime.now()));
+
+        // when
+        List<Reservation> reservations = jdbcReservationRepository.findByDateAndTheme(date, theme);
+
+        // then
+        assertThat(reservations).containsExactlyInAnyOrder(expected, sameThemeReservation);
+    }
+
+    @Test
+    @DisplayName("예약 시간으로 예약 존재 여부를 확인한다")
+    void existsByTime() {
+        // given
+        LocalDate date = LocalDate.parse("2026-08-06");
+        Theme theme = createTheme("미술관의 밤");
+        ReservationTime reservedTime = jdbcReservationTimeRepository.save(
+                ReservationTime.createNew(LocalTime.parse("10:00"))
+        );
+        ReservationTime emptyTime = jdbcReservationTimeRepository.save(
+                ReservationTime.createNew(LocalTime.parse("11:00"))
+        );
+        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservedTime));
+        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+
+        // when & then
+        assertThat(jdbcReservationRepository.existsByTime(reservedTime)).isTrue();
+        assertThat(jdbcReservationRepository.existsByTime(emptyTime)).isFalse();
+    }
+
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
     }

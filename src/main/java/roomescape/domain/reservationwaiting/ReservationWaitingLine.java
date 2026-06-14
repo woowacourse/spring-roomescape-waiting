@@ -3,71 +3,118 @@ package roomescape.domain.reservationwaiting;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Optional;
+import java.util.OptionalInt;
 import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservationslot.ReservationSlot;
 
 public class ReservationWaitingLine {
-    private final Map<Long, Integer> sequencesByWaitingId;
-    private final Set<String> names;
+    public static final String UNSAVED_WAITING_MESSAGE = "저장되지 않은 대기는 대기 줄에 포함될 수 없습니다.";
+    public static final String DIFFERENT_SLOT_MESSAGE = "서로 다른 슬롯의 대기를 하나의 대기 줄로 묶을 수 없습니다.";
+    private static final Comparator<ReservationWaitingOrder> WAITING_ORDER = Comparator
+            .comparing(ReservationWaitingOrder::requestedAt)
+            .thenComparing(ReservationWaitingOrder::waitingId);
 
-    public ReservationWaitingLine(final List<ReservationWaitingOrder> orders) {
-        List<ReservationWaitingOrder> sortedOrders = orders.stream()
-                .sorted(Comparator.comparing(ReservationWaitingOrder::requestedAt)
-                        .thenComparing(ReservationWaitingOrder::waitingId))
+    private final List<ReservationWaiting> waitings;
+
+    public ReservationWaitingLine(final List<ReservationWaiting> waitings) {
+        validate(waitings);
+        this.waitings = waitings.stream()
+                .sorted((first, second) -> WAITING_ORDER.compare(toOrder(first), toOrder(second)))
                 .toList();
-
-        this.sequencesByWaitingId = IntStream.range(0, sortedOrders.size())
-                .boxed()
-                .collect(Collectors.toMap(
-                        index -> sortedOrders.get(index).waitingId(),
-                        index -> index + 1
-                ));
-        this.names = sortedOrders.stream()
-                .map(ReservationWaitingOrder::name)
-                .filter(Objects::nonNull)
-                .map(name -> ReservationName.from(name).value())
-                .collect(Collectors.toSet());
     }
 
     public static ReservationWaitingLine fromWaitings(final List<ReservationWaiting> waitings) {
-        return new ReservationWaitingLine(waitings.stream()
-                .map(waiting -> new ReservationWaitingOrder(
-                        waiting.getId(),
-                        waiting.getRequestedAt(),
-                        waiting.getName()
-                ))
-                .toList());
+        return new ReservationWaitingLine(waitings);
     }
 
     public boolean isEmpty() {
-        return sequencesByWaitingId.isEmpty();
+        return waitings.isEmpty();
+    }
+
+    public boolean isForSlot(final ReservationSlot slot) {
+        if (waitings.isEmpty()) {
+            return true;
+        }
+
+        Long slotId = slot.getId();
+        return waitings.stream()
+                .map(waiting -> waiting.getSlot().getId())
+                .allMatch(waitingSlotId -> Objects.equals(waitingSlotId, slotId));
     }
 
     public boolean containsName(final ReservationName name) {
-        return names.contains(name.value());
+        return waitings.stream()
+                .map(ReservationWaiting::getName)
+                .anyMatch(name.value()::equals);
     }
 
-    public int sequenceOf(final long waitingId) {
-        Integer sequence = sequencesByWaitingId.get(waitingId);
+    public Optional<ReservationWaiting> first() {
+        return waitings.stream()
+                .findFirst();
+    }
 
-        if (sequence == null) {
-            throw new IllegalArgumentException("대기 순번을 찾을 수 없습니다.");
+    public OptionalInt indexOf(final long waitingId) {
+        return indexOf(waitings.stream()
+                .map(ReservationWaitingLine::toOrder)
+                .toList(), waitingId);
+    }
+
+    public static OptionalInt indexOf(final List<ReservationWaitingOrder> orders, final long waitingId) {
+        validateOrders(orders);
+        List<ReservationWaitingOrder> sortedOrders = orders.stream()
+                .sorted(WAITING_ORDER)
+                .toList();
+
+        for (int index = 0; index < sortedOrders.size(); index++) {
+            if (sortedOrders.get(index).waitingId() == waitingId) {
+                return OptionalInt.of(index);
+            }
         }
 
-        return sequence;
+        return OptionalInt.empty();
+    }
+
+    private void validate(final List<ReservationWaiting> waitings) {
+        validateOrders(waitings.stream()
+                .map(ReservationWaitingLine::toOrder)
+                .toList());
+    }
+
+    private static void validateOrders(final List<ReservationWaitingOrder> orders) {
+        if (orders.isEmpty()) {
+            return;
+        }
+
+        Long slotId = orders.get(0).slotId();
+        for (ReservationWaitingOrder order : orders) {
+            validateSaved(order);
+            validateSameSlot(slotId, order);
+        }
+    }
+
+    private static void validateSaved(final ReservationWaitingOrder order) {
+        if (order.waitingId() == null || order.slotId() == null) {
+            throw new IllegalArgumentException(UNSAVED_WAITING_MESSAGE);
+        }
+    }
+
+    private static void validateSameSlot(final Long slotId, final ReservationWaitingOrder order) {
+        if (!Objects.equals(slotId, order.slotId())) {
+            throw new IllegalArgumentException(DIFFERENT_SLOT_MESSAGE);
+        }
+    }
+
+    private static ReservationWaitingOrder toOrder(final ReservationWaiting waiting) {
+        ReservationSlot slot = waiting.getSlot();
+        return new ReservationWaitingOrder(waiting.getId(), slot.getId(), waiting.getRequestedAt());
     }
 
     public record ReservationWaitingOrder(
-            long waitingId,
-            LocalDateTime requestedAt,
-            String name
+            Long waitingId,
+            Long slotId,
+            LocalDateTime requestedAt
     ) {
-        public ReservationWaitingOrder(final long waitingId, final LocalDateTime requestedAt) {
-            this(waitingId, requestedAt, null);
-        }
     }
 }

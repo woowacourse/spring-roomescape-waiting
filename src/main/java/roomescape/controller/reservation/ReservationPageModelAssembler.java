@@ -13,7 +13,6 @@ import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
-import roomescape.domain.reservation.Reservation;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -53,7 +52,8 @@ public class ReservationPageModelAssembler {
             final String reservationName,
             final int period,
             final int limit,
-            final String errorCode
+            final String errorCode,
+            final LocalDateTime requestedAt
     ) {
         model.addAttribute("themes", themeService.getAll().stream()
                 .map(ThemeResponse::from)
@@ -76,7 +76,8 @@ public class ReservationPageModelAssembler {
                 selectedThemeId,
                 selectedTheme,
                 selectedDate,
-                myHistories
+                myHistories,
+                requestedAt
         ));
         model.addAttribute("myHistories", myHistories);
     }
@@ -85,13 +86,15 @@ public class ReservationPageModelAssembler {
             final Long selectedThemeId,
             final ThemeResponse selectedTheme,
             final LocalDate selectedDate,
-            final List<HistoryResponse> myHistories
+            final List<HistoryResponse> myHistories,
+            final LocalDateTime requestedAt
     ) {
         if (selectedTheme == null || selectedDate == null) {
             return List.of();
         }
 
-        Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
+        Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId, requestedAt)
+                .stream()
                 .map(reservationTime -> reservationTime.getId())
                 .collect(Collectors.toSet());
 
@@ -99,7 +102,12 @@ public class ReservationPageModelAssembler {
                 .map(reservationTime -> new ReservationTimeSlotResponse(
                         reservationTime.getId(),
                         reservationTime.getStartAt(),
-                        resolveSlotStatus(selectedDate, reservationTime.getStartAt(), availableTimeIds.contains(reservationTime.getId())),
+                        resolveSlotStatus(
+                                selectedDate,
+                                reservationTime.getStartAt(),
+                                availableTimeIds.contains(reservationTime.getId()),
+                                requestedAt
+                        ),
                         findWaitingId(myHistories, selectedDate, selectedThemeId, reservationTime.getId())
                 ))
                 .toList();
@@ -108,9 +116,10 @@ public class ReservationPageModelAssembler {
     private ReservationTimeSlotStatus resolveSlotStatus(
             final LocalDate selectedDate,
             final LocalTime startAt,
-            final boolean reservable
+            final boolean reservable,
+            final LocalDateTime requestedAt
     ) {
-        if (Reservation.isPast(selectedDate, startAt, LocalDateTime.now())) {
+        if (LocalDateTime.of(selectedDate, startAt).isBefore(requestedAt)) {
             return ReservationTimeSlotStatus.PAST;
         }
 

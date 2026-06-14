@@ -141,6 +141,7 @@
         <a th:href="@{/pages/admin/reservations}">예약 관리</a>
         <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
         <a th:href="@{/pages/admin/themes}">테마 관리</a>
+        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
     </nav>
 
     <section class="hero">
@@ -188,6 +189,7 @@
                     </div>
                     <div class="actions">
                         <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+                        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
                         <form method="post" th:action="@{/pages/admin/themes/{id}/delete(id=${theme.id})}">
                             <button type="submit" class="delete">삭제</button>
                         </form>

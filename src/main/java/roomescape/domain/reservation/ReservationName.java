@@ -1,5 +1,7 @@
 package roomescape.domain.reservation;
 
+import java.util.Objects;
+
 public class ReservationName {
     private static final int MAX_LENGTH = 10;
 
@@ -16,6 +18,20 @@ public class ReservationName {
 
     public String value() {
         return value;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof ReservationName)) {
+            return false;
+        }
+        ReservationName that = (ReservationName) o;
+        return Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     private void validate(final String name) {
