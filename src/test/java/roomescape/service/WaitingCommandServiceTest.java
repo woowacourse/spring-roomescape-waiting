@@ -16,7 +16,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.WaitingDao;
@@ -74,7 +73,7 @@ class WaitingCommandServiceTest {
     @DisplayName("존재하지 않는 대기는 취소할 수 없다.")
     void cancel_nonExistent() {
         assertThatThrownBy(() -> waitingCommandService.cancel(999L, "user_d"))
-                .isInstanceOf(InvalidReferenceException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -21,7 +21,7 @@ import roomescape.domain.Theme;
 
 @JdbcTest
 @Import({ReservationDao.class, ThemeDao.class, ReservationTimeDao.class})
-@Sql("/truncate.sql")
+@Transactional
 class ReservationDaoTest {
 
     private static final LocalDate DATE = LocalDate.of(2026, 6, 5);

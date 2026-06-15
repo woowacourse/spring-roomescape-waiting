@@ -140,4 +140,13 @@ class AdminReservationValidationTest {
                 .then().log().all()
                 .statusCode(400);
     }
+
+    @Test
+    @DisplayName("관리자 예약 삭제 시 id가 숫자가 아니면 400을 반환한다.")
+    void deleteReservationWithInvalidId() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/reservations/abc")
+                .then().log().all()
+                .statusCode(400);
+    }
 }

@@ -79,7 +79,7 @@ public class WaitingCommandService {
 
     private Waiting findWaitingReference(long waitingId) {
         return waitingDao.findById(waitingId)
-                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 대기입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약 대기입니다."));
     }
 
     private ReservationTime findTimeReference(long timeId) {
