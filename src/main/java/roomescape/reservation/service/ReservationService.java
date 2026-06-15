@@ -77,9 +77,12 @@ public class ReservationService {
     @Transactional
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservation(id);
-        ReservationStatus reservationStatus = reservation.getStatus();
+
         lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
             reservation.getTheme().getId());
+
+        reservation = getReservation(id);
+        ReservationStatus reservationStatus = reservation.getStatus();
         reservation.cancelByManager();
         reservationRepository.updateStatusAndWaitingOrder(reservation);
         if (reservationStatus == RESERVED) {
@@ -92,15 +95,19 @@ public class ReservationService {
     @Transactional
     public Reservation cancel(Long id, String requesterName) {
         Reservation reservation = getReservation(id);
-        ReservationStatus reservationStatus = reservation.getStatus();
+
         lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
             reservation.getTheme().getId());
+
+        reservation = getReservation(id);
+        ReservationStatus reservationStatus = reservation.getStatus();
         reservation.cancel(requesterName);
         reservationRepository.updateStatusAndWaitingOrder(reservation);
         if (reservationStatus == RESERVED) {
             promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
         }
+
         return reservation;
     }
 
@@ -118,10 +125,15 @@ public class ReservationService {
         lockSlot(previousDateId, previousTimeId, themeId);
         lockSlot(newDate.getId(), newTime.getId(), themeId);
 
+        reservation = getReservation(command.id());
+        previousDateId = reservation.getDate().getId();
+        previousTimeId = reservation.getTime().getId();
+        themeId = reservation.getTheme().getId();
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
         decideStatus(command, reservation);
         reservationRepository.updateScheduleAndStatus(reservation);
         promoteWaitingReservation(previousDateId, previousTimeId, themeId);
+
         return reservation;
     }
 
@@ -139,6 +151,10 @@ public class ReservationService {
         lockSlot(previousDateId, previousTimeId, themeId);
         lockSlot(newDate.getId(), newTime.getId(), themeId);
 
+        reservation = getReservation(command.id());
+        previousDateId = reservation.getDate().getId();
+        previousTimeId = reservation.getTime().getId();
+        themeId = reservation.getTheme().getId();
         reservation.changeScheduleByManager(newDate, newTime);
         decideStatus(command, reservation);
         reservationRepository.updateScheduleAndStatus(reservation);

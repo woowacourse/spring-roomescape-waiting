@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
@@ -31,6 +32,7 @@ import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.FakeReservationRepository;
 import roomescape.reservation.fixture.FakeReservationSlotRepository;
 import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.reservation.repository.StaleFirstReadReservationRepository;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
@@ -300,6 +302,33 @@ class ReservationServiceTest {
                 .isEqualTo(ReservationStatus.RESERVED);
         }
 
+        @Test
+        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 다음 대기를 승격한다")
+        void 성공5() {
+            // given
+            StaleFirstReadReservationRepository staleRepository =
+                replaceWithStaleFirstReadRepository();
+            String promotedName = "승격된 사용자";
+            String nextWaitingName = "다음 대기자";
+            Reservation promotedReservation = save(
+                reservation(promotedName, reservationDate1, reservationTime1, theme1));
+            Reservation nextWaitingReservation = save(
+                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
+            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
+
+            // when
+            reservationService.cancel(promotedReservation.getId(), promotedName);
+            Optional<Reservation> nextWaiting = reservationRepository.findById(
+                nextWaitingReservation.getId());
+
+            // then
+            assertThat(nextWaiting)
+                .isPresent()
+                .get()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
+        }
+
 
         @Test
         @DisplayName("예약자가 아니면 예외가 발생한다")
@@ -427,6 +456,33 @@ class ReservationServiceTest {
                 .isEqualTo(ReservationStatus.RESERVED);
         }
 
+        @Test
+        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 다음 대기를 승격한다")
+        void 성공5() {
+            // given
+            StaleFirstReadReservationRepository staleRepository =
+                replaceWithStaleFirstReadRepository();
+            String promotedName = "승격된 사용자";
+            String nextWaitingName = "다음 대기자";
+            Reservation promotedReservation = save(
+                reservation(promotedName, reservationDate1, reservationTime1, theme1));
+            Reservation nextWaitingReservation = save(
+                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
+            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
+
+            // when
+            reservationService.cancelByManager(promotedReservation.getId());
+            Optional<Reservation> actual = reservationRepository.findById(
+                nextWaitingReservation.getId());
+
+            // then
+            assertThat(actual)
+                .isPresent()
+                .get()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
+        }
+
 
         @Test
         @DisplayName("이미 취소된 예약이면 예외가 발생한다")
@@ -503,6 +559,40 @@ class ReservationServiceTest {
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        }
+
+        @Test
+        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 일정을 변경하고 이전 슬롯 대기를 승격한다")
+        void 성공3() {
+            // given
+            StaleFirstReadReservationRepository staleRepository =
+                replaceWithStaleFirstReadRepository();
+            String promotedName = "승격된 사용자";
+            String nextWaitingName = "다음 대기자";
+            Reservation promotedReservation = save(
+                reservation(promotedName, reservationDate1, reservationTime1, theme1));
+            Reservation nextWaitingReservation = save(
+                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
+            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(
+                promotedReservation.getId(), promotedName, reservationDate2.getId(),
+                reservationTime2.getId());
+
+            // when
+            Reservation changed = reservationService.changeSchedule(changeCommand);
+            Optional<Reservation> nextWaiting = reservationRepository.findById(
+                nextWaitingReservation.getId());
+
+            // then
+            assertAll(
+                () -> assertThat(changed.getDate().getId()).isEqualTo(reservationDate2.getId()),
+                () -> assertThat(changed.getTime().getId()).isEqualTo(reservationTime2.getId()),
+                () -> assertThat(nextWaiting)
+                    .isPresent()
+                    .get()
+                    .extracting(Reservation::getStatus)
+                    .isEqualTo(ReservationStatus.RESERVED)
+            );
         }
 
 
@@ -598,7 +688,8 @@ class ReservationServiceTest {
         @DisplayName("대기 상태인 예약이면 예외가 발생한다")
         void 실패6() {
             // given
-            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation saved = save(
+                waitReservation(name, reservationDate1, reservationTime1, theme1));
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -651,6 +742,40 @@ class ReservationServiceTest {
                 .get()
                 .extracting("status")
                 .isEqualTo(ReservationStatus.WAITING);
+        }
+
+        @Test
+        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 일정을 변경하고 이전 슬롯 대기를 승격한다")
+        void 성공3() {
+            // given
+            StaleFirstReadReservationRepository staleRepository =
+                replaceWithStaleFirstReadRepository();
+            String promotedName = "승격된 사용자";
+            String nextWaitingName = "다음 대기자";
+            Reservation promotedReservation = save(
+                reservation(promotedName, reservationDate1, reservationTime1, theme1));
+            Reservation nextWaitingReservation = save(
+                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
+            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(
+                promotedReservation.getId(), null, reservationDate2.getId(),
+                reservationTime2.getId());
+
+            // when
+            Reservation changed = reservationService.changeScheduleByManager(changeCommand);
+            Optional<Reservation> nextWaiting = reservationRepository.findById(
+                nextWaitingReservation.getId());
+
+            // then
+            assertAll(
+                () -> assertThat(changed.getDate().getId()).isEqualTo(reservationDate2.getId()),
+                () -> assertThat(changed.getTime().getId()).isEqualTo(reservationTime2.getId()),
+                () -> assertThat(nextWaiting)
+                    .isPresent()
+                    .get()
+                    .extracting(Reservation::getStatus)
+                    .isEqualTo(ReservationStatus.RESERVED)
+            );
         }
 
 
@@ -711,7 +836,8 @@ class ReservationServiceTest {
         @DisplayName("대기 상태인 예약이면 예외가 발생한다")
         void 실패4() {
             // given
-            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation saved = save(
+                waitReservation(name, reservationDate1, reservationTime1, theme1));
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -720,5 +846,20 @@ class ReservationServiceTest {
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
+    }
+
+    private StaleFirstReadReservationRepository replaceWithStaleFirstReadRepository() {
+        StaleFirstReadReservationRepository staleRepository =
+            new StaleFirstReadReservationRepository();
+        reservationRepository = staleRepository;
+        reservationService = new ReservationService(reservationSlotRepository,
+            reservationRepository, reservationTimeRepository, reservationDateRepository,
+            themeRepository);
+        return staleRepository;
+    }
+
+    private Reservation waitVersionOf(Reservation reservation, String name, Long waitingOrder) {
+        return Reservation.load(reservation.getId(), name, reservation.getDate(),
+            reservation.getTime(), reservation.getTheme(), ReservationStatus.WAITING, waitingOrder);
     }
 }
