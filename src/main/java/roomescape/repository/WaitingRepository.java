@@ -146,4 +146,30 @@ public class WaitingRepository {
             );
         };
     }
+
+    public Optional<Waiting> findFirstBySchedule(LocalDate date, long timeId, long themeId) {
+        String sql = """
+                SELECT w.id          AS waiting_id,
+                       w.name        AS waiting_name,
+                       w.date        AS waiting_date,
+                       t.id          AS time_id,
+                       t.start_at    AS time_start_at,
+                       th.id         AS theme_id,
+                       th.name       AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail  AS theme_thumbnail
+                FROM waiting w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.id
+                LIMIT 1
+                """;
+        try {
+            Waiting waiting = jdbcTemplate.queryForObject(sql, reservationRowsMapper(), date, timeId, themeId);
+            return Optional.ofNullable(waiting);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 }

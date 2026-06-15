@@ -76,4 +76,41 @@ class WaitingTest {
         assertThatThrownBy(() -> waiting.validateOwner("어셔"))
                 .isInstanceOf(DomainConflictException.class);
     }
+
+    @Test
+    void 승격한_대기가_예약과_같은_정보를_가진다() {
+        //given
+        Waiting waiting = new Waiting(
+                1L,
+                "밍구",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        //when
+        Reservation reservation = waiting.promote(NOW);
+
+        //then
+        assertThat(reservation.getName()).isEqualTo(waiting.getName());
+        assertThat(reservation.getDate()).isEqualTo(waiting.getDate());
+        assertThat(reservation.getTime()).isEqualTo(waiting.getTime());
+        assertThat(reservation.getTheme()).isEqualTo(waiting.getTheme());
+    }
+
+    @Test
+    void 지난_시간의_대기는_승격할_수_없다() {
+        //given
+        Waiting waiting = new Waiting(
+                1L,
+                "밍구",
+                LocalDate.of(2026, 5, 10),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+        );
+
+        //when & then
+        assertThatThrownBy(() -> waiting.promote(LocalDate.of(2026, 5, 11).atStartOfDay()))
+                .isInstanceOf(DomainConflictException.class);
+    }
 }

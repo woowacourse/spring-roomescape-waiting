@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -9,7 +10,9 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.UserReservation;
+import roomescape.service.event.ReservationSlotReleasedEvent;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -24,23 +27,29 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final UserReservationRepository userReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ReservationService(
             ReservationRepository reservationRepository,
+            WaitingRepository waitingRepository,
             UserReservationRepository userReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            Clock clock
+            Clock clock,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.userReservationRepository = userReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<Reservation> findReservations(int page, int size) {
@@ -53,6 +62,8 @@ public class ReservationService {
 
     @Transactional
     public Reservation createReservation(String name, LocalDate date, long timeId, long themeId) {
+        checkWaitingExists(date, timeId, themeId);
+
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
 
@@ -75,6 +86,11 @@ public class ReservationService {
         Reservation updated = reservation.changeSchedule(date, time, name, LocalDateTime.now(clock));
         checkDuplicated(updated);
         reservationRepository.update(updated);
+
+        eventPublisher.publishEvent(
+                new ReservationSlotReleasedEvent(id, reservation.getDate(), reservation.getTime().getId(),
+                        reservation.getTheme().getId()));
+
         return updated;
     }
 
@@ -85,6 +101,10 @@ public class ReservationService {
 
         reservation.checkCancellable(name, LocalDateTime.now(clock));
         reservationRepository.delete(reservation);
+
+        eventPublisher.publishEvent(
+                new ReservationSlotReleasedEvent(id, reservation.getDate(), reservation.getTime().getId(),
+                        reservation.getTheme().getId()));
     }
 
     private void checkDuplicated(Reservation reservation) {
@@ -98,6 +118,14 @@ public class ReservationService {
 
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void checkWaitingExists(LocalDate date, long timeId, long themeId) {
+        boolean waitingExists = waitingRepository.findFirstBySchedule(date, timeId, themeId).isPresent();
+
+        if (waitingExists) {
+            throw new BusinessConflictException(ErrorCode.RESERVATION_NOT_ALLOWED_WITH_WAITING);
         }
     }
 }

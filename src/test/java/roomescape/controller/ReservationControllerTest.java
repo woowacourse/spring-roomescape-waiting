@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
@@ -36,12 +37,14 @@ class ReservationControllerTest {
     @Test
     void 내_예약_목록_조회_요청을_Service에_전달하고_예약과_대기를_함께_반환한다() throws Exception {
         List<UserReservation> reservations = List.of(
-                UserReservation.reserved(1L, "레서", LocalDate.of(2026, 5, 6),
+                new UserReservation(1L, "레서", LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
-                        new Theme(1L, "공포방", "무서운방입니다.", "image-url")),
-                UserReservation.waiting(2L, "레서", LocalDate.of(2026, 5, 7),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                        ReservationStatus.RESERVED, null),
+                new UserReservation(2L, "레서", LocalDate.of(2026, 5, 7),
                         new ReservationTime(2L, LocalTime.of(20, 0)),
-                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"), 2L)
+                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"),
+                        ReservationStatus.WAITING, 2L)
         );
         when(reservationService.findUserReservations("레서", 1, 5)).thenReturn(reservations);
 

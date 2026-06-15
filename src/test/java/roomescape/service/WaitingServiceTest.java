@@ -65,7 +65,8 @@ class WaitingServiceTest {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(false);
-        when(reservationRepository.findBySchedule(futureDate, 1L, 1L)).thenReturn(Optional.empty());
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, time, theme);
+        when(reservationRepository.findBySchedule(futureDate, 1L, 1L)).thenReturn(Optional.of(reservation));
         Waiting saved = new Waiting(1L, "레서", futureDate, time, theme);
         when(waitingRepository.save(any())).thenReturn(saved);
         when(waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(1L, theme, futureDate, time))
@@ -104,6 +105,9 @@ class WaitingServiceTest {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
+        when(reservationRepository.findBySchedule(pastDate, 1L, 1L))
+                .thenReturn(Optional.of(new Reservation(1L, "브라운", pastDate, time, theme)));
+
         assertThatThrownBy(() -> waitingService.createWaiting("레서", pastDate, 1L, 1L))
                 .isInstanceOf(DomainConflictException.class);
         verify(waitingRepository, never()).save(any());
@@ -111,6 +115,9 @@ class WaitingServiceTest {
 
     @Test
     void 동일한_일정에_이미_대기_중이면_예외가_발생한다() {
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, time, theme);
+        when(reservationRepository.findBySchedule(any(), anyLong(), anyLong()))
+                .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(true);

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.UserReservation;
@@ -67,17 +68,19 @@ public class UserReservationRepository {
                     rs.getString("thumbnail")
             );
 
-            String status = rs.getString("status");
+            ReservationStatus status = ReservationStatus.valueOf(rs.getString("status"));
+            Long rank = rs.getObject("rank", Long.class);
 
-            if (status.equals("RESERVED")) {
-                return UserReservation.reserved(rs.getLong("id"), rs.getString("name"),
-                        LocalDate.parse(rs.getString("date")), time, theme);
-            }
+            UserReservation userReservation = new UserReservation(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    LocalDate.parse(rs.getString("date")),
+                    time,
+                    theme,
+                    status,
+                    rank);
 
-            long rank = rs.getLong("rank");
-
-            return UserReservation.waiting(rs.getLong("id"), rs.getString("name"),
-                    LocalDate.parse(rs.getString("date")), time, theme, rank);
+            return userReservation;
         };
     }
 }

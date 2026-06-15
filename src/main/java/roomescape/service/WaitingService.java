@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -11,6 +12,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.WaitingResult;
 import roomescape.service.exception.BusinessConflictException;
+import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
 
@@ -46,6 +48,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
+        checkReservationAndWaitingExists(date, timeId, themeId);
         checkDuplicatedWaiting(date, timeId, themeId, name);
         checkDuplicatedReservation(date, timeId, themeId, name);
 
@@ -58,11 +61,17 @@ public class WaitingService {
         return WaitingResult.of(waiting, order);
     }
 
+    @Transactional
     public void deleteWaiting(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
         waiting.validateOwner(name);
+        waitingRepository.delete(waiting);
+    }
+
+    @Transactional
+    public void deleteForPromotion(Waiting waiting) {
         waitingRepository.delete(waiting);
     }
 
@@ -82,5 +91,18 @@ public class WaitingService {
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    private void checkReservationAndWaitingExists(LocalDate date, long timeId, long themeId) {
+        boolean reservationExists = reservationRepository.findBySchedule(date, timeId, themeId).isPresent();
+        boolean waitingExists = waitingRepository.findFirstBySchedule(date, timeId, themeId).isPresent();
+
+        if (!reservationExists && !waitingExists) {
+            throw new BusinessException(ErrorCode.WAITING_WITHOUT_RESERVATION);
+        }
+    }
+
+    public Optional<Waiting> findFirstWaiting(LocalDate date, long timeId, long themeId) {
+        return waitingRepository.findFirstBySchedule(date, timeId, themeId);
     }
 }
