@@ -6,10 +6,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationCancellation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.PastReservationException;
-import roomescape.domain.reservation.ReservationSlotBooking;
+import roomescape.domain.reservation.ReservationCancellationResult;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -163,8 +162,7 @@ public class ReservationService {
 
     private void cancel(final Reservation reservation, final LocalDateTime requestedAt) {
         ReservationWaitingLine waitingLine = reservationWaitingRepository.findLineBySlot(reservation.getSlot());
-        ReservationSlotBooking booking = new ReservationSlotBooking(reservation, waitingLine);
-        ReservationCancellation cancellation = booking.cancel(requestedAt);
+        ReservationCancellationResult cancellation = reservation.cancel(waitingLine, requestedAt);
 
         deleteReservation(cancellation.cancelledReservation());
         cancellation.promotedReservation().ifPresent(this::savePromotedReservation);

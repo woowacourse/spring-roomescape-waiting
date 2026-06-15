@@ -10,27 +10,25 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationCancellation;
-import roomescape.domain.reservation.ReservationSlotBooking;
+import roomescape.domain.reservation.ReservationCancellationResult;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
 
-class ReservationSlotBookingTest {
+class ReservationCancellationResultTest {
     private static final LocalDateTime REQUESTED_AT = LocalDateTime.parse("2026-08-05T12:00:00");
 
     @Test
     @DisplayName("대기가 없으면 예약만 취소된다")
     void cancelWithoutWaiting() {
         Reservation reservation = createReservation(1L, "쿠다", LocalTime.parse("10:00"));
-        ReservationSlotBooking booking = new ReservationSlotBooking(
-                reservation,
-                new ReservationWaitingLine(List.of())
-        );
 
-        ReservationCancellation cancellation = booking.cancel(REQUESTED_AT);
+        ReservationCancellationResult cancellation = reservation.cancel(
+                new ReservationWaitingLine(List.of()),
+                REQUESTED_AT
+        );
 
         assertThat(cancellation.cancelledReservation()).isEqualTo(reservation);
         assertThat(cancellation.promotedWaiting()).isEmpty();
@@ -53,12 +51,11 @@ class ReservationSlotBookingTest {
                 "도기",
                 LocalDateTime.parse("2026-08-05T11:01:00")
         );
-        ReservationSlotBooking booking = new ReservationSlotBooking(
-                reservation,
-                new ReservationWaitingLine(List.of(secondWaiting, firstWaiting))
-        );
 
-        ReservationCancellation cancellation = booking.cancel(REQUESTED_AT);
+        ReservationCancellationResult cancellation = reservation.cancel(
+                new ReservationWaitingLine(List.of(secondWaiting, firstWaiting)),
+                REQUESTED_AT
+        );
 
         assertThat(cancellation.cancelledReservation()).isEqualTo(reservation);
         assertThat(cancellation.promotedWaiting()).contains(firstWaiting);
@@ -80,12 +77,12 @@ class ReservationSlotBookingTest {
                 LocalDateTime.parse("2026-08-05T11:00:00")
         );
 
-        assertThatThrownBy(() -> new ReservationSlotBooking(
-                reservation,
-                new ReservationWaitingLine(List.of(waiting))
+        assertThatThrownBy(() -> reservation.cancel(
+                new ReservationWaitingLine(List.of(waiting)),
+                REQUESTED_AT
         ))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(ReservationSlotBooking.DIFFERENT_SLOT_MESSAGE);
+                .hasMessage("예약과 대기 줄의 슬롯이 일치하지 않습니다.");
     }
 
     private Reservation createReservation(final Long slotId, final String name, final LocalTime startAt) {

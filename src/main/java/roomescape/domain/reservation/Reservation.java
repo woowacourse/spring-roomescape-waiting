@@ -5,12 +5,15 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
     private static final String PAST_RESERVATION_MESSAGE = "과거 날짜와 시간으로는 예약을 할 수 없습니다.";
     private static final String PAST_CANCEL_MESSAGE = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String PAST_UPDATE_MESSAGE = "이미 지난 예약은 변경할 수 없습니다.";
+    private static final String DIFFERENT_SLOT_MESSAGE = "예약과 대기 줄의 슬롯이 일치하지 않습니다.";
 
     private final Long id;
     private final ReservationName name;
@@ -88,6 +91,17 @@ public class Reservation {
         return new Reservation(this.id, this.name, slot, this.createdAt);
     }
 
+    public ReservationCancellationResult cancel(
+            final ReservationWaitingLine waitingLine,
+            final LocalDateTime requestedAt
+    ) {
+        validateWaitingLine(waitingLine);
+
+        return waitingLine.first()
+                .map(waiting -> promote(waiting, requestedAt))
+                .orElseGet(() -> ReservationCancellationResult.withoutPromotion(this));
+    }
+
     public boolean hasName(final String name) {
         return this.name.equals(ReservationName.from(name));
     }
@@ -115,6 +129,26 @@ public class Reservation {
         validateSlot(slot);
         if (slot.isPast(standardDateTime)) {
             throw new PastReservationException(PAST_RESERVATION_MESSAGE);
+        }
+    }
+
+    private ReservationCancellationResult promote(
+            final ReservationWaiting waiting,
+            final LocalDateTime requestedAt
+    ) {
+        return ReservationCancellationResult.withPromotion(
+                this,
+                waiting,
+                waiting.toReservation(requestedAt)
+        );
+    }
+
+    private void validateWaitingLine(final ReservationWaitingLine waitingLine) {
+        if (waitingLine == null) {
+            throw new IllegalArgumentException("대기 줄은 비어있으면 안됩니다.");
+        }
+        if (!waitingLine.isEmpty() && !waitingLine.isForSlot(this.slot)) {
+            throw new IllegalArgumentException(DIFFERENT_SLOT_MESSAGE);
         }
     }
 

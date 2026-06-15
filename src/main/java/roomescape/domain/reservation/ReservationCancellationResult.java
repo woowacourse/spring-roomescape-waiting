@@ -3,13 +3,13 @@ package roomescape.domain.reservation;
 import java.util.Optional;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 
-public class ReservationCancellation {
+public class ReservationCancellationResult {
 
     private final Reservation cancelledReservation;
     private final ReservationWaiting promotedWaiting;
     private final Reservation promotedReservation;
 
-    private ReservationCancellation(
+    private ReservationCancellationResult(
             final Reservation cancelledReservation,
             final ReservationWaiting promotedWaiting,
             final Reservation promotedReservation
@@ -19,16 +19,16 @@ public class ReservationCancellation {
         this.promotedReservation = promotedReservation;
     }
 
-    public static ReservationCancellation withoutPromotion(final Reservation cancelledReservation) {
-        return new ReservationCancellation(cancelledReservation, null, null);
+    public static ReservationCancellationResult withoutPromotion(final Reservation cancelledReservation) {
+        return new ReservationCancellationResult(cancelledReservation, null, null);
     }
 
-    public static ReservationCancellation withPromotion(
+    public static ReservationCancellationResult withPromotion(
             final Reservation cancelledReservation,
             final ReservationWaiting promotedWaiting,
             final Reservation promotedReservation
     ) {
-        return new ReservationCancellation(cancelledReservation, promotedWaiting, promotedReservation);
+        return new ReservationCancellationResult(cancelledReservation, promotedWaiting, promotedReservation);
     }
 
     public Reservation cancelledReservation() {
