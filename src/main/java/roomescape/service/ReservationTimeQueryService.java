@@ -35,7 +35,8 @@ public class ReservationTimeQueryService {
     }
 
     private void validateThemeExists(long themeId) {
-        themeDao.findById(themeId)
-                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
+        if (!themeDao.existsById(themeId)) {
+            throw new InvalidReferenceException("존재하지 않는 테마입니다.");
+        }
     }
 }

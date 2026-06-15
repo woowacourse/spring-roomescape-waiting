@@ -78,4 +78,18 @@ class ThemeDaoTest {
 
         assertThat(result).hasSize(2);
     }
+
+    @Test
+    @DisplayName("id에 해당하는 테마가 존재하면 true를 반환한다.")
+    void existsById_existingTheme() {
+        Theme theme = themeDao.save(Theme.create(0, "테마", "url", "설명"));
+
+        assertThat(themeDao.existsById(theme.id())).isTrue();
+    }
+
+    @Test
+    @DisplayName("id에 해당하는 테마가 없으면 false를 반환한다.")
+    void existsById_unknownTheme() {
+        assertThat(themeDao.existsById(999L)).isFalse();
+    }
 }
