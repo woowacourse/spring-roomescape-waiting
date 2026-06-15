@@ -12,12 +12,12 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.exception.DomainConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.UserReservation;
 import roomescape.service.event.ReservationSlotReleasedEvent;
 import roomescape.service.exception.BusinessConflictException;
@@ -41,6 +41,9 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Mock
+    private WaitingRepository waitingRepository;
+
+    @Mock
     private UserReservationRepository userReservationRepository;
 
     @Mock
@@ -59,7 +62,7 @@ class ReservationServiceTest {
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, userReservationRepository, reservationTimeRepository,
+                reservationRepository, waitingRepository, userReservationRepository, reservationTimeRepository,
                 themeRepository, fixedClock, eventPublisher
         );
     }
@@ -237,8 +240,9 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
 
         List<UserReservation> userReservations = List.of(
-                UserReservation.reserved(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme)),
-                UserReservation.waiting(new Waiting(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme), 2L)
+                new UserReservation(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme, ReservationStatus.RESERVED,
+                        null),
+                new UserReservation(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme, ReservationStatus.WAITING, 2L)
         );
 
         when(userReservationRepository.findByName("브라운", 0, 10)).thenReturn(userReservations);
