@@ -73,4 +73,17 @@ class ReservationTimeDaoTest {
         assertThat(result).extracting(ReservationTime::id)
                 .containsExactlyInAnyOrder(time1.id(), time2.id());
     }
+
+    @Test
+    @DisplayName("예약 가능한 시간은 시작 시간 오름차순으로 반환한다.")
+    void findAvailable_ordersByStartAt() {
+        Theme theme = themeDao.save(Theme.create(0, "테마", "url", "설명"));
+        timeDao.save(ReservationTime.create(0, LocalTime.of(14, 0)));
+        timeDao.save(ReservationTime.create(0, LocalTime.of(10, 0)));
+
+        List<ReservationTime> result = timeDao.findAvailable(DATE, theme.id());
+
+        assertThat(result).extracting(ReservationTime::startAt)
+                .containsExactly(LocalTime.of(10, 0), LocalTime.of(14, 0));
+    }
 }

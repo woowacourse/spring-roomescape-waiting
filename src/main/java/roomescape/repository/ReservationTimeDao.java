@@ -73,6 +73,7 @@ public class ReservationTimeDao {
                     AND r.date = :date
                     AND r.theme_id = :themeId
                 WHERE r.id IS NULL
+                ORDER BY rt.start_at ASC, rt.id ASC
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", date)
