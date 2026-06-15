@@ -33,14 +33,14 @@ class ReservationTimeDaoTest {
 
     @Test
     @DisplayName("예약된 슬롯의 시간은 조회 결과에서 제외된다.")
-    void findAvailable_excludesReservedTime() {
+    void findUnreservedBy_excludesReservedTime() {
         Theme theme = themeDao.save(Theme.create(0, "테마", "url", "설명"));
         ReservationTime bookedTime = timeDao.save(ReservationTime.create(0, LocalTime.of(10, 0)));
         ReservationTime freeTime = timeDao.save(ReservationTime.create(0, LocalTime.of(12, 0)));
 
         reservationDao.save(Reservation.forNew(new Member("user_a"), new Slot(DATE, bookedTime, theme)));
 
-        List<ReservationTime> result = timeDao.findAvailable(DATE, theme.id());
+        List<ReservationTime> result = timeDao.findUnreservedBy(DATE, theme.id());
 
         assertThat(result).extracting(ReservationTime::id)
                 .containsExactly(freeTime.id())
@@ -49,13 +49,13 @@ class ReservationTimeDaoTest {
 
     @Test
     @DisplayName("다른 날짜의 예약은 조회 결과를 제한하지 않는다.")
-    void findAvailable_differentDateDoesNotExclude() {
+    void findUnreservedBy_differentDateDoesNotExclude() {
         Theme theme = themeDao.save(Theme.create(0, "테마", "url", "설명"));
         ReservationTime time = timeDao.save(ReservationTime.create(0, LocalTime.of(10, 0)));
 
         reservationDao.save(Reservation.forNew(new Member("user_a"), new Slot(DATE.plusDays(1), time, theme)));
 
-        List<ReservationTime> result = timeDao.findAvailable(DATE, theme.id());
+        List<ReservationTime> result = timeDao.findUnreservedBy(DATE, theme.id());
 
         assertThat(result).extracting(ReservationTime::id)
                 .contains(time.id());
@@ -63,12 +63,12 @@ class ReservationTimeDaoTest {
 
     @Test
     @DisplayName("예약이 없으면 모든 시간을 반환한다.")
-    void findAvailable_noReservations() {
+    void findUnreservedBy_noReservations() {
         Theme theme = themeDao.save(Theme.create(0, "테마", "url", "설명"));
         ReservationTime time1 = timeDao.save(ReservationTime.create(0, LocalTime.of(10, 0)));
         ReservationTime time2 = timeDao.save(ReservationTime.create(0, LocalTime.of(12, 0)));
 
-        List<ReservationTime> result = timeDao.findAvailable(DATE, theme.id());
+        List<ReservationTime> result = timeDao.findUnreservedBy(DATE, theme.id());
 
         assertThat(result).extracting(ReservationTime::id)
                 .containsExactlyInAnyOrder(time1.id(), time2.id());
@@ -76,12 +76,12 @@ class ReservationTimeDaoTest {
 
     @Test
     @DisplayName("예약 가능한 시간은 시작 시간 오름차순으로 반환한다.")
-    void findAvailable_ordersByStartAt() {
+    void findUnreservedBy_ordersByStartAt() {
         Theme theme = themeDao.save(Theme.create(0, "테마", "url", "설명"));
         timeDao.save(ReservationTime.create(0, LocalTime.of(14, 0)));
         timeDao.save(ReservationTime.create(0, LocalTime.of(10, 0)));
 
-        List<ReservationTime> result = timeDao.findAvailable(DATE, theme.id());
+        List<ReservationTime> result = timeDao.findUnreservedBy(DATE, theme.id());
 
         assertThat(result).extracting(ReservationTime::startAt)
                 .containsExactly(LocalTime.of(10, 0), LocalTime.of(14, 0));

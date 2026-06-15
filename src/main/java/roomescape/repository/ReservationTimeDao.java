@@ -64,7 +64,7 @@ public class ReservationTimeDao {
         return jdbcTemplate.query(sql, Map.of(), rowMapper);
     }
 
-    public List<ReservationTime> findAvailable(LocalDate date, long themeId) {
+    public List<ReservationTime> findUnreservedBy(LocalDate date, long themeId) {
         String sql = """
                 SELECT rt.id, rt.start_at
                 FROM reservation_time rt

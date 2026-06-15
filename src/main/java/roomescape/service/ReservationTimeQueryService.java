@@ -29,7 +29,7 @@ public class ReservationTimeQueryService {
     public List<ReservationTime> findAvailableReservationTimes(LocalDate date, long themeId) {
         validateThemeExists(themeId);
         LocalDateTime now = LocalDateTime.now(clock);
-        return reservationTimeDao.findAvailable(date, themeId).stream()
+        return reservationTimeDao.findUnreservedBy(date, themeId).stream()
                 .filter(time -> !time.isPast(date, now))
                 .toList();
     }
