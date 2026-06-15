@@ -147,7 +147,7 @@ public class WaitingRepository {
         };
     }
 
-    public Optional<Waiting> findFirstBySchedule(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Waiting> findFirstBySchedule(LocalDate date, long timeId, long themeId) {
         String sql = """
                 SELECT w.id          AS waiting_id,
                        w.name        AS waiting_name,

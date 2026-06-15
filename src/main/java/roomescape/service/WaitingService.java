@@ -48,7 +48,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
-        checkReservationExists(date, timeId, themeId);
+        checkReservationAndWaitingExists(date, timeId, themeId);
         checkDuplicatedWaiting(date, timeId, themeId, name);
         checkDuplicatedReservation(date, timeId, themeId, name);
 
@@ -93,14 +93,16 @@ public class WaitingService {
         }
     }
 
-    private void checkReservationExists(LocalDate date, long timeId, long themeId) {
-        boolean exists = reservationRepository.findBySchedule(date, timeId, themeId).isPresent();
-        if (!exists) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+    private void checkReservationAndWaitingExists(LocalDate date, long timeId, long themeId) {
+        boolean reservationExists = reservationRepository.findBySchedule(date, timeId, themeId).isPresent();
+        boolean waitingExists = waitingRepository.findFirstBySchedule(date, timeId, themeId).isPresent();
+
+        if (!reservationExists && !waitingExists) {
+            throw new BusinessException(ErrorCode.WAITING_WITHOUT_RESERVATION);
         }
     }
 
-    public Optional<Waiting> findFirstWaiting(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Waiting> findFirstWaiting(LocalDate date, long timeId, long themeId) {
         return waitingRepository.findFirstBySchedule(date, timeId, themeId);
     }
 }

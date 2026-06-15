@@ -20,7 +20,8 @@ public enum ErrorCode {
 
     // Waiting
     DUPLICATE_WAITING("이미 대기 중인 시간입니다."),
-    INVALID_WAITING_RANK("대기 순번은 1 이상이어야 합니다.");
+    INVALID_WAITING_RANK("대기 순번은 1 이상이어야 합니다."),
+    WAITING_WITHOUT_RESERVATION("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
 
     private final String message;
 
