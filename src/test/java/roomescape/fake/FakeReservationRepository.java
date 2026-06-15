@@ -60,7 +60,18 @@ public class FakeReservationRepository implements ReservationRepository {
         for (int i = 0; i < store.size(); i++) {
             Reservation r = store.get(i);
             if (r.getId() != null && r.getId().equals(id)) {
-                store.set(i, Reservation.restore(id, r.getSlot(), name, r.getCreatedAt()));
+                store.set(i, Reservation.restore(id, r.getSlot(), name, r.getCreatedAt(), r.isPaid()));
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void updatePaid(Long id, boolean paid) {
+        for (int i = 0; i < store.size(); i++) {
+            Reservation r = store.get(i);
+            if (r.getId() != null && r.getId().equals(id)) {
+                store.set(i, r.updatePaid(paid));
                 return;
             }
         }
@@ -71,7 +82,7 @@ public class FakeReservationRepository implements ReservationRepository {
         for (int i = 0; i < store.size(); i++) {
             Reservation r = store.get(i);
             if (r.getId() != null && r.getId().equals(id)) {
-                store.set(i, Reservation.restore(id, r.getSlot(), name, createdAt));
+                store.set(i, Reservation.restore(id, r.getSlot(), name, createdAt, r.isPaid()));
                 return 1;
             }
         }

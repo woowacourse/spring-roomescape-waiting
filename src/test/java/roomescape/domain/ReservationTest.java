@@ -47,7 +47,7 @@ public class ReservationTest {
     void restore는_과거_슬롯이어도_예외_없이_복원된다() {
         Slot pastSlot = Slot.restore(1L, LocalDate.now().minusDays(1), reservationTime, theme);
 
-        assertThatCode(() -> Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now()))
+        assertThatCode(() -> Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now(), false))
                 .doesNotThrowAnyException();
     }
 
@@ -57,7 +57,7 @@ public class ReservationTest {
         Slot slot = Slot.restore(1L, date, reservationTime, theme);
         LocalDateTime createdAt = LocalDateTime.now();
 
-        Reservation reservation = Reservation.restore(1L, slot, "브라운", createdAt);
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", createdAt, false);
 
         assertThat(reservation.getId()).isEqualTo(1L);
         assertThat(reservation.getName()).isEqualTo("브라운");
@@ -65,12 +65,57 @@ public class ReservationTest {
         assertThat(reservation.getTime()).isEqualTo(reservationTime);
         assertThat(reservation.getTheme()).isEqualTo(theme);
         assertThat(reservation.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(reservation.isPaid()).isFalse();
+    }
+
+    @Test
+    void create로_생성된_예약은_미결제_상태이다() {
+        Slot futureSlot = slotOf(LocalDateTime.now().plusDays(1));
+
+        Reservation reservation = Reservation.create("브라운", futureSlot);
+
+        assertThat(reservation.isPaid()).isFalse();
+    }
+
+    @Test
+    void restore는_저장된_결제_상태를_그대로_복원한다() {
+        Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
+
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now(), true);
+
+        assertThat(reservation.isPaid()).isTrue();
+    }
+
+    @Test
+    void updatePaid는_결제_상태만_변경하고_나머지_필드는_유지한다() {
+        Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
+        LocalDateTime createdAt = LocalDateTime.now();
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", createdAt, false);
+
+        Reservation paid = reservation.updatePaid(true);
+
+        assertThat(paid.isPaid()).isTrue();
+        assertThat(paid.getId()).isEqualTo(1L);
+        assertThat(paid.getName()).isEqualTo("브라운");
+        assertThat(paid.getDate()).isEqualTo(slot.getDate());
+        assertThat(paid.getTime()).isEqualTo(slot.getTime());
+        assertThat(paid.getCreatedAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    void update는_기존_결제_상태를_유지한다() {
+        Slot currentSlot = slotOf(LocalDateTime.now().plusDays(1));
+        Slot newSlot = slotOf(LocalDateTime.now().plusDays(2));
+        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now(), true);
+
+        assertThat(reservation.update("네오").isPaid()).isTrue();
+        assertThat(reservation.update("네오", newSlot).isPaid()).isTrue();
     }
 
     @Test
     void withName은_같은_슬롯에서_이름만_변경한다() {
         Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
-        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now(), false);
 
         Reservation renamed = reservation.update("네오");
 
@@ -84,7 +129,7 @@ public class ReservationTest {
     @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
     void 과거_슬롯의_예약은_withName_시_예외가_발생한다(int day, int hour) {
         Slot pastSlot = slotOf(LocalDateTime.now().minusDays(day).minusHours(hour));
-        Reservation reservation = Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now(), false);
 
         assertThatThrownBy(() -> reservation.update("네오"))
                 .isExactlyInstanceOf(ExpiredDateTimeException.class);
@@ -94,7 +139,7 @@ public class ReservationTest {
     void 미래_슬롯으로_이동하면_정상_변경된다() {
         Slot currentSlot = slotOf(LocalDateTime.now().plusDays(1));
         Slot newSlot = slotOf(LocalDateTime.now().plusDays(2));
-        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now(), false);
 
         Reservation moved = reservation.update("네오", newSlot);
 
@@ -109,7 +154,7 @@ public class ReservationTest {
     void 과거_슬롯으로_이동하면_예외가_발생한다(int day, int hour) {
         Slot currentSlot = slotOf(LocalDateTime.now().plusDays(1));
         Slot pastSlot = slotOf(LocalDateTime.now().minusDays(day).minusHours(hour));
-        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now(), false);
 
         assertThatThrownBy(() -> reservation.update("네오", pastSlot))
                 .isExactlyInstanceOf(ExpiredDateTimeException.class);
@@ -120,7 +165,7 @@ public class ReservationTest {
     void 과거_예약은_미래_슬롯으로_이동해도_예외가_발생한다(int day, int hour) {
         Slot pastSlot = slotOf(LocalDateTime.now().minusDays(day).minusHours(hour));
         Slot futureSlot = slotOf(LocalDateTime.now().plusDays(2));
-        Reservation reservation = Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now(), false);
 
         assertThatThrownBy(() -> reservation.update("네오", futureSlot))
                 .isExactlyInstanceOf(ExpiredDateTimeException.class);
@@ -129,7 +174,7 @@ public class ReservationTest {
     @Test
     void isReservedBy는_예약자_이름과_일치하는지_확인한다() {
         Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
-        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now(), false);
 
         assertThat(reservation.isReservedBy("브라운")).isTrue();
         assertThat(reservation.isReservedBy("네오")).isFalse();

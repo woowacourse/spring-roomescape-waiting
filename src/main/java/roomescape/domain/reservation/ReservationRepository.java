@@ -20,6 +20,8 @@ public interface ReservationRepository {
 
     void updateName(Long id, String name);
 
+    void updatePaid(Long id, boolean paid);
+
     long update(Long id, String name, Long slotId, LocalDateTime createdAt);
 
     long delete(Long id);

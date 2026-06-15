@@ -32,6 +32,7 @@ CREATE TABLE reservation
     slot_id    BIGINT       NOT NULL,
     name       VARCHAR(255) NOT NULL,
     created_at TIMESTAMP    NOT NULL,
+    paid       BOOLEAN      NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id),
     UNIQUE (slot_id),
     FOREIGN KEY (slot_id) REFERENCES slot (id) ON DELETE RESTRICT

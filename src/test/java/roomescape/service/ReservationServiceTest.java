@@ -295,7 +295,7 @@ class ReservationServiceTest {
         Slot pastSlot = Slot.create(LocalDate.now().minusDays(1), time, theme);
         Long slotId = slotDao.insert(pastSlot);
         Long expiredId = reservationUpdatingDao.insert(
-                Reservation.restore(null, pastSlot.withId(slotId), "브라운", LocalDateTime.now()));
+                Reservation.restore(null, pastSlot.withId(slotId), "브라운", LocalDateTime.now(), false));
 
         assertThatThrownBy(() -> reservationService.delete(expiredId))
                 .isInstanceOf(ExpiredDateTimeException.class);

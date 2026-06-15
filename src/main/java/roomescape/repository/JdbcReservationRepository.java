@@ -30,6 +30,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT r.id AS reservation_id,
                    r.name AS reservation_name,
                    r.created_at AS reservation_created_at,
+                   r.paid AS reservation_paid,
                    s.id AS slot_id,
                    s.date AS slot_date,
                    t.id AS time_id,
@@ -65,7 +66,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getLong("reservation_id"),
                 slot,
                 resultSet.getString("reservation_name"),
-                resultSet.getObject("reservation_created_at", LocalDateTime.class)
+                resultSet.getObject("reservation_created_at", LocalDateTime.class),
+                resultSet.getBoolean("reservation_paid")
         );
     };
 
@@ -106,13 +108,14 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Long insert(Reservation reservation) {
-        String sql = "insert into reservation(slot_id, name, created_at) values(?, ?, ?)";
+        String sql = "insert into reservation(slot_id, name, created_at, paid) values(?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setLong(1, reservation.getSlot().getId());
             ps.setString(2, reservation.getName());
             ps.setObject(3, reservation.getCreatedAt());
+            ps.setBoolean(4, reservation.isPaid());
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -122,6 +125,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void updateName(Long id, String name) {
         String sql = "update reservation set name = ? where id = ?";
         jdbcTemplate.update(sql, name, id);
+    }
+
+    @Override
+    public void updatePaid(Long id, boolean paid) {
+        String sql = "update reservation set paid = ? where id = ?";
+        jdbcTemplate.update(sql, paid, id);
     }
 
     @Override

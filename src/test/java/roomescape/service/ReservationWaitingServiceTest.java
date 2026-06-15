@@ -49,7 +49,7 @@ class ReservationWaitingServiceTest {
     private Slot reservedSlot(Long slotId, LocalDate date, String ownerName) {
         Slot slot = Slot.restore(slotId, date, reservationTime, theme);
         slotDao.save(slot);
-        reservationQueryingDao.save(Reservation.restore(slotId * 10, slot, ownerName, LocalDateTime.now()));
+        reservationQueryingDao.save(Reservation.restore(slotId * 10, slot, ownerName, LocalDateTime.now(), false));
         return slot;
     }
 
