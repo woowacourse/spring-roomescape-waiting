@@ -10,6 +10,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserReservationRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.UserReservation;
 import roomescape.service.event.ReservationSlotReleasedEvent;
 import roomescape.service.exception.BusinessConflictException;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final UserReservationRepository userReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -34,6 +36,7 @@ public class ReservationService {
 
     public ReservationService(
             ReservationRepository reservationRepository,
+            WaitingRepository waitingRepository,
             UserReservationRepository userReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
@@ -41,6 +44,7 @@ public class ReservationService {
             ApplicationEventPublisher eventPublisher
     ) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.userReservationRepository = userReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -58,6 +62,8 @@ public class ReservationService {
 
     @Transactional
     public Reservation createReservation(String name, LocalDate date, long timeId, long themeId) {
+        checkWaitingExists(date, timeId, themeId);
+
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
 
@@ -112,6 +118,14 @@ public class ReservationService {
 
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void checkWaitingExists(LocalDate date, long timeId, long themeId) {
+        boolean waitingExists = waitingRepository.findFirstBySchedule(date, timeId, themeId).isPresent();
+
+        if (waitingExists) {
+            throw new BusinessConflictException(ErrorCode.RESERVATION_NOT_ALLOWED_WITH_WAITING);
         }
     }
 }
