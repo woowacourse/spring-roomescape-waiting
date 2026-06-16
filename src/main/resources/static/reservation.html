@@ -80,6 +80,13 @@
             line-height: 1.5;
         }
 
+        .theme-info .price {
+            margin-top: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
         .step {
             background: #fff;
             border-radius: 12px;
@@ -221,7 +228,7 @@
         <p class="step-label">Step 3</p>
         <h3>예약자 이름</h3>
         <input type="text" id="name-input" placeholder="이름을 입력하세요" maxlength="30">
-        <button id="submit" class="submit-btn" disabled>예약하기</button>
+        <button id="submit" class="submit-btn" disabled>결제하기</button>
         <div id="result"></div>
     </div>
 </main>
@@ -259,6 +266,7 @@
                 <div class="theme-info-body">
                     <h2>${theme.name}</h2>
                     <p>${theme.description}</p>
+                    ${theme.price != null ? `<p class="price">₩${Number(theme.price).toLocaleString()}</p>` : ''}
                 </div>
             `;
         } catch (e) {
@@ -356,6 +364,13 @@
                 throw new Error(data.message || `서버 오류 (${res.status})`);
             }
 
+            // 결제가 필요한 신규 예약: 서버가 발급한 orderId 로 결제 페이지로 이동한다.
+            if (data.orderId) {
+                window.location.href = '/payments/checkout?orderId=' + encodeURIComponent(data.orderId);
+                return;
+            }
+
+            // orderId 가 없으면 결제 불필요(예: 대기 등록) — 기존 안내를 유지한다.
             if (data.waitingOrder > 0) {
                 alert(`이미 예약된 시간입니다. 대기 ${data.waitingOrder}번으로 등록되었습니다.`);
             } else {
