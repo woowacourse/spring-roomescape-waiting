@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>결제 완료</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+            margin: 0;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        header {
+            background: #1d1d1f;
+            color: #fff;
+            padding: 24px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        main {
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .desc {
+            color: #888;
+            margin: 0 0 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 16px;
+        }
+
+        .row .label {
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .row .val {
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .links {
+            margin-top: 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .links a {
+            color: #007aff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>🔑 방탈출 예약</h1>
+</header>
+<main>
+    <div class="card">
+        <h2>✅ 결제를 완료했어요</h2>
+        <p class="desc">브라우저 인증 후 <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정하고, 예약을 CONFIRMED 로 변경했습니다.</p>
+
+        <div class="row"><span class="label">결제 상태</span>
+            <span class="val" th:text="${result != null ? result.status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
+        <div class="row"><span class="label">주문번호</span>
+            <span class="val" th:text="${result?.orderId()}">order-xxxx</span></div>
+        <div class="row"><span class="label">승인 금액</span>
+            <span class="val"
+                  th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">30,000원</span>
+        </div>
+        <div class="row"><span class="label">paymentKey</span>
+            <span class="val" th:text="${paymentKey}">tviva...</span></div>
+
+        <div class="links">
+            <a href="/my-reservations.html">내 예약 보기</a>
+            <a href="/index.html">← 메인으로</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
