@@ -32,7 +32,8 @@ public class AdminThemeService {
         Theme theme = Theme.of(
                 request.name(),
                 request.description(),
-                request.imageUrl()
+                request.imageUrl(),
+                request.price()
         );
 
         Theme saved = adminThemeRepository.save(theme);
@@ -71,7 +72,7 @@ public class AdminThemeService {
 
     private void validateDuplicateTheme(String name) {
         if (adminThemeRepository.existsByName(name)) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_THEME_NAME);
         }
     }
 }

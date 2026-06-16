@@ -36,7 +36,7 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 예약_정상_생성_확인_테스트() {
+    void 예약_정상_생성_확인_테스트() throws InterruptedException {
         Long themeId = insertTheme("테마1");
         Long timeId = insertTime("10:00", "11:00");
 
@@ -46,12 +46,16 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
         params.put("themeId", themeId);
 
-        RestAssured.given().log().all()
+        String jobId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(202)
+                .extract().jsonPath().getString("jobId");
+
+        Map<String, Object> result = pollUntilDone(jobId);
+        assertEquals("SUCCESS", result.get("status"));
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE name = ?", Integer.class, "유저1"
@@ -80,7 +84,7 @@ class ReservationControllerTest {
     }
 
     @Test
-    void createReservation_과거_날짜인경우_에러_반환_테스트() {
+    void createReservation_과거_날짜인경우_에러_반환_테스트() throws InterruptedException {
         Long themeId = insertTheme("테마1");
         Long timeId = insertTime("10:00", "11:00");
 
@@ -90,17 +94,21 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
         params.put("themeId", themeId);
 
-        RestAssured.given().log().all()
+        String jobId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(422)
-                .body("message", is("이미 지난 날짜의 예약은 생성할 수 없습니다."));
+                .statusCode(202)
+                .extract().jsonPath().getString("jobId");
+
+        Map<String, Object> result = pollUntilDone(jobId);
+        assertEquals("FAILED", result.get("status"));
+        assertEquals("이미 지난 날짜의 예약은 생성할 수 없습니다.", result.get("errorMessage"));
     }
 
     @Test
-    void createReservation_중복된_예약인경우_에러_반환_테스트() {
+    void createReservation_중복된_예약인경우_에러_반환_테스트() throws InterruptedException {
         Long themeId = insertTheme("테마1");
         Long timeId = insertTime("10:00", "11:00");
         insertReservation("유저1", "2099-12-31", timeId, themeId);
@@ -111,17 +119,21 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
         params.put("themeId", themeId);
 
-        RestAssured.given().log().all()
+        String jobId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(409)
-                .body("message", is("이미 선택된 예약입니다."));
+                .statusCode(202)
+                .extract().jsonPath().getString("jobId");
+
+        Map<String, Object> result = pollUntilDone(jobId);
+        assertEquals("FAILED", result.get("status"));
+        assertEquals("이미 선택된 예약입니다.", result.get("errorMessage"));
     }
 
     @Test
-    void createReservation_존재하지_않는_시간_id인경우_에러_반환_테스트() {
+    void createReservation_존재하지_않는_시간_id인경우_에러_반환_테스트() throws InterruptedException {
         Long themeId = insertTheme("테마1");
 
         Map<String, Object> params = new HashMap<>();
@@ -130,17 +142,21 @@ class ReservationControllerTest {
         params.put("timeId", 999L);
         params.put("themeId", themeId);
 
-        RestAssured.given().log().all()
+        String jobId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(404)
-                .body("message", is("해당 time id를 찾을 수 없습니다."));
+                .statusCode(202)
+                .extract().jsonPath().getString("jobId");
+
+        Map<String, Object> result = pollUntilDone(jobId);
+        assertEquals("FAILED", result.get("status"));
+        assertEquals("해당 time id를 찾을 수 없습니다.", result.get("errorMessage"));
     }
 
     @Test
-    void createReservation_존재하지_않는_테마_id인경우_에러_반환_테스트() {
+    void createReservation_존재하지_않는_테마_id인경우_에러_반환_테스트() throws InterruptedException {
         Long timeId = insertTime("10:00", "11:00");
 
         Map<String, Object> params = new HashMap<>();
@@ -149,13 +165,17 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
         params.put("themeId", 999L);
 
-        RestAssured.given().log().all()
+        String jobId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(404)
-                .body("message", is("해당 theme id를 찾을 수 없습니다."));
+                .statusCode(202)
+                .extract().jsonPath().getString("jobId");
+
+        Map<String, Object> result = pollUntilDone(jobId);
+        assertEquals("FAILED", result.get("status"));
+        assertEquals("해당 theme id를 찾을 수 없습니다.", result.get("errorMessage"));
     }
 
     @Test
@@ -220,7 +240,7 @@ class ReservationControllerTest {
         Long reservationId = insertReservation("유저1", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/reservation/" + reservationId)
+                .when().delete("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
 
@@ -231,9 +251,41 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 예약_삭제_시_대기자가_있으면_첫번째_대기자가_예약으로_승격된다() {
+        Long themeId = insertTheme("테마1");
+        Long timeId = insertTime("10:00", "11:00");
+        Long reservationId = insertReservation("유저1", "2099-12-31", timeId, themeId);
+        insertWaiting("대기자1", "2099-12-31", timeId, themeId);
+        insertWaiting("대기자2", "2099-12-31", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        Integer reservationCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE name = ? AND date = ?",
+                Integer.class, "대기자1", "2099-12-31"
+        );
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE name = ? AND date = ?",
+                Integer.class, "대기자1", "2099-12-31"
+        );
+        Integer remainingWaitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE date = ?",
+                Integer.class, "2099-12-31"
+        );
+        assertAll(
+                () -> assertEquals(1, reservationCount),
+                () -> assertEquals(0, waitingCount),
+                () -> assertEquals(1, remainingWaitingCount)
+        );
+    }
+
+    @Test
     void deleteReservation_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-                .when().delete("/reservation/999")
+                .when().delete("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("해당 reservation id를 찾을 수 없습니다."));
@@ -254,7 +306,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
 
@@ -284,7 +336,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(401)
                 .body("message", is("해당 예약을 삭제할 권한이 없습니다."));
@@ -302,7 +354,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/999")
+                .when().patch("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("해당 reservation id를 찾을 수 없습니다."));
@@ -322,7 +374,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("해당 time id를 찾을 수 없습니다."));
@@ -342,10 +394,25 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservation/" + reservationId)
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(422)
                 .body("message", is("이미 지난 날짜의 예약은 생성할 수 없습니다."));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> pollUntilDone(String jobId) throws InterruptedException {
+        for (int i = 0; i < 50; i++) {
+            Thread.sleep(100);
+            Map<String, Object> result = RestAssured.given()
+                    .get("/reservations/status/" + jobId)
+                    .then().statusCode(200)
+                    .extract().as(Map.class);
+            if (!"PENDING".equals(result.get("status"))) {
+                return result;
+            }
+        }
+        throw new RuntimeException("Job did not complete in time: " + jobId);
     }
 
     private Long insertTheme(String name) {
@@ -375,6 +442,16 @@ class ReservationControllerTest {
         );
         return jdbcTemplate.queryForObject(
                 "SELECT MAX(id) FROM reservation", Long.class
+        );
+    }
+
+    private Long insertWaiting(String name, String date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, date, timeId, themeId
+        );
+        return jdbcTemplate.queryForObject(
+                "SELECT MAX(id) FROM waiting", Long.class
         );
     }
 }

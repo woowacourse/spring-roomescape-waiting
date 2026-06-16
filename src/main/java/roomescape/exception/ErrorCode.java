@@ -19,14 +19,21 @@ public enum ErrorCode {
     //409 - CONFLICT
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 선택된 예약입니다."),
     TIME_DELETE_NOT_ALLOWED(HttpStatus.CONFLICT, "예약이 존재하는 시간을 삭제할 수 없습니다."),
-    DUPLICATE_RESERVATION_NAME(HttpStatus.CONFLICT, "해당 이름의 예약이 이미 존재합니다."),
     DUPLICATE_WAITING_NAME(HttpStatus.CONFLICT, "해당 이름의 예약 대기가 이미 존재합니다."),
     DUPLICATE_TIME(HttpStatus.CONFLICT, "이미 등록된 시작 시간입니다."),
+    DUPLICATE_THEME_NAME(HttpStatus.CONFLICT, "이미 등록된 테마 이름입니다."),
 
     //422 - UNPROCESSABLE CONTENT
     RESERVATION_TIME_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 지난 날짜의 예약은 생성할 수 없습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.UNPROCESSABLE_ENTITY, "해당 예약은 점유되어있지 않습니다."),
-    WAITING_NOT_AVAILABLE(HttpStatus.UNPROCESSABLE_ENTITY, "예약이 이미 등록되어있습니다.");
+    WAITING_NOT_AVAILABLE(HttpStatus.UNPROCESSABLE_ENTITY, "예약이 이미 등록되어있습니다."),
+
+    //400 - PAYMENT
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
+    PAYMENT_CONFIRM_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "예약 확정에 실패했습니다."),
+
+    //503 - SERVICE_UNAVAILABLE
+    SERVER_OVERLOADED(HttpStatus.SERVICE_UNAVAILABLE, "서버가 일시적으로 처리할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

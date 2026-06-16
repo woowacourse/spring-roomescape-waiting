@@ -1,13 +1,12 @@
 package roomescape.domain.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,8 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.dto.ThemeResponse;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -31,13 +28,13 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Test
-    void getTopThemes_top10_id_순서대로_반환() {
-        Theme theme1 = Theme.of(1L, "테마1", "설명1", "url1");
-        Theme theme2 = Theme.of(2L, "테마2", "설명2", "url2");
-        when(reservationRepository.findThemeIdTop10(any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(List.of(1L, 2L));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme1));
-        when(themeRepository.findById(2L)).thenReturn(Optional.of(theme2));
+    void getTopThemes_예약_많은_테마_순서대로_반환() {
+        Theme theme1 = Theme.of(1L, "테마1", "설명1", "url1", 50_000L);
+        Theme theme2 = Theme.of(2L, "테마2", "설명2", "url2", 50_000L);
+        // theme1 이 2번, theme2 가 1번 예약됨
+        when(reservationRepository.findThemeIdsByDateRange(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(1L, 1L, 2L));
+        when(themeRepository.findByIds(anyList())).thenReturn(List.of(theme1, theme2));
 
         List<ThemeResponse> responses = themeService.getTopThemes();
 
@@ -46,20 +43,9 @@ class ThemeServiceTest {
     }
 
     @Test
-    void getTopThemes_테마_id가_존재하지_않으면_예외() {
-        when(reservationRepository.findThemeIdTop10(any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(List.of(999L));
-        when(themeRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> themeService.getTopThemes())
-                .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
-    }
-
-    @Test
     void getAllThemes_정상_조회() {
-        Theme theme1 = Theme.of(1L, "테마1", "설명1", "url1");
-        Theme theme2 = Theme.of(2L, "테마2", "설명2", "url2");
+        Theme theme1 = Theme.of(1L, "테마1", "설명1", "url1", 50_000L);
+        Theme theme2 = Theme.of(2L, "테마2", "설명2", "url2", 50_000L);
         when(themeRepository.findAll()).thenReturn(List.of(theme1, theme2));
 
         List<ThemeResponse> responses = themeService.getAllThemes();

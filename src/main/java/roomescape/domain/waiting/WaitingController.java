@@ -1,18 +1,19 @@
 package roomescape.domain.waiting;
 
-import java.net.URI;
+import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.waiting.dto.MyWaitingsResponse;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.domain.waiting.dto.WaitingResponse;
+import roomescape.infra.queue.JobResult;
 
 @RestController
 public class WaitingController {
@@ -26,12 +27,20 @@ public class WaitingController {
     }
 
     @PostMapping("/reservations/waiting")
-    public ResponseEntity<WaitingResponse> createWaiting(
+    public ResponseEntity<Map<String, String>> createWaiting(
             @Valid @RequestBody WaitingRequest waitingRequest
     ) {
-        WaitingResponse response = waitingQueue.submit(waitingRequest);
-        URI location = URI.create("/reservations/waiting/" + response.id());
-        return ResponseEntity.created(location).body(response);
+        String jobId = waitingQueue.enqueue(waitingRequest);
+        return ResponseEntity.accepted().body(Map.of("jobId", jobId));
+    }
+
+    @GetMapping("/reservations/waiting/status/{jobId}")
+    public ResponseEntity<JobResult<WaitingResponse>> getJobStatus(@PathVariable String jobId) {
+        JobResult<WaitingResponse> result = waitingQueue.getResult(jobId);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/reservations/waiting/mine")

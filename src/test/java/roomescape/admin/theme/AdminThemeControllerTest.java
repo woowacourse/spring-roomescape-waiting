@@ -33,10 +33,11 @@ class AdminThemeControllerTest {
 
     @Test
     void 테마_정상_생성_확인_테스트() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "테마1");
         params.put("description", "테마 설명");
         params.put("imageUrl", "https://example.com/image.jpg");
+        params.put("price", 50000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -52,10 +53,11 @@ class AdminThemeControllerTest {
 
     @Test
     void createTheme_이름이_비어있는경우_에러_반환_테스트() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "");
         params.put("description", "테마 설명");
         params.put("imageUrl", "https://example.com/image.jpg");
+        params.put("price", 50000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -68,10 +70,11 @@ class AdminThemeControllerTest {
 
     @Test
     void createTheme_중복된_이름인경우_에러_반환_테스트() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "테마1");
         params.put("description", "테마 설명");
         params.put("imageUrl", "https://example.com/image.jpg");
+        params.put("price", 50000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -86,7 +89,7 @@ class AdminThemeControllerTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", is("해당 이름의 예약이 이미 존재합니다."));
+                .body("message", is("이미 등록된 테마 이름입니다."));
     }
 
     @Test

@@ -198,7 +198,7 @@ function clearBookingBar() {
   document.querySelectorAll('#time-list .time-btn').forEach(el => el.classList.remove('active'));
 }
 
-function confirmBooking() {
+async function confirmBooking() {
   const name = document.getElementById('booking-name').value.trim();
   if (!name) {
     alert('예약자 이름을 입력해주세요.');
@@ -209,20 +209,33 @@ function confirmBooking() {
     return;
   }
 
-  const endpoint = state.isWaiting ? WAITING_API : RESERVATION_API;
-  apiFetch(endpoint, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      name,
-      date: state.date,
-      timeId: state.timeId,
-      themeId: state.themeId
-    })
-  })
-    .then(() => {
-      alert(state.isWaiting ? '예약 대기가 완료되었습니다.' : '예약이 완료되었습니다.');
-      refreshTimes();
-    })
-    .catch(showError);
+  const body = JSON.stringify({ name, date: state.date, timeId: state.timeId, themeId: state.themeId });
+
+  try {
+    if (state.isWaiting) {
+      const { jobId } = await apiFetch(WAITING_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body
+      });
+      const result = await pollJobUntilDone(`/reservations/waiting/status/${jobId}`);
+      if (result.status === 'SUCCESS') {
+        alert('예약 대기가 완료되었습니다.');
+        refreshTimes();
+      } else {
+        showError(new Error(result.errorMessage));
+      }
+    } else {
+      const params = new URLSearchParams({
+        name,
+        date: state.date,
+        timeId: state.timeId,
+        themeId: state.themeId,
+        themeName: state.themeName || ''
+      });
+      window.location.href = `/payments/checkout?${params}`;
+    }
+  } catch (err) {
+    showError(err);
+  }
 }

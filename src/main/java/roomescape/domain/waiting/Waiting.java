@@ -1,10 +1,9 @@
 package roomescape.domain.waiting;
 
 import java.time.LocalDate;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 
 public class Waiting {
 
@@ -27,6 +26,7 @@ public class Waiting {
     }
 
     public static Waiting of(String name, LocalDate date, ReservationTime time, Theme theme) {
+        time.validateIfTimePast(date);
         return new Waiting(null, name, date, time, theme);
     }
 
@@ -50,9 +50,8 @@ public class Waiting {
         return name;
     }
 
-    public void validateNotOwnerOf(String reservationOwner) {
-        if (this.name.equals(reservationOwner)) {
-            throw new RoomescapeException(ErrorCode.WAITING_NOT_AVAILABLE);
-        }
+    public ReservationSlot getSlot() {
+        return ReservationSlot.of(date, time, theme);
     }
+
 }

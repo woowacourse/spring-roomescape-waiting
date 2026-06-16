@@ -133,7 +133,7 @@ function saveEdit(row, id, date, timeId) {
     alert('날짜와 시간을 선택해주세요.');
     return;
   }
-  apiFetch(`/reservation/${id}`, {
+  apiFetch(`/reservations/${id}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ name: currentName, date, timeId })
@@ -147,7 +147,7 @@ function saveEdit(row, id, date, timeId) {
 
 function deleteReservation(id, row) {
   if (!confirm('이 예약을 삭제하시겠습니까?')) return;
-  apiFetch(`/reservation/${id}`, { method: 'DELETE' })
+  apiFetch(`/reservations/${id}`, { method: 'DELETE' })
     .then(() => {
       row.remove();
       const tbody = document.getElementById('reservation-table-body');

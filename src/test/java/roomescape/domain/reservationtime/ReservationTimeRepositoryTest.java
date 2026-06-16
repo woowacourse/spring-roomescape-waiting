@@ -10,7 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 
 @JdbcTest
@@ -146,7 +146,7 @@ class ReservationTimeRepositoryTest {
                     ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
             );
 
-            Optional<ReservationTime> result = reservationTimeRepository.findByIdForUpdate(saved.getId());
+            Optional<ReservationTime> result = reservationTimeRepository.findById(saved.getId());
 
             assertAll(
                     () -> assertThat(result).isPresent(),
@@ -157,7 +157,7 @@ class ReservationTimeRepositoryTest {
 
         @Test
         void 존재하지_않는_id면_빈_Optional을_반환한다() {
-            Optional<ReservationTime> result = reservationTimeRepository.findByIdForUpdate(999L);
+            Optional<ReservationTime> result = reservationTimeRepository.findById(999L);
 
             assertThat(result).isEmpty();
         }

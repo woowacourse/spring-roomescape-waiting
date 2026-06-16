@@ -2,12 +2,12 @@ package roomescape.domain.theme;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.dto.ThemeResponse;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 
 @Service
 public class ThemeService {
@@ -25,12 +25,15 @@ public class ThemeService {
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now();
 
-        List<Long> themeIds = reservationRepository.findThemeIdTop10(startDate, endDate);
+        List<Long> top10Ids = ThemeRanking.from(
+                reservationRepository.findThemeIdsByDateRange(startDate, endDate)
+        ).topThemeIds(10);
 
-        return themeIds.stream()
-                .map((themeId) ->
-                        themeRepository.findById(themeId)
-                                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND)))
+        Map<Long, Theme> themeMap = themeRepository.findByIds(top10Ids).stream()
+                .collect(Collectors.toMap(Theme::getId, t -> t));
+
+        return top10Ids.stream()
+                .map(themeMap::get)
                 .map(ThemeResponse::from)
                 .toList();
     }

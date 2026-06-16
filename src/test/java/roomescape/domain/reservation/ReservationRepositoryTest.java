@@ -12,11 +12,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationSummary;
 
 @JdbcTest
 @Import(ReservationRepository.class)
@@ -53,8 +55,8 @@ class ReservationRepositoryTest {
 
         time = ReservationTime.of(timeId, LocalTime.of(10, 0), LocalTime.of(11, 0));
         anotherTime = ReservationTime.of(anotherTimeId, LocalTime.of(12, 0), LocalTime.of(13, 0));
-        theme = Theme.of(themeId, "테마1", "설명1", "https://example.com/1.jpg");
-        anotherTheme = Theme.of(anotherThemeId, "테마2", "설명2", "https://example.com/2.jpg");
+        theme = Theme.of(themeId, "테마1", "설명1", "https://example.com/1.jpg", 50_000L);
+        anotherTheme = Theme.of(anotherThemeId, "테마2", "설명2", "https://example.com/2.jpg", 50_000L);
     }
 
     @Nested
@@ -85,8 +87,8 @@ class ReservationRepositoryTest {
         void 예약이_존재하면_true를_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            boolean result = reservationRepository.existsBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 
             assertThat(result).isTrue();
@@ -96,8 +98,8 @@ class ReservationRepositoryTest {
         void 날짜가_다르면_false를_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                    LocalDate.of(2099, 12, 30), time.getId(), theme.getId()
+            boolean result = reservationRepository.existsBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 30), time, theme)
             );
 
             assertThat(result).isFalse();
@@ -107,8 +109,8 @@ class ReservationRepositoryTest {
         void 시간이_다르면_false를_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                    LocalDate.of(2099, 12, 31), anotherTime.getId(), theme.getId()
+            boolean result = reservationRepository.existsBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), anotherTime, theme)
             );
 
             assertThat(result).isFalse();
@@ -118,8 +120,8 @@ class ReservationRepositoryTest {
         void 테마가_다르면_false를_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                    LocalDate.of(2099, 12, 31), time.getId(), anotherTheme.getId()
+            boolean result = reservationRepository.existsBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), time, anotherTheme)
             );
 
             assertThat(result).isFalse();
@@ -157,7 +159,7 @@ class ReservationRepositoryTest {
 
             reservationRepository.deleteById(saved.getId());
 
-            assertThat(reservationRepository.existsById(saved.getId())).isFalse();
+            assertThat(reservationRepository.findById(saved.getId())).isEmpty();
         }
     }
 
@@ -185,45 +187,23 @@ class ReservationRepositoryTest {
     }
 
     @Nested
-    @DisplayName("id로 예약 존재 여부 조회")
-    class ExistsById {
+    @DisplayName("날짜 범위로 테마 ID 조회")
+    class FindThemeIdsByDateRange {
 
         @Test
-        void 존재하는_id면_true를_반환한다() {
-            Reservation saved = reservationRepository.save(
-                    Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
-            );
-
-            boolean result = reservationRepository.existsById(saved.getId());
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 존재하지_않는_id면_false를_반환한다() {
-            boolean result = reservationRepository.existsById(999L);
-
-            assertThat(result).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("인기 테마 id 조회")
-    class FindThemeIdTop10 {
-
-        @Test
-        void 기간_내_예약이_많은_테마_id부터_최대_10개를_반환한다() {
+        void 기간_내_예약의_테마_id를_모두_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             reservationRepository.save(Reservation.of("유저2", LocalDate.of(2099, 12, 30), time, theme));
             reservationRepository.save(Reservation.of("유저3", LocalDate.of(2099, 12, 30), anotherTime, theme));
             reservationRepository.save(Reservation.of("다른유저", LocalDate.of(2099, 12, 31), time, anotherTheme));
             reservationRepository.save(Reservation.of("기간밖유저", LocalDate.of(2099, 12, 29), time, anotherTheme));
 
-            List<Long> result = reservationRepository.findThemeIdTop10(
+            List<Long> result = reservationRepository.findThemeIdsByDateRange(
                     LocalDate.of(2099, 12, 30), LocalDate.of(2099, 12, 31)
             );
 
-            assertThat(result).containsExactly(theme.getId(), anotherTheme.getId());
+            assertThat(result).hasSize(4)
+                    .containsOnly(theme.getId(), anotherTheme.getId());
         }
     }
 
@@ -236,14 +216,14 @@ class ReservationRepositoryTest {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             reservationRepository.save(Reservation.of("유저2", LocalDate.of(2099, 12, 31), anotherTime, anotherTheme));
 
-            List<Reservation> result = reservationRepository.findByName("유저1");
+            List<ReservationSummary> result = reservationRepository.findByName("유저1");
 
             assertAll(
                     () -> assertThat(result).hasSize(1),
-                    () -> assertThat(result.get(0).getName()).isEqualTo("유저1"),
-                    () -> assertThat(result.get(0).getDate()).isEqualTo(LocalDate.of(2099, 12, 31)),
-                    () -> assertThat(result.get(0).getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
-                    () -> assertThat(result.get(0).getTheme().getName()).isEqualTo("테마1")
+                    () -> assertThat(result.get(0).name()).isEqualTo("유저1"),
+                    () -> assertThat(result.get(0).date()).isEqualTo(LocalDate.of(2099, 12, 31)),
+                    () -> assertThat(result.get(0).startAt()).isEqualTo(LocalTime.of(10, 0)),
+                    () -> assertThat(result.get(0).themeName()).isEqualTo("테마1")
             );
         }
 
@@ -251,7 +231,7 @@ class ReservationRepositoryTest {
         void 이름에_해당하는_예약이_없으면_빈_리스트를_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            List<Reservation> result = reservationRepository.findByName("없는유저");
+            List<ReservationSummary> result = reservationRepository.findByName("없는유저");
 
             assertThat(result).isEmpty();
         }
@@ -288,50 +268,27 @@ class ReservationRepositoryTest {
     }
 
     @Nested
-    @DisplayName("id로 예약 존재 여부 조회 (FOR UPDATE)")
-    class ExistsByIdForUpdate {
+    @DisplayName("날짜/시간/테마로 예약 조회 (FOR UPDATE)")
+    class FindBySlotForUpdate {
 
         @Test
-        void 존재하는_id면_true를_반환한다() {
-            Reservation saved = reservationRepository.save(
-                    Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
-            );
-
-            boolean result = reservationRepository.existsByIdForUpdate(saved.getId());
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 존재하지_않는_id면_false를_반환한다() {
-            boolean result = reservationRepository.existsByIdForUpdate(999L);
-
-            assertThat(result).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("날짜/시간/테마로 예약자 이름 조회 (FOR UPDATE)")
-    class FindNameByDateAndTimeIdAndThemeIdForUpdate {
-
-        @Test
-        void 해당_날짜_시간_테마의_예약이_있으면_예약자_이름을_반환한다() {
+        void 해당_날짜_시간_테마의_예약이_있으면_예약을_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            Optional<Reservation> result = reservationRepository.findBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 
             assertAll(
                     () -> assertThat(result).isPresent(),
-                    () -> assertThat(result.get()).isEqualTo("유저1")
+                    () -> assertThat(result.get().getName()).isEqualTo("유저1")
             );
         }
 
         @Test
         void 해당_날짜_시간_테마의_예약이_없으면_빈_Optional을_반환한다() {
-            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            Optional<Reservation> result = reservationRepository.findBySlot(
+                    ReservationSlot.of(LocalDate.of(2099, 12, 31), time, theme)
             );
 
             assertThat(result).isEmpty();
@@ -348,7 +305,8 @@ class ReservationRepositoryTest {
                     Reservation.of("유저1", LocalDate.of(2099, 12, 30), time, theme)
             );
 
-            reservationRepository.updateDateAndTime(saved.getId(), LocalDate.of(2099, 12, 31), anotherTime.getId());
+            saved.changeSchedule(LocalDate.of(2099, 12, 31), anotherTime);
+            reservationRepository.update(saved);
 
             Optional<Reservation> result = reservationRepository.findById(saved.getId());
             assertAll(

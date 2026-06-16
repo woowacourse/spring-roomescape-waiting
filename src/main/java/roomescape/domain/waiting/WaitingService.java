@@ -1,11 +1,12 @@
 package roomescape.domain.waiting;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -43,24 +44,18 @@ public class WaitingService {
         Theme theme = themeRepository.findById(waitingRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
-        validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
-                waitingRequest.name());
-        reservationTime.validateIfTimePast(waitingRequest.date());
+        ReservationSlot slot = ReservationSlot.of(waitingRequest.date(), reservationTime, theme);
 
-        Waiting waiting = Waiting.of(
-                waitingRequest.name(),
-                waitingRequest.date(),
-                reservationTime,
-                theme
-        );
-
-        String reservationOwner = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
-                        waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
+        Reservation reservation = reservationRepository.findBySlot(slot)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
-        waiting.validateNotOwnerOf(reservationOwner);
+
+        Waitings waitings = Waitings.of(waitingRepository.findAllBySlot(slot));
+        waitings.validateCanEnqueue(waitingRequest.name(), reservation);
 
         try {
-            Waiting saved = waitingRepository.save(waiting);
+            Waiting saved = waitingRepository.save(
+                    Waiting.of(waitingRequest.name(), waitingRequest.date(), reservationTime, theme)
+            );
             return WaitingResponse.of(saved);
         } catch (DuplicateKeyException exception) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_WAITING_NAME);
@@ -69,27 +64,21 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaiting(Long id) {
-        validateWaitingId(id);
+        if (!waitingRepository.existsById(id)) {
+            throw new RoomescapeException(ErrorCode.WAITING_ID_NOT_FOUND);
+        }
         waitingRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
     public MyWaitingsResponse getMyWaitings(String name) {
-        List<MyWaitingResult> myWaitingResults = waitingRepository.findByName(name);
-        return MyWaitingsResponse.from(myWaitingResults);
+        List<Waiting> myWaitings = waitingRepository.findByName(name);
+        List<MyWaitingResult> results = myWaitings.stream()
+                .map(waiting -> {
+                    Waitings slotWaitings = Waitings.of(waitingRepository.findAllBySlot(waiting.getSlot()));
+                    return MyWaitingResult.of(waiting, slotWaitings.positionOf(name));
+                })
+                .toList();
+        return MyWaitingsResponse.from(results);
     }
-
-    private void validateDuplicateWaiting(LocalDate date, Long timeId, Long themeId, String name) {
-        boolean isDuplicated = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name);
-        if (isDuplicated) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_WAITING_NAME);
-        }
-    }
-
-    private void validateWaitingId(Long id) {
-        if (!waitingRepository.existsById(id)) {
-            throw new RoomescapeException(ErrorCode.WAITING_ID_NOT_FOUND);
-        }
-    }
-
 }

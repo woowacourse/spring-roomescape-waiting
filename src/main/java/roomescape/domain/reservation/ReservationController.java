@@ -3,9 +3,9 @@ package roomescape.domain.reservation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,24 +21,35 @@ import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.infra.queue.JobResult;
 
 @Validated
 @RestController
 public class ReservationController {
 
+    private final ReservationQueue reservationQueue;
     private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationQueue reservationQueue, ReservationService reservationService) {
+        this.reservationQueue = reservationQueue;
         this.reservationService = reservationService;
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
+    public ResponseEntity<Map<String, String>> createReservation(
             @RequestBody @Valid ReservationRequest request
     ) {
-        ReservationResponse response = reservationService.createReservation(request);
-        URI location = URI.create("/reservations/" + response.id());
-        return ResponseEntity.created(location).body(response);
+        String jobId = reservationQueue.enqueue(request);
+        return ResponseEntity.accepted().body(Map.of("jobId", jobId));
+    }
+
+    @GetMapping("/reservations/status/{jobId}")
+    public ResponseEntity<JobResult<ReservationResponse>> getJobStatus(@PathVariable String jobId) {
+        JobResult<ReservationResponse> result = reservationQueue.getResult(jobId);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/reservations")
@@ -57,7 +68,7 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/reservation/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id
     ) {
@@ -65,7 +76,7 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/reservation/{id}")
+    @PatchMapping("/reservations/{id}")
     public ResponseEntity<Void> updateMyReservation(
             @PathVariable Long id,
             @RequestBody ReservationFixRequest request

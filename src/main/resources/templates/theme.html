@@ -36,7 +36,7 @@
   </div>
 
   <div id="theme-form" class="filter-card d-none" style="margin-bottom:20px;">
-    <div class="filter-row" style="grid-template-columns: 1fr 2fr 2fr auto;">
+    <div class="filter-row" style="grid-template-columns: 1fr 2fr 2fr 1fr auto;">
       <div>
         <label class="form-label">이름</label>
         <input id="new-name" type="text" class="form-control" placeholder="테마 이름">
@@ -48,6 +48,10 @@
       <div>
         <label class="form-label">이미지 URL</label>
         <input id="new-image" type="text" class="form-control" placeholder="https://...">
+      </div>
+      <div>
+        <label class="form-label">가격 (원)</label>
+        <input id="new-price" type="number" class="form-control" placeholder="50000" min="1">
       </div>
       <div style="display:flex;gap:8px;">
         <button id="save-theme" class="btn btn-success">확인</button>
