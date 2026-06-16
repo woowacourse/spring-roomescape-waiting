@@ -16,7 +16,7 @@ public class Reservations {
     }
 
     public ReservationStatus determineStatus() {
-        if (values.stream().anyMatch(Reservation::isConfirmed)) {
+        if (values.stream().anyMatch(Reservation::takesSlot)) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.CONFIRMED;
@@ -31,6 +31,7 @@ public class Reservations {
 
     public List<TimeSlot> toTimeSlots(List<ReservationTime> allTimes) {
         Set<Long> reservedTimeIds = values.stream()
+                .filter(Reservation::takesSlot)
                 .map(it -> it.getTime().getId())
                 .collect(Collectors.toSet());
 

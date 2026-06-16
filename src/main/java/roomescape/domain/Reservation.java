@@ -11,15 +11,21 @@ public class Reservation {
     private ReservationTime time;
     private Theme theme;
     private ReservationStatus status;
+    private String orderId;
+    private String paymentKey;
+    private Long amount;
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
-        this(null, name, date, time, theme, status);
+        this(null, name, date, time, theme, status, null, null, null);
     }
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
+                       ReservationStatus status, String orderId, String paymentKey, Long amount) {
         this.id = id;
         this.status = status;
+        this.orderId = orderId;
+        this.paymentKey = paymentKey;
+        this.amount = amount;
         validateName(name);
         validateDate(date);
         validateTime(time);
@@ -53,6 +59,29 @@ public class Reservation {
         return status;
     }
 
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
+
+    public void completePayment(String paymentKey) {
+        this.paymentKey = paymentKey;
+        this.status = ReservationStatus.CONFIRMED;
+    }
+
+    public void setPaymentInfo(String orderId, Long amount) {
+        this.orderId = orderId;
+        this.amount = amount;
+        this.status = ReservationStatus.PENDING_PAYMENT;
+    }
+
     public boolean isSameDateTime(LocalDate date, Long timeId) {
         return this.date.equals(date) && this.time.getId().equals(timeId);
     }
@@ -61,15 +90,20 @@ public class Reservation {
         return status == ReservationStatus.CONFIRMED;
     }
 
+    public boolean isPendingPayment() {
+        return status == ReservationStatus.PENDING_PAYMENT;
+    }
+
+    public boolean takesSlot() {
+        return isConfirmed() || isPendingPayment();
+    }
+
     public boolean isWaiting() {
         return status == ReservationStatus.WAITING;
     }
 
-    public void confirm() {
-        if (!isWaiting()) {
-            throw new InvalidStateException("대기 중인 예약만 승격할 수 있습니다.");
-        }
-        this.status = ReservationStatus.CONFIRMED;
+    public boolean isToday() {
+        return date.equals(LocalDate.now());
     }
 
     public void validateNotPast() {

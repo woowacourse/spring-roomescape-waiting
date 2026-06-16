@@ -36,7 +36,10 @@ public class ReservationRepository {
                     resultSet.getString("description"),
                     resultSet.getString("url")
             ),
-            ReservationStatus.valueOf(resultSet.getString("status"))
+            ReservationStatus.valueOf(resultSet.getString("status")),
+            resultSet.getString("order_id"),
+            resultSet.getString("payment_key"),
+            resultSet.getLong("amount")
     );
 
     public ReservationRepository(JdbcTemplate jdbcTemplate) {
@@ -45,7 +48,7 @@ public class ReservationRepository {
 
     @Transactional
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, status, order_id, amount) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -56,6 +59,12 @@ public class ReservationRepository {
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
             ps.setString(5, reservation.getStatus().name());
+            ps.setString(6, reservation.getOrderId());
+            if (reservation.getAmount() != null) {
+                ps.setLong(7, reservation.getAmount());
+            } else {
+                ps.setNull(7, java.sql.Types.BIGINT);
+            }
 
             return ps;
         }, keyHolder);
@@ -68,7 +77,8 @@ public class ReservationRepository {
     public Reservations findAll() {
         String sql = """
                     SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
-                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
+                        r.order_id, r.payment_key, r.amount
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
@@ -80,7 +90,8 @@ public class ReservationRepository {
     public Optional<Reservation> findById(Long id) {
         String sql = """
                     SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
+                        r.order_id, r.payment_key, r.amount
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
@@ -91,6 +102,27 @@ public class ReservationRepository {
                 .stream().findFirst();
     }
 
+    public Optional<Reservation> findByOrderId(String orderId) {
+        String sql = """
+                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
+                        r.order_id, r.payment_key, r.amount
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.order_id = ?
+                """;
+
+        return jdbcTemplate.query(sql, reservationRowMapper, orderId)
+                .stream().findFirst();
+    }
+
+    @Transactional
+    public void updatePayment(Long id, String paymentKey, ReservationStatus status, String orderId, Long amount) {
+        jdbcTemplate.update("UPDATE reservation SET payment_key = ?, status = ?, order_id = ?, amount = ? WHERE id = ?", 
+                paymentKey, status.name(), orderId, amount, id);
+    }
+
     public List<ReservationRank> findByName(String name) {
         String sql = """
                     SELECT *
@@ -98,6 +130,7 @@ public class ReservationRepository {
                         SELECT
                             r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
                             t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
+                            r.order_id, r.payment_key, r.amount,
                             CASE WHEN r.status = 'WAITING'
                                  THEN ROW_NUMBER() OVER (
                                      PARTITION BY r.date, r.theme_id, r.time_id, r.status 
@@ -123,7 +156,8 @@ public class ReservationRepository {
     public Reservations findByDateAndThemeId(LocalDate date, long themeId) {
         String sql = """
                     SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
+                        r.order_id, r.payment_key, r.amount
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
@@ -137,7 +171,8 @@ public class ReservationRepository {
     public Reservations findByDateAndThemeAndTimeForUpdate(LocalDate date, long themeId, long timeId) {
         String sql = """
                     SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status
+                        t.id AS theme_id, t.name AS theme_name, t.description, t.url, r.status,
+                        r.order_id, r.payment_key, r.amount
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
@@ -146,11 +181,6 @@ public class ReservationRepository {
                 """;
 
         return new Reservations(jdbcTemplate.query(sql, reservationRowMapper, date, themeId, timeId));
-    }
-
-    @Transactional
-    public void updateStatus(Long id, ReservationStatus status) {
-        jdbcTemplate.update("UPDATE reservation SET status = ? WHERE id = ?", status.name(), id);
     }
 
     @Transactional

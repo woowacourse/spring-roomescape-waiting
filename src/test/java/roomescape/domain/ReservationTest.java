@@ -62,20 +62,12 @@ class ReservationTest {
     }
 
     @Test
-    void 대기_상태에서_예약_승인() {
-        Reservation waiting = new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.WAITING);
+    void 결제_완료_시_상태_변경() {
+        Reservation pending = new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.PENDING_PAYMENT);
 
-        waiting.confirm();
+        pending.completePayment("payment-key");
 
-        assertThat(waiting.isConfirmed()).isTrue();
-    }
-
-    @Test
-    void 이미_승인된_경우_승인_시_예외() {
-        Reservation confirmed = new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.CONFIRMED);
-
-        assertThatThrownBy(confirmed::confirm)
-                .isInstanceOf(InvalidStateException.class)
-                .hasMessage("대기 중인 예약만 승격할 수 있습니다.");
+        assertThat(pending.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+        assertThat(pending.getPaymentKey()).isEqualTo("payment-key");
     }
 }

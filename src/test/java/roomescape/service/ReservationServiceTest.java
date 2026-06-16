@@ -148,7 +148,7 @@ class ReservationServiceTest {
         ReservationResponse second = findReservation(secondId);
         ReservationResponse third = findReservation(thirdId);
 
-        assertThat(second.status()).isEqualTo(ReservationStatus.CONFIRMED);
+        assertThat(second.status()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
         assertThat(third.status()).isEqualTo(ReservationStatus.WAITING);
     }
 

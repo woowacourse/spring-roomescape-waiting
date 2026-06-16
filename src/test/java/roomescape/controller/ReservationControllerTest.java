@@ -57,7 +57,9 @@ class ReservationControllerTest {
                 LocalDate.now().plusDays(1),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
-                ReservationStatus.CONFIRMED
+                ReservationStatus.CONFIRMED,
+                null,
+                null
         );
         given(reservationService.save(any())).willReturn(response);
 
@@ -80,7 +82,9 @@ class ReservationControllerTest {
                 LocalDate.now(),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
-                ReservationStatus.CONFIRMED
+                ReservationStatus.CONFIRMED,
+                null,
+                null
         );
         given(reservationService.findAll()).willReturn(List.of(response));
 
@@ -100,7 +104,9 @@ class ReservationControllerTest {
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
                 ReservationStatus.WAITING,
-                1L
+                1L,
+                null,
+                null
         );
         given(reservationService.find("아나키")).willReturn(List.of(response));
 
@@ -124,7 +130,9 @@ class ReservationControllerTest {
                 LocalDate.now().plusDays(2),
                 new ReservationTimeResponse(2L, LocalTime.of(11, 0)),
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
-                ReservationStatus.CONFIRMED
+                ReservationStatus.CONFIRMED,
+                null,
+                null
         );
         given(reservationService.update(any(), any())).willReturn(response);
 
