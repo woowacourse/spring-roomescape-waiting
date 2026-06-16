@@ -101,17 +101,8 @@ public class ReservationService {
                 .stream()
                 .map(r -> new MyReservation(r, null))
                 .toList();
-        List<MyReservation> waiting = reservationRepository.findByNameAndStatus(username, ReservationStatus.WAITING)
-                .stream()
-                .map(r -> new MyReservation(r, countWaitingNumber(r)))
-                .toList();
+        List<MyReservation> waiting = reservationRepository.findWaitingWithRankByName(username, ReservationStatus.WAITING);
         return Stream.concat(confirmed.stream(), waiting.stream()).toList();
-    }
-
-    private long countWaitingNumber(Reservation r) {
-        return reservationRepository.countWaitingBefore(
-                r.getDate(), r.getTime().getId(), r.getTheme().getId(),
-                ReservationStatus.WAITING, r.getCreatedAt(), r.getId()) + 1;
     }
 
     @Transactional(readOnly = true)

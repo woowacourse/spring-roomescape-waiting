@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -73,4 +74,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("date") LocalDate date, @Param("timeId") Long timeId, @Param("themeId") Long themeId,
             @Param("status") ReservationStatus status, @Param("createdAt") LocalDateTime createdAt,
             @Param("id") Long id);
+
+    @Query("""
+            SELECT new roomescape.domain.MyReservation(
+                w,
+                (SELECT COUNT(w2) + 1 FROM Reservation w2
+                 WHERE w2.theme = w.theme
+                   AND w2.date = w.date
+                   AND w2.time = w.time
+                   AND w2.status = :status
+                   AND (w2.createdAt < w.createdAt
+                        OR (w2.createdAt = w.createdAt AND w2.id < w.id))))
+            FROM Reservation w
+            WHERE w.name = :name AND w.status = :status
+            """)
+    List<MyReservation> findWaitingWithRankByName(
+            @Param("name") String name, @Param("status") ReservationStatus status);
 }

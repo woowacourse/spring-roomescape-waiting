@@ -139,11 +139,8 @@ class ReservationServiceTest {
         Reservation waiting = new Reservation(2L, "브라운", LocalDate.of(2026, 5, 20), fixedNow, sampleTime, sampleTheme, ReservationStatus.WAITING);
 
         given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.CONFIRMED)).willReturn(List.of(confirmed));
-        given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.WAITING)).willReturn(List.of(waiting));
-        given(reservationRepository.countWaitingBefore(
-                waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(),
-                ReservationStatus.WAITING, waiting.getCreatedAt(), waiting.getId()))
-                .willReturn(1L);
+        given(reservationRepository.findWaitingWithRankByName("브라운", ReservationStatus.WAITING))
+                .willReturn(List.of(new MyReservation(waiting, 2L)));
 
         List<MyReservation> result = reservationService.findAllMine("브라운");
 
@@ -157,7 +154,8 @@ class ReservationServiceTest {
         Reservation confirmed = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), fixedNow, sampleTime, sampleTheme);
 
         given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.CONFIRMED)).willReturn(List.of(confirmed));
-        given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.WAITING)).willReturn(List.of());
+        given(reservationRepository.findWaitingWithRankByName("브라운", ReservationStatus.WAITING))
+                .willReturn(List.of());
 
         List<MyReservation> result = reservationService.findAllMine("브라운");
 

@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -139,6 +140,20 @@ class ReservationRepositoryTest {
 
         Reservation updated = reservationRepository.findById(waiting.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    void findWaitingWithRankByName_순번_포함_조회() {
+        LocalDate date = LocalDate.of(2026, 12, 31);
+        LocalDateTime first = LocalDateTime.of(2026, 12, 1, 9, 0);
+        LocalDateTime second = LocalDateTime.of(2026, 12, 1, 10, 0);
+        reservationRepository.save(new Reservation("이영희", date, first, time(), theme(), ReservationStatus.WAITING));
+        reservationRepository.save(new Reservation("브리", date, second, time(), theme(), ReservationStatus.WAITING));
+
+        List<MyReservation> result = reservationRepository.findWaitingWithRankByName("브리", ReservationStatus.WAITING);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).waitingNumber()).isEqualTo(2L);
     }
 
     @Test
