@@ -18,8 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.ReservationTimeRepository;
+import roomescape.dao.ThemeRepository;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -33,8 +33,8 @@ import roomescape.domain.Theme;
 class ReservationServiceTest {
 
     @Mock private ReservationDao reservationDao;
-    @Mock private ReservationTimeDao reservationTimeDao;
-    @Mock private ThemeDao themeDao;
+    @Mock private ReservationTimeRepository reservationTimeRepository;
+    @Mock private ThemeRepository themeRepository;
     @Mock private Clock clock;
     @InjectMocks private ReservationService reservationService;
 
@@ -51,8 +51,8 @@ class ReservationServiceTest {
     void save_정상_예약_저장() {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
-        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(sampleTheme));
         given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
         given(reservationDao.save(any(Reservation.class)))
                 .willReturn(new Reservation(10L, "브라운", futureDate, fixedNow, sampleTime, sampleTheme));
@@ -66,7 +66,7 @@ class ReservationServiceTest {
 
     @Test
     void save_존재하지_않는_시간이면_예외() {
-        given(reservationTimeDao.findById(99L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findById(99L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.save("브라운", fixedNow.toLocalDate().plusDays(1), 99L, 1L))
                 .isInstanceOf(ReservationTimeNotFoundException.class)
@@ -75,8 +75,8 @@ class ReservationServiceTest {
 
     @Test
     void save_존재하지_않는_테마이면_예외() {
-        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
-        given(themeDao.findById(99L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeRepository.findById(99L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.save("브라운", fixedNow.toLocalDate().plusDays(1), 1L, 99L))
                 .isInstanceOf(ThemeNotFoundException.class)
@@ -86,8 +86,8 @@ class ReservationServiceTest {
     @Test
     void save_이미_예약된_시간이면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
-        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(sampleTheme));
         given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
 
         assertThatThrownBy(() -> reservationService.save("브라운", futureDate, 1L, 1L))
@@ -141,7 +141,7 @@ class ReservationServiceTest {
         Reservation updated = new Reservation(1L, "브라운", newDate, fixedNow.minusHours(1), newTime, sampleTheme);
 
         given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeDao.findById(2L)).willReturn(Optional.of(newTime));
+        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
         given(reservationDao.existsByDateAndTimeIdAndThemeId(newDate, 2L, 1L)).willReturn(false);
         given(reservationDao.update(any())).willReturn(updated);
         given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(oldDate, 1L, 1L))
@@ -151,5 +151,4 @@ class ReservationServiceTest {
 
         then(reservationDao).should().updateStatus(5L, ReservationStatus.CONFIRMED);
     }
-
 }

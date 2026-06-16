@@ -11,20 +11,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ReservationTimeRepository;
 import roomescape.service.exception.ReservationConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
 
-    @Mock private ReservationTimeDao reservationTimeDao;
+    @Mock private ReservationTimeRepository reservationTimeRepository;
     @Mock private ReservationDao reservationDao;
     @InjectMocks private ReservationTimeService reservationTimeService;
 
     @Test
     void save_이미_존재하는_시간이면_예외() {
         LocalTime startAt = LocalTime.of(10, 0);
-        given(reservationTimeDao.existsByStartAt(startAt)).willReturn(true);
+        given(reservationTimeRepository.existsByStartAt(startAt)).willReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.save(startAt))
                 .isInstanceOf(ReservationConflictException.class)
@@ -37,7 +37,7 @@ class ReservationTimeServiceTest {
 
         reservationTimeService.delete(1L);
 
-        then(reservationTimeDao).should().delete(1L);
+        then(reservationTimeRepository).should().deleteById(1L);
     }
 
     @Test

@@ -9,8 +9,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.ReservationTimeRepository;
+import roomescape.dao.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -24,14 +24,14 @@ import roomescape.service.exception.ThemeNotFoundException;
 @Service
 public class ReservationService {
     private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
     private final Clock clock;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, Clock clock) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, Clock clock) {
         this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
         this.clock = clock;
     }
 
@@ -118,13 +118,12 @@ public class ReservationService {
     }
 
     private ReservationTime validateReservationTime(long timeId) {
-        return reservationTimeDao.findById(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다."));
     }
 
     private Theme validateTheme(long themeId) {
-        return themeDao.findById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
     }
-
 }

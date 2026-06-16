@@ -10,13 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.ThemeRepository;
 import roomescape.service.exception.ReservationConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-    @Mock private ThemeDao themeDao;
+    @Mock private ThemeRepository themeRepository;
     @Mock private ReservationDao reservationDao;
     @InjectMocks private ThemeService themeService;
 
@@ -26,7 +26,7 @@ class ThemeServiceTest {
 
         themeService.delete(1L);
 
-        then(themeDao).should().delete(1L);
+        then(themeRepository).should().deleteById(1L);
     }
 
     @Test

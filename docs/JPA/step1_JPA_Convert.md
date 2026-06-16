@@ -11,5 +11,5 @@
 - [x] #3 **독립 엔티티 매핑 (Theme, ReservationTime)**
   `@Entity`, `@Id`, `@GeneratedValue(strategy = IDENTITY)` 부여
 
-- [ ] #4 **JpaRepository 인터페이스 작성 및 JdbcTemplate 기반 Repository 제거**
+- [x] #4 **JpaRepository 인터페이스 작성 및 JdbcTemplate 기반 Repository 제거**
   `JpaRepository<T, Long>` 작성, `KeyHolder`·`SimpleJdbcInsert` 등 JdbcTemplate 잔재 제거
