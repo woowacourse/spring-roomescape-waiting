@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:database
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+toss:
+  base-url: https://api.tosspayments.com
+  client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+  secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
