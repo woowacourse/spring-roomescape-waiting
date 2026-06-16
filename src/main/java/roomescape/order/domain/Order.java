@@ -12,6 +12,7 @@ import java.util.Objects;
 public class Order {
 
     private final String orderId;
+    private final Long reservationId;
     private final Long amount;
 
     public void validateAmountMatch(Long requestAmount) {

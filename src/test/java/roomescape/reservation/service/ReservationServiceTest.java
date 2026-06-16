@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
+import roomescape.order.domain.Order;
+import roomescape.payment.service.PaymentService;
+import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
@@ -27,6 +30,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.mock;
+import static roomescape.reservation.domain.ReservationStatus.PENDING_PAYMENT;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 
@@ -43,6 +51,7 @@ class ReservationServiceTest {
 
     private FakeReservationRepository reservationRepository;
     private FakeReservationSlotRepository reservationSlotRepository;
+    private PaymentService paymentService;
 
     private ReservationService reservationService;
 
@@ -53,8 +62,11 @@ class ReservationServiceTest {
         FakeReservationDateRepository reservationDateRepository = new FakeReservationDateRepository();
         FakeThemeRepository themeRepository = new FakeThemeRepository();
         reservationSlotRepository = new FakeReservationSlotRepository();
+        paymentService = mock(PaymentService.class);
+        given(paymentService.createOrder(anyLong(), anyLong()))
+                .willReturn(new Order("test-order-id", 1L, 1000L));
 
-        reservationService = new ReservationService(reservationRepository, reservationSlotRepository);
+        reservationService = new ReservationService(reservationRepository, reservationSlotRepository, paymentService);
 
         reservationTime1 = reservationTimeRepository.save(ReservationTimeFixture.time15());
         reservationTime2 = reservationTimeRepository.save(ReservationTimeFixture.time16());
@@ -95,6 +107,20 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("빈 슬롯에 예약하면 결제 대기 상태가 되고, 주문이 생성된다.")
+    void reserve_pending_payment_and_creates_order() {
+        // when
+        ReservationWithSlotDetailDto actual = reservationService.reserve(name, slot1.getId());
+
+        // then
+        assertThat(actual.status())
+                .isEqualTo(PENDING_PAYMENT);
+
+        verify(paymentService)
+                .createOrder(anyLong(), anyLong());
+    }
+
+    @Test
     @DisplayName("이미 예약된 슬롯에 다른 사람이 예약하면 대기 예약이 된다.")
     void reserved_duplicated() {
         // given
@@ -102,10 +128,11 @@ class ReservationServiceTest {
         reservationRepository.save(Reservation.reserve(name, slot1.getId(), RESERVED, LocalDateTime.now()));
 
         // when
-        Reservation actual = reservationService.reserve(anotherName, slot1.getId());
+        ReservationWithSlotDetailDto actual = reservationService.reserve(anotherName, slot1.getId());
 
         // then
-        assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(actual.status())
+                .isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
@@ -117,10 +144,11 @@ class ReservationServiceTest {
         reservationRepository.updateStatus(reservation);
 
         // when
-        Reservation actual = reservationService.reserve(name, slot1.getId());
+        ReservationWithSlotDetailDto actual = reservationService.reserve(name, slot1.getId());
 
         // then
-        Assertions.assertThat(actual.getStatus()).isEqualTo(RESERVED);
+        Assertions.assertThat(actual.status())
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test

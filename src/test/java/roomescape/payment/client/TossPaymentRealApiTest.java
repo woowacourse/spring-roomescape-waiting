@@ -1,5 +1,6 @@
 package roomescape.payment.client;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,7 +52,7 @@ class TossPaymentRealApiTest {
     }
 
     @Test
-//  @Disabled("PAYMENT_KEY / ORDER_ID / AMOUNT 상수에 샌드박스 결제로 얻은 값을 직접 넣고 이 @Disabled 를 지우면 실행됩니다.")
+    @Disabled("PAYMENT_KEY / ORDER_ID / AMOUNT 상수에 샌드박스 결제로 얻은 값을 직접 넣고 이 @Disabled 를 지우면 실행됩니다.")
     void 샌드박스에서_인증한_결제건을_승인하면_DONE_결과를_반환한다() {
         // 같은 paymentKey 는 한 번만 승인된다(두 번째부터 ALREADY_PROCESSED_PAYMENT).
         var result = tossPaymentGateway.confirm(

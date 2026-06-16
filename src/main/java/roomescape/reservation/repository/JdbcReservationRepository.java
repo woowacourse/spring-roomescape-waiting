@@ -144,7 +144,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id AS reservation_id, r.name, r.slot_id, r.status, r.reserved_at
                 FROM reservation r
                 WHERE r.slot_id = :slotId
-                  AND r.status IN ('RESERVED', 'WAITING')
+                  AND r.status IN ('RESERVED', 'WAITING', 'PENDING_PAYMENT')
                 ORDER BY r.reserved_at ASC
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("slotId", slotId);

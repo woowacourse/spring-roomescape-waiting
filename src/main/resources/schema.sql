@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS reservation
     name        VARCHAR(255) NOT NULL,
     slot_id     BIGINT       NOT NULL,
     reserved_at TIMESTAMP    NOT NULL,
-    status   ENUM('RESERVED', 'WAITING', 'CANCELED') NOT NULL,
+    status   ENUM('RESERVED', 'WAITING', 'CANCELED', 'PENDING_PAYMENT') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id)
 );

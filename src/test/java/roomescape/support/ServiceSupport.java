@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Import;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.date.repository.ReservationDateRepository;
+import roomescape.order.repository.OrderRepository;
+import roomescape.payment.repository.PaymentRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
@@ -30,7 +32,9 @@ import java.time.LocalDateTime;
         JdbcReservationSlotRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcReservationDateRepository.class,
-        JdbcThemeRepository.class
+        JdbcThemeRepository.class,
+        OrderRepository.class,
+        PaymentRepository.class
 })
 public abstract class ServiceSupport {
 

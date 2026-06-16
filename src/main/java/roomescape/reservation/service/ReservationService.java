@@ -3,6 +3,9 @@ package roomescape.reservation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.order.domain.Order;
+import roomescape.payment.service.PaymentService;
+import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.repository.ReservationRepository;
@@ -22,8 +25,11 @@ import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private static final long RESERVATION_AMOUNT = 1000L;
+
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
+    private final PaymentService paymentService;
 
     public List<ReservationWithSlotInformation> readAll() {
         return reservationRepository.findAll();
@@ -34,10 +40,17 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation reserve(String requesterName, Long slotId) {
+    public ReservationWithSlotDetailDto reserve(String requesterName, Long slotId) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
         Reservation reservation = slot.reserve(requesterName);
-        return reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+
+        if (saved.isPendingPayment()) {
+            Order order = paymentService.createOrder(saved.getId(), RESERVATION_AMOUNT);
+            return ReservationWithSlotDetailDto.of(saved, slot, order);
+        }
+
+        return ReservationWithSlotDetailDto.of(saved, slot);
     }
 
     @Transactional
