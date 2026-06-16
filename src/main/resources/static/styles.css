@@ -159,6 +159,16 @@ a { color: inherit; }
   margin-bottom: 22px;
 }
 
+.section h1 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
 .section h2 {
   margin: 0;
   font-size: 22px;
@@ -697,6 +707,28 @@ a { color: inherit; }
 .result p strong {
   color: var(--text);
   font-weight: 600;
+}
+
+.payment-area {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.payment-area[hidden] {
+  display: none;
+}
+
+.payment-method,
+.payment-agreement {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.payment-button {
+  width: 100%;
 }
 
 /* ─── Empty & Loading ─── */

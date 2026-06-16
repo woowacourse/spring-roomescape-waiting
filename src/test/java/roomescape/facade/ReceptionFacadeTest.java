@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -27,6 +29,9 @@ import roomescape.domain.Wait;
 import roomescape.domain.Waits;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.domain.exception.DomainErrorCode;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentService;
+import roomescape.payment.PaymentStatus;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -40,6 +45,7 @@ public class ReceptionFacadeTest {
     private WaitService waitService;
     private ReservationTimeService reservationTimeService;
     private ThemeService themeService;
+    private PaymentService paymentService;
     private Clock clock;
     private ReceptionFacade receptionFacade;
 
@@ -54,6 +60,7 @@ public class ReceptionFacadeTest {
         waitService = Mockito.mock(WaitService.class);
         reservationTimeService = Mockito.mock(ReservationTimeService.class);
         themeService = Mockito.mock(ThemeService.class);
+        paymentService = Mockito.mock(PaymentService.class);
         clock = Clock.fixed(Instant.parse("2026-05-02T00:00:00Z"), ZoneId.of("Asia/Seoul"));
 
         reservationDate = LocalDate.of(2026, 5, 3);
@@ -62,23 +69,111 @@ public class ReceptionFacadeTest {
         now = LocalDateTime.now(clock);
 
         receptionFacade = new ReceptionFacade(reservationService, waitService, reservationTimeService, themeService,
-                clock);
+                paymentService, clock);
     }
 
     @Test
     void saveReservationTest() {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest("fizz", reservationDate,
                 reservationTime.getId(), theme.getId());
-        Reservation newReservation = request.toReservation(reservationTime, theme);
+        Reservation pendingReservation = Reservation.pending("fizz", reservationDate, reservationTime, theme,
+                "order_test", 50000L);
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
         when(reservationService.lockBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
                 Optional.empty());
-        when(reservationService.save(request, reservationTime, theme)).thenReturn(newReservation);
+        when(reservationService.savePending(request, reservationTime, theme))
+                .thenReturn(pendingReservation);
 
         assertThat(receptionFacade.save(request)).isEqualTo(
-                ReceptionResponse.from(newReservation, 0L, ReservationStatus.CONFIRMED.name()));
+                ReceptionResponse.from(pendingReservation, 0L, ReservationStatus.PENDING.name()));
+
+        InOrder inOrder = Mockito.inOrder(reservationService);
+        inOrder.verify(reservationService).deleteStalePendingBefore(now.minusMinutes(10));
+        inOrder.verify(reservationService).lockBySlot(request.reservationDate(), request.timeId(), request.themeId());
+    }
+
+    @Test
+    void confirmPaymentTest() {
+        Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
+                ReservationStatus.PENDING, "order_test", 50000L, null);
+        Reservation confirmedReservation = pendingReservation.confirmPayment("payment_key");
+
+        doNothing().when(reservationService).lockByOrderId("order_test");
+        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        when(paymentService.confirm("payment_key", "order_test", 50000L))
+                .thenReturn(new PaymentResult("payment_key", "order_test", "DONE", 50000L));
+        when(reservationService.confirmPayment("order_test", "payment_key")).thenReturn(confirmedReservation);
+
+        assertThat(receptionFacade.confirmPayment("payment_key", "order_test", 50000L)).isEqualTo(
+                ReceptionResponse.from(confirmedReservation, 0L, ReservationStatus.CONFIRMED.name()));
+
+        InOrder inOrder = Mockito.inOrder(reservationService, paymentService);
+        inOrder.verify(reservationService).lockByOrderId("order_test");
+        inOrder.verify(reservationService).findByOrderId("order_test");
+        inOrder.verify(paymentService).confirm("payment_key", "order_test", 50000L);
+        inOrder.verify(reservationService).confirmPayment("order_test", "payment_key");
+    }
+
+    @Test
+    void confirmPaymentAmountMismatchBlocksPaymentGatewayTest() {
+        Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
+                ReservationStatus.PENDING, "order_test", 50000L, null);
+
+        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+
+        assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 1000L))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH));
+        verify(paymentService, never()).confirm(any(), any(), any());
+    }
+
+    @Test
+    void confirmPaymentGatewayResultMismatchExceptionTest() {
+        Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
+                ReservationStatus.PENDING, "order_test", 50000L, null);
+
+        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        when(paymentService.confirm("payment_key", "order_test", 50000L))
+                .thenReturn(new PaymentResult("payment_key", "other_order", "DONE", 50000L));
+
+        assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_FAILED));
+        verify(reservationService, never()).confirmPayment(any(), any());
+    }
+
+    @Test
+    void confirmPaymentGatewayStatusNotDoneExceptionTest() {
+        Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
+                ReservationStatus.PENDING, "order_test", 50000L, null);
+
+        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        when(paymentService.confirm("payment_key", "order_test", 50000L))
+                .thenReturn(new PaymentResult("payment_key", "order_test", "ABORTED", 50000L));
+
+        assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_FAILED));
+        verify(reservationService, never()).confirmPayment(any(), any());
+    }
+
+    @Test
+    void failPaymentWithNullOrderIdDoesNotThrowTest() {
+        receptionFacade.failPayment(null);
+
+        verify(reservationService, times(0)).deletePendingByOrderId(any());
+    }
+
+    @Test
+    void failPaymentDeletesPendingReservationTest() {
+        receptionFacade.failPayment("order_test");
+
+        verify(reservationService, times(1)).deletePendingByOrderId("order_test");
     }
 
     @Test
@@ -100,6 +195,8 @@ public class ReceptionFacadeTest {
 
         assertThat(receptionFacade.save(request)).isEqualTo(
                 ReceptionResponse.from(savedWait, 1L, ReservationStatus.WAITING.name()));
+
+        verify(reservationService, times(1)).deleteStalePendingBefore(now.minusMinutes(10));
     }
 
     @Test

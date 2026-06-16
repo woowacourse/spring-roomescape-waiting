@@ -185,6 +185,16 @@ async function handleReservationSubmit(event) {
   event.preventDefault();
   const reservation = await createReservation();
   renderReservationResult(reservation);
+  if (reservation.status === "PENDING") {
+    showToast("결제창을 여는 중입니다.");
+    try {
+      await requestTossPayment(reservation);
+    } catch (error) {
+      await cleanupPendingPayment(reservation.orderId);
+      showToast(error.message || "결제가 취소되었습니다.", true);
+    }
+    return;
+  }
   const isWaiting = reservation.status === "WAITING";
   showToast(isWaiting ? `대기 ${reservation.order}번으로 등록되었습니다.` : "예약이 확정되었습니다!");
   await loadAvailableTimes();
@@ -205,16 +215,92 @@ async function createReservation() {
 
 function renderReservationResult(reservation) {
   const isWaiting = reservation.status === "WAITING";
+  const isPending = reservation.status === "PENDING";
   elements.result.hidden = false;
   elements.result.innerHTML = `
-    <span class="result-status ${isWaiting ? "is-waiting" : "is-confirmed"}">
-      ${isWaiting ? `대기 ${reservation.order}번` : "예약 확정"}
+    <span class="result-status ${isWaiting || isPending ? "is-waiting" : "is-confirmed"}">
+      ${isWaiting ? `대기 ${reservation.order}번` : isPending ? "결제 대기" : "예약 확정"}
     </span>
     <p><strong>${escapeHtml(reservation.theme.name)}</strong></p>
     <p>예약자 &nbsp;${escapeHtml(reservation.name)}</p>
     <p>날짜 &nbsp;${reservation.date} &nbsp;${formatStartAt(reservation.time.startAt)}</p>
+    ${isPending ? `<p style="color:var(--primary);font-size:12px;margin-top:8px">결제 승인 후 예약이 확정됩니다.</p>` : ""}
     ${isWaiting ? `<p style="color:var(--warn);font-size:12px;margin-top:8px">앞 예약이 취소되면 자동으로 확정됩니다.</p>` : ""}
   `;
+}
+
+async function requestTossPayment(reservation) {
+  if (!window.TossPayments) {
+    throw new Error("결제 SDK를 불러오지 못했습니다.");
+  }
+  const config = await requestJson("/payments/config");
+  const tossPayments = TossPayments(config.clientKey);
+  const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+  const { paymentArea, paymentButton } = ensurePaymentArea();
+  await widgets.setAmount({ currency: "KRW", value: reservation.amount });
+  await widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" });
+  await widgets.renderAgreement({ selector: "#payment-agreement", variantKey: "AGREEMENT" });
+  paymentArea.hidden = false;
+  showToast("결제 수단을 선택한 뒤 결제하기를 눌러주세요.");
+
+  return new Promise((resolve, reject) => {
+    paymentButton.addEventListener("click", async () => {
+      paymentButton.disabled = true;
+      paymentButton.textContent = "결제창 여는 중";
+      try {
+        await widgets.requestPayment({
+          orderId: reservation.orderId,
+          orderName: `${reservation.theme.name} 예약`,
+          successUrl: `${window.location.origin}/payment-success.html`,
+          failUrl: `${window.location.origin}/payment-fail.html`,
+          customerName: reservation.name,
+        });
+        resolve();
+      } catch (error) {
+        paymentButton.disabled = false;
+        paymentButton.textContent = "결제하기";
+        reject(error);
+      }
+    });
+  });
+}
+
+async function cleanupPendingPayment(orderId) {
+  if (!orderId) return;
+  await request("/payments/fail", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code: "PAY_PROCESS_CANCELED", message: "결제가 취소되었습니다.", orderId }),
+  });
+}
+
+function ensurePaymentArea() {
+  let paymentArea = document.querySelector("#payment-area");
+  if (!paymentArea) {
+    paymentArea = document.createElement("div");
+    paymentArea.id = "payment-area";
+    paymentArea.className = "payment-area";
+    elements.result.after(paymentArea);
+  }
+
+  paymentArea.hidden = true;
+  paymentArea.innerHTML = "";
+  const paymentMethod = document.createElement("div");
+  paymentMethod.id = "payment-method";
+  paymentMethod.className = "payment-method";
+
+  const paymentAgreement = document.createElement("div");
+  paymentAgreement.id = "payment-agreement";
+  paymentAgreement.className = "payment-agreement";
+
+  const paymentButton = document.createElement("button");
+  paymentButton.id = "payment-button";
+  paymentButton.className = "primary-button payment-button";
+  paymentButton.type = "button";
+  paymentButton.textContent = "결제하기";
+
+  paymentArea.append(paymentMethod, paymentAgreement, paymentButton);
+  return { paymentArea, paymentButton };
 }
 
 // ── 내 예약 조회 ────────────────────────────────────────────

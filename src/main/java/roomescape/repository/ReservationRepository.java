@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
@@ -16,6 +17,16 @@ public interface ReservationRepository {
     Optional<Long> lockById(Long id);
 
     Optional<Long> lockBySlot(LocalDate date, Long timeId, Long themeId);
+
+    Optional<Long> lockByOrderId(String orderId);
+
+    Optional<Reservation> findByOrderId(String orderId);
+
+    Reservation confirmPayment(String orderId, String paymentKey);
+
+    void deletePendingByOrderId(String orderId);
+
+    void deleteStalePendingBefore(LocalDateTime expiresBefore);
 
     List<Reservation> findByName(String name);
 

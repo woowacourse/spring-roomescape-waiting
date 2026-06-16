@@ -11,7 +11,9 @@ public record ReceptionResponse(
         ReservationTimeResponse time,
         ThemeResponse theme,
         String status,
-        Long order
+        Long order,
+        String orderId,
+        Long amount
 ) {
     public static ReceptionResponse from(Reservation reservation, Long order, String status) {
         return new ReceptionResponse(
@@ -21,7 +23,9 @@ public record ReceptionResponse(
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
                 status,
-                order
+                order,
+                reservation.getOrderId(),
+                reservation.getAmount()
         );
     }
 
@@ -33,7 +37,9 @@ public record ReceptionResponse(
                 ReservationTimeResponse.from(wait.getTime()),
                 ThemeResponse.from(wait.getTheme()),
                 status,
-                order
+                order,
+                null,
+                null
         );
     }
 }

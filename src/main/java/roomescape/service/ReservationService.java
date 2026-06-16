@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -9,20 +10,31 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
+import roomescape.payment.OrderIdGenerator;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
 @Service
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
+    private static final long RESERVATION_AMOUNT = 50_000L;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    private final ReservationRepository reservationRepository;
+    private final OrderIdGenerator orderIdGenerator;
+
+    public ReservationService(ReservationRepository reservationRepository, OrderIdGenerator orderIdGenerator) {
         this.reservationRepository = reservationRepository;
+        this.orderIdGenerator = orderIdGenerator;
     }
 
     public Reservation save(ServiceReservationCreateRequest request, ReservationTime reservationTime, Theme theme) {
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
+        return reservationRepository.save(reservationWithoutId);
+    }
+
+    public Reservation savePending(ServiceReservationCreateRequest request, ReservationTime reservationTime, Theme theme) {
+        Reservation reservationWithoutId = Reservation.pending(request.name(), request.reservationDate(),
+                reservationTime, theme, orderIdGenerator.generate(), RESERVATION_AMOUNT);
         return reservationRepository.save(reservationWithoutId);
     }
 
@@ -54,6 +66,28 @@ public class ReservationService {
 
     public Optional<Long> lockBySlot(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.lockBySlot(date, timeId, themeId);
+    }
+
+    public void lockByOrderId(String orderId) {
+        reservationRepository.lockByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    public Reservation findByOrderId(String orderId) {
+        return reservationRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    public Reservation confirmPayment(String orderId, String paymentKey) {
+        return reservationRepository.confirmPayment(orderId, paymentKey);
+    }
+
+    public void deletePendingByOrderId(String orderId) {
+        reservationRepository.deletePendingByOrderId(orderId);
+    }
+
+    public void deleteStalePendingBefore(LocalDateTime expiresBefore) {
+        reservationRepository.deleteStalePendingBefore(expiresBefore);
     }
 
     public void validateReferencedTheme(Long themeId) {
