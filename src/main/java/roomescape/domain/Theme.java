@@ -1,12 +1,22 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.domain.exception.InvalidInputException;
 
+@Entity
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnailUrl;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnailUrl;
+
+    protected Theme() {
+    }
 
     public Theme(Long id, String name, String description, String thumbnailUrl) {
         if (name == null || name.isBlank()) {

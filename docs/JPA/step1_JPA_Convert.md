@@ -8,7 +8,7 @@
 - [x] #2 **application.properties JPA 설정 추가**
   `show-sql`, `format_sql`, `ddl-auto=create-drop`, `defer-datasource-initialization=true` 추가
 
-- [ ] #3 **독립 엔티티 매핑 (Theme, ReservationTime)**
+- [x] #3 **독립 엔티티 매핑 (Theme, ReservationTime)**
   `@Entity`, `@Id`, `@GeneratedValue(strategy = IDENTITY)` 부여
 
 - [ ] #4 **JpaRepository 인터페이스 작성 및 JdbcTemplate 기반 Repository 제거**
