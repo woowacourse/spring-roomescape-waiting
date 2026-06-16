@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${title}">방탈출 예약 시스템</title>
+    <link rel="stylesheet" href="/css/user.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+</head>
+<body>
+    <header th:fragment="header" class="main-header">
+        <div class="container header-content">
+            <h1 class="logo"><a href="/">ROOM<span>ESCAPE</span></a></h1>
+            <nav class="gnb">
+                <a href="/" class="gnb-link" id="nav-booking"><i data-lucide="calendar"></i> 예약하기</a>
+                <a href="/?view=my" class="gnb-link" id="nav-my"><i data-lucide="user"></i> 내 예약</a>
+                <a href="/admin" class="gnb-link"><i data-lucide="settings"></i> 관리자</a>
+            </nav>
+        </div>
+    </header>
+
+    <footer th:fragment="footer" class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>ROOM ESCAPE</h3>
+                    <p>당신의 한계를 시험하는 극한의 공포와 전율</p>
+                </div>
+                <div class="footer-info">
+                    <p>&copy; 2026 Room Escape. 모든 권리 보유.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Modal -->
+        <div id="custom-modal" class="modal-overlay is-hidden">
+            <div class="modal-content">
+                <h3 id="modal-title">알림</h3>
+                <p id="modal-message"></p>
+                <div class="modal-actions">
+                    <button id="modal-cancel" class="btn-secondary is-hidden">취소</button>
+                    <button id="modal-confirm" class="btn-primary">확인</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <script>
+            lucide.createIcons();
+            
+            // UI Utils
+            window.UI = {
+                modal: {
+                    show: (title, message, onConfirm, onCancel) => {
+                        const modal = document.getElementById('custom-modal');
+                        document.getElementById('modal-title').textContent = title;
+                        document.getElementById('modal-message').textContent = message;
+                        const confirmBtn = document.getElementById('modal-confirm');
+                        const cancelBtn = document.getElementById('modal-cancel');
+                        
+                        modal.classList.add('is-active');
+                        
+                        confirmBtn.onclick = () => {
+                            modal.classList.remove('is-active');
+                            if (onConfirm) onConfirm();
+                        };
+                        
+                        if (onCancel) {
+                            cancelBtn.classList.remove('is-hidden');
+                            cancelBtn.onclick = () => {
+                                modal.classList.remove('is-active');
+                                onCancel();
+                            };
+                        } else {
+                            cancelBtn.classList.add('is-hidden');
+                        }
+                    }
+                },
+                toast: (message, type = 'info') => {
+                    const container = document.getElementById('toast-container');
+                    const toast = document.createElement('div');
+                    toast.className = `toast toast-${type}`;
+                    toast.textContent = message;
+                    container.appendChild(toast);
+                    setTimeout(() => {
+                        toast.classList.add('toast-fade-out');
+                        setTimeout(() => toast.remove(), 500);
+                    }, 3000);
+                }
+            };
+            
+            window.alert = (msg) => window.UI.toast(msg);
+            window.confirm = (msg) => new Promise(resolve => {
+                window.UI.modal.show('확인', msg, () => resolve(true), () => resolve(false));
+            });
+        </script>
+    </footer>
+</body>
+</html>

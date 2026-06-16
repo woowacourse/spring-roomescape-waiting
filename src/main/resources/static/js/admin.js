@@ -1,237 +1,174 @@
 (function () {
     "use strict";
 
-    const THEME_LIST_LIMIT = 500;
+    const $ = (s) => document.querySelector(s);
 
-    // --- 요소 셀렉터 ---
-    const themeCreateForm = document.getElementById("theme-create-form");
-    const themeName = document.getElementById("theme-name");
-    const themeDesc = document.getElementById("theme-desc");
-    const themeImage = document.getElementById("theme-image");
-    const themeCreateMsg = document.getElementById("theme-create-msg");
-    const themeDeleteSelect = document.getElementById("theme-delete-select");
-    const themeDeleteBtn = document.getElementById("theme-delete-btn");
-    const themeDeleteMsg = document.getElementById("theme-delete-msg");
-
-    const timeCreateForm = document.getElementById("time-create-form");
-    const timeStart = document.getElementById("time-start");
-    const timeCreateMsg = document.getElementById("time-create-msg");
-    const timeDeleteSelect = document.getElementById("time-delete-select");
-    const timeDeleteBtn = document.getElementById("time-delete-btn");
-    const timeDeleteMsg = document.getElementById("time-delete-msg");
-
-    const reservationsBody = document.getElementById("reservations-body");
-    const refreshReservations = document.getElementById("refresh-reservations");
-    const reservationsMsg = document.getElementById("reservations-msg");
-
-    // --- 유틸리티 함수 ---
-    function setMsg(el, text, ok) {
-        if (!el) return;
-        el.textContent = text;
-        el.classList.remove("message--ok", "message--err");
-        if (text) el.classList.add(ok ? "message--ok" : "message--err");
+    async function init() {
+        await Promise.all([loadThemes(), loadTimes(), loadReservations()]);
     }
 
-    async function fetchJson(url, options) {
-        const res = await fetch(url, options);
-        if (!res.ok) {
-            const body = await res.text();
-            let msg = body || res.statusText;
-            try {
-                const json = JSON.parse(body);
-                if (json.message) msg = json.message;
-            } catch (e) {
-            }
-            throw new Error(msg);
-        }
-        if (res.status === 204) return null;
-        const ct = res.headers.get("content-type") || "";
-        if (ct.includes("application/json")) return res.json();
-        return null;
+    function getPillInfo(status) {
+        if (status === 'CONFIRMED') return { text: '확정', class: 'badge-confirmed' };
+        if (status === 'WAITING') return { text: '대기', class: 'badge-waiting' };
+        return { text: '결제대기', class: 'badge-pending' };
     }
 
-    function formatTime(t) {
-        if (!t) return "—";
-        const parts = String(t).split(":");
-        return `${parts[0]}:${parts[1] || "00"}`;
-    }
-
-    // --- 테마 관리 로직 (서버 데이터만 사용) ---
-    async function loadThemesIntoDeleteSelect() {
-        themeDeleteSelect.innerHTML = "";
+    // 테마 관리
+    async function loadThemes() {
         try {
-            const apiThemes = await fetchJson(`/themes`);
-            const themes = apiThemes || [];
-            const sorted = [...themes].sort((a, b) => a.name.localeCompare(b.name, "ko"));
-
-            const empty = document.createElement("option");
-            empty.value = "";
-            empty.textContent = "테마를 선택하세요";
-            themeDeleteSelect.appendChild(empty);
-
-            sorted.forEach((t) => {
-                const opt = document.createElement("option");
-                opt.value = String(t.id);
-                opt.textContent = t.name;
-                themeDeleteSelect.appendChild(opt);
-            });
-        } catch (e) {
-            setMsg(themeDeleteMsg, "테마 목록을 불러오지 못했습니다.", false);
-        }
-    }
-
-    themeCreateForm.addEventListener("submit", async (ev) => {
-        ev.preventDefault();
-        setMsg(themeCreateMsg, "", true);
-        const file = themeImage.files && themeImage.files[0];
-        if (!file) {
-            setMsg(themeCreateMsg, "이미지를 선택해 주세요.", false);
-            return;
-        }
-        try {
-            const formData = new FormData();
-            formData.append("name", themeName.value.trim());
-            formData.append("description", themeDesc.value.trim());
-            formData.append("file", file);
-
-            const res = await fetch("/admin/themes", {method: "POST", body: formData});
-            if (!res.ok) {
-                const body = await res.text();
-                let msg = body || "등록 실패";
-                try {
-                    const json = JSON.parse(body);
-                    if (json.message) msg = json.message;
-                } catch (e) {
-                }
-                throw new Error(msg);
-            }
-
-            setMsg(themeCreateMsg, "테마가 등록되었습니다.", true);
-            themeCreateForm.reset();
-            await loadThemesIntoDeleteSelect(); // 등록 후 목록 갱신
-        } catch (e) {
-            setMsg(themeCreateMsg, e.message, false);
-        }
-    });
-
-    themeDeleteBtn.addEventListener("click", async () => {
-        const id = themeDeleteSelect.value;
-        if (!id || !confirm("삭제하시겠습니까?")) return;
-        try {
-            await fetchJson(`/admin/themes/${id}`, {method: "DELETE"});
-            setMsg(themeDeleteMsg, "삭제되었습니다.", true);
-            await loadThemesIntoDeleteSelect(); // 삭제 후 목록 갱신
-        } catch (e) {
-            setMsg(themeDeleteMsg, e.message || "삭제 실패", false);
-        }
-    });
-
-    // --- 시간 및 예약 관리 로직 ---
-    async function loadTimesIntoDeleteSelect() {
-        if (!timeDeleteSelect) return;
-        timeDeleteSelect.innerHTML = "";
-        try {
-            const times = await fetchJson("/times");
-            const sorted = [...times].sort((a, b) => a.startAt.localeCompare(b.startAt));
-
-            const empty = document.createElement("option");
-            empty.value = "";
-            empty.textContent = "시간을 선택하세요";
-            timeDeleteSelect.appendChild(empty);
-
-            sorted.forEach((t) => {
-                const opt = document.createElement("option");
-                opt.value = String(t.id);
-                opt.textContent = formatTime(t.startAt);
-                timeDeleteSelect.appendChild(opt);
-            });
-        } catch (e) {
-            setMsg(timeDeleteMsg, "시간 목록 로드 실패", false);
-        }
-    }
-
-    timeCreateForm.addEventListener("submit", async (ev) => {
-        ev.preventDefault();
-        setMsg(timeCreateMsg, "", true);
-        let startAt = timeStart.value;
-        if (startAt.split(":").length === 2) startAt += ":00";
-        try {
-            await fetchJson("/admin/times", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({startAt}),
-            });
-            setMsg(timeCreateMsg, "시간이 등록되었습니다.", true);
-            timeCreateForm.reset();
-            await loadTimesIntoDeleteSelect();
-        } catch (e) {
-            setMsg(timeCreateMsg, e.message, false);
-        }
-    });
-
-    timeDeleteBtn.addEventListener("click", async () => {
-        const id = timeDeleteSelect.value;
-        if (!id || !confirm("삭제하시겠습니까?")) return;
-        try {
-            await fetchJson(`/admin/times/${id}`, {method: "DELETE"});
-            setMsg(timeDeleteMsg, "삭제되었습니다.", true);
-            await loadTimesIntoDeleteSelect();
-        } catch (e) {
-            setMsg(timeDeleteMsg, e.message || "삭제 실패", false);
-        }
-    });
-
-    async function loadReservations() {
-        setMsg(reservationsMsg, "", true);
-        reservationsBody.innerHTML = "";
-        try {
-            const list = await fetchJson("/reservations");
-            if (!list || !list.length) {
-                reservationsBody.innerHTML = '<tr><td colspan="7">예약이 없습니다.</td></tr>';
+            const res = await fetch('/themes');
+            const themes = await res.json();
+            const container = $('#admin-theme-list');
+            if (!themes || themes.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:0.9rem;">등록된 테마가 없습니다.</div>';
                 return;
             }
-            list.forEach((r) => {
-                const tr = document.createElement("tr");
-                const timeVal = r.timeResponse?.startAt;
-                const statusText = r.status === "WAITING" ? "대기" : "확정";
-                const cells = [r.id, r.name, r.date, formatTime(timeVal), r.themeResponse?.name || "—", statusText];
-                cells.forEach(text => {
-                    const td = document.createElement("td");
-                    td.textContent = text;
-                    tr.appendChild(td);
-                });
-
-                // 관리 컬럼: 삭제 버튼 추가
-                const actionTd = document.createElement("td");
-                const deleteBtn = document.createElement("button");
-                deleteBtn.type = "button";
-                deleteBtn.className = "btn btn--danger btn--sm";
-                deleteBtn.textContent = "삭제";
-                deleteBtn.onclick = () => onDeleteReservation(r.id);
-                actionTd.appendChild(deleteBtn);
-                tr.appendChild(actionTd);
-
-                reservationsBody.appendChild(tr);
-            });
+            container.innerHTML = themes.map(t => `
+                <div class="admin-item">
+                    <span style="font-weight:600;">${t.name}</span>
+                    <button class="btn-danger-sm" onclick="deleteTheme(${t.id})">삭제</button>
+                </div>
+            `).join('');
         } catch (e) {
-            setMsg(reservationsMsg, "로드 실패", false);
+            console.error('테마 로드 실패', e);
         }
     }
 
-    async function onDeleteReservation(id) {
-        if (!id || !confirm("예약을 삭제하시겠습니까?")) return;
+    $('#theme-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData($('#theme-form'));
+        
         try {
-            await fetchJson(`/reservations/${id}`, {method: "DELETE"});
-            setMsg(reservationsMsg, "삭제되었습니다.", true);
-            await loadReservations();
+            const res = await fetch('/admin/themes', {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
+            }
+            alert('테마가 추가되었습니다.');
+            location.reload();
         } catch (e) {
-            setMsg(reservationsMsg, e.message || "삭제 실패", false);
+            alert('테마 추가 실패: ' + e.message);
+        }
+    });
+
+    window.deleteTheme = async (id) => {
+        const confirmed = await confirm('이 테마를 삭제하시겠습니까?');
+        if (!confirmed) return;
+        try {
+            const res = await fetch(`/admin/themes/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
+            }
+            loadThemes();
+        } catch (e) {
+            alert('삭제 실패: ' + e.message);
+        }
+    };
+
+    // 시간 관리
+    async function loadTimes() {
+        try {
+            const res = await fetch('/times');
+            const times = await res.json();
+            const container = $('#admin-time-list');
+            
+            if (!times || times.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:0.9rem;">등록된 시간이 없습니다.</div>';
+                return;
+            }
+            
+            container.innerHTML = times.map(t => `
+                <div class="admin-item">
+                    <span style="font-family:monospace; font-weight:700;">${t.startAt.slice(0,5)}</span>
+                    <button class="btn-danger-sm" onclick="deleteTime(${t.id})">삭제</button>
+                </div>
+            `).join('');
+        } catch (e) {
+            console.error('시간 로드 실패', e);
         }
     }
 
-    refreshReservations.addEventListener("click", loadReservations);
+    $('#time-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/admin/times', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startAt: $('#time-start').value + ':00' })
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
+            }
+            alert('시간이 추가되었습니다.');
+            location.reload();
+        } catch (e) {
+            alert('시간 추가 실패: ' + e.message);
+        }
+    });
 
-    loadThemesIntoDeleteSelect();
-    loadTimesIntoDeleteSelect();
-    loadReservations();
+    window.deleteTime = async (id) => {
+        const confirmed = await confirm('이 시간 슬롯을 삭제하시겠습니까?');
+        if (!confirmed) return;
+        try {
+            const res = await fetch(`/admin/times/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
+            }
+            loadTimes();
+        } catch (e) {
+            alert('삭제 실패: ' + e.message);
+        }
+    };
+
+    // 예약 관리
+    async function loadReservations() {
+        try {
+            const res = await fetch('/reservations');
+            const list = await res.json();
+            const container = $('#admin-reservation-list');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">현재 예약 내역이 없습니다.</td></tr>';
+                return;
+            }
+            container.innerHTML = list.map(r => {
+                const badge = getPillInfo(r.status);
+                return `
+                    <tr>
+                        <td>#${r.id}</td>
+                        <td style="font-weight:600;">${r.name}</td>
+                        <td>${r.date}</td>
+                        <td style="font-family:monospace;">${r.timeResponse.startAt.slice(0,5)}</td>
+                        <td>${r.themeResponse.name}</td>
+                        <td><span class="badge ${badge.class}">${badge.text}</span></td>
+                        <td><button class="btn-danger-sm" onclick="deleteReservation(${r.id})">취소</button></td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (e) {
+            console.error('예약 로드 실패', e);
+        }
+    }
+
+    window.deleteReservation = async (id) => {
+        const confirmed = await confirm('이 예약을 취소하시겠습니까?');
+        if (!confirmed) return;
+        try {
+            const res = await fetch(`/reservations/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
+            }
+            loadReservations();
+        } catch (e) {
+            alert('취소 실패: ' + e.message);
+        }
+    };
+
+    init();
 })();
