@@ -8,20 +8,20 @@ VALUES ('10:00'),
        ('15:00');
 
 -- 테마 데이터
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('무인도 탈출', '갯벌이 많은 무인도를 탈출하는 흥미진진 대탈출!', 'https://picsum.photos/seed/roomescape1/800/600.jpg'),
-       ('도시 탈출', '아포칼립스 상황인 도시 탈출하는 흥미진진 대탈출!', 'https://picsum.photos/seed/roomescape2/800/600.jpg'),
-       ('열기구 탈출', '터지기 5분전! 열기구 탈출하는 흥미진진 대탈출!', 'https://picsum.photos/seed/roomescape3/800/600.jpg'),
-       ('페허 탈출', '고립된 페어를 탈출하는 흥미진진 대탈출 !', 'https://picsum.photos/seed/roomescape4/800/600.jpg'),
-       ('혹한기 탈출', '혹한기에 에베레스트를 탈출하는 흥미진진 대탈출 !', 'https://picsum.photos/seed/roomescape6/800/600.jpg'),
-       (' 이름 1', '설명1', 'https://picsum.photos/seed/roomescape7/800/600.jpg'),
-       (' 이름 2', '설명2', 'https://picsum.photos/seed/roomescape8/800/600.jpg'),
-       (' 이름 3', '설명3', 'https://picsum.photos/seed/roomescape9/800/600.jpg'),
-       (' 이름 4', '설명4', 'https://picsum.photos/seed/roomescape10/800/600.jpg'),
-       (' 이름 5', '설명5', 'https://picsum.photos/seed/roomescape11/800/600.jpg'),
-       (' 이름 6', '설명6', 'https://picsum.photos/seed/roomescape12/800/600.jpg'),
-       (' 이름 7', '설명7', 'https://picsum.photos/seed/roomescape13/800/600.jpg'),
-       (' 이름 8', '설명8', 'https://picsum.photos/seed/roomescape14/800/600.jpg');
+INSERT INTO theme (name, description, thumbnail_url, price)
+VALUES ('무인도 탈출', '갯벌이 많은 무인도를 탈출하는 흥미진진 대탈출!', 'https://picsum.photos/seed/roomescape1/800/600.jpg', 30000),
+       ('도시 탈출', '아포칼립스 상황인 도시 탈출하는 흥미진진 대탈출!', 'https://picsum.photos/seed/roomescape2/800/600.jpg', 28000),
+       ('열기구 탈출', '터지기 5분전! 열기구 탈출하는 흥미진진 대탈출!', 'https://picsum.photos/seed/roomescape3/800/600.jpg', 32000),
+       ('페허 탈출', '고립된 페어를 탈출하는 흥미진진 대탈출 !', 'https://picsum.photos/seed/roomescape4/800/600.jpg', 25000),
+       ('혹한기 탈출', '혹한기에 에베레스트를 탈출하는 흥미진진 대탈출 !', 'https://picsum.photos/seed/roomescape6/800/600.jpg', 35000),
+       (' 이름 1', '설명1', 'https://picsum.photos/seed/roomescape7/800/600.jpg', 10000),
+       (' 이름 2', '설명2', 'https://picsum.photos/seed/roomescape8/800/600.jpg', 10000),
+       (' 이름 3', '설명3', 'https://picsum.photos/seed/roomescape9/800/600.jpg', 10000),
+       (' 이름 4', '설명4', 'https://picsum.photos/seed/roomescape10/800/600.jpg', 10000),
+       (' 이름 5', '설명5', 'https://picsum.photos/seed/roomescape11/800/600.jpg', 10000),
+       (' 이름 6', '설명6', 'https://picsum.photos/seed/roomescape12/800/600.jpg', 10000),
+       (' 이름 7', '설명7', 'https://picsum.photos/seed/roomescape13/800/600.jpg', 10000),
+       (' 이름 8', '설명8', 'https://picsum.photos/seed/roomescape14/800/600.jpg', 10000);
 
 -- 날짜 데이터 생성 (과거 일부 + 오늘부터 30일치)
 INSERT INTO reservation_date (date)
