@@ -605,6 +605,55 @@ h2 {
     justify-content: flex-end;
 }
 
+.payment-page {
+    display: grid;
+    min-height: calc(100vh - 84px);
+    align-items: center;
+}
+
+.payment-status {
+    width: min(680px, 100%);
+    margin: 48px auto;
+    padding: 34px;
+    border: 1px solid rgba(49, 130, 246, 0.22);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.payment-status.is-failed {
+    border-color: rgba(229, 72, 77, 0.22);
+}
+
+.payment-status h1 {
+    margin-bottom: 16px;
+    font-size: clamp(34px, 5vw, 48px);
+}
+
+.payment-status p {
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.payment-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 22px 0;
+}
+
+.payment-summary > span {
+    min-height: 30px;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #f9fafb;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
 .empty-state {
     padding: 42px 20px;
     border: 1px dashed var(--line-strong);

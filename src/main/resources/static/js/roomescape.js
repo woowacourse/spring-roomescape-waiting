@@ -26,6 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (page === "admin") {
         initAdmin();
     }
+    if (page === "payment-success") {
+        initPaymentSuccess();
+    }
+    if (page === "payment-fail") {
+        initPaymentFail();
+    }
 });
 
 function setDefaultDates() {
@@ -272,17 +278,122 @@ async function createReservation(event) {
     }
 
     try {
-        const reservation = await api("/reservations", {
+        const paymentOrder = await api("/payments/orders", {
             method: "POST",
             body: JSON.stringify({ name, date, timeId, themeId })
         });
         localStorage.setItem("roomflow.name", name);
-        showToast(resultMessage(reservation));
-        state.selectedTimeId = null;
-        await loadAvailability();
+        showToast("결제창으로 이동합니다.");
+        await requestTossPayment(paymentOrder);
     } catch (error) {
         showToast(error.message, "error");
     }
+}
+
+async function requestTossPayment(paymentOrder) {
+    if (!paymentOrder.clientKey) {
+        throw new Error("Toss Payments 클라이언트 키가 설정되지 않았습니다.");
+    }
+    if (!window.TossPayments) {
+        throw new Error("Toss Payments 결제창을 불러오지 못했습니다.");
+    }
+
+    const tossPayments = TossPayments(paymentOrder.clientKey);
+    await tossPayments.requestPayment("카드", {
+        amount: paymentOrder.amount,
+        orderId: paymentOrder.orderId,
+        orderName: paymentOrder.orderName,
+        customerName: paymentOrder.customerName,
+        successUrl: `${window.location.origin}/payment-success.html`,
+        failUrl: `${window.location.origin}/payment-fail.html`
+    });
+}
+
+async function initPaymentSuccess() {
+    const params = new URLSearchParams(window.location.search);
+    const paymentKey = params.get("paymentKey");
+    const orderId = params.get("orderId");
+    const amount = Number(params.get("amount"));
+
+    if (!paymentKey || !orderId || !Number.isInteger(amount) || amount <= 0) {
+        renderPaymentFailure("결제 승인 정보가 올바르지 않습니다.", "INVALID_PAYMENT_CALLBACK");
+        return;
+    }
+
+    try {
+        const reservation = await api("/payments/confirm", {
+            method: "POST",
+            body: JSON.stringify({ paymentKey, orderId, amount })
+        });
+        localStorage.setItem("roomflow.name", reservation.name);
+        renderPaymentSuccess(reservation);
+    } catch (error) {
+        renderPaymentFailure(error.message, "PAYMENT_CONFIRM_FAILED");
+    }
+}
+
+async function initPaymentFail() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code") || "PAYMENT_FAILED";
+    const message = params.get("message") || "결제가 완료되지 않았습니다.";
+    const orderId = params.get("orderId");
+
+    try {
+        await api("/payments/fail", {
+            method: "POST",
+            body: JSON.stringify({ code, message, orderId })
+        });
+    } catch (error) {
+        showToast(error.message, "error");
+    }
+
+    renderPaymentFailure(message, code);
+}
+
+function renderPaymentSuccess(reservation) {
+    const root = $("#paymentResult");
+    if (!root) {
+        return;
+    }
+
+    root.classList.remove("is-failed");
+    root.innerHTML = `
+        <p class="eyebrow">PAYMENT</p>
+        <h1>예약 완료</h1>
+        <p>${escapeHtml(resultMessage(reservation))}</p>
+        <div class="payment-summary">
+            <span>${escapeHtml(reservation.name)}</span>
+            <span>${escapeHtml(reservation.date)}</span>
+            <span>${displayTime(reservation.time.startAt)}</span>
+            <span>${escapeHtml(reservation.theme.name)}</span>
+            ${statusChip(reservation)}
+        </div>
+        <div class="hero-actions">
+            <a class="button primary" href="/my.html?name=${encodeURIComponent(reservation.name)}">내 예약 보기</a>
+            <a class="button ghost" href="/">다른 예약하기</a>
+        </div>
+    `;
+}
+
+function renderPaymentFailure(message, code) {
+    const root = $("#paymentResult");
+    if (!root) {
+        return;
+    }
+
+    root.classList.add("is-failed");
+    root.innerHTML = `
+        <p class="eyebrow">PAYMENT</p>
+        <h1>결제 실패</h1>
+        <p>${escapeHtml(message)}</p>
+        <div class="payment-summary">
+            <span>코드 ${escapeHtml(code)}</span>
+        </div>
+        <div class="hero-actions">
+            <a class="button primary" href="/">다시 예약하기</a>
+            <a class="button ghost" href="/my.html">내 예약 보기</a>
+        </div>
+    `;
 }
 
 async function loadMyReservations() {

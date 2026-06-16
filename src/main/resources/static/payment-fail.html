@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Roomflow | 결제 실패</title>
+    <link rel="stylesheet" href="/css/roomescape.css">
+    <script defer src="/js/roomescape.js"></script>
+</head>
+<body data-page="payment-fail">
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Roomflow 홈">
+        <span class="brand-mark"></span>
+        <span>Roomflow</span>
+    </a>
+    <nav class="top-nav" aria-label="주요 메뉴">
+        <a class="nav-link" href="/">예약</a>
+        <a class="nav-link" href="/my.html">내 예약</a>
+        <a class="nav-link" href="/admin.html">관리자</a>
+    </nav>
+</header>
+
+<main class="page-shell payment-page">
+    <section class="payment-status is-failed" id="paymentResult" aria-live="polite">
+        <p class="eyebrow">PAYMENT</p>
+        <h1>결제 확인 중</h1>
+        <p>결제 실패 정보를 정리하고 있습니다.</p>
+    </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
