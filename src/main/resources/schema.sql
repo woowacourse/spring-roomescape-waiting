@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS orders
+(
+    id       VARCHAR(255)       NOT NULL,
+    amount   INT                NOT NULL,
+    PRIMARY KEY (id)
+);
+
 CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,

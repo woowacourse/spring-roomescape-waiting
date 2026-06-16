@@ -2,6 +2,14 @@ DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS waiting;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
+DROP TABLE IF EXISTS orders;
+
+CREATE TABLE IF NOT EXISTS orders
+(
+    id       VARCHAR(255)       NOT NULL,
+    amount   INT                NOT NULL,
+    PRIMARY KEY (id)
+    );
 
 CREATE TABLE reservation_time
 (
