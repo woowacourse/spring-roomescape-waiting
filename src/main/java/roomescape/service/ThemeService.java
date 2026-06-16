@@ -13,15 +13,19 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeJpaRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ThemeService {
+    private final ThemeJpaRepository themeJpaRepository;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeJpaRepository themeJpaRepository, ThemeRepository themeRepository,
+                        ReservationRepository reservationRepository) {
+        this.themeJpaRepository = themeJpaRepository;
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -30,15 +34,16 @@ public class ThemeService {
     public Theme create(ThemeCreateRequest request) {
         Theme theme = Theme.create(new ThemeName(request.getName()), request.getDescription(),
                 new ThumbnailUrl(request.getThumbnailUrl()));
-        return themeRepository.save(theme);
+        return themeJpaRepository.save(theme);
     }
 
     public Theme find(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
+        return themeJpaRepository.findById(themeId)
+                .orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
     }
 
     public List<Theme> findAll() {
-        return themeRepository.findAll();
+        return themeJpaRepository.findAll();
     }
 
     public List<Theme> findFamous(ThemeFamousFindRequest request, LocalDate now) {
@@ -50,7 +55,7 @@ public class ThemeService {
 
     @Transactional
     public void delete(long themeId) {
-        if (!themeRepository.existsById(themeId)) {
+        if (!themeJpaRepository.existsById(themeId)) {
             throw new RoomEscapeException(ErrorCode.THEME_NOT_FOUND);
         }
 
@@ -58,6 +63,6 @@ public class ThemeService {
             throw new RoomEscapeException(ErrorCode.THEME_IN_USE);
         }
 
-        themeRepository.deleteById(themeId);
+        themeJpaRepository.deleteById(themeId);
     }
 }

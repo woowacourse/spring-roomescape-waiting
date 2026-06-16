@@ -2,13 +2,20 @@ package roomescape.domain.theme;
 
 import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
 public class ThemeName {
     private static final int MIN_NAME_LENGTH = 1;
     private static final int MAX_NAME_LENGTH = 30;
 
-    private final String value;
+    @Column(name = "name", nullable = false, length = 20)
+    private String value;
+
+    protected ThemeName() {
+    }
 
     public ThemeName(String value) {
         Objects.requireNonNull(value);

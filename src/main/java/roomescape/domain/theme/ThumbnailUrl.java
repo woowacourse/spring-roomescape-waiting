@@ -2,13 +2,20 @@ package roomescape.domain.theme;
 
 import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class ThumbnailUrl {
     private static final Pattern URL_PATTERN = Pattern.compile("^https?://.+");
 
-    private final String value;
+    @Column(name = "thumbnail_url", nullable = false)
+    private String value;
+
+    protected ThumbnailUrl() {
+    }
 
     public ThumbnailUrl(String value) {
         validate(value);

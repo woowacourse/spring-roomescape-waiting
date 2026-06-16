@@ -10,28 +10,32 @@ import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.controller.dto.request.ReservationTimeCreateRequest;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeJpaRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
     private final ReservationRepository reservationRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ReservationTimeJpaRepository reservationTimeJpaRepository,
                                   ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
         this.reservationRepository = reservationRepository;
     }
 
     @Transactional
     public ReservationTime create(ReservationTimeCreateRequest request) {
         ReservationTime reservationTime = ReservationTime.of(request.getStartAt());
-        return reservationTimeRepository.save(reservationTime);
+        return reservationTimeJpaRepository.save(reservationTime);
     }
 
     public List<ReservationTime> findAll() {
-        return reservationTimeRepository.findAll();
+        return reservationTimeJpaRepository.findAll();
     }
 
     public List<ReservationTime> findAvailable(AvailableTimeFindRequest request, LocalDate now) {
@@ -44,7 +48,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(long reservationTimeId) {
-        if (!reservationTimeRepository.existsById(reservationTimeId)) {
+        if (!reservationTimeJpaRepository.existsById(reservationTimeId)) {
             throw new RoomEscapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND);
         }
 
@@ -52,6 +56,6 @@ public class ReservationTimeService {
             throw new RoomEscapeException(ErrorCode.RESERVATION_TIME_IN_USE);
         }
 
-        reservationTimeRepository.delete(reservationTimeId);
+        reservationTimeJpaRepository.deleteById(reservationTimeId);
     }
 }

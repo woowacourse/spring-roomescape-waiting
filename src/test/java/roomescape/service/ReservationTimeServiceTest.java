@@ -12,12 +12,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationTimeJpaRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
     @Mock
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeJpaRepository reservationTimeRepository;
     @Mock
     private ReservationRepository reservationRepository;
 

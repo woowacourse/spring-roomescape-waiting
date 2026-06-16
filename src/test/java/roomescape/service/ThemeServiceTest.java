@@ -16,11 +16,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeJpaRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
+    @Mock
+    private ThemeJpaRepository themeJpaRepository;
     @Mock
     private ThemeRepository themeRepository;
 
@@ -33,7 +36,7 @@ class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마_조회_시_예외가_발생한다() {
         // given
-        given(themeRepository.findById(999L)).willReturn(Optional.empty());
+        given(themeJpaRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
         Assertions.assertThatThrownBy(() -> themeService.find(999L)).isInstanceOf(RoomEscapeException.class);
@@ -42,7 +45,7 @@ class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마_삭제_시_예외가_발생한다() {
         // given
-        given(themeRepository.existsById(999L)).willReturn(false);
+        given(themeJpaRepository.existsById(999L)).willReturn(false);
 
         // when & then
         Assertions.assertThatThrownBy(() -> themeService.delete(999L)).isInstanceOf(RoomEscapeException.class);
@@ -62,7 +65,7 @@ class ThemeServiceTest {
 
     @Test
     void 삭제시_테마를_사용하는_예외가_있으면_예외가_발생한다() {
-        given(themeRepository.existsById(1L)).willReturn(true);
+        given(themeJpaRepository.existsById(1L)).willReturn(true);
         given(reservationRepository.existsByThemeId(1L)).willReturn(true);
         Assertions.assertThatThrownBy(() -> themeService.delete(1L)).isInstanceOf(RoomEscapeException.class);
     }

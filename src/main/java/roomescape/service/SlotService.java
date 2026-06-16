@@ -10,19 +10,19 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationTimeJpaRepository;
 import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.ThemeJpaRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class SlotService {
     private final SlotRepository slotRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final ReservationTimeJpaRepository reservationTimeRepository;
+    private final ThemeJpaRepository themeRepository;
 
-    public SlotService(SlotRepository slotRepository, ReservationTimeRepository reservationTimeRepository,
-                       ThemeRepository themeRepository) {
+    public SlotService(SlotRepository slotRepository, ReservationTimeJpaRepository reservationTimeRepository,
+                       ThemeJpaRepository themeRepository) {
         this.slotRepository = slotRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -46,11 +46,6 @@ public class SlotService {
             return slotRepository.findByDateAndTimeAndTheme(date, time, theme)
                     .orElseThrow(() -> new RoomEscapeException(ErrorCode.SLOT_NOT_FOUND));
         }
-    }
-
-    public Slot findById(long slotId) {
-        return slotRepository.findById(slotId)
-                .orElseThrow(() -> new RoomEscapeException(ErrorCode.SLOT_NOT_FOUND));
     }
 
     public void lockSlot(Slot foundSlot) {

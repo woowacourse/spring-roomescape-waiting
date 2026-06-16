@@ -24,9 +24,9 @@ import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationTimeJpaRepository;
 import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.ThemeJpaRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Transactional
@@ -37,9 +37,9 @@ public class ReservationServiceTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeJpaRepository themeRepository;
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeJpaRepository reservationTimeRepository;
     @Autowired
     private SlotRepository slotRepository;
 
