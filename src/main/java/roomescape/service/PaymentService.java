@@ -40,4 +40,8 @@ public class PaymentService {
         PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
         return paymentGateway.confirm(confirmation);
     }
+
+    public Order getOrder(String orderId) {
+        return orderRepository.getByOrderId(orderId);
+    }
 }
