@@ -19,6 +19,7 @@ import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.query.ReservationQueryRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -77,6 +78,36 @@ class ReservationServiceTest {
         assertThat(result.entry())
                 .extracting("id", "name", "status")
                 .containsExactly(1L, "이프", "RESERVED");
+    }
+
+    @Test
+    void 결제_금액이_테마_금액과_일치하지_않으면_예외가_발생한다() {
+        // given: 테마 금액은 30000원인데 다른 금액으로 예약을 시도함
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(TestDateTimes.defaultTime()));
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        LocalDate reservationDate = FIXED.toLocalDate().plusDays(1);
+        ReservationCommand command = new ReservationCommand("이프", reservationDate, theme.getId(), time.getId(), 9999L);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessageContaining("결제 금액이 테마 금액과 일치하지 않습니다.");
+    }
+
+    @Test
+    void 대기_신청_시_결제_금액이_테마_금액과_일치하지_않으면_예외가_발생한다() {
+        // given
+        saveDefaultThemeAndTime();
+        Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
+        reservationRepository.save(existingReservation);
+
+        LocalDate date = existingReservation.getDate();
+        ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L, 9999L);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.addWaiting(command))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessageContaining("결제 금액이 테마 금액과 일치하지 않습니다.");
     }
 
     @Test

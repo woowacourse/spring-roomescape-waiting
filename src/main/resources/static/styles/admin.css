@@ -179,6 +179,12 @@ tbody td {
     font-weight: 500;
 }
 
+.td-price {
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
 .td-description {
     max-width: 200px;
     color: var(--text-secondary);

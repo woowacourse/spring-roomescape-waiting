@@ -99,6 +99,13 @@
     -webkit-box-orient: vertical;
 }
 
+.popular-card-price {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
 .divider {
     margin-top: 48px;
 }
@@ -137,6 +144,13 @@
     overflow: hidden;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+}
+
+.theme-card-price {
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
 }
 
 .theme-card-footer {

@@ -51,6 +51,11 @@ public class Reservation {
         return this.schedule.equals(Schedule.of(date, time));
     }
 
+    public ReservationEntry reserve(String name, Long amount, LocalDateTime now) {
+        theme.validatePaymentAmount(amount);
+        return reserve(name, now);
+    }
+
     public ReservationEntry reserve(String name, LocalDateTime now) {
         validateNotPast(now);
         validateDuplicateEntry(name);
@@ -58,6 +63,11 @@ public class Reservation {
             throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", schedule.getDate(), schedule.getStartAt());
         }
         return entries.addReserved(name, now);
+    }
+
+    public ReservationEntry reserveOrWait(String name, Long amount, LocalDateTime now) {
+        theme.validatePaymentAmount(amount);
+        return reserveOrWait(name, now);
     }
 
     public ReservationEntry reserveOrWait(String name, LocalDateTime now) {

@@ -6,10 +6,12 @@ public record ThemeResponse(
         long id,
         String name,
         String description,
-        String thumbnailImageUrl
+        String thumbnailImageUrl,
+        Long price
 ) {
 
     public static ThemeResponse from(ThemeRegisterResult result) {
-        return new ThemeResponse(result.id(), result.name(), result.description(), result.thumbnailImageUrl());
+        return new ThemeResponse(result.id(), result.name(), result.description(), result.thumbnailImageUrl(),
+                result.price());
     }
 }

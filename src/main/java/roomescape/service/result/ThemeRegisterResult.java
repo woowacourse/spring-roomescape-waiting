@@ -7,6 +7,7 @@ public record ThemeRegisterResult(
         String name,
         String description,
         String thumbnailImageUrl,
+        Long price,
         boolean isActive
 ) {
 
@@ -16,6 +17,7 @@ public record ThemeRegisterResult(
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailImageUrl(),
+                theme.getPrice(),
                 theme.isActive());
     }
 }

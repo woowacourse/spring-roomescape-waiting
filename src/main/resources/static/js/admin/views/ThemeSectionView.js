@@ -1,5 +1,5 @@
 import View from "../../common/View.js";
-import {clearElement, delegate, emit, qs} from "../../common/helpers.js";
+import {clearElement, delegate, emit, formatCurrency, qs} from "../../common/helpers.js";
 
 export default class ThemeSectionView extends View {
     constructor(element) {
@@ -16,7 +16,8 @@ export default class ThemeSectionView extends View {
             emit(this.element, "@create-theme", {
                 name: String(formData.get("name") || "").trim(),
                 description: String(formData.get("description") || "").trim(),
-                thumbnailImageUrl: String(formData.get("thumbnailImageUrl") || "").trim()
+                thumbnailImageUrl: String(formData.get("thumbnailImageUrl") || "").trim(),
+                price: Number(formData.get("price"))
             });
         });
 
@@ -37,7 +38,7 @@ export default class ThemeSectionView extends View {
         clearElement(this.tableBody);
 
         if (!themes.length) {
-            this.tableBody.innerHTML = '<tr class="empty-row"><td colspan="4">등록된 테마가 없습니다.</td></tr>';
+            this.tableBody.innerHTML = '<tr class="empty-row"><td colspan="5">등록된 테마가 없습니다.</td></tr>';
             return;
         }
 
@@ -48,6 +49,7 @@ export default class ThemeSectionView extends View {
         <td><span class="badge badge-gray">${theme.id}</span></td>
         <td class="td-name ${isActive ? '' : 'text-gray'}">${theme.name}</td>
         <td class="td-description">${theme.description}</td>
+        <td class="td-price">${formatCurrency(theme.price)}</td>
         <td>
           <button class="btn-toggle ${isActive ? 'btn-deactivate' : 'btn-activate'}" 
                   type="button" 

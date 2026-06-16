@@ -1,5 +1,5 @@
 import View from "../../common/View.js";
-import {clearElement, createElement} from "../../common/helpers.js";
+import {clearElement, createElement, formatCurrency} from "../../common/helpers.js";
 import {createThemeImage} from "../../common/image.js";
 
 export default class PopularThemesView extends View {
@@ -30,8 +30,9 @@ export default class PopularThemesView extends View {
             const rank = createElement("span", "popular-rank", `${index + 1}위`);
             const name = createElement("div", "popular-card-name", theme.name);
             const description = createElement("div", "popular-card-desc", theme.description);
+            const price = createElement("div", "popular-card-price", formatCurrency(theme.price));
 
-            body.append(rank, name, description);
+            body.append(rank, name, description, price);
             card.append(media, body);
             this.element.appendChild(card);
         });

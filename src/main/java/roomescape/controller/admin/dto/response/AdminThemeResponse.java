@@ -7,6 +7,7 @@ public record AdminThemeResponse(
         String name,
         String description,
         String thumbnailImageUrl,
+        Long price,
         boolean isActive
 ) {
     public static AdminThemeResponse from(ThemeRegisterResult result) {
@@ -15,6 +16,7 @@ public record AdminThemeResponse(
                 result.name(),
                 result.description(),
                 result.thumbnailImageUrl(),
+                result.price(),
                 result.isActive());
     }
 }

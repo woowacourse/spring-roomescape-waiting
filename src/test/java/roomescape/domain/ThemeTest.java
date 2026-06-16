@@ -19,14 +19,16 @@ class ThemeTest {
         String name = "공포의 방";
         String description = "정말 무시무시한 공포 테마입니다.";
         String thumbnailImageUrl = "https://image.com/horror.png";
+        Long price = 30000L;
 
         // when
-        Theme theme = Theme.create(name, description, thumbnailImageUrl);
+        Theme theme = Theme.create(name, description, thumbnailImageUrl, price);
 
         // then: 기본 생성 시 삭제되지 않은 상태이다.
         assertThat(theme)
-                .extracting(Theme::getName, Theme::getDescription, Theme::getThumbnailImageUrl, Theme::isActive)
-                .containsExactly(name, description, thumbnailImageUrl, true);
+                .extracting(Theme::getName, Theme::getDescription, Theme::getThumbnailImageUrl, Theme::getPrice,
+                        Theme::isActive)
+                .containsExactly(name, description, thumbnailImageUrl, price, true);
     }
 
     @ParameterizedTest
@@ -38,9 +40,31 @@ class ThemeTest {
         String thumbnailImageUrl = "https://image.com/test.png";
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(invalidName, description, thumbnailImageUrl))
+        assertThatThrownBy(() -> Theme.create(invalidName, description, thumbnailImageUrl, 30000L))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이름은 필수 값입니다.");
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0, -1, -10000})
+    void 테마_금액이_0이하이면_예외가_발생한다(long invalidPrice) {
+        // given
+        String name = "테마 이름";
+        String description = "설명";
+        String thumbnailImageUrl = "https://image.com/test.png";
+
+        // when & then
+        assertThatThrownBy(() -> Theme.create(name, description, thumbnailImageUrl, invalidPrice))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("금액은 양수여야 합니다.");
+    }
+
+    @Test
+    void 테마_금액이_null이면_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> Theme.create("테마 이름", "설명", "https://image.com/test.png", null))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("금액은 필수 값입니다.");
     }
 
     @ParameterizedTest
@@ -52,7 +76,7 @@ class ThemeTest {
         String thumbnailImageUrl = "https://image.com/test.png";
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(name, invalidDescription, thumbnailImageUrl))
+        assertThatThrownBy(() -> Theme.create(name, invalidDescription, thumbnailImageUrl, 30000L))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("설명은 필수 값입니다.");
     }
@@ -72,7 +96,7 @@ class ThemeTest {
         String description = "설명";
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(name, description, invalidUrl))
+        assertThatThrownBy(() -> Theme.create(name, description, invalidUrl, 30000L))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage(expectedMessage);
     }

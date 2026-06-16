@@ -24,7 +24,7 @@ public class ThemeService {
     public ThemeRegisterResult register(ThemeRegisterCommand command) {
         validateDuplicationName(command.name());
 
-        Theme theme = Theme.create(command.name(), command.description(), command.thumbnailImageUrl());
+        Theme theme = Theme.create(command.name(), command.description(), command.thumbnailImageUrl(), command.price());
 
         return ThemeRegisterResult.from(themeRepository.save(theme));
     }

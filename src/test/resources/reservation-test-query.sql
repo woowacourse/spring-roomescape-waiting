@@ -1,9 +1,9 @@
-INSERT INTO theme (name, description, thumbnail_image_url, is_active)
-VALUES ('화이트노이즈', 'SF 추리 테마', 'https://picsum.photos/seed/1/800/600', 1),
-       ('클락워크 호텔', '미스터리 테마', 'https://picsum.photos/seed/2/800/600', 1),
-       ('선셋 다이브', '어드벤처 테마', 'https://picsum.photos/seed/3/800/600', 1),
-       ('스모크 스테이지', '퍼포먼스 테마', 'https://picsum.photos/seed/4/800/600', 1),
-       ('문라이트 아카이브', '감성 판타지 테마', 'https://picsum.photos/seed/5/800/600', 1);
+INSERT INTO theme (name, description, thumbnail_image_url, price, is_active)
+VALUES ('화이트노이즈', 'SF 추리 테마', 'https://picsum.photos/seed/1/800/600', 30000, 1),
+       ('클락워크 호텔', '미스터리 테마', 'https://picsum.photos/seed/2/800/600', 30000, 1),
+       ('선셋 다이브', '어드벤처 테마', 'https://picsum.photos/seed/3/800/600', 25000, 1),
+       ('스모크 스테이지', '퍼포먼스 테마', 'https://picsum.photos/seed/4/800/600', 25000, 1),
+       ('문라이트 아카이브', '감성 판타지 테마', 'https://picsum.photos/seed/5/800/600', 28000, 1);
 
 INSERT INTO reservation_time (start_at, status)
 VALUES ('10:00:00', 'ACTIVE'),

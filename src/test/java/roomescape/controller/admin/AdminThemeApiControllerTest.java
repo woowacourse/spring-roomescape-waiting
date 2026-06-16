@@ -40,10 +40,10 @@ class AdminThemeApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 관리자가_테마_정보로_테마_추가_요청_시_성공한다() {
         // given
-        AdminThemeRequest body = new AdminThemeRequest("공포", "공포 방탈출입니다.", "http://image.com/image.png");
+        AdminThemeRequest body = new AdminThemeRequest("공포", "공포 방탈출입니다.", "http://image.com/image.png", 30000L);
 
         ThemeRegisterResult result = new ThemeRegisterResult(1L, "공포", "공포 방탈출입니다.", "http://image.com/image.png",
-                true);
+                30000L, true);
         when(themeService.register(any(ThemeRegisterCommand.class))).thenReturn(result);
 
         AdminThemeResponse expected = AdminThemeResponse.from(result);

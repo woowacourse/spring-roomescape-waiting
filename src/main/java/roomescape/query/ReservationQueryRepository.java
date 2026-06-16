@@ -28,6 +28,7 @@ public class ReservationQueryRepository {
                             rs.getString("theme_name"),
                             rs.getString("theme_description"),
                             rs.getString("theme_thumbnail_image_url"),
+                            rs.getLong("theme_price"),
                             rs.getBoolean("theme_is_active")
                     ),
                     new ReservationTimeResult(
@@ -65,6 +66,7 @@ public class ReservationQueryRepository {
                     t.name AS theme_name,
                     t.description AS theme_description,
                     t.thumbnail_image_url AS theme_thumbnail_image_url,
+                    t.price AS theme_price,
                     t.is_active AS theme_is_active,
                     rt.id AS time_id,
                     rt.start_at AS time_start_at,

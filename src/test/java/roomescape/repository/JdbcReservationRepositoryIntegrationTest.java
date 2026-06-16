@@ -26,7 +26,7 @@ class JdbcReservationRepositoryIntegrationTest {
 
     private final ReservationTime reservationTime = ReservationTime.restore(1L, TestDateTimes.defaultTime(),
             TimeStatus.ACTIVE);
-    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
+    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", 30000L, false);
     @Autowired
     private ReservationRepository reservationRepository;
 

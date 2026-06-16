@@ -88,6 +88,7 @@ export default class Controller {
 
         this.views.formView.sync({
             selectedThemeId: this.store.selectedThemeId,
+            selectedThemePrice: this.store.selectedThemePrice,
             selectedDate: this.store.selectedDate,
             name: this.store.name,
             canSubmit: this.store.canSubmit(),
