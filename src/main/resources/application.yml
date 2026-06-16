@@ -17,3 +17,11 @@ toss:
   client-key: ${TOSS_CLIENT_KEY:test_ck_REPLACE_WITH_YOUR_TEST_CLIENT_KEY}
   secret-key: ${TOSS_SECRET_KEY:}
   confirm-url: ${TOSS_CONFIRM_URL:https://api.tosspayments.com/v1/payments/confirm}
+
+# 결제 미완료(abandonment) 정리 스케줄러.
+# ttl-minutes: 이 시간이 지난 PENDING 주문을 정리(결제창 유효시간보다 길게 — 진행 중 결제 보호).
+# poll-interval-ms: 스케줄러가 얼마나 자주 도는지(TTL과 별개).
+payment:
+  expiry:
+    ttl-minutes: ${PAYMENT_EXPIRY_TTL_MINUTES:30}
+    poll-interval-ms: ${PAYMENT_EXPIRY_POLL_INTERVAL_MS:60000}

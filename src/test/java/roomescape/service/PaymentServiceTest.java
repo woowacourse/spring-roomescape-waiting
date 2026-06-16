@@ -88,4 +88,33 @@ class PaymentServiceTest {
 
         verify(paymentGateway, never()).confirm(any());
     }
+
+    @Test
+    @DisplayName("만료 정리(expire)는 PENDING 주문을 FAILED로, 예약을 CANCELED로 만든다 (abandon 재사용)")
+    void expireAbandonedOrder() {
+        Order order = Order.reconstruct(1L, "order-1", 10L, 30000L, null, OrderStatus.PENDING);
+        Reservation reservation = pendingReservation(10L);
+        given(orderDao.findByOrderId("order-1")).willReturn(Optional.of(order));
+        given(reservationDao.findById(10L)).willReturn(Optional.of(reservation));
+
+        paymentService.expire("order-1");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.FAILED);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        verify(orderDao).update(order);
+        verify(reservationDao).update(reservation);
+    }
+
+    @Test
+    @DisplayName("이미 확정된 주문은 만료 정리에서 건너뛴다")
+    void expireSkipsConfirmed() {
+        Order order = Order.reconstruct(1L, "order-1", 10L, 30000L, "pk", OrderStatus.CONFIRMED);
+        given(orderDao.findByOrderId("order-1")).willReturn(Optional.of(order));
+
+        paymentService.expire("order-1");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        verify(orderDao, never()).update(any());
+        verify(reservationDao, never()).update(any());
+    }
 }

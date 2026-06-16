@@ -1,5 +1,7 @@
 package roomescape.dao;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import roomescape.domain.payment.Order;
 
@@ -9,4 +11,6 @@ public interface OrderDao {
     Optional<Order> findByOrderId(String orderId);
 
     Order update(Order order);
+
+    List<Order> findExpiredPending(LocalDateTime threshold);
 }

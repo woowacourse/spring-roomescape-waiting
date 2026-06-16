@@ -66,6 +66,10 @@ public class Order {
         return status == OrderStatus.CONFIRMED;
     }
 
+    public boolean isPending() {
+        return status == OrderStatus.PENDING;
+    }
+
     public Long getId() {
         return id;
     }

@@ -1,6 +1,7 @@
 package roomescape.domain.payment;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +78,25 @@ public class PaymentService {
         });
     }
 
+    /**
+     * 결제 신호 없이 방치된(abandonment) 주문 후보를 찾는다. 기준 시각보다 *이전에* 생성된 PENDING만 —
+     * 갓 만든 PENDING(아직 결제 진행 중일 수 있음)은 기준 시각보다 어려서 걸리지 않는다.
+     */
+    @Transactional(readOnly = true)
+    public List<String> findExpiredPendingOrderIds(LocalDateTime threshold) {
+        return orderDao.findExpiredPending(threshold).stream()
+                .map(Order::getOrderId)
+                .toList();
+    }
+
+    /**
+     * 만료된 주문 한 건을 정리한다. failUrl 콜백과 똑같이 abandon을 재사용한다(트리거만 다르고 정리 로직은 하나).
+     * 다시 조회해 그 사이 확정/정리됐으면 abandon이 알아서 건너뛴다.
+     */
+    public void expire(String orderId) {
+        orderDao.findByOrderId(orderId).ifPresent(this::abandon);
+    }
+
     private void confirmReservation(Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
@@ -85,7 +105,7 @@ public class PaymentService {
     }
 
     private void abandon(Order order) {
-        if (order.isConfirmed()) {
+        if (!order.isPending()) {
             return;
         }
         order.markFailed();

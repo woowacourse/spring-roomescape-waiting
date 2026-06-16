@@ -1,5 +1,7 @@
 package roomescape.dao.jdbc;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -69,5 +71,18 @@ public class OrderJdbcDao implements OrderDao {
                 .addValue("orderId", order.getOrderId());
         jdbcTemplate.update(sql, params);
         return order;
+    }
+
+    @Override
+    public List<Order> findExpiredPending(LocalDateTime threshold) {
+        String sql = """
+                SELECT id, order_id, reservation_id, amount, payment_key, status
+                FROM orders
+                WHERE status = :status AND created_at < :threshold
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("status", OrderStatus.PENDING.name())
+                .addValue("threshold", threshold);
+        return jdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 }
