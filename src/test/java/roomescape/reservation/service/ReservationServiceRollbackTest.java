@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
@@ -54,7 +53,7 @@ class ReservationServiceRollbackTest {
     @DisplayName("예약 취소-승격 중 승격 insert 가 실패하면 예약·대기 삭제가 모두 롤백된다")
     void 취소_승격_중간실패시_전체롤백() {
         // given: 예약(로치) + 대기(브라운) 가 같은 슬롯에 존재
-        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime, ReservationStatus.CONFIRMED));
+        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime));
         ReservationWaiting waiting = reservationWaitingDao.insert(new ReservationWaiting("브라운", THEME_ID, date, originTime));
 
         // 승격 마지막 단계(insert)에서 실패하도록 주입
@@ -77,7 +76,7 @@ class ReservationServiceRollbackTest {
     @DisplayName("예약 수정-승격 중 승격 insert 가 실패하면 예약 이동·대기 삭제가 모두 롤백된다")
     void 수정_승격_중간실패시_전체롤백() {
         // given: 예약(로치)@원래슬롯 + 대기(브라운)@원래슬롯
-        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime, ReservationStatus.CONFIRMED));
+        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime));
         ReservationWaiting waiting = reservationWaitingDao.insert(new ReservationWaiting("브라운", THEME_ID, date, originTime));
 
         doThrow(new RuntimeException("강제 실패")).when(reservationDao).insert(any(Reservation.class));

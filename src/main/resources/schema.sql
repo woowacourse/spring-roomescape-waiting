@@ -22,8 +22,6 @@ CREATE TABLE reservation (
     theme_id BIGINT NOT NULL,
     date    DATE NOT NULL,
     time_id BIGINT NOT NULL,
-    status  VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
-
     PRIMARY KEY (id),
     CONSTRAINT uk_reservation_theme_date_time UNIQUE (theme_id, date, time_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE CASCADE,

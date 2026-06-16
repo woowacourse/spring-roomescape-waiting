@@ -9,7 +9,6 @@ import org.springframework.dao.DuplicateKeyException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dto.ReservationChangeRequest;
 import roomescape.theme.dao.ThemeDao;
@@ -52,8 +51,8 @@ public class ReservationServiceTest {
     void 전체_예약_조회_성공() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "초록", 1L, LocalDate.now().plusDays(1), time, ReservationStatus.CONFIRMED),
-                new Reservation(2L, "브라운", 1L, LocalDate.now().plusDays(1), time, ReservationStatus.CONFIRMED)
+                new Reservation(1L, "초록", 1L, LocalDate.now().plusDays(1), time),
+                new Reservation(2L, "브라운", 1L, LocalDate.now().plusDays(1), time)
         );
         given(reservationDao.selectAll()).willReturn(reservations);
 
@@ -69,7 +68,7 @@ public class ReservationServiceTest {
         Long reservationId = 1L;
         Reservation reservation = new Reservation(
                 reservationId, "초록", 1L, LocalDate.now().plusDays(1),
-                new ReservationTime(1L, LocalTime.of(10, 0)), ReservationStatus.CONFIRMED
+                new ReservationTime(1L, LocalTime.of(10, 0))
         );
         given(reservationDao.selectById(reservationId)).willReturn(Optional.of(reservation));
 
@@ -96,8 +95,8 @@ public class ReservationServiceTest {
         Long themeId = 1L;
         ReservationTime time = new ReservationTime(22L, LocalTime.now().plusMinutes(3));
         List<Reservation> reservations = List.of(
-                new Reservation(name, themeId, LocalDate.now(), time, ReservationStatus.CONFIRMED),
-                new Reservation(name, themeId, LocalDate.now(), time, ReservationStatus.CONFIRMED)
+                new Reservation(name, themeId, LocalDate.now(), time),
+                new Reservation(name, themeId, LocalDate.now(), time)
         );
         when(reservationDao.selectByName(name)).thenReturn(reservations);
 
@@ -130,7 +129,7 @@ public class ReservationServiceTest {
         given(timeDao.selectById(timeId)).willReturn(Optional.of(time));
         given(themeDao.existsById(themeId)).willReturn(true);
         given(reservationDao.insert(any(Reservation.class)))
-                .willReturn(new Reservation(10L, "초록", themeId, date, time, ReservationStatus.CONFIRMED));
+                .willReturn(new Reservation(10L, "초록", themeId, date, time));
 
         Reservation actual = reservationService.add("초록", themeId, date, timeId);
 
@@ -222,8 +221,7 @@ public class ReservationServiceTest {
                 name,
                 themeId,
                 LocalDate.now().plusDays(2),
-                new ReservationTime(3L, LocalTime.of(10, 0)),
-                ReservationStatus.CONFIRMED
+                new ReservationTime(3L, LocalTime.of(10, 0))
         );
 
         given(reservationDao.lockById(reservationId))
@@ -234,7 +232,7 @@ public class ReservationServiceTest {
                 .willReturn(Optional.of(time));
         given(themeDao.existsById(themeId)).willReturn(true);
 
-        Reservation changedReservation = new Reservation(reservationId, name, themeId, date, time, ReservationStatus.CONFIRMED);
+        Reservation changedReservation = new Reservation(reservationId, name, themeId, date, time);
         given(reservationDao.updateDateTimeById(reservationId, date, timeId))
                 .willReturn(Optional.of(changedReservation));
         given(reservationWaitingDao.lockFirstByThemeAndDateAndTime(
@@ -257,8 +255,7 @@ public class ReservationServiceTest {
                 "로치",
                 1L,
                 LocalDate.now().plusDays(1),
-                new ReservationTime(3L, LocalTime.of(12, 0)),
-                ReservationStatus.CONFIRMED
+                new ReservationTime(3L, LocalTime.of(12, 0))
         );
 
         ReservationChangeRequest request = new ReservationChangeRequest(
@@ -393,8 +390,7 @@ public class ReservationServiceTest {
                 name,
                 themeId,
                 LocalDate.now().plusDays(1),
-                new ReservationTime(3L, LocalTime.of(10, 0)),
-                ReservationStatus.CONFIRMED
+                new ReservationTime(3L, LocalTime.of(10, 0))
         );
 
         given(reservationDao.lockById(reservationId)).willReturn(Optional.of(reservationId));
@@ -416,8 +412,7 @@ public class ReservationServiceTest {
                 "로치",
                 1L,
                 LocalDate.now().plusDays(1),
-                new ReservationTime(3L, LocalTime.of(12, 0)),
-                ReservationStatus.CONFIRMED
+                new ReservationTime(3L, LocalTime.of(12, 0))
         );
 
         given(reservationDao.lockById(reservationId))
@@ -448,8 +443,7 @@ public class ReservationServiceTest {
                 "로치",
                 1L,
                 LocalDate.now().minusDays(1),
-                new ReservationTime(2L, LocalTime.of(11, 0)),
-                ReservationStatus.CONFIRMED
+                new ReservationTime(2L, LocalTime.of(11, 0))
         );
 
         given(reservationDao.lockById(pastReserved)).willReturn(Optional.of(pastReserved));
@@ -468,7 +462,7 @@ public class ReservationServiceTest {
         Long themeId = 1L;
         Reservation origin = new Reservation(
                 reservationId, "로치", themeId, LocalDate.now().plusDays(1),
-                new ReservationTime(3L, LocalTime.of(10, 0)), ReservationStatus.CONFIRMED
+                new ReservationTime(3L, LocalTime.of(10, 0))
         );
         given(reservationDao.lockById(reservationId)).willReturn(Optional.of(reservationId));
         given(reservationDao.selectById(reservationId)).willReturn(Optional.of(origin));

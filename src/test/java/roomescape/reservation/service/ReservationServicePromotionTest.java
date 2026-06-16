@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
@@ -44,7 +43,7 @@ class ReservationServicePromotionTest {
     @DisplayName("예약을 다른 슬롯으로 옮기면, 원래 슬롯의 첫 대기자가 그 슬롯의 예약으로 승격된다")
     void 수정시_원래_슬롯_대기자가_예약으로_승격된다() {
         // given: 로치 예약(원래 슬롯) + 브라운 대기(같은 슬롯)
-        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime, ReservationStatus.CONFIRMED));
+        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime));
         reservationWaitingDao.insert(new ReservationWaiting("브라운", THEME_ID, date, originTime));
 
         // when: 로치 예약을 새 슬롯으로 이동 (원래 슬롯이 비워짐)
@@ -62,7 +61,7 @@ class ReservationServicePromotionTest {
     @DisplayName("원래 슬롯에 대기자가 없으면 승격이 일어나지 않는다")
     void 수정시_원래_슬롯에_대기자가_없으면_승격하지_않는다() {
         // given: 로치 예약만 존재, 대기 없음
-        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime, ReservationStatus.CONFIRMED));
+        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime));
 
         // when: 로치 예약을 새 슬롯으로 이동 (원래 슬롯이 비워짐)
         reservationService.modifyDateTimeByName(reserved.getId(), "로치", THEME_ID, date, NEW_TIME_ID);
@@ -76,7 +75,7 @@ class ReservationServicePromotionTest {
     @DisplayName("예약을 취소하면, 그 슬롯의 첫 대기자가 예약으로 승격된다")
     void 취소시_슬롯_대기자가_예약으로_승격된다() {
         // given: 로치 예약 + 브라운 대기(같은 슬롯)
-        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime, ReservationStatus.CONFIRMED));
+        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime));
         reservationWaitingDao.insert(new ReservationWaiting("브라운", THEME_ID, date, originTime));
 
         // when: 로치 예약 취소
@@ -94,7 +93,7 @@ class ReservationServicePromotionTest {
     @DisplayName("예약을 취소할 때 대기자가 없으면 승격 없이 슬롯이 비워진다")
     void 취소시_대기자가_없으면_승격하지_않는다() {
         // given: 로치 예약만 존재, 대기 없음
-        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime, ReservationStatus.CONFIRMED));
+        Reservation reserved = reservationDao.insert(new Reservation("로치", THEME_ID, date, originTime));
 
         // when: 로치 예약 취소
         reservationService.deleteById(reserved.getId());
