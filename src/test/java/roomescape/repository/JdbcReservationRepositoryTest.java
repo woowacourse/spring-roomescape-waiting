@@ -30,8 +30,8 @@ class JdbcReservationRepositoryTest {
 
     private JdbcReservationRepository jdbcReservationRepository;
 
-    private static final Theme THEME_1 = new Theme(1L, "테스트테마1", "테스트용 첫 번째 테마 설명", "https://test.com/thumb1.jpg");
-    private static final Theme THEME_2 = new Theme(2L, "테스트테마2", "테스트용 두 번째 테마 설명", "https://test.com/thumb2.jpg");
+    private static final Theme THEME_1 = new Theme(1L, "테스트테마1", "테스트용 첫 번째 테마 설명", "https://test.com/thumb1.jpg", 10000L);
+    private static final Theme THEME_2 = new Theme(2L, "테스트테마2", "테스트용 두 번째 테마 설명", "https://test.com/thumb2.jpg", 10000L);
     private static final Time TIME_10 = new Time(1L, LocalTime.of(10, 0));
     private static final Time TIME_14 = new Time(2L, LocalTime.of(14, 0));
     private static final Time TIME_18 = new Time(3L, LocalTime.of(18, 0));

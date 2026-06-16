@@ -17,6 +17,8 @@ public class Reservation {
     private final Time time;
     private final Theme theme;
     private ReservationStatus reservationStatus;
+    private final String orderId;
+    private final Long amount;
 
     public Reservation(String name, Long themeSlotId, LocalDate date, Time time, Theme theme) {
         validate(name, date, time, theme);
@@ -27,6 +29,21 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.reservationStatus = PendingStatus.getInstance();
+        this.orderId = null;
+        this.amount = null;
+    }
+
+    public Reservation(String name, Long themeSlotId, LocalDate date, Time time, Theme theme, String orderId, Long amount) {
+        validate(name, date, time, theme);
+        this.id = null;
+        this.name = name;
+        this.themeSlotId = themeSlotId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.reservationStatus = PendingStatus.getInstance();
+        this.orderId = orderId;
+        this.amount = amount;
     }
 
     public Reservation(Long id, String name, Long themeSlotId, LocalDate date, Time time, Theme theme, ReservationStatus reservationStatus) {
@@ -38,6 +55,21 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.reservationStatus = reservationStatus;
+        this.orderId = null;
+        this.amount = null;
+    }
+
+    public Reservation(Long id, String name, Long themeSlotId, LocalDate date, Time time, Theme theme, ReservationStatus reservationStatus, String orderId, Long amount) {
+        validate(name, date, time, theme);
+        this.id = id;
+        this.name = name;
+        this.themeSlotId = themeSlotId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.reservationStatus = reservationStatus;
+        this.orderId = orderId;
+        this.amount = amount;
     }
 
     public static Reservation of(Long id, Reservation reservation) {
@@ -48,7 +80,9 @@ public class Reservation {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
-                reservation.getReservationStatus()
+                reservation.getReservationStatus(),
+                reservation.getOrderId(),
+                reservation.getAmount()
         );
     }
 
@@ -97,6 +131,14 @@ public class Reservation {
 
     public String getReservationStatusName() {
         return reservationStatus.getName();
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public Long getAmount() {
+        return amount;
     }
 
     public void changeStatus(ReservationStatus reservationStatus) {

@@ -47,7 +47,7 @@ class ReservationServiceTest {
                 fakeThemeSlotRepository
         );
         savedTime = fakeReservationTimeDao.save(Time.of(LocalTime.of(10, 0)));
-        savedTheme = fakeThemeRepository.save(new Theme("이름", "설명", "test.com"));
+        savedTheme = fakeThemeRepository.save(new Theme("이름", "설명", "test.com", 10000L));
         savedThemeSlot1 = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(1), savedTime, false));
         savedThemeSlot2 = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(2), savedTime, false));
         savedPastThemeSlot = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().minusDays(1), savedTime, false));

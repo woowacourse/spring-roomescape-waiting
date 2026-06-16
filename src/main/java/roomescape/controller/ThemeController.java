@@ -36,7 +36,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTime(@Valid @RequestBody ThemeRequest themeRequest) {
-        Theme theme = themeService.saveTheme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnailUrl());
+        Theme theme = themeService.saveTheme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnailUrl(), themeRequest.price());
         return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(theme));
     }
 

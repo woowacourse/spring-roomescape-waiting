@@ -1,6 +1,8 @@
 package roomescape.controller.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record ThemeRequest(
         @NotBlank
@@ -10,5 +12,8 @@ public record ThemeRequest(
         String description,
 
         @NotBlank
-        String thumbnailUrl
+        String thumbnailUrl,
+
+        @NotNull @Positive
+        Long price
 ) { }

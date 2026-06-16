@@ -17,7 +17,7 @@ import roomescape.global.exception.CustomException;
 class ReservationsTest {
 
     private static final Long THEME_SLOT_ID = 1L;
-    private static final Theme THEME = new Theme(1L, "테마", "설명", "test.com");
+    private static final Theme THEME = new Theme(1L, "테마", "설명", "test.com", 10000L);
     private static final LocalDate DATE = LocalDate.now().plusDays(1);
     private static final Time TIME = new Time(1L, LocalTime.of(10, 0));
 

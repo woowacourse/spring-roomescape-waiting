@@ -104,19 +104,20 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public List<ThemeSlot> findByThemeIdAndDate(long themeId, LocalDate date) {
         String sql = """
-                SELECT 
+                SELECT
                     ts.id AS id,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price,
                     ts.date AS date,
-                    t.id AS time_id, 
+                    t.id AS time_id,
                     t.start_at AS start_at,
                     ts.is_reserved AS is_reserved
-                FROM 
+                FROM
                     theme_slot ts
-                        INNER JOIN time t ON ts.time_id = t.id 
+                        INNER JOIN time t ON ts.time_id = t.id
                         INNER JOIN theme th ON ts.theme_id = th.id
                 WHERE ts.theme_id = ?
                 AND ts.date = ?
@@ -127,19 +128,20 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public Optional<ThemeSlot> findById(long id) {
         String sql = """
-                SELECT 
+                SELECT
                     ts.id AS id,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price,
                     ts.date AS date,
-                    t.id AS time_id, 
+                    t.id AS time_id,
                     t.start_at AS start_at,
                     ts.is_reserved AS is_reserved
-                FROM 
+                FROM
                     theme_slot ts
-                        INNER JOIN time t ON ts.time_id = t.id 
+                        INNER JOIN time t ON ts.time_id = t.id
                         INNER JOIN theme th ON ts.theme_id = th.id
                 WHERE ts.id = ?
                 FOR UPDATE
@@ -230,7 +232,8 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
                         rs.getLong("theme_id"),
                         rs.getString("theme_name"),
                         rs.getString("theme_description"),
-                        rs.getString("theme_thumbnail_url")
+                        rs.getString("theme_thumbnail_url"),
+                        rs.getLong("theme_price")
                 ),
                 rs.getObject("date", LocalDate.class),
                 new Time(

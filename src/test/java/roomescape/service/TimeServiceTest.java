@@ -71,7 +71,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("해당 테마, 날짜에 대한 슬롯이 없으면 등록된 모든 시간으로 슬롯을 생성하여 반환한다.")
     void findThemeSlotBy_createsSlots_whenNotExists() {
-        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com"));
+        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com", 10000L));
         fakeTimeRepository.save(Time.of(LocalTime.of(10, 0)));
         fakeTimeRepository.save(Time.of(LocalTime.of(14, 0)));
         LocalDate date = LocalDate.now().plusDays(1);
@@ -85,7 +85,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("해당 테마, 날짜에 대한 슬롯이 이미 존재하면 DB에서 그대로 조회하여 반환한다.")
     void findThemeSlotBy_returnsExisting_whenExists() {
-        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com"));
+        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com", 10000L));
         Time time = fakeTimeRepository.save(Time.of(LocalTime.of(10, 0)));
         LocalDate date = LocalDate.now().plusDays(1);
 
@@ -109,7 +109,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 시간을 삭제하면 예외가 발생한다.")
     void throwsExceptionWhenDeletingTimeWithReservation() {
-        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com"));
+        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com", 10000L));
         Time time = reservationTimeService.saveTime(LocalTime.of(10, 0));
         ThemeSlot themeSlot = fakeThemeSlotRepository.save(new ThemeSlot(theme, LocalDate.now().plusDays(1), time, false));
         fakeReservationRepository.save(new Reservation("브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
