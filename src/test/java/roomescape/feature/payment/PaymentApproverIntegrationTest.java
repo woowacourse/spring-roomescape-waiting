@@ -19,7 +19,7 @@ import roomescape.feature.payment.dto.PaymentApproveRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class PaymentApproverIntegrationTest {
 
-    private static final Long NON_EXISTENT_ORDER_ID = 1L;
+    private static final String NON_EXISTENT_ORDER_ID = "non_existent_order_id";
     private static final String NON_EXISTENT_PAYMENT_KEY = "non_existent_payment_key";
     private static final Long AMOUNT = 1_000L;
 

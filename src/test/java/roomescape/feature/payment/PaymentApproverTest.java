@@ -25,7 +25,7 @@ class PaymentApproverTest {
     private static final String BASE_URL = "https://api.tosspayments.com";
     private static final String APPROVE_URL = BASE_URL + "/v1/payments/confirm";
 
-    private static final Long ORDER_ID = 1L;
+    private static final String ORDER_ID = "test_order_id";
     private static final String PAYMENT_KEY = "test_payment_key";
     private static final Long AMOUNT = 1_000L;
     private static final PaymentApproveRequest APPROVE_REQUEST =

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>결제 확인</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container" style="max-width: 480px; margin-top: 80px;">
+  <div class="card shadow-sm">
+    <div class="card-body text-center p-5">
+      <div id="paymentStatusIcon" class="mb-3" style="font-size: 3rem;">⏳</div>
+      <h4 id="paymentStatusTitle" class="mb-2">결제를 확인하고 있습니다</h4>
+      <p id="paymentStatusMessage" class="text-muted mb-0">잠시만 기다려 주세요...</p>
+      <a id="paymentHomeLink" href="/" class="btn btn-dark mt-4 d-none">홈으로</a>
+    </div>
+  </div>
+</div>
+<script>
+  (async () => {
+    const params = new URLSearchParams(window.location.search);
+    const reservationId = params.get('reservationId');
+    const reservationName = params.get('reservationName');
+    const requestBody = {
+      orderId: params.get('orderId'),
+      paymentKey: params.get('paymentKey'),
+      amount: Number(params.get('amount'))
+    };
+
+    const icon = document.getElementById('paymentStatusIcon');
+    const title = document.getElementById('paymentStatusTitle');
+    const message = document.getElementById('paymentStatusMessage');
+    const homeLink = document.getElementById('paymentHomeLink');
+
+    const homeHref = reservationName
+        ? '/?reservationName=' + encodeURIComponent(reservationName)
+        : '/';
+    homeLink.href = homeHref;
+
+    try {
+      const response = await fetch('/api/reservations/' + encodeURIComponent(reservationId) + '/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        let data;
+        try {
+          data = await response.json();
+        } catch (error) {
+          data = {};
+        }
+        throw new Error(data.message || '결제 승인에 실패했습니다.');
+      }
+
+      icon.innerText = '✅';
+      title.innerText = '결제가 완료되었습니다';
+      message.innerText = '예약이 확정되었습니다. 잠시 후 홈으로 이동합니다.';
+      setTimeout(() => { location.href = homeHref; }, 1500);
+    } catch (error) {
+      icon.innerText = '❌';
+      title.innerText = '결제 확인에 실패했습니다';
+      message.innerText = error.message || '결제 승인 중 오류가 발생했습니다.';
+      homeLink.classList.remove('d-none');
+    }
+  })();
+</script>
+</body>
+</html>

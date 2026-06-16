@@ -20,4 +20,14 @@ public class ViewController {
     public String adminReservationPage() {
         return "admin/management";
     }
+
+    @GetMapping("/payments/success")
+    public String paymentSuccessPage() {
+        return "payments/success";
+    }
+
+    @GetMapping("/payments/fail")
+    public String paymentFailPage() {
+        return "payments/fail";
+    }
 }

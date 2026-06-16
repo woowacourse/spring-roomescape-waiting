@@ -194,6 +194,8 @@
       }
     }
   </style>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <script src="/js/payment.js"></script>
 </head>
 <body>
 
@@ -466,6 +468,21 @@
 
     document.getElementById('reservationLookupName').value = reservationName;
     await loadUserReservations();
+
+    const pendingReservation = findPendingActiveReservation();
+    if (pendingReservation) {
+      try {
+        await startReservationPayment(pendingReservation.id, reservationName);
+      } catch (error) {
+        console.error('결제 시작 실패:', error);
+      }
+    }
+  }
+
+  function findPendingActiveReservation() {
+    return userReservations.find(reservation =>
+        reservation.orderStatus === 'PENDING'
+        && (reservation.status === 'EDITABLE' || reservation.status === 'EDIT_RECOMMENDED'));
   }
 
   document.getElementById('reservationLookupForm').addEventListener('submit', loadUserReservations);
@@ -571,10 +588,16 @@
       const message = reservation.message
           ? `<p class="small text-muted mt-3 mb-0">${escapeHtml(reservation.message)}</p>`
           : '';
+      const needsPayment = editable && reservation.orderStatus === 'PENDING';
       let actions = '';
       if (editable) {
+        const paymentButton = needsPayment
+            ? `<button type="button" class="btn btn-success btn-sm"
+                  onclick="startReservationPayment(${reservation.id}, lastReservationLookupName)">결제하기</button>`
+            : '';
         actions = `
             <div class="d-flex gap-2 mt-3">
+              ${paymentButton}
               <button type="button" class="btn btn-outline-primary btn-sm"
                   onclick="openEditReservationModal(${reservation.id})">수정</button>
               <button type="button" class="btn btn-outline-danger btn-sm"
@@ -599,7 +622,10 @@
                 <div class="fw-bold">${escapeHtml(reservation.theme.name)}</div>
                 <div class="text-muted small">${escapeHtml(reservation.date)} · ${escapeHtml(reservation.time.startAt)}</div>
               </div>
-              <span class="status-badge ${statusClass(reservation.status)}">${statusLabel(reservation.status)}</span>
+              <div class="d-flex flex-column align-items-end gap-1">
+                <span class="status-badge ${statusClass(reservation.status)}">${statusLabel(reservation.status)}</span>
+                ${needsPayment ? '<span class="badge bg-warning text-dark">결제 대기</span>' : ''}
+              </div>
             </div>
             <div class="d-flex flex-wrap gap-2">${resourceBadges}</div>
             ${message}
