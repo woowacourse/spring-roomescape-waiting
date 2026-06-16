@@ -10,21 +10,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
-import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.theme.JdbcThemeRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
+import roomescape.repository.reservationslot.ReservationSlotRepository;
+import roomescape.repository.theme.ThemeRepository;
 
-@JdbcTest
+@SpringBootTest
 class JdbcThemeRepositoryTest {
 
-    private JdbcThemeRepository jdbcThemeRepository;
-    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
-    private JdbcReservationTimeRepository jdbcReservationTimeRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -32,9 +37,6 @@ class JdbcThemeRepositoryTest {
     @BeforeEach
     void setup() {
         clearTables();
-        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
-        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
-        jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
     }
 
     @Test
@@ -44,8 +46,8 @@ class JdbcThemeRepositoryTest {
         Theme theme = Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
         // when
-        Theme result = jdbcThemeRepository.save(theme);
-        Theme saved = jdbcThemeRepository.findById(result.getId())
+        Theme result = themeRepository.save(theme);
+        Theme saved = themeRepository.findById(result.getId())
                 .orElseThrow();
 
         // then
@@ -56,10 +58,10 @@ class JdbcThemeRepositoryTest {
     @DisplayName("테마 전체 조회")
     void theme_findAll_test() {
         // given
-        jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        themeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
 
         // when
-        List<Theme> themes = jdbcThemeRepository.findAll();
+        List<Theme> themes = themeRepository.findAll();
 
         // then
         assertThat(themes).hasSize(1);
@@ -69,11 +71,11 @@ class JdbcThemeRepositoryTest {
     @DisplayName("테마 이름 중복 저장 예외")
     void theme_save_duplicate_test() {
         // given
-        jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        themeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
 
         // when & then
         assertThrows(PersistenceConflictException.class, () ->
-                jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "새 설명", "https://example.com/new-theme.png"))
+                themeRepository.save(Theme.createNew("미술관의 밤", "새 설명", "https://example.com/new-theme.png"))
         );
     }
 
@@ -81,16 +83,16 @@ class JdbcThemeRepositoryTest {
     @DisplayName("테마 삭제")
     void theme_delete_test() {
         // given
-        Theme saved = jdbcThemeRepository.save(
+        Theme saved = themeRepository.save(
                 Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
         );
-        int beforeSize = jdbcThemeRepository.findAll().size();
+        int beforeSize = themeRepository.findAll().size();
 
         // when
-        int affectedRowCount = jdbcThemeRepository.deleteById(saved.getId());
+        int affectedRowCount = themeRepository.deleteById(saved.getId());
 
         // then
-        int afterSize = jdbcThemeRepository.findAll().size();
+        int afterSize = themeRepository.findAll().size();
         assertThat(affectedRowCount).isOne();
         assertThat(afterSize).isEqualTo(beforeSize - 1);
     }
@@ -99,7 +101,7 @@ class JdbcThemeRepositoryTest {
     @DisplayName("존재하지 않는 테마 ID는 삭제 건수가 0이다")
     void theme_delete_not_found_test() {
         // when
-        int affectedRowCount = jdbcThemeRepository.deleteById(999L);
+        int affectedRowCount = themeRepository.deleteById(999L);
 
         // then
         assertThat(affectedRowCount).isZero();
@@ -109,11 +111,11 @@ class JdbcThemeRepositoryTest {
     @DisplayName("테마 이름 존재 여부 확인")
     void theme_existsByName_test() {
         // given
-        jdbcThemeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        themeRepository.save(Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png"));
 
         // when
-        boolean exists = jdbcThemeRepository.existsByName("미술관의 밤");
-        boolean notExists = jdbcThemeRepository.existsByName("놀이공원 탈출");
+        boolean exists = themeRepository.existsByName("미술관의 밤");
+        boolean notExists = themeRepository.existsByName("놀이공원 탈출");
 
         // then
         assertThat(exists).isTrue();
@@ -128,9 +130,9 @@ class JdbcThemeRepositoryTest {
         Theme secondTheme = createTheme("심해 연구소");
         Theme thirdTheme = createTheme("폐병원 탈출");
 
-        ReservationTime firstThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        ReservationTime secondThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
-        ReservationTime thirdThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("12:00")));
+        ReservationTime firstThemeTime = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTime secondThemeTime = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationTime thirdThemeTime = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("12:00")));
 
         insertHistoricalReservation("쿠다", today.minusDays(1), firstTheme, firstThemeTime);
         insertHistoricalReservation("아루", today.minusDays(2), firstTheme, firstThemeTime);
@@ -142,7 +144,7 @@ class JdbcThemeRepositoryTest {
         insertHistoricalReservation("레오", today.minusDays(1), thirdTheme, thirdThemeTime);
         insertHistoricalReservation("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime);
 
-        List<Theme> popularThemes = jdbcThemeRepository.findPopularThemes(7, 2);
+        List<Theme> popularThemes = themeRepository.findPopularThemes(7, 2);
 
         assertThat(popularThemes).hasSize(2);
         assertThat(popularThemes.get(0).getId()).isEqualTo(firstTheme.getId());
@@ -161,7 +163,7 @@ class JdbcThemeRepositoryTest {
     }
 
     private Theme createTheme(final String name) {
-        return jdbcThemeRepository.save(
+        return themeRepository.save(
                 Theme.createNew(name, "추리 테마", "https://example.com/theme.png")
         );
     }
@@ -172,7 +174,7 @@ class JdbcThemeRepositoryTest {
             final Theme theme,
             final ReservationTime reservationTime
     ) {
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, slot_id, created_at) VALUES (?, ?, ?)",
                 name,

@@ -10,15 +10,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
 
-@JdbcTest
+@SpringBootTest
 class JdbcReservationTimeRepositoryTest {
 
-    private JdbcReservationTimeRepository jdbcReservationTimeRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -26,7 +27,6 @@ class JdbcReservationTimeRepositoryTest {
     @BeforeEach
     void setup() {
         clearTables();
-        jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
     }
 
     @Test
@@ -36,9 +36,9 @@ class JdbcReservationTimeRepositoryTest {
         LocalTime time = LocalTime.parse("11:00");
 
         ReservationTime nonIdReservationTime = ReservationTime.createNew(time);
-        jdbcReservationTimeRepository.save(nonIdReservationTime);
+        reservationTimeRepository.save(nonIdReservationTime);
 
-        Optional<ReservationTime> reservationTime = jdbcReservationTimeRepository.findAll()
+        Optional<ReservationTime> reservationTime = reservationTimeRepository.findAll()
                 .stream()
                 .findFirst();
         //then
@@ -53,8 +53,8 @@ class JdbcReservationTimeRepositoryTest {
         ReservationTime nonIdReservationTime = ReservationTime.createNew(time);
 
         //when
-        ReservationTime result = jdbcReservationTimeRepository.save(nonIdReservationTime);
-        ReservationTime saved = jdbcReservationTimeRepository.findById(result.getId())
+        ReservationTime result = reservationTimeRepository.save(nonIdReservationTime);
+        ReservationTime saved = reservationTimeRepository.findById(result.getId())
                 .orElseThrow();
         //then
         assertThat(result).isEqualTo(saved);
@@ -67,11 +67,11 @@ class JdbcReservationTimeRepositoryTest {
         LocalTime time = LocalTime.parse("11:00");
 
         //when
-        jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
+        reservationTimeRepository.save(ReservationTime.createNew(time));
 
         //then
         assertThrows(PersistenceConflictException.class, () -> {
-            jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
+            reservationTimeRepository.save(ReservationTime.createNew(time));
         });
     }
 
@@ -81,14 +81,14 @@ class JdbcReservationTimeRepositoryTest {
         // given
         LocalTime time = LocalTime.parse("11:00");
         ReservationTime nonIdReservationTime = ReservationTime.createNew(time);
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(nonIdReservationTime);
-        int beforeSize = jdbcReservationTimeRepository.findAll().size();
+        ReservationTime reservationTime = reservationTimeRepository.save(nonIdReservationTime);
+        int beforeSize = reservationTimeRepository.findAll().size();
 
         // when
-        int affectedRowCount = jdbcReservationTimeRepository.deleteById(reservationTime.getId());
+        int affectedRowCount = reservationTimeRepository.deleteById(reservationTime.getId());
 
         // then
-        int afterSize = jdbcReservationTimeRepository.findAll().size();
+        int afterSize = reservationTimeRepository.findAll().size();
 
         assertThat(affectedRowCount).isOne();
         assertThat(afterSize).isEqualTo(beforeSize - 1);
@@ -98,7 +98,7 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("존재하지 않는 예약 시간 ID는 삭제 건수가 0이다")
     void reservationTime_delete_not_found_test() {
         // when
-        int affectedRowCount = jdbcReservationTimeRepository.deleteById(999L);
+        int affectedRowCount = reservationTimeRepository.deleteById(999L);
 
         // then
         assertThat(affectedRowCount).isZero();

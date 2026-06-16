@@ -9,52 +9,54 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
-import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
-import roomescape.repository.theme.JdbcThemeRepository;
+import roomescape.repository.reservationslot.ReservationSlotRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
+import roomescape.repository.theme.ThemeRepository;
 
-@JdbcTest
+@SpringBootTest
 class JdbcReservationSlotRepositoryTest {
 
-    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
-    private JdbcThemeRepository jdbcThemeRepository;
-    private JdbcReservationTimeRepository jdbcReservationTimeRepository;
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
-        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
-        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
-        jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
         clearTables();
     }
 
     @Test
     @DisplayName("날짜와 테마로 슬롯을 조회한다")
     void findByDateAndTheme() {
-        Theme theme = jdbcThemeRepository.save(
+        Theme theme = themeRepository.save(
                 Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
         );
-        Theme otherTheme = jdbcThemeRepository.save(
+        Theme otherTheme = themeRepository.save(
                 Theme.createNew("심해 연구소", "잠수 테마", "https://example.com/other.png")
         );
-        ReservationTime ten = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        ReservationTime eleven = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationTime ten = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTime eleven = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
         LocalDate date = LocalDate.parse("2026-08-06");
 
-        ReservationSlot first = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, ten));
-        ReservationSlot second = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
-        jdbcReservationSlotRepository.save(new ReservationSlot(date.plusDays(1), theme, ten));
-        jdbcReservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
+        ReservationSlot first = reservationSlotRepository.save(new ReservationSlot(date, theme, ten));
+        ReservationSlot second = reservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
+        reservationSlotRepository.save(new ReservationSlot(date.plusDays(1), theme, ten));
+        reservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
 
-        List<ReservationSlot> slots = jdbcReservationSlotRepository.findByDateAndTheme(date, theme);
+        List<ReservationSlot> slots = reservationSlotRepository.findByDateAndTheme(date, theme);
 
         assertThat(slots)
                 .extracting(ReservationSlot::getId)

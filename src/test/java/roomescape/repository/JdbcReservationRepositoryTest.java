@@ -11,24 +11,31 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
-import roomescape.repository.reservation.JdbcReservationRepository;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
-import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
+import roomescape.repository.reservationslot.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.theme.JdbcThemeRepository;
+import roomescape.repository.theme.ThemeRepository;
 
-@JdbcTest
+@SpringBootTest
 class JdbcReservationRepositoryTest {
 
-    private JdbcReservationRepository jdbcReservationRepository;
-    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
-    private JdbcReservationTimeRepository jdbcReservationTimeRepository;
-    private JdbcThemeRepository jdbcThemeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -36,10 +43,6 @@ class JdbcReservationRepositoryTest {
     @BeforeEach
     void setup() {
         clearTables();
-        jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
-        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
-        jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
-        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
     }
 
     @Test
@@ -52,13 +55,13 @@ class JdbcReservationRepositoryTest {
         LocalDateTime createdAt = LocalDateTime.parse("2023-08-04T12:00:00");
         Theme theme = createTheme("미술관의 밤");
 
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(time));
 
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
         Reservation reservation = Reservation.reserve(name, slot, createdAt);
         //when
-        Reservation result = jdbcReservationRepository.save(reservation);
-        Reservation saved = jdbcReservationRepository.findById(result.getId())
+        Reservation result = reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.findById(result.getId())
                 .orElseThrow();
 
         // then
@@ -74,13 +77,13 @@ class JdbcReservationRepositoryTest {
         LocalTime time = LocalTime.parse("10:00");
         Theme theme = createTheme("미술관의 밤");
 
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(time));
 
         // when & then
         assertThrows(PersistenceConflictException.class, () -> {
-            ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-            jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
-            jdbcReservationRepository.save(Reservation.reserve("아루", slot, LocalDateTime.now()));
+            ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+            reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+            reservationRepository.save(Reservation.reserve("아루", slot, LocalDateTime.now()));
         });
     }
 
@@ -92,12 +95,12 @@ class JdbcReservationRepositoryTest {
         LocalTime time = LocalTime.parse("10:00");
         Theme theme = createTheme("미술관의 밤");
 
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(time));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         //when
-        List<Reservation> reservations = jdbcReservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findAll();
 
         //then
         assertThat(reservations.size()).isEqualTo(1);
@@ -111,23 +114,23 @@ class JdbcReservationRepositoryTest {
         LocalTime time = LocalTime.parse("10:00");
         Theme theme = createTheme("미술관의 밤");
 
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(time));
 
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
-        int beforeSize = jdbcReservationRepository.findAll().size();
+        int beforeSize = reservationRepository.findAll().size();
 
-        Reservation reservation = jdbcReservationRepository.findAll()
+        Reservation reservation = reservationRepository.findAll()
                 .stream()
                 .findFirst()
                 .orElseThrow();
 
         // when
-        jdbcReservationRepository.delete(reservation);
+        reservationRepository.delete(reservation);
 
         // then
-        int afterSize = jdbcReservationRepository.findAll().size();
+        int afterSize = reservationRepository.findAll().size();
 
         assertThat(afterSize).isEqualTo(beforeSize - 1);
     }
@@ -138,14 +141,14 @@ class JdbcReservationRepositoryTest {
         // given
         LocalDate date = LocalDate.parse("2026-08-06");
         Theme theme = createTheme("미술관의 밤");
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(
+        ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.createNew(LocalTime.parse("10:00"))
         );
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
-        Reservation saved = jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservationTime));
+        Reservation saved = reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         // when
-        Reservation found = jdbcReservationRepository.findBySlot(new ReservationSlot(date, theme, reservationTime))
+        Reservation found = reservationRepository.findBySlot(new ReservationSlot(date, theme, reservationTime))
                 .orElseThrow();
 
         // then
@@ -159,19 +162,19 @@ class JdbcReservationRepositoryTest {
         LocalDate date = LocalDate.parse("2026-08-06");
         Theme theme = createTheme("미술관의 밤");
         Theme otherTheme = createTheme("잠실의 밤");
-        ReservationTime ten = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        ReservationTime eleven = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, ten));
-        ReservationSlot otherTimeSlot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
-        ReservationSlot otherThemeSlot = jdbcReservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
-        Reservation expected = jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
-        Reservation sameThemeReservation = jdbcReservationRepository.save(
+        ReservationTime ten = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTime eleven = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, ten));
+        ReservationSlot otherTimeSlot = reservationSlotRepository.save(new ReservationSlot(date, theme, eleven));
+        ReservationSlot otherThemeSlot = reservationSlotRepository.save(new ReservationSlot(date, otherTheme, ten));
+        Reservation expected = reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        Reservation sameThemeReservation = reservationRepository.save(
                 Reservation.reserve("아루", otherTimeSlot, LocalDateTime.now())
         );
-        jdbcReservationRepository.save(Reservation.reserve("도기", otherThemeSlot, LocalDateTime.now()));
+        reservationRepository.save(Reservation.reserve("도기", otherThemeSlot, LocalDateTime.now()));
 
         // when
-        List<Reservation> reservations = jdbcReservationRepository.findByDateAndTheme(date, theme);
+        List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
 
         // then
         assertThat(reservations).containsExactlyInAnyOrder(expected, sameThemeReservation);
@@ -183,18 +186,18 @@ class JdbcReservationRepositoryTest {
         // given
         LocalDate date = LocalDate.parse("2026-08-06");
         Theme theme = createTheme("미술관의 밤");
-        ReservationTime reservedTime = jdbcReservationTimeRepository.save(
+        ReservationTime reservedTime = reservationTimeRepository.save(
                 ReservationTime.createNew(LocalTime.parse("10:00"))
         );
-        ReservationTime emptyTime = jdbcReservationTimeRepository.save(
+        ReservationTime emptyTime = reservationTimeRepository.save(
                 ReservationTime.createNew(LocalTime.parse("11:00"))
         );
-        ReservationSlot slot = jdbcReservationSlotRepository.save(new ReservationSlot(date, theme, reservedTime));
-        jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        ReservationSlot slot = reservationSlotRepository.save(new ReservationSlot(date, theme, reservedTime));
+        reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
 
         // when & then
-        assertThat(jdbcReservationRepository.existsByTime(reservedTime)).isTrue();
-        assertThat(jdbcReservationRepository.existsByTime(emptyTime)).isFalse();
+        assertThat(reservationRepository.existsByTime(reservedTime)).isTrue();
+        assertThat(reservationRepository.existsByTime(emptyTime)).isFalse();
     }
 
     private void clearTables() {
@@ -209,7 +212,7 @@ class JdbcReservationRepositoryTest {
     }
 
     private Theme createTheme(final String name) {
-        return jdbcThemeRepository.save(
+        return themeRepository.save(
                 Theme.createNew(name, "추리 테마", "https://example.com/theme.png")
         );
     }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -18,20 +18,29 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.reservation.JdbcReservationRepository;
-import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
-import roomescape.repository.reservationslot.JdbcReservationSlotRepository;
-import roomescape.repository.reservationwaiting.JdbcReservationWaitingRepository;
-import roomescape.repository.theme.JdbcThemeRepository;
+import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
+import roomescape.repository.reservationslot.ReservationSlotRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
+import roomescape.repository.theme.ThemeRepository;
 
-@JdbcTest
+@SpringBootTest
 class JdbcReservationWaitingRepositoryTest {
 
-    private JdbcReservationWaitingRepository jdbcReservationWaitingRepository;
-    private JdbcReservationRepository jdbcReservationRepository;
-    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
-    private JdbcReservationTimeRepository jdbcReservationTimeRepository;
-    private JdbcThemeRepository jdbcThemeRepository;
+    @Autowired
+    private ReservationWaitingRepository reservationWaitingRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -39,11 +48,6 @@ class JdbcReservationWaitingRepositoryTest {
     @BeforeEach
     void setup() {
         clearTables();
-        jdbcReservationWaitingRepository = new JdbcReservationWaitingRepository(jdbcTemplate);
-        jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
-        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
-        jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
-        jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
     }
 
     @Test
@@ -56,7 +60,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
 
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(waiting);
+        ReservationWaiting saved = reservationWaitingRepository.save(waiting);
 
         assertThat(saved.getId()).isEqualTo(1L);
         Long slotId = jdbcTemplate.queryForObject(
@@ -79,13 +83,13 @@ class JdbcReservationWaitingRepositoryTest {
     void saveDuplicateNameForSlot() {
         Reservation reservation = createReservation();
 
-        jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+        reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        assertThrows(PersistenceConflictException.class, () -> jdbcReservationWaitingRepository.save(
+        assertThrows(PersistenceConflictException.class, () -> reservationWaitingRepository.save(
                 ReservationWaiting.createNew(reservation.getSlot(), "아루", LocalDateTime.parse("2026-08-05T12:01:00"))
         ));
     }
@@ -94,13 +98,13 @@ class JdbcReservationWaitingRepositoryTest {
     @DisplayName("대기 ID로 예약 대기를 조회한다")
     void findById() {
         Reservation reservation = createReservation();
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+        ReservationWaiting saved = reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        ReservationWaiting found = jdbcReservationWaitingRepository.findById(saved.getId())
+        ReservationWaiting found = reservationWaitingRepository.findById(saved.getId())
                 .orElseThrow();
 
         assertThat(found).isEqualTo(saved);
@@ -113,13 +117,13 @@ class JdbcReservationWaitingRepositoryTest {
     @DisplayName("대기 ID로 예약 대기를 삭제한다")
     void deleteById() {
         Reservation reservation = createReservation();
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+        ReservationWaiting saved = reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        jdbcReservationWaitingRepository.delete(saved);
+        reservationWaitingRepository.delete(saved);
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = ?",
@@ -134,13 +138,13 @@ class JdbcReservationWaitingRepositoryTest {
     @DisplayName("슬롯의 대기 줄을 조회한다")
     void findLineBySlot() {
         Reservation reservation = createReservation();
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+        ReservationWaiting saved = reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        ReservationWaitingLine waitingLine = jdbcReservationWaitingRepository.findLineBySlot(reservation.getSlot());
+        ReservationWaitingLine waitingLine = reservationWaitingRepository.findLineBySlot(reservation.getSlot());
 
         assertThat(waitingLine.isEmpty()).isFalse();
         assertThat(waitingLine.indexOf(saved.getId())).hasValue(0);
@@ -150,18 +154,18 @@ class JdbcReservationWaitingRepositoryTest {
     @DisplayName("대기 줄에서 첫 번째 대기를 찾는다")
     void findLineBySlotFirst() {
         Reservation reservation = createReservation();
-        ReservationWaiting second = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+        ReservationWaiting second = reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation.getSlot(),
                 "도기",
                 LocalDateTime.parse("2026-08-05T12:01:00")
         ));
-        ReservationWaiting first = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+        ReservationWaiting first = reservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation.getSlot(),
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        ReservationWaiting found = jdbcReservationWaitingRepository.findLineBySlot(reservation.getSlot())
+        ReservationWaiting found = reservationWaitingRepository.findLineBySlot(reservation.getSlot())
                 .first()
                 .orElseThrow();
 
@@ -170,17 +174,17 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     private Reservation createReservation() {
-        Theme theme = jdbcThemeRepository.save(
+        Theme theme = themeRepository.save(
                 Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
         );
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(
+        ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.createNew(LocalTime.parse("10:00"))
         );
 
-        ReservationSlot slot = jdbcReservationSlotRepository.save(
+        ReservationSlot slot = reservationSlotRepository.save(
                 new ReservationSlot(LocalDate.parse("2026-08-06"), theme, reservationTime)
         );
-        return jdbcReservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
+        return reservationRepository.save(Reservation.reserve("쿠다", slot, LocalDateTime.now()));
     }
 
     private void clearTables() {
