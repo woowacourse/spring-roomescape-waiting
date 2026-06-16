@@ -19,6 +19,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.service.exception.ResourceConflictException;
 import roomescape.service.exception.ResourceNotFoundException;
 
 @Repository
@@ -193,6 +194,18 @@ public class JdbcReservationRepository implements ReservationRepository {
     private ReservationWithWaitingOrder findWithWaitingOrderById(Long id) {
         String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.id = ?";
         return jdbcTemplate.queryForObject(sql, reservationWithWaitingOrderRowMapper, id);
+    }
+
+    @Override
+    public void confirm(Long id) {
+        int affectedRows = jdbcTemplate.update(
+                "UPDATE reservation SET status = ? WHERE id = ? AND status = ?",
+                ReservationStatus.CONFIRMED.name(), id, ReservationStatus.PENDING.name()
+        );
+        if (affectedRows == 0) {
+            throw new ResourceConflictException(
+                    "결제 대기(PENDING) 상태의 예약이 아니어서 확정할 수 없습니다: reservationId=" + id);
+        }
     }
 
     @Override

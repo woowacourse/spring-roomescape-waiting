@@ -18,6 +18,8 @@ public interface ReservationRepository {
 
     ReservationWithWaitingOrder update(Reservation reservation);
 
+    void confirm(Long id);
+
     void deleteById(Long id);
 
     boolean existsById(Long id);
