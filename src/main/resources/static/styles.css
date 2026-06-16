@@ -1162,6 +1162,162 @@ input:focus-visible {
     line-height: 1.45;
 }
 
+.payment-ready-panel {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(140px, auto) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid rgba(229, 9, 20, 0.54);
+    background: #16090b;
+}
+
+.payment-ready-panel.is-compact {
+    grid-template-columns: 1fr;
+    margin: 0 0 16px;
+}
+
+.payment-ready-copy {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.payment-ready-copy strong,
+.payment-ready-copy span,
+.payment-ready-copy small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.payment-ready-copy strong {
+    color: var(--text);
+    font-size: 0.98rem;
+}
+
+.payment-ready-copy span,
+.payment-ready-copy small {
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+
+.payment-status-message {
+    color: #ffd08a !important;
+    font-weight: 800;
+}
+
+.payment-processing-panel {
+    width: min(680px, 100%);
+    display: grid;
+    gap: 16px;
+    margin: 8vh auto 0;
+    padding: 28px;
+    border: 1px solid rgba(229, 9, 20, 0.54);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.payment-processing-panel h1 {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.15;
+}
+
+.payment-processing-panel p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.payment-processing-summary {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    background: #101010;
+}
+
+.payment-processing-summary div {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 12px;
+}
+
+.payment-processing-summary dt {
+    color: var(--subtle);
+    font-weight: 800;
+}
+
+.payment-processing-summary dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.payment-processing-message {
+    padding: 12px;
+    border: 1px solid rgba(255, 184, 77, 0.5);
+    color: #ffd08a !important;
+    background: #1a1206;
+    font-weight: 800;
+}
+
+.payment-processing-message.is-error {
+    border-color: rgba(255, 77, 95, 0.58);
+    color: #ff9aa6 !important;
+    background: var(--danger-soft);
+}
+
+.payment-processing-panel .payment-ready-panel {
+    grid-template-columns: 1fr;
+}
+
+.payment-fail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.payment-ready-summary {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+}
+
+.payment-ready-summary div {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+}
+
+.payment-ready-summary dt,
+.payment-ready-summary dd {
+    margin: 0;
+    font-size: 0.84rem;
+}
+
+.payment-ready-summary dt {
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.payment-ready-summary dd {
+    min-width: 0;
+    color: var(--text);
+    font-weight: 900;
+    overflow-wrap: anywhere;
+}
+
+.payment-button {
+    min-height: 40px;
+    padding: 0 18px;
+    white-space: nowrap;
+}
+
 .submit-button {
     width: 100%;
     min-height: 46px;
@@ -1281,6 +1437,11 @@ input:focus-visible {
     background: #11100d;
 }
 
+.my-reservation-item.is-payment-pending {
+    border-color: rgba(229, 9, 20, 0.54);
+    background: #15090a;
+}
+
 .my-reservation-item.is-editing {
     align-items: start;
 }
@@ -1300,6 +1461,29 @@ input:focus-visible {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+}
+
+.payment-card-amount {
+    display: block;
+    margin-top: 4px;
+    color: #ffd08a;
+    font-weight: 900;
+}
+
+.payment-badge {
+    flex: 0 0 auto;
+    padding: 4px 7px;
+    border: 1px solid rgba(229, 9, 20, 0.54);
+    color: #ffb3ba;
+    background: var(--primary-soft);
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.primary-button.compact {
+    min-height: 36px;
+    padding: 0 12px;
 }
 
 .waiting-postpone-form {
@@ -1998,10 +2182,23 @@ input:focus-visible {
     }
 
     .reservation-card-actions .secondary-button,
+    .reservation-card-actions .primary-button,
     .reservation-card-actions .danger-button,
     .reservation-edit-actions .secondary-button,
     .reservation-edit-actions .primary-button {
         flex: 1 1 0;
+    }
+
+    .payment-ready-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-ready-summary {
+        width: 100%;
+    }
+
+    .payment-button {
+        width: 100%;
     }
 
     .reservation-edit-form .form-row {

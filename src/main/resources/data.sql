@@ -83,327 +83,327 @@ VALUES ('기억의 병원', '낡은 진료 기록과 심전도 소리를 따라 
         'https://images.unsplash.com/photo-1707552246192-eeb45c6e782d?auto=format&fit=crop&w=1200&q=80');
 
 -- 최근 1주 인기 테마 산정용 예약 데이터
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피노', '2026-05-21', 2, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('워넬', '2026-05-21', 2, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('이삭', '2026-05-22', 3, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('코코', '2026-05-22', 3, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('러키', '2026-05-23', 4, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('소낙눈', '2026-05-23', 4, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피즈', '2026-05-24', 5, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('스타크', '2026-05-24', 5, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('로지', '2026-05-25', 6, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('초록', '2026-05-25', 6, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('도우너', '2026-05-26', 7, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('이산', '2026-05-26', 7, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('고래', '2026-05-26', 8, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('쿠다', '2026-05-26', 9, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('바니', '2026-05-21', 2, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('카야', '2026-05-21', 2, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('나무', '2026-05-22', 2, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피온', '2026-05-22', 2, 6);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('카키', '2026-05-23', 2, 7);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('어셔', '2026-05-23', 2, 8);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('아이큐', '2026-05-22', 3, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('아나키', '2026-05-22', 3, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('루드비코', '2026-05-23', 3, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('비밥', '2026-05-23', 3, 6);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('송송', '2026-05-24', 3, 7);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('티온', '2026-05-23', 4, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('티뉴', '2026-05-23', 4, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('캐리', '2026-05-24', 4, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-05-24', 4, 6);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-05-24', 5, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피노', '2026-05-24', 5, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('워넬', '2026-05-25', 5, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('이삭', '2026-05-25', 6, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('코코', '2026-05-25', 6, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('러키', '2026-05-26', 7, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('소낙눈', '2026-05-26', 8, 4);
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피노', '2026-06-10', 2, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('워넬', '2026-06-10', 2, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('이삭', '2026-06-11', 3, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('코코', '2026-06-11', 3, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('러키', '2026-06-12', 4, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('소낙눈', '2026-06-12', 4, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피즈', '2026-06-13', 5, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('스타크', '2026-06-13', 5, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('로지', '2026-06-14', 6, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('초록', '2026-06-14', 6, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('도우너', '2026-06-15', 7, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('이산', '2026-06-15', 7, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('고래', '2026-06-15', 8, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('쿠다', '2026-06-15', 9, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('바니', '2026-06-10', 2, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('카야', '2026-06-10', 2, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('나무', '2026-06-11', 2, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피온', '2026-06-11', 2, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('카키', '2026-06-12', 2, 7, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('어셔', '2026-06-12', 2, 8, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('아이큐', '2026-06-11', 3, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('아나키', '2026-06-11', 3, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('루드비코', '2026-06-12', 3, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('비밥', '2026-06-12', 3, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('송송', '2026-06-13', 3, 7, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('티온', '2026-06-12', 4, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('티뉴', '2026-06-12', 4, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('캐리', '2026-06-13', 4, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-13', 4, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-13', 5, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피노', '2026-06-13', 5, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('워넬', '2026-06-14', 5, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('이삭', '2026-06-14', 6, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('코코', '2026-06-14', 6, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('러키', '2026-06-15', 7, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('소낙눈', '2026-06-15', 8, 4, 'CONFIRMED');
 
 -- 미래 예약 데이터
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-05-28', 1, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-05-28', 1, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('워넬', '2026-05-28', 2, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('이삭', '2026-05-28', 3, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-05-29', 1, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-05-29', 4, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('코코', '2026-05-29', 5, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('러키', '2026-05-29', 6, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-05-30', 2, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-05-30', 3, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('소낙눈', '2026-05-30', 7, 6);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피즈', '2026-05-30', 8, 7);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('스타크', '2026-05-31', 1, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('로지', '2026-05-31', 9, 8);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('초록', '2026-05-31', 10, 9);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('도우너', '2026-05-31', 11, 10);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-06-01', 12, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-06-01', 13, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('이산', '2026-06-01', 14, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('고래', '2026-06-01', 15, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('쿠다', '2026-06-02', 16, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('바니', '2026-06-02', 17, 6);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('카야', '2026-06-02', 18, 7);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('나무', '2026-06-02', 1, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피온', '2026-06-03', 2, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('카키', '2026-06-03', 3, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('어셔', '2026-06-03', 4, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('아이큐', '2026-06-03', 5, 6);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('아나키', '2026-06-04', 6, 7);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('루드비코', '2026-06-04', 7, 8);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('비밥', '2026-06-04', 8, 9);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('송송', '2026-06-04', 9, 10);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('티온', '2026-06-05', 10, 11);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('티뉴', '2026-06-05', 11, 12);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('캐리', '2026-06-05', 12, 13);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-06-05', 13, 14);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-06-06', 14, 1);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-06-06', 15, 2);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-06-06', 16, 3);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-06-06', 17, 4);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('찰리', '2026-06-07', 18, 5);
-INSERT INTO reservation (name, date, theme_id, time_id)
-VALUES ('피케이', '2026-06-07', 1, 6);
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-18', 1, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-18', 1, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('워넬', '2026-06-18', 2, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('이삭', '2026-06-18', 3, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-19', 1, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-19', 4, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('코코', '2026-06-19', 5, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('러키', '2026-06-19', 6, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-20', 2, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-20', 3, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('소낙눈', '2026-06-20', 7, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피즈', '2026-06-20', 8, 7, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('스타크', '2026-06-21', 1, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('로지', '2026-06-21', 9, 8, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('초록', '2026-06-21', 10, 9, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('도우너', '2026-06-21', 11, 10, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-22', 12, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-22', 13, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('이산', '2026-06-22', 14, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('고래', '2026-06-22', 15, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('쿠다', '2026-06-23', 16, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('바니', '2026-06-23', 17, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('카야', '2026-06-23', 18, 7, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('나무', '2026-06-23', 1, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피온', '2026-06-24', 2, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('카키', '2026-06-24', 3, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('어셔', '2026-06-24', 4, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('아이큐', '2026-06-24', 5, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('아나키', '2026-06-25', 6, 7, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('루드비코', '2026-06-25', 7, 8, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('비밥', '2026-06-25', 8, 9, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('송송', '2026-06-25', 9, 10, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('티온', '2026-06-26', 10, 11, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('티뉴', '2026-06-26', 11, 12, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('캐리', '2026-06-26', 12, 13, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-26', 13, 14, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-27', 14, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-27', 15, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-27', 16, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-27', 17, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('찰리', '2026-06-28', 18, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, theme_id, time_id, status)
+VALUES ('피케이', '2026-06-28', 1, 6, 'CONFIRMED');
 
 -- 미래 예약에 대한 대기 데이터
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-28', 1, 1, 1);
+VALUES ('찰리', '2026-06-18', 1, 1, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('워넬', '2026-05-28', 1, 1, 2);
+VALUES ('워넬', '2026-06-18', 1, 1, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('이삭', '2026-05-28', 1, 1, 3);
+VALUES ('이삭', '2026-06-18', 1, 1, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피노', '2026-05-28', 1, 1, 4);
+VALUES ('피노', '2026-06-18', 1, 1, 4);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-28', 1, 2, 1);
+VALUES ('피케이', '2026-06-18', 1, 2, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('코코', '2026-05-28', 1, 2, 2);
+VALUES ('코코', '2026-06-18', 1, 2, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('러키', '2026-05-28', 1, 2, 3);
+VALUES ('러키', '2026-06-18', 1, 2, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-28', 2, 1, 1);
+VALUES ('피케이', '2026-06-18', 2, 1, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-28', 2, 1, 2);
+VALUES ('찰리', '2026-06-18', 2, 1, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('소낙눈', '2026-05-28', 2, 1, 3);
+VALUES ('소낙눈', '2026-06-18', 2, 1, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-28', 3, 3, 1);
+VALUES ('찰리', '2026-06-18', 3, 3, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-28', 3, 3, 2);
+VALUES ('피케이', '2026-06-18', 3, 3, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-29', 1, 3, 1);
+VALUES ('피케이', '2026-06-19', 1, 3, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피즈', '2026-05-29', 1, 3, 2);
+VALUES ('피즈', '2026-06-19', 1, 3, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('스타크', '2026-05-29', 1, 3, 3);
+VALUES ('스타크', '2026-06-19', 1, 3, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-29', 4, 2, 1);
+VALUES ('찰리', '2026-06-19', 4, 2, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('로지', '2026-05-29', 4, 2, 2);
+VALUES ('로지', '2026-06-19', 4, 2, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('초록', '2026-05-29', 4, 2, 3);
+VALUES ('초록', '2026-06-19', 4, 2, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-29', 5, 4, 1);
+VALUES ('피케이', '2026-06-19', 5, 4, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-29', 5, 4, 2);
+VALUES ('찰리', '2026-06-19', 5, 4, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-29', 6, 5, 1);
+VALUES ('피케이', '2026-06-19', 6, 5, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-29', 6, 5, 2);
+VALUES ('찰리', '2026-06-19', 6, 5, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('도우너', '2026-05-29', 6, 5, 3);
+VALUES ('도우너', '2026-06-19', 6, 5, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-30', 2, 2, 1);
+VALUES ('찰리', '2026-06-20', 2, 2, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('이산', '2026-05-30', 2, 2, 2);
+VALUES ('이산', '2026-06-20', 2, 2, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('고래', '2026-05-30', 2, 2, 3);
+VALUES ('고래', '2026-06-20', 2, 2, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-30', 3, 1, 1);
+VALUES ('피케이', '2026-06-20', 3, 1, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('쿠다', '2026-05-30', 3, 1, 2);
+VALUES ('쿠다', '2026-06-20', 3, 1, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('바니', '2026-05-30', 3, 1, 3);
+VALUES ('바니', '2026-06-20', 3, 1, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-30', 7, 6, 1);
+VALUES ('찰리', '2026-06-20', 7, 6, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-30', 7, 6, 2);
+VALUES ('피케이', '2026-06-20', 7, 6, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('카야', '2026-05-30', 8, 7, 1);
+VALUES ('카야', '2026-06-20', 8, 7, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-30', 8, 7, 2);
+VALUES ('피케이', '2026-06-20', 8, 7, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('나무', '2026-05-31', 1, 4, 1);
+VALUES ('나무', '2026-06-21', 1, 4, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피온', '2026-05-31', 1, 4, 2);
+VALUES ('피온', '2026-06-21', 1, 4, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-31', 1, 4, 3);
+VALUES ('찰리', '2026-06-21', 1, 4, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-31', 9, 8, 1);
+VALUES ('피케이', '2026-06-21', 9, 8, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('카키', '2026-05-31', 9, 8, 2);
+VALUES ('카키', '2026-06-21', 9, 8, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('어셔', '2026-05-31', 10, 9, 1);
+VALUES ('어셔', '2026-06-21', 10, 9, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-05-31', 10, 9, 2);
+VALUES ('찰리', '2026-06-21', 10, 9, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('아이큐', '2026-05-31', 11, 10, 1);
+VALUES ('아이큐', '2026-06-21', 11, 10, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-05-31', 11, 10, 2);
+VALUES ('피케이', '2026-06-21', 11, 10, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-01', 12, 1, 1);
+VALUES ('피케이', '2026-06-22', 12, 1, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('아나키', '2026-06-01', 12, 1, 2);
+VALUES ('아나키', '2026-06-22', 12, 1, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('루드비코', '2026-06-01', 12, 1, 3);
+VALUES ('루드비코', '2026-06-22', 12, 1, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-01', 13, 2, 1);
+VALUES ('찰리', '2026-06-22', 13, 2, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('비밥', '2026-06-01', 13, 2, 2);
+VALUES ('비밥', '2026-06-22', 13, 2, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('송송', '2026-06-01', 13, 2, 3);
+VALUES ('송송', '2026-06-22', 13, 2, 3);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-01', 14, 3, 1);
+VALUES ('피케이', '2026-06-22', 14, 3, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-01', 14, 3, 2);
+VALUES ('찰리', '2026-06-22', 14, 3, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('티온', '2026-06-01', 15, 4, 1);
+VALUES ('티온', '2026-06-22', 15, 4, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('티뉴', '2026-06-01', 15, 4, 2);
+VALUES ('티뉴', '2026-06-22', 15, 4, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-02', 16, 5, 1);
+VALUES ('피케이', '2026-06-23', 16, 5, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-02', 16, 5, 2);
+VALUES ('찰리', '2026-06-23', 16, 5, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('캐리', '2026-06-02', 17, 6, 1);
+VALUES ('캐리', '2026-06-23', 17, 6, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-02', 17, 6, 2);
+VALUES ('피케이', '2026-06-23', 17, 6, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-02', 18, 7, 1);
+VALUES ('찰리', '2026-06-23', 18, 7, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피노', '2026-06-02', 18, 7, 2);
+VALUES ('피노', '2026-06-23', 18, 7, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-02', 1, 5, 1);
+VALUES ('찰리', '2026-06-23', 1, 5, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-02', 1, 5, 2);
+VALUES ('피케이', '2026-06-23', 1, 5, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-03', 2, 3, 1);
+VALUES ('피케이', '2026-06-24', 2, 3, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-03', 2, 3, 2);
+VALUES ('찰리', '2026-06-24', 2, 3, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('워넬', '2026-06-03', 3, 4, 1);
+VALUES ('워넬', '2026-06-24', 3, 4, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-03', 3, 4, 2);
+VALUES ('찰리', '2026-06-24', 3, 4, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('이삭', '2026-06-03', 4, 5, 1);
+VALUES ('이삭', '2026-06-24', 4, 5, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-03', 4, 5, 2);
+VALUES ('피케이', '2026-06-24', 4, 5, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('코코', '2026-06-03', 5, 6, 1);
+VALUES ('코코', '2026-06-24', 5, 6, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-03', 5, 6, 2);
+VALUES ('찰리', '2026-06-24', 5, 6, 2);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-04', 6, 7, 1);
+VALUES ('피케이', '2026-06-25', 6, 7, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-04', 7, 8, 1);
+VALUES ('찰리', '2026-06-25', 7, 8, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-04', 8, 9, 1);
+VALUES ('피케이', '2026-06-25', 8, 9, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-04', 9, 10, 1);
+VALUES ('찰리', '2026-06-25', 9, 10, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-05', 10, 11, 1);
+VALUES ('피케이', '2026-06-26', 10, 11, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-05', 11, 12, 1);
+VALUES ('찰리', '2026-06-26', 11, 12, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-05', 12, 13, 1);
+VALUES ('피케이', '2026-06-26', 12, 13, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-05', 13, 14, 1);
+VALUES ('찰리', '2026-06-26', 13, 14, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-06', 14, 1, 1);
+VALUES ('피케이', '2026-06-27', 14, 1, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-06', 15, 2, 1);
+VALUES ('찰리', '2026-06-27', 15, 2, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-06', 16, 3, 1);
+VALUES ('피케이', '2026-06-27', 16, 3, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-06', 17, 4, 1);
+VALUES ('찰리', '2026-06-27', 17, 4, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('피케이', '2026-06-07', 18, 5, 1);
+VALUES ('피케이', '2026-06-28', 18, 5, 1);
 INSERT INTO waiting (name, date, theme_id, time_id, rank)
-VALUES ('찰리', '2026-06-07', 1, 6, 1);
+VALUES ('찰리', '2026-06-28', 1, 6, 1);

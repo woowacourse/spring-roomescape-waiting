@@ -1,5 +1,6 @@
 import {appEl, modalRootEl, toastRootEl} from "./dom.js";
 import {canSubmitReservation, isPastReservation, selectedTheme, selectedTime, state, todayString} from "./state.js";
+import {formatAmount, isPaymentPendingReservation} from "./payment.js";
 
 let enterAnimationTimer = null;
 
@@ -16,11 +17,27 @@ export function render(options = {}) {
 
     appEl.innerHTML = `
     ${renderHeader()}
-    ${state.route === "admin" ? renderAdmin() : renderReserve()}
+    ${renderRoute()}
   `;
     modalRootEl.innerHTML = renderConfirm();
     toastRootEl.innerHTML = renderToast();
     syncThemeFilter();
+}
+
+function renderRoute() {
+    if (state.route === "admin") {
+        return renderAdmin();
+    }
+
+    if (state.route === "payment-processing") {
+        return renderPaymentProcessing();
+    }
+
+    if (state.route === "payment-fail") {
+        return renderPaymentFail();
+    }
+
+    return renderReserve();
 }
 
 export function syncThemeFilter() {
@@ -66,6 +83,7 @@ function renderReserve() {
     return `
     <main class="page-shell">
       ${renderMyReservations()}
+      ${renderPendingPaymentBanner()}
 
       <section class="headline-row">
         <div>
@@ -122,6 +140,82 @@ function renderReserve() {
 
           ${renderThemeGrid()}
         </section>
+      </section>
+    </main>
+  `;
+}
+
+function renderPaymentProcessing() {
+    const processing = state.payment.processing;
+    const result = state.payment.result;
+    const success = result?.status === "success";
+    const failed = result?.status === "failed" || processing.status === "failed";
+    const title = success ? "결제 완료" : (failed ? "결제 승인 실패" : "결제 승인 중");
+    const description = success
+        ? "결제가 승인되어 예약이 확정되었습니다."
+        : (failed ? "결제 승인 정보를 확인하지 못했습니다. 예약 조회 후 다시 결제해 주세요." : "결제 승인 결과를 확인하고 있습니다.");
+    const statusMessage = result?.message || processing.message || "잠시만 기다려 주세요.";
+
+    return `
+    <main class="page-shell">
+      <section class="payment-processing-panel" aria-live="polite" aria-busy="${success || failed ? "false" : "true"}">
+        <p class="section-kicker">Payment</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(description)}</p>
+        <dl class="payment-processing-summary">
+          <div>
+            <dt>주문</dt>
+            <dd>${escapeHtml(processing.orderId || "-")}</dd>
+          </div>
+          <div>
+            <dt>금액</dt>
+            <dd>${escapeHtml(processing.amount ? formatAmount(processing.amount) : "-")}</dd>
+          </div>
+        </dl>
+        <p class="payment-processing-message ${failed ? "is-error" : ""}">${escapeHtml(statusMessage)}</p>
+        <button class="secondary-button" type="button" data-route="reserve">예약 조회로 돌아가기</button>
+      </section>
+    </main>
+  `;
+}
+
+function renderPaymentFail() {
+    const failure = state.payment.failure;
+    const retryReservation = findRetryablePaymentReservation(failure.orderId);
+    const canceled = failure.code === "PAY_PROCESS_CANCELED";
+    const title = canceled ? "결제가 취소되었습니다" : "결제를 완료하지 못했습니다";
+    const description = retryReservation
+        ? "예약은 결제 대기 상태입니다. 같은 주문으로 다시 결제할 수 있습니다."
+        : "예약 조회에서 이름으로 예약을 찾은 뒤 결제 대기 예약을 다시 결제해 주세요.";
+    const detailMessage = failure.message || "결제가 완료되지 않았습니다.";
+
+    return `
+    <main class="page-shell">
+      <section class="payment-processing-panel" aria-live="polite">
+        <p class="section-kicker">Payment</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(description)}</p>
+        <dl class="payment-processing-summary">
+          <div>
+            <dt>사유</dt>
+            <dd>${escapeHtml(failure.code || "-")}</dd>
+          </div>
+          <div>
+            <dt>주문</dt>
+            <dd>${escapeHtml(failure.orderId || "-")}</dd>
+          </div>
+        </dl>
+        <p class="payment-processing-message is-error">${escapeHtml(detailMessage)}</p>
+        ${retryReservation ? `
+          ${renderPaymentPanel(retryReservation, {
+              compact: true,
+              title: "결제 재시도",
+              description: "이 주문번호와 연결된 결제 대기 예약입니다."
+          })}
+        ` : ""}
+        <div class="payment-fail-actions">
+          <button class="secondary-button" type="button" data-route="reserve">예약 조회로 돌아가기</button>
+        </div>
       </section>
     </main>
   `;
@@ -295,6 +389,20 @@ function renderBookingSummary(theme) {
   `;
 }
 
+function renderPendingPaymentBanner() {
+    const context = state.payment.pendingContext;
+
+    if (!context?.reservation || !isPaymentPendingReservation(context.reservation)) {
+        return "";
+    }
+
+    return renderPaymentPanel(context.reservation, {
+        compact: false,
+        title: "결제 대기",
+        description: "예약 확정 전 결제가 필요합니다."
+    });
+}
+
 function renderMyReservations() {
     const canSearch = Boolean(state.reservationSearchName.trim()) && !state.loading.searchedReservations;
     const showReset = state.reservationSearchSubmitted || state.reservationSearchName;
@@ -340,7 +448,7 @@ function renderMyReservationResults() {
 
     return `
     <div class="my-reservation-results">
-      ${renderApplicationGroup("예약 목록", "확정된 예약입니다.", state.searchedReservations, renderMyReservationItem)}
+      ${renderApplicationGroup("예약 목록", "결제 대기와 확정 예약입니다.", state.searchedReservations, renderMyReservationItem)}
       ${renderApplicationGroup("대기 목록", "예약 취소가 발생하면 순서대로 확정됩니다.", state.searchedWaitings, renderMyWaitingItem)}
     </div>
   `;
@@ -368,28 +476,103 @@ function renderApplicationGroup(title, description, items, renderer) {
 function renderMyReservationItem(reservation) {
     const editing = Number(state.reservationEdit.id) === Number(reservation.id);
     const past = isPastReservation(reservation);
+    const pendingPayment = isPaymentPendingReservation(reservation);
 
     return `
-    <article class="my-reservation-item ${editing ? "is-editing" : ""}">
+    <article class="my-reservation-item ${editing ? "is-editing" : ""} ${pendingPayment ? "is-payment-pending" : ""}">
       <span class="row-thumb"><img src="${escapeAttr(reservation.theme.thumbnailImgUrl)}" alt="" loading="lazy" data-cover></span>
       <span class="row-main">
         <span class="reservation-card-heading">
           <strong>${escapeHtml(reservation.theme.name)}</strong>
-          ${past ? `<em class="lock-badge">지난 예약</em>` : `<em class="open-badge">변경 가능</em>`}
+          ${renderReservationStatusBadge(reservation, past)}
         </span>
         <small>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)} · ${escapeHtml(reservation.name)}</small>
+        ${pendingPayment ? `<small class="payment-card-amount">결제 금액 ${escapeHtml(formatAmount(reservation.payment.amount))}</small>` : ""}
       </span>
       <span class="reservation-card-actions">
-        <button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}" ${past || editing ? "disabled" : ""}>
-          ${past ? "변경 불가" : "변경"}
-        </button>
+        ${pendingPayment ? `
+          <button class="primary-button compact" type="button" data-action="start-payment" data-reservation-id="${reservation.id}">
+            결제하기
+          </button>
+        ` : `
+          <button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}" ${past || editing ? "disabled" : ""}>
+            ${past ? "변경 불가" : "변경"}
+          </button>
+        `}
         <button class="danger-button" type="button" data-action="delete-reservation" data-delete-mode="cancel" data-reservation-id="${reservation.id}" ${past ? "disabled" : ""}>
           ${past ? "취소 불가" : "예약 취소"}
         </button>
       </span>
-      ${editing ? renderReservationEditForm(reservation) : ""}
+      ${pendingPayment ? renderPaymentPanel(reservation, {compact: false}) : ""}
+      ${editing && !pendingPayment ? renderReservationEditForm(reservation) : ""}
     </article>
   `;
+}
+
+function renderReservationStatusBadge(reservation, past) {
+    if (isPaymentPendingReservation(reservation)) {
+        return `<em class="payment-badge">결제 대기</em>`;
+    }
+
+    if (past) {
+        return `<em class="lock-badge">지난 예약</em>`;
+    }
+
+    return `<em class="open-badge">변경 가능</em>`;
+}
+
+function renderPaymentPanel(reservation, options = {}) {
+    const payment = reservation.payment || {};
+    const title = options.title || "결제 준비";
+    const description = options.description || "결제를 완료하면 예약이 확정됩니다.";
+    const processing = state.payment.processing;
+    const sameOrder = processing.orderId && payment.orderId && processing.orderId === payment.orderId;
+    const message = sameOrder ? processing.message : "";
+    const classes = `payment-ready-panel ${options.compact ? "is-compact" : ""}`;
+
+    return `
+    <section class="${classes}" aria-label="결제 대기 안내">
+      <div class="payment-ready-copy">
+        <p class="section-kicker">${escapeHtml(title)}</p>
+        <strong>${escapeHtml(reservation.theme.name)}</strong>
+        <span>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)} · ${escapeHtml(reservation.name)}</span>
+        <small>${escapeHtml(description)}</small>
+        ${message ? `<small class="payment-status-message">${escapeHtml(message)}</small>` : ""}
+      </div>
+      <dl class="payment-ready-summary">
+        <div>
+          <dt>금액</dt>
+          <dd>${escapeHtml(formatAmount(payment.amount))}</dd>
+        </div>
+        <div>
+          <dt>주문</dt>
+          <dd>${escapeHtml(payment.orderId || "-")}</dd>
+        </div>
+      </dl>
+      <button class="primary-button payment-button" type="button" data-action="start-payment" data-reservation-id="${reservation.id}">
+        결제하기
+      </button>
+    </section>
+  `;
+}
+
+function findRetryablePaymentReservation(orderId) {
+    if (!orderId) {
+        return null;
+    }
+
+    const contextReservation = state.payment.pendingContext?.reservation;
+
+    if (isMatchingPendingPaymentReservation(contextReservation, orderId)) {
+        return contextReservation;
+    }
+
+    return [...state.searchedReservations, ...state.reservations]
+        .find((reservation) => isMatchingPendingPaymentReservation(reservation, orderId)) || null;
+}
+
+function isMatchingPendingPaymentReservation(reservation, orderId) {
+    return isPaymentPendingReservation(reservation) && reservation.payment?.orderId === orderId;
 }
 
 function renderMyWaitingItem(waiting) {
