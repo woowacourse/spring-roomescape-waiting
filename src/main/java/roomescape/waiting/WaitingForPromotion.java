@@ -2,6 +2,7 @@ package roomescape.waiting;
 
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
 import roomescape.time.ReservationTime;
 
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ public record WaitingForPromotion(
 ) {
 
     public Reservation toReservation() {
-        return new Reservation(name, themeId, date, time);
+        return new Reservation(name, themeId, date, time, ReservationStatus.CONFIRMED);
     }
 
     public void validateSameName(String name){

@@ -3,6 +3,7 @@ package roomescape.reservation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.global.exception.RoomescapeException;
+import roomescape.reservation.ReservationStatus;
 import roomescape.time.ReservationTime;
 
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ class ReservationTest {
 
     @BeforeEach
     void setUp() {
-        reservation = new Reservation("ever", 1L, LocalDate.now(), new ReservationTime(1L, LocalTime.now().plusHours(1)));
+        reservation = new Reservation("ever", 1L, LocalDate.now(), new ReservationTime(1L, LocalTime.now().plusHours(1)), ReservationStatus.CONFIRMED);
     }
 
     @Test

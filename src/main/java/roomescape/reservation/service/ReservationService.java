@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
@@ -57,7 +58,7 @@ public class ReservationService {
             throw new RoomescapeException(RESERVATION_ALREADY_EXISTS);
         }
 
-        Reservation newReservation = new Reservation(name, themeId, date, time);
+        Reservation newReservation = new Reservation(name, themeId, date, time, ReservationStatus.PENDING);
         try {
             return reservationDao.insert(newReservation);
         } catch (DuplicateKeyException e) {
