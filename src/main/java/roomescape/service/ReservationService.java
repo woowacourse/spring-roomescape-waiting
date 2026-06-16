@@ -132,7 +132,8 @@ public class ReservationService {
             throw new ConcurrencyConflictException("승격 대상 대기가 사라졌습니다.");
         }
 
-        reservationRepository.insert(reservationWaiting.promote());
+        long reservationId = reservationRepository.insert(reservationWaiting.promote());
+        reservationOrderService.insert(reservationId);
     }
 
     private Reservation updateSlot(Reservation existed, ReservationRequest request) {

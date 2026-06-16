@@ -21,6 +21,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationOrder.ReservationOrderRepository;
 import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.slot.SlotRepository;
@@ -61,6 +62,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationWaitingRepository reservationWaitingDao;
+
+    @Autowired
+    private ReservationOrderRepository reservationOrderDao;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -261,6 +265,19 @@ class ReservationServiceTest {
         assertThat(remaining).hasSize(1);
         assertThat(remaining.get(0).name()).isEqualTo("네오");
         assertThat(reservationWaitingDao.findAllReservationWaiting()).isEmpty();
+    }
+
+    @Test
+    void 대기자가_승격되면_승격된_예약에_주문이_생성된다() {
+        setUpTimeAndTheme();
+        ReservationResponse created = reserve("브라운", LocalDate.now().plusDays(1));
+        Slot slot = findSlot(created.date());
+        reservationWaitingDao.create(ReservationWaiting.create("네오", slot));
+
+        reservationService.delete(created.id());
+
+        ReservationResponse promoted = reservationService.readByName("네오").get(0);
+        assertThat(reservationOrderDao.findByReservationId(promoted.id())).isPresent();
     }
 
     @Test
