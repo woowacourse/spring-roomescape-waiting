@@ -15,6 +15,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
+import roomescape.exception.PaymentException.AlreadyProcessedException;
 
 public class ReservationTest {
 
@@ -178,5 +179,27 @@ public class ReservationTest {
 
         assertThat(reservation.isReservedBy("브라운")).isTrue();
         assertThat(reservation.isReservedBy("네오")).isFalse();
+    }
+
+    @Test
+    void confirmPayment는_미결제_예약을_결제완료로_전이한다() {
+        Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now(), false);
+
+        Reservation confirmed = reservation.confirmPayment();
+
+        assertThat(confirmed.isPaid()).isTrue();
+        assertThat(confirmed.getId()).isEqualTo(1L);
+        assertThat(confirmed.getName()).isEqualTo("브라운");
+        assertThat(confirmed.getCreatedAt()).isEqualTo(reservation.getCreatedAt());
+    }
+
+    @Test
+    void 이미_결제된_예약을_confirmPayment하면_예외가_발생한다() {
+        Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
+        Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now(), true);
+
+        assertThatThrownBy(reservation::confirmPayment)
+                .isInstanceOf(AlreadyProcessedException.class);
     }
 }
