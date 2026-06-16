@@ -99,12 +99,12 @@
 
     function setStep(n) {
         state.step = n;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
+        window.scrollTo({top: 0, behavior: 'smooth'});
+
         document.querySelectorAll('.step-content').forEach((el, i) => {
             el.classList.toggle('is-hidden', i + 1 !== n);
         });
-        
+
         document.querySelectorAll('.flow-step').forEach((el, i) => {
             el.classList.toggle('is-active', i + 1 <= n);
         });
@@ -115,17 +115,18 @@
             document.querySelectorAll('.step-content').forEach(el => el.classList.add('is-hidden'));
         }
     }
+
     window.setStep = setStep;
 
     async function initAndRenderPaymentWidget(methodsSelector, agreementSelector) {
         if (!window.TOSS_CLIENT_KEY) return;
-        
+
         try {
             if (!paymentWidget) {
                 paymentWidget = PaymentWidget(window.TOSS_CLIENT_KEY, PaymentWidget.ANONYMOUS);
             }
-            
-            paymentMethodsWidget = paymentWidget.renderPaymentMethods(methodsSelector, { value: 50000 });
+
+            paymentMethodsWidget = paymentWidget.renderPaymentMethods(methodsSelector, {value: 50000});
             paymentWidget.renderAgreement(agreementSelector);
         } catch (e) {
             console.error('결제 위젯 로드 실패:', e);
@@ -143,12 +144,12 @@
             d.setDate(today.getDate() + i);
             const dateStr = d.toISOString().split('T')[0];
             const isToday = i === 0;
-            
+
             const btn = document.createElement('button');
             btn.className = 'calendar-day-btn';
             btn.innerHTML = `
                 <div style="font-size:0.75rem; opacity:0.6; font-weight:700; color: ${isToday ? 'var(--primary)' : 'inherit'}">
-                    ${d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                    ${d.toLocaleDateString('ko-KR', {month: 'short', day: 'numeric'})}
                 </div>
                 <div style="font-size:1.5rem; font-weight:800; margin-top:4px;">${d.getDate()}</div>
             `;
@@ -168,7 +169,7 @@
         try {
             const res = await fetch(`/times/available-times?themeId=${state.selectedTheme.id}&date=${date}`);
             const slots = await res.json();
-            
+
             timeSelect.innerHTML = '<option value="">시간을 선택해주세요</option>' + slots.map(s => {
                 const isReserved = s.status === 'RESERVED';
                 return `
@@ -184,7 +185,7 @@
 
     reserveForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (!timeSelect.value) {
             alert('시간을 선택해주세요.');
             return;
@@ -192,7 +193,7 @@
 
         reserveMessage.textContent = '예약 처리 중...';
         reserveMessage.style.color = 'var(--primary)';
-        
+
         const body = {
             name: nameInput.value,
             date: state.selectedDate,
@@ -203,12 +204,12 @@
         try {
             const res = await fetch('/reservations', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(body)
             });
 
             if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                const errorData = await res.json().catch(() => ({message: '알 수 없는 오류가 발생했습니다.'}));
                 throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
             }
             const data = await res.json();
@@ -241,7 +242,7 @@
         try {
             const res = await fetch(`/reservations/my-reservation?name=${encodeURIComponent(name)}`);
             if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: '조회 중 오류가 발생했습니다.' }));
+                const errorData = await res.json().catch(() => ({message: '조회 중 오류가 발생했습니다.'}));
                 throw new Error(errorData.message);
             }
             const list = await res.json();
@@ -253,9 +254,9 @@
     });
 
     function getBadgeInfo(status) {
-        if (status === 'CONFIRMED') return { text: '예약 확정', class: 'badge-confirmed' };
-        if (status === 'WAITING') return { text: '예약 대기', class: 'badge-waiting' };
-        return { text: '결제 대기', class: 'badge-pending' };
+        if (status === 'CONFIRMED') return {text: '예약 확정', class: 'badge-confirmed'};
+        if (status === 'WAITING') return {text: '예약 대기', class: 'badge-waiting'};
+        return {text: '결제 대기', class: 'badge-pending'};
     }
 
     function renderMyList(reservations) {
@@ -268,21 +269,21 @@
             `;
             return;
         }
-        
+
         container.innerHTML = reservations.map(r => {
             const badge = getBadgeInfo(r.status);
             const orderInfo = (r.order && r.status === 'WAITING') ? ` (대기 순번: ${r.order}번)` : '';
-            const paymentBtn = r.status === 'PENDING_PAYMENT' 
-                ? `<button class="btn-primary-sm" style="margin-right:8px;" onclick="payReservation('${r.orderId}', '${r.themeResponse.name}')">결제하기</button>` 
+            const paymentBtn = r.status === 'PENDING_PAYMENT'
+                ? `<button class="btn-primary-sm" style="margin-right:8px;" onclick="payReservation('${r.orderId}', '${r.themeResponse.name}')">결제하기</button>`
                 : '';
-            
+
             return `
                 <div class="mission-card">
                     <div class="mission-info">
                         <span class="badge ${badge.class}">${badge.text}${orderInfo}</span>
                         <h3 style="margin-top:12px; font-size:1.3rem;">${r.themeResponse.name}</h3>
                         <div class="mission-meta" style="color:var(--text-muted); font-size:0.95rem; margin-top:4px;">
-                            ${r.date} • ${r.timeResponse.startAt.slice(0,5)}
+                            ${r.date} • ${r.timeResponse.startAt.slice(0, 5)}
                         </div>
                     </div>
                     <div style="display:flex;">
@@ -328,11 +329,11 @@
     window.cancelReservation = async (id) => {
         const confirmed = await confirm('정말로 예약을 취소하시겠습니까?');
         if (!confirmed) return;
-        
+
         try {
-            const res = await fetch(`/reservations/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/reservations/${id}`, {method: 'DELETE'});
             if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+                const errorData = await res.json().catch(() => ({message: '알 수 없는 오류가 발생했습니다.'}));
                 throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
             }
             alert('예약이 취소되었습니다.');

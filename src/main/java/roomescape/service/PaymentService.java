@@ -31,7 +31,8 @@ public class PaymentService {
         var result = paymentGateway.confirm(confirmation);
 
         reservation.completePayment(result.paymentKey());
-        reservationRepository.updatePayment(reservation.getId(), result.paymentKey(), reservation.getStatus(), reservation.getOrderId(), reservation.getAmount());
+        reservationRepository.updatePayment(reservation.getId(), result.paymentKey(), reservation.getStatus(),
+                reservation.getOrderId(), reservation.getAmount());
 
         return result;
     }

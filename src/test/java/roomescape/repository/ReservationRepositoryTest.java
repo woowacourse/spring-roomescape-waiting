@@ -109,7 +109,8 @@ class ReservationRepositoryTest {
         Reservation reservation = reservationRepository.save(
                 new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.PENDING_PAYMENT));
 
-        reservationRepository.updatePayment(reservation.getId(), "payment-key", ReservationStatus.CONFIRMED, "order-id", 50000L);
+        reservationRepository.updatePayment(reservation.getId(), "payment-key", ReservationStatus.CONFIRMED, "order-id",
+                50000L);
 
         Reservation result = reservationRepository.findById(reservation.getId()).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);

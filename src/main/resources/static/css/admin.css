@@ -14,7 +14,9 @@ body.admin-body {
     font-family: 'Pretendard', sans-serif;
 }
 
-.admin-container { padding: 40px 24px; }
+.admin-container {
+    padding: 40px 24px;
+}
 
 .admin-grid {
     display: grid;
@@ -38,7 +40,13 @@ body.admin-body {
     color: var(--primary);
 }
 
-.admin-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
 .admin-form input {
     padding: 12px;
     background: var(--bg-admin);
@@ -60,7 +68,7 @@ body.admin-body {
 }
 
 .admin-table th {
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
     padding: 16px;
     text-align: left;
     font-size: 0.8rem;
@@ -77,10 +85,18 @@ body.admin-body {
     vertical-align: middle;
 }
 
-.admin-table tbody tr { transition: background 0.2s; }
-.admin-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.admin-table tbody tr {
+    transition: background 0.2s;
+}
 
-.admin-table td:first-child { font-family: monospace; color: var(--text-muted); }
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-table td:first-child {
+    font-family: monospace;
+    color: var(--text-muted);
+}
 
 /* Status Badges in Table */
 .status-pill {
@@ -91,9 +107,20 @@ body.admin-body {
     font-weight: 700;
 }
 
-.pill-confirmed { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-.pill-waiting { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-.pill-pending { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.pill-confirmed {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+}
+
+.pill-waiting {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.pill-pending {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
 
 .btn-danger-sm {
     background: rgba(239, 68, 68, 0.1);
@@ -105,6 +132,12 @@ body.admin-body {
     font-size: 0.85rem;
     transition: all 0.2s;
 }
-.btn-danger-sm:hover { background: var(--danger); color: white; }
 
-.full-width { grid-column: 1 / -1; }
+.btn-danger-sm:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}

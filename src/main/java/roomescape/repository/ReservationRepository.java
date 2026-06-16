@@ -119,7 +119,7 @@ public class ReservationRepository {
 
     @Transactional
     public void updatePayment(Long id, String paymentKey, ReservationStatus status, String orderId, Long amount) {
-        jdbcTemplate.update("UPDATE reservation SET payment_key = ?, status = ?, order_id = ?, amount = ? WHERE id = ?", 
+        jdbcTemplate.update("UPDATE reservation SET payment_key = ?, status = ?, order_id = ?, amount = ? WHERE id = ?",
                 paymentKey, status.name(), orderId, amount, id);
     }
 

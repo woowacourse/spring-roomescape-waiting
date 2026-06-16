@@ -1,8 +1,8 @@
 package roomescape.service;
 
-import java.util.UUID;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +15,7 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.exception.InvalidStateException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -121,7 +122,7 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
 
         if (reservation.isToday()) {
-            throw new roomescape.exception.InvalidStateException("당일 예약은 취소할 수 없습니다.");
+            throw new InvalidStateException("당일 예약은 취소할 수 없습니다.");
         }
 
         Reservations currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
@@ -167,7 +168,8 @@ public class ReservationService {
                     .ifPresent(next -> {
                         String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
                         next.setPaymentInfo(orderId, 50_000L); // 결제 대기 상태로 변경 및 주문 정보 설정
-                        reservationRepository.updatePayment(next.getId(), null, next.getStatus(), next.getOrderId(), next.getAmount());
+                        reservationRepository.updatePayment(next.getId(), null, next.getStatus(), next.getOrderId(),
+                                next.getAmount());
                     });
         }
     }

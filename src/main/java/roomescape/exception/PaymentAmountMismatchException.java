@@ -5,8 +5,8 @@ package roomescape.exception;
  */
 public class PaymentAmountMismatchException extends RuntimeException {
 
-  public PaymentAmountMismatchException(Long expected, Long actual) {
-    super(String.format("결제 금액이 일치하지 않습니다. (주문금액: %d, 요청금액: %d)", expected, actual));
-  }
+    public PaymentAmountMismatchException(Long expected, Long actual) {
+        super(String.format("결제 금액이 일치하지 않습니다. (주문금액: %d, 요청금액: %d)", expected, actual));
+    }
 
 }
