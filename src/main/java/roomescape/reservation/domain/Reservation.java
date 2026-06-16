@@ -1,5 +1,13 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
@@ -8,13 +16,33 @@ import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
+@Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"}))
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    protected Reservation() {
+    }
 
     private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         if (member == null) {
@@ -48,12 +76,18 @@ public class Reservation {
         return new Reservation(id, member, date, time, theme);
     }
 
-    public Reservation reschedule(LocalDate date, ReservationTime time) {
-        Reservation changed = new Reservation(id, this.member, date, time, this.theme);
-        if (changed.isPast()) {
+    public void reschedule(LocalDate newDate, ReservationTime newTime) {
+        if (newDate == null) {
+            throw new IllegalArgumentException("날짜는 필수입니다.");
+        }
+        if (newTime == null) {
+            throw new IllegalArgumentException("예약 시간은 필수입니다.");
+        }
+        if (LocalDateTime.of(newDate, newTime.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 시간으로 변경할 수 없습니다.");
         }
-        return changed;
+        this.date = newDate;
+        this.time = newTime;
     }
 
     public boolean isPast() {
