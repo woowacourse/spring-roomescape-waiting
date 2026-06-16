@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -62,4 +63,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Reservation r SET r.date = :date, r.time = :time WHERE r.id = :id")
     void updateDateAndTime(@Param("id") Long id, @Param("date") LocalDate date, @Param("time") ReservationTime time);
+
+    @Query("""
+            SELECT COUNT(r) FROM Reservation r
+            WHERE r.date = :date AND r.time.id = :timeId AND r.theme.id = :themeId AND r.status = :status
+            AND (r.createdAt < :createdAt OR (r.createdAt = :createdAt AND r.id < :id))
+            """)
+    long countWaitingBefore(
+            @Param("date") LocalDate date, @Param("timeId") Long timeId, @Param("themeId") Long themeId,
+            @Param("status") ReservationStatus status, @Param("createdAt") LocalDateTime createdAt,
+            @Param("id") Long id);
 }

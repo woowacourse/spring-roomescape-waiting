@@ -10,7 +10,7 @@ JdbcTemplate 기반 ReservationDao를 JPA Repository로 전면 교체합니다.
 - [x] #2 비관적 락 · JPQL `@Query` · `@Modifying` 구현
   `@Lock(PESSIMISTIC_WRITE)` for `findByIdForUpdate`, `findWaitingByIdForUpdate`, `findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate`. JPQL `@Query`로 `findFirstWaitingByDateAndTimeIdAndThemeId`. `@Modifying @Query`로 `updateStatus`, `updateDateAndTime`.
 
-- [ ] #3 ROW_NUMBER 기반 대기 순번 쿼리 구현 (native SQL)
+- [x] #3 ROW_NUMBER 기반 대기 순번 쿼리 구현 (native SQL)
   `findAllWaitingByName`과 `findWaitingWithNumberById`는 H2 호환 native SQL로 구현. 결과를 `ReservationWaiting`으로 변환하는 로직 포함.
 
 - [ ] #4 서비스 주입 교체 + `ReservationDao` 제거
