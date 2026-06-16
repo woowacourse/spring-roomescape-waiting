@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.*;
 import roomescape.controller.dto.AdminReservationRequest;
-import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
@@ -109,28 +108,12 @@ public class ReservationService {
         promoteWaitingReservation(reservation, changed.getSchedule().getId());
     }
 
-    public List<ReservationResponse> findAll() {
-        LocalDateTime now = LocalDateTime.now();
-        return reservationDao.findAll()
-                .stream()
-                .map(result -> toReservationResponse(result, now))
-                .toList();
+    public List<ReservationWithWaitingOrder> findAll() {
+        return reservationDao.findAll();
     }
 
-    public List<ReservationResponse> findByMember(Member member) {
-        LocalDateTime now = LocalDateTime.now();
-        return reservationDao.findByMemberId(member.getId())
-                .stream()
-                .map(result -> toReservationResponse(result, now))
-                .toList();
-    }
-
-    private ReservationResponse toReservationResponse(ReservationWithWaitingOrder result, LocalDateTime now) {
-        return ReservationResponse.from(
-                result.reservation(),
-                result.order(),
-                now
-        );
+    public List<ReservationWithWaitingOrder> findByMember(Member member) {
+        return reservationDao.findByMemberId(member.getId());
     }
 
     private void promoteWaitingReservation(Reservation reserved, long scheduleId) {

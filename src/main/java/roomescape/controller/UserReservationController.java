@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Member;
 import roomescape.global.auth.LoginMember;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @RequestMapping("/reservations")
 @RestController
@@ -33,7 +35,11 @@ public class UserReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findMine(@LoginMember Member member) {
-        return ResponseEntity.ok(reservationService.findByMember(member));
+        LocalDateTime now = LocalDateTime.now();
+        List<ReservationResponse> responses = reservationService.findByMember(member).stream()
+                .map(result -> toResponse(result, now))
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping
@@ -55,5 +61,9 @@ public class UserReservationController {
     ) {
         reservationService.cancelReservation(id, member);
         return ResponseEntity.noContent().build();
+    }
+
+    private ReservationResponse toResponse(ReservationWithWaitingOrder result, LocalDateTime now) {
+        return ReservationResponse.from(result.reservation(), result.order(), now);
     }
 }

@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import roomescape.controller.dto.AdminReservationRequest;
-import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -270,11 +269,11 @@ class ReservationServiceTest {
         Reservation reservation = reservation(1L, member, schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
         given(reservationDao.findByMemberId(member.getId())).willReturn(List.of(new ReservationWithWaitingOrder(reservation, 1)));
 
-        List<ReservationResponse> responses = reservationService.findByMember(member);
+        List<ReservationWithWaitingOrder> results = reservationService.findByMember(member);
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).name()).isEqualTo("러로");
-        assertThat(responses.get(0).order()).isEqualTo(1);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).reservation()).isEqualTo(reservation);
+        assertThat(results.get(0).order()).isEqualTo(1);
     }
 
     private Reservation reservation(

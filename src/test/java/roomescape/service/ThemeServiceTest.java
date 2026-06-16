@@ -21,7 +21,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 
 import roomescape.controller.dto.ThemeRequest;
-import roomescape.controller.dto.ThemeResponse;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
@@ -106,18 +105,18 @@ class ThemeServiceTest {
                 .isEqualTo(DomainErrorCode.REFERENTIAL_INTEGRITY);
     }
 
-    @DisplayName("테마 목록을 응답 DTO로 변환한다.")
+    @DisplayName("테마 목록을 조회한다.")
     @Test
     void findAll() {
         given(themeDao.findAll()).willReturn(List.of(
                 new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg")
         ));
 
-        List<ThemeResponse> responses = themeService.findAll();
+        List<Theme> themes = themeService.findAll();
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(0).name()).isEqualTo("잠긴 방");
+        assertThat(themes).hasSize(1);
+        assertThat(themes.get(0).getId()).isEqualTo(1L);
+        assertThat(themes.get(0).getName()).isEqualTo("잠긴 방");
     }
 
     @DisplayName("인기 테마는 최근 7일의 RESERVED 예약 기준으로 조회한다.")
@@ -130,10 +129,10 @@ class ThemeServiceTest {
                 eq(10)
         )).willReturn(List.of(new Theme(1L, "인기 테마", "설명", "https://example.com/theme.jpg")));
 
-        List<ThemeResponse> responses = themeService.findPopularThemes();
+        List<Theme> themes = themeService.findPopularThemes();
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).name()).isEqualTo("인기 테마");
+        assertThat(themes).hasSize(1);
+        assertThat(themes.get(0).getName()).isEqualTo("인기 테마");
     }
 
     private void givenThemeDeleteFails(long id) {

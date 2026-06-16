@@ -17,12 +17,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-import roomescape.controller.dto.AvailableTimeResponse;
-import roomescape.controller.dto.ThemeResponse;
+import roomescape.domain.Theme;
 import roomescape.global.exception.DomainErrorHttpMapper;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+import roomescape.service.dto.AvailableTimeResult;
 
 @WebMvcTest(UserThemeController.class)
 @Import(DomainErrorHttpMapper.class)
@@ -44,7 +44,7 @@ class UserThemeControllerTest {
     @Test
     void findAll() throws Exception {
         given(themeService.findAll()).willReturn(List.of(
-                new ThemeResponse(1L, "잠긴 방", "설명", "https://example.com/theme.jpg")
+                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg")
         ));
 
         mockMvc.perform(get("/themes"))
@@ -58,7 +58,7 @@ class UserThemeControllerTest {
     @Test
     void findPopularThemes() throws Exception {
         given(themeService.findPopularThemes()).willReturn(List.of(
-                new ThemeResponse(1L, "인기 테마", "설명", "https://example.com/theme.jpg")
+                new Theme(1L, "인기 테마", "설명", "https://example.com/theme.jpg")
         ));
 
         mockMvc.perform(get("/themes/popular"))
@@ -71,8 +71,8 @@ class UserThemeControllerTest {
     void findAvailableTimes() throws Exception {
         LocalDate date = LocalDate.of(2026, 7, 1);
         given(reservationTimeService.findAvailableTimes(1L, date)).willReturn(List.of(
-                new AvailableTimeResponse(1L, LocalTime.of(10, 0), true, 0),
-                new AvailableTimeResponse(2L, LocalTime.of(11, 0), false, 1)
+                new AvailableTimeResult(1L, LocalTime.of(10, 0), 0),
+                new AvailableTimeResult(2L, LocalTime.of(11, 0), 2)
         ));
 
         mockMvc.perform(get("/themes/1/available-times").param("date", "2026-07-01"))

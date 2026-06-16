@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.ThemeRequest;
-import roomescape.controller.dto.ThemeResponse;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
@@ -57,27 +56,19 @@ public class ThemeService {
         }
     }
 
-    public List<ThemeResponse> findAll() {
-        return themeDao.findAll()
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
+    public List<Theme> findAll() {
+        return themeDao.findAll();
     }
 
-    public List<ThemeResponse> findPopularThemes() {
+    public List<Theme> findPopularThemes() {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(DEFAULT_POPULAR_PERIOD);
-        List<Theme> responses = themeDao.findPopularThemes(
+        return themeDao.findPopularThemes(
                 startDate,
                 endDate,
                 ReservationStatus.RESERVED,
                 DEFAULT_POPULAR_LIMIT
         );
-
-        return responses
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 
     private void validateDuplicateName(String name) {

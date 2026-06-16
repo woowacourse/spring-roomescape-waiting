@@ -22,6 +22,9 @@ public class AdminMemberController {
 
     @GetMapping
     public ResponseEntity<List<LoginMemberResponse>> findUsers() {
-        return ResponseEntity.ok(memberService.findUsers());
+        List<LoginMemberResponse> responses = memberService.findUsers().stream()
+                .map(LoginMemberResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 }

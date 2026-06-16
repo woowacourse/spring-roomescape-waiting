@@ -32,12 +32,18 @@ public class UserThemeController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findAll() {
-        return ResponseEntity.ok(themeService.findAll());
+        List<ThemeResponse> responses = themeService.findAll().stream()
+                .map(ThemeResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> findPopularThemes() {
-        return ResponseEntity.ok(themeService.findPopularThemes());
+        List<ThemeResponse> responses = themeService.findPopularThemes().stream()
+                .map(ThemeResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}/available-times")
@@ -46,6 +52,9 @@ public class UserThemeController {
             @RequestParam("date")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        return ResponseEntity.ok(reservationTimeService.findAvailableTimes(id, date));
+        List<AvailableTimeResponse> responses = reservationTimeService.findAvailableTimes(id, date).stream()
+                .map(AvailableTimeResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 }

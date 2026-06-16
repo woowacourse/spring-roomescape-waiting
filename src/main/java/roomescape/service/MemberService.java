@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import roomescape.controller.dto.LoginMemberResponse;
+import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.repository.MemberDao;
 
@@ -19,10 +19,7 @@ public class MemberService {
         this.memberDao = memberDao;
     }
 
-    public List<LoginMemberResponse> findUsers() {
-        return memberDao.findByRole(Role.USER)
-                .stream()
-                .map(LoginMemberResponse::from)
-                .toList();
+    public List<Member> findUsers() {
+        return memberDao.findByRole(Role.USER);
     }
 }
