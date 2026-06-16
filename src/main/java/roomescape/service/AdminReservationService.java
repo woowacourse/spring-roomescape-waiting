@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -49,6 +50,11 @@ public class AdminReservationService {
 
     @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
+        return create(command, ReservationStatus.CONFIRMED);
+    }
+
+    @Transactional
+    public ReservationResult create(ReservationCreateCommand command, ReservationStatus status) {
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
@@ -63,7 +69,7 @@ public class AdminReservationService {
 
         validateNoConflict(command);
 
-        Reservation reservation = new Reservation(null, command.name(), new ReservationSlot(null, command.date(), time, theme));
+        Reservation reservation = new Reservation(null, command.name(), new ReservationSlot(null, command.date(), time, theme), status);
         ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
         log.info("예약 생성 완료: reservationId={}, name={}, date={}, timeId={}, themeId={}",
                 saved.id(), saved.name(), saved.date(), command.timeId(), command.themeId());

@@ -10,12 +10,18 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
+    private final ReservationStatus status;
 
     public Reservation(Long id, String name, ReservationSlot slot) {
+        this(id, name, slot, ReservationStatus.CONFIRMED);
+    }
+
+    public Reservation(Long id, String name, ReservationSlot slot, ReservationStatus status) {
         validateNameLength(name);
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.status = status;
     }
 
     private static void validateNameLength(String name) {
@@ -34,6 +40,10 @@ public class Reservation {
 
     public ReservationSlot getSlot() {
         return slot;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public LocalDate getDate() {

@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -64,7 +65,7 @@ class UserReservationServiceTest {
         ReservationResult expected = new ReservationResult(
                 1L, OWNER, FUTURE_DATE, null, null, 0L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(reservationService.create(command)).willReturn(expected);
+        given(reservationService.create(command, ReservationStatus.PENDING)).willReturn(expected);
 
         ReservationResult actual = userReservationService.create(command);
 
@@ -100,12 +101,40 @@ class UserReservationServiceTest {
     void 중복_예약_시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
-        given(reservationService.create(command)).willThrow(new ReservationConflictException("중복 예약"));
+        given(reservationService.create(command, ReservationStatus.PENDING)).willThrow(new ReservationConflictException("중복 예약"));
 
         assertThrows(
                 ReservationConflictException.class,
                 () -> userReservationService.create(command)
         );
+    }
+
+    @Test
+    @DisplayName("빈 슬롯 예약은 PENDING 상태로 생성된다")
+    void 빈_슬롯_예약은_PENDING으로_생성된다() {
+        ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        ReservationResult expected = new ReservationResult(1L, OWNER, FUTURE_DATE, null, null, 0L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(FUTURE_DATE, 1L, 1L)).willReturn(false);
+        given(reservationService.create(command, ReservationStatus.PENDING)).willReturn(expected);
+
+        ReservationResult actual = userReservationService.create(command);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("이미 예약된 슬롯은 WAITING 상태로 생성된다")
+    void 이미_예약된_슬롯은_WAITING으로_생성된다() {
+        ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        ReservationResult expected = new ReservationResult(1L, OWNER, FUTURE_DATE, null, null, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(FUTURE_DATE, 1L, 1L)).willReturn(true);
+        given(reservationService.create(command, ReservationStatus.WAITING)).willReturn(expected);
+
+        ReservationResult actual = userReservationService.create(command);
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
