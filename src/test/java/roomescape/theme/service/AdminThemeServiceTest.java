@@ -44,7 +44,7 @@ class AdminThemeServiceTest {
     @DisplayName("테마를 생성하면 응답에 정보가 담기고 DB에 저장된다")
     void 테마_생성_시_응답과_DB에_저장된다() {
         AdminThemeResponse response = adminThemeService.createTheme(
-                new AdminThemeRequest("테마A", "설명A", "https://a.com"));
+                new AdminThemeRequest("테마A", "설명A", "https://a.com", 25000L));
 
         assertThat(response.id()).isNotNull().isPositive();
         assertThat(response.name()).isEqualTo("테마A");
@@ -54,8 +54,8 @@ class AdminThemeServiceTest {
     @Test
     @DisplayName("전체 테마 목록을 조회한다")
     void 전체_테마_목록을_조회한다() {
-        adminThemeService.createTheme(new AdminThemeRequest("테마A", "설명A", "https://a.com"));
-        adminThemeService.createTheme(new AdminThemeRequest("테마B", "설명B", "https://b.com"));
+        adminThemeService.createTheme(new AdminThemeRequest("테마A", "설명A", "https://a.com", 25000L));
+        adminThemeService.createTheme(new AdminThemeRequest("테마B", "설명B", "https://b.com", 25000L));
 
         assertThat(adminThemeService.getAllThemes()).hasSize(2);
     }
@@ -64,7 +64,7 @@ class AdminThemeServiceTest {
     @DisplayName("테마를 삭제하면 DB에서 제거된다")
     void 테마_삭제_시_DB에서_제거된다() {
         AdminThemeResponse saved = adminThemeService.createTheme(
-                new AdminThemeRequest("테마A", "설명A", "https://a.com"));
+                new AdminThemeRequest("테마A", "설명A", "https://a.com", 25000L));
 
         adminThemeService.deleteTheme(saved.id());
 

@@ -40,7 +40,7 @@ class AdminThemeControllerTest {
         given()
                 .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
+                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com", "price", 25000))
                 .post("/admin/themes")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
@@ -64,7 +64,7 @@ class AdminThemeControllerTest {
         int id = given()
                 .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
+                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com", "price", 25000))
                 .post("/admin/themes")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
@@ -82,7 +82,7 @@ class AdminThemeControllerTest {
     void 비인증_관리자_접근_실패() {
         given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
+                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com", "price", 25000))
                 .post("/admin/themes")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -101,7 +101,7 @@ class AdminThemeControllerTest {
         given()
                 .cookie("JSESSIONID", userSession)
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
+                .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com", "price", 25000))
                 .post("/admin/themes")
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value());
