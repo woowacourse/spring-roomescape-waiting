@@ -72,6 +72,7 @@ class ReservationConcurrencyTest {
     void tearDown() {
         jdbcTemplate.update("DELETE FROM promotion_outbox");
         jdbcTemplate.update("DELETE FROM waitings");
+        jdbcTemplate.update("DELETE FROM orders");
         jdbcTemplate.update("DELETE FROM reservations");
         jdbcTemplate.update("DELETE FROM times");
         jdbcTemplate.update("DELETE FROM themes");

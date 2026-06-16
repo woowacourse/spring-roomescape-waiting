@@ -35,7 +35,7 @@ public abstract class BaseE2ETest {
 
     protected void truncateAll() {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-        for (String table : List.of("promotion_outbox", "waitings", "reservations", "members", "stores", "themes", "times")) {
+        for (String table : List.of("orders", "promotion_outbox", "waitings", "reservations", "members", "stores", "themes", "times")) {
             jdbcTemplate.execute("TRUNCATE TABLE " + table);
             jdbcTemplate.execute("ALTER TABLE " + table + " ALTER COLUMN id RESTART WITH 1");
         }
@@ -67,9 +67,13 @@ public abstract class BaseE2ETest {
     }
 
     protected Long seedTheme(String name) {
+        return seedTheme(name, 30000L);
+    }
+
+    protected Long seedTheme(String name, long price) {
         jdbcTemplate.update(
-                "INSERT INTO themes(name, thumbnail_url, description) VALUES (?, ?, ?)",
-                name, "http://thumbnail/" + name, "설명");
+                "INSERT INTO themes(name, thumbnail_url, description, price) VALUES (?, ?, ?, ?)",
+                name, "http://thumbnail/" + name, "설명", price);
         return jdbcTemplate.queryForObject(
                 "SELECT id FROM themes WHERE name = ?", Long.class, name);
     }

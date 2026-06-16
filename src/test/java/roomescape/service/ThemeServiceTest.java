@@ -72,8 +72,8 @@ class ThemeServiceTest {
                 "유저", "user@test.com", "password", "USER"
         );
         member = memberDao.findByEmail("user@test.com").orElseThrow();
-        requestDto1 = new ThemeRequestDto("테마1", "http://thumbnail_url", "설명1");
-        requestDto2 = new ThemeRequestDto("테마2", "http://thumbnail_url", "설명2");
+        requestDto1 = new ThemeRequestDto("테마1", "http://thumbnail_url", "설명1", 30000L);
+        requestDto2 = new ThemeRequestDto("테마2", "http://thumbnail_url", "설명2", 35000L);
     }
 
     @Nested

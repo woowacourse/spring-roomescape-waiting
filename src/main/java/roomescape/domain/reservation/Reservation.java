@@ -38,7 +38,7 @@ public class Reservation {
         if (slot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 생성은 불가능합니다.");
         }
-        return new Reservation(null, member, slot, ReservationStatus.BOOKED, null, 0L);
+        return new Reservation(null, member, slot, ReservationStatus.PENDING, null, 0L);
     }
 
     public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme, Store store) {
@@ -66,6 +66,27 @@ public class Reservation {
     private void doCancel(LocalDateTime now) {
         if (!isActive()) {
             throw new BusinessRuleViolationException("이미 취소된 예약입니다.");
+        }
+        this.status = ReservationStatus.CANCELED;
+        this.deletedAt = now;
+    }
+
+    /**
+     * 결제 승인 성공 시 결제 대기(PENDING) 예약을 확정(BOOKED)으로 바꾼다.
+     */
+    public void confirm(LocalDateTime now) {
+        if (status != ReservationStatus.PENDING) {
+            throw new BusinessRuleViolationException("결제 대기 상태의 예약만 확정할 수 있습니다.");
+        }
+        this.status = ReservationStatus.BOOKED;
+    }
+
+    /**
+     * 결제 실패/취소 시 결제 대기(PENDING) 예약을 정리한다(취소 처리로 슬롯을 풀어준다).
+     */
+    public void cancelPending(LocalDateTime now) {
+        if (status != ReservationStatus.PENDING) {
+            throw new BusinessRuleViolationException("결제 대기 상태의 예약만 정리할 수 있습니다.");
         }
         this.status = ReservationStatus.CANCELED;
         this.deletedAt = now;

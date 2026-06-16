@@ -8,18 +8,20 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.InvalidInputException;
+import roomescape.common.exception.PaymentAmountMismatchException;
 import roomescape.common.exception.UnauthenticatedException;
 import roomescape.common.exception.UnauthorizedException;
 
 public class ExceptionHttpStatusMapper {
-    private static final Map<Class<? extends DomainException>, HttpStatus> STATUS_MAP = Map.of(
-            InvalidInputException.class, HttpStatus.BAD_REQUEST,
-            BusinessRuleViolationException.class, HttpStatus.BAD_REQUEST,
-            EntityNotFoundException.class, HttpStatus.NOT_FOUND,
-            HiddenResourceException.class, HttpStatus.NOT_FOUND,
-            DuplicateEntityException.class, HttpStatus.CONFLICT,
-            UnauthenticatedException.class, HttpStatus.UNAUTHORIZED,
-            UnauthorizedException.class, HttpStatus.FORBIDDEN
+    private static final Map<Class<? extends DomainException>, HttpStatus> STATUS_MAP = Map.ofEntries(
+            Map.entry(InvalidInputException.class, HttpStatus.BAD_REQUEST),
+            Map.entry(BusinessRuleViolationException.class, HttpStatus.BAD_REQUEST),
+            Map.entry(EntityNotFoundException.class, HttpStatus.NOT_FOUND),
+            Map.entry(HiddenResourceException.class, HttpStatus.NOT_FOUND),
+            Map.entry(DuplicateEntityException.class, HttpStatus.CONFLICT),
+            Map.entry(UnauthenticatedException.class, HttpStatus.UNAUTHORIZED),
+            Map.entry(UnauthorizedException.class, HttpStatus.FORBIDDEN),
+            Map.entry(PaymentAmountMismatchException.class, HttpStatus.BAD_REQUEST)
     );
 
     public static HttpStatus resolve(DomainException e) {

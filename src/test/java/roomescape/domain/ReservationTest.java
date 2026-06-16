@@ -45,7 +45,7 @@ class ReservationTest {
 
             Reservation reservation = Reservation.createByUser(member, futureDate, time, theme, store, now);
 
-            assertThat(reservation.isActive()).isTrue();
+            assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
         }
 
         @Test

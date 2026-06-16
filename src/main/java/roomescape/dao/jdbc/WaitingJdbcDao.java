@@ -45,7 +45,8 @@ public class WaitingJdbcDao implements WaitingDao {
             rs.getLong("theme_id"),
             new Name(rs.getString("theme_name")),
             rs.getString("theme_thumbnail_url"),
-            rs.getString("theme_description")
+            rs.getString("theme_description"),
+            rs.getLong("theme_price")
     );
     private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> {
         Long waitingStoreId = rs.getObject("waiting_store_id", Long.class);
@@ -78,7 +79,8 @@ public class WaitingJdbcDao implements WaitingDao {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.thumbnail_url AS theme_thumbnail_url,
-                    th.description AS theme_description
+                    th.description AS theme_description,
+                    th.price AS theme_price
                 FROM waitings w
                 INNER JOIN members m ON w.member_id = m.id
                 INNER JOIN times t ON w.time_id = t.id

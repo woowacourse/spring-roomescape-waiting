@@ -25,6 +25,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
+import roomescape.dao.jdbc.OrderJdbcDao;
 import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.StoreJdbcDao;
@@ -33,7 +34,9 @@ import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
+import roomescape.domain.payment.PaymentService;
 import roomescape.domain.promotion.PromotionService;
+import roomescape.fixture.FakePaymentGateway;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationCreator;
 import roomescape.domain.reservation.ReservationService;
@@ -49,7 +52,8 @@ import roomescape.dto.request.ReservationRequestDto;
 @JdbcTest
 @Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, WaitingService.class,
         ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class,
-        WaitingJdbcDao.class, PromotionOutboxJdbcDao.class, PromotionService.class})
+        WaitingJdbcDao.class, PromotionOutboxJdbcDao.class, PromotionService.class,
+        OrderJdbcDao.class, PaymentService.class, FakePaymentGateway.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
 
@@ -103,9 +107,10 @@ class ReservationServiceTest {
         @Test
         @DisplayName("유효한 요청으로 예약을 생성한다")
         void createsReservation() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationService.create(member, requestDto1).reservation();
 
             assertThat(saved.getId()).isNotNull();
+            assertThat(saved.getStatus()).isEqualTo(ReservationStatus.PENDING);
             assertThat(saved.getMember()).isEqualTo(member);
             assertThat(saved.getDate()).isEqualTo(requestDto1.date());
         }
@@ -154,7 +159,8 @@ class ReservationServiceTest {
         @Test
         @DisplayName("BOOKED 예약을 조회한다")
         void returnsActiveReservation() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, requestDto1.date(), savedTime1, savedTheme1, store));
 
             assertThat(reservationService.findActiveById(saved.getId())).isEqualTo(saved);
         }
@@ -177,7 +183,7 @@ class ReservationServiceTest {
         @Test
         @DisplayName("멤버 ID로 활성 예약 목록을 조회한다")
         void returnsActiveReservationsByMemberId() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationService.create(member, requestDto1).reservation();
 
             List<Reservation> result = reservationService.findAllByMemberId(member.getId());
 
@@ -207,7 +213,8 @@ class ReservationServiceTest {
         @Test
         @DisplayName("본인 예약을 수정한다")
         void updatesReservation() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, requestDto1.date(), savedTime1, savedTheme1, store));
             LocalDate newDate = LocalDate.now().plusDays(3);
             ReservationPatchDto updateDto = new ReservationPatchDto(newDate, savedTime2.getId());
 
@@ -220,7 +227,7 @@ class ReservationServiceTest {
         @Test
         @DisplayName("다른 사람의 예약을 수정하면 예외를 반환한다")
         void throwsWhenMemberMismatch() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationService.create(member, requestDto1).reservation();
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime2.getId());
 
             assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), otherMember, updateDto))
@@ -230,7 +237,7 @@ class ReservationServiceTest {
         @Test
         @DisplayName("다른 사람의 예약을 존재하지 않는 시간으로 수정해도 숨김 예외를 반환한다")
         void throwsHiddenResourceWhenMemberMismatchWithUnknownTime() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationService.create(member, requestDto1).reservation();
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), -1L);
 
             assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), otherMember, updateDto))

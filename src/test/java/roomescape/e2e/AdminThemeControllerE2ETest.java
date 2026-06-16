@@ -43,7 +43,8 @@ class AdminThemeControllerE2ETest extends BaseE2ETest {
                     .body(Map.of(
                             "name", "신규테마",
                             "thumbnailUrl", "https://example.com/img.jpg",
-                            "description", "설명"
+                            "description", "설명",
+                            "price", 30000
                     ))
                     .when().post("/admin/themes")
                     .then().statusCode(HttpStatus.CREATED.value())
@@ -61,7 +62,8 @@ class AdminThemeControllerE2ETest extends BaseE2ETest {
                     .body(Map.of(
                             "name", "중복테마",
                             "thumbnailUrl", "https://example.com/img.jpg",
-                            "description", "설명"
+                            "description", "설명",
+                            "price", 30000
                     ))
                     .when().post("/admin/themes")
                     .then().statusCode(HttpStatus.CONFLICT.value());

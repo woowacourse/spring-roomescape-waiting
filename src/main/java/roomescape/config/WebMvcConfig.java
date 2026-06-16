@@ -36,6 +36,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registration.addUrlPatterns(
                 "/reservations", "/reservations/*",
                 "/waitings", "/waitings/*",
+                "/payments/confirm", "/payments/fail",
                 "/members/me"
         );
         return registration;

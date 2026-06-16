@@ -36,3 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 .claude/
+
+### Secrets — 토스 시크릿 키 등 (커밋 금지) ###
+application-local.yml
+application-local.yaml
+.env

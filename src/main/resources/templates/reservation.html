@@ -193,6 +193,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://js.tosspayments.com/v1/payment"></script>
 <script>
 async function logout() {
   await fetch('/logout', { method: 'POST' });
@@ -365,6 +366,7 @@ async function doReserve() {
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true;
   try {
+    // 1) 결제 전 주문 저장 — 예약은 PENDING으로 생성되고 orderId/amount를 받는다.
     const r = await fetch('/reservations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -383,15 +385,28 @@ async function doReserve() {
       toast('err', msg);
       return;
     }
+    const order = await r.json(); // { reservationId, orderId, amount, orderName }
     closeModal();
-    toast('ok', '예약이 완료되었습니다');
-    await onDate(selDate);
+    // 2) 토스 결제창 인증으로 넘어간다. 성공/실패는 successUrl/failUrl로 돌아온다.
+    await startPayment(order);
   } catch {
     closeModal();
     toast('err', '네트워크 오류가 발생했습니다');
   } finally {
     btn.disabled = false;
   }
+}
+
+async function startPayment(order) {
+  const cfg = await (await fetch('/payments/config')).json();
+  const tossPayments = TossPayments(cfg.clientKey);
+  await tossPayments.requestPayment('카드', {
+    amount: order.amount,
+    orderId: order.orderId,
+    orderName: order.orderName,
+    successUrl: location.origin + '/payment/success',
+    failUrl: location.origin + '/payment/fail'
+  });
 }
 
 async function doWait() {

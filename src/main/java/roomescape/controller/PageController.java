@@ -31,6 +31,16 @@ public class PageController {
         return "my-reservations";
     }
 
+    @GetMapping("/payment/success")
+    public String paymentSuccess() {
+        return "payment-success";
+    }
+
+    @GetMapping("/payment/fail")
+    public String paymentFail() {
+        return "payment-fail";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";

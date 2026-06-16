@@ -16,6 +16,8 @@ import roomescape.domain.time.Time;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
 import roomescape.domain.promotion.PromotionService;
+import roomescape.domain.payment.Order;
+import roomescape.domain.payment.PaymentService;
 
 @Service
 @Transactional
@@ -25,19 +27,22 @@ public class ReservationService {
     private final PromotionService promotionService;
     private final ReservationAuthorizationService authorizationService;
     private final ReservationCreator reservationCreator;
+    private final PaymentService paymentService;
 
     public ReservationService(
             ReservationDao reservationDao,
             TimeDao timeDao,
             PromotionService promotionService,
             ReservationAuthorizationService authorizationService,
-            ReservationCreator reservationCreator
+            ReservationCreator reservationCreator,
+            PaymentService paymentService
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
         this.promotionService = promotionService;
         this.authorizationService = authorizationService;
         this.reservationCreator = reservationCreator;
+        this.paymentService = paymentService;
     }
 
     @Transactional(readOnly = true)
@@ -55,13 +60,16 @@ public class ReservationService {
         return reservation;
     }
 
-    public Reservation create(Member member, ReservationRequestDto request) {
+    public ReservationOrder create(Member member, ReservationRequestDto request) {
         Reservation reservation = reservationCreator.createByUser(member, request, LocalDateTime.now());
+        Reservation saved;
         try {
-            return reservationDao.insert(reservation);
+            saved = reservationDao.insert(reservation);
         } catch (DuplicateKeyException e) {
             throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
         }
+        Order order = paymentService.createOrder(saved.getId(), saved.getTheme().getPrice());
+        return new ReservationOrder(saved, order);
     }
 
     public Reservation updateByUser(Long id, Member member, ReservationPatchDto request) {

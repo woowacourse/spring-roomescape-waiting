@@ -48,7 +48,8 @@ public class ReservationJdbcDao implements ReservationDao {
                 th.id AS theme_id,
                 th.name AS theme_name,
                 th.thumbnail_url AS theme_thumbnail_url,
-                th.description AS theme_description
+                th.description AS theme_description,
+                th.price AS theme_price
             FROM reservations r
             INNER JOIN members m ON r.member_id = m.id
             INNER JOIN times t ON r.time_id = t.id
@@ -62,7 +63,8 @@ public class ReservationJdbcDao implements ReservationDao {
                     rs.getLong("theme_id"),
                     new Name(rs.getString("theme_name")),
                     rs.getString("theme_thumbnail_url"),
-                    rs.getString("theme_description")
+                    rs.getString("theme_description"),
+                    rs.getLong("theme_price")
             );
     private static final RowMapper<Time> TIME_ROW_MAPPER = (rs, rowNum) ->
             new Time(
@@ -112,7 +114,7 @@ public class ReservationJdbcDao implements ReservationDao {
         simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
                 .withTableName("reservations")
                 .usingGeneratedKeyColumns("id")
-                .usingColumns("member_id", "date", "time_id", "theme_id", "store_id");
+                .usingColumns("member_id", "date", "time_id", "theme_id", "store_id", "status");
     }
 
     @Override
@@ -134,11 +136,12 @@ public class ReservationJdbcDao implements ReservationDao {
                 .addValue("date", reservation.getDate())
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId())
-                .addValue("store_id", reservation.getStoreId());
+                .addValue("store_id", reservation.getStoreId())
+                .addValue("status", reservation.getStatus().name());
 
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return Reservation.reconstruct(id, reservation.getMember(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme(), ReservationStatus.BOOKED, null, 0L,
+                reservation.getTime(), reservation.getTheme(), reservation.getStatus(), null, 0L,
                 reservation.getStore());
     }
 

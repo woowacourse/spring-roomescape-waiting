@@ -25,7 +25,8 @@ public class ThemeJdbcDao implements ThemeDao {
                     rs.getLong("id"),
                     new Name(rs.getString("name")),
                     rs.getString("thumbnail_url"),
-                    rs.getString("description")
+                    rs.getString("description"),
+                    rs.getLong("price")
             );
 
     private static final RowMapper<ThemeReservationCount> THEME_COUNT_ROW_MAPPER = (rs, rowNum) ->
@@ -58,7 +59,8 @@ public class ThemeJdbcDao implements ThemeDao {
                     id,
                     name,
                     thumbnail_url,
-                    description
+                    description,
+                    price
                 FROM themes
                 """;
 
@@ -72,7 +74,8 @@ public class ThemeJdbcDao implements ThemeDao {
                      id,
                      name,
                      thumbnail_url,
-                     description
+                     description,
+                     price
                  FROM themes
                  WHERE id = :id
                 """;
@@ -88,24 +91,26 @@ public class ThemeJdbcDao implements ThemeDao {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", theme.getName().getValue())
                 .addValue("thumbnail_url", theme.getThumbnailUrl())
-                .addValue("description", theme.getDescription());
+                .addValue("description", theme.getDescription())
+                .addValue("price", theme.getPrice());
 
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return new Theme(id, theme.getName(), theme.getThumbnailUrl(), theme.getDescription());
+        return new Theme(id, theme.getName(), theme.getThumbnailUrl(), theme.getDescription(), theme.getPrice());
     }
 
     @Override
     public Theme update(Theme theme) {
         String sql = """
                 UPDATE themes
-                SET name = :name, thumbnail_url = :thumbnailUrl, description = :description
+                SET name = :name, thumbnail_url = :thumbnailUrl, description = :description, price = :price
                 WHERE id = :id
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", theme.getName().getValue())
                 .addValue("thumbnailUrl", theme.getThumbnailUrl())
                 .addValue("description", theme.getDescription())
+                .addValue("price", theme.getPrice())
                 .addValue("id", theme.getId());
         jdbcTemplate.update(sql, params);
         return theme;
@@ -178,6 +183,7 @@ public class ThemeJdbcDao implements ThemeDao {
                         th.name,
                         th.thumbnail_url,
                         th.description,
+                        th.price,
                         COALESCE(r.cnt, 0) AS reservation_count
                     FROM themes th
                     LEFT JOIN (

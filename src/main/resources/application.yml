@@ -9,3 +9,11 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+
+# 토스페이먼츠 연동.
+# secret-key는 서버 승인 전용 비밀이다 — 절대 커밋하지 않는다.
+# 환경변수 TOSS_SECRET_KEY 또는 gitignore된 application-local.yml로 주입한다.
+toss:
+  client-key: ${TOSS_CLIENT_KEY:test_ck_REPLACE_WITH_YOUR_TEST_CLIENT_KEY}
+  secret-key: ${TOSS_SECRET_KEY:}
+  confirm-url: ${TOSS_CONFIRM_URL:https://api.tosspayments.com/v1/payments/confirm}
