@@ -230,7 +230,7 @@ class ReservationServiceTest {
 
         @Test
         void 이름으로_조회() {
-            ReservationSummary summary = new ReservationSummary(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), "테마1", ReservationStatus.CONFIRMED);
+            ReservationSummary summary = new ReservationSummary(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), "테마1", ReservationStatus.CONFIRMED, null);
             when(reservationRepository.findByName("유저1")).thenReturn(List.of(summary));
 
             MyReservationsResponse response = reservationService.getMyReservations("유저1");
