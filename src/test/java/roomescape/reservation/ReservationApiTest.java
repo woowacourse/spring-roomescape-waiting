@@ -46,7 +46,7 @@ class ReservationApiTest {
                 .body("time.startAt", equalTo("09:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
                 .body("theme.name", equalTo("공포 테마"))
-                .body("status", equalTo("CONFIRM"));
+                .body("status", equalTo("PAYMENT_PENDING"));
     }
 
     @DisplayName("방탈출 예약 삭제 API를 테스트합니다.")
@@ -162,7 +162,7 @@ class ReservationApiTest {
                 .body("time.startAt", equalTo("10:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
                 .body("theme.name", equalTo("공포 테마"))
-                .body("status", equalTo("CONFIRM"));
+                .body("status", equalTo("PAYMENT_PENDING"));
     }
 
     @DisplayName("존재하지 않는 예약을 변경 시 404 응답 반환을 테스트합니다.")
@@ -312,7 +312,7 @@ class ReservationApiTest {
                 .body("content[0].time.startAt", equalTo("09:00"))
                 .body("content[0].theme.id", equalTo(themeId.intValue()))
                 .body("content[0].theme.name", equalTo("공포 테마"))
-                .body("content[0].status", equalTo("CONFIRM"))
+                .body("content[0].status", equalTo("PAYMENT_PENDING"))
 
                 .body("content[1].id", greaterThan(0))
                 .body("content[1].name", equalTo("비밥"))
@@ -321,7 +321,7 @@ class ReservationApiTest {
                 .body("content[1].time.startAt", equalTo("09:00"))
                 .body("content[1].theme.id", equalTo(themeId.intValue()))
                 .body("content[1].theme.name", equalTo("공포 테마"))
-                .body("content[1].status", equalTo("CONFIRM"))
+                .body("content[1].status", equalTo("PAYMENT_PENDING"))
 
                 .body("content[2].id", greaterThan(0))
                 .body("content[2].name", equalTo("스타크"))
@@ -330,7 +330,7 @@ class ReservationApiTest {
                 .body("content[2].time.startAt", equalTo("10:00"))
                 .body("content[2].theme.id", equalTo(themeId.intValue()))
                 .body("content[2].theme.name", equalTo("공포 테마"))
-                .body("content[2].status", equalTo("CONFIRM"));
+                .body("content[2].status", equalTo("PAYMENT_PENDING"));
     }
 
     @DisplayName("관리자 예약 목록 조회 시 페이지가 0보다 작으면 400 응답 반환을 테스트합니다.")
@@ -405,7 +405,7 @@ class ReservationApiTest {
                 .body("[0].time.startAt", equalTo("09:00"))
                 .body("[0].theme.id", equalTo(themeId.intValue()))
                 .body("[0].theme.name", equalTo("공포 테마"))
-                .body("[0].status", equalTo("CONFIRM"))
+                .body("[0].status", equalTo("PAYMENT_PENDING"))
 
                 .body("[1].id", greaterThan(0))
                 .body("[1].name", equalTo("스타크"))
@@ -414,7 +414,7 @@ class ReservationApiTest {
                 .body("[1].time.startAt", equalTo("10:00"))
                 .body("[1].theme.id", equalTo(themeId.intValue()))
                 .body("[1].theme.name", equalTo("공포 테마"))
-                .body("[1].status", equalTo("CONFIRM"));
+                .body("[1].status", equalTo("PAYMENT_PENDING"));
     }
 
     @DisplayName("이미 지나간 시간의 예약을 삭제 시 422 응답 반환을 테스트합니다.")

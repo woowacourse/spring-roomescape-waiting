@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.application.dao.ReservationDetailDao;
 import roomescape.reservation.application.dto.ReservationDetail;
+import roomescape.reservation.domain.ReservationStatus;
 
 @RequiredArgsConstructor
 @Repository
@@ -17,7 +18,7 @@ public class JdbcReservationDao implements ReservationDetailDao {
     public List<ReservationDetail> findAllByPage(int limit, long offset) {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at
+                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
@@ -33,7 +34,8 @@ public class JdbcReservationDao implements ReservationDetailDao {
                                 rs.getString("description"),
                                 rs.getString("thumbnail_img_url"),
                                 rs.getLong("time_id"),
-                                rs.getTime("start_at").toLocalTime()),
+                                rs.getTime("start_at").toLocalTime(),
+                                ReservationStatus.valueOf(rs.getString("status"))),
                 limit,
                 offset
         );
@@ -56,7 +58,7 @@ public class JdbcReservationDao implements ReservationDetailDao {
     public List<ReservationDetail> findByName(String username) {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at
+                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
@@ -72,7 +74,8 @@ public class JdbcReservationDao implements ReservationDetailDao {
                                 rs.getString("description"),
                                 rs.getString("thumbnail_img_url"),
                                 rs.getLong("time_id"),
-                                rs.getTime("start_at").toLocalTime()),
+                                rs.getTime("start_at").toLocalTime(),
+                                ReservationStatus.valueOf(rs.getString("status"))),
                 username
         );
     }

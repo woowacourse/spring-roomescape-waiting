@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.User;
 import roomescape.theme.application.dto.ThemeCreateCommand;
 
@@ -54,7 +55,8 @@ public class TestDataHelper {
                 "name", name,
                 "date", date,
                 "theme_id", themeId,
-                "time_id", timeId
+                "time_id", timeId,
+                "status", ReservationStatus.PAYMENT_PENDING.name()
         )).longValue();
     }
 
@@ -103,7 +105,7 @@ public class TestDataHelper {
 
     public Reservation findReservationBySlot(ReservationSlot slot) {
         return jdbcTemplate.queryForObject("""
-                        SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
+                        SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at, r.status
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         WHERE r.date = ?
@@ -121,6 +123,7 @@ public class TestDataHelper {
                                 .timeId(rs.getLong("time_id"))
                                 .startAt(rs.getObject("start_at", LocalTime.class))
                                 .build())
+                        .status(ReservationStatus.valueOf(rs.getString("status")))
                         .build(),
                 slot.date(),
                 slot.themeId(),

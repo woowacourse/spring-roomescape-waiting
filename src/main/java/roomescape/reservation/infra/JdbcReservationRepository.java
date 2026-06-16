@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.repository.ReservationRepository;
 
@@ -30,7 +31,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return jdbcTemplate.query("""
-                            SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
+                            SELECT r.id, r.name, r.date, r.theme_id, r.time_id, r.status, rt.start_at
                             FROM reservation r
                             JOIN reservation_time rt ON r.time_id = rt.id
                             WHERE r.id = ?
@@ -51,6 +52,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                             .id(rs.getLong("id"))
                             .user(user)
                             .slot(slot)
+                            .status(ReservationStatus.valueOf(rs.getString("status")))
                             .build();
                 }
                 , id).stream().findFirst();
@@ -80,8 +82,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("name", reservation.getUserName())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
-                .addValue("time_id", slot.timeId());
-
+                .addValue("time_id", slot.timeId())
+                .addValue("status", reservation.getStatus().name());
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
             return reservation.withId(id);

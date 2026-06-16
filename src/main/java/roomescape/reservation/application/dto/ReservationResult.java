@@ -11,7 +11,7 @@ public record ReservationResult(
         LocalDate date,
         ThemeResult theme,
         ReservationTimeResult time,
-        Status status
+        String status
 ) {
 
     public static ReservationResult confirmed(Reservation reservation, ThemeResult themeResult,
@@ -22,7 +22,7 @@ public record ReservationResult(
                 reservation.getSlot().date(),
                 themeResult,
                 timeResult,
-                Status.CONFIRM
+                reservation.getStatus().name()
         );
     }
 
@@ -41,11 +41,7 @@ public record ReservationResult(
                         reservationDetail.timeId(),
                         reservationDetail.startAt()
                 ),
-                Status.CONFIRM
+                reservationDetail.status().name()
         );
-    }
-
-    public enum Status {
-        CONFIRM
     }
 }

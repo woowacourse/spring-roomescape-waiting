@@ -19,7 +19,6 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
-import roomescape.reservation.application.dto.ReservationResult.Status;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.domain.Reservation;
@@ -59,7 +58,7 @@ class ReservationCommandServiceTest {
             softly.assertThat(result.date()).isEqualTo(request.date());
             softly.assertThat(result.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(result.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
-            softly.assertThat(result.status()).isEqualTo(Status.CONFIRM);
+            softly.assertThat(result.status()).isEqualTo("PAYMENT_PENDING");
         });
     }
 
