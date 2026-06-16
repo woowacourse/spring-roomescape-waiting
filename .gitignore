@@ -18,6 +18,9 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+docs
+.omc
+src/main/java/roomescape/common/log
 mysql-k6-env/**
 .idea
 *.iws
