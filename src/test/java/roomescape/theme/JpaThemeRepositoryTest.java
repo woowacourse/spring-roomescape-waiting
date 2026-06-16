@@ -7,18 +7,18 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.theme.adapter.out.persistence.JdbcThemeRepository;
+import roomescape.theme.adapter.out.persistence.JpaThemeRepository;
 import roomescape.theme.domain.Theme;
 
-@JdbcTest
+@DataJpaTest
 @ActiveProfiles("test")
-@Import(JdbcThemeRepository.class)
-class JdbcThemeRepositoryTest {
+@Import(JpaThemeRepository.class)
+class JpaThemeRepositoryTest {
     @Autowired
-    private JdbcThemeRepository repository;
+    private JpaThemeRepository repository;
 
     @Test
     @DisplayName("테마를 저장할 수 있다.")

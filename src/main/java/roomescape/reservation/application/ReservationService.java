@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.member.application.port.out.MemberRepository;
+import roomescape.member.domain.Member;
 import roomescape.reservation.application.dto.request.ReservationSaveRequest;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.dto.response.ReservationSaveResponse;
@@ -32,17 +34,24 @@ import roomescape.waiting.domain.WaitingPromotionPolicy;
 @RequiredArgsConstructor
 public class ReservationService implements CreateReservationUseCase, FindReservationUseCase, CancelReservationUseCase {
     private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
     private final SlotAssembler slotAssembler;
     private final WaitingPromotionPolicy waitingPromotionPolicy;
     private final Clock clock;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
+        Member member = findMember(memberId);
         Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
         throwIfSlotUnavailableForReservation(slot.getId());
-        Reservation reservation = reservationRepository.save(Reservation.create(memberId, slot));
+        Reservation reservation = reservationRepository.save(Reservation.create(member, slot));
 
         return ReservationSaveResponse.from(reservation);
+    }
+
+    private Member findMember(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.MEMBER_NOT_FOUND, memberId));
     }
 
     private void throwIfSlotUnavailableForReservation(long slotId) {
@@ -127,7 +136,7 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
         return waitingDetails.stream()
                 .map(waitingDetail -> ReservationDetailFindResponse.from(
                         waitingDetail,
-                        waitingOrderOf(memberId, waitingDetail, waitingLines)
+                        waitingOrderOf(waitingDetail, waitingLines)
                 ))
                 .toList();
     }
@@ -142,12 +151,10 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
     }
 
     private long waitingOrderOf(
-            long memberId,
             WaitingDetailProjection waitingDetail,
             WaitingLines waitingLines
     ) {
-        Waiting waiting = Waiting.of(waitingDetail.id(), memberId, waitingDetail.slotId());
-        return waitingLines.orderOf(waiting);
+        return waitingLines.orderOf(waitingDetail.slotId(), waitingDetail.id());
     }
 
     private List<ReservationDetailFindResponse> mergeMyReservations(

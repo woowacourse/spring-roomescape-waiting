@@ -7,8 +7,15 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema.sql
       data-locations: classpath:test-data.sql
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
 
 auth:
   jwt:

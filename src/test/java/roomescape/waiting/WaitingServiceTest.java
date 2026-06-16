@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.member.application.port.out.MemberRepository;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.application.SlotAssembler;
@@ -40,6 +41,9 @@ class WaitingServiceTest {
     private SlotAssembler slotAssembler;
 
     @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
     private WaitingRepository waitingRepository;
 
     @Mock
@@ -53,10 +57,11 @@ class WaitingServiceTest {
     void saves_reservation_waiting_successfully() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
-        Waiting firstWaiting = Waiting.of(8L, 3L, slotId);
-        Waiting secondWaiting = Waiting.of(9L, 2L, slotId);
-        Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
+        Waiting firstWaiting = roomescape.TestFixtures.waiting(8L, 3L, slotId);
+        Waiting secondWaiting = roomescape.TestFixtures.waiting(9L, 2L, slotId);
+        Waiting savedWaiting = roomescape.TestFixtures.waiting(10L, MEMBER_ID, slotId);
 
+        givenMemberExists();
         when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slot(slotId, request));
         when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
@@ -96,6 +101,7 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
 
+        givenMemberExists();
         when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slot(slotId, request));
         when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
@@ -116,6 +122,7 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
 
+        givenMemberExists();
         when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slot(slotId, request));
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
@@ -136,6 +143,7 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 4L, 4L);
         long slotId = 4L;
 
+        givenMemberExists();
         when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slot(slotId, request));
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
@@ -158,8 +166,9 @@ class WaitingServiceTest {
     void reserved_slot_accepts_first_waiting() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
-        Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
+        Waiting savedWaiting = roomescape.TestFixtures.waiting(10L, MEMBER_ID, slotId);
 
+        givenMemberExists();
         when(slotAssembler.assembleExisting(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slot(slotId, request));
         when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
@@ -183,10 +192,15 @@ class WaitingServiceTest {
         verify(waitingRepository).save(any(Waiting.class));
     }
 
+    private void givenMemberExists() {
+        when(memberRepository.findById(MEMBER_ID))
+                .thenReturn(Optional.of(roomescape.TestFixtures.member(MEMBER_ID)));
+    }
+
     @Test
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
     void member_cancels_own_waiting_successfully() {
-        Waiting waiting = Waiting.of(1L, 1L, 1L);
+        Waiting waiting = roomescape.TestFixtures.waiting(1L, 1L, 1L);
         when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatCode(() -> waitingService.deleteByIdForUser(1L, 1L))
@@ -198,7 +212,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
     void canceling_other_members_waiting_throws_exception() {
-        Waiting waiting = Waiting.of(1L, 1L, 1L);
+        Waiting waiting = roomescape.TestFixtures.waiting(1L, 1L, 1L);
         when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatThrownBy(() -> waitingService.deleteByIdForUser(1L, 2L))

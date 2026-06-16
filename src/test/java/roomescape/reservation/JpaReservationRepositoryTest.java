@@ -10,30 +10,30 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.reservation.adapter.out.persistence.JdbcReservationRepository;
+import roomescape.reservation.adapter.out.persistence.JpaReservationRepository;
 import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 
-@JdbcTest
+@DataJpaTest
 @ActiveProfiles("test")
-@Import(JdbcReservationRepository.class)
-class JdbcReservationRepositoryTest {
+@Import(JpaReservationRepository.class)
+class JpaReservationRepositoryTest {
 
     private static final long MEMBER_ID = 1L;
 
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private JpaReservationRepository reservationRepository;
 
     @Test
     @DisplayName("예약을 저장할 수 있다.")
     void saves_reservation_successfully() {
-        Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
+        Reservation reservation = Reservation.create(roomescape.TestFixtures.member(MEMBER_ID), slot(4L));
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -57,7 +57,7 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("전체 예약 상세를 조회할 수 있다.")
     void finds_all_reservation_details_successfully() {
-        Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
+        Reservation reservation = Reservation.create(roomescape.TestFixtures.member(MEMBER_ID), slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
         List<ReservationDetailProjection> reservations = reservationRepository.findAll();
@@ -70,7 +70,7 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("예약을 삭제할 수 있다.")
     void deletes_reservation_successfully() {
-        Reservation reservation = Reservation.create(MEMBER_ID, slot(4L));
+        Reservation reservation = Reservation.create(roomescape.TestFixtures.member(MEMBER_ID), slot(4L));
         Reservation savedReservation = reservationRepository.save(reservation);
 
         reservationRepository.deleteById(savedReservation.getId());

@@ -25,6 +25,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
+import roomescape.member.application.port.out.MemberRepository;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.application.port.out.ReservationRepository;
@@ -50,6 +51,8 @@ class ReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
+    private MemberRepository memberRepository;
+    @Mock
     private SlotAssembler slotAssembler;
     @Mock
     private WaitingRepository waitingRepository;
@@ -61,6 +64,7 @@ class ReservationServiceTest {
     void setUp() {
         reservationService = new ReservationService(
                 reservationRepository,
+                memberRepository,
                 waitingRepository,
                 slotAssembler,
                 waitingPromotionPolicy,
@@ -79,10 +83,10 @@ class ReservationServiceTest {
                 .thenReturn(List.of(firstWaitingDetail, secondWaitingDetail));
         when(waitingRepository.findAllBySlotIds(List.of(10L, 20L)))
                 .thenReturn(List.of(
-                        Waiting.of(11L, MEMBER_ID, 10L),
-                        Waiting.of(9L, OTHER_MEMBER_ID, 10L),
-                        Waiting.of(22L, MEMBER_ID, 20L),
-                        Waiting.of(21L, OTHER_MEMBER_ID, 20L)
+                        roomescape.TestFixtures.waiting(11L, MEMBER_ID, 10L),
+                        roomescape.TestFixtures.waiting(9L, OTHER_MEMBER_ID, 10L),
+                        roomescape.TestFixtures.waiting(22L, MEMBER_ID, 20L),
+                        roomescape.TestFixtures.waiting(21L, OTHER_MEMBER_ID, 20L)
                 ));
 
         List<ReservationDetailFindResponse> responses = reservationService.findMyReservations(MEMBER_ID);
@@ -132,7 +136,7 @@ class ReservationServiceTest {
             LocalTime startAt,
             Long slotId
     ) {
-        return Reservation.of(reservationId, memberId, slot(slotId, date, themeId, timeId, startAt));
+        return roomescape.TestFixtures.reservation(reservationId, memberId, slot(slotId, date, themeId, timeId, startAt));
     }
 
     private Slot slot(Long slotId, LocalDate date, Long themeId, Long timeId, LocalTime startAt) {
@@ -180,9 +184,9 @@ class ReservationServiceTest {
         Reservation oldReservation = reservation(
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
         );
-        Waiting firstWaiting = Waiting.of(1L, 2L, oldReservation.getSlotId());
-        Waiting secondWaiting = Waiting.of(2L, 3L, oldReservation.getSlotId());
-        Reservation promotedReservation = Reservation.create(firstWaiting.getMemberId(), oldReservation.getSlot());
+        Waiting firstWaiting = roomescape.TestFixtures.waiting(1L, 2L, oldReservation.getSlotId());
+        Waiting secondWaiting = roomescape.TestFixtures.waiting(2L, 3L, oldReservation.getSlotId());
+        Reservation promotedReservation = Reservation.create(firstWaiting.getMember(), oldReservation.getSlot());
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(waitingRepository.findAllBySlotIdOrderByIdForUpdate(oldReservation.getSlotId()))
@@ -207,8 +211,8 @@ class ReservationServiceTest {
         Reservation oldReservation = reservation(
                 reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0), 10L
         );
-        Waiting firstWaiting = Waiting.of(1L, 2L, oldReservation.getSlotId());
-        Reservation promotedReservation = Reservation.create(firstWaiting.getMemberId(), oldReservation.getSlot());
+        Waiting firstWaiting = roomescape.TestFixtures.waiting(1L, 2L, oldReservation.getSlotId());
+        Reservation promotedReservation = Reservation.create(firstWaiting.getMember(), oldReservation.getSlot());
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(oldReservation));
         when(waitingRepository.findAllBySlotIdOrderByIdForUpdate(oldReservation.getSlotId()))

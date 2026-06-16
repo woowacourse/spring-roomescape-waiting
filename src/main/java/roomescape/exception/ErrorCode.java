@@ -43,6 +43,9 @@ public enum ErrorCode {
     THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "THEME_404", "테마(%d번)이 존재하지 않습니다."),
     THEME_ALREADY_EXIST(HttpStatus.CONFLICT, "THEME_409", "이미 존재하는 테마 입니다"),
 
+    // Member
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_404", "회원(%d번)이 존재하지 않습니다."),
+
     // 요청 값
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "INVALID_INPUT_400", "요청 값이 올바르지 않습니다."),
 

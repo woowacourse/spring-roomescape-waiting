@@ -32,16 +32,20 @@ public class WaitingLine {
     }
 
     public long orderOf(Waiting waiting) {
+        return orderOf(waiting.getId());
+    }
+
+    public long orderOf(Long waitingId) {
         for (int index = 0; index < waitings.size(); index++) {
-            if (hasSameId(waitings.get(index), waiting)) {
+            if (hasSameId(waitings.get(index), waitingId)) {
                 return index + 1L;
             }
         }
         throw new IllegalArgumentException("대기열에 존재하지 않는 대기입니다.");
     }
 
-    private boolean hasSameId(Waiting source, Waiting target) {
-        return source.getId().equals(target.getId());
+    private boolean hasSameId(Waiting source, Long targetId) {
+        return source.getId().equals(targetId);
     }
 
     public Optional<Waiting> first() {

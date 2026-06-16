@@ -14,8 +14,8 @@ public class WaitingLineTest {
     @Test
     @DisplayName("가장 먼저 신청한 대기를 첫 번째 대기로 반환한다.")
     void returns_earliest_waiting_as_first() {
-        Waiting first = Waiting.of(1L, 1L, 1L);
-        Waiting second = Waiting.of(2L, 2L, 1L);
+        Waiting first = roomescape.TestFixtures.waiting(1L, 1L, 1L);
+        Waiting second = roomescape.TestFixtures.waiting(2L, 2L, 1L);
         WaitingLine waitingLine = WaitingLine.of(List.of(first, second));
 
         assertThat(waitingLine.first()).contains(first);
@@ -24,8 +24,8 @@ public class WaitingLineTest {
     @Test
     @DisplayName("대기 순번은 신청 순서 기준으로 계산한다.")
     void calculates_waiting_order_by_request_sequence() {
-        Waiting first = Waiting.of(1L, 1L, 1L);
-        Waiting second = Waiting.of(2L, 2L, 1L);
+        Waiting first = roomescape.TestFixtures.waiting(1L, 1L, 1L);
+        Waiting second = roomescape.TestFixtures.waiting(2L, 2L, 1L);
         WaitingLine waitingLine = WaitingLine.of(List.of(first, second));
 
         assertThat(waitingLine.orderOf(second)).isEqualTo(2);
@@ -42,8 +42,8 @@ public class WaitingLineTest {
     @Test
     @DisplayName("서로 다른 슬롯의 대기로 대기열을 만들 수 없다.")
     void waitings_from_different_slots_cannot_create_waiting_line() {
-        Waiting first = Waiting.of(1L, 1L, 1L);
-        Waiting second = Waiting.of(2L, 2L, 2L);
+        Waiting first = roomescape.TestFixtures.waiting(1L, 1L, 1L);
+        Waiting second = roomescape.TestFixtures.waiting(2L, 2L, 2L);
 
         assertThatThrownBy(() -> WaitingLine.of(List.of(first, second)))
                 .isInstanceOf(IllegalArgumentException.class);
