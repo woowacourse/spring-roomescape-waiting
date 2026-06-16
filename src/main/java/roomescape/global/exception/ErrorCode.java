@@ -33,7 +33,16 @@ public enum ErrorCode {
     THEME_IS_REFERENCED(HttpStatus.UNPROCESSABLE_ENTITY, "예약에 해당하는 시간이 존재합니다."),
 
     // theme slot
-    THEME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "예약 가능한 시간이 존재하지 않습니다.");
+    THEME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "예약 가능한 시간이 존재하지 않습니다."),
+
+    // payment
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.UNPROCESSABLE_ENTITY, "결제 금액이 주문 금액과 일치하지 않습니다."),
+    PAYMENT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 결제입니다."),
+    PAYMENT_CARD_REJECTED(HttpStatus.FORBIDDEN, "카드 결제가 거절되었습니다."),
+    PAYMENT_UNAUTHORIZED_KEY(HttpStatus.UNAUTHORIZED, "결제 인증 키가 유효하지 않습니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
+    PAYMENT_TOSS_INTERNAL_ERROR(HttpStatus.BAD_GATEWAY, "결제 서버 내부 오류입니다. 잠시 후 재시도해 주세요."),
+    PAYMENT_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 알 수 없는 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
