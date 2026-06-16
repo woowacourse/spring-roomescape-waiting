@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.client.TossPaymentException;
 
 @RestControllerAdvice
@@ -28,25 +27,15 @@ public class GlobalExceptionHandler {
                 );
     }
 
-    @ExceptionHandler(TossPaymentException.GatewayConfig.class)
-    public ResponseEntity<ErrorResponse> handleTossGatewayConfig(TossPaymentException.GatewayConfig exception) {
-        log.error("[운영 알람] Toss API 키 설정 오류 code={} message={}", exception.getCode(), exception.getMessage());
-        return ResponseEntity
-                .status(exception.getStatus())
-                .body(ErrorResponse.of(exception.getMessage()));
-    }
-
-    @ExceptionHandler(TossPaymentException.Retryable.class)
-    public ResponseEntity<ErrorResponse> handleTossRetryable(TossPaymentException.Retryable exception) {
-        log.error("[운영 알람] Toss 내부 오류 재시도 초과 code={} message={}", exception.getCode(), exception.getMessage());
-        return ResponseEntity
-                .status(exception.getStatus())
-                .body(ErrorResponse.of(exception.getMessage()));
-    }
-
-    @ExceptionHandler(PaymentGatewayException.class)
-    public ResponseEntity<ErrorResponse> handlePaymentGatewayException(PaymentGatewayException exception) {
-        log.warn("결제 게이트웨이 오류 code={} message={}", exception.getCode(), exception.getMessage());
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException exception) {
+        if (exception instanceof TossPaymentException.GatewayConfig) {
+            log.error("[운영 알람] Toss API 키 설정 오류 code={} message={}", exception.getCode(), exception.getMessage());
+        } else if (exception instanceof TossPaymentException.Retryable) {
+            log.error("[운영 알람] Toss 내부 오류 재시도 초과 code={} message={}", exception.getCode(), exception.getMessage());
+        } else {
+            log.warn("Toss 결제 오류 code={} message={}", exception.getCode(), exception.getMessage());
+        }
         return ResponseEntity
                 .status(exception.getStatus())
                 .body(ErrorResponse.of(exception.getMessage()));

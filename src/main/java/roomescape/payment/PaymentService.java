@@ -12,9 +12,9 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.payment.client.TossPaymentGateway;
+import roomescape.payment.client.dto.TossPaymentResponse;
 import roomescape.payment.dto.CheckoutResult;
 import roomescape.payment.dto.PaymentConfirmResult;
-import roomescape.payment.dto.PaymentResult;
 
 @Service
 public class PaymentService {
@@ -51,10 +51,10 @@ public class PaymentService {
         if (amount != reservation.getTheme().getPrice()) {
             throw new RoomescapeException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
-        PaymentResult paymentResult = tossPaymentGateway.confirm(paymentKey, orderId, amount);
+        TossPaymentResponse tossResponse = tossPaymentGateway.confirm(paymentKey, orderId, amount);
         try {
-            ReservationResponse result = reservationService.confirmPayment(orderId, paymentResult);
-            return new PaymentConfirmResult(paymentResult, result);
+            ReservationResponse result = reservationService.confirmPayment(orderId, tossResponse);
+            return new PaymentConfirmResult(tossResponse, result);
         } catch (RoomescapeException e) {
             tossPaymentGateway.cancel(paymentKey, "예약 확정 실패");
             throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRM_FAILED);
