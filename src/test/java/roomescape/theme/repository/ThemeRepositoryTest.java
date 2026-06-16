@@ -13,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.repository.projection.PopularThemeResult;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ThemeRepositoryTest {
 
     @Autowired

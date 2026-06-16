@@ -19,7 +19,7 @@ import roomescape.date.exception.ReservationDateException;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.ReservationDateRepository;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ReservationDateServiceTest {
 
     private static final LocalDate DEFAULT_DATE = LocalDate.of(2099, 1, 1);

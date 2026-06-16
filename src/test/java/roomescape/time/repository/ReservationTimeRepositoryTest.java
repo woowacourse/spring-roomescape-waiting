@@ -20,7 +20,7 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ReservationTimeRepositoryTest {
 
     @Autowired

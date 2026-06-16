@@ -27,7 +27,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 import roomescape.time.repository.ReservationTimeRepository;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ReservationRepositoryTest {
 
     private final String name = "한다";

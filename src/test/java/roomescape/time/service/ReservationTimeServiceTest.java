@@ -22,7 +22,7 @@ import roomescape.time.exception.ReservationTimeException;
 import roomescape.time.fixture.ReservationTimeFixture;
 import roomescape.time.repository.ReservationTimeRepository;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ReservationTimeServiceTest {
 
     @Autowired

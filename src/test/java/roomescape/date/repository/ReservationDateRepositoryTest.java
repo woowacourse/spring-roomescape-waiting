@@ -13,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ReservationDateRepositoryTest {
 
     @Autowired

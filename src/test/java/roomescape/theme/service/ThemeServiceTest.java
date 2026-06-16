@@ -20,7 +20,7 @@ import roomescape.theme.exception.ThemeException;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.theme.repository.ThemeRepository;
 
-@DataJpaTest
+@DataJpaTest(showSql = false)
 class ThemeServiceTest {
 
     private final String name = "테마1";
