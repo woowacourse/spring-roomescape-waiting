@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,6 +18,7 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
+import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
@@ -24,6 +26,8 @@ import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
+import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -37,8 +41,14 @@ class ReservationCommandServiceTest {
     @Autowired
     private ReservationCommandService reservationCommandService;
 
+    @Autowired
+    private ReservationRepository reservationRepository;
+
     @MockitoSpyBean
     private WaitingRepository waitingRepository;
+
+    @MockitoSpyBean
+    private PaymentOrderRepository orderRepository;
 
     @Autowired
     private TestDataHelper testHelper;
@@ -59,6 +69,9 @@ class ReservationCommandServiceTest {
             softly.assertThat(result.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(result.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
             softly.assertThat(result.status()).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(result.payment()).isNotNull();
+            softly.assertThat(result.payment().orderId()).startsWith("order-");
+            softly.assertThat(result.payment().amount()).isEqualTo(50_000L);
         });
     }
 
@@ -260,6 +273,24 @@ class ReservationCommandServiceTest {
         assertThatThrownBy(() -> reservationCommandService.save(request))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("이미 해당 날짜와 시간에 예약이 존재합니다.");
+    }
+
+    @DisplayName("결제 주문 저장 중 유니크 제약 위반 시 예약 생성 예외를 테스트합니다.")
+    @Test
+    void save_reservation_payment_order_unique_constraint_exception() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        ReservationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+
+        doThrow(new UniqueConstraintViolationException(new RuntimeException()))
+                .when(orderRepository)
+                .save(any());
+
+        assertThatThrownBy(() -> reservationCommandService.save(request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("결제 주문 생성에 실패했습니다. 다시 시도해주세요.");
+
+        assertThat(reservationRepository.existsBySlot(request.toSlot(LocalTime.of(10, 0)))).isFalse();
     }
 
     @DisplayName("확정 예약 삭제 시 예약 대기의 확정 예약으로의 승격을 테스트합니다.")

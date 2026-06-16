@@ -12,9 +12,11 @@ import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.domain.PaymentOrder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -29,10 +31,13 @@ import roomescape.theme.domain.repository.ThemeRepository;
 @Service
 public class ReservationCommandService {
 
+    private static final Long DEFAULT_AMOUNT = 50_000L;
+
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentOrderRepository orderRepository;
 
     public ReservationResult save(ReservationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -45,10 +50,13 @@ public class ReservationCommandService {
         Reservation reservation = request.toReservation(slot);
 
         Reservation savedReservation = saveReservation(reservation);
-        return ReservationResult.confirmed(
+        PaymentOrder savedOrder = savePaymentOrder(savedReservation);
+
+        return ReservationResult.paymentPending(
                 savedReservation,
                 ThemeResult.from(theme),
-                ReservationTimeResult.from(time)
+                ReservationTimeResult.from(time),
+                savedOrder
         );
     }
 
@@ -105,8 +113,20 @@ public class ReservationCommandService {
             waitingRepository.delete(waiting.getId());
             waitingRepository.rebalanceRank(waiting.getSlot(), waiting.getRank());
 
-            saveReservation(Reservation.create(waiting.getUser(), waiting.getSlot(), now));
+            Reservation promotedReservation = saveReservation(
+                    Reservation.create(waiting.getUser(), waiting.getSlot(), now)
+            );
+            savePaymentOrder(promotedReservation);
         });
+    }
+
+    private PaymentOrder savePaymentOrder(Reservation reservation) {
+        try {
+            PaymentOrder order = PaymentOrder.create(reservation.getId(), DEFAULT_AMOUNT);
+            return orderRepository.save(order);
+        } catch (UniqueConstraintViolationException e) {
+            throw new ConflictException("결제 주문 생성에 실패했습니다. 다시 시도해주세요.");
+        }
     }
 
     private Reservation saveReservation(Reservation reservation) {

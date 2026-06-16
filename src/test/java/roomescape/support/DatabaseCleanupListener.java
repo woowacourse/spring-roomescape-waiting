@@ -19,6 +19,7 @@ public class DatabaseCleanupListener extends AbstractTestExecutionListener {
         JdbcTemplate jdbcTemplate = testContext.getApplicationContext()
                 .getBean(JdbcTemplate.class);
 
+        jdbcTemplate.update("DELETE FROM payment_order");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM waiting");
         jdbcTemplate.update("DELETE FROM reservation_time");

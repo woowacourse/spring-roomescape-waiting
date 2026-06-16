@@ -13,7 +13,8 @@ public record ReservationResponse(
         LocalDate date,
         ThemeResponse theme,
         ReservationTimeResponse time,
-        String status
+        String status,
+        PaymentReadyResponse payment
 ) {
     public static ReservationResponse from(ReservationResult result) {
         return new ReservationResponse(
@@ -22,7 +23,8 @@ public record ReservationResponse(
                 result.date(),
                 ThemeResponse.from(result.theme()),
                 ReservationTimeResponse.from(result.time()),
-                result.status()
+                result.status(),
+                PaymentReadyResponse.from(result.payment())
         );
     }
 }

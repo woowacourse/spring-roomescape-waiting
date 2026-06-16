@@ -3,6 +3,7 @@ package roomescape.reservation;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.startsWith;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -46,7 +47,9 @@ class ReservationApiTest {
                 .body("time.startAt", equalTo("09:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
                 .body("theme.name", equalTo("공포 테마"))
-                .body("status", equalTo("PAYMENT_PENDING"));
+                .body("status", equalTo("PAYMENT_PENDING"))
+                .body("payment.orderId", startsWith("order-"))
+                .body("payment.amount", equalTo(50_000));
     }
 
     @DisplayName("방탈출 예약 삭제 API를 테스트합니다.")

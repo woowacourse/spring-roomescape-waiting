@@ -13,5 +13,7 @@ public record ReservationDetail(Long reservationId,
                                 String thumbnailImgUrl,
                                 Long timeId,
                                 LocalTime startAt,
-                                ReservationStatus status) {
+                                ReservationStatus status,
+                                String orderId,
+                                Long amount) {
 }
