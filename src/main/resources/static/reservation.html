@@ -266,19 +266,32 @@
         if (!date) { showToast('날짜를 선택해주세요', true); return; }
         if (!selectedThemeId || !selectedTimeId) { showToast('테마와 시간을 선택해주세요', true); return; }
 
+        const orderId = crypto.randomUUID();
+
         try {
-            const res = await fetch('/reservations', {
+            const prepareRes = await fetch('/payments/prepare', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, date, timeId: selectedTimeId, themeId: selectedThemeId })
+                body: JSON.stringify({
+                    orderId,
+                    amount: RESERVATION_AMOUNT,
+                    name,
+                    date,
+                    timeId: selectedTimeId,
+                    themeId: selectedThemeId
+                })
             });
-            if (res.ok) {
-                showToast('예약이 완료되었습니다!');
-                loadTimes();
-            } else {
-                const err = await res.json();
-                showToast(err.message || '예약에 실패했습니다', true);
+            if (!prepareRes.ok) {
+                showToast('결제 준비에 실패했습니다', true);
+                return;
             }
+
+            await widgets.requestPayment({
+                orderId,
+                orderName: '방탈출 예약',
+                successUrl: window.location.origin + '/payment/success',
+                failUrl: window.location.origin + '/payment/fail',
+            });
         } catch (e) {
             showToast('오류가 발생했습니다', true);
         }
