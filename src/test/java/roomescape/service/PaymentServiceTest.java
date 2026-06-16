@@ -104,4 +104,28 @@ class PaymentServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage("예약이 존재하지 않습니다.");
     }
+
+    @Test
+    @DisplayName("결제 실패 처리 시 해당 orderId의 예약이 CANCELLED 상태가 된다.")
+    void handlePaymentFail_withValidOrderId_cancelsReservation() {
+        Reservation reservation = pendingReservation("order-123", 10000L);
+
+        paymentService.handlePaymentFail("order-123");
+
+        assertThat(fakeReservationRepository.findById(reservation.getId()).get().isCancelled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("orderId가 null이면 결제 실패 처리 시 아무것도 하지 않는다.")
+    void handlePaymentFail_withNullOrderId_doesNothing() {
+        paymentService.handlePaymentFail(null);
+        // 예외 없이 정상 종료
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 orderId로 결제 실패 처리 시 조용히 무시된다.")
+    void handlePaymentFail_withUnknownOrderId_doesNothing() {
+        paymentService.handlePaymentFail("nonexistent-order");
+        // 예외 없이 정상 종료
+    }
 }
