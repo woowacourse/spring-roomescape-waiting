@@ -30,4 +30,14 @@ public class PageController {
     public String adminPage() {
         return "admin";
     }
+
+    @GetMapping("/payment/success")
+    public String paymentSuccessPage() {
+        return "payment-success";
+    }
+
+    @GetMapping("/payment/fail")
+    public String paymentFailPage() {
+        return "payment-fail";
+    }
 }

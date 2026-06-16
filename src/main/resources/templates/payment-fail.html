@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 실패 - ENIGMA ROOMS</title>
+    <link rel="stylesheet" href="/css/user.css">
+    <style>
+        .status-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 40px;
+            background: #0b0d10;
+            border: 1px solid rgba(226, 90, 90, 0.3);
+            border-radius: 14px;
+        }
+        .status-container h1 {
+            color: #e25a5a;
+            margin-bottom: 20px;
+        }
+        .status-container p {
+            color: #b5b5b5;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <h1>결제 실패</h1>
+        <p id="fail-message">결제 중 오류가 발생했습니다.</p>
+        <p id="fail-code" style="font-size: 14px; color: #888;"></p>
+        <button class="primary-button" onclick="location.href='/reservation'">다시 시도하기</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get("message");
+            const code = urlParams.get("code");
+
+            if (message) {
+                document.getElementById("fail-message").textContent = message;
+            }
+            if (code) {
+                document.getElementById("fail-code").textContent = `에러 코드: ${code}`;
+            }
+        });
+    </script>
+</body>
+</html>

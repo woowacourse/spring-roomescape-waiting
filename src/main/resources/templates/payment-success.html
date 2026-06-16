@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 성공 - ENIGMA ROOMS</title>
+    <link rel="stylesheet" href="/css/user.css">
+    <style>
+        .status-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 40px;
+            background: #0b0d10;
+            border: 1px solid rgba(210, 180, 76, 0.3);
+            border-radius: 14px;
+        }
+        .status-container h1 {
+            color: #d2b44c;
+            margin-bottom: 20px;
+        }
+        .status-container p {
+            color: #b5b5b5;
+            margin-bottom: 30px;
+        }
+        .loader {
+            border: 4px solid #1a1a1a;
+            border-top: 4px solid #d2b44c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <div id="loading">
+            <div class="loader"></div>
+            <h1>결제 승인 중...</h1>
+            <p>잠시만 기다려주세요. 결제를 확인하고 있습니다.</p>
+        </div>
+        <div id="error" style="display: none;">
+            <h1 style="color: #e25a5a;">결제 승인 실패</h1>
+            <p id="error-message">오류가 발생했습니다.</p>
+            <button class="primary-button" onclick="location.href='/reservation'">예약 페이지로 돌아가기</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentKey = urlParams.get("paymentKey");
+            const orderId = urlParams.get("orderId");
+            const amount = urlParams.get("amount");
+
+            if (!paymentKey || !orderId || !amount) {
+                showError("결제 정보가 부족합니다.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/member/payments/confirm", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
+                    },
+                    body: JSON.stringify({
+                        paymentKey,
+                        orderId,
+                        amount: Number(amount)
+                    })
+                });
+
+                if (response.ok) {
+                    alert("결제가 완료되었습니다!");
+                    location.href = "/reservation-lookup";
+                } else {
+                    const errorData = await response.json();
+                    showError(errorData.message || "결제 승인에 실패했습니다.");
+                }
+            } catch (e) {
+                showError("서버 통신 중 오류가 발생했습니다.");
+            }
+        });
+
+        function showError(message) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("error").style.display = "block";
+            document.getElementById("error-message").textContent = message;
+        }
+    </script>
+</body>
+</html>

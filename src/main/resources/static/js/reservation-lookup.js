@@ -92,6 +92,8 @@ function renderReservations(reservations) {
 
         const isCanceled = reservation.status === "CANCELED";
         const isWaiting = reservation.status === "WAITING";
+        const isPendingPayment = reservation.status === "PENDING_PAYMENT";
+
         const waitingTurnText = isWaiting && reservation.waitingTurn
             ? `<p>대기 순번: ${reservation.waitingTurn}번째</p>`
             : "";
@@ -116,7 +118,7 @@ function renderReservations(reservations) {
                     <button
                         class="reschedule-button"
                         type="button"
-                        ${isCanceled ? "style='display: none;'" : ""}
+                        ${(isCanceled || isPendingPayment) ? "style='display: none;'" : ""}
                     >
                         예약 변경
                     </button>
@@ -139,9 +141,11 @@ function renderReservations(reservations) {
                 await cancelReservation(reservation.slotId, reservation.id);
             });
 
-            rescheduleButton.addEventListener("click", () => {
-                openRescheduleModal(reservation);
-            });
+            if (!isPendingPayment) {
+                rescheduleButton.addEventListener("click", () => {
+                    openRescheduleModal(reservation);
+                });
+            }
         }
 
         reservationResultList.appendChild(article);
@@ -310,6 +314,9 @@ function formatStatus(status) {
     }
     if (status === "CANCELED") {
         return "예약 취소";
+    }
+    if (status === "PENDING_PAYMENT") {
+        return "결제 대기";
     }
     return status;
 }

@@ -62,6 +62,11 @@ let selectedDate = null;
 let selectedTheme = null;
 let selectedTime = null;
 
+// Toss Payments Widget Initialization
+const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+const customerKey = Math.random().toString(36).substring(2, 12);
+let paymentWidget = null;
+
 async function authFetch(url, options = {}) {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -82,6 +87,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         location.href = "/";
         return;
     }
+
+    // Initialize Toss PaymentWidget
+    if (typeof PaymentWidget !== "undefined") {
+        paymentWidget = PaymentWidget(clientKey, customerKey);
+    }
+
     await loadThemes();
     await loadPopularThemes();
 });
@@ -121,7 +132,10 @@ async function loadPopularThemes() {
             <img src="${theme.thumbnailUrl}" alt="${theme.name}">
             <div class="popular-rank-badge">${index + 1}</div>
             <div class="popular-theme-content">
-                <h3>${theme.name}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>${theme.name}</h3>
+                    <span class="popular-theme-price">${theme.amount?.toLocaleString() || 0}원</span>
+                </div>
                 <p>${theme.description}</p>
             </div>
         `;
@@ -155,11 +169,15 @@ async function loadThemes() {
         article.dataset.themeName = theme.name;
         article.dataset.themeDescription = theme.description;
         article.dataset.themeThumbnailUrl = theme.thumbnailUrl;
+        article.dataset.themeAmount = theme.amount;
 
         article.innerHTML = `
             <img src="${theme.thumbnailUrl}" alt="${theme.name}">
             <div class="theme-card-content">
-                <h3>${theme.name}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>${theme.name}</h3>
+                    <span class="theme-price">${theme.amount?.toLocaleString() || 0}원</span>
+                </div>
                 <p>${theme.description}</p>
             </div>
         `;
@@ -296,8 +314,50 @@ async function createReservation() {
         return;
     }
 
-    alert("예약이 완료되었습니다.");
-    location.href = "/reservation-lookup";
+    const reservationData = await response.json();
+
+    if (reservationData.status === "PENDING_PAYMENT") {
+        openPaymentModal(reservationData);
+    } else {
+        alert("예약이 완료되었습니다.");
+        location.href = "/reservation-lookup";
+    }
+}
+
+function openPaymentModal(reservation) {
+    const paymentModal = document.getElementById("payment-modal");
+    paymentModal.style.display = "block";
+
+    if (!paymentWidget) {
+        alert("결제 위젯을 초기화할 수 없습니다. 잠시 후 다시 시도해주세요.");
+        return;
+    }
+
+    paymentWidget.renderPaymentMethods("#payment-method", { value: reservation.amount });
+    paymentWidget.renderAgreement("#agreement");
+
+    const paymentButton = document.getElementById("payment-button");
+    paymentButton.onclick = async () => {
+        try {
+            await paymentWidget.requestPayment({
+                orderId: reservation.orderId,
+                orderName: reservation.themeName,
+                successUrl: window.location.origin + "/payment/success",
+                failUrl: window.location.origin + "/payment/fail",
+                customerName: reservation.name
+            });
+        } catch (error) {
+            if (error.code === "USER_CANCEL") {
+                // User closed the payment window
+            } else {
+                alert(error.message);
+            }
+        }
+    };
+}
+
+function closePaymentModal() {
+    document.getElementById("payment-modal").style.display = "none";
 }
 
 function logout() {

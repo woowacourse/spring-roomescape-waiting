@@ -25,8 +25,6 @@ import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private static final long RESERVATION_AMOUNT = 1000L;
-
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final PaymentService paymentService;
@@ -46,7 +44,7 @@ public class ReservationService {
         Reservation saved = reservationRepository.save(reservation);
 
         if (saved.isPendingPayment()) {
-            Order order = paymentService.createOrder(saved.getId(), RESERVATION_AMOUNT);
+            Order order = paymentService.createOrder(saved.getId(), slot.getTheme().getAmount());
             return ReservationWithSlotDetailDto.of(saved, slot, order);
         }
 
