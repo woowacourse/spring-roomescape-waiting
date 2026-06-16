@@ -46,10 +46,10 @@ public class TossPaymentGateway implements PaymentGateway {
     public PaymentResult confirm(String paymentKey, String orderId, long amount) {
         try {
             return Objects.requireNonNull(restClient.post().uri("/v1/payments/confirm")
-                    .body(new TossConfirmRequest(paymentKey, orderId, amount))
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, (request, response) -> handleConfirmError(response))
-                    .body(TossConfirmResponse.class))
+                            .body(new TossConfirmRequest(paymentKey, orderId, amount))
+                            .retrieve()
+                            .onStatus(HttpStatusCode::isError, (request, response) -> handleConfirmError(response))
+                            .body(TossConfirmResponse.class))
                     .toPaymentResult();
         } catch (AlreadyProcessedException e) {
             TossConfirmResponse confirmResponse = getPayment(paymentKey);

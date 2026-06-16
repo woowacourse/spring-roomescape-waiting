@@ -12,7 +12,6 @@ public record TossConfirmResponse(
         OffsetDateTime approvedAt
 ) {
 
-    /* 부패 방지 계층(ACL): Toss 응답을 코어 모델로 번역 */
     public PaymentResult toPaymentResult() {
         return new PaymentResult(paymentKey, orderId, totalAmount, mapStatus(status), approvedAt);
     }

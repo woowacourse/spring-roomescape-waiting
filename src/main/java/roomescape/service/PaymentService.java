@@ -34,8 +34,7 @@ public class PaymentService {
         ReservationOrder order = reservationOrderService.getByOrderId(request.orderId());
         order.verifyAmount(request.amount());
 
-        PaymentResult result = paymentGateway.confirm(
-                request.paymentKey(), request.orderId(), request.amount());
+        PaymentResult result = paymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
 
         return transactionTemplate.execute(status -> ReservationResponse.from(complete(order, result.paymentKey())));
     }
