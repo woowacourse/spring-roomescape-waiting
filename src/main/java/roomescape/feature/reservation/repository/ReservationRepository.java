@@ -3,6 +3,7 @@ package roomescape.feature.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.feature.reservation.domain.OrderStatus;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -29,6 +30,8 @@ public interface ReservationRepository {
     Reservation update(Reservation reservation);
 
     void changeStatus(Long id, long version, ReservationStatus from, ReservationStatus to);
+
+    void changeOrderStatus(Long id, long version, OrderStatus from, OrderStatus to);
 
     int countByIdLessThanEqualAndSlot(Long id, SlotKey slotKey);
 

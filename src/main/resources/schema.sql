@@ -27,6 +27,7 @@ CREATE TABLE reservation (
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     status ENUM('ACTIVE', 'CANCELED', 'DELETED', 'WAITING') DEFAULT 'ACTIVE',
+    order_status ENUM('PENDING', 'CONFIRMED') NOT NULL DEFAULT 'PENDING',
     version BIGINT NOT NULL DEFAULT 0,
     active_flag BOOLEAN GENERATED ALWAYS AS (
         CASE WHEN status = 'ACTIVE' THEN true END

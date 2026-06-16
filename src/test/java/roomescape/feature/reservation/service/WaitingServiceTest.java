@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
+import roomescape.feature.payment.PaymentApprover;
 import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
@@ -51,6 +52,8 @@ class WaitingServiceTest {
     @Mock
     private ThemeRepository themeRepository;
     @Mock
+    private PaymentApprover paymentApprover;
+    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     private WaitingService waitingService;
@@ -59,7 +62,7 @@ class WaitingServiceTest {
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         waitingService = new ReservationManagementService(
-            reservationRepository, timeRepository, themeRepository, mapper, eventPublisher);
+            reservationRepository, timeRepository, themeRepository, paymentApprover, mapper, eventPublisher);
     }
 
     private Time timeWithId(Long id) {

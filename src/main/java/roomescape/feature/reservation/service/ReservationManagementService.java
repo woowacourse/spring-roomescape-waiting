@@ -10,6 +10,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.feature.payment.PaymentApprover;
+import roomescape.feature.payment.PaymentException;
+import roomescape.feature.payment.dto.PaymentApproveRequest;
+import roomescape.feature.reservation.domain.OrderStatus;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -41,6 +45,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
+    private final PaymentApprover paymentApprover;
     private final ReservationMapper reservationMapper;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -132,6 +137,22 @@ public class ReservationManagementService implements ReservationService, AdminRe
         eventPublisher.publishEvent(new SlotReleasedEvent(existingReservation.getSlot().toSlotKey()));
 
         return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
+    }
+
+    @Override
+    public void confirmReservation(Long reservationId, PaymentApproveRequest request) {
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(reservationId)
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+        Reservation confirmedReservation = reservation.confirmOrder();
+
+        boolean approved = paymentApprover.approve(request);
+        if (!approved) {
+            throw new IllegalStateException("결제 승인에 실패했습니다.");
+        }
+
+        reservationRepository.changeOrderStatus(
+                reservationId, reservation.getVersion(),
+                reservation.getOrderStatus(), confirmedReservation.getOrderStatus());
     }
 
     @Override
