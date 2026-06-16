@@ -140,6 +140,12 @@
         <p class="placeholder">날짜와 테마를 먼저 선택해주세요</p>
     </div>
 
+    <div id="payment-widget-area" style="display:none; margin-bottom: 24px;">
+        <div class="section-title" style="margin-bottom: 16px;">결제 수단</div>
+        <div id="payment-method"></div>
+        <div id="agreement"></div>
+    </div>
+
     <div id="actionArea" style="display:none;">
         <button class="submit-btn" id="reserveBtn" onclick="submitReservation()">예약하기</button>
         <button class="wait-btn" id="waitBtn" onclick="submitWaiting()" style="display:none;">대기 신청</button>
@@ -148,10 +154,25 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://js.tosspayments.com/v2/standard"></script>
 <script>
     let selectedThemeId = null;
     let selectedTimeId = null;
     let selectedTimeAvailable = false;
+    let widgets = null;
+
+    const RESERVATION_AMOUNT = 50000;
+
+    async function initPaymentWidget() {
+        const tossPayments = TossPayments("test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm");
+        widgets = tossPayments.widgets({ customerKey: crypto.randomUUID() });
+
+        await widgets.setAmount({ currency: "KRW", value: RESERVATION_AMOUNT });
+        await widgets.renderPaymentMethods({ selector: "#payment-method" });
+        await widgets.renderAgreement({ selector: "#agreement" });
+
+        document.getElementById("payment-widget-area").style.display = "block";
+    }
 
     async function loadThemes() {
         try {
@@ -228,9 +249,11 @@
         if (isAvailable) {
             reserveBtn.style.display = 'inline-block';
             waitBtn.style.display = 'none';
+            initPaymentWidget();
         } else {
             reserveBtn.style.display = 'none';
             waitBtn.style.display = 'inline-block';
+            document.getElementById("payment-widget-area").style.display = "none";
         }
     }
 
