@@ -19,5 +19,15 @@
 - [x] #2 `Reservation` → `ReservationTime`, `Theme` 단방향 `@ManyToOne` 매핑
   `time` 필드에 `@ManyToOne @JoinColumn(name = "time_id")`, `theme` 필드에 `@ManyToOne @JoinColumn(name = "theme_id")` 추가. `cascade`, `orphanRemoval` 미적용.
 
-- [ ] #3 양방향 매핑 시도 후 단방향으로 후퇴 (설계 판단 기록)
+- [x] #3 양방향 매핑 시도 후 단방향으로 후퇴 (설계 판단 기록)
   `ReservationTime` 또는 `Theme`에 `@OneToMany(mappedBy = ...)` 추가해 양방향을 의식적으로 시도한다. 무한 직렬화 가능성, 불필요한 컬렉션 노출 등을 검토한 뒤 단방향으로 후퇴하고 이유를 기록한다.
+
+  **시도:** `ReservationTime`에 `@OneToMany(mappedBy = "time") List<Reservation> reservations` 추가.
+
+  **검토 결과 및 단방향 후퇴 근거:**
+  1. **불필요한 컬렉션**: `ReservationTime`은 도메인적으로 자신을 참조하는 예약 목록을 알 필요가 없다. 탐색 방향이 항상 `Reservation → ReservationTime`이지 역방향은 사용처가 없다.
+  2. **무한 직렬화 가능성**: 엔티티를 직접 직렬화하거나 getter를 추가하는 순간 `ReservationTime → Reservation → ReservationTime → ...` 순환 참조로 `StackOverflowError` 발생. `@JsonIgnore`나 `@JsonManagedReference` 없이는 방어 불가.
+  3. **연관관계 주인 혼란**: FK(`time_id`)는 `reservation` 테이블에 있으므로 실제 주인은 `Reservation.time`. `ReservationTime.reservations`를 통해 관계를 조작해도 JPA가 UPDATE를 무시해 의도치 않은 동작 발생 가능.
+  4. **N+1 위험**: `@OneToMany`는 기본 LAZY지만 실수로 접근하면 Reservation 전체를 로딩하는 쿼리가 추가로 발생.
+
+  **결론:** 양방향이 필요한 비즈니스 이유(예: `ReservationTime`에서 예약 목록을 직접 순회해야 하는 유스케이스)가 생길 때까지 단방향 유지.
