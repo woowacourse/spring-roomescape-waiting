@@ -45,9 +45,9 @@ public class ThemeSlot {
         return new ThemeSlot(id, themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.isReserved());
     }
 
-    public Reservation addReservation(String name) {
+    public Reservation addReservation(String name, String orderId, Long amount) {
         reservations.validateDuplicate(name);
-        Reservation reservation = new Reservation(name, this.id, this.date, this.time, this.theme);
+        Reservation reservation = new Reservation(name, this.id, this.date, this.time, this.theme, orderId, amount);
         reservations.add(reservation);
         return reservation;
     }
