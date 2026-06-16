@@ -2,10 +2,9 @@ package roomescape.payment.client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.client.dto.TossErrorResponse;
 
-public class TossPaymentException extends PaymentGatewayException {
+public class TossPaymentException extends RuntimeException {
 
     private final HttpStatusCode status;
     private final String code;
@@ -85,5 +84,4 @@ public class TossPaymentException extends PaymentGatewayException {
             super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
         }
     }
-
 }

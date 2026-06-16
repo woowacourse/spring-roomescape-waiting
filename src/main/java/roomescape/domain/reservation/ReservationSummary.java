@@ -10,8 +10,6 @@ public record ReservationSummary(
         LocalTime startAt,
         String themeName,
         ReservationStatus status,
-        String orderId,
-        String paymentKey,
-        Long amount
+        String orderId
 ) {
 }
