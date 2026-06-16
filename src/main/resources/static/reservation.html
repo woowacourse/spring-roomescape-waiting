@@ -364,19 +364,15 @@
                 throw new Error(data.message || `서버 오류 (${res.status})`);
             }
 
-            // 결제가 필요한 신규 예약: 서버가 발급한 orderId 로 결제 페이지로 이동한다.
-            if (data.orderId) {
-                window.location.href = '/payments/checkout?orderId=' + encodeURIComponent(data.orderId);
+            // 대기 등록이면 결제 없이 안내 후 종료한다.
+            if (data.waitingOrder > 0) {
+                alert(`이미 예약된 시간입니다. 대기 ${data.waitingOrder}번으로 등록되었습니다.`);
+                location.reload();
                 return;
             }
 
-            // orderId 가 없으면 결제 불필요(예: 대기 등록) — 기존 안내를 유지한다.
-            if (data.waitingOrder > 0) {
-                alert(`이미 예약된 시간입니다. 대기 ${data.waitingOrder}번으로 등록되었습니다.`);
-            } else {
-                alert('예약이 완료되었습니다.');
-            }
-            location.reload();
+            // 결제가 필요한 예약: 예약 id 로 결제 페이지로 이동한다(주문 생성은 checkout 핸들러가 담당).
+            window.location.href = '/payments/checkout?reservationId=' + data.id;
         } catch (e) {
             result.innerHTML = `<p class="error">예약에 실패했습니다. ${e.message}</p>`;
             submitBtn.disabled = false;
