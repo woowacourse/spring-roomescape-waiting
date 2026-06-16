@@ -11,7 +11,9 @@ import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.PaymentAmountMismatchException;
 import roomescape.common.exception.UnprocessableEntityException;
+import roomescape.infrastructure.payment.toss.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -80,6 +82,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GlobalErrorResponse> handleNullPointerException(NullPointerException e) {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ResponseEntity<GlobalErrorResponse> handlePaymentAmountMismatchException(PaymentAmountMismatchException e) {
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<GlobalErrorResponse> handleTossPaymentException(TossPaymentException e) {
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(GlobalErrorResponse.from(e.getMessage()));
     }
 }
