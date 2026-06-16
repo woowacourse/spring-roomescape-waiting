@@ -1,10 +1,3 @@
-CREATE TABLE IF NOT EXISTS orders
-(
-    id       VARCHAR(255)       NOT NULL,
-    amount   INT                NOT NULL,
-    PRIMARY KEY (id)
-);
-
 CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
@@ -46,4 +39,13 @@ CREATE TABLE IF NOT EXISTS waiting
     CONSTRAINT uq_waiting_name_date_time_theme UNIQUE (name, date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
-)
+);
+
+CREATE TABLE IF NOT EXISTS orders
+(
+    id             VARCHAR(255) NOT NULL,
+    amount         INT          NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);

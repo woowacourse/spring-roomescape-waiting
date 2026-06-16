@@ -12,6 +12,7 @@ import roomescape.controller.dto.response.ConfirmResponse;
 import roomescape.controller.dto.response.PaymentResponse;
 import roomescape.domain.order.Order;
 import roomescape.domain.order.OrderRepository;
+import roomescape.facade.PaymentReservationFacade;
 import roomescape.infrastructure.payment.toss.TossPaymentException;
 import roomescape.infrastructure.payment.toss.dto.TossErrorResponse;
 import roomescape.service.PaymentService;
@@ -25,23 +26,26 @@ public class PaymentController {
 
     private final OrderRepository orderRepository;
     private final PaymentService paymentService;
+    private final PaymentReservationFacade paymentReservationFacade;
     private final String clientKey;
 
     public PaymentController(
             OrderRepository orderRepository,
             PaymentService paymentService,
+            PaymentReservationFacade paymentReservationFacade,
             @Value("${toss.client-key}") String clientKey
     ) {
         this.orderRepository = orderRepository;
         this.paymentService = paymentService;
+        this.paymentReservationFacade = paymentReservationFacade;
         this.clientKey = clientKey;
     }
 
     @GetMapping
-    public ResponseEntity<PaymentResponse> checkout() {
+    public ResponseEntity<PaymentResponse> checkout(@RequestParam Long reservationId) {
         String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
 
-        orderRepository.save(new Order(orderId, DEFAULT_AMOUNT));
+        orderRepository.save(new Order(orderId, DEFAULT_AMOUNT, reservationId));
 
         PaymentResponse response = new PaymentResponse(
                 clientKey,
@@ -59,7 +63,7 @@ public class PaymentController {
             @RequestParam String orderId,
             @RequestParam Long amount
     ) {
-        PaymentResult result = paymentService.confirm(paymentKey, orderId, amount);
+        PaymentResult result = paymentReservationFacade.confirmPaymentAndReservation(paymentKey, orderId, amount);
 
         ConfirmResponse response = new ConfirmResponse(
                 result.paymentKey(),

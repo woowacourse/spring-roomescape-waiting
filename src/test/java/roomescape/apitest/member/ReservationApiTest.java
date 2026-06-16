@@ -1,6 +1,7 @@
 package roomescape.apitest.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
 import io.restassured.RestAssured;
@@ -9,16 +10,20 @@ import io.restassured.path.json.JsonPath;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.WaitingDetailResponse;
+import roomescape.domain.order.PaymentStatus;
+import roomescape.service.PaymentGateway;
+import roomescape.service.dto.result.PaymentResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -26,16 +31,20 @@ class ReservationApiTest {
     private final String userName = "브라운";
     private final Long timeId = 1L;
     private final Long themeId = 1L;
-    private int initialReservationSize;
+    private int initialTotalSize;
+    private int initialConfirmedSize;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @MockBean
+    private PaymentGateway paymentGateway;
+
     @BeforeEach
     void setUp() {
-        String sql = "SELECT COUNT(*) FROM reservation";
-        Integer result = jdbcTemplate.queryForObject(sql, Integer.class);
-        initialReservationSize = Optional.ofNullable(result).orElse(0);
+        initialTotalSize = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
+        initialConfirmedSize = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE status = 'CONFIRMED'", Integer.class);
     }
 
     @Test
@@ -55,6 +64,23 @@ class ReservationApiTest {
                 .statusCode(201)
                 .extract().jsonPath().getLong("id");
 
+        String dynamicOrderId = "order-" + generatedId;
+        jdbcTemplate.update(
+                "INSERT INTO orders (id, amount, reservation_id) VALUES (?, ?, ?)",
+                dynamicOrderId, 50000, generatedId
+        );
+
+        BDDMockito.given(paymentGateway.confirm(any()))
+                .willReturn(new PaymentResult("mock_payment_key", dynamicOrderId, PaymentStatus.DONE, 50000L));
+
+        RestAssured.given().log().all()
+                .queryParam("paymentKey", "test_payment_key")
+                .queryParam("orderId", dynamicOrderId)
+                .queryParam("amount", 50000)
+                .when().get("/payments/success")
+                .then().log().all()
+                .statusCode(200);
+
         List<Long> allIds = RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
@@ -62,7 +88,7 @@ class ReservationApiTest {
                 .extract().jsonPath().getList("id", Long.class);
 
         assertThat(allIds)
-                .hasSize(initialReservationSize + 1)
+                .hasSize(initialTotalSize + 1)
                 .contains(generatedId);
 
         JsonPath jsonPath = RestAssured.given().log().all()
@@ -75,7 +101,7 @@ class ReservationApiTest {
         List<String> names = jsonPath.getList("reservationResponses.name", String.class);
 
         assertThat(idsByUserName)
-                .hasSize(initialReservationSize + 1)
+                .hasSize(initialConfirmedSize + 1)
                 .contains(generatedId);
 
         assertThat(names).containsOnly(userName);
@@ -91,7 +117,7 @@ class ReservationApiTest {
                 .statusCode(200)
                 .extract().jsonPath().getList("reservationResponses.id", Long.class);
 
-        assertThat(remainIds).hasSize(initialReservationSize);
+        assertThat(remainIds).hasSize(initialConfirmedSize);
         assertThat(remainIds).doesNotContain(generatedId);
     }
 
@@ -161,7 +187,7 @@ class ReservationApiTest {
         int expectedSequence = 1;
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/" + initialReservationSize + "?userName=" + userName)
+                .when().delete("/reservations/" + initialConfirmedSize + "?userName=" + userName)
                 .then().log().all()
                 .statusCode(204);
 

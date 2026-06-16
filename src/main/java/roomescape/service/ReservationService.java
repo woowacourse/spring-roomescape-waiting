@@ -98,10 +98,20 @@ public class ReservationService {
             throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
 
-        Reservation confirmed = pending.confirm();
-        Reservation saved = reservationDao.save(confirmed);
+        Reservation saved = reservationDao.save(pending);
 
         return ReservationResult.from(saved);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ReservationResult confirmReservation(Long id) {
+        Reservation pending = reservationDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
+
+        Reservation confirmed = pending.confirm();
+        reservationDao.update(confirmed);
+
+        return ReservationResult.from(confirmed);
     }
 
     @Transactional(rollbackFor = Exception.class)

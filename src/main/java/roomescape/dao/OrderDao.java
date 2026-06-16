@@ -20,21 +20,22 @@ public class OrderDao implements OrderRepository {
     @Override
     public void save(Order order) {
         String sql = """
-                INSERT INTO orders (id, amount) 
-                VALUES (?, ?)
+                INSERT INTO orders (id, amount, reservation_id) 
+                VALUES (?, ?, ?)
                 """;
 
         jdbcTemplate.update(
                 sql,
                 order.id(),
-                order.amount()
+                order.amount(),
+                order.reservation_id()
         );
     }
 
     @Override
     public Optional<Order> findById(String id) {
         String sql = """
-                SELECT o.id, o.amount
+                SELECT o.id, o.amount, o.reservation_id
                 FROM orders o
                 WHERE o.id = ?
                 """;
