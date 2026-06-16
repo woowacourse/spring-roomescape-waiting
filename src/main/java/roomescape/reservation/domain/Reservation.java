@@ -13,27 +13,58 @@ import static roomescape.reservation.exception.ReservationErrorInformation.RESER
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_TIME_IS_NULL;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
+@Entity(name = "reservation")
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "date_id", nullable = false)
     private ReservationDate date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
+
+    @Column(nullable = false)
     private Long waitingOrder;
 
     public static Reservation reserved(String name, ReservationDate reservationDate,

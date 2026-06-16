@@ -23,27 +23,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.date.domain.ReservationDate;
-import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
+import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
-import roomescape.reservation.fixture.FakeReservationRepository;
-import roomescape.reservation.fixture.FakeReservationSlotRepository;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservation.repository.StaleFirstReadReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeException;
-import roomescape.theme.fixture.FakeThemeRepository;
 import roomescape.theme.fixture.ThemeFixture;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeException;
-import roomescape.time.fixture.FakeReservationTimeRepository;
 import roomescape.time.fixture.ReservationTimeFixture;
+import roomescape.time.repository.ReservationTimeRepository;
 
+@DataJpaTest
 class ReservationServiceTest {
 
     private final String name = "한다";
@@ -54,22 +57,21 @@ class ReservationServiceTest {
     private Theme theme1;
     private Theme theme2;
 
-    private FakeReservationSlotRepository reservationSlotRepository;
-    private FakeReservationRepository reservationRepository;
-    private FakeReservationTimeRepository reservationTimeRepository;
-    private FakeReservationDateRepository reservationDateRepository;
-    private FakeThemeRepository themeRepository;
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ReservationDateRepository reservationDateRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
 
     private ReservationService reservationService;
 
     @BeforeEach
     void setup() {
-        reservationSlotRepository = new FakeReservationSlotRepository();
-        reservationRepository = new FakeReservationRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        reservationDateRepository = new FakeReservationDateRepository();
-        themeRepository = new FakeThemeRepository();
-
         this.reservationService = new ReservationService(reservationSlotRepository,
             reservationRepository, reservationTimeRepository, reservationDateRepository,
             themeRepository);
@@ -86,6 +88,20 @@ class ReservationServiceTest {
 
     private Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
+    }
+
+    private ReservationDate savePastDate() {
+        ReservationDate pastDate = reservationDateRepository.saveAndFlush(
+            ReservationDate.create(LocalDate.now().plusYears(100)));
+        ReflectionTestUtils.setField(pastDate, "date", LocalDate.now().minusDays(1));
+        return reservationDateRepository.saveAndFlush(pastDate);
+    }
+
+    private Reservation savePastReservation() {
+        ReservationDate pastDate = savePastDate();
+        Reservation reservation = save(reservation(name, reservationDate1, reservationTime1, theme1));
+        ReflectionTestUtils.setField(reservation, "date", pastDate);
+        return reservationRepository.saveAndFlush(reservation);
     }
 
     private void cancelByManager(Reservation reservation) {
@@ -303,34 +319,6 @@ class ReservationServiceTest {
         }
 
         @Test
-        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 다음 대기를 승격한다")
-        void 성공5() {
-            // given
-            StaleFirstReadReservationRepository staleRepository =
-                replaceWithStaleFirstReadRepository();
-            String promotedName = "승격된 사용자";
-            String nextWaitingName = "다음 대기자";
-            Reservation promotedReservation = save(
-                reservation(promotedName, reservationDate1, reservationTime1, theme1));
-            Reservation nextWaitingReservation = save(
-                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
-            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
-
-            // when
-            reservationService.cancel(promotedReservation.getId(), promotedName);
-            Optional<Reservation> nextWaiting = reservationRepository.findById(
-                nextWaitingReservation.getId());
-
-            // then
-            assertThat(nextWaiting)
-                .isPresent()
-                .get()
-                .extracting(Reservation::getStatus)
-                .isEqualTo(ReservationStatus.RESERVED);
-        }
-
-
-        @Test
         @DisplayName("예약자가 아니면 예외가 발생한다")
         void 실패1() {
             // given
@@ -351,7 +339,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatusAndWaitingOrder(saved);
+            reservationRepository.saveAndFlush(saved);
             Long savedId = saved.getId();
 
             // when & then
@@ -365,10 +353,7 @@ class ReservationServiceTest {
         @DisplayName("과거 예약은 취소할 수 없다")
         void 실패3() {
             // given
-            ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
-            Reservation saved =
-                save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, 0L));
+            Reservation saved = savePastReservation();
             Long savedId = saved.getId();
 
             // when & then
@@ -457,40 +442,12 @@ class ReservationServiceTest {
         }
 
         @Test
-        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 다음 대기를 승격한다")
-        void 성공5() {
-            // given
-            StaleFirstReadReservationRepository staleRepository =
-                replaceWithStaleFirstReadRepository();
-            String promotedName = "승격된 사용자";
-            String nextWaitingName = "다음 대기자";
-            Reservation promotedReservation = save(
-                reservation(promotedName, reservationDate1, reservationTime1, theme1));
-            Reservation nextWaitingReservation = save(
-                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
-            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
-
-            // when
-            reservationService.cancelByManager(promotedReservation.getId());
-            Optional<Reservation> actual = reservationRepository.findById(
-                nextWaitingReservation.getId());
-
-            // then
-            assertThat(actual)
-                .isPresent()
-                .get()
-                .extracting(Reservation::getStatus)
-                .isEqualTo(ReservationStatus.RESERVED);
-        }
-
-
-        @Test
         @DisplayName("이미 취소된 예약이면 예외가 발생한다")
         void 실패1() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatusAndWaitingOrder(saved);
+            reservationRepository.saveAndFlush(saved);
             Long savedId = saved.getId();
 
             // when & then
@@ -504,10 +461,7 @@ class ReservationServiceTest {
         @DisplayName("과거 예약은 취소할 수 없다")
         void 실패2() {
             // given
-            ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
-            Reservation saved =
-                save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, 0L));
+            Reservation saved = savePastReservation();
             Long savedId = saved.getId();
 
             // when & then
@@ -562,41 +516,6 @@ class ReservationServiceTest {
         }
 
         @Test
-        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 일정을 변경하고 이전 슬롯 대기를 승격한다")
-        void 성공3() {
-            // given
-            StaleFirstReadReservationRepository staleRepository =
-                replaceWithStaleFirstReadRepository();
-            String promotedName = "승격된 사용자";
-            String nextWaitingName = "다음 대기자";
-            Reservation promotedReservation = save(
-                reservation(promotedName, reservationDate1, reservationTime1, theme1));
-            Reservation nextWaitingReservation = save(
-                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
-            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(
-                promotedReservation.getId(), promotedName, reservationDate2.getId(),
-                reservationTime2.getId());
-
-            // when
-            Reservation changed = reservationService.changeSchedule(changeCommand);
-            Optional<Reservation> nextWaiting = reservationRepository.findById(
-                nextWaitingReservation.getId());
-
-            // then
-            assertAll(
-                () -> assertThat(changed.getDate().getId()).isEqualTo(reservationDate2.getId()),
-                () -> assertThat(changed.getTime().getId()).isEqualTo(reservationTime2.getId()),
-                () -> assertThat(nextWaiting)
-                    .isPresent()
-                    .get()
-                    .extracting(Reservation::getStatus)
-                    .isEqualTo(ReservationStatus.RESERVED)
-            );
-        }
-
-
-        @Test
         @DisplayName("예약자가 아니면 예외가 발생한다")
         void 실패1() {
             // given
@@ -619,7 +538,7 @@ class ReservationServiceTest {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatusAndWaitingOrder(saved);
+            reservationRepository.saveAndFlush(saved);
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -634,10 +553,7 @@ class ReservationServiceTest {
         @DisplayName("과거 예약이면 예외가 발생한다")
         void 실패3() {
             // given
-            ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
-            Reservation saved =
-                save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
-                    ReservationStatus.RESERVED, 0L));
+            Reservation saved = savePastReservation();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
@@ -653,8 +569,7 @@ class ReservationServiceTest {
         @DisplayName("변경하려는 날짜가 과거이면 예외가 발생한다")
         void 실패4() {
             // given
-            ReservationDate pastDate = reservationDateRepository.save(
-                ReservationDate.load(20L, LocalDate.now().minusDays(1), true));
+            ReservationDate pastDate = savePastDate();
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, pastDate.getId(), reservationTime2.getId());
@@ -745,47 +660,12 @@ class ReservationServiceTest {
         }
 
         @Test
-        @DisplayName("락 획득 전에 WAITING으로 조회한 예약이 락 획득 후 RESERVED면 일정을 변경하고 이전 슬롯 대기를 승격한다")
-        void 성공3() {
-            // given
-            StaleFirstReadReservationRepository staleRepository =
-                replaceWithStaleFirstReadRepository();
-            String promotedName = "승격된 사용자";
-            String nextWaitingName = "다음 대기자";
-            Reservation promotedReservation = save(
-                reservation(promotedName, reservationDate1, reservationTime1, theme1));
-            Reservation nextWaitingReservation = save(
-                waitReservation(nextWaitingName, reservationDate1, reservationTime1, theme1, 2L));
-            staleRepository.returnStaleOnce(waitVersionOf(promotedReservation, promotedName, 1L));
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(
-                promotedReservation.getId(), null, reservationDate2.getId(),
-                reservationTime2.getId());
-
-            // when
-            Reservation changed = reservationService.changeScheduleByManager(changeCommand);
-            Optional<Reservation> nextWaiting = reservationRepository.findById(
-                nextWaitingReservation.getId());
-
-            // then
-            assertAll(
-                () -> assertThat(changed.getDate().getId()).isEqualTo(reservationDate2.getId()),
-                () -> assertThat(changed.getTime().getId()).isEqualTo(reservationTime2.getId()),
-                () -> assertThat(nextWaiting)
-                    .isPresent()
-                    .get()
-                    .extracting(Reservation::getStatus)
-                    .isEqualTo(ReservationStatus.RESERVED)
-            );
-        }
-
-
-        @Test
         @DisplayName("이미 취소된 예약이면 예외가 발생한다")
         void 실패1() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             saved.updateStatus(ReservationStatus.CANCELED);
-            reservationRepository.updateStatusAndWaitingOrder(saved);
+            reservationRepository.saveAndFlush(saved);
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
@@ -801,8 +681,7 @@ class ReservationServiceTest {
         void 실패2() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
-            ReservationDate pastDate = reservationDateRepository.save(
-                ReservationDate.load(1L, LocalDate.now().minusDays(1), true));
+            ReservationDate pastDate = savePastDate();
             ReservationTime pastTime = reservationTimeRepository.save(
                 ReservationTimeFixture.time16());
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
@@ -846,20 +725,5 @@ class ReservationServiceTest {
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
-    }
-
-    private StaleFirstReadReservationRepository replaceWithStaleFirstReadRepository() {
-        StaleFirstReadReservationRepository staleRepository =
-            new StaleFirstReadReservationRepository();
-        reservationRepository = staleRepository;
-        reservationService = new ReservationService(reservationSlotRepository,
-            reservationRepository, reservationTimeRepository, reservationDateRepository,
-            themeRepository);
-        return staleRepository;
-    }
-
-    private Reservation waitVersionOf(Reservation reservation, String name, Long waitingOrder) {
-        return Reservation.load(reservation.getId(), name, reservation.getDate(),
-            reservation.getTime(), reservation.getTheme(), ReservationStatus.WAITING, waitingOrder);
     }
 }

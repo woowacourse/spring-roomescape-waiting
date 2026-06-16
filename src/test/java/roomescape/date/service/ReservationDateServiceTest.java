@@ -12,21 +12,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
-import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
+import roomescape.date.repository.ReservationDateRepository;
 
+@DataJpaTest
 class ReservationDateServiceTest {
 
     private static final LocalDate DEFAULT_DATE = LocalDate.of(2099, 1, 1);
 
-    private FakeReservationDateRepository reservationDateRepository;
+    @Autowired
+    private ReservationDateRepository reservationDateRepository;
     private ReservationDateService reservationDateService;
 
     @BeforeEach
     void setUp() {
-        reservationDateRepository = new FakeReservationDateRepository();
         reservationDateService = new ReservationDateService(reservationDateRepository);
     }
 

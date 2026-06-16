@@ -12,21 +12,31 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.date.repository.ReservationDateRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.controller.dto.request.ReservationTimeSaveDto;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeException;
-import roomescape.time.fixture.FakeReservationTimeRepository;
 import roomescape.time.fixture.ReservationTimeFixture;
+import roomescape.time.repository.ReservationTimeRepository;
 
+@DataJpaTest
 class ReservationTimeServiceTest {
 
-    private FakeReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ReservationDateRepository reservationDateRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
     private ReservationTimeService reservationTimeService;
 
     @BeforeEach
     void setup() {
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository);
+        reservationTimeService = new ReservationTimeService(reservationDateRepository,
+            reservationTimeRepository, themeRepository);
     }
 
     private List<ReservationTime> saveAll(List<ReservationTime> reservationTimes) {

@@ -4,18 +4,32 @@ import static roomescape.time.exception.ReservationTimeErrorInformation.ID_IS_NU
 import static roomescape.time.exception.ReservationTimeErrorInformation.INACTIVE_TIME_NOT_ALLOWED;
 import static roomescape.time.exception.ReservationTimeErrorInformation.START_AT_IS_NULL;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.time.exception.ReservationTimeException;
 
+@Entity(name = "reservation_time")
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class ReservationTime {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
     private LocalTime startAt;
+
+    @Column
     private boolean isActive;
 
     public static ReservationTime create(LocalTime startAt) {

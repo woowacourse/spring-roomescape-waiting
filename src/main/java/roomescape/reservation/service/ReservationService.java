@@ -15,7 +15,6 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -46,27 +45,26 @@ public class ReservationService {
     }
 
     public List<ReservationWithWaitingTurn> readAllByName(String name) {
-        return reservationRepository.findMyReservationsWithWaitingTurn(name);
+        return reservationRepository.findAllByNameWithWaitingTurn(name);
     }
 
     @Transactional
     public Reservation reserve(String name, ReservationSaveCommand command) {
-        ReservationTime reservationTime = getReservationTime(command.timeId());
-        reservationTime.validateIsInactive();
-
         ReservationDate reservationDate = getReservationDate(command.dateId());
         reservationDate.validateIsInactive();
+
+        ReservationTime reservationTime = getReservationTime(command.timeId());
+        reservationTime.validateIsInactive();
 
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        lockSlot(command.dateId(), command.timeId(), command.themeId());
+        lockSlot(reservationDate, reservationTime, theme);
 
-        boolean isReservedSlot = checkReserved(name, command.dateId(), command.timeId(),
-            command.themeId());
+        boolean isReservedSlot = checkReserved(name, reservationDate, reservationTime, theme);
         if (isReservedSlot) {
-            Long waitingOrder = reservationRepository.findNextWaitingOrderBySlot(command.dateId(),
-                command.timeId(), command.themeId());
+            Long waitingOrder = reservationRepository.findNextWaitingOrderByDateAndTimeAndTheme(
+                reservationDate, reservationTime, theme);
             return reservationRepository.save(
                 Reservation.wait(name, reservationDate, reservationTime, theme, waitingOrder));
         }
@@ -78,117 +76,112 @@ public class ReservationService {
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservation(id);
 
-        lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
-            reservation.getTheme().getId());
+        lockSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
 
         reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
         reservation.cancelByManager();
-        reservationRepository.updateStatusAndWaitingOrder(reservation);
         if (reservationStatus == RESERVED) {
-            promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
+            promoteWaitingReservation(reservation.getDate(), reservation.getTime(),
+                reservation.getTheme());
         }
-        return reservation;
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
     public Reservation cancel(Long id, String requesterName) {
         Reservation reservation = getReservation(id);
 
-        lockSlot(reservation.getDate().getId(), reservation.getTime().getId(),
-            reservation.getTheme().getId());
+        lockSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
 
         reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
         reservation.cancel(requesterName);
-        reservationRepository.updateStatusAndWaitingOrder(reservation);
         if (reservationStatus == RESERVED) {
-            promoteWaitingReservation(reservation.getDate().getId(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
+            promoteWaitingReservation(reservation.getDate(), reservation.getTime(),
+                reservation.getTheme());
         }
 
-        return reservation;
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
     public Reservation changeSchedule(ReservationChangeCommand command) {
         Reservation reservation = getReservation(command.id());
-        Long previousDateId = reservation.getDate().getId();
-        Long previousTimeId = reservation.getTime().getId();
-        Long themeId = reservation.getTheme().getId();
+        ReservationDate previousDate = reservation.getDate();
+        ReservationTime previousTime = reservation.getTime();
+        Theme theme = reservation.getTheme();
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        lockSlot(previousDateId, previousTimeId, themeId);
-        lockSlot(newDate.getId(), newTime.getId(), themeId);
+        lockSlot(previousDate, previousTime, theme);
+        lockSlot(newDate, newTime, theme);
 
         reservation = getReservation(command.id());
-        previousDateId = reservation.getDate().getId();
-        previousTimeId = reservation.getTime().getId();
-        themeId = reservation.getTheme().getId();
+        previousDate = reservation.getDate();
+        previousTime = reservation.getTime();
+        theme = reservation.getTheme();
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
-        decideStatus(command, reservation);
-        reservationRepository.updateScheduleAndStatus(reservation);
-        promoteWaitingReservation(previousDateId, previousTimeId, themeId);
+        decideStatus(reservation);
+        promoteWaitingReservation(previousDate, previousTime, theme);
 
-        return reservation;
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
     public Reservation changeScheduleByManager(ReservationChangeCommand command) {
         Reservation reservation = getReservation(command.id());
-        Long previousDateId = reservation.getDate().getId();
-        Long previousTimeId = reservation.getTime().getId();
-        Long themeId = reservation.getTheme().getId();
+        ReservationDate previousDate = reservation.getDate();
+        ReservationTime previousTime = reservation.getTime();
+        Theme theme = reservation.getTheme();
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        lockSlot(previousDateId, previousTimeId, themeId);
-        lockSlot(newDate.getId(), newTime.getId(), themeId);
+        lockSlot(previousDate, previousTime, theme);
+        lockSlot(newDate, newTime, theme);
 
         reservation = getReservation(command.id());
-        previousDateId = reservation.getDate().getId();
-        previousTimeId = reservation.getTime().getId();
-        themeId = reservation.getTheme().getId();
         reservation.changeScheduleByManager(newDate, newTime);
-        decideStatus(command, reservation);
-        reservationRepository.updateScheduleAndStatus(reservation);
-        promoteWaitingReservation(previousDateId, previousTimeId, themeId);
-        return reservation;
+        decideStatus(reservation);
+        promoteWaitingReservation(previousDate, previousTime, theme);
+
+        return reservationRepository.save(reservation);
     }
 
-    private void lockSlot(Long dateId, Long timeId, Long themeId) {
-        reservationSlotRepository.saveIfAbsent(ReservationSlot.create(dateId, timeId, themeId));
-        reservationSlotRepository.lockByDateTimeAndThemeId(dateId, timeId, themeId);
+    private void lockSlot(ReservationDate reservationDate, ReservationTime reservationTime,
+        Theme theme) {
+        reservationSlotRepository.saveIfAbsent(reservationDate, reservationTime, theme);
+        reservationSlotRepository.findByDateAndTimeAndThemeForUpdate(reservationDate, reservationTime, theme);
     }
 
-    private void promoteWaitingReservation(Long dateId, Long timeId, Long themeId) {
-        boolean hasReserved = reservationRepository.findAllActiveByDateTimeAndThemeId(dateId,
-                timeId, themeId)
+    private void promoteWaitingReservation(ReservationDate reservationDate,
+        ReservationTime reservationTime, Theme theme) {
+        boolean hasReserved = reservationRepository.findAllActiveByDateAndTimeAndTheme(
+                reservationDate, reservationTime, theme)
             .stream()
             .anyMatch(reservation -> reservation.getStatus() == RESERVED);
 
         if (hasReserved) {
             return;
         }
-        reservationRepository.findFirstWaitingByDateTimeAndThemeId(dateId, timeId, themeId)
+        reservationRepository.findFirstWaitingByDateAndTimeAndTheme(reservationDate,
+                reservationTime, theme)
             .ifPresent(reservation -> {
                 reservation.changeToReserved();
-                reservationRepository.updateStatusAndWaitingOrder(reservation);
+                reservationRepository.save(reservation);
             });
     }
 
-    private void decideStatus(ReservationChangeCommand command, Reservation reservation) {
+    private void decideStatus(Reservation reservation) {
         boolean isReservedSlot = checkReservedExcept(reservation.getId(), reservation.getName(),
-            command.dateId(), command.timeId(), reservation.getTheme().getId());
+            reservation.getDate(), reservation.getTime(), reservation.getTheme());
         if (isReservedSlot) {
-            Long waitingOrder = reservationRepository.findNextWaitingOrderBySlot(command.dateId(),
-                command.timeId(), reservation.getTheme().getId());
+            Long waitingOrder = reservationRepository.findNextWaitingOrderByDateAndTimeAndTheme(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
             reservation.changeToWaitingWithOrder(waitingOrder);
             return;
         }
@@ -215,17 +208,18 @@ public class ReservationService {
             .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
-    private boolean checkReserved(String name, Long dateId, Long timeId, Long themeId) {
-        return checkReservedExcept(null, name, dateId, timeId, themeId);
+    private boolean checkReserved(String name, ReservationDate reservationDate,
+        ReservationTime reservationTime, Theme theme) {
+        return checkReservedExcept(null, name, reservationDate, reservationTime, theme);
     }
 
-    private boolean checkReservedExcept(Long excludedId, String name, Long dateId,
-        Long timeId, Long themeId) {
-        List<Reservation> reservationsInSameSlot =
-            reservationRepository.findAllActiveByDateTimeAndThemeId(dateId, timeId, themeId)
-                .stream()
-                .filter(reservation -> !reservation.getId().equals(excludedId))
-                .toList();
+    private boolean checkReservedExcept(Long excludedId, String name,
+        ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
+        List<Reservation> reservationsInSameSlot = reservationRepository.findAllActiveByDateAndTimeAndTheme(
+                reservationDate, reservationTime, theme)
+            .stream()
+            .filter(reservation -> !reservation.getId().equals(excludedId))
+            .toList();
         validateReservedByMyself(reservationsInSameSlot, name);
 
         return !reservationsInSameSlot.isEmpty();

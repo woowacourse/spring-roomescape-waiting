@@ -6,21 +6,39 @@ import static roomescape.theme.exception.ThemeErrorInformation.INACTIVE_THEME_NO
 import static roomescape.theme.exception.ThemeErrorInformation.NAME_IS_NULL;
 import static roomescape.theme.exception.ThemeErrorInformation.THUMBNAIL_URL_IS_NULL;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.theme.exception.ThemeException;
 
+@Entity(name = "theme")
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class Theme {
 
     public static final String DEFAULT_THUMBNAIL_URL = "DEFAULT_THUMBNAIL_URL";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
     private String name;
+
+    @Column
     private String description;
+
+    @Column(name = "thumbnail_url")
     private String thumbnailUrl;
+
+    @Column(name = "is_active")
     private boolean isActive;
 
     public static Theme create(String name, String description, String thumbnailUrl) {
