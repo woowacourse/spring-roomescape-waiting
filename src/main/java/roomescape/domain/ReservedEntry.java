@@ -43,6 +43,6 @@ public class ReservedEntry extends ReservationEntry {
 
     @Override
     public ReservationEntry promote() {
-        return this;
+        throw new UnsupportedOperationException("이미 예약되었습니다.");
     }
 }
