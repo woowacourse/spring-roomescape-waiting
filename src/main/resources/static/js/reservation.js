@@ -226,18 +226,14 @@ async function confirmBooking() {
         showError(new Error(result.errorMessage));
       }
     } else {
-      const { jobId } = await apiFetch(RESERVATION_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body
+      const params = new URLSearchParams({
+        name,
+        date: state.date,
+        timeId: state.timeId,
+        themeId: state.themeId,
+        themeName: state.themeName || ''
       });
-      const result = await pollJobUntilDone(`/reservations/status/${jobId}`);
-      if (result.status === 'SUCCESS') {
-        alert('예약이 완료되었습니다.');
-        refreshTimes();
-      } else {
-        showError(new Error(result.errorMessage));
-      }
+      window.location.href = `/payments/checkout?${params}`;
     }
   } catch (err) {
     showError(err);

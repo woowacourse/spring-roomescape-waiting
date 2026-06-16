@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -55,8 +55,8 @@ class ReservationRepositoryTest {
 
         time = ReservationTime.of(timeId, LocalTime.of(10, 0), LocalTime.of(11, 0));
         anotherTime = ReservationTime.of(anotherTimeId, LocalTime.of(12, 0), LocalTime.of(13, 0));
-        theme = Theme.of(themeId, "테마1", "설명1", "https://example.com/1.jpg");
-        anotherTheme = Theme.of(anotherThemeId, "테마2", "설명2", "https://example.com/2.jpg");
+        theme = Theme.of(themeId, "테마1", "설명1", "https://example.com/1.jpg", 50_000L);
+        anotherTheme = Theme.of(anotherThemeId, "테마2", "설명2", "https://example.com/2.jpg", 50_000L);
     }
 
     @Nested

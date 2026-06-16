@@ -20,7 +20,8 @@ public class ThemeRepository {
             resultSet.getLong("id"),
             resultSet.getString("name"),
             resultSet.getString("description"),
-            resultSet.getString("image_url")
+            resultSet.getString("image_url"),
+            resultSet.getLong("price")
     );
 
     public Optional<Theme> findById(Long id) {

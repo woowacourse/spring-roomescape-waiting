@@ -58,7 +58,7 @@ class WaitingServiceTest {
     @BeforeEach
     void setUp() {
         time = ReservationTime.of(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        theme = Theme.of(1L, "테마1", "설명", "https://example.com/image.jpg");
+        theme = Theme.of(1L, "테마1", "설명", "https://example.com/image.jpg", 50_000L);
     }
 
     @Nested

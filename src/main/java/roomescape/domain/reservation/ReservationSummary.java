@@ -8,6 +8,8 @@ public record ReservationSummary(
         String name,
         LocalDate date,
         LocalTime startAt,
-        String themeName
+        String themeName,
+        ReservationStatus status,
+        String orderId
 ) {
 }

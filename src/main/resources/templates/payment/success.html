@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 완료 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <style>
+    .result-wrap {
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .07);
+    }
+
+    .result-card h2 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    .result-card .subtitle {
+      color: #888;
+      font-size: 14px;
+      margin: 0 0 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      gap: 16px;
+    }
+
+    .info-row .label {
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .info-row .value {
+      text-align: right;
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .result-actions a {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s;
+    }
+
+    .btn-primary-link {
+      background: var(--accent, #3182f6);
+      color: #fff;
+    }
+
+    .btn-primary-link:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-ghost-link {
+      background: #f0f0f0;
+      color: #555;
+    }
+
+    .btn-ghost-link:hover {
+      background: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/admin/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation">예약하기</a>
+      <a href="/my-reservations">예약 관리</a>
+    </nav>
+  </div>
+</header>
+
+<div class="result-wrap">
+  <div class="result-card">
+    <h2><i class="fas fa-check-circle" style="color:#2ecc71;margin-right:8px;"></i>예약 및 결제 완료</h2>
+    <p class="subtitle">결제가 확정되고 예약이 생성되었습니다.</p>
+
+    <div class="info-row">
+      <span class="label">결제 상태</span>
+      <span class="value" th:text="${payment.status()}">DONE</span>
+    </div>
+    <div class="info-row">
+      <span class="label">결제 금액</span>
+      <span class="value">
+        <span th:text="${#numbers.formatInteger(payment.totalAmount(), 0, 'COMMA')}">50,000</span>원
+      </span>
+    </div>
+    <div class="info-row">
+      <span class="label">예약 번호</span>
+      <span class="value" th:text="${reservation.id()}">1</span>
+    </div>
+    <div class="info-row">
+      <span class="label">예약자</span>
+      <span class="value" th:text="${reservation.name()}">홍길동</span>
+    </div>
+    <div class="info-row">
+      <span class="label">예약 날짜</span>
+      <span class="value" th:text="${reservation.date()}">2025-01-01</span>
+    </div>
+    <div class="info-row">
+      <span class="label">주문번호</span>
+      <span class="value" style="font-size:12px;font-weight:400;" th:text="${payment.orderId()}">order-xxx</span>
+    </div>
+
+    <div class="result-actions">
+      <a href="/my-reservations" class="btn-primary-link"><i class="fas fa-list"></i> 예약 관리</a>
+      <a href="/reservation" class="btn-ghost-link"><i class="fas fa-plus"></i> 추가 예약</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

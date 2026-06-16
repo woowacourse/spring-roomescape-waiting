@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,10 @@ import roomescape.domain.waiting.WaitingRepository;
 import roomescape.domain.waiting.Waitings;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.payment.client.TossPaymentGateway;
+import roomescape.payment.client.dto.TossPaymentResponse;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.domain.PaymentRepository;
 
 @Service
 public class ReservationService {
@@ -29,17 +34,23 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentRepository paymentRepository;
+    private final TossPaymentGateway tossPaymentGateway;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            WaitingRepository waitingRepository
+            WaitingRepository waitingRepository,
+            PaymentRepository paymentRepository,
+            TossPaymentGateway tossPaymentGateway
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
+        this.paymentRepository = paymentRepository;
+        this.tossPaymentGateway = tossPaymentGateway;
     }
 
     @Transactional
@@ -52,13 +63,7 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(request.date(), time, theme);
         validateDuplicateReservation(slot);
 
-        Reservation reservation = Reservation.of(
-                request.name(),
-                request.date(),
-                time,
-                theme
-        );
-
+        Reservation reservation = Reservation.of(request.name(), request.date(), time, theme);
         try {
             Reservation saved = reservationRepository.save(reservation);
             return ReservationResponse.from(saved);
@@ -67,11 +72,43 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public void createPendingReservation(ReservationRequest request, String orderId) {
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+
+        ReservationSlot slot = ReservationSlot.of(request.date(), time, theme);
+        validateDuplicateReservation(slot);
+
+        Reservation pending = Reservation.pendingPayment(request.name(), request.date(), time, theme, orderId);
+        try {
+            reservationRepository.save(pending);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    @Transactional
+    public ReservationResponse confirmPayment(String orderId, TossPaymentResponse tossResponse) {
+        Reservation reservation = reservationRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+        reservationRepository.updateStatus(reservation.getId(), ReservationStatus.CONFIRMED);
+        paymentRepository.save(Payment.of(
+                tossResponse.paymentKey(),
+                tossResponse.orderId(),
+                tossResponse.totalAmount(),
+                tossResponse.status(),
+                reservation.getId()
+        ));
+        return ReservationResponse.from(reservation);
+    }
+
     @Transactional(readOnly = true)
     public List<TimeResponse> getReservations(LocalDate date, Long themeId) {
         ReservationTimes allTimes = ReservationTimes.of(reservationTimeRepository.findAll());
         List<Long> bookedTimeIds = reservationRepository.findTimeByDateAndThemeId(date, themeId);
-
         return allTimes.availableExcluding(bookedTimeIds).stream()
                 .map(TimeResponse::from)
                 .toList();
@@ -82,6 +119,11 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
 
+        paymentRepository.findByReservationId(id).ifPresent(payment -> {
+            tossPaymentGateway.cancel(payment.getPaymentKey(), "예약 취소");
+            paymentRepository.deleteByReservationId(id);
+        });
+
         int deleted = reservationRepository.deleteById(id);
 
         if (deleted > 0) {
@@ -91,8 +133,12 @@ public class ReservationService {
     }
 
     private void promoteToReservation(Waiting waiting) {
+        String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
         try {
-            reservationRepository.save(waiting.toReservation());
+            Reservation pending = Reservation.pendingPayment(
+                    waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme(), orderId
+            );
+            reservationRepository.save(pending);
             waitingRepository.deleteById(waiting.getId());
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
@@ -128,5 +174,4 @@ public class ReservationService {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
-
 }

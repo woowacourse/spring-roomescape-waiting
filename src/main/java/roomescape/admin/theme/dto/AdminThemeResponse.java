@@ -6,7 +6,8 @@ public record AdminThemeResponse(
         Long id,
         String name,
         String description,
-        String imageUrl
+        String imageUrl,
+        long price
 ) {
 
     public static AdminThemeResponse from(Theme saved) {
@@ -14,7 +15,8 @@ public record AdminThemeResponse(
                 saved.getId(),
                 saved.getName(),
                 saved.getDescription(),
-                saved.getImageUrl()
+                saved.getImageUrl(),
+                saved.getPrice()
         );
     }
 }

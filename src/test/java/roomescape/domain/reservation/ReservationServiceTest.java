@@ -23,8 +23,10 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.payment.domain.PaymentRepository;
 import roomescape.domain.reservation.ReservationSummary;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
@@ -55,6 +57,12 @@ class ReservationServiceTest {
     @Mock
     private WaitingRepository waitingRepository;
 
+    @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -64,7 +72,7 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         time = ReservationTime.of(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        theme = Theme.of(1L, "테마1", "설명", "https://example.com/image.jpg");
+        theme = Theme.of(1L, "테마1", "설명", "https://example.com/image.jpg", 50_000L);
     }
 
     @Nested
@@ -193,9 +201,11 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             Waiting waiting1 = Waiting.of(10L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
             Waiting waiting2 = Waiting.of(11L, "대기자2", LocalDate.of(2099, 12, 31), time, theme);
+            Reservation promoted = Reservation.of(20L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
             when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.deleteById(1L)).thenReturn(1);
             when(waitingRepository.findAllBySlotForUpdate(any(ReservationSlot.class))).thenReturn(List.of(waiting1, waiting2));
+            when(reservationRepository.save(any(Reservation.class))).thenReturn(promoted);
 
             reservationService.deleteReservation(1L);
 
@@ -220,7 +230,7 @@ class ReservationServiceTest {
 
         @Test
         void 이름으로_조회() {
-            ReservationSummary summary = new ReservationSummary(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), "테마1");
+            ReservationSummary summary = new ReservationSummary(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), "테마1", ReservationStatus.CONFIRMED);
             when(reservationRepository.findByName("유저1")).thenReturn(List.of(summary));
 
             MyReservationsResponse response = reservationService.getMyReservations("유저1");

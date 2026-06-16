@@ -22,7 +22,8 @@ class ReservationTest {
             1L,
             "테마1",
             "설명",
-            "https://example.com/image.png"
+            "https://example.com/image.png",
+            50_000L
     );
 
     @Test

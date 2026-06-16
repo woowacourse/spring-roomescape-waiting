@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.theme.Theme;
 
@@ -25,7 +25,7 @@ class AdminThemeRepositoryTest {
 
         @Test
         void 저장하면_id가_부여된다() {
-            Theme theme = Theme.of("테마1", "설명", "https://example.com/image.jpg");
+            Theme theme = Theme.of("테마1", "설명", "https://example.com/image.jpg", 50_000L);
 
             Theme saved = adminThemeRepository.save(theme);
 
@@ -44,7 +44,7 @@ class AdminThemeRepositoryTest {
 
         @Test
         void 삭제하면_해당_테마가_조회되지_않는다() {
-            Theme saved = adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg"));
+            Theme saved = adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg", 50_000L));
 
             adminThemeRepository.deleteById(saved.getId());
 
@@ -58,8 +58,8 @@ class AdminThemeRepositoryTest {
 
         @Test
         void 저장된_테마를_전체_조회한다() {
-            Theme first = adminThemeRepository.save(Theme.of("테마1", "설명1", "https://example.com/1.jpg"));
-            Theme second = adminThemeRepository.save(Theme.of("테마2", "설명2", "https://example.com/2.jpg"));
+            Theme first = adminThemeRepository.save(Theme.of("테마1", "설명1", "https://example.com/1.jpg", 50_000L));
+            Theme second = adminThemeRepository.save(Theme.of("테마2", "설명2", "https://example.com/2.jpg", 50_000L));
 
             List<Theme> result = adminThemeRepository.findAll();
 
@@ -79,7 +79,7 @@ class AdminThemeRepositoryTest {
 
         @Test
         void 존재하는_id면_true를_반환한다() {
-            Theme saved = adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg"));
+            Theme saved = adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg", 50_000L));
 
             boolean result = adminThemeRepository.existsById(saved.getId());
 
@@ -100,7 +100,7 @@ class AdminThemeRepositoryTest {
 
         @Test
         void 존재하는_이름이면_true를_반환한다() {
-            adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg"));
+            adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg", 50_000L));
 
             boolean result = adminThemeRepository.existsByName("테마1");
 
@@ -109,7 +109,7 @@ class AdminThemeRepositoryTest {
 
         @Test
         void 존재하지_않는_이름이면_false를_반환한다() {
-            adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg"));
+            adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg", 50_000L));
 
             boolean result = adminThemeRepository.existsByName("테마2");
 

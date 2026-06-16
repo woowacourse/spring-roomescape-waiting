@@ -1,7 +1,6 @@
 package roomescape.domain.waiting;
 
 import java.time.LocalDate;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -53,10 +52,6 @@ public class Waiting {
 
     public ReservationSlot getSlot() {
         return ReservationSlot.of(date, time, theme);
-    }
-
-    public Reservation toReservation() {
-        return Reservation.of(name, date, time, theme);
     }
 
 }

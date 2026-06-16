@@ -28,6 +28,10 @@ public enum ErrorCode {
     RESERVATION_NOT_FOUND(HttpStatus.UNPROCESSABLE_ENTITY, "해당 예약은 점유되어있지 않습니다."),
     WAITING_NOT_AVAILABLE(HttpStatus.UNPROCESSABLE_ENTITY, "예약이 이미 등록되어있습니다."),
 
+    //400 - PAYMENT
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
+    PAYMENT_CONFIRM_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "예약 확정에 실패했습니다."),
+
     //503 - SERVICE_UNAVAILABLE
     SERVER_OVERLOADED(HttpStatus.SERVICE_UNAVAILABLE, "서버가 일시적으로 처리할 수 없습니다.");
 

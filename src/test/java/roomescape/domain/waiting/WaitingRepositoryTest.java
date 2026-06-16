@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.ReservationSlot;
@@ -41,7 +41,7 @@ class WaitingRepositoryTest {
         Long themeId = jdbcTemplate.queryForObject("SELECT id FROM theme LIMIT 1", Long.class);
 
         time = ReservationTime.of(timeId, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        theme = Theme.of(themeId, "테마1", "설명", "https://example.com/image.jpg");
+        theme = Theme.of(themeId, "테마1", "설명", "https://example.com/image.jpg", 50_000L);
     }
 
     @Nested

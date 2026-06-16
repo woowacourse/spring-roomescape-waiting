@@ -30,7 +30,8 @@ public class WaitingRepository {
                     rs.getLong("theme_id"),
                     rs.getString("theme_name"),
                     rs.getString("theme_description"),
-                    rs.getString("theme_image_url")
+                    rs.getString("theme_image_url"),
+                    rs.getLong("theme_price")
             )
     );
 
@@ -66,7 +67,7 @@ public class WaitingRepository {
                 SELECT w.id AS waiting_id, w.name, w.date,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
-                       th.image_url AS theme_image_url
+                       th.image_url AS theme_image_url, th.price AS theme_price
                 FROM waiting w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme th ON w.theme_id = th.id
@@ -82,7 +83,7 @@ public class WaitingRepository {
                 SELECT w.id AS waiting_id, w.name, w.date,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
-                       th.image_url AS theme_image_url
+                       th.image_url AS theme_image_url, th.price AS theme_price
                 FROM waiting w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme th ON w.theme_id = th.id
@@ -100,7 +101,7 @@ public class WaitingRepository {
                 SELECT w.id AS waiting_id, w.name, w.date,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
-                       th.image_url AS theme_image_url
+                       th.image_url AS theme_image_url, th.price AS theme_price
                 FROM waiting w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme th ON w.theme_id = th.id
