@@ -3,6 +3,9 @@ package roomescape.reservation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.service.PaymentService;
+import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.repository.ReservationRepository;
@@ -24,6 +27,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
+    private final PaymentService paymentService;
 
     public List<ReservationWithSlotInformation> readAll() {
         return reservationRepository.findAll();
@@ -34,12 +38,20 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation reserve(String requesterName, Long slotId) {
+    public ReservationWithSlotDetailDto reserve(String requesterName, Long slotId) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
         Reservation reservation = slot.reserve(requesterName);
-        return reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+
+        if (saved.isPendingPayment()) {
+            Payment payment = paymentService.createPendingPayment(saved.getId(), slot.getId(), slot.getTheme().getAmount());
+            return ReservationWithSlotDetailDto.of(saved, slot, payment);
+        }
+
+        return ReservationWithSlotDetailDto.of(saved, slot);
     }
 
+    // 취소, 변경에서 승격자의 Payment를 생성하는 건 PASS
     @Transactional
     public Reservation cancel(Long slotId, Long reservationId, String requesterName) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);

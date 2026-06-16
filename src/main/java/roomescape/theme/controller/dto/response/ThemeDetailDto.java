@@ -8,7 +8,8 @@ public record ThemeDetailDto(
         String name,
         String description,
         String thumbnailUrl,
-        boolean isActive
+        boolean isActive,
+        Long amount
 ) {
     public static ThemeDetailDto from(Theme theme) {
         return new ThemeDetailDto(
@@ -16,7 +17,8 @@ public record ThemeDetailDto(
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailUrl(),
-                theme.isActive()
+                theme.isActive(),
+                theme.getAmount()
         );
     }
 
@@ -26,7 +28,8 @@ public record ThemeDetailDto(
                 result.name(),
                 result.description(),
                 result.thumbnailUrl(),
-                result.isActive()
+                result.isActive(),
+                result.amount()
         );
     }
 }

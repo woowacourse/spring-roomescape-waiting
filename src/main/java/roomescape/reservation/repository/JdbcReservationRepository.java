@@ -11,6 +11,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
 
+import roomescape.payment.domain.PaymentStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -85,7 +87,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString("thumbnail_url"),
                 ReservationStatus.valueOf(rs.getString("status")),
                 rs.getObject("reserved_at", LocalDateTime.class),
-                null
+                null,
+                null, null, null, null
         ));
     }
 
@@ -103,6 +106,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.id            AS theme_id,
                     t.name          AS theme_name,
                     t.thumbnail_url AS thumbnail_url,
+                    p.order_id      AS order_id,
+                    p.payment_key   AS payment_key,
+                    p.amount        AS payment_amount,
+                    p.status        AS payment_status,
                     CASE
                         WHEN r.status = 'WAITING' THEN (
                             SELECT COUNT(*) + 1
@@ -119,6 +126,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     JOIN reservation_date rd ON s.date_id  = rd.id
                     JOIN reservation_time rt ON s.time_id  = rt.id
                     JOIN theme            t  ON s.theme_id = t.id
+                    LEFT JOIN payment     p  ON p.reservation_id = r.id
                 WHERE r.name = :name
                 ORDER BY rd.date ASC, rt.start_at ASC
                 """;
@@ -134,7 +142,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString("thumbnail_url"),
                 ReservationStatus.valueOf(rs.getString("status")),
                 rs.getObject("reserved_at", LocalDateTime.class),
-                rs.getObject("waiting_turn", Long.class)
+                rs.getObject("waiting_turn", Long.class),
+                rs.getString("order_id"),
+                rs.getString("payment_key"),
+                rs.getObject("payment_amount", Long.class),
+                Optional.ofNullable(rs.getString("payment_status"))
+                        .map(PaymentStatus::valueOf)
+                        .orElse(null)
         ));
     }
 
@@ -144,7 +158,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id AS reservation_id, r.name, r.slot_id, r.status, r.reserved_at
                 FROM reservation r
                 WHERE r.slot_id = :slotId
-                  AND r.status IN ('RESERVED', 'WAITING')
+                  AND r.status IN ('RESERVED', 'WAITING', 'PENDING_PAYMENT')
                 ORDER BY r.reserved_at ASC
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("slotId", slotId);

@@ -93,6 +93,25 @@ class ReservationControllerTest extends AcceptanceTest {
     }
 
     @Test
+    @DisplayName("빈 슬롯에 예약하면 결제 대기 상태가 된다.")
+    void reserve_pending_payment() {
+        // given
+        Integer dateId = createReservationDate(managerToken, date);
+        Integer timeId = createReservationTime(managerToken, startAt);
+        Integer themeId = createTheme(managerToken, themeName);
+        Integer slotId = createSlot(managerToken, dateId, timeId, themeId);
+
+        // when & then
+        RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, memberToken)
+                .contentType(ContentType.JSON)
+                .when().post("/member/slots/" + slotId + "/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("status", is(ReservationStatus.PENDING_PAYMENT.name()));
+    }
+
+    @Test
     @DisplayName("다른 사람이 예약한 날짜/시간/테마를 예약하면 대기 상태된다.")
     void waited_duplicated_reserved() {
         Integer dateId = createReservationDate(managerToken, date);

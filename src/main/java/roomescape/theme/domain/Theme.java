@@ -18,22 +18,24 @@ public class Theme {
     private String description;
     private String thumbnailUrl;
     private boolean isActive;
+    private Long amount;
 
-    public static Theme create(String name, String description, String thumbnailUrl) {
-        validate(name, description, thumbnailUrl);
-        return new Theme(null, name, description, resolveThumbnailUrl(thumbnailUrl), true);
+    public static Theme create(String name, String description, String thumbnailUrl, Long amount) {
+        validate(name, description, thumbnailUrl, amount);
+        return new Theme(null, name, description, resolveThumbnailUrl(thumbnailUrl), true, amount);
     }
 
-    public static Theme load(Long id, String name, String description, String thumbnailUrl, boolean isActive) {
+    public static Theme load(Long id, String name, String description, String thumbnailUrl, boolean isActive, Long amount) {
         validateId(id);
-        validate(name, description, thumbnailUrl);
-        return new Theme(id, name, description, resolveThumbnailUrl(thumbnailUrl), isActive);
+        validate(name, description, thumbnailUrl, amount);
+        return new Theme(id, name, description, resolveThumbnailUrl(thumbnailUrl), isActive, amount);
     }
 
-    private static void validate(String name, String description, String thumbnailUrl) {
+    private static void validate(String name, String description, String thumbnailUrl, Long amount) {
         validateName(name);
         validateDescription(description);
         validateThumbnailUrl(thumbnailUrl);
+        validateAmount(amount);
     }
 
     private static void validateId(Long id) {
@@ -57,6 +59,15 @@ public class Theme {
     private static void validateDescription(String description) {
         if (description == null || description.isBlank()) {
             throw new ThemeException(DESCRIPTION_IS_NULL);
+        }
+    }
+
+    private static void validateAmount(Long amount) {
+        if (amount == null) {
+            throw new ThemeException(AMOUNT_IS_NULL);
+        }
+        if (amount < 0) {
+            throw new ThemeException(AMOUNT_IS_NEGATIVE);
         }
     }
 

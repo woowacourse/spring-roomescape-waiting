@@ -61,8 +61,30 @@
             </div>
         </article>
     </section>
+
+    <!-- 결제 모달 -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content" style="width: 700px; margin: 2% auto;">
+            <div class="modal-header">
+                <h2>결제하기</h2>
+                <button type="button" class="close-button" onclick="closePaymentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="payment-method"></div>
+                <div id="agreement"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="secondary-button" onclick="closePaymentModal()">취소</button>
+                <button id="payment-button" type="button" class="primary-button" style="width: 200px;">결제하기</button>
+            </div>
+        </div>
+    </div>
 </main>
 
+<script th:inline="javascript">
+    const tossClientKey = [[${clientKey}]];
+</script>
+<script src="https://js.tosspayments.com/v1/payment-widget"></script>
 <script th:src="@{/js/user.js}"></script>
 </body>
 </html>

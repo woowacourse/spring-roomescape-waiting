@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS theme
     description   VARCHAR(255) NOT NULL,
     thumbnail_url VARCHAR(255) NOT NULL,
     is_active     BOOLEAN      NOT NULL DEFAULT FALSE,
+    amount        BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -51,7 +52,21 @@ CREATE TABLE IF NOT EXISTS reservation
     name        VARCHAR(255) NOT NULL,
     slot_id     BIGINT       NOT NULL,
     reserved_at TIMESTAMP    NOT NULL,
-    status   ENUM('RESERVED', 'WAITING', 'CANCELED') NOT NULL,
+    status   ENUM('RESERVED', 'WAITING', 'CANCELED', 'PENDING_PAYMENT') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id)
+);
+
+CREATE TABLE IF NOT EXISTS payment
+(
+    id             BIGINT AUTO_INCREMENT NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    slot_id        BIGINT       NOT NULL,
+    order_id       VARCHAR(255) NOT NULL UNIQUE,
+    payment_key    VARCHAR(255),
+    amount         BIGINT       NOT NULL,
+    status         ENUM('PENDING','CONFIRMED','FAILED','UNKNOWN') NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    FOREIGN KEY (slot_id)        REFERENCES reservation_slot (id)
 );

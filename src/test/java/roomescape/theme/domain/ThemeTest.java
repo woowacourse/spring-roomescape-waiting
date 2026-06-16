@@ -13,12 +13,13 @@ class ThemeTest {
     private final String name = "공포";
     private final String description = "테마 설명";
     private final String defaultThumbnailUrl = "DEFAULT_THUMBNAIL_URL";
+    private final Long amount = 1000L;
 
     @Test
     @DisplayName("유효한 값으로 테마를 등록할 수 있다.")
     void create_with_valid_field() {
         // when & then
-        Assertions.assertThatCode(() -> Theme.create(name, description, defaultThumbnailUrl))
+        Assertions.assertThatCode(() -> Theme.create(name, description, defaultThumbnailUrl, amount))
                 .doesNotThrowAnyException();
     }
 
@@ -26,14 +27,15 @@ class ThemeTest {
     @DisplayName("유효한 값으로 테마를 등록하면 입력한 값을 그대로 유지한다.")
     void create_compare_fields() {
         // when
-        Theme theme = Theme.create(name, description, defaultThumbnailUrl);
+        Theme theme = Theme.create(name, description, defaultThumbnailUrl, amount);
 
         // then
         Assertions.assertThat(theme)
                 .returns(null, Theme::getId)
                 .returns(name, Theme::getName)
                 .returns(description, Theme::getDescription)
-                .returns(true, Theme::isActive);
+                .returns(true, Theme::isActive)
+                .returns(amount, Theme::getAmount);
     }
 
     @Test
@@ -44,7 +46,7 @@ class ThemeTest {
         boolean loadStatus = false;
 
         // when
-        Assertions.assertThatCode(() -> Theme.load(loadValidId, name, description, description, loadStatus))
+        Assertions.assertThatCode(() -> Theme.load(loadValidId, name, description, description, loadStatus, amount))
                 .doesNotThrowAnyException();
     }
 
@@ -56,7 +58,7 @@ class ThemeTest {
         boolean loadStatus = false;
 
         // when
-        Assertions.assertThatThrownBy(() -> Theme.load(nullId, name, description, description, loadStatus))
+        Assertions.assertThatThrownBy(() -> Theme.load(nullId, name, description, description, loadStatus, amount))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(ID_IS_NULL.getMessage());
     }
@@ -65,8 +67,8 @@ class ThemeTest {
     @DisplayName("등록, 로드한 테마는 id와 활성화상태를 제외한 모든 필드가 일치한다.")
     void creat_compare_load() {
         // given
-        Theme createdTheme = Theme.create(name, description, description);
-        Theme loadedTheme = Theme.load(1L, name, description, description, true);
+        Theme createdTheme = Theme.create(name, description, description, amount);
+        Theme loadedTheme = Theme.load(1L, name, description, description, true, amount);
 
         // when & then
         Assertions.assertThat(createdTheme)
@@ -82,7 +84,7 @@ class ThemeTest {
         String nullName = null;
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(nullName, description, defaultThumbnailUrl))
+        assertThatThrownBy(() -> Theme.create(nullName, description, defaultThumbnailUrl, amount))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(NAME_IS_NULL.getMessage());
     }
@@ -94,7 +96,7 @@ class ThemeTest {
         String emptyName = "";
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(emptyName, description, defaultThumbnailUrl))
+        assertThatThrownBy(() -> Theme.create(emptyName, description, defaultThumbnailUrl, amount))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(NAME_IS_NULL.getMessage());
     }
@@ -106,7 +108,7 @@ class ThemeTest {
         String nullDescription = null;
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(name, nullDescription, defaultThumbnailUrl))
+        assertThatThrownBy(() -> Theme.create(name, nullDescription, defaultThumbnailUrl, amount))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(DESCRIPTION_IS_NULL.getMessage());
     }
@@ -118,7 +120,7 @@ class ThemeTest {
         String emptyDescription = "";
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(name, emptyDescription, defaultThumbnailUrl))
+        assertThatThrownBy(() -> Theme.create(name, emptyDescription, defaultThumbnailUrl, amount))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(DESCRIPTION_IS_NULL.getMessage());
     }
@@ -130,7 +132,7 @@ class ThemeTest {
         String nullThumbnailUrl = null;
 
         // when & then
-        assertThatThrownBy(() -> Theme.create(name, description, nullThumbnailUrl))
+        assertThatThrownBy(() -> Theme.create(name, description, nullThumbnailUrl, amount))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(THUMBNAIL_URL_IS_NULL.getMessage());
     }
@@ -142,10 +144,45 @@ class ThemeTest {
         String emptyThumbnailUrl = "";
 
         // when
-        Theme theme = Theme.create(name, description, emptyThumbnailUrl);
+        Theme theme = Theme.create(name, description, emptyThumbnailUrl, amount);
 
         //then
         assertThat(defaultThumbnailUrl)
                 .isEqualTo(theme.getThumbnailUrl());
+    }
+
+    @Test
+    @DisplayName("테마 가격이 null이면 예외가 발생한다.")
+    void create_null_amount() {
+        // given
+        Long nullAmount = null;
+
+        // when & then
+        assertThatThrownBy(() -> Theme.create(name, description, defaultThumbnailUrl, nullAmount))
+                .isInstanceOf(ThemeException.class)
+                .hasMessage(AMOUNT_IS_NULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("테마 가격이 음수이면 예외가 발생한다.")
+    void create_negative_amount() {
+        // given
+        Long negativeAmount = -1L;
+
+        // when & then
+        assertThatThrownBy(() -> Theme.create(name, description, defaultThumbnailUrl, negativeAmount))
+                .isInstanceOf(ThemeException.class)
+                .hasMessage(AMOUNT_IS_NEGATIVE.getMessage());
+    }
+
+    @Test
+    @DisplayName("테마 가격이 0이면 정상적으로 등록된다.")
+    void create_zero_amount() {
+        // given
+        Long zeroAmount = 0L;
+
+        // when & then
+        Assertions.assertThatCode(() -> Theme.create(name, description, defaultThumbnailUrl, zeroAmount))
+                .doesNotThrowAnyException();
     }
 }

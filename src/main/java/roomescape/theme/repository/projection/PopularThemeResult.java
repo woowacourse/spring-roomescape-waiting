@@ -6,6 +6,7 @@ public record PopularThemeResult(
         String description,
         String thumbnailUrl,
         boolean isActive,
+        Long amount,
         long reservationCount
 ) {
 }

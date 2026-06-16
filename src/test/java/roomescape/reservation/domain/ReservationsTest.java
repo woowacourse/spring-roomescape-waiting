@@ -59,6 +59,19 @@ class ReservationsTest {
     }
 
     @Test
+    @DisplayName("결제 대기중인 예약이 있어도 true를 반환한다.")
+    void hasReserved_returnTrue_when_pending_payment() {
+        // given
+        Reservations reservations = new Reservations(List.of(
+                Reservation.load(1L, anotherName, slotId, PENDING_PAYMENT, LocalDateTime.now())
+        ));
+
+        // when & then
+        Assertions.assertThat(reservations.hasReserved())
+                .isTrue();
+    }
+
+    @Test
     @DisplayName("확정 예약이 없으면 false를 반환한다.")
     void hasReserved_returnFalse() {
         // given
@@ -70,7 +83,7 @@ class ReservationsTest {
     }
 
     @Test
-    @DisplayName("빈 슬롯에 예약하면 RESERVED 상태로 추가된다.")
+    @DisplayName("빈 슬롯에 예약하면 결제 대기 상태로 추가된다.")
     void reserve_adds_new_reservation() {
         // given
         Reservations reservations = new Reservations(new ArrayList<>());
@@ -80,7 +93,7 @@ class ReservationsTest {
 
         // then
         Assertions.assertThat(result.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
 
         Assertions.assertThat(reservations.values())
                 .hasSize(1);
@@ -92,6 +105,22 @@ class ReservationsTest {
         // given
         Reservations reservations = new Reservations(List.of(
                 Reservation.load(1L, name, slotId, RESERVED, LocalDateTime.now())
+        ));
+
+        // when
+        Reservation result = reservations.reserve(anotherName, slotId, LocalDateTime.now());
+
+        // then
+        Assertions.assertThat(result.getStatus())
+                .isEqualTo(WAITING);
+    }
+
+    @Test
+    @DisplayName("결제 대기중인 슬롯에 다른 사람이 예약하면 WAITING 상태로 추가된다.")
+    void reserve_adds_waiting_when_pending_payment_slot_taken() {
+        // given
+        Reservations reservations = new Reservations(List.of(
+                Reservation.load(1L, name, slotId, PENDING_PAYMENT, LocalDateTime.now())
         ));
 
         // when
@@ -122,7 +151,30 @@ class ReservationsTest {
                 .isEqualTo(CANCELED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("결제 대기중인 예약을 취소하면 CANCELED 상태가 되고, 다음 대기자가 승격된다.")
+    void cancel_pending_payment_promotes_waiting() {
+        // given
+        Reservation pendingPayment = Reservation.load(1L, name, slotId, PENDING_PAYMENT, LocalDateTime.now());
+        Reservation waiting = Reservation.load(2L, anotherName, slotId, WAITING, LocalDateTime.now().plusSeconds(1));
+        Reservations reservations = new Reservations(List.of(pendingPayment, waiting));
+
+        // when
+        Reservations changed = reservations.cancel(pendingPayment.getId(), pendingPayment.getName());
+        Reservation canceled = changed.findById(pendingPayment.getId());
+        Reservation promoted = changed.findById(waiting.getId());
+
+        // then
+        Assertions.assertThat(changed.values()).hasSize(2);
+
+        Assertions.assertThat(canceled.getStatus())
+                .isEqualTo(CANCELED);
+
+        Assertions.assertThat(promoted.getStatus())
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -164,7 +216,7 @@ class ReservationsTest {
                 .isEqualTo(CANCELED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -217,7 +269,7 @@ class ReservationsTest {
     }
 
     @Test
-    @DisplayName("예약이 없으면 RESERVED 상태를 반환한다.")
+    @DisplayName("예약이 없으면 결제대기 상태를 반환한다.")
     void decideStatus_empty() {
         // given
         Reservations reservations = new Reservations(List.of(
@@ -228,7 +280,7 @@ class ReservationsTest {
 
         // then
         Assertions.assertThat(actual)
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -252,7 +304,7 @@ class ReservationsTest {
                 .isEqualTo(RESERVED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
 }

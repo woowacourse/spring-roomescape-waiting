@@ -6,18 +6,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PageController {
 
+    private final String clientKey;
+
+    public PageController(@org.springframework.beans.factory.annotation.Value("${toss.client-key:}") String clientKey) {
+        this.clientKey = clientKey;
+    }
+
     @GetMapping("/")
     public String indexPage() {
         return "index";
     }
 
     @GetMapping("/reservation")
-    public String userPage() {
+    public String userPage(org.springframework.ui.Model model) {
+        model.addAttribute("clientKey", clientKey);
         return "user";
     }
 
     @GetMapping("/reservation-lookup")
-    public String reservationLookupPage() {
+    public String reservationLookupPage(org.springframework.ui.Model model) {
+        model.addAttribute("clientKey", clientKey);
         return "reservation-lookup";
     }
 

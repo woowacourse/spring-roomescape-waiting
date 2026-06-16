@@ -101,9 +101,10 @@ class ThemeServiceIntegrationTest extends ServiceSupport {
         String name = "테마1";
         String description = "테마1 설명";
         String thumbnail = "테마1 썸네일";
+        Long amount = 1000L;
 
         // when
-        themeService.register(name, description, thumbnail);
+        themeService.register(name, description, thumbnail, amount);
 
         // then
         assertThat(themeService.readThemes())
@@ -117,9 +118,10 @@ class ThemeServiceIntegrationTest extends ServiceSupport {
         String name = "테마1";
         String description = "테마1 설명";
         String thumbnail = "테마1 썸네일";
+        Long amount = 1000L;
 
         // when
-        Theme registeredTheme = themeService.register(name, description, thumbnail);
+        Theme registeredTheme = themeService.register(name, description, thumbnail, amount);
 
         // then
         assertThat(registeredTheme)

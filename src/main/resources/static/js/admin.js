@@ -300,6 +300,7 @@ async function loadThemes() {
             <tr>
                 <td>${theme.id}</td>
                 <td>${theme.name}</td>
+                <td>${theme.amount?.toLocaleString() || 0}원</td>
                 <td>
                     <span class="badge ${badgeClass}">${badgeText}</span>
                 </td>
@@ -318,8 +319,9 @@ async function createTheme() {
     const name = document.getElementById("theme-name-input").value;
     const description = document.getElementById("theme-description-input").value;
     const thumbnailUrl = document.getElementById("theme-thumbnail-input").value;
+    const amount = document.getElementById("theme-amount-input").value;
 
-    if (!name || !description || !thumbnailUrl) {
+    if (!name || !description || !thumbnailUrl || !amount) {
         alert("테마 정보를 모두 입력해주세요.");
         return;
     }
@@ -327,7 +329,7 @@ async function createTheme() {
     const response = await authFetch("/admin/themes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, thumbnailUrl })
+        body: JSON.stringify({ name, description, thumbnailUrl, amount: Number(amount) })
     });
 
     if (!response || !response.ok) {
@@ -338,6 +340,7 @@ async function createTheme() {
     document.getElementById("theme-name-input").value = "";
     document.getElementById("theme-description-input").value = "";
     document.getElementById("theme-thumbnail-input").value = "";
+    document.getElementById("theme-amount-input").value = "";
     await loadThemes();
 }
 
@@ -371,6 +374,10 @@ async function loadReservations() {
 
     reservations.forEach(reservation => {
         const isCanceled = reservation.status === "CANCELED";
+        const isPendingPayment = reservation.status === "PENDING_PAYMENT";
+        
+        const statusText = isPendingPayment ? "결제 대기" : reservation.status;
+        const statusBadgeClass = isPendingPayment ? "inactive" : ""; // Reuse inactive for now or leave as is
 
         tbody.insertAdjacentHTML("beforeend", `
         <tr>
@@ -379,10 +386,10 @@ async function loadReservations() {
             <td>${reservation.date}</td>
             <td>${formatTime(reservation.time)}</td>
             <td>${reservation.themeName}</td>
-            <td>${reservation.status}</td>
+            <td>${statusText}</td>
             <td class="align-right">
                 <button class="reschedule-button" type="button" 
-                        ${isCanceled ? "style='display: none;'" : ""}
+                        ${(isCanceled || isPendingPayment) ? "style='display: none;'" : ""}
                         onclick="openRescheduleModal(${reservation.id})">
                     변경
                 </button>

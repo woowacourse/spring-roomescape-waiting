@@ -61,6 +61,11 @@ async function handleResponseError(response, defaultMessage) {
 let selectedDate = null;
 let selectedTheme = null;
 let selectedTime = null;
+let currentReservation = null;
+
+// Toss Payments Widget Initialization
+const customerKey = Math.random().toString(36).substring(2, 12);
+let paymentWidget = null;
 
 async function authFetch(url, options = {}) {
     const token = localStorage.getItem("token");
@@ -82,6 +87,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         location.href = "/";
         return;
     }
+
+    // Initialize Toss PaymentWidget using global tossClientKey from Thymeleaf
+    if (typeof PaymentWidget !== "undefined" && typeof tossClientKey !== "undefined") {
+        paymentWidget = PaymentWidget(tossClientKey, customerKey);
+    }
+
     await loadThemes();
     await loadPopularThemes();
 });
@@ -121,7 +132,10 @@ async function loadPopularThemes() {
             <img src="${theme.thumbnailUrl}" alt="${theme.name}">
             <div class="popular-rank-badge">${index + 1}</div>
             <div class="popular-theme-content">
-                <h3>${theme.name}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>${theme.name}</h3>
+                    <span class="popular-theme-price">${theme.amount?.toLocaleString() || 0}원</span>
+                </div>
                 <p>${theme.description}</p>
             </div>
         `;
@@ -155,11 +169,15 @@ async function loadThemes() {
         article.dataset.themeName = theme.name;
         article.dataset.themeDescription = theme.description;
         article.dataset.themeThumbnailUrl = theme.thumbnailUrl;
+        article.dataset.themeAmount = theme.amount;
 
         article.innerHTML = `
             <img src="${theme.thumbnailUrl}" alt="${theme.name}">
             <div class="theme-card-content">
-                <h3>${theme.name}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>${theme.name}</h3>
+                    <span class="theme-price">${theme.amount?.toLocaleString() || 0}원</span>
+                </div>
                 <p>${theme.description}</p>
             </div>
         `;
@@ -296,8 +314,56 @@ async function createReservation() {
         return;
     }
 
-    alert("예약이 완료되었습니다.");
-    location.href = "/reservation-lookup";
+    const reservationData = await response.json();
+
+    if (reservationData.status === "PENDING_PAYMENT") {
+        openPaymentModal(reservationData);
+    } else {
+        alert("예약이 완료되었습니다.");
+        location.href = "/reservation-lookup";
+    }
+}
+
+function openPaymentModal(reservation) {
+    currentReservation = reservation;
+    const paymentModal = document.getElementById("payment-modal");
+    paymentModal.style.display = "block";
+
+    if (!paymentWidget) {
+        alert("결제 위젯을 초기화할 수 없습니다. 잠시 후 다시 시도해주세요.");
+        return;
+    }
+
+    paymentWidget.renderPaymentMethods("#payment-method", { value: reservation.amount });
+    paymentWidget.renderAgreement("#agreement");
+
+    const paymentButton = document.getElementById("payment-button");
+    paymentButton.onclick = async () => {
+        try {
+            await paymentWidget.requestPayment({
+                orderId: reservation.orderId,
+                orderName: reservation.themeName,
+                successUrl: window.location.origin + "/payments/success",
+                failUrl: window.location.origin + "/payments/fail",
+                customerName: reservation.name
+            });
+        } catch (error) {
+            if (error.code === "USER_CANCEL") {
+                alert("결제가 완료되지 않았습니다.");
+                location.href = "/reservation-lookup";
+            } else {
+                alert(error.message);
+            }
+        }
+    };
+}
+
+function closePaymentModal() {
+    if (currentReservation) {
+        location.href = `/payments/fail?code=USER_CANCEL&message=${encodeURIComponent("결제를 취소했습니다.")}&orderId=${currentReservation.orderId}`;
+        return;
+    }
+    document.getElementById("payment-modal").style.display = "none";
 }
 
 function logout() {
