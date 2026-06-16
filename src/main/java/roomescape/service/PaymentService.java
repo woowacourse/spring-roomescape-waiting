@@ -36,8 +36,14 @@ public class PaymentService {
 
         PaymentResult result = paymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
 
-        return transactionTemplate.execute(status -> ReservationResponse.from(complete(order, result.paymentKey())));
+        try {
+            return transactionTemplate.execute(status -> ReservationResponse.from(complete(order, result.paymentKey())));
+        } catch (RuntimeException e) {
+            /* refund */
+            throw e;
+        }
     }
+
 
     private Reservation complete(ReservationOrder order, String paymentKey) {
         reservationOrderService.completeOrder(order, paymentKey);
