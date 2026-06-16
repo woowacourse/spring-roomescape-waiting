@@ -13,6 +13,7 @@ import roomescape.payment.client.dto.CancelRequest;
 import roomescape.payment.client.dto.ConfirmRequest;
 import roomescape.payment.client.dto.TossErrorResponse;
 import roomescape.payment.client.dto.TossPaymentResponse;
+import roomescape.payment.dto.PaymentResult;
 
 @Component
 public class TossPaymentGateway {
@@ -28,7 +29,7 @@ public class TossPaymentGateway {
     }
 
     @Retryable(retryFor = TossPaymentException.Retryable.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
-    public TossPaymentResponse confirm(String paymentKey, String orderId, long amount) {
+    public PaymentResult confirm(String paymentKey, String orderId, long amount) {
         log.info("결제 승인 요청 paymentKey={} orderId={} amount={}", paymentKey, orderId, amount);
         TossPaymentResponse response = tossRestClient.post()
                 .uri("/v1/payments/confirm")
@@ -41,7 +42,7 @@ public class TossPaymentGateway {
                 })
                 .body(TossPaymentResponse.class);
         log.info("결제 승인 완료 paymentKey={} orderId={}", paymentKey, orderId);
-        return response;
+        return new PaymentResult(response.paymentKey(), response.orderId(), response.status(), response.totalAmount());
     }
 
     public void cancel(String paymentKey, String cancelReason) {

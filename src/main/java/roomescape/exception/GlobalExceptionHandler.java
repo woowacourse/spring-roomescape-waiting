@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.client.TossPaymentException;
 
 @RestControllerAdvice
@@ -27,8 +28,8 @@ public class GlobalExceptionHandler {
                 );
     }
 
-    @ExceptionHandler(TossPaymentException.class)
-    public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException exception) {
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentGatewayException(PaymentGatewayException exception) {
         if (exception instanceof TossPaymentException.GatewayConfig) {
             log.error("[운영 알람] Toss API 키 설정 오류 code={} message={}", exception.getCode(), exception.getMessage());
         } else if (exception instanceof TossPaymentException.Retryable) {

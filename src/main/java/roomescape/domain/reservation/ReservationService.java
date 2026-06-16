@@ -22,7 +22,7 @@ import roomescape.domain.waiting.Waitings;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.payment.client.TossPaymentGateway;
-import roomescape.payment.client.dto.TossPaymentResponse;
+import roomescape.payment.dto.PaymentResult;
 import roomescape.payment.domain.Payment;
 import roomescape.payment.domain.PaymentRepository;
 
@@ -90,15 +90,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse confirmPayment(String orderId, TossPaymentResponse tossResponse) {
+    public ReservationResponse confirmPayment(String orderId, PaymentResult paymentResult) {
         Reservation reservation = reservationRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         reservationRepository.updateStatus(reservation.getId(), ReservationStatus.CONFIRMED);
         paymentRepository.save(Payment.of(
-                tossResponse.paymentKey(),
-                tossResponse.orderId(),
-                tossResponse.totalAmount(),
-                tossResponse.status(),
+                paymentResult.paymentKey(),
+                paymentResult.orderId(),
+                paymentResult.totalAmount(),
+                paymentResult.status(),
                 reservation.getId()
         ));
         return ReservationResponse.from(reservation);
