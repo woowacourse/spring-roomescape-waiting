@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.exception.RoomescapeException;
-import roomescape.payment.client.TossPaymentException;
 import roomescape.payment.dto.CheckoutResult;
 import roomescape.payment.dto.PaymentConfirmResult;
 
@@ -49,12 +48,12 @@ public class PaymentController {
     ) {
         try {
             PaymentConfirmResult result = paymentService.confirm(paymentKey, orderId, amount);
-            model.addAttribute("payment", result.tossResponse());
+            model.addAttribute("payment", result.paymentResult());
             model.addAttribute("reservation", result.reservation());
             return "payment/success";
         } catch (RoomescapeException e) {
             return failView(model, e.getErrorCode().name(), e.getMessage(), orderId);
-        } catch (TossPaymentException e) {
+        } catch (PaymentGatewayException e) {
             return failView(model, e.getCode(), e.getMessage(), orderId);
         }
     }
