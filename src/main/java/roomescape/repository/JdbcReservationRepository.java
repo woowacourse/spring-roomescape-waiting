@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
@@ -32,6 +33,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id    AS theme_id,
@@ -54,6 +56,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id         AS theme_id,
@@ -79,6 +82,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id         AS theme_id,
@@ -102,6 +106,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id         AS theme_id,
@@ -147,7 +152,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -156,13 +161,15 @@ public class JdbcReservationRepository implements ReservationRepository {
             ps.setObject(2, reservation.getSchedule().getDate());
             ps.setObject(3, reservation.getSchedule().getTime().getId());
             ps.setObject(4, reservation.getSchedule().getTheme().getId());
+            ps.setString(5, reservation.getStatus().name());
             return ps;
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
         return new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getSchedule());
+                reservation.getSchedule(),
+                reservation.getStatus());
     }
 
     @Override
@@ -182,9 +189,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void confirm(long id) {
+        String sql = "UPDATE reservation SET status = ? WHERE id = ?";
+        jdbcTemplate.update(sql, ReservationStatus.CONFIRMED.name(), id);
+    }
+
+    @Override
     public boolean delete(Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
         return jdbcTemplate.update(sql, reservation.getId()) > 0;
+    }
+
+    @Override
+    public boolean deletePendingById(long id) {
+        String sql = "DELETE FROM reservation WHERE id = ? AND status = ?";
+        return jdbcTemplate.update(sql, id, ReservationStatus.PENDING.name()) > 0;
     }
 
     private RowMapper<Reservation> reservationRowsMapper() {
@@ -204,7 +223,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             return new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
-                    new Schedule(LocalDate.parse(rs.getString("reservation_date")), time, theme)
+                    new Schedule(LocalDate.parse(rs.getString("reservation_date")), time, theme),
+                    ReservationStatus.valueOf(rs.getString("reservation_status"))
             );
         };
     }

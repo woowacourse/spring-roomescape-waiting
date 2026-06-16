@@ -7,6 +7,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
+import roomescape.domain.PaymentOrder;
+import roomescape.repository.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -24,11 +26,31 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
 
+    private static final long RESERVATION_AMOUNT = 50_000L;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
     private final Clock clock;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
+            WaitingRepository waitingRepository,
+            PaymentOrderRepository paymentOrderRepository,
+            Clock clock
+    ) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
+        this.paymentOrderRepository = paymentOrderRepository;
+        this.clock = clock;
+    }
 
     public ReservationService(
             ReservationRepository reservationRepository,
@@ -37,11 +59,7 @@ public class ReservationService {
             WaitingRepository waitingRepository,
             Clock clock
     ) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
-        this.clock = clock;
+        this(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository, null, clock);
     }
 
     public List<Reservation> findReservations(int page, int size) {
@@ -62,7 +80,9 @@ public class ReservationService {
 
         Reservation reservation = Reservation.create(name, new Schedule(date, time, theme), LocalDateTime.now(clock));
         checkDuplicated(reservation);
-        return save(reservation);
+        Reservation saved = save(reservation);
+        savePaymentOrder(saved);
+        return saved;
     }
 
     @Transactional
@@ -114,6 +134,14 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    private void savePaymentOrder(Reservation reservation) {
+        if (paymentOrderRepository == null) {
+            return;
+        }
+        String orderId = "order-" + java.util.UUID.randomUUID().toString().replace("-", "");
+        paymentOrderRepository.save(new PaymentOrder(orderId, reservation.getId(), RESERVATION_AMOUNT, null));
     }
 
     private void update(Reservation reservation) {
