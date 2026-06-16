@@ -1,11 +1,15 @@
 package roomescape.acceptance;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static roomescape.support.ReservationApiSteps.내_예약목록_조회;
 import static roomescape.support.ReservationApiSteps.예약_변경_요청;
 import static roomescape.support.ReservationApiSteps.예약_생성_요청;
 import static roomescape.support.ReservationApiSteps.예약_취소_요청;
 
+import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +17,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import roomescape.domain.payment.PaymentGateway;
+import roomescape.domain.payment.PaymentResult;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.support.AcceptanceTest;
 import roomescape.support.FixedClockConfig;
 
@@ -41,6 +49,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     private Long timeId11;
     private Long themeId;
 
+    @MockitoBean
+    private PaymentGateway paymentGateway;
+
     @BeforeEach
     void setUpSlot() {
         timeId10 = fixture.insertTime(LocalTime.of(10, 0));
@@ -49,33 +60,67 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("사용자는 예약하고, 내 목록에서 보고, 변경하고, 취소할 수 있다 (전체 흐름)")
-    void 예약_조회_변경_취소_흐름() {
-        // 1) 예약한다
+    @DisplayName("사용자 예약 요청은 결제 대기 주문을 만들고 예약은 PENDING 상태가 된다")
+    void 예약_요청은_결제_대기_주문을_만든다() {
         long reservationId = 예약_생성_요청("브라운", FUTURE, timeId10, themeId)
                 .statusCode(201)
-                .extract().jsonPath().getLong("id");
+                .body("reservationId", notNullValue())
+                .body("orderId", notNullValue())
+                .body("amount", is(1000))
+                .body("orderName", is("테마A"))
+                .body("clientKey", notNullValue())
+                .extract().jsonPath().getLong("reservationId");
 
-        // 2) 내 목록에 예약으로 보인다
+        org.assertj.core.api.Assertions.assertThat(fixture.findReservationStatus(reservationId))
+                .isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("결제 성공 콜백이 오면 예약이 CONFIRMED 상태가 된다")
+    void 결제_성공_콜백_후_예약_확정() {
+        var json = 예약_생성_요청("브라운", FUTURE, timeId10, themeId)
+                .statusCode(201)
+                .extract().jsonPath();
+        long reservationId = json.getLong("reservationId");
+        String orderId = json.getString("orderId");
+        int amount = json.getInt("amount");
+
+        given(paymentGateway.confirm(any()))
+                .willReturn(new PaymentResult("test_pk_1", orderId, PaymentStatus.DONE, amount));
+
+        RestAssured.given()
+                .redirects().follow(false)
+                .queryParam("paymentKey", "test_pk_1")
+                .queryParam("orderId", orderId)
+                .queryParam("amount", amount)
+                .when().get("/payments/success")
+                .then().statusCode(302);
+
+        org.assertj.core.api.Assertions.assertThat(fixture.findReservationStatus(reservationId))
+                .isEqualTo("CONFIRMED");
+    }
+
+    @Test
+    @DisplayName("사용자는 확정된 예약을 내 목록에서 보고, 변경하고, 취소할 수 있다")
+    void 예약_조회_변경_취소_흐름() {
+        long reservationId = fixture.insertReservation("브라운", FUTURE, timeId10, themeId);
+
         내_예약목록_조회("브라운")
                 .statusCode(200)
                 .body("size()", is(1))
                 .body("[0].status", is("RESERVED"))
                 .body("[0].time.startAt", is("10:00"));
 
-        // 3) 날짜·시간을 변경한다
         예약_변경_요청(reservationId, "브라운", FUTURE_2, timeId11)
                 .statusCode(200)
                 .body("date", is(FUTURE_2.toString()))
                 .body("time.startAt", is("11:00"));
 
-        // 4) 변경이 조회에 반영된다
         내_예약목록_조회("브라운")
                 .statusCode(200)
                 .body("[0].date", is(FUTURE_2.toString()))
                 .body("[0].time.startAt", is("11:00"));
 
-        // 5) 취소하면 목록이 빈다
         예약_취소_요청(reservationId, "브라운")
                 .statusCode(204);
 
