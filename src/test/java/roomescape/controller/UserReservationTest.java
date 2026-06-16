@@ -184,13 +184,13 @@ public class UserReservationTest {
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 
-        String reservationId = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getString("id");
+                .statusCode(201);
+        long reservationId = firstReservationId();
 
         Map<String, Object> update = new HashMap<>();
         update.put("name", "브라운");
@@ -231,9 +231,9 @@ public class UserReservationTest {
         createTime("11:00");
 
         Map<String, Object> reservation1 = createReservationBody("브라운", FUTURE_DATE, 1, 1);
-        String reservationId = RestAssured.given().contentType(ContentType.JSON).body(reservation1)
-                .when().post("/reservations").then().statusCode(201)
-                .extract().jsonPath().getString("id");
+        RestAssured.given().contentType(ContentType.JSON).body(reservation1)
+                .when().post("/reservations").then().statusCode(201);
+        long reservationId = firstReservationId();
 
         Map<String, Object> reservation2 = createReservationBody("네오", FUTURE_DATE, 2, 1);
         RestAssured.given().contentType(ContentType.JSON).body(reservation2)
@@ -313,9 +313,9 @@ public class UserReservationTest {
         createTime("10:00");
 
         Map<String, Object> reservation = createReservationBody("브라운", FUTURE_DATE, 1, 1);
-        String reservationId = RestAssured.given().contentType(ContentType.JSON).body(reservation)
-                .when().post("/reservations").then().statusCode(201)
-                .extract().jsonPath().getString("id");
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+        long reservationId = firstReservationId();
 
         Map<String, Object> update = createReservationBody("브라운", PAST_DATE, 1, 1);
         RestAssured.given().log().all()
@@ -365,5 +365,13 @@ public class UserReservationTest {
         body.put("timeId", timeId);
         body.put("themeId", themeId);
         return body;
+    }
+
+    // 예약 생성 응답은 주문 정보(orderId, amount)만 반환하므로 예약 id는 조회로 가져온다.
+    private long firstReservationId() {
+        return RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .extract().jsonPath().getLong("[0].id");
     }
 }
