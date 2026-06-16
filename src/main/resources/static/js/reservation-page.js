@@ -129,13 +129,15 @@ reservationForm.addEventListener("submit", async (event) => {
     };
 
     try {
-        await request("/reservations", { method: "POST", body: JSON.stringify(payload) });
+        const createdReservation = await request("/reservations", { method: "POST", body: JSON.stringify(payload) });
         showFeedback(reservationFeedback, "success", "예약이 등록되었습니다.");
         reservationNameInput.value = "";
         await loadTopAvailableTimes();
 
         // 내 예약 목록 갱신
         if (checkNameInput.value) checkForm.dispatchEvent(new Event("submit"));
+        const amount = 50000;
+        window.location.href = `/orders/checkout/${createdReservation.id}?amount=${amount}`;
     } catch (error) {
         showFeedback(reservationFeedback, "error", error.message);
     }
@@ -329,16 +331,46 @@ function renderMyReservations(reservations, username) {
                 renderMyReservations(reservations, username);
             };
 
+            // [수정 후] 내 예약 인라인 취소 버튼 로직
             article.querySelector('.inline-cancel-btn').onclick = async () => {
-                if (!window.confirm("이 예약을 정말 취소하시겠습니까?")) return;
+                if (!window.confirm("이 예약을 정말 취소하시겠습니까?\n결제된 예약인 경우 환불이 함께 진행됩니다.")) return;
+
                 clearFeedback(checkFeedback);
                 try {
-                    const params = new URLSearchParams({
-                        username,
-                        status: reservation.status
-                    });
-                    await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
-                    showFeedback(checkFeedback, "success", "예약이 성공적으로 취소되었습니다.");
+                    let orderId = null;
+                    let orderData = null;
+                    // 1단계: 주문 정보가 있는지 확인
+                    try {
+                        orderData = await request(`/orders/${reservation.id}`, { method: "GET" });
+                        if (orderData && orderData.orderId) {
+                            orderId = orderData.orderId;
+                        }
+                    } catch (e) {
+                        console.warn("결제 내역이 없거나 불러올 수 없는 예약입니다.");
+                    }
+
+                    if (orderId) {
+                        // 2-A: 결제 내역이 있으면 [환불 처리 API] 호출
+                        const result = await request(`/payments/cancel/${orderId}`, {
+                            method: "POST",
+                            body: JSON.stringify({
+                                cancelReason: "고객 직접 취소",
+                                cancelAmount: orderData.amount,
+                                name: username
+                            })
+                        });
+                        showFeedback(checkFeedback, "success", `예약이 취소되었습니다. (환불 금액: ${result.canceledAmount}원)`);
+                    } else {
+                        // 2-B: 결제 내역이 없으면 (예: 대기 예약, 구형 데이터) [일반 삭제 API] 호출
+                        const params = new URLSearchParams({
+                            username,
+                            status: reservation.status
+                        });
+                        await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
+                        showFeedback(checkFeedback, "success", "예약이 성공적으로 취소되었습니다.");
+                    }
+
+                    // 목록 다시 불러오기
                     checkForm.dispatchEvent(new Event("submit"));
                     loadTopAvailableTimes();
                 } catch (error) {
@@ -364,3 +396,20 @@ checkForm.addEventListener("submit", async (event) => {
         showFeedback(checkFeedback, "error", error.message);
     }
 });
+const historySearchBtn = document.getElementById("history-search-btn");
+
+if (historySearchBtn) {
+    historySearchBtn.addEventListener("click", () => {
+        const name = checkNameInput.value.trim();
+
+        // 이름이 비어있으면 경고창 띄우고 포커스 주기
+        if (!name) {
+            alert("결제 내역을 조회할 예약자 이름을 입력해주세요.");
+            checkNameInput.focus();
+            return;
+        }
+
+        // 이름이 입력되어 있다면 결제 내역 페이지로 이동
+        window.location.href = `/orders/history?name=${encodeURIComponent(name)}`;
+    });
+}
