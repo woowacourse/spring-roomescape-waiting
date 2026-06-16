@@ -41,3 +41,15 @@ CREATE TABLE reservation_entry
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
+
+CREATE TABLE payment_order
+(
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    order_id   VARCHAR(50) NOT NULL,
+    amount     BIGINT      NOT NULL,
+    entry_id   BIGINT      NOT NULL,
+    created_at TIMESTAMP   NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_payment_order_order_id UNIQUE (order_id),
+    FOREIGN KEY (entry_id) REFERENCES reservation_entry (id)
+);

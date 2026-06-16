@@ -29,6 +29,12 @@ public class ReservationEntries {
         return entry;
     }
 
+    public ReservationEntry addPending(String name, LocalDateTime createdAt) {
+        ReservationEntry entry = ReservationEntry.pending(name, createdAt);
+        entries.add(entry);
+        return entry;
+    }
+
     public boolean hasActiveEntryByName(String name) {
         return entries.stream()
                 .filter(ReservationEntry::isActive)
@@ -37,7 +43,7 @@ public class ReservationEntries {
 
     public boolean hasReservedEntry() {
         return entries.stream()
-                .anyMatch(ReservationEntry::isReserved);
+                .anyMatch(e -> e.isReserved() || e.isPending());
     }
 
     public List<ReservationEntry> getEntries() {

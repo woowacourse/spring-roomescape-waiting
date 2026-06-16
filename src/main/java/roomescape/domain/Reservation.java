@@ -51,6 +51,16 @@ public class Reservation {
         return this.schedule.equals(Schedule.of(date, time));
     }
 
+    public void addPendingEntry(String name, Long amount, LocalDateTime now) {
+        theme.validatePaymentAmount(amount);
+        validateNotPast(now);
+        validateDuplicateEntry(name);
+        if (entries.hasReservedEntry()) {
+            throw new DuplicateEntityException("이미 예약 또는 결제 중인 날짜입니다. (%s %s)", schedule.getDate(), schedule.getStartAt());
+        }
+        entries.addPending(name, now);
+    }
+
     public ReservationEntry reserve(String name, Long amount, LocalDateTime now) {
         theme.validatePaymentAmount(amount);
         return reserve(name, now);
