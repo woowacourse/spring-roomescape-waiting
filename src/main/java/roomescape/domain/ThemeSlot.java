@@ -48,10 +48,6 @@ public class ThemeSlot {
     public Reservation addReservation(String name) {
         reservations.validateDuplicate(name);
         Reservation reservation = new Reservation(name, this.id, this.date, this.time, this.theme);
-        if (reservations.hasNoActiveReservation()) {
-            reservation.confirm();
-            this.isReserved = true;
-        }
         reservations.add(reservation);
         return reservation;
     }

@@ -29,6 +29,7 @@ class ReservationServiceTest {
 
     private ReservationService reservationService;
     private FakeThemeSlotRepository fakeThemeSlotRepository;
+    private FakeReservationRepository fakeReservationRepository;
     private Time savedTime;
     private Theme savedTheme;
     private ThemeSlot savedThemeSlot1;
@@ -39,7 +40,7 @@ class ReservationServiceTest {
     void setUp() {
         FakeTimeRepository fakeReservationTimeDao = new FakeTimeRepository();
         FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
-        FakeReservationRepository fakeReservationRepository = new FakeReservationRepository();
+        fakeReservationRepository = new FakeReservationRepository();
         fakeThemeSlotRepository = new FakeThemeSlotRepository(fakeReservationRepository);
 
         reservationService = new ReservationService(
@@ -85,11 +86,11 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 테이블에 themeSlot에 해당하는 예약이 없다면, reservation 상태가 confirm으로 변경된다.")
+    @DisplayName("결제 전이므로 첫 예약도 PENDING 상태이고 슬롯 예약 상태는 변하지 않는다.")
     void saveReservationByNotExistsThemeSlot() {
         Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
-        assertThat(reservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
-        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isTrue();
+        assertThat(reservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isFalse();
     }
 
     @Test
@@ -104,13 +105,13 @@ class ReservationServiceTest {
     @DisplayName("같은 슬롯에 대한 대기는 신청 순서대로 순번이 부여된다")
     void giveOrderByApplicationOrder() {
         reservationService.saveReservation("브라운", savedThemeSlot1.getId());
-        Reservation reservation1 = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
-        Reservation reservation2 = reservationService.saveReservation("나피리", savedThemeSlot1.getId());
-        Reservation reservation3 = reservationService.saveReservation("드레이븐", savedThemeSlot1.getId());
+        reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+        reservationService.saveReservation("나피리", savedThemeSlot1.getId());
+        reservationService.saveReservation("드레이븐", savedThemeSlot1.getId());
 
         List<WaitingReservationResponse> responses = reservationService.findWaitingReservationWithOrder(savedThemeSlot1.getId());
         assertThat(responses).extracting(WaitingReservationResponse::waitingOrder)
-                .containsExactly(1, 2, 3);
+                .containsExactly(1, 2, 3, 4);
     }
 
     @Test
@@ -135,14 +136,18 @@ class ReservationServiceTest {
         //then
         Reservation findReservation = reservationService.findReservation(reservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
-        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isTrue();
+        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isFalse();
     }
 
     @Test
     @DisplayName("취소 대상 상태가 CONFIRM이고 대기중인 예약이 있는 경우, 대상 reservation의 status가 CANCEL되고, 대기중인 예약이 CONFIRM으로 변경된다.")
     void reservationStatusCancelWhenReservationIsConfirmAndExistsPendingReservation(){
-        // given
-        Reservation confirmReservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        // given: PaymentService가 결제 완료 후 CONFIRMED로 전환한 상황을 직접 세팅
+        ThemeSlot slot = fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get();
+        Reservation confirmReservation = fakeReservationRepository.save(
+                new Reservation(null, "브라운", savedThemeSlot1.getId(), slot.getDate(), slot.getTime(), slot.getTheme(), ConfirmedStatus.getInstance())
+        );
+        fakeThemeSlotRepository.update(new ThemeSlot(null, slot.getTheme(), slot.getDate(), slot.getTime(), true));
         Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
 
         //when
@@ -182,10 +187,14 @@ class ReservationServiceTest {
     @Test
     @DisplayName("이미 COMPLETED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
     void returnInvalidCancelledCommandWhenCancelCompletedReservation(){
-        Reservation completedReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
-        reservationService.completeReservation(completedReservation.getId());
+        // PENDING → complete() 불가이므로 결제 완료 상태(CONFIRMED)를 직접 세팅 후 완료 처리
+        ThemeSlot slot = fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get();
+        Reservation confirmedReservation = fakeReservationRepository.save(
+                new Reservation(null, "김대기", savedThemeSlot1.getId(), slot.getDate(), slot.getTime(), slot.getTheme(), ConfirmedStatus.getInstance())
+        );
+        reservationService.completeReservation(confirmedReservation.getId());
         assertThatThrownBy(() -> {
-            reservationService.cancelReservation(completedReservation.getId());
+            reservationService.cancelReservation(confirmedReservation.getId());
         }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
     }
 
@@ -232,8 +241,10 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("내 예약 조회시, PENDING 예약인 경우 순번과 함께 조회되고, PENDING이 아닌 예약은 순번 없이 조회 된다.")
+    @DisplayName("내 예약 조회시, PENDING 예약에 슬롯별 대기 순번이 포함된다.")
     void showWaitingOrderForPendingReservationsOnly(){
+        // slot1: 김대기1(1순위), 김대기2(2순위), 김대기3(3순위)
+        // slot2: 김대기1(1순위), 김대기3(2순위), 김대기2(3순위)
         reservationService.saveReservation("김대기1", savedThemeSlot1.getId());
         reservationService.saveReservation("김대기2", savedThemeSlot1.getId());
         reservationService.saveReservation("김대기3", savedThemeSlot1.getId());
@@ -242,11 +253,13 @@ class ReservationServiceTest {
         reservationService.saveReservation("김대기2", savedThemeSlot2.getId());
 
         MyReservationResponse reservation2Response = reservationService.findReservationBy("김대기2");
-        assertThat(reservation2Response.waitingReservationResponses().get(0).waitingOrder()).isEqualTo(1);
-        assertThat(reservation2Response.waitingReservationResponses().get(1).waitingOrder()).isEqualTo(2);
+        assertThat(reservation2Response.waitingReservationResponses())
+                .extracting(WaitingReservationResponse::waitingOrder)
+                .containsExactlyInAnyOrder(2, 3);
 
         MyReservationResponse reservation3Response = reservationService.findReservationBy("김대기3");
-        assertThat(reservation3Response.waitingReservationResponses().get(0).waitingOrder()).isEqualTo(2);
-        assertThat(reservation3Response.waitingReservationResponses().get(1).waitingOrder()).isEqualTo(1);
+        assertThat(reservation3Response.waitingReservationResponses())
+                .extracting(WaitingReservationResponse::waitingOrder)
+                .containsExactlyInAnyOrder(3, 2);
     }
 }

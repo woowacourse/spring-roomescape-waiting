@@ -42,18 +42,18 @@ class ThemeSlotTest {
     }
 
     @Test
-    @DisplayName("빈 슬롯에 첫 예약을 하면 CONFIRMED 상태로 생성되고 슬롯이 예약됨으로 표시된다.")
-    void addReservation_firstReservation_isConfirmedAndSlotMarkedReserved() {
+    @DisplayName("빈 슬롯에 첫 예약을 하면 PENDING 상태로 생성되고 슬롯 예약 상태는 변하지 않는다.")
+    void addReservation_firstReservation_isPendingAndSlotNotReserved() {
         ThemeSlot themeSlot = emptySlot();
 
         Reservation reservation = themeSlot.addReservation("브라운");
 
-        assertThat(reservation.isConfirmed()).isTrue();
-        assertThat(themeSlot.isReserved()).isTrue();
+        assertThat(reservation.isPending()).isTrue();
+        assertThat(themeSlot.isReserved()).isFalse();
     }
 
     @Test
-    @DisplayName("이미 예약된 슬롯에 다른 이름으로 예약하면 PENDING 상태로 생성된다.")
+    @DisplayName("같은 슬롯에 두 번째 예약을 해도 PENDING 상태로 생성되고 슬롯 예약 상태는 변하지 않는다.")
     void addReservation_secondReservation_isPending() {
         ThemeSlot themeSlot = emptySlot();
         themeSlot.addReservation("브라운");
@@ -61,7 +61,7 @@ class ThemeSlotTest {
         Reservation pending = themeSlot.addReservation("포비");
 
         assertThat(pending.isPending()).isTrue();
-        assertThat(themeSlot.isReserved()).isTrue();
+        assertThat(themeSlot.isReserved()).isFalse();
     }
 
     @Test
@@ -76,13 +76,13 @@ class ThemeSlotTest {
     }
 
     @Test
-    @DisplayName("취소된 예약이 있는 슬롯에 같은 이름으로 다시 예약할 수 있다.")
-    void addReservation_afterCancellation_canReserveAgain() {
+    @DisplayName("취소된 예약이 있는 슬롯에 같은 이름으로 다시 예약할 수 있으며 PENDING 상태로 생성된다.")
+    void addReservation_afterCancellation_canReserveAgainAsPending() {
         ThemeSlot themeSlot = slotWith(false, cancelled(1L, "브라운"));
 
         Reservation reservation = themeSlot.addReservation("브라운");
 
-        assertThat(reservation.isConfirmed()).isTrue();
+        assertThat(reservation.isPending()).isTrue();
     }
 
     @Test
