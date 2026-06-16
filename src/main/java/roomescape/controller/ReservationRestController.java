@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.ReserveResponse;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.service.ReservationService;
@@ -48,14 +49,14 @@ public class ReservationRestController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest reservationReq) {
-        ReservationResponse newReservation = reservationService.create(reservationReq);
+    public ResponseEntity<ReserveResponse> create(@RequestBody ReservationRequest reservationReq) {
+        ReserveResponse newReservation = reservationService.reserve(reservationReq);
         return new ResponseEntity<>(newReservation, HttpStatus.CREATED);
     }
 
     @PutMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
-                                                      @RequestBody ReservationRequest reservationReq) {
+                                                  @RequestBody ReservationRequest reservationReq) {
         ReservationResponse updatedReservation = reservationService.update(id, reservationReq);
         return ResponseEntity.ok(updatedReservation);
     }

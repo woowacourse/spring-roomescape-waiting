@@ -6,12 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationOrder.ReservationOrder;
+import roomescape.domain.reservationOrder.ReservationOrderRepository;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.SlotDomainService;
-import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.ReservationRequest;
+import roomescape.dto.reservation.ReserveResponse;
 import roomescape.exception.ConcurrencyConflictException;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
@@ -27,13 +30,16 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final SlotDomainService slotDomainService;
+    private final ReservationOrderService reservationOrderService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationWaitingRepository reservationWaitingRepository,
-                              SlotDomainService slotDomainService) {
+                              SlotDomainService slotDomainService, ReservationOrderRepository reservationOrderRepository,
+                              ReservationOrderService reservationOrderService) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.slotDomainService = slotDomainService;
+        this.reservationOrderService = reservationOrderService;
     }
 
     public ReservationResponse read(Long id) {
@@ -53,15 +59,18 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse create(ReservationRequest reservationReq) {
+    public ReserveResponse reserve(ReservationRequest reservationReq) {
         if (slotDomainService.isExistByDateAndTimeAndTheme(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId())) {
             throw new ReservationAlreadyExistException();
         }
         Slot slot = slotDomainService.create(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId());
 
         Reservation reservation = Reservation.create(reservationReq.name(), slot);
+
         Long reservationId = reservationRepository.insert(reservation);
-        return ReservationResponse.from(reservation.withId(reservationId));
+        ReservationOrder order = reservationOrderService.insert(reservationId);
+
+        return ReserveResponse.from(order);
     }
 
     @Retryable(retryFor = ConcurrencyConflictException.class, backoff = @Backoff(delay = 50, multiplier = 2.0, random = true))

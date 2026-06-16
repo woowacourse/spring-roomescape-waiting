@@ -6,6 +6,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
+import roomescape.exception.PaymentException.AlreadyProcessedException;
 
 public class Reservation {
 
@@ -50,6 +51,13 @@ public class Reservation {
 
     public Reservation updatePaid(boolean paid) {
         return new Reservation(this.id, this.name, this.slot, this.createdAt, paid);
+    }
+
+    public Reservation confirmPayment() {
+        if (this.paid) {
+            throw new AlreadyProcessedException("이미 결제 완료된 예약입니다.");
+        }
+        return new Reservation(this.id, this.name, this.slot, this.createdAt, true);
     }
 
     public boolean isReservedBy(String name) {
