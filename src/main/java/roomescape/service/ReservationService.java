@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,9 @@ public class ReservationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
         validateBeforeDate(themeSlot);
         validateDateTime(themeSlot);
-        Reservation reservation = themeSlot.addReservation(name);
+        String orderId = UUID.randomUUID().toString();
+        Long amount = themeSlot.getTheme().getPrice();
+        Reservation reservation = themeSlot.addReservation(name, orderId, amount);
         themeSlotRepository.update(themeSlot);
         return reservationRepository.save(reservation);
     }

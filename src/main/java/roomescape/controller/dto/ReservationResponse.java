@@ -10,7 +10,9 @@ public record ReservationResponse(
         LocalDate date,
         TimeResponse time,
         ThemeResponse theme,
-        String status
+        String status,
+        String orderId,
+        Long amount
 ) {
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -19,7 +21,9 @@ public record ReservationResponse(
                 reservation.getDate(),
                 TimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getReservationStatusName()
+                reservation.getReservationStatusName(),
+                reservation.getOrderId(),
+                reservation.getAmount()
         );
     }
 }

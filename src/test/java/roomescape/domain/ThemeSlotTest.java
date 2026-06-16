@@ -46,7 +46,7 @@ class ThemeSlotTest {
     void addReservation_firstReservation_isPendingAndSlotNotReserved() {
         ThemeSlot themeSlot = emptySlot();
 
-        Reservation reservation = themeSlot.addReservation("브라운");
+        Reservation reservation = themeSlot.addReservation("브라운", "order-brown", 10000L);
 
         assertThat(reservation.isPending()).isTrue();
         assertThat(themeSlot.isReserved()).isFalse();
@@ -56,9 +56,9 @@ class ThemeSlotTest {
     @DisplayName("같은 슬롯에 두 번째 예약을 해도 PENDING 상태로 생성되고 슬롯 예약 상태는 변하지 않는다.")
     void addReservation_secondReservation_isPending() {
         ThemeSlot themeSlot = emptySlot();
-        themeSlot.addReservation("브라운");
+        themeSlot.addReservation("브라운", "order-brown", 10000L);
 
-        Reservation pending = themeSlot.addReservation("포비");
+        Reservation pending = themeSlot.addReservation("포비", "order-pobi", 10000L);
 
         assertThat(pending.isPending()).isTrue();
         assertThat(themeSlot.isReserved()).isFalse();
@@ -68,9 +68,9 @@ class ThemeSlotTest {
     @DisplayName("같은 이름으로 중복 예약하면 예외가 발생한다.")
     void addReservation_duplicateName_throwsException() {
         ThemeSlot themeSlot = emptySlot();
-        themeSlot.addReservation("브라운");
+        themeSlot.addReservation("브라운", "order-brown", 10000L);
 
-        assertThatThrownBy(() -> themeSlot.addReservation("브라운"))
+        assertThatThrownBy(() -> themeSlot.addReservation("브라운", "order-brown", 10000L))
                 .isInstanceOf(CustomException.class)
                 .hasMessage("이미 같은 시간에 예약 또는 대기를 신청했습니다.");
     }
@@ -80,7 +80,7 @@ class ThemeSlotTest {
     void addReservation_afterCancellation_canReserveAgainAsPending() {
         ThemeSlot themeSlot = slotWith(false, cancelled(1L, "브라운"));
 
-        Reservation reservation = themeSlot.addReservation("브라운");
+        Reservation reservation = themeSlot.addReservation("브라운", "order-brown", 10000L);
 
         assertThat(reservation.isPending()).isTrue();
     }
