@@ -1,19 +1,43 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.exception.InvalidInputException;
 import roomescape.domain.exception.PastReservationException;
 
+@Entity
+@Table(name = "reservation")
 public class Reservation {
-    private final Long id;
-    private final String name;
-    private final LocalDate date;
-    private final LocalDateTime createdAt;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final ReservationStatus status;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private LocalDate date;
+    private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+
+    protected Reservation() {
+    }
 
     public Reservation(Long id, String name, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme, ReservationStatus status) {
         validateFields(name, date, time, theme);
