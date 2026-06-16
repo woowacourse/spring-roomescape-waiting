@@ -49,10 +49,11 @@ CREATE TABLE waiting
     FOREIGN KEY (slot_id) REFERENCES slot (id) ON DELETE RESTRICT
 );
 
-CREATE TABLE order
+CREATE TABLE reservation_order
 (
     id              VARCHAR(64)     NOT NULL,
     amount          BIGINT          NOT NULL,
+    payment_key     VARCHAR(255),
     reservation_id  BIGINT          NOT NULL,
     PRIMARY KEY (id)
-)
+);
