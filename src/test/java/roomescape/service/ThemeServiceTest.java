@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.service.exception.ReservationConflictException;
 
@@ -17,12 +17,12 @@ import roomescape.service.exception.ReservationConflictException;
 class ThemeServiceTest {
 
     @Mock private ThemeRepository themeRepository;
-    @Mock private ReservationDao reservationDao;
+    @Mock private ReservationRepository reservationRepository;
     @InjectMocks private ThemeService themeService;
 
     @Test
     void delete_정상_삭제() {
-        given(reservationDao.existsByThemeId(1L)).willReturn(false);
+        given(reservationRepository.existsByTheme_Id(1L)).willReturn(false);
 
         themeService.delete(1L);
 
@@ -31,7 +31,7 @@ class ThemeServiceTest {
 
     @Test
     void delete_예약에_사용중인_테마이면_예외() {
-        given(reservationDao.existsByThemeId(1L)).willReturn(true);
+        given(reservationRepository.existsByTheme_Id(1L)).willReturn(true);
 
         assertThatThrownBy(() -> themeService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class)

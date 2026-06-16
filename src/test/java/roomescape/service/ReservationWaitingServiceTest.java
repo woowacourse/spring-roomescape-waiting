@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -30,7 +30,7 @@ import roomescape.service.exception.ThemeNotFoundException;
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingServiceTest {
 
-    @Mock private ReservationDao reservationDao;
+    @Mock private ReservationRepository reservationRepository;
     @Mock private ReservationService reservationService;
     @Mock private Clock clock;
     @InjectMocks private ReservationWaitingService reservationWaitingService;
@@ -89,12 +89,11 @@ class ReservationWaitingServiceTest {
         Reservation saved = new Reservation(7L, "이영희", futureDate, fixedNow, sampleTime, sampleTheme, ReservationStatus.WAITING);
         given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
         given(reservationService.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "이영희")).willReturn(false);
-        given(reservationDao.existsWaitingByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "이영희")).willReturn(false);
+        given(reservationRepository.existsByDateAndTime_IdAndTheme_IdAndNameAndStatus(futureDate, 1L, 1L, "이영희", ReservationStatus.WAITING)).willReturn(false);
         given(reservationService.getTime(1L)).willReturn(sampleTime);
         given(reservationService.getTheme(1L)).willReturn(sampleTheme);
-        given(reservationDao.save(any())).willReturn(saved);
-        given(reservationDao.findWaitingWithNumberById(7L))
-                .willReturn(Optional.of(new ReservationWaiting(saved, 2L)));
+        given(reservationRepository.save(any())).willReturn(saved);
+        given(reservationRepository.countWaitingBefore(futureDate, 1L, 1L, ReservationStatus.WAITING, fixedNow, 7L)).willReturn(1L);
 
         ReservationWaiting result = reservationWaitingService.saveWaiting("이영희", futureDate, 1L, 1L);
 
@@ -118,7 +117,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
         given(reservationService.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(false);
-        given(reservationDao.existsWaitingByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(true);
+        given(reservationRepository.existsByDateAndTime_IdAndTheme_IdAndNameAndStatus(futureDate, 1L, 1L, "브라운", ReservationStatus.WAITING)).willReturn(true);
 
         assertThatThrownBy(() -> reservationWaitingService.saveWaiting("브라운", futureDate, 1L, 1L))
                 .isInstanceOf(ReservationConflictException.class)
@@ -130,11 +129,11 @@ class ReservationWaitingServiceTest {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        given(reservationDao.findWaitingByIdForUpdate(1L))
+        given(reservationRepository.findByIdAndStatusForUpdate(1L, ReservationStatus.WAITING))
                 .willReturn(Optional.of(reservation));
 
         reservationWaitingService.deleteWaiting(1L);
 
-        then(reservationDao).should().delete(1L);
+        then(reservationRepository).should().deleteById(1L);
     }
 }

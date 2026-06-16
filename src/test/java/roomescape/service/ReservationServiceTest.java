@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.service.exception.ReservationConflictException;
@@ -32,7 +32,7 @@ import roomescape.domain.Theme;
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    @Mock private ReservationDao reservationDao;
+    @Mock private ReservationRepository reservationRepository;
     @Mock private ReservationTimeRepository reservationTimeRepository;
     @Mock private ThemeRepository themeRepository;
     @Mock private Clock clock;
@@ -53,8 +53,8 @@ class ReservationServiceTest {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(sampleTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(sampleTheme));
-        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
-        given(reservationDao.save(any(Reservation.class)))
+        given(reservationRepository.existsByDateAndTime_IdAndTheme_IdAndStatus(futureDate, 1L, 1L, ReservationStatus.CONFIRMED)).willReturn(false);
+        given(reservationRepository.save(any(Reservation.class)))
                 .willReturn(new Reservation(10L, "브라운", futureDate, fixedNow, sampleTime, sampleTheme));
 
         Reservation result = reservationService.save("브라운", futureDate, 1L, 1L);
@@ -88,7 +88,7 @@ class ReservationServiceTest {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(sampleTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(sampleTheme));
-        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
+        given(reservationRepository.existsByDateAndTime_IdAndTheme_IdAndStatus(futureDate, 1L, 1L, ReservationStatus.CONFIRMED)).willReturn(true);
 
         assertThatThrownBy(() -> reservationService.save("브라운", futureDate, 1L, 1L))
                 .isInstanceOf(ReservationConflictException.class)
@@ -100,11 +100,11 @@ class ReservationServiceTest {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
-        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
 
         reservationService.delete(1L);
 
-        then(reservationDao).should().delete(1L);
+        then(reservationRepository).should().deleteById(1L);
     }
 
     @Test
@@ -121,13 +121,14 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         Reservation waiting = new Reservation(5L, "이영희", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
 
-        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
-        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(futureDate, 1L, 1L))
+        given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.findFirstByDateAndTime_IdAndTheme_IdAndStatusOrderByCreatedAtAscIdAsc(
+                futureDate, 1L, 1L, ReservationStatus.WAITING))
                 .willReturn(Optional.of(waiting));
 
         reservationService.delete(1L);
 
-        then(reservationDao).should().updateStatus(5L, ReservationStatus.CONFIRMED);
+        then(reservationRepository).should().updateStatus(5L, ReservationStatus.CONFIRMED);
     }
 
     @Test
@@ -140,15 +141,16 @@ class ReservationServiceTest {
         Reservation waiting = new Reservation(5L, "이영희", oldDate, fixedNow.minusHours(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
         Reservation updated = new Reservation(1L, "브라운", newDate, fixedNow.minusHours(1), newTime, sampleTheme);
 
-        given(reservationDao.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.findByIdForUpdate(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
-        given(reservationDao.existsByDateAndTimeIdAndThemeId(newDate, 2L, 1L)).willReturn(false);
-        given(reservationDao.update(any())).willReturn(updated);
-        given(reservationDao.findFirstWaitingByDateAndTimeIdAndThemeIdForUpdate(oldDate, 1L, 1L))
+        given(reservationRepository.existsByDateAndTime_IdAndTheme_IdAndStatus(newDate, 2L, 1L, ReservationStatus.CONFIRMED)).willReturn(false);
+        given(reservationRepository.findFirstByDateAndTime_IdAndTheme_IdAndStatusOrderByCreatedAtAscIdAsc(
+                oldDate, 1L, 1L, ReservationStatus.WAITING))
                 .willReturn(Optional.of(waiting));
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(updated));
 
         reservationService.update(1L, newDate, 2L);
 
-        then(reservationDao).should().updateStatus(5L, ReservationStatus.CONFIRMED);
+        then(reservationRepository).should().updateStatus(5L, ReservationStatus.CONFIRMED);
     }
 }

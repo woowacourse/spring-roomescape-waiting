@@ -4,7 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.service.exception.ReservationConflictException;
@@ -12,11 +12,11 @@ import roomescape.service.exception.ReservationConflictException;
 @Service
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ReservationDao reservationDao) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional(readOnly = true)
@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(long id) {
-        if (reservationDao.existsByTimeId(id)) {
+        if (reservationRepository.existsByTime_Id(id)) {
             throw new ReservationConflictException("예약에 사용 중인 시간은 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);

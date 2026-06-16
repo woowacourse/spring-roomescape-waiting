@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.domain.AvailableTime;
 import roomescape.domain.ReservationTime;
@@ -14,11 +14,11 @@ import roomescape.service.exception.ReservationConflictException;
 @Service
 public class ThemeService {
     private final ThemeRepository themeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationDao reservationDao) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional(readOnly = true)
@@ -45,7 +45,7 @@ public class ThemeService {
 
     @Transactional
     public void delete(long id) {
-        if (reservationDao.existsByThemeId(id)) {
+        if (reservationRepository.existsByTheme_Id(id)) {
             throw new ReservationConflictException("예약에 사용 중인 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);

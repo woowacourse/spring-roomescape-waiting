@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.service.exception.ReservationConflictException;
 
@@ -18,7 +18,7 @@ import roomescape.service.exception.ReservationConflictException;
 class ReservationTimeServiceTest {
 
     @Mock private ReservationTimeRepository reservationTimeRepository;
-    @Mock private ReservationDao reservationDao;
+    @Mock private ReservationRepository reservationRepository;
     @InjectMocks private ReservationTimeService reservationTimeService;
 
     @Test
@@ -33,7 +33,7 @@ class ReservationTimeServiceTest {
 
     @Test
     void delete_정상_삭제() {
-        given(reservationDao.existsByTimeId(1L)).willReturn(false);
+        given(reservationRepository.existsByTime_Id(1L)).willReturn(false);
 
         reservationTimeService.delete(1L);
 
@@ -42,7 +42,7 @@ class ReservationTimeServiceTest {
 
     @Test
     void delete_예약에_사용중인_시간이면_예외() {
-        given(reservationDao.existsByTimeId(1L)).willReturn(true);
+        given(reservationRepository.existsByTime_Id(1L)).willReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class)
