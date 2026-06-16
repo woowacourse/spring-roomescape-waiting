@@ -3,7 +3,6 @@ package roomescape.repository;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -16,7 +15,13 @@ import roomescape.service.dto.PopularTheme;
 public class JdbcThemeRepository implements ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Theme> themeRowMapper = new DataClassRowMapper<>(Theme.class);
+    private final RowMapper<Theme> themeRowMapper = (rs, rowNum) -> new Theme(
+            rs.getLong("id"),
+            rs.getString("name"),
+            rs.getString("description"),
+            rs.getString("thumbnail_url"),
+            rs.getLong("price")
+    );
     private final RowMapper<PopularTheme> popularThemeRowMapper = (rs, rowNum) -> new PopularTheme(
             new Theme(
                     rs.getLong("id"),
@@ -35,7 +40,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme WHERE is_deleted = FALSE",
+                "SELECT id, name, description, thumbnail_url, price FROM theme WHERE is_deleted = FALSE",
                 themeRowMapper
         );
     }
@@ -43,7 +48,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(Long id) {
         List<Theme> result = jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? AND is_deleted = FALSE",
+                "SELECT id, name, description, thumbnail_url, price FROM theme WHERE id = ? AND is_deleted = FALSE",
                 themeRowMapper,
                 id
         );
