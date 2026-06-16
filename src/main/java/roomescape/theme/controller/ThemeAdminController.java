@@ -44,7 +44,7 @@ public class ThemeAdminController {
     @AuthGuard(roles = MANAGER)
     @PostMapping("/themes")
     public ResponseEntity<ThemeDetailDto> createTheme(@Validated @RequestBody ThemeSaveDto dto) {
-        Theme theme = themeService.register(dto.name(), dto.description(), dto.thumbnailUrl());
+        Theme theme = themeService.register(dto.name(), dto.description(), dto.thumbnailUrl(), dto.amount());
         ThemeDetailDto responseData = ThemeDetailDto.from(theme);
         return ResponseEntity.ok(responseData);
     }

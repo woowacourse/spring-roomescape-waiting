@@ -8,7 +8,8 @@ public record PopularThemeDetailDto(
         String description,
         String thumbnailUrl,
         boolean isActive,
-        long reservationCount
+        Long amount,
+        Long reservationCount
 ) {
     public static PopularThemeDetailDto from(PopularThemeResult result) {
         return new PopularThemeDetailDto(
@@ -17,6 +18,7 @@ public record PopularThemeDetailDto(
                 result.description(),
                 result.thumbnailUrl(),
                 result.isActive(),
+                result.amount(),
                 result.reservationCount()
         );
     }

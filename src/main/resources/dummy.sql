@@ -28,14 +28,14 @@ MERGE INTO reservation_date (date, is_active) KEY (date)
     (DATEADD('DAY', 3, CURRENT_DATE), false);
 
 -- Theme
-INSERT INTO theme (name, description, thumbnail_url, is_active)
-SELECT v.name, v.description, v.thumbnail_url, v.is_active
+INSERT INTO theme (name, description, thumbnail_url, is_active, amount)
+SELECT v.name, v.description, v.thumbnail_url, v.is_active, v.amount
 FROM (
          VALUES
-         ('잠겨버린 연구실', '제한 시간 안에 단서를 찾아 연구실을 탈출해야 합니다.', 'https://images.unsplash.com/photo-1518005020951-eccb494ad742', TRUE),
-             ('사라진 탐정', '실종된 탐정의 흔적을 따라 사건의 진실을 밝혀내세요.', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee', TRUE),
-             ('고대 유적의 비밀', '고대 유적에 숨겨진 암호를 풀고 보물을 찾아야 합니다.', 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', TRUE)
-     ) AS v(name, description, thumbnail_url, is_active)
+         ('잠겨버린 연구실', '제한 시간 안에 단서를 찾아 연구실을 탈출해야 합니다.', 'https://images.unsplash.com/photo-1518005020951-eccb494ad742', TRUE, 25000),
+             ('사라진 탐정', '실종된 탐정의 흔적을 따라 사건의 진실을 밝혀내세요.', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee', TRUE, 27000),
+             ('고대 유적의 비밀', '고대 유적에 숨겨진 암호를 풀고 보물을 찾아야 합니다.', 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', TRUE, 29000)
+     ) AS v(name, description, thumbnail_url, is_active, amount)
 WHERE NOT EXISTS (
     SELECT 1 FROM theme t WHERE t.name = v.name
 );

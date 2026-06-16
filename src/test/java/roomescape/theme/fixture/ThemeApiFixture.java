@@ -11,6 +11,7 @@ public class ThemeApiFixture {
 
     private static final String THEME_DESCRIPTION = "테마1 설명";
     private static final String THUMBNAIL_URL = "테마1 썸네일";
+    private static final Long DEFAULT_AMOUNT = 1000L;
 
     private ThemeApiFixture() {
     }
@@ -20,6 +21,7 @@ public class ThemeApiFixture {
         params.put("name", name);
         params.put("description", THEME_DESCRIPTION);
         params.put("thumbnailUrl", THUMBNAIL_URL);
+        params.put("amount", DEFAULT_AMOUNT);
 
         return RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, token)

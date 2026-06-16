@@ -22,6 +22,7 @@ class ThemeServiceTest {
     private final String name = "테마1";
     private final String description = "테마1 설명";
     private final String thumbnail = "테마1 썸네일";
+    private final Long amount = 1000L;
 
     private ThemeService themeService;
     private FakeThemeRepository themeRepository;
@@ -101,7 +102,7 @@ class ThemeServiceTest {
     @DisplayName("테마를 1개 등록하면 테마 데이터 수가 1 증가한다.")
     void register() {
         // when
-        themeService.register(name, description, thumbnail);
+        themeService.register(name, description, thumbnail, amount);
 
         // then
         assertThat(themeService.readThemes())
@@ -112,12 +113,23 @@ class ThemeServiceTest {
     @DisplayName("등록한 테마와 다시 조회한 테마의 모든 필드가 일치한다.")
     void register_theme_fields_match() {
         // when
-        Theme registeredTheme = themeService.register(name, description, thumbnail);
+        Theme registeredTheme = themeService.register(name, description, thumbnail, amount);
 
         // then
         assertThat(registeredTheme)
                 .usingRecursiveComparison()
                 .isEqualTo(themeService.readTheme(registeredTheme.getId()));
+    }
+
+    @Test
+    @DisplayName("테마를 등록하면 가격이 그대로 저장된다.")
+    void register_with_amount() {
+        // when
+        Theme registeredTheme = themeService.register(name, description, thumbnail, amount);
+
+        // then
+        assertThat(registeredTheme.getAmount())
+                .isEqualTo(amount);
     }
 
     @Test

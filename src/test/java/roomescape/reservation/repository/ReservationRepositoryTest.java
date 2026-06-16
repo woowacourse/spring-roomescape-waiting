@@ -73,7 +73,7 @@ class ReservationRepositoryTest {
 
         reservationDate1 = jdbcReservationDateRepository.save(ReservationDate.create(date1));
         reservationDate2 = jdbcReservationDateRepository.save(ReservationDate.create(date2));
-        theme = jdbcThemeRepository.save(Theme.create("테마", "설명", "썸네일"));
+        theme = jdbcThemeRepository.save(Theme.create("테마", "설명", "썸네일", 1000L));
 
         slot1 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime1, theme));
         slot2 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime2, theme));

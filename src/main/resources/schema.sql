@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS theme
     description   VARCHAR(255) NOT NULL,
     thumbnail_url VARCHAR(255) NOT NULL,
     is_active     BOOLEAN      NOT NULL DEFAULT FALSE,
+    amount        BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
 

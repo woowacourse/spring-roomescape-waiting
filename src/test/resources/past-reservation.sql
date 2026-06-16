@@ -12,8 +12,8 @@ VALUES (DATEADD('DAY', -1, CURRENT_DATE), TRUE);
 INSERT INTO reservation_time (start_at, is_active)
 VALUES ('09:00:00', TRUE);
 
-INSERT INTO theme (name, description, thumbnail_url, is_active)
-VALUES ('테마1', '설명1', 'https://example.com/theme1.png', TRUE);
+INSERT INTO theme (name, description, thumbnail_url, is_active, amount)
+VALUES ('테마1', '설명1', 'https://example.com/theme1.png', TRUE, 1000);
 
 INSERT INTO reservation_slot (date_id, time_id, theme_id)
 SELECT
