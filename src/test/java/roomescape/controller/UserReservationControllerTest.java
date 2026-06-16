@@ -163,7 +163,7 @@ class UserReservationControllerTest {
     private Reservation reservation(Member member) {
         Schedule schedule = new Schedule(
                 1L,
-                new Theme(1L, "잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg"),
+                new Theme(1L, "잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg", 20000),
                 LocalDate.of(2026, 7, 1),
                 new ReservationTime(1L, LocalTime.of(10, 0))
         );

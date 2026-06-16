@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS theme (
     name             VARCHAR(255)    NOT NULL UNIQUE,
     description      VARCHAR(255)    NOT NULL,
     thumbnail_url    TEXT            NOT NULL,
+    price            INT             NOT NULL,
     PRIMARY KEY      (id)
 );
 
@@ -53,3 +54,27 @@ CREATE INDEX idx_reservation_schedule_id
 
 CREATE INDEX idx_reservation_user_schedule_status
     ON reservation(user_id, schedule_id, status);
+
+CREATE TABLE IF NOT EXISTS payment_order (
+    id               BIGINT          NOT NULL AUTO_INCREMENT,
+    order_id         VARCHAR(64)     NOT NULL UNIQUE,
+    user_id          BIGINT          NOT NULL,
+    schedule_id      BIGINT          NOT NULL,
+    amount           INT             NOT NULL,
+    status           VARCHAR(20)     NOT NULL,
+    payment_key      VARCHAR(200),
+    reservation_id   BIGINT,
+    failure_code     VARCHAR(100),
+    failure_message  VARCHAR(510),
+    created_at       DATETIME        NOT NULL,
+    updated_at       DATETIME        NOT NULL,
+    PRIMARY KEY (id),
+
+    CONSTRAINT check_payment_order_status CHECK (status IN ('PENDING', 'CONFIRMED', 'FAILED')),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (schedule_id) REFERENCES schedule (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);
+
+CREATE INDEX idx_payment_order_schedule_status
+    ON payment_order(schedule_id, status);

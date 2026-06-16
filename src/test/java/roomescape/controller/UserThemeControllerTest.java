@@ -44,7 +44,7 @@ class UserThemeControllerTest {
     @Test
     void findAll() throws Exception {
         given(themeService.findAll()).willReturn(List.of(
-                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg")
+                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg", 20000)
         ));
 
         mockMvc.perform(get("/themes"))
@@ -58,7 +58,7 @@ class UserThemeControllerTest {
     @Test
     void findPopularThemes() throws Exception {
         given(themeService.findPopularThemes()).willReturn(List.of(
-                new Theme(1L, "인기 테마", "설명", "https://example.com/theme.jpg")
+                new Theme(1L, "인기 테마", "설명", "https://example.com/theme.jpg", 20000)
         ));
 
         mockMvc.perform(get("/themes/popular"))

@@ -72,6 +72,23 @@ public class ReservationService {
     }
 
     @Transactional
+    public Long saveConfirmedReservationByPayment(long scheduleId, Member member) {
+        LocalDateTime now = LocalDateTime.now();
+        scheduleService.lockById(scheduleId);
+        Schedule schedule = scheduleService.getById(scheduleId);
+
+        if (reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())) {
+            throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");
+        }
+        if (countReservationBySchedule(schedule.getId()) != EMPTY_RESERVATION_COUNT) {
+            throw new RoomescapeException(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE, "이미 예약된 슬롯은 결제 승인할 수 없습니다.");
+        }
+
+        Reservation reservation = Reservation.createBy(member, schedule, ReservationStatus.RESERVED, now);
+        return reservationDao.save(reservation);
+    }
+
+    @Transactional
     public void cancelReservationByAdmin(long reservationId) {
         LocalDateTime now = LocalDateTime.now();
         long scheduleId = getScheduleIdByReservationId(reservationId);

@@ -43,9 +43,9 @@ class ThemeServiceTest {
     @DisplayName("중복 이름이 아니면 테마를 저장한다.")
     @Test
     void saveTheme() {
-        ThemeRequest request = new ThemeRequest("잠긴 방", "설명", "https://example.com/theme.jpg");
+        ThemeRequest request = new ThemeRequest("잠긴 방", "설명", "https://example.com/theme.jpg", 20000);
         given(themeDao.existsByName("잠긴 방")).willReturn(false);
-        given(themeDao.save(request.name(), request.description(), request.thumbnailUrl())).willReturn(1L);
+        given(themeDao.save(request.name(), request.description(), request.thumbnailUrl(), request.price())).willReturn(1L);
 
         Long themeId = themeService.saveTheme(request);
 
@@ -55,7 +55,7 @@ class ThemeServiceTest {
     @DisplayName("이미 존재하는 이름이면 테마를 저장하지 않는다.")
     @Test
     void saveDuplicateTheme() {
-        ThemeRequest request = new ThemeRequest("잠긴 방", "설명", "https://example.com/theme.jpg");
+        ThemeRequest request = new ThemeRequest("잠긴 방", "설명", "https://example.com/theme.jpg", 20000);
         given(themeDao.existsByName("잠긴 방")).willReturn(true);
 
         assertThatThrownBy(() -> themeService.saveTheme(request))
@@ -63,15 +63,15 @@ class ThemeServiceTest {
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.DUPLICATE_THEME_NAME);
 
-        verify(themeDao, never()).save(any(), any(), any());
+        verify(themeDao, never()).save(any(), any(), any(), org.mockito.ArgumentMatchers.anyInt());
     }
 
     @DisplayName("DB 유니크 제약 예외도 도메인 예외로 변환한다.")
     @Test
     void saveThemeDuplicateKeyException() {
-        ThemeRequest request = new ThemeRequest("잠긴 방", "설명", "https://example.com/theme.jpg");
+        ThemeRequest request = new ThemeRequest("잠긴 방", "설명", "https://example.com/theme.jpg", 20000);
         given(themeDao.existsByName("잠긴 방")).willReturn(false);
-        given(themeDao.save(request.name(), request.description(), request.thumbnailUrl()))
+        given(themeDao.save(request.name(), request.description(), request.thumbnailUrl(), request.price()))
                 .willThrow(new DuplicateKeyException("duplicate"));
 
         assertThatThrownBy(() -> themeService.saveTheme(request))
@@ -109,7 +109,7 @@ class ThemeServiceTest {
     @Test
     void findAll() {
         given(themeDao.findAll()).willReturn(List.of(
-                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg")
+                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg", 20000)
         ));
 
         List<Theme> themes = themeService.findAll();
@@ -127,7 +127,7 @@ class ThemeServiceTest {
                 any(LocalDate.class),
                 eq(ReservationStatus.RESERVED),
                 eq(10)
-        )).willReturn(List.of(new Theme(1L, "인기 테마", "설명", "https://example.com/theme.jpg")));
+        )).willReturn(List.of(new Theme(1L, "인기 테마", "설명", "https://example.com/theme.jpg", 20000)));
 
         List<Theme> themes = themeService.findPopularThemes();
 

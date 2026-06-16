@@ -53,11 +53,12 @@ class ReservationConcurrencyTest {
 
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)", TIME_ID, "10:00");
         jdbcTemplate.update(
-                "INSERT INTO theme (id, name, description, thumbnail_url) VALUES (?, ?, ?, ?)",
+                "INSERT INTO theme (id, name, description, thumbnail_url, price) VALUES (?, ?, ?, ?, ?)",
                 THEME_ID,
                 "테스트 테마",
                 "테스트 설명",
-                "https://example.com/theme.png"
+                "https://example.com/theme.png",
+                20000
         );
     }
 

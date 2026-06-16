@@ -20,7 +20,8 @@ public class ThemeDao {
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("description"),
-            rs.getString("thumbnail_url")
+            rs.getString("thumbnail_url"),
+            rs.getInt("price")
     );
 
     private final JdbcTemplate jdbcTemplate;
@@ -33,11 +34,12 @@ public class ThemeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Long save(String name, String description, String thumbnailUrl) {
+    public Long save(String name, String description, String thumbnailUrl, int price) {
         return jdbcInsert.executeAndReturnKey(Map.of(
                 "name", name,
                 "description", description,
-                "thumbnail_url", thumbnailUrl
+                "thumbnail_url", thumbnailUrl,
+                "price", price
         )).longValue();
     }
 
@@ -46,7 +48,7 @@ public class ThemeDao {
     }
 
     public List<Theme> findAll() {
-        return jdbcTemplate.query("SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
+        return jdbcTemplate.query("SELECT id, name, description, thumbnail_url, price FROM theme", themeRowMapper);
     }
 
     public List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, ReservationStatus status, int limit) {
@@ -55,7 +57,8 @@ public class ThemeDao {
                 th.id,
                 th.name,
                 th.description,
-                th.thumbnail_url
+                th.thumbnail_url,
+                th.price
             FROM reservation r
             INNER JOIN schedule s ON r.schedule_id = s.id
             INNER JOIN theme th ON s.theme_id = th.id
@@ -66,7 +69,8 @@ public class ThemeDao {
                 th.id,
                 th.name,
                 th.description,
-                th.thumbnail_url
+                th.thumbnail_url,
+                th.price
             ORDER BY COUNT(r.id) DESC, th.id ASC
             LIMIT ?
             """;

@@ -36,7 +36,7 @@ public class ThemeService {
         validateDuplicateName(request.name());
 
         try {
-            return themeDao.save(request.name(), request.description(), request.thumbnailUrl());
+            return themeDao.save(request.name(), request.description(), request.thumbnailUrl(), request.price());
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(DomainErrorCode.DUPLICATE_THEME_NAME, "존재하는 테마는 추가할 수 없습니다.");
         }

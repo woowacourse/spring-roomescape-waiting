@@ -293,7 +293,7 @@ class ReservationServiceTest {
     private Schedule futureSchedule(Long id, LocalDate date, LocalTime time) {
         return new Schedule(
                 id,
-                new Theme(1L, "테마", "설명", "https://example.com/theme.jpg"),
+                new Theme(1L, "테마", "설명", "https://example.com/theme.jpg", 20000),
                 date,
                 new ReservationTime(1L, time)
         );

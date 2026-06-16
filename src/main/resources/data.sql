@@ -14,14 +14,14 @@ INSERT INTO reservation_time (start_at) VALUES ('21:00');
 INSERT INTO reservation_time (start_at) VALUES ('22:00');
 
 -- Themes
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('공포의 저택', '버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다.', 'https://picsum.photos/seed/haunted/400/250');
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('우주 정거장', '고장난 우주 정거장에서 살아남아라. 산소가 30분 후면 바닥난다!', 'https://picsum.photos/seed/spacestation/400/250');
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('마법사의 연구실', '미친 마법사의 연구실에서 탈출하라. 다음 실험 대상이 되기 전에!', 'https://picsum.photos/seed/wizard/400/250');
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('탐정 사무소', '살인 사건의 유일한 용의자가 되었다. 진범을 찾아 무죄를 증명하라.', 'https://picsum.photos/seed/detective/400/250');
+INSERT INTO theme (name, description, thumbnail_url, price)
+VALUES ('공포의 저택', '버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다.', 'https://picsum.photos/seed/haunted/400/250', 22000);
+INSERT INTO theme (name, description, thumbnail_url, price)
+VALUES ('우주 정거장', '고장난 우주 정거장에서 살아남아라. 산소가 30분 후면 바닥난다!', 'https://picsum.photos/seed/spacestation/400/250', 25000);
+INSERT INTO theme (name, description, thumbnail_url, price)
+VALUES ('마법사의 연구실', '미친 마법사의 연구실에서 탈출하라. 다음 실험 대상이 되기 전에!', 'https://picsum.photos/seed/wizard/400/250', 23000);
+INSERT INTO theme (name, description, thumbnail_url, price)
+VALUES ('탐정 사무소', '살인 사건의 유일한 용의자가 되었다. 진범을 찾아 무죄를 증명하라.', 'https://picsum.photos/seed/detective/400/250', 21000);
 
 -- Schedules
 -- Past schedules: 조회 시 RESERVED는 COMPLETED, WAITING은 EXPIRED로 표시된다.
