@@ -20,6 +20,11 @@ public class ReservationOrderService {
         return order;
     }
 
+    public ReservationOrder getByReservationId(long reservationId) {
+        return reservationOrderRepository.findByReservationId(reservationId)
+                .orElseThrow(() -> new PaymentNotFoundException("해당 예약에 대해서 존재하지 않는 주문입니다: " + reservationId));
+    }
+
     public ReservationOrder getByOrderId(String orderId) {
         return reservationOrderRepository.findById(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException("존재하지 않는 주문입니다: " + orderId));

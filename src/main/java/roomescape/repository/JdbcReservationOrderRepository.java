@@ -47,6 +47,13 @@ public class JdbcReservationOrderRepository implements ReservationOrderRepositor
     }
 
     @Override
+    public Optional<ReservationOrder> findByReservationId(long reservationId) {
+        String sql = "select id, amount, payment_key, reservation_id from reservation_order where reservation_id = ?";
+        return jdbcTemplate.query(sql, orderRowMapper, reservationId).stream()
+                .findFirst();
+    }
+
+    @Override
     public void updatePaymentKey(String id, String paymentKey) {
         String sql = "update reservation_order set payment_key = ? where id = ?";
         jdbcTemplate.update(sql, paymentKey, id);

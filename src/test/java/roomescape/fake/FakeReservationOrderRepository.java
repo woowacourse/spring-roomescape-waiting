@@ -28,6 +28,13 @@ public class FakeReservationOrderRepository implements ReservationOrderRepositor
     }
 
     @Override
+    public Optional<ReservationOrder> findByReservationId(long reservationId) {
+        return store.stream()
+                .filter(order -> order.getReservationId() == reservationId)
+                .findFirst();
+    }
+
+    @Override
     public void updatePaymentKey(String id, String paymentKey) {
         for (int i = 0; i < store.size(); i++) {
             ReservationOrder order = store.get(i);

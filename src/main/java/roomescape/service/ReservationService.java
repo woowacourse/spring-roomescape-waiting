@@ -14,7 +14,7 @@ import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.SlotDomainService;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
-import roomescape.dto.reservation.ReserveResponse;
+import roomescape.dto.reservationOrder.OrderResponse;
 import roomescape.exception.ConcurrencyConflictException;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
@@ -59,7 +59,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReserveResponse reserve(ReservationRequest reservationReq) {
+    public OrderResponse reserve(ReservationRequest reservationReq) {
         if (slotDomainService.isExistByDateAndTimeAndTheme(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId())) {
             throw new ReservationAlreadyExistException();
         }
@@ -70,7 +70,7 @@ public class ReservationService {
         Long reservationId = reservationRepository.insert(reservation);
         ReservationOrder order = reservationOrderService.insert(reservationId);
 
-        return ReserveResponse.from(order);
+        return OrderResponse.from(order);
     }
 
     @Retryable(retryFor = ConcurrencyConflictException.class, backoff = @Backoff(delay = 50, multiplier = 2.0, random = true))

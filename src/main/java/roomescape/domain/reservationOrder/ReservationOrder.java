@@ -30,14 +30,12 @@ public class ReservationOrder {
         return new ReservationOrder(this.id, this.amount, paymentKey, this.reservationId);
     }
 
-    // 금액 위변조 검증은 주문 자신이 책임진다
     public void verifyAmount(long requestedAmount) {
         if (this.amount != requestedAmount) {
             throw new PaymentAmountMismatchException("결제 금액이 주문 금액과 일치하지 않습니다.");
         }
     }
 
-    // paymentKey 부여(결제 확정) 상태 전이
     public ReservationOrder confirm(String paymentKey) {
         if (isConfirmed()) {
             throw new AlreadyProcessedException("이미 확정된 주문입니다.");

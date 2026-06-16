@@ -27,6 +27,7 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.service.ReservationOrderService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationWaitingService;
 import org.springframework.http.MediaType;
@@ -44,6 +45,9 @@ public class ReservationWaitingControllerTest {
 
     @MockBean
     private ReservationWaitingService reservationWaitingService;
+
+    @MockBean
+    private ReservationOrderService reservationOrderService;
 
     private final static LocalDate tomorrow = LocalDate.now().plusDays(1);
     private final static LocalDateTime nowDateTime = LocalDateTime.now();
