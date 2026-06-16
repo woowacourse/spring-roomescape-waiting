@@ -86,6 +86,12 @@ public class ReservationTestHelper {
                 Integer.class, Date.valueOf(date), timeId, themeId);
     }
 
+    public String findReservationStatus(Long reservationId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM reservation WHERE id = ?",
+                String.class, reservationId);
+    }
+
     public boolean existsWaiting(Long waitingId) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM waiting WHERE id = ?",

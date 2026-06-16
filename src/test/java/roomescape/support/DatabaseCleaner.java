@@ -36,13 +36,15 @@ public class DatabaseCleaner {
     }
 
     public void clean() {
-        // FK 제약 때문에 자식 테이블(waiting, reservation)부터 비운다.
+        // FK 제약 때문에 자식 테이블(payment, waiting, reservation)부터 비운다.
+        jdbcTemplate.execute("DELETE FROM payment");
         jdbcTemplate.execute("DELETE FROM waiting");
         jdbcTemplate.execute("DELETE FROM reservation");
         jdbcTemplate.execute("DELETE FROM reservation_time");
         jdbcTemplate.execute("DELETE FROM theme");
 
         // 각 테스트가 id 1부터 시작한다고 가정할 수 있도록 시퀀스를 리셋한다.
+        jdbcTemplate.execute("ALTER TABLE payment ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");

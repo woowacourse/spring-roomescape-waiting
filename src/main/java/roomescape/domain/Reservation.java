@@ -12,30 +12,43 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationStatus status;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, String name, LocalDate date,
+                        ReservationTime time, Theme theme, ReservationStatus status) {
         validate(name, date, time, theme);
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public static Reservation create(String name, LocalDate date,
                                      ReservationTime time, Theme theme,
                                      ReservationPolicy policy) {
         policy.validateCreatable(ReservationDateTime.of(date, time.getStartAt()));
-        return new Reservation(null, name, date, time, theme);
+        // step3: 기존 동작 보존(CONFIRMED). step4에서 결제 게이트 도입 시 PENDING으로 전환.
+        return new Reservation(null, name, date, time, theme, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation createPending(String name, LocalDate date,
+                                            ReservationTime time, Theme theme,
+                                            ReservationPolicy policy) {
+        policy.validateCreatable(ReservationDateTime.of(date, time.getStartAt()));
+        return new Reservation(null, name, date, time, theme, ReservationStatus.PENDING);
     }
 
     public static Reservation withId(Long id, String name, LocalDate date,
-                                     ReservationTime time, Theme theme) {
-        return new Reservation(id, name, date, time, theme);
+                                     ReservationTime time, Theme theme, ReservationStatus status) {
+        return new Reservation(id, name, date, time, theme, status);
     }
 
     public static Reservation promote(Waiting w) {
-        return new Reservation(null, w.getName(), w.getDate(), w.getTime(), w.getTheme());
+        // [이월] 대기 승격 시 결제 흐름은 이번 미션 범위 밖 → 즉시 확정으로 둔다.
+        return new Reservation(null, w.getName(), w.getDate(), w.getTime(), w.getTheme(),
+                ReservationStatus.CONFIRMED);
     }
 
     public ReservationDateTime dateTime() {
@@ -96,5 +109,13 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public boolean isPending() {
+        return status == ReservationStatus.PENDING;
     }
 }
