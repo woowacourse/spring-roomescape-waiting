@@ -1,12 +1,31 @@
 package roomescape.reservationtime.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalTime;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
+@Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"start_at", "finish_at"}))
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
-    private final LocalTime finishAt;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+
+    @Column(name = "start_at", nullable = false)
+    private LocalTime startAt;
+
+    @Column(name = "finish_at", nullable = false)
+    private LocalTime finishAt;
+
+    protected ReservationTime() {
+    }
 
     private ReservationTime(Long id, LocalTime startAt, LocalTime finishAt) {
         if (startAt == null) {
