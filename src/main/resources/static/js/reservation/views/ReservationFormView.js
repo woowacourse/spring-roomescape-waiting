@@ -67,7 +67,7 @@ export default class ReservationFormView extends View {
             ? formatCurrency(selectedThemePrice)
             : "테마를 선택하세요.";
 
-        this.submitButton.textContent = submitMode === "waiting" ? "대기 등록" : isEdit ? "예약 변경" : "예약 확정";
+        this.submitButton.textContent = submitMode === "waiting" ? "대기 등록" : isEdit ? "예약 변경" : "결제하기";
         this.submitButton.disabled = !canSubmit;
     }
 }

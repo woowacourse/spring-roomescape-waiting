@@ -5,7 +5,8 @@ import {
     createWaitingReservation,
     fetchReservation,
     fetchThemes,
-    fetchThemeSlots
+    fetchThemeSlots,
+    preparePayment
 } from "./api.js";
 
 export default class Store {
@@ -111,15 +112,23 @@ export default class Store {
         );
     }
 
-    async submit() {
+    buildPayload() {
         const theme = this.themes.find((t) => String(t.id) === String(this.selectedThemeId));
-        const payload = {
+        return {
             name: this.name,
             date: this.selectedDate,
             themeId: Number(this.selectedThemeId),
             timeId: this.selectedTimeId,
             amount: theme ? theme.price : 0
         };
+    }
+
+    async prepare() {
+        return preparePayment(this.buildPayload());
+    }
+
+    async submit() {
+        const payload = this.buildPayload();
 
         if (this.reservationId) {
             return changeReservation(this.reservationId, {
