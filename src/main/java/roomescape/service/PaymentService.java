@@ -40,6 +40,17 @@ public class PaymentService {
     }
 
     @Transactional
+    public void handlePaymentFail(String orderId) {
+        if (orderId == null) {
+            return;
+        }
+        reservationRepository.findByOrderId(orderId).ifPresent(reservation -> {
+            reservation.cancel();
+            reservationRepository.updateStatus(reservation);
+        });
+    }
+
+    @Transactional
     public Payment confirmPayment(PaymentConfirmation confirmation) {
         Reservation reservation = reservationRepository.findByOrderId(confirmation.orderId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
