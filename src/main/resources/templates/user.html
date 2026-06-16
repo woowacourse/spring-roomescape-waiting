@@ -81,6 +81,9 @@
     </div>
 </main>
 
+<script th:inline="javascript">
+    const tossClientKey = [[${clientKey}]];
+</script>
 <script src="https://js.tosspayments.com/v1/payment-widget"></script>
 <script th:src="@{/js/user.js}"></script>
 </body>

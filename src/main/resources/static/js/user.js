@@ -63,7 +63,6 @@ let selectedTheme = null;
 let selectedTime = null;
 
 // Toss Payments Widget Initialization
-const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 const customerKey = Math.random().toString(36).substring(2, 12);
 let paymentWidget = null;
 
@@ -88,9 +87,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // Initialize Toss PaymentWidget
-    if (typeof PaymentWidget !== "undefined") {
-        paymentWidget = PaymentWidget(clientKey, customerKey);
+    // Initialize Toss PaymentWidget using global tossClientKey from Thymeleaf
+    if (typeof PaymentWidget !== "undefined" && typeof tossClientKey !== "undefined") {
+        paymentWidget = PaymentWidget(tossClientKey, customerKey);
     }
 
     await loadThemes();
@@ -342,8 +341,8 @@ function openPaymentModal(reservation) {
             await paymentWidget.requestPayment({
                 orderId: reservation.orderId,
                 orderName: reservation.themeName,
-                successUrl: window.location.origin + "/payment/success",
-                failUrl: window.location.origin + "/payment/fail",
+                successUrl: window.location.origin + "/payments/success",
+                failUrl: window.location.origin + "/payments/fail",
                 customerName: reservation.name
             });
         } catch (error) {

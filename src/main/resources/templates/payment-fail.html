@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>결제 실패 - ENIGMA ROOMS</title>
@@ -27,24 +27,10 @@
 <body>
     <div class="status-container">
         <h1>결제 실패</h1>
-        <p id="fail-message">결제 중 오류가 발생했습니다.</p>
-        <p id="fail-code" style="font-size: 14px; color: #888;"></p>
+        <p th:text="${message}">결제 중 오류가 발생했습니다.</p>
+        <p style="font-size: 14px; color: #888;" th:if="${code}" th:text="'에러 코드: ' + ${code}"></p>
+        <p style="font-size: 14px; color: #888;" th:if="${orderId}" th:text="'주문 번호: ' + ${orderId}"></p>
         <button class="primary-button" onclick="location.href='/reservation'">다시 시도하기</button>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const message = urlParams.get("message");
-            const code = urlParams.get("code");
-
-            if (message) {
-                document.getElementById("fail-message").textContent = message;
-            }
-            if (code) {
-                document.getElementById("fail-code").textContent = `에러 코드: ${code}`;
-            }
-        });
-    </script>
 </body>
 </html>
