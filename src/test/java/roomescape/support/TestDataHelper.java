@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import roomescape.reservation.domain.PaymentOrder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
@@ -101,6 +102,42 @@ public class TestDataHelper {
                 slot.date(),
                 slot.themeId(),
                 slot.timeId());
+    }
+
+    public void confirmPaymentOrder(PaymentOrder order, String paymentKey) {
+        jdbcTemplate.update(
+                "UPDATE payment_order SET payment_key = ?, status = 'CONFIRMED' WHERE order_id = ?",
+                paymentKey,
+                order.getOrderId().value()
+        );
+        jdbcTemplate.update(
+                "UPDATE reservation SET status = 'CONFIRMED' WHERE id = ?",
+                order.getReservationId()
+        );
+    }
+
+    public String findPaymentOrderStatus(String orderId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM payment_order WHERE order_id = ?",
+                String.class,
+                orderId
+        );
+    }
+
+    public String findPaymentKey(String orderId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT payment_key FROM payment_order WHERE order_id = ?",
+                String.class,
+                orderId
+        );
+    }
+
+    public String findReservationStatus(Long reservationId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM reservation WHERE id = ?",
+                String.class,
+                reservationId
+        );
     }
 
     public Reservation findReservationBySlot(ReservationSlot slot) {

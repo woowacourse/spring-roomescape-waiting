@@ -16,7 +16,6 @@ import roomescape.reservation.domain.PaymentOrder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -31,13 +30,11 @@ import roomescape.theme.domain.repository.ThemeRepository;
 @Service
 public class ReservationCommandService {
 
-    private static final Long DEFAULT_AMOUNT = 50_000L;
-
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
-    private final PaymentOrderRepository orderRepository;
+    private final PaymentService paymentService;
 
     public ReservationResult save(ReservationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -50,7 +47,7 @@ public class ReservationCommandService {
         Reservation reservation = request.toReservation(slot);
 
         Reservation savedReservation = saveReservation(reservation);
-        PaymentOrder savedOrder = savePaymentOrder(savedReservation);
+        PaymentOrder savedOrder = paymentService.prepare(savedReservation.getId());
 
         return ReservationResult.paymentPending(
                 savedReservation,
@@ -116,17 +113,8 @@ public class ReservationCommandService {
             Reservation promotedReservation = saveReservation(
                     Reservation.create(waiting.getUser(), waiting.getSlot(), now)
             );
-            savePaymentOrder(promotedReservation);
+            paymentService.prepare(promotedReservation.getId());
         });
-    }
-
-    private PaymentOrder savePaymentOrder(Reservation reservation) {
-        try {
-            PaymentOrder order = PaymentOrder.create(reservation.getId(), DEFAULT_AMOUNT);
-            return orderRepository.save(order);
-        } catch (UniqueConstraintViolationException e) {
-            throw new ConflictException("결제 주문 생성에 실패했습니다. 다시 시도해주세요.");
-        }
     }
 
     private Reservation saveReservation(Reservation reservation) {

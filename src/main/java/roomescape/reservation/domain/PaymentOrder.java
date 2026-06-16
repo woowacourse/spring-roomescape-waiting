@@ -14,11 +14,11 @@ public class PaymentOrder {
     private final Long reservationId;
     private final PaymentAmount amount;
     private final String paymentKey;
-    private final PaymentStatus status;
+    private final PaymentOrderStatus status;
 
     @Builder
     public PaymentOrder(Long id, OrderId orderId, Long reservationId, PaymentAmount amount, String paymentKey,
-                        PaymentStatus status) {
+                        PaymentOrderStatus status) {
         this.id = id;
         this.orderId = Objects.requireNonNull(orderId);
         this.reservationId = Objects.requireNonNull(reservationId);
@@ -34,7 +34,22 @@ public class PaymentOrder {
                 .amount(PaymentAmount.builder()
                         .value(amount)
                         .build())
-                .status(PaymentStatus.PENDING)
+                .status(PaymentOrderStatus.PENDING)
                 .build();
+    }
+
+    public PaymentOrder confirm(String paymentKey) {
+        return PaymentOrder.builder()
+                .id(id)
+                .orderId(orderId)
+                .reservationId(reservationId)
+                .amount(amount)
+                .paymentKey(paymentKey)
+                .status(PaymentOrderStatus.CONFIRMED)
+                .build();
+    }
+
+    public boolean isPending() {
+        return status == PaymentOrderStatus.PENDING && paymentKey == null;
     }
 }
