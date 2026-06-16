@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.ThemeRepository;
+import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -91,6 +93,25 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> findAllByName(String username) {
         return reservationRepository.findByNameAndStatus(username, ReservationStatus.CONFIRMED);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyReservation> findAllMine(String username) {
+        List<MyReservation> confirmed = reservationRepository.findByNameAndStatus(username, ReservationStatus.CONFIRMED)
+                .stream()
+                .map(r -> new MyReservation(r, null))
+                .toList();
+        List<MyReservation> waiting = reservationRepository.findByNameAndStatus(username, ReservationStatus.WAITING)
+                .stream()
+                .map(r -> new MyReservation(r, countWaitingNumber(r)))
+                .toList();
+        return Stream.concat(confirmed.stream(), waiting.stream()).toList();
+    }
+
+    private long countWaitingNumber(Reservation r) {
+        return reservationRepository.countWaitingBefore(
+                r.getDate(), r.getTime().getId(), r.getTheme().getId(),
+                ReservationStatus.WAITING, r.getCreatedAt(), r.getId()) + 1;
     }
 
     @Transactional(readOnly = true)

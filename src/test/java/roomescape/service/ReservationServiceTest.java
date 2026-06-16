@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,14 +21,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.ThemeRepository;
-import roomescape.service.exception.ReservationConflictException;
-import roomescape.service.exception.ReservationNotFoundException;
-import roomescape.service.exception.ReservationTimeNotFoundException;
-import roomescape.service.exception.ThemeNotFoundException;
+import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationNotFoundException;
+import roomescape.service.exception.ReservationTimeNotFoundException;
+import roomescape.service.exception.ThemeNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -129,6 +131,38 @@ class ReservationServiceTest {
         reservationService.delete(1L);
 
         then(reservationRepository).should().updateStatus(5L, ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    void findAllMine_CONFIRMED와_WAITING_합산() {
+        Reservation confirmed = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), fixedNow, sampleTime, sampleTheme, ReservationStatus.CONFIRMED);
+        Reservation waiting = new Reservation(2L, "브라운", LocalDate.of(2026, 5, 20), fixedNow, sampleTime, sampleTheme, ReservationStatus.WAITING);
+
+        given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.CONFIRMED)).willReturn(List.of(confirmed));
+        given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.WAITING)).willReturn(List.of(waiting));
+        given(reservationRepository.countWaitingBefore(
+                waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(),
+                ReservationStatus.WAITING, waiting.getCreatedAt(), waiting.getId()))
+                .willReturn(1L);
+
+        List<MyReservation> result = reservationService.findAllMine("브라운");
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).waitingNumber()).isNull();
+        assertThat(result.get(1).waitingNumber()).isEqualTo(2L);
+    }
+
+    @Test
+    void findAllMine_예약만_있으면_WAITING_없음() {
+        Reservation confirmed = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), fixedNow, sampleTime, sampleTheme);
+
+        given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.CONFIRMED)).willReturn(List.of(confirmed));
+        given(reservationRepository.findByNameAndStatus("브라운", ReservationStatus.WAITING)).willReturn(List.of());
+
+        List<MyReservation> result = reservationService.findAllMine("브라운");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).waitingNumber()).isNull();
     }
 
     @Test
