@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -39,8 +40,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getLong("theme_id"),
                     resultSet.getString("theme_name"),
                     resultSet.getString("theme_description"),
-                    resultSet.getString("theme_image_url")
-            )
+                    resultSet.getString("theme_image_url"),
+                    resultSet.getLong("theme_price")
+            ),
+            ReservationStatus.valueOf(resultSet.getString("status"))
     );
 
     private final RowMapper<Long> idMapper = (resultSet, rowNum) -> resultSet.getLong("id");
@@ -58,19 +61,20 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("member_id", reservation.getMember().getId())
                 .addValue("date", reservation.getDate())
                 .addValue("time_id", reservation.getTime().getId())
-                .addValue("theme_id", reservation.getTheme().getId());
+                .addValue("theme_id", reservation.getTheme().getId())
+                .addValue("status", reservation.getStatus().name());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Reservation.restore(id, reservation.getMember(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme());
+                reservation.getTheme(), reservation.getStatus());
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
         String query = """
-                SELECT r.id AS reservation_id, r.date,
+                SELECT r.id AS reservation_id, r.date, r.status,
                        m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
-                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url, t.price AS theme_price
                 FROM reservation r
                 JOIN member m ON r.member_id = m.id
                 JOIN reservation_time rt ON r.time_id = rt.id
@@ -83,10 +87,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByMemberId(Long memberId) {
         String query = """
-                SELECT r.id AS reservation_id, r.date,
+                SELECT r.id AS reservation_id, r.date, r.status,
                        m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
-                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url, t.price AS theme_price
                 FROM reservation r
                 JOIN member m ON r.member_id = m.id
                 JOIN reservation_time rt ON r.time_id = rt.id
@@ -101,6 +105,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void update(Long id, LocalDate date, Long timeId) {
         String query = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
         jdbcTemplate.update(query, date, timeId, id);
+    }
+
+    @Override
+    public void confirm(Long id) {
+        String query = "UPDATE reservation SET status = 'CONFIRMED' WHERE id = ?";
+        jdbcTemplate.update(query, id);
     }
 
     @Override
