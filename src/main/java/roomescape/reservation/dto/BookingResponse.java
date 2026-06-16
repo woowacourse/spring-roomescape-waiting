@@ -13,19 +13,28 @@ public record BookingResponse(
         LocalDate date,
         TimeResponse time,
         Long themeId,
-        String themeName
+        String themeName,
+        String orderId,
+        Long amount,
+        String clientKey,
+        String redirectUrl
 ) {
 
-    public static BookingResponse reserved(Reservation reservation) {
+    public static BookingResponse pendingPayment(Reservation reservation, String orderId, Long amount,
+                                                 String clientKey) {
         return new BookingResponse(
                 reservation.getId(),
-                "RESERVED",
-                "예약이 완료되었습니다.",
+                "PAYMENT_PENDING",
+                "결제를 진행해주세요.",
                 reservation.getMember().getName(),
                 reservation.getDate(),
                 TimeResponse.of(reservation.getTime()),
                 reservation.getTheme().getId(),
-                reservation.getTheme().getName()
+                reservation.getTheme().getName(),
+                orderId,
+                amount,
+                clientKey,
+                "/payments/checkout?orderId=" + orderId
         );
     }
 
@@ -38,7 +47,11 @@ public record BookingResponse(
                 waiting.getDate(),
                 TimeResponse.of(waiting.getTime()),
                 waiting.getTheme().getId(),
-                waiting.getTheme().getName()
+                waiting.getTheme().getName(),
+                null,
+                null,
+                null,
+                null
         );
     }
 }

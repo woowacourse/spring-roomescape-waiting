@@ -67,7 +67,20 @@ function renderAll(reservations, waitings) {
 
   rows.forEach(({type, data}) => {
     const tr = document.createElement('tr');
-    if (type === 'reservation') {
+    if (type === 'reservation' && data.status === 'PENDING') {
+      tr.innerHTML = `
+        <td>${data.date}</td>
+        <td>${data.themeName}</td>
+        <td>${formatTime(data.time.startAt)}</td>
+        <td><span class="status-badge status-badge--waiting">결제 필요</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
+            onclick="payReservation('${data.orderId}')">결제하기</button>
+          <button class="btn btn-danger"
+            onclick="cancelReservation(${data.id})">취소</button>
+        </td>
+      `;
+    } else if (type === 'reservation') {
       tr.innerHTML = `
         <td>${data.date}</td>
         <td>${data.themeName}</td>
@@ -100,6 +113,10 @@ function formatTime(value) {
   if (!value) return '';
   const parts = String(value).split(':');
   return `${parts[0]}:${parts[1]}`;
+}
+
+function payReservation(orderId) {
+  window.location.href = `/payments/checkout?orderId=${orderId}`;
 }
 
 function cancelReservation(id, btn) {

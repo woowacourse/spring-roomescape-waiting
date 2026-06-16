@@ -10,17 +10,27 @@ public record ReservationResponse(
         LocalDate date,
         TimeResponse time,
         Long themeId,
-        String themeName
+        String themeName,
+        String status,
+        Long price,
+        String orderId
 ) {
 
     public static ReservationResponse from(Reservation reservation) {
+        return of(reservation, null);
+    }
+
+    public static ReservationResponse of(Reservation reservation, String orderId) {
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getMember().getName(),
                 reservation.getDate(),
                 TimeResponse.of(reservation.getTime()),
                 reservation.getTheme().getId(),
-                reservation.getTheme().getName()
+                reservation.getTheme().getName(),
+                reservation.getStatus().name(),
+                reservation.getTheme().getPrice(),
+                orderId
         );
     }
 }
