@@ -15,12 +15,14 @@ public class Reservation {
     private final Long id;
     private final User user;
     private final ReservationSlot slot;
+    private final ReservationStatus status;
 
     @Builder
-    public Reservation(Long id, User user, ReservationSlot slot) {
+    public Reservation(Long id, User user, ReservationSlot slot, ReservationStatus status) {
         this.id = id;
         this.user = Objects.requireNonNull(user);
         this.slot = Objects.requireNonNull(slot);
+        this.status = Objects.requireNonNull(status);
     }
 
     public static Reservation create(User user, ReservationSlot slot, LocalDateTime now) {
@@ -29,6 +31,7 @@ public class Reservation {
         return Reservation.builder()
                 .user(user)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
     }
 
@@ -41,6 +44,7 @@ public class Reservation {
                 .id(this.id)
                 .user(this.user)
                 .slot(updatedSlot)
+                .status(this.status)
                 .build();
     }
 
