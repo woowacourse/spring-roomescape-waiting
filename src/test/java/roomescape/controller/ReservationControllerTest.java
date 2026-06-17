@@ -45,7 +45,7 @@ class ReservationControllerTest extends ControllerTest {
                 .body("id", equalTo(1))
                 .body("orderId", matchesPattern("[A-Za-z0-9_-]{6,64}"))
                 .body("amount", equalTo(10000))
-                .body("clientKey", equalTo("test_ck_test"))
+                .body("clientKey", equalTo("test_gck_test"))
                 .body("orderName", equalTo("공포의 저택 예약"))
                 .body("reservationStatus", equalTo("PAYMENT_PENDING"));
     }

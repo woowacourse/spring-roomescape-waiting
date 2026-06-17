@@ -29,16 +29,14 @@ class PaymentControllerTest extends ControllerTest {
                 .willReturn(new PaymentResult("payment_key", orderId, "DONE", 10000L));
 
         RestAssured.given().log().all()
+                .redirects().follow(false)
                 .queryParam("paymentKey", "payment_key")
                 .queryParam("orderId", orderId)
                 .queryParam("amount", 10000)
                 .when().get("/payments/success")
                 .then().log().all()
-                .statusCode(200)
-                .body("date", equalTo(date))
-                .body("time", equalTo("10:00"))
-                .body("themeName", equalTo("공포의 저택"))
-                .body("reservationStatus", equalTo("RESERVED"));
+                .statusCode(302)
+                .header("Location", equalTo("/user.html?payment=success#my"));
     }
 
     @DisplayName("결제 성공 콜백의 amount가 저장 금액과 다르면 400")
@@ -63,15 +61,14 @@ class PaymentControllerTest extends ControllerTest {
         String orderId = createReservationPaymentOrder("브라운", date, 1, 1);
 
         RestAssured.given().log().all()
+                .redirects().follow(false)
                 .queryParam("code", "PAY_PROCESS_CANCELED")
                 .queryParam("message", "사용자가 결제를 취소했습니다.")
                 .queryParam("orderId", orderId)
                 .when().get("/payments/fail")
                 .then().log().all()
-                .statusCode(200)
-                .body("code", equalTo("PAY_PROCESS_CANCELED"))
-                .body("message", equalTo("사용자가 결제를 취소했습니다."))
-                .body("orderId", equalTo(orderId));
+                .statusCode(302)
+                .header("Location", equalTo("/user.html?payment=fail&code=PAY_PROCESS_CANCELED&message=%EC%82%AC%EC%9A%A9%EC%9E%90%EA%B0%80%20%EA%B2%B0%EC%A0%9C%EB%A5%BC%20%EC%B7%A8%EC%86%8C%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4.#booking"));
 
         createReservationPaymentOrder("브라운", date, 1, 1);
     }
@@ -80,13 +77,12 @@ class PaymentControllerTest extends ControllerTest {
     @Test
     void 결제_실패_콜백_orderId_없음() {
         RestAssured.given().log().all()
+                .redirects().follow(false)
                 .queryParam("code", "PAY_PROCESS_CANCELED")
                 .queryParam("message", "사용자가 결제를 취소했습니다.")
                 .when().get("/payments/fail")
                 .then().log().all()
-                .statusCode(200)
-                .body("code", equalTo("PAY_PROCESS_CANCELED"))
-                .body("message", equalTo("사용자가 결제를 취소했습니다."));
+                .statusCode(302);
     }
 
     private String createReservationPaymentOrder(String name, String date, long timeId, long themeId) {
