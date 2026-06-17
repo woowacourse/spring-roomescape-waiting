@@ -8,7 +8,6 @@ import roomescape.waiting.ReservationWaiting;
 public class MyReservation {
     private static final String RESERVED_RESOURCE = "reservation";
     private static final String WAITING_RESOURCE = "waiting";
-    private static final String RESERVED_STATUS = "예약 확정";
     private static final String WAITING_STATUS = "대기중";
 
     private final Long id;
@@ -27,7 +26,7 @@ public class MyReservation {
         this.date = reservation.getDate();
         this.startAt = reservation.getTime().getStartAt();
         this.resourceType = RESERVED_RESOURCE;
-        this.status = RESERVED_STATUS;
+        this.status = reservation.getStatus().getDescription();
         this.waitingNumber = null;
     }
 

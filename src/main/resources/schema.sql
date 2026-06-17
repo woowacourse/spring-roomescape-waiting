@@ -22,6 +22,7 @@ CREATE TABLE reservation (
     theme_id BIGINT NOT NULL,
     date    DATE NOT NULL,
     time_id BIGINT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
 
     PRIMARY KEY (id),
     CONSTRAINT uk_reservation_theme_date_time UNIQUE (theme_id, date, time_id),
@@ -41,4 +42,17 @@ CREATE TABLE reservation_waiting (
     CONSTRAINT uk_waiting_name_theme_date_time UNIQUE (name, theme_id, date, time_id),
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE CASCADE,
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE CASCADE
+);
+
+CREATE TABLE payment(
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT NOT NULL,
+    payment_key VARCHAR(255),
+    order_id VARCHAR(64) NOT NULL,
+    amount BIGINT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE RESTRICT,
+    UNIQUE (order_id)
 );
