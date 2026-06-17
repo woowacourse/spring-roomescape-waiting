@@ -4,11 +4,23 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handle(HttpMessageNotReadableException e) {
+        Throwable cause = e.getMostSpecificCause();
+        if (cause instanceof InvalidInputException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse("INVALID_INPUT", cause.getMessage()));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_INPUT", "요청 본문을 해석할 수 없습니다."));
+    }
 
     @ExceptionHandler(ReservationAlreadyExistException.class)
     public ResponseEntity<ErrorResponse> handle(ReservationAlreadyExistException e) {
