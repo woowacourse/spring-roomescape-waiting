@@ -1,5 +1,6 @@
 package roomescape.reservation.infra;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -177,15 +178,20 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
 
     @Override
     public PendingReservation insertWithId(PendingReservation reservation) {
-        String sql = "INSERT INTO pending(id, name, slot_id, created_at) "
-                + "VALUES(:id, :name, :slotId, :createdAt)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservation.getId())
                 .addValue("name", reservation.getName())
                 .addValue("slotId", reservation.getSlot().getId())
                 .addValue("createdAt", reservation.getCreatedAt());
-
-        jdbcTemplate.update(sql, params);
+        String updateSql = "UPDATE pending "
+                + "SET name = :name, slot_id = :slotId, created_at = :createdAt, is_deleted = 0 "
+                + "WHERE id = :id";
+        int affected = jdbcTemplate.update(updateSql, params);
+        if (affected == 0) {
+            String insertSql = "INSERT INTO pending(id, name, slot_id, created_at) "
+                    + "VALUES(:id, :name, :slotId, :createdAt)";
+            jdbcTemplate.update(insertSql, params);
+        }
         return reservation;
     }
 
@@ -229,5 +235,43 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
                 + "JOIN reservation_time rt ON ts.time_id = rt.id "
                 + "WHERE p.id = :id AND p.is_deleted = 0";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findAny();
+    }
+
+    @Override
+    public List<PendingReservation> findExpiredReservations(LocalDate today) {
+        String sql = "SELECT "
+                + "p.id AS p_id, p.name AS p_name, p.is_deleted AS p_is_deleted, p.created_at AS p_created_at, "
+                + "ts.id AS ts_id, ts.date AS ts_date, "
+                + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
+                + "t.description AS t_description, t.duration_time AS t_duration_time, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "FROM pending p "
+                + "INNER JOIN time_slot ts ON p.slot_id = ts.id "
+                + "INNER JOIN theme t ON ts.theme_id = t.id "
+                + "INNER JOIN reservation_time rt ON ts.time_id = rt.id "
+                + "WHERE ts.date < :today AND p.is_deleted = 0";
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("today", today);
+
+        return jdbcTemplate.query(sql, params, rowMapper);
+    }
+
+    @Override
+    public List<PendingReservation> findAllByIdIn(List<Long> reservationIds) {
+        String sql = "SELECT "
+                + "p.id AS p_id, p.name AS p_name, p.is_deleted AS p_is_deleted, p.created_at AS p_created_at, "
+                + "ts.id AS ts_id, ts.date AS ts_date, "
+                + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
+                + "t.description AS t_description, t.duration_time AS t_duration_time, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "FROM pending p "
+                + "INNER JOIN time_slot ts ON p.slot_id = ts.id "
+                + "INNER JOIN theme t ON ts.theme_id = t.id "
+                + "INNER JOIN reservation_time rt ON ts.time_id = rt.id "
+                + "WHERE p.id IN (:ids) AND p.is_deleted = 0";
+
+        SqlParameterSource params = new MapSqlParameterSource("ids", reservationIds);
+        return jdbcTemplate.query(sql, params, rowMapper);
     }
 }

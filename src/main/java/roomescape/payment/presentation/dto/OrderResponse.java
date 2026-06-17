@@ -18,8 +18,8 @@ public record OrderResponse(
         return OrderResponse.builder()
                 .orderId(order.orderId())
                 .amount(order.amount())
-                .reservationId(order.reservationId())
-                .themeName(order.themeName())
+                .reservationId(order.reservation().id())
+                .themeName(order.reservation().themeName())
                 .createdAt(order.createdAt())
                 .status(order.status())
                 .build();

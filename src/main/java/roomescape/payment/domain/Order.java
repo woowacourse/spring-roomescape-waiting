@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import roomescape.reservation.domain.ActiveReservation;
 
 @Getter
 @Builder
@@ -13,16 +12,16 @@ import roomescape.reservation.domain.ActiveReservation;
 public class Order {
     private String orderId;
     private Long amount;
-    private ActiveReservation reservation;
+    private Long reservationId;
     private OrderStatus status;
     private LocalDateTime createdAt;
     private String paymentKey;
 
-    public static Order createPending(String orderId, Long amount, ActiveReservation reservation, Clock clock) {
+    public static Order createPending(String orderId, Long amount, Long reservationId, Clock clock) {
         return Order.builder()
                 .orderId(orderId)
                 .amount(amount)
-                .reservation(reservation)
+                .reservationId(reservationId)
                 .status(OrderStatus.PENDING)
                 .createdAt(LocalDateTime.now(clock))
                 .build();
@@ -33,7 +32,7 @@ public class Order {
         return Order.builder()
                 .orderId(orderId)
                 .amount(amount)
-                .reservation(reservation)
+                .reservationId(reservationId)
                 .status(OrderStatus.COMPLETED)
                 .createdAt(LocalDateTime.now(clock))
                 .paymentKey(paymentKey)
@@ -45,7 +44,7 @@ public class Order {
         return Order.builder()
                 .orderId(orderId)
                 .amount(amount)
-                .reservation(reservation)
+                .reservationId(reservationId)
                 .status(OrderStatus.FAILED)
                 .createdAt(LocalDateTime.now(clock))
                 .paymentKey(paymentKey)
@@ -57,7 +56,7 @@ public class Order {
         return Order.builder()
                 .orderId(orderId)
                 .amount(amount)
-                .reservation(reservation)
+                .reservationId(reservationId)
                 .status(OrderStatus.CANCELED)
                 .createdAt(LocalDateTime.now(clock))
                 .paymentKey(paymentKey)

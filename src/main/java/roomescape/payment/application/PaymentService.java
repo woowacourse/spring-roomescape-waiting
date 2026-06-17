@@ -15,6 +15,8 @@ import roomescape.payment.application.exception.PaymentUnauthorizedException;
 import roomescape.payment.domain.Order;
 import roomescape.payment.domain.OrderRepository;
 import roomescape.payment.domain.OrderStatus;
+import roomescape.reservation.application.ReservationReader;
+import roomescape.reservation.application.dto.ReservationIntegrationInfo;
 
 @Slf4j
 @Service
@@ -25,6 +27,7 @@ public class PaymentService {
     private final Clock clock;
     private final OrderRepository orderRepository;
     private final PaymentGateway paymentGateway;
+    private final ReservationReader reservationReader;
 
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Order order = orderRepository.getByOrderId(orderId);
@@ -74,20 +77,38 @@ public class PaymentService {
 
     public PaymentResult cancel(String orderId, PaymentCancelCommand command) {
         Order order = orderRepository.getByOrderId(orderId);
-        if (!order.getReservation().getName().equals(command.name())) {
+        ReservationIntegrationInfo reservation = reservationReader.read(order.getReservationId());
+        if (!reservation.name().equals(command.name())) {
             throw new PaymentUnauthorizedException("결제 취소 권한이 없습니다.");
         }
+
         if (!order.getAmount().equals(command.cancelAmount())) {
             throw new PaymentAmountMismatchException(order.getAmount(), command.cancelAmount());
         }
+
         PaymentCancel cancel = PaymentCancel.builder()
                 .cancelAmount(command.cancelAmount())
                 .cancelReason(command.cancelReason())
                 .paymentKey(order.getPaymentKey())
                 .build();
+
         PaymentResult result = paymentGateway.cancel(cancel);
         Order cancelled = order.cancel(clock);
         orderRepository.update(cancelled);
         return result;
+    }
+
+    public void cancelBySystem(String orderId, String reason) {
+        Order order = orderRepository.getByOrderId(orderId);
+
+        PaymentCancel cancel = PaymentCancel.builder()
+                .cancelAmount(order.getAmount())
+                .cancelReason(reason)
+                .paymentKey(order.getPaymentKey())
+                .build();
+
+        paymentGateway.cancel(cancel);
+        Order cancelled = order.cancel(clock);
+        orderRepository.update(cancelled);
     }
 }

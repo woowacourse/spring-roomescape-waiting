@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
@@ -16,6 +17,8 @@ public interface PendingReservationRepository {
     int update(PendingReservation reservation);
     List<PendingReservation> findAll();
     List<ReservationQueryResult> findAllByName(String name);
+    List<PendingReservation> findExpiredReservations(LocalDate today);
+    List<PendingReservation> findAllByIdIn(List<Long> remainingIds);
 
     default PendingReservation getById(Long id) {
         return findById(id)

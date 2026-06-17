@@ -1,6 +1,7 @@
 package roomescape.reservation.application;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.ActiveReservation;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.domain.Theme;
@@ -95,8 +97,17 @@ public class ReservationManager {
         if (isSlotFull) {
             return pendingReservationService.change(id, slot, command.name());
         }
-        pendingReservationService.cancel(id, command.name());
-        return activeReservationService.transferReservation(id, slot, command.toCreateCommand());
+        try {
+            ReservationInfo reservation = activeReservationService.transferReservation(id, slot,
+                    command.toCreateCommand());
+            pendingReservationService.cancel(id, command.name());
+            if (!orderService.existsByReservationId(id)) {
+                orderService.createOrder(id);
+            }
+            return reservation;
+        } catch (ReservationInUseException e) {
+            return pendingReservationService.change(id, slot, command.name());
+        }
     }
 
     private ReservationInfo changeActiveReservation(final Long id, final ReservationChangeCommand command,
@@ -124,7 +135,15 @@ public class ReservationManager {
     }
 
     private void promoteNextPending(final Long oldSlotId) {
-        pendingReservationService.popNextPendingAndPromote(oldSlotId)
-                .ifPresent(activeReservationService::savePromoted);
+        Optional<ActiveReservation> promotedOpt = pendingReservationService.popNextPendingAndPromote(oldSlotId);
+        if (promotedOpt.isEmpty()) {
+            return;
+        }
+        ActiveReservation reservation = promotedOpt.get();
+        activeReservationService.savePromoted(reservation);
+
+        if (!orderService.existsByReservationId(reservation.getId())) {
+            orderService.createOrder(reservation.getId());
+        }
     }
 }

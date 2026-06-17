@@ -38,7 +38,7 @@ public class PaymentController {
             OrderInfo order = orderService.getOrder(request.orderId());
             model.addAttribute("result", result);
             model.addAttribute("paymentKey", result.paymentKey());
-            model.addAttribute("username", order.username());
+            model.addAttribute("username", order.reservation().name());
             return "success";
         } catch (PaymentAmountMismatchException e) {
             paymentService.fail(request.orderId());

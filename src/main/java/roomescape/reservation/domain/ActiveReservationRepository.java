@@ -12,6 +12,7 @@ public interface ActiveReservationRepository {
     List<ActiveReservation> findAll();
     List<ActiveReservation> findByThemeAndDate(Long themeId, LocalDate date);
     List<ActiveReservation> findAllByName(String name);
+    List<ActiveReservation> findAllByIdIn(List<Long> reservationIds);
     boolean existsByReservationTime(Long timeId);
     boolean existsByTheme(Long id);
     boolean existsByActiveSlotId(Long slotId);

@@ -31,7 +31,7 @@ public class OrderController {
         OrderInfo order = orderService.getOrder(reservationId);
         model.addAttribute("clientKey", clientKey);
         model.addAttribute("orderId", order.orderId());
-        model.addAttribute("orderName", order.themeName());
+        model.addAttribute("orderName", order.reservation().themeName());
         model.addAttribute("amount", order.amount());
         return "checkout";
     }

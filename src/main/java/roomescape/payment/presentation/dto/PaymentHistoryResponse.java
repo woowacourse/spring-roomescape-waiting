@@ -20,7 +20,7 @@ public record PaymentHistoryResponse(
                 .status(info.status().name())
                 .orderId(info.orderId())
                 .amount(info.amount())
-                .detail(info.themeName() + " 테마 예약")
+                .detail(info.reservation().themeName() + " 테마 예약")
                 .build();
     }
 }

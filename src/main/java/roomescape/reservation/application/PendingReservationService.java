@@ -1,6 +1,7 @@
 package roomescape.reservation.application;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -110,5 +111,9 @@ public class PendingReservationService {
                 .stream()
                 .map(ReservationPendingInfo::from)
                 .toList();
+    }
+
+    public List<PendingReservation> findExpiredReservations(LocalDate today) {
+        return reservationRepository.findExpiredReservations(today);
     }
 }
