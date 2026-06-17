@@ -73,6 +73,10 @@ public class Reservation {
         return new Reservation(id, user, theme, date, time, store, status);
     }
 
+    public Reservation withStatus(ReservationStatus status) {
+        return new Reservation(id, user, theme, date, time, store, status);
+    }
+
     public Long getId() {
         return id;
     }

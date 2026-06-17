@@ -10,13 +10,19 @@ public class PaymentOrder {
     private final Long reservationId;
     private final String orderId;
     private final long amount;
+    private final String paymentKey;
 
     public PaymentOrder(Long id, Long reservationId, String orderId, long amount) {
+        this(id, reservationId, orderId, amount, null);
+    }
+
+    public PaymentOrder(Long id, Long reservationId, String orderId, long amount, String paymentKey) {
         validate(reservationId, orderId, amount);
         this.id = id;
         this.reservationId = reservationId;
         this.orderId = orderId;
         this.amount = amount;
+        this.paymentKey = paymentKey;
     }
 
     private void validate(Long reservationId, String orderId, long amount) {
@@ -35,7 +41,11 @@ public class PaymentOrder {
         if (this.id != null) {
             throw new InvalidDomainException("이미 id가 존재하는 도메인입니다. 도메인 id는 생성 이후 수정될 수 없습니다.");
         }
-        return new PaymentOrder(id, reservationId, orderId, amount);
+        return new PaymentOrder(id, reservationId, orderId, amount, paymentKey);
+    }
+
+    public PaymentOrder withPaymentKey(String paymentKey) {
+        return new PaymentOrder(id, reservationId, orderId, amount, paymentKey);
     }
 
     public Long getId() {
@@ -52,5 +62,9 @@ public class PaymentOrder {
 
     public long getAmount() {
         return amount;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
     }
 }

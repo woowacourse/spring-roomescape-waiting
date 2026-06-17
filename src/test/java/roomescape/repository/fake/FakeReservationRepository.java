@@ -92,6 +92,16 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public int updateStatus(Long id, ReservationStatus status) {
+        Reservation reservation = store.get(id);
+        if (reservation == null) {
+            return 0;
+        }
+        store.put(id, reservation.withStatus(status));
+        return 1;
+    }
+
+    @Override
     public List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date) {
         return store.values().stream()
                 .filter(r -> r.getTheme().getId().equals(themeId))

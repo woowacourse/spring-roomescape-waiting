@@ -23,7 +23,9 @@ public class RoomescapeExceptionStatusMapper {
             Map.entry(ReservationNotFoundForWaitingException.class, HttpStatus.CONFLICT),
             Map.entry(ReservationNotReservedException.class, HttpStatus.CONFLICT),
             Map.entry(ReservationNotWaitingException.class, HttpStatus.CONFLICT),
-            Map.entry(DuplicateWaitingReservationException.class, HttpStatus.CONFLICT)
+            Map.entry(DuplicateWaitingReservationException.class, HttpStatus.CONFLICT),
+            Map.entry(PaymentAmountMismatchException.class, HttpStatus.CONFLICT),
+            Map.entry(PaymentOrderNotFoundException.class, HttpStatus.NOT_FOUND)
     );
 
     public HttpStatus statusOf(RoomescapeBaseException exception) {

@@ -217,6 +217,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
+    public int updateStatus(Long id, ReservationStatus status) {
+        String sql = "update reservation set status = ? where id = ?";
+        return jdbcTemplate.update(sql, status.name(), id);
+    }
+
+    @Override
     public List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date) {
         String sql = """
                 select time_id
