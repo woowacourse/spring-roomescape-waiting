@@ -45,6 +45,9 @@ public class PaymentController {
             @RequestParam(required = false) String orderId,
             Model model
     ) {
+        if (orderId != null && !orderId.isBlank()) {
+            paymentService.cancelPayment(orderId);
+        }
         return failView(model, code, message, orderId);
     }
 

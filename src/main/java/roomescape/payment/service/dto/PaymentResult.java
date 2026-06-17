@@ -10,4 +10,8 @@ public record PaymentResult(
         Long approvedAmount
 ) {
 
+    public boolean isDone() {
+        return this.status == PaymentStatus.DONE;
+    }
+
 }

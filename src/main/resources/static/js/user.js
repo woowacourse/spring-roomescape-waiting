@@ -61,6 +61,7 @@ async function handleResponseError(response, defaultMessage) {
 let selectedDate = null;
 let selectedTheme = null;
 let selectedTime = null;
+let currentReservation = null;
 
 // Toss Payments Widget Initialization
 const customerKey = Math.random().toString(36).substring(2, 12);
@@ -324,6 +325,7 @@ async function createReservation() {
 }
 
 function openPaymentModal(reservation) {
+    currentReservation = reservation;
     const paymentModal = document.getElementById("payment-modal");
     paymentModal.style.display = "block";
 
@@ -347,7 +349,7 @@ function openPaymentModal(reservation) {
             });
         } catch (error) {
             if (error.code === "USER_CANCEL") {
-                // User closed the payment window
+                location.href = `/payments/fail?code=${error.code}&message=${encodeURIComponent("결제를 취소했습니다.")}&orderId=${reservation.orderId}`;
             } else {
                 alert(error.message);
             }
@@ -356,6 +358,10 @@ function openPaymentModal(reservation) {
 }
 
 function closePaymentModal() {
+    if (currentReservation) {
+        location.href = `/payments/fail?code=USER_CANCEL&message=${encodeURIComponent("결제를 취소했습니다.")}&orderId=${currentReservation.orderId}`;
+        return;
+    }
     document.getElementById("payment-modal").style.display = "none";
 }
 

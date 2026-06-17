@@ -27,6 +27,7 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     @Override
+    // @Retryable
     public PaymentResult confirm(PaymentConfirmation confirmation) {
         TossPaymentResponse tossPaymentResponse = tossRestClient.post()
                 .uri("/v1/payments/confirm")
