@@ -6,36 +6,239 @@
     <title>RoomEscape — 방탈출 예약</title>
     <meta content="방탈출 테마 선택 및 예약 페이지" name="description">
     <link href="style.css" rel="stylesheet">
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
     <style>
-        .user-layout { min-height: 100vh; display: flex; flex-direction: column; }
-        .top-nav { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 0 36px; min-height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 16px; }
-        .top-nav-logo { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #5b7fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; border: none; cursor: pointer; padding: 0; }
-        .top-nav-links { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .user-main { flex: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px; width: 100%; }
-        .steps { display: flex; align-items: center; gap: 0; margin-bottom: 36px; }
-        .step { display: flex; align-items: center; gap: 8px; flex: 1; position: relative; }
-        .step:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: calc(100% - 120px); height: 2px; background: var(--border); left: 130px; }
-        .step.done::after { background: var(--accent); }
-        .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--border); color: var(--text-muted); background: var(--bg-secondary); flex-shrink: 0; transition: all 0.3s; }
-        .step.active .step-num { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 16px rgba(91, 127, 255, 0.4); }
-        .step.done .step-num { background: var(--success); border-color: var(--success); color: #0d0f1a; }
-        .step-label { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
-        .step.active .step-label { color: var(--accent); }
-        .step.done .step-label { color: var(--success); }
-        .section-panel { display: none; animation: fadeIn 0.3s ease; }
-        .section-panel.visible { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .booking-summary { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 20px; flex-wrap: wrap; }
-        .summary-item { display: flex; flex-direction: column; gap: 2px; }
-        .summary-key { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .summary-val { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-        .summary-val.empty { color: var(--text-muted); font-weight: 400; font-style: italic; }
-        .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; align-items:center; justify-content:center; }
-        .modal-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; width:100%; max-width:480px; margin:0 16px; }
-        .login-required-notice { background: rgba(91,127,255,0.08); border: 1px solid rgba(91,127,255,0.2); border-radius: var(--radius); padding: 20px 24px; text-align: center; }
-        .login-required-notice p { color: var(--text-secondary); font-size: 14px; margin-bottom: 14px; }
-        .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: var(--accent-soft); border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
-        .user-chip:hover { background: rgba(91,127,255,0.18); box-shadow: 0 0 0 2px rgba(91,127,255,0.3); }
+        .user-layout {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 36px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 16px;
+        }
+
+        .top-nav-logo {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #5b7fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .top-nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-main {
+            flex: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            width: 100%;
+        }
+
+        .steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 36px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: calc(100% - 120px);
+            height: 2px;
+            background: var(--border);
+            left: 130px;
+        }
+
+        .step.done::after {
+            background: var(--accent);
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-num {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 16px rgba(91, 127, 255, 0.4);
+        }
+
+        .step.done .step-num {
+            background: var(--success);
+            border-color: var(--success);
+            color: #0d0f1a;
+        }
+
+        .step-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .step.active .step-label {
+            color: var(--accent);
+        }
+
+        .step.done .step-label {
+            color: var(--success);
+        }
+
+        .section-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section-panel.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-summary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .summary-key {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-val {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .summary-val.empty {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 16px;
+        }
+
+        .login-required-notice {
+            background: rgba(91, 127, 255, 0.08);
+            border: 1px solid rgba(91, 127, 255, 0.2);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            text-align: center;
+        }
+
+        .login-required-notice p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: var(--accent-soft);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+
+        .user-chip:hover {
+            background: rgba(91, 127, 255, 0.18);
+            box-shadow: 0 0 0 2px rgba(91, 127, 255, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -58,16 +261,34 @@
         </div>
 
         <div class="steps" id="steps">
-            <div class="step active" id="step-1"><div class="step-num">1</div><span class="step-label">테마 선택</span></div>
-            <div class="step" id="step-2"><div class="step-num">2</div><span class="step-label">날짜 · 시간</span></div>
-            <div class="step" id="step-3"><div class="step-num">3</div><span class="step-label">예약 완료</span></div>
+            <div class="step active" id="step-1">
+                <div class="step-num">1</div>
+                <span class="step-label">테마 선택</span></div>
+            <div class="step" id="step-2">
+                <div class="step-num">2</div>
+                <span class="step-label">날짜 · 시간</span></div>
+            <div class="step" id="step-3">
+                <div class="step-num">3</div>
+                <span class="step-label">예약 완료</span></div>
         </div>
 
         <div class="booking-summary" id="booking-summary">
-            <div class="summary-item"><div class="summary-key">테마</div><div class="summary-val empty" id="sum-theme">–</div></div>
-            <div class="summary-item"><div class="summary-key">날짜</div><div class="summary-val empty" id="sum-date">–</div></div>
-            <div class="summary-item"><div class="summary-key">시간</div><div class="summary-val empty" id="sum-time">–</div></div>
-            <div class="summary-item"><div class="summary-key">계정</div><div class="summary-val empty" id="sum-name">–</div></div>
+            <div class="summary-item">
+                <div class="summary-key">테마</div>
+                <div class="summary-val empty" id="sum-theme">–</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-key">날짜</div>
+                <div class="summary-val empty" id="sum-date">–</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-key">시간</div>
+                <div class="summary-val empty" id="sum-time">–</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-key">계정</div>
+                <div class="summary-val empty" id="sum-name">–</div>
+            </div>
         </div>
 
         <div class="section-panel visible" id="panel-1">
@@ -78,7 +299,8 @@
                 </div>
                 <div class="theme-grid" id="theme-grid"></div>
                 <div style="text-align: center; margin-top: 16px;">
-                    <button class="btn btn-ghost" id="theme-load-more-btn" style="display:none;" type="button">더 보기</button>
+                    <button class="btn btn-ghost" id="theme-load-more-btn" style="display:none;" type="button">더 보기
+                    </button>
                 </div>
             </div>
 
@@ -116,9 +338,12 @@
                     <span class="card-title">✅ 예약 정보 확인</span>
                     <button class="btn btn-ghost btn-sm" id="back-step-2" type="button">← 뒤로</button>
                 </div>
-                <div id="confirm-summary" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;"></div>
+                <div id="confirm-summary"
+                     style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;"></div>
                 <div id="submit-area">
-                    <button class="btn btn-primary btn-full" id="submit-reservation-btn" style="max-width: 300px;" type="button">🎟 예약 확정</button>
+                    <button class="btn btn-primary btn-full" id="submit-reservation-btn" style="max-width: 300px;"
+                            type="button">🎟 예약 확정
+                    </button>
                 </div>
             </div>
         </div>
@@ -129,6 +354,24 @@
                 <button class="btn btn-ghost btn-sm" id="my-res-refresh-btn" type="button">새로고침</button>
             </div>
             <div id="my-res-section"></div>
+        </div>
+
+        <div class="modal-backdrop" id="payment-modal-backdrop">
+            <div class="modal-card" style="max-height:90vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <span style="font-size:16px;font-weight:700;">💳 결제</span>
+                    <button class="btn btn-ghost btn-sm" id="payment-close-btn" type="button">✕</button>
+                </div>
+                <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                    <span id="payment-order-name" style="font-weight:600;"></span>
+                    <span id="payment-amount" style="font-weight:700;color:var(--accent);white-space:nowrap;"></span>
+                </div>
+                <div id="payment-method"></div>
+                <div id="agreement"></div>
+                <button class="btn btn-primary btn-full" id="payment-pay-btn" type="button" style="margin-top:16px;">
+                    결제하기
+                </button>
+            </div>
         </div>
 
         <div class="modal-backdrop" id="edit-modal-backdrop">
@@ -145,11 +388,15 @@
                     </div>
                     <div class="form-group">
                         <label for="edit-theme">테마</label>
-                        <select id="edit-theme"><option value="">테마 선택</option></select>
+                        <select id="edit-theme">
+                            <option value="">테마 선택</option>
+                        </select>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="edit-time">시간</label>
-                        <select id="edit-time"><option value="">시간 선택</option></select>
+                        <select id="edit-time">
+                            <option value="">시간 선택</option>
+                        </select>
                     </div>
                 </div>
                 <div style="display:flex;gap:10px;">
@@ -215,8 +462,96 @@
 
     let pendingReturnTo = null;
 
+    // Toss Payments 결제위젯 클라이언트 키 (테스트용 공개 키)
+    const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+
     function tokenInfo() {
         return R.decodeToken(R.auth.getMemberToken());
+    }
+
+    // 로그인 사용자별 고유 customerKey 생성 (영문/숫자/_-=.@ 만 허용)
+    function paymentCustomerKey() {
+        const info = tokenInfo();
+        const base = String(info?.sub ?? info?.username ?? 'guest');
+        return ('customer_' + base).replace(/[^A-Za-z0-9_\-=.@]/g, '').slice(0, 50);
+    }
+
+    function openPaymentModal() {
+        R.byId('payment-modal-backdrop').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+        R.byId('payment-modal-backdrop').style.display = 'none';
+    }
+
+    // 주문 정보로 결제위젯을 초기화하고 결제창을 띄운다.
+    function openPaymentWidget(order, orderName) {
+        if (typeof PaymentWidget !== 'function') {
+            R.toast('결제 모듈을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.', 'error');
+            return;
+        }
+        R.byId('payment-order-name').textContent = orderName;
+        R.byId('payment-amount').textContent = `${Number(order.amount).toLocaleString()}원`;
+        R.byId('payment-method').replaceChildren();
+        R.byId('agreement').replaceChildren();
+
+        const payBtn = R.byId('payment-pay-btn');
+        payBtn.disabled = true;
+        payBtn.textContent = '결제 UI 준비 중...';
+
+        // 결제 UI가 보이는 영역에서 렌더링되도록 모달을 먼저 표시한다.
+        openPaymentModal();
+
+        const widget = PaymentWidget(TOSS_CLIENT_KEY, paymentCustomerKey());
+        const methodsWidget = widget.renderPaymentMethods(
+            '#payment-method', {value: order.amount}, {variantKey: 'DEFAULT'});
+        widget.renderAgreement('#agreement', {variantKey: 'AGREEMENT'});
+
+        // 결제 UI 렌더링이 끝난 뒤에만 결제 버튼을 활성화한다.
+        const enablePay = () => {
+            payBtn.disabled = false;
+            payBtn.textContent = '결제하기';
+        };
+        if (methodsWidget && typeof methodsWidget.on === 'function') {
+            methodsWidget.on('ready', enablePay);
+        } else if (methodsWidget && typeof methodsWidget.then === 'function') {
+            methodsWidget.then(enablePay);
+        } else {
+            enablePay();
+        }
+
+        payBtn.onclick = async () => {
+            try {
+                // 카드 정보 입력·인증은 결제창과 카드사가 처리한다.
+                // 성공 시 토스가 successUrl 로 paymentKey, orderId, amount 를 넘긴다.
+                await widget.requestPayment({
+                    orderId: order.orderId,
+                    orderName,
+                    successUrl: `${window.location.origin}/?payment=success`,
+                    failUrl: `${window.location.origin}/?payment=fail`,
+                });
+            } catch (e) {
+                R.toast(`결제 요청 실패: ${e.message}`, 'error');
+            }
+        };
+    }
+
+    // successUrl/failUrl 리다이렉트 복귀 처리
+    function handlePaymentRedirect(params) {
+        const payment = params.get('payment');
+        if (!payment) return;
+        if (payment === 'success') {
+            const paymentKey = params.get('paymentKey');
+            const orderId = params.get('orderId');
+            const amount = params.get('amount');
+            // TODO(결제 승인 단계): POST /payments/confirm {paymentKey, orderId, amount} 로 서버 최종 승인
+            console.info('Toss 결제 인증 결과', {paymentKey, orderId, amount});
+            R.toast('결제 인증이 완료되었습니다.', 'success');
+        } else if (payment === 'fail') {
+            const message = params.get('message') || '결제가 취소되었거나 실패했습니다.';
+            R.toast(`결제 실패: ${message}`, 'error');
+        }
+        history.replaceState(null, '', '/');
     }
 
     function requireLogin() {
@@ -465,10 +800,16 @@
                     style: {background: 'var(--bg-input)', padding: '12px', width: '100%'},
                     on: {click: () => selectTheme(theme)},
                 }, [
-                    R.h('span', {text: ['🥇', '🥈', '🥉'][index] || String(index + 1), style: {width: '28px', textAlign: 'center'}}),
+                    R.h('span', {
+                        text: ['🥇', '🥈', '🥉'][index] || String(index + 1),
+                        style: {width: '28px', textAlign: 'center'}
+                    }),
                     R.h('span', {style: {flex: '1', textAlign: 'left'}}, [
                         R.h('strong', {text: theme.name}),
-                        R.h('div', {text: theme.description || '', style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
+                        R.h('div', {
+                            text: theme.description || '',
+                            style: {fontSize: '12px', color: 'var(--text-secondary)'}
+                        }),
                     ]),
                     R.badge(`🔖 ${theme.reservedCount}건`, 'yellow'),
                 ]));
@@ -556,12 +897,18 @@
             R.h('div', {style: {background: 'var(--bg-input)', borderRadius: 'var(--radius)', padding: '16px'}}, [
                 R.h('div', {text: '테마', style: {fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600'}}),
                 R.h('div', {text: state.selectedTheme?.name || '–', style: {fontSize: '16px', fontWeight: '700'}}),
-                R.h('div', {text: state.selectedTheme?.description || '', style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
+                R.h('div', {
+                    text: state.selectedTheme?.description || '',
+                    style: {fontSize: '12px', color: 'var(--text-secondary)'}
+                }),
             ]),
             R.h('div', {style: {background: 'var(--bg-input)', borderRadius: 'var(--radius)', padding: '16px'}}, [
                 R.h('div', {text: '일정', style: {fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600'}}),
                 R.h('div', {text: state.selectedDate || '–', style: {fontSize: '16px', fontWeight: '700'}}),
-                R.h('div', {text: `⏰ ${state.selectedTime?.startAt || '–'}`, style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
+                R.h('div', {
+                    text: `⏰ ${state.selectedTime?.startAt || '–'}`,
+                    style: {fontSize: '12px', color: 'var(--text-secondary)'}
+                }),
             ]),
         );
     }
@@ -575,9 +922,11 @@
         const isWaiting = state.isWaiting;
         if (isWaiting && !confirm('이미 예약된 슬롯입니다. 대기 등록하시겠습니까?')) return;
         const endpoint = isWaiting ? '/reservations/waiting' : '/reservations';
+        const token = R.auth.getMemberToken();
+        const themeName = state.selectedTheme.name;
         try {
-            await R.api('POST', endpoint, {
-                token: R.auth.getMemberToken(),
+            const created = await R.api('POST', endpoint, {
+                token,
                 body: {
                     themeId: state.selectedTheme.id,
                     date: state.selectedDate,
@@ -585,25 +934,32 @@
                     storeId: 1,
                 },
             });
-            R.toast(
-                isWaiting
-                    ? `"${state.selectedTheme.name}" 대기 등록이 완료되었습니다.`
-                    : `"${state.selectedTheme.name}" 예약이 완료되었습니다.`,
-                'success',
-            );
-            state.selectedTheme = null;
-            state.selectedDate = null;
-            state.selectedTime = null;
-            state.isWaiting = false;
-            updateSummary();
-            goToStep(1);
-            await loadThemes(true);
-            await loadMyReservations();
+            if (isWaiting) {
+                R.toast(`"${themeName}" 대기 등록이 완료되었습니다.`, 'success');
+                await resetReservationWizard();
+                return;
+            }
+            // 확정 예약: 생성된 주문을 조회해 결제창으로 진행한다.
+            const order = await R.api('GET', `/order?reservationId=${created.id}`, {token});
+            R.toast(`"${themeName}" 예약이 생성되었습니다. 결제를 진행해주세요.`, 'success');
+            openPaymentWidget(order, themeName);
+            await resetReservationWizard();
         } catch (e) {
             if (e.status === 401) R.auth.clearMemberToken();
             updateAuthUi();
             R.toast(`${isWaiting ? '대기 신청' : '예약'} 실패: ${e.message}`, 'error');
         }
+    }
+
+    async function resetReservationWizard() {
+        state.selectedTheme = null;
+        state.selectedDate = null;
+        state.selectedTime = null;
+        state.isWaiting = false;
+        updateSummary();
+        goToStep(1);
+        await loadThemes(true);
+        await loadMyReservations();
     }
 
     async function loadMyReservations() {
@@ -773,14 +1129,19 @@
             if (e.key === 'Escape') {
                 closeAuthModal();
                 closeEditModal();
+                closePaymentModal();
             }
         });
         R.byId('tab-login').addEventListener('click', () => switchAuthTab('login'));
         R.byId('tab-signup').addEventListener('click', () => switchAuthTab('signup'));
         R.byId('login-btn').addEventListener('click', loginMember);
         R.byId('register-btn').addEventListener('click', registerMember);
-        R.byId('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') loginMember(); });
-        R.byId('signup-password').addEventListener('keydown', e => { if (e.key === 'Enter') registerMember(); });
+        R.byId('auth-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') loginMember();
+        });
+        R.byId('signup-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') registerMember();
+        });
 
         // 관리자 링크 권한 체크
         R.byId('admin-nav-btn').addEventListener('click', () => {
@@ -830,8 +1191,15 @@
             if (e.target === R.byId('edit-modal-backdrop')) closeEditModal();
         });
 
+        // 결제 모달
+        R.byId('payment-close-btn').addEventListener('click', closePaymentModal);
+        R.byId('payment-modal-backdrop').addEventListener('click', e => {
+            if (e.target === R.byId('payment-modal-backdrop')) closePaymentModal();
+        });
+
         // URL 파라미터 처리 (관리자 리다이렉트 후 복귀)
         const params = new URLSearchParams(window.location.search);
+        handlePaymentRedirect(params);
         const authError = params.get('authError');
         const returnTo = params.get('returnTo');
         if (returnTo) pendingReturnTo = returnTo;
