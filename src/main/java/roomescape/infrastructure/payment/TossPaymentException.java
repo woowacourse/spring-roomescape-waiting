@@ -1,11 +1,7 @@
 package roomescape.infrastructure.payment;
 
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.util.Locale;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.web.client.RestClientException;
 import roomescape.exception.RoomescapeBaseException;
 
 public class TossPaymentException extends RoomescapeBaseException {
@@ -15,12 +11,6 @@ public class TossPaymentException extends RoomescapeBaseException {
 
     public TossPaymentException(HttpStatusCode status, String code, String message) {
         super(message);
-        this.status = status;
-        this.code = code;
-    }
-
-    public TossPaymentException(HttpStatusCode status, String code, String message, Throwable cause) {
-        super(message, cause);
         this.status = status;
         this.code = code;
     }
@@ -37,33 +27,6 @@ public class TossPaymentException extends RoomescapeBaseException {
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new Retryable(error.message());
             default -> new TossPaymentException(status, error.code(), error.message());
         };
-    }
-
-    public static TossPaymentException fromNetworkFailure(RestClientException exception) {
-        Throwable rootCause = rootCause(exception);
-        if (rootCause instanceof ConnectException || isConnectTimeout(rootCause)) {
-            return new ConnectionFailed(exception);
-        }
-        if (rootCause instanceof SocketTimeoutException) {
-            return new ConfirmationUnknown(exception);
-        }
-        return new NetworkFailure(exception);
-    }
-
-    private static Throwable rootCause(Throwable throwable) {
-        Throwable current = throwable;
-        while (current.getCause() != null) {
-            current = current.getCause();
-        }
-        return current;
-    }
-
-    private static boolean isConnectTimeout(Throwable throwable) {
-        if (!(throwable instanceof SocketTimeoutException)) {
-            return false;
-        }
-        String message = throwable.getMessage();
-        return message != null && message.toLowerCase(Locale.ROOT).contains("connect");
     }
 
     public HttpStatusCode getStatus() {
@@ -127,30 +90,6 @@ public class TossPaymentException extends RoomescapeBaseException {
 
         public Retryable(String message) {
             super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
-        }
-    }
-
-    public static class ConnectionFailed extends TossPaymentException {
-
-        public ConnectionFailed(Throwable cause) {
-            super(HttpStatus.SERVICE_UNAVAILABLE, "TOSS_CONNECTION_FAILED",
-                    "결제 승인 요청을 보낼 수 없습니다. 잠시 후 다시 시도해주세요.", cause);
-        }
-    }
-
-    public static class ConfirmationUnknown extends TossPaymentException {
-
-        public ConfirmationUnknown(Throwable cause) {
-            super(HttpStatus.GATEWAY_TIMEOUT, "TOSS_CONFIRMATION_UNKNOWN",
-                    "결제 승인 응답을 받지 못했습니다. 결제가 완료됐는지 확인한 뒤 다시 시도해주세요.", cause);
-        }
-    }
-
-    public static class NetworkFailure extends TossPaymentException {
-
-        public NetworkFailure(Throwable cause) {
-            super(HttpStatus.SERVICE_UNAVAILABLE, "TOSS_NETWORK_FAILED",
-                    "결제 승인 요청 중 네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", cause);
         }
     }
 }
