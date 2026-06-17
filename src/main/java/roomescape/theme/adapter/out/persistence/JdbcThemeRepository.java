@@ -22,17 +22,22 @@ public class JdbcThemeRepository implements ThemeRepository {
                     resultSet.getLong("id"),
                     resultSet.getString("name"),
                     resultSet.getString("description"),
-                    resultSet.getString("thumbnail_url")
+                    resultSet.getString("thumbnail_url"),
+                    resultSet.getInt("price")
             );
 
     @Override
     public Theme save(Theme theme) {
-        String sql = "INSERT INTO theme(name, description, thumbnail_url) VALUES (:name, :description, :thumbnail_url)";
+        String sql = """
+                INSERT INTO theme(name, description, thumbnail_url, price)
+                VALUES (:name, :description, :thumbnail_url, :price)
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
-                .addValue("thumbnail_url", theme.getThumbnailUrl());
+                .addValue("thumbnail_url", theme.getThumbnailUrl())
+                .addValue("price", theme.getPrice());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(sql, params, keyHolder);
@@ -46,7 +51,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 keyHolder.getKey().longValue(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailUrl()
+                theme.getThumbnailUrl(),
+                theme.getPrice()
         );
     }
 
@@ -61,7 +67,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findThemesBySlotDate(LocalDate date) {
-        String sql = "SELECT DISTINCT t.id, t.name, t.description, t.thumbnail_url " +
+        String sql = "SELECT DISTINCT t.id, t.name, t.description, t.thumbnail_url, t.price " +
                 "FROM theme t " +
                 "JOIN slot s ON t.id = s.theme_id " +
                 "WHERE s.date = :date " +
@@ -77,13 +83,14 @@ public class JdbcThemeRepository implements ThemeRepository {
     public List<Theme> findPopularThemeByCurrentDate(LocalDate currentDate) {
         LocalDate startDate = currentDate.minusDays(7);
 
-        String sql = "SELECT t.id, t.name, t.description, t.thumbnail_url " +
+        String sql = "SELECT t.id, t.name, t.description, t.thumbnail_url, t.price " +
                 "FROM theme t " +
                 "JOIN slot s ON t.id = s.theme_id " +
                 "JOIN reservation r ON s.id = r.slot_id " +
                 "WHERE s.date >= :startDate " +
                 "AND s.date < :currentDate " +
-                "GROUP BY t.id, t.name, t.description, t.thumbnail_url " +
+                "AND r.status = 'CONFIRMED' " +
+                "GROUP BY t.id, t.name, t.description, t.thumbnail_url, t.price " +
                 "ORDER BY COUNT(r.id) DESC, t.id ASC " +
                 "LIMIT :limit";
 

@@ -6,14 +6,20 @@ public record ThemeSaveResponse(
         Long id,
         String name,
         String description,
-        String thumbnailUrl
+        String thumbnailUrl,
+        int price
 ) {
+    public ThemeSaveResponse(Long id, String name, String description, String thumbnailUrl) {
+        this(id, name, description, thumbnailUrl, 0);
+    }
+
     public static ThemeSaveResponse from(Theme theme) {
         return new ThemeSaveResponse(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailUrl()
+                theme.getThumbnailUrl(),
+                theme.getPrice()
         );
     }
 }
