@@ -440,6 +440,48 @@ class ReservationAcceptanceTest {
     }
 
     @Test
+    void DELETE_reservations_id_첫번째_예약_대기를_예약_확정으로_승격한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
+                .date("9999-12-31").member("브라운").save();
+        Scenario.ExistingReservation firstWaiting = Scenario.waitingReservation(jdbcTemplate)
+                .date(reserved.date()).onTheme(reserved.themeId()).onTime(reserved.timeId()).onStore(reserved.storeId())
+                .member("샤를").save();
+        Scenario.ExistingReservation secondWaiting = Scenario.waitingReservation(jdbcTemplate)
+                .date(reserved.date()).onTheme(reserved.themeId()).onTime(reserved.timeId()).onStore(reserved.storeId())
+                .member("아론").save();
+
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 08:00:00",
+                firstWaiting.reservationId());
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
+                secondWaiting.reservationId());
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, reserved.bearer())
+                .when().delete("/reservations/" + reserved.reservationId())
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, firstWaiting.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].id", equalTo((int) firstWaiting.reservationId()))
+                .body("waitingReservations.size()", is(0));
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, secondWaiting.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(0))
+                .body("waitingReservations.size()", is(1))
+                .body("waitingReservations[0].id", equalTo((int) secondWaiting.reservationId()))
+                .body("waitingReservations[0].waitingOrder", equalTo(1));
+    }
+
+    @Test
     void DELETE_reservations_id_예약_대기이면_409과_메시지를_반환한다() {
         Scenario.ExistingReservation waiting = Scenario.waitingReservation(jdbcTemplate).member("브라운").save();
 

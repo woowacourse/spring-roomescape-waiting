@@ -185,6 +185,50 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
+    void findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate_가장_먼저_등록된_대기를_반환한다() {
+        Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
+        Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
+        Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
+        Long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
+        Long time = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        Long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
+        LocalDate date = LocalDate.of(2026, 6, 1);
+        DbFixtures.insertReservation(jdbcTemplate, brown, themeA, "2026-06-01", time,
+                ReservationStatus.RESERVED.name());
+        Long firstWaitingId = DbFixtures.insertReservation(jdbcTemplate, charles, themeA, "2026-06-01", time,
+                ReservationStatus.WAITING.name());
+        Long secondWaitingId = DbFixtures.insertReservation(jdbcTemplate, aron, themeA, "2026-06-01", time,
+                ReservationStatus.WAITING.name());
+        DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-01", time,
+                ReservationStatus.WAITING.name());
+
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
+                secondWaitingId);
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 08:00:00",
+                firstWaitingId);
+
+        Reservation result = repository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+                date, time, themeA, storeId).orElseThrow();
+
+        assertThat(result.getId()).isEqualTo(firstWaitingId);
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    void findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate_매칭되는_대기가_없으면_empty를_반환한다() {
+        Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        Long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
+        DbFixtures.insertReservation(jdbcTemplate, brown, themeId, "2026-06-01", timeId,
+                ReservationStatus.RESERVED.name());
+
+        assertThat(repository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+                LocalDate.of(2026, 6, 1), timeId, themeId, storeId)).isEmpty();
+    }
+
+    @Test
     void update_지정한_id의_필드를_갱신한다() {
         Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
@@ -209,6 +253,38 @@ class ReservationJdbcRepositoryTest {
         assertThat(found.getTheme().getId()).isEqualTo(themeB);
         assertThat(found.getTime().getId()).isEqualTo(time2);
         assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    void updateWaitingToReserved_예약_대기를_예약_확정으로_변경한다() {
+        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-06-01", timeId,
+                ReservationStatus.WAITING.name());
+        Reservation waitingReservation = repository.findById(reservationId).orElseThrow();
+
+        int affected = repository.updateWaitingToReserved(waitingReservation.confirm());
+
+        assertThat(affected).isEqualTo(1);
+        assertThat(repository.findById(reservationId).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void updateWaitingToReserved_예약_대기가_아니면_0을_반환한다() {
+        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-06-01", timeId,
+                ReservationStatus.RESERVED.name());
+        Reservation reservation = repository.findById(reservationId).orElseThrow();
+
+        int affected = repository.updateWaitingToReserved(reservation);
+
+        assertThat(affected).isZero();
+        assertThat(repository.findById(reservationId).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.RESERVED);
     }
 
     @Test

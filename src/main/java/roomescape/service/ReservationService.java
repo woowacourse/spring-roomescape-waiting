@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -20,6 +21,7 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
+import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
@@ -138,7 +140,11 @@ public class ReservationService {
         validateIsReserved(reservation);
         validateExistingNotInPast(reservation);
 
-        reservationRepository.deleteById(command.reservationId());
+        Optional<Reservation> firstWaitingReservation = findFirstWaitingReservationForUpdate(reservation);
+
+        deleteReservation(command.reservationId());
+
+        firstWaitingReservation.ifPresent(this::confirmWaitingReservation);
     }
 
     @Transactional
@@ -149,12 +155,9 @@ public class ReservationService {
         validateIsWaiting(reservation);
         validateExistingNotInPast(reservation);
 
-        reservationRepository.deleteById(command.reservationId());
+        deleteReservation(command.reservationId());
     }
 
-    /**
-     * 헬퍼메서드
-     */
     private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
@@ -164,9 +167,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
         Store store = storeRepository.findById(command.storeId())
                 .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
-        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store,
-                status);
-        return newReservation;
+        return new Reservation(null, user, theme, command.date(), reservationTime, store, status);
     }
 
     private void validateIsReserved(Reservation existing) {
@@ -230,6 +231,35 @@ public class ReservationService {
                 reservation.getStore().getId(),
                 reservation.getUser().getId())) {
             throw new DuplicateWaitingReservationException();
+        }
+    }
+
+    private Optional<Reservation> findFirstWaitingReservationForUpdate(Reservation reservation) {
+        return reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getStore().getId());
+    }
+
+    private void deleteReservation(long reservationId) {
+        int affected = reservationRepository.deleteById(reservationId);
+        validateReservationModified(affected);
+    }
+
+    private void confirmWaitingReservation(Reservation waitingReservation) {
+        Reservation confirmedReservation = waitingReservation.confirm();
+        updateWaitingToReserved(confirmedReservation);
+    }
+
+    private void updateWaitingToReserved(Reservation reservation) {
+        int affected = reservationRepository.updateWaitingToReserved(reservation);
+        validateReservationModified(affected);
+    }
+
+    private void validateReservationModified(int affected) {
+        if (affected == 0) {
+            throw new ReservationConcurrentConflictException();
         }
     }
 }

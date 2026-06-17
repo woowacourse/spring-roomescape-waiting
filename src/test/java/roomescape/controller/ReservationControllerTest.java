@@ -33,6 +33,7 @@ import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
+import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
@@ -219,6 +220,16 @@ class ReservationControllerTest {
         mockMvc.perform(delete("/reservations/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("본인의 예약만 취소 혹은 변경 가능합니다."));
+    }
+
+    @Test
+    void DELETE_reservations_id_예약_정보가_동시에_변경되면_409과_메시지를_반환한다() throws Exception {
+        willThrow(new ReservationConcurrentConflictException())
+                .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(1L, 1L));
+
+        mockMvc.perform(delete("/reservations/1"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요."));
     }
 
     @Test
