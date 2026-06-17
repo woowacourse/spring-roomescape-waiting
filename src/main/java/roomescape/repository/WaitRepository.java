@@ -32,14 +32,14 @@ public interface WaitRepository extends JpaRepository<Wait, Long> {
                     WITH slot_waiting_list AS (
                         SELECT `id`, ROW_NUMBER() OVER (ORDER BY created_at, id) AS `order`
                         FROM wait
-                        WHERE `reservation_date` = :date AND `time_id` = :timeId AND `theme_id` = :themeId
+                        WHERE `reservation_date` = :reservationDate AND `time_id` = :timeId AND `theme_id` = :themeId
                     )
                     SELECT `order` FROM slot_waiting_list WHERE `id` = :waitId
                     """,
             nativeQuery = true
     )
     Long calculateWaitingOrder(
-            @Param("date") LocalDate date,
+            @Param("reservationDate") LocalDate reservationDate,
             @Param("timeId") Long timeId,
             @Param("themeId") Long themeId,
             @Param("waitId") Long waitId);
