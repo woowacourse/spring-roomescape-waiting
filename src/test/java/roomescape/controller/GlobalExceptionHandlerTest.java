@@ -28,6 +28,7 @@ import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
+import roomescape.service.ReservationPaymentService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -37,6 +38,7 @@ import roomescape.service.ThemeService;
 class GlobalExceptionHandlerTest {
 
     @MockitoBean ReservationService reservationService;
+    @MockitoBean ReservationPaymentService reservationPaymentService;
     @MockitoBean ReservationTimeService reservationTimeService;
     @MockitoBean ThemeService themeService;
 

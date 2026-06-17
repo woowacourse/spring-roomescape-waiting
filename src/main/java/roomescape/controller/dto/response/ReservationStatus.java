@@ -2,5 +2,6 @@ package roomescape.controller.dto.response;
 
 public enum ReservationStatus {
     RESERVED,
-    WAITING
+    WAITING,
+    PAYMENT_PENDING
 }

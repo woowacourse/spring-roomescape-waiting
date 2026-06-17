@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.nullValue;
 
 import io.restassured.RestAssured;
@@ -28,6 +29,46 @@ class ReservationControllerTest extends ControllerTest {
                 .body("time", equalTo("10:00"))
                 .body("themeName", equalTo("공포의 저택"))
                 .body("reservationStatus", equalTo("RESERVED"));
+    }
+
+    @DisplayName("예약 결제 대기 주문 생성")
+    @Test
+    void 예약_결제_대기_주문_생성() {
+        String date = LocalDate.now().plusDays(1).toString();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationParams("브라운", date, 1, 1))
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", equalTo(1))
+                .body("orderId", matchesPattern("[A-Za-z0-9_-]{6,64}"))
+                .body("amount", equalTo(10000))
+                .body("clientKey", equalTo("test_ck_test"))
+                .body("orderName", equalTo("공포의 저택 예약"))
+                .body("reservationStatus", equalTo("PAYMENT_PENDING"));
+    }
+
+    @DisplayName("결제 대기 중인 슬롯은 다시 결제 대기 주문을 만들 수 없다")
+    @Test
+    void 결제_대기_중인_슬롯이면_409() {
+        String date = LocalDate.now().plusDays(1).toString();
+        Map<String, Object> params = reservationParams("브라운", date, 1, 1);
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("이미 예약된 시간입니다."));
     }
 
     @DisplayName("사용자 예약 삭제")
