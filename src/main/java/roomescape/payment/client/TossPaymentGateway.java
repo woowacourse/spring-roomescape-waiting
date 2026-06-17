@@ -3,6 +3,8 @@ package roomescape.payment.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -28,6 +30,11 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     @Override
+    @Retryable(
+            exceptionExpression = "#root.retryable",
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000, multiplier = 2) // TODO 기준 공부 후 적용
+    )
     public PaymentResult confirm(PaymentConfirmation confirmation) {
         try {
             TossPaymentResponse tossResponse = tossRestClient.post()
