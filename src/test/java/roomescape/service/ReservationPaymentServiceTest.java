@@ -26,6 +26,10 @@ import roomescape.domain.ReservationPayment;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.payment.OrderIdGenerator;
+import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 
@@ -37,6 +41,7 @@ class ReservationPaymentServiceTest {
     @Mock private ReservationTimeDao reservationTimeDao;
     @Mock private ThemeDao themeDao;
     @Mock private OrderIdGenerator orderIdGenerator;
+    @Mock private PaymentGateway paymentGateway;
     @Mock private Clock clock;
 
     private ReservationPaymentService reservationPaymentService;
@@ -53,6 +58,7 @@ class ReservationPaymentServiceTest {
                 reservationTimeDao,
                 themeDao,
                 orderIdGenerator,
+                paymentGateway,
                 clock,
                 10000L
         );
@@ -118,8 +124,49 @@ class ReservationPaymentServiceTest {
         then(reservationPaymentDao).should(never()).save(any());
     }
 
+    @Test
+    void confirm_저장된_금액과_콜백_금액이_다르면_승인_호출_전에_차단한다() {
+        LocalDate date = fixedNow.toLocalDate().plusDays(1);
+        ReservationPayment payment = payment("order_123456", 10000L, date);
+        given(reservationPaymentDao.findByOrderId("order_123456")).willReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> reservationPaymentService.confirm("payment_key", "order_123456", 9000L))
+                .isInstanceOf(PaymentAmountMismatchException.class);
+
+        then(paymentGateway).should(never()).confirm(any());
+        then(reservationPaymentDao).should(never()).updatePaymentKey(any(), any());
+        then(reservationDao).should(never()).save(any());
+    }
+
+    @Test
+    void confirm_금액이_일치하면_결제를_승인하고_예약을_확정한다() {
+        LocalDate date = fixedNow.toLocalDate().plusDays(1);
+        ReservationPayment payment = payment("order_123456", 10000L, date);
+        given(reservationPaymentDao.findByOrderId("order_123456")).willReturn(Optional.of(payment));
+        given(paymentGateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 10000L)))
+                .willReturn(new PaymentResult("payment_key", "order_123456", "DONE", 10000L));
+        given(reservationDao.save(payment.getReservation())).willReturn(payment.getReservation());
+
+        var reservation = reservationPaymentService.confirm("payment_key", "order_123456", 10000L);
+
+        assertThat(reservation.getName()).isEqualTo("브라운");
+        then(paymentGateway).should().confirm(new PaymentConfirmation("payment_key", "order_123456", 10000L));
+        then(reservationPaymentDao).should().updatePaymentKey("order_123456", "payment_key");
+        then(reservationDao).should().save(payment.getReservation());
+    }
+
     private void fixClock() {
         given(clock.getZone()).willReturn(ZoneOffset.UTC);
         given(clock.instant()).willReturn(fixedNow.toInstant(ZoneOffset.UTC));
+    }
+
+    private ReservationPayment payment(String orderId, long amount, LocalDate date) {
+        return new ReservationPayment(
+                1L,
+                orderId,
+                amount,
+                null,
+                new roomescape.domain.Reservation("브라운", date, fixedNow, sampleTime, sampleTheme)
+        );
     }
 }

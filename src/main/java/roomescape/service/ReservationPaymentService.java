@@ -16,6 +16,11 @@ import roomescape.domain.ReservationPayment;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.payment.OrderIdGenerator;
+import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentOrderNotFoundException;
+import roomescape.payment.PaymentResult;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
@@ -29,6 +34,7 @@ public class ReservationPaymentService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final OrderIdGenerator orderIdGenerator;
+    private final PaymentGateway paymentGateway;
     private final Clock clock;
     private final long reservationAmount;
 
@@ -38,6 +44,7 @@ public class ReservationPaymentService {
             ReservationTimeDao reservationTimeDao,
             ThemeDao themeDao,
             OrderIdGenerator orderIdGenerator,
+            PaymentGateway paymentGateway,
             Clock clock,
             @Value("${payment.reservation.amount}") long reservationAmount
     ) {
@@ -46,6 +53,7 @@ public class ReservationPaymentService {
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.orderIdGenerator = orderIdGenerator;
+        this.paymentGateway = paymentGateway;
         this.clock = clock;
         this.reservationAmount = reservationAmount;
     }
@@ -62,6 +70,23 @@ public class ReservationPaymentService {
         ReservationPayment payment = new ReservationPayment(orderIdGenerator.generate(), reservationAmount, reservation);
         try {
             return reservationPaymentDao.save(payment);
+        } catch (DataConflictException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+    }
+
+    @Transactional
+    public Reservation confirm(String paymentKey, String orderId, long amount) {
+        ReservationPayment payment = reservationPaymentDao.findByOrderId(orderId)
+                .orElseThrow(() -> new PaymentOrderNotFoundException("존재하지 않는 주문입니다."));
+        if (payment.getAmount() != amount) {
+            throw new PaymentAmountMismatchException(payment.getAmount(), amount);
+        }
+
+        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        reservationPaymentDao.updatePaymentKey(orderId, result.paymentKey());
+        try {
+            return reservationDao.save(payment.getReservation());
         } catch (DataConflictException e) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }

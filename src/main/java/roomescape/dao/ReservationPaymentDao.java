@@ -76,6 +76,10 @@ public class ReservationPaymentDao {
         return jdbcTemplate.query(sql, reservationPaymentRowMapper, orderId).stream().findFirst();
     }
 
+    public void updatePaymentKey(String orderId, String paymentKey) {
+        jdbcTemplate.update("UPDATE reservation_payment SET payment_key = ? WHERE order_id = ?", paymentKey, orderId);
+    }
+
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation_payment WHERE date = ? AND time_id = ? AND theme_id = ?",

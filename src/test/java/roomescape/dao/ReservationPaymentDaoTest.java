@@ -63,6 +63,16 @@ class ReservationPaymentDaoTest {
     }
 
     @Test
+    void updatePaymentKey_paymentKey를_저장한다() {
+        reservationPaymentDao.save(payment("order_123456", LocalDate.of(2026, 12, 31), 1L, 1L));
+
+        reservationPaymentDao.updatePaymentKey("order_123456", "payment_key");
+
+        ReservationPayment found = reservationPaymentDao.findByOrderId("order_123456").orElseThrow();
+        assertThat(found.getPaymentKey()).isEqualTo("payment_key");
+    }
+
+    @Test
     void save_동일한_orderId이면_예외() {
         ReservationPayment first = payment("order_123456", LocalDate.of(2026, 12, 31), 1L, 1L);
         ReservationPayment second = payment("order_123456", LocalDate.of(2026, 12, 30), 2L, 1L);
