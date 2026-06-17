@@ -14,6 +14,7 @@ import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
+import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
@@ -59,24 +60,55 @@ class ReservationServiceTest {
     @Autowired
     private ReservationWaitingService reservationWaitingService;
 
+    @Autowired
+    private PaymentOrderDao paymentOrderDao;
+
     @BeforeEach
     void setUp() {
         databaseInitializer.clear();
     }
 
     @Test
-    void 예약을_추가한다() {
+    void 예약을_추가하면_결제_대기_예약과_결제_주문이_생성된다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        LocalDateTime now = LocalDateTime.now();
+
         CreateReservationCommand command = new CreateReservationCommand(
-                "브라운", LocalDate.now().plusDays(1), time.getId(), theme.getId()
+                "브라운", reservationDate, time.getId(), theme.getId()
         );
 
-        ReservationResponse response = reservationService.addReservation(command, LocalDateTime.now());
+        ReservationPaymentResponse response = reservationService.addReservation(command, now);
 
         assertThat(response)
-                .extracting(ReservationResponse::name, ReservationResponse::date)
-                .containsExactly("브라운", LocalDate.now().plusDays(1));
+                .extracting(
+                        ReservationPaymentResponse::name,
+                        ReservationPaymentResponse::date,
+                        ReservationPaymentResponse::amount
+                )
+                .containsExactly("브라운", reservationDate, 10_000L);
+
+        assertThat(response.orderId()).isNotBlank();
+        assertThat(response.reservationId()).isNotNull();
+
+        Reservation savedReservation = reservationDao.selectById(response.reservationId()).get();
+        assertThat(savedReservation.getState()).isEqualTo(ReservationState.PENDING);
+
+        PaymentOrder paymentOrder = paymentOrderDao.selectByOrderId(response.orderId()).get();
+        assertThat(paymentOrder)
+                .extracting(
+                        PaymentOrder::getReservationId,
+                        PaymentOrder::getAmount,
+                        PaymentOrder::getStatus,
+                        PaymentOrder::getCreatedAt
+                )
+                .containsExactly(
+                        response.reservationId(),
+                        10_000L,
+                        PaymentOrderStatus.PENDING,
+                        now
+                );
     }
 
     @Test

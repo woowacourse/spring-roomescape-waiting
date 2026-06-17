@@ -31,6 +31,10 @@ public class Reservation {
         return new Reservation(null, name, slot, ReservationState.CONFIRMED, null);
     }
 
+    public static Reservation createPendingWithoutId(String name, ReservationSlot slot) {
+        return new Reservation(null, name, slot, ReservationState.PENDING, null);
+    }
+
     public void validateCancelable(LocalDateTime now) {
         Objects.requireNonNull(now, "현재 시간은 필수값 입니다.");
 

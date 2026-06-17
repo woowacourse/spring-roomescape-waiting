@@ -67,4 +67,12 @@ public class PaymentOrderDao {
             return Optional.empty();
         }
     }
+
+    public int deleteByReservationId(Long reservationId) {
+        String sql = """
+                DELETE FROM payment_order
+                WHERE reservation_id = ?
+                """;
+        return jdbcTemplate.update(sql, reservationId);
+    }
 }

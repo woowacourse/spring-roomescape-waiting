@@ -29,13 +29,15 @@ public class ReservationControllerTest {
     }
 
     @Test
-    void 예약을_추가한다() {
+    void 예약을_추가하면_결제_대기_정보를_반환한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
 
         createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId, themeId)
                 .statusCode(201)
-                .body("id", notNullValue())
+                .body("reservationId", notNullValue())
+                .body("orderId", notNullValue())
+                .body("amount", is(10000))
                 .header("Location", "/reservations/1");
     }
 
@@ -107,7 +109,7 @@ public class ReservationControllerTest {
         int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         int reservationId = createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId1, themeId)
                 .statusCode(201)
-                .extract().path("id");
+                .extract().path("reservationId");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -134,7 +136,7 @@ public class ReservationControllerTest {
         int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         int reservationId = createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId, themeId)
                 .statusCode(201)
-                .extract().path("id");
+                .extract().path("reservationId");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -153,7 +155,7 @@ public class ReservationControllerTest {
 
         int reservationId2 = createReservation("로지", LocalDate.now().plusDays(2).toString(), timeId, themeId)
                 .statusCode(201)
-                .extract().path("id");
+                .extract().path("reservationId");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -169,7 +171,7 @@ public class ReservationControllerTest {
         int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
         int reservationId = createReservation("브라운", LocalDate.now().plusDays(2).toString(), timeId, themeId)
                 .statusCode(201)
-                .extract().path("id");
+                .extract().path("reservationId");
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + reservationId)
@@ -186,7 +188,7 @@ public class ReservationControllerTest {
 
         int reservationId = createReservation("브라운", date, timeId, themeId)
                 .statusCode(201)
-                .extract().path("id");
+                .extract().path("reservationId");
 
         createReservationWaiting("맥스", LocalDate.parse(date), timeId, themeId)
                 .statusCode(201);
