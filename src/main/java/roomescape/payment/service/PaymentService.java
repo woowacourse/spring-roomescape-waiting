@@ -23,7 +23,6 @@ import java.util.UUID;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PaymentService {
 
@@ -31,7 +30,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
-    private final PropertyResolver propertyResolver;
 
     @Transactional
     public Payment createPendingPayment(Long reservationId, Long slotId, Long amount) {
