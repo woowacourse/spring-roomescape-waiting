@@ -1,4 +1,4 @@
-package roomescape.payment;
+package roomescape.payment.order;
 
 public record PaymentOrder(
         Long id,

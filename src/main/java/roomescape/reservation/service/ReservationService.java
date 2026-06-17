@@ -4,7 +4,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.RoomescapeException;
-import roomescape.payment.dao.PaymentOrderDao;
+import roomescape.payment.order.dao.PaymentOrderDao;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;

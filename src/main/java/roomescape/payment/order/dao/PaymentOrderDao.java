@@ -1,10 +1,10 @@
-package roomescape.payment.dao;
+package roomescape.payment.order.dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.payment.PaymentOrder;
+import roomescape.payment.order.PaymentOrder;
 
 @Repository
 public class PaymentOrderDao {
