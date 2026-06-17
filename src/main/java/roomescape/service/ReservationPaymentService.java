@@ -16,6 +16,7 @@ import roomescape.domain.ReservationPayment;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.payment.OrderIdGenerator;
+import roomescape.payment.PaymentFailure;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
@@ -92,6 +93,14 @@ public class ReservationPaymentService {
         }
     }
 
+    @Transactional
+    public PaymentFailure fail(String code, String message, String orderId) {
+        if (hasText(orderId)) {
+            reservationPaymentDao.deleteByOrderId(orderId);
+        }
+        return new PaymentFailure(code, message, orderId);
+    }
+
     private ReservationTime validateReservationTime(long timeId) {
         return reservationTimeDao.findById(timeId)
                 .orElseThrow(() -> new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다."));
@@ -100,5 +109,9 @@ public class ReservationPaymentService {
     private Theme validateTheme(long themeId) {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

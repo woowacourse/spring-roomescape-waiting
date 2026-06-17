@@ -73,6 +73,16 @@ class ReservationPaymentDaoTest {
     }
 
     @Test
+    void deleteByOrderId_orderId로_결제_대기를_삭제한다() {
+        reservationPaymentDao.save(payment("order_123456", LocalDate.of(2026, 12, 31), 1L, 1L));
+
+        int deletedCount = reservationPaymentDao.deleteByOrderId("order_123456");
+
+        assertThat(deletedCount).isEqualTo(1);
+        assertThat(reservationPaymentDao.findByOrderId("order_123456")).isEmpty();
+    }
+
+    @Test
     void save_동일한_orderId이면_예외() {
         ReservationPayment first = payment("order_123456", LocalDate.of(2026, 12, 31), 1L, 1L);
         ReservationPayment second = payment("order_123456", LocalDate.of(2026, 12, 30), 2L, 1L);

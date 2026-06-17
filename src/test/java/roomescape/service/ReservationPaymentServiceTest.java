@@ -155,6 +155,25 @@ class ReservationPaymentServiceTest {
         then(reservationDao).should().save(payment.getReservation());
     }
 
+    @Test
+    void fail_orderId가_있으면_결제_대기를_삭제한다() {
+        var failure = reservationPaymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", "order_123456");
+
+        assertThat(failure.code()).isEqualTo("PAY_PROCESS_CANCELED");
+        assertThat(failure.message()).isEqualTo("사용자가 결제를 취소했습니다.");
+        assertThat(failure.orderId()).isEqualTo("order_123456");
+        then(reservationPaymentDao).should().deleteByOrderId("order_123456");
+    }
+
+    @Test
+    void fail_orderId가_없어도_NPE가_나지_않고_삭제하지_않는다() {
+        var failure = reservationPaymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", null);
+
+        assertThat(failure.code()).isEqualTo("PAY_PROCESS_CANCELED");
+        assertThat(failure.orderId()).isNull();
+        then(reservationPaymentDao).should(never()).deleteByOrderId(any());
+    }
+
     private void fixClock() {
         given(clock.getZone()).willReturn(ZoneOffset.UTC);
         given(clock.instant()).willReturn(fixedNow.toInstant(ZoneOffset.UTC));

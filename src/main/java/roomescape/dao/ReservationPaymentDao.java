@@ -80,6 +80,10 @@ public class ReservationPaymentDao {
         jdbcTemplate.update("UPDATE reservation_payment SET payment_key = ? WHERE order_id = ?", paymentKey, orderId);
     }
 
+    public int deleteByOrderId(String orderId) {
+        return jdbcTemplate.update("DELETE FROM reservation_payment WHERE order_id = ?", orderId);
+    }
+
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation_payment WHERE date = ? AND time_id = ? AND theme_id = ?",

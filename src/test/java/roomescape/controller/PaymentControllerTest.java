@@ -56,6 +56,39 @@ class PaymentControllerTest extends ControllerTest {
                 .statusCode(400);
     }
 
+    @DisplayName("결제 실패 콜백은 실패 사유를 응답하고 결제 대기를 정리한다")
+    @Test
+    void 결제_실패_콜백_정리() {
+        String date = LocalDate.now().plusDays(1).toString();
+        String orderId = createReservationPaymentOrder("브라운", date, 1, 1);
+
+        RestAssured.given().log().all()
+                .queryParam("code", "PAY_PROCESS_CANCELED")
+                .queryParam("message", "사용자가 결제를 취소했습니다.")
+                .queryParam("orderId", orderId)
+                .when().get("/payments/fail")
+                .then().log().all()
+                .statusCode(200)
+                .body("code", equalTo("PAY_PROCESS_CANCELED"))
+                .body("message", equalTo("사용자가 결제를 취소했습니다."))
+                .body("orderId", equalTo(orderId));
+
+        createReservationPaymentOrder("브라운", date, 1, 1);
+    }
+
+    @DisplayName("결제 실패 콜백은 orderId가 없어도 처리된다")
+    @Test
+    void 결제_실패_콜백_orderId_없음() {
+        RestAssured.given().log().all()
+                .queryParam("code", "PAY_PROCESS_CANCELED")
+                .queryParam("message", "사용자가 결제를 취소했습니다.")
+                .when().get("/payments/fail")
+                .then().log().all()
+                .statusCode(200)
+                .body("code", equalTo("PAY_PROCESS_CANCELED"))
+                .body("message", equalTo("사용자가 결제를 취소했습니다."));
+    }
+
     private String createReservationPaymentOrder(String name, String date, long timeId, long themeId) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", name);
