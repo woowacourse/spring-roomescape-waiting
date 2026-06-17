@@ -1,6 +1,7 @@
 package roomescape.reservation.controller.dto.response;
 
-import roomescape.order.domain.Order;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithSlotInformation;
@@ -21,7 +22,8 @@ public record ReservationWithSlotDetailDto(
         ReservationStatus status,
         Long waitingTurn,
         String orderId,
-        Long amount
+        Long amount,
+        PaymentStatus paymentStatus
 ) {
 
     public static ReservationWithSlotDetailDto from(ReservationWithSlotInformation projection) {
@@ -36,12 +38,13 @@ public record ReservationWithSlotDetailDto(
                 projection.themeThumbnailUrl(),
                 projection.status(),
                 projection.waitingTurn(),
-                null,
-                null
+                projection.orderId(),
+                projection.paymentAmount(),
+                projection.paymentStatus()
         );
     }
 
-    public static ReservationWithSlotDetailDto of(Reservation reservation, ReservationSlot slot, Order order) {
+    public static ReservationWithSlotDetailDto of(Reservation reservation, ReservationSlot slot, Payment payment) {
         return new ReservationWithSlotDetailDto(
                 reservation.getId(),
                 reservation.getSlotId(),
@@ -53,8 +56,9 @@ public record ReservationWithSlotDetailDto(
                 slot.getTheme().getThumbnailUrl(),
                 reservation.getStatus(),
                 null,
-                order.getOrderId(),
-                order.getAmount()
+                payment.getOrderId(),
+                payment.getAmount(),
+                payment.getStatus()
         );
     }
 
@@ -71,8 +75,8 @@ public record ReservationWithSlotDetailDto(
                 reservation.getStatus(),
                 null,
                 null,
+                null,
                 null
         );
     }
-
 }

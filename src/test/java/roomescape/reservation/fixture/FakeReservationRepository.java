@@ -28,7 +28,8 @@ public class FakeReservationRepository implements ReservationRepository {
                 .map(r -> new ReservationWithSlotInformation(
                         r.getId(), r.getSlotId(), r.getName(),
                         null, null, null, null, null,
-                        r.getStatus(), LocalDateTime.now(), null))
+                        r.getStatus(), LocalDateTime.now(), null,
+                        null, null, null, null))
                 .toList();
     }
 

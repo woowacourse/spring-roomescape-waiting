@@ -46,7 +46,7 @@ class TossPaymentRealApiTest {
                 1000L);
 
         // 토스가 주는 구체 코드는 상황에 따라 다를 수 있으므로(NOT_FOUND_PAYMENT / INVALID_REQUEST 등),
-        // 어댑터가 'TossPaymentException 으로 변환한다'는 사실만 검증한다.
+        // 어댑터가 PaymentException 으로 변환한다는 사실만 검증한다.
         assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation))
                 .isInstanceOf(TossPaymentException.class);
     }

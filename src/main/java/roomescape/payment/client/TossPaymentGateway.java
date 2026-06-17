@@ -27,24 +27,23 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     @Override
-    // @Retryable
     public PaymentResult confirm(PaymentConfirmation confirmation) {
-        TossPaymentResponse tossPaymentResponse = tossRestClient.post()
+        TossPaymentResponse resp = tossRestClient.post()
                 .uri("/v1/payments/confirm")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(confirmation)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, ((request, response) -> {
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
                     var error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
                     throw TossPaymentException.of(response.getStatusCode(), error);
-                }))
+                })
                 .body(TossPaymentResponse.class);
 
         return new PaymentResult(
-                tossPaymentResponse.paymentKey(),
-                tossPaymentResponse.orderId(),
-                PaymentStatus.valueOf(tossPaymentResponse.status()),
-                tossPaymentResponse.totalAmount()
+                resp.paymentKey(),
+                resp.orderId(),
+                PaymentStatus.from(resp.status()),
+                resp.totalAmount()
         );
     }
 

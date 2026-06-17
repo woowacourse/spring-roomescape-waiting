@@ -10,11 +10,13 @@ public class TossPaymentException extends RuntimeException {
 
     private final HttpStatusCode status;
     private final String code;
+    private final boolean retryable;
 
-    public TossPaymentException(HttpStatusCode status, String code, String message) {
+    public TossPaymentException(HttpStatusCode status, String code, String message, boolean retryable) {
         super(message);
         this.status = status;
         this.code = code;
+        this.retryable = retryable;
     }
 
     /**
@@ -30,7 +32,7 @@ public class TossPaymentException extends RuntimeException {
             case "REJECT_CARD_PAYMENT" -> new CardRejected(error.message());
             case "NOT_FOUND_PAYMENT" -> new PaymentNotFound(error.message());
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new Retryable(error.message());
-            default -> new TossPaymentException(status, error.code(), error.message());
+            default -> new TossPaymentException(status, error.code(), error.message(), false);
         };
     }
 
@@ -42,13 +44,17 @@ public class TossPaymentException extends RuntimeException {
         return code;
     }
 
+    public boolean isRetryable() {
+        return retryable;
+    }
+
     /**
      * 400 - 이미 승인된 결제(중복 승인 시도).
      */
     public static class AlreadyProcessed extends TossPaymentException {
 
         public AlreadyProcessed(String message) {
-            super(HttpStatus.BAD_REQUEST, "ALREADY_PROCESSED_PAYMENT", message);
+            super(HttpStatus.BAD_REQUEST, "ALREADY_PROCESSED_PAYMENT", message, false);
         }
 
     }
@@ -59,7 +65,7 @@ public class TossPaymentException extends RuntimeException {
     public static class DuplicatedOrder extends TossPaymentException {
 
         public DuplicatedOrder(String message) {
-            super(HttpStatus.BAD_REQUEST, "DUPLICATED_ORDER_ID", message);
+            super(HttpStatus.BAD_REQUEST, "DUPLICATED_ORDER_ID", message, false);
         }
 
     }
@@ -70,7 +76,7 @@ public class TossPaymentException extends RuntimeException {
     public static class SessionExpired extends TossPaymentException {
 
         public SessionExpired(String message) {
-            super(HttpStatus.BAD_REQUEST, "NOT_FOUND_PAYMENT_SESSION", message);
+            super(HttpStatus.BAD_REQUEST, "NOT_FOUND_PAYMENT_SESSION", message, false);
         }
 
     }
@@ -81,7 +87,7 @@ public class TossPaymentException extends RuntimeException {
     public static class InvalidRequest extends TossPaymentException {
 
         public InvalidRequest(String message) {
-            super(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", message);
+            super(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", message, false);
         }
 
     }
@@ -92,7 +98,7 @@ public class TossPaymentException extends RuntimeException {
     public static class GatewayConfig extends TossPaymentException {
 
         public GatewayConfig(String message) {
-            super(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_KEY", message);
+            super(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_KEY", message, false);
         }
 
     }
@@ -103,7 +109,7 @@ public class TossPaymentException extends RuntimeException {
     public static class CardRejected extends TossPaymentException {
 
         public CardRejected(String message) {
-            super(HttpStatus.FORBIDDEN, "REJECT_CARD_PAYMENT", message);
+            super(HttpStatus.FORBIDDEN, "REJECT_CARD_PAYMENT", message, false);
         }
 
     }
@@ -114,7 +120,7 @@ public class TossPaymentException extends RuntimeException {
     public static class PaymentNotFound extends TossPaymentException {
 
         public PaymentNotFound(String message) {
-            super(HttpStatus.NOT_FOUND, "NOT_FOUND_PAYMENT", message);
+            super(HttpStatus.NOT_FOUND, "NOT_FOUND_PAYMENT", message, false);
         }
 
     }
@@ -125,7 +131,7 @@ public class TossPaymentException extends RuntimeException {
     public static class Retryable extends TossPaymentException {
 
         public Retryable(String message) {
-            super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
+            super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message, true);
         }
 
     }

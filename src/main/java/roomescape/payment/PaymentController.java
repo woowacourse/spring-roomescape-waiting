@@ -30,11 +30,11 @@ public class PaymentController {
             model.addAttribute("paymentKey", paymentKey);
             return "payment-success";
         } catch (PaymentAmountMismatchException e) {
-            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
+            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId, false);
         } catch (TossPaymentException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId);
+            return failView(model, e.getCode(), e.getMessage(), orderId, e.isRetryable());
         } catch (Exception e) {
-            return failView(model, "UNKNOWN_ERROR", "알 수 없는 오류가 발생했습니다.", orderId);
+            return failView(model, "UNKNOWN_ERROR", "알 수 없는 오류가 발생했습니다.", orderId, true);
         }
     }
 
@@ -45,16 +45,15 @@ public class PaymentController {
             @RequestParam(required = false) String orderId,
             Model model
     ) {
-        if (orderId != null && !orderId.isBlank()) {
-            paymentService.cancelPayment(orderId);
-        }
-        return failView(model, code, message, orderId);
+        paymentService.cancelPendingByOrderId(orderId);
+        return failView(model, code, message, orderId, false);
     }
 
-    private String failView(Model model, String code, String message, String orderId) {
+    private String failView(Model model, String code, String message, String orderId, boolean retryable) {
         model.addAttribute("code", code);
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
+        model.addAttribute("retryable", retryable);
         return "payment-fail";
     }
 }

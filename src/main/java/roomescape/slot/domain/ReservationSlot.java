@@ -50,6 +50,12 @@ public class ReservationSlot {
         return reservations.reserve(requesterName, this.id, reservedAt);
     }
 
+    public Reservation promotePayment(Long reservationId) {
+        Reservation reservation = reservations.findById(reservationId);
+        reservation.promote();
+        return reservation;
+    }
+
     public Reservations cancel(Long reservationId, String requesterName) {
         validateNotPast(LocalDateTime.now());
         return reservations.cancel(reservationId, requesterName);

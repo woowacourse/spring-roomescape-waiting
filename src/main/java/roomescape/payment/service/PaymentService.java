@@ -2,9 +2,12 @@ package roomescape.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.order.domain.Order;
-import roomescape.order.repository.OrderRepository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.domain.PaymentStatus;
+import roomescape.payment.exception.TossPaymentException;
+import roomescape.payment.repository.PaymentRepository;
 import roomescape.payment.service.dto.PaymentConfirmation;
 import roomescape.payment.service.dto.PaymentResult;
 import roomescape.reservation.domain.Reservation;
@@ -19,73 +22,92 @@ import roomescape.slot.repository.ReservationSlotRepository;
 import java.util.List;
 import java.util.UUID;
 
+import static roomescape.payment.domain.PaymentStatus.FAILED;
+import static roomescape.payment.domain.PaymentStatus.UNKNOWN;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentGateway paymentGateway;
-    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationSlotRepository slotRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
-    public Order createOrder(Long reservationId, Long amount) {
+    @Transactional
+    public Payment createPendingPayment(Long reservationId, Long slotId, Long amount) {
         String orderId = UUID.randomUUID().toString();
-        Order order = new Order(orderId, reservationId, amount);
-        return orderRepository.save(order);
+        return paymentRepository.save(Payment.pending(reservationId, slotId, orderId, amount));
     }
 
+    @Transactional
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
-        var order = orderRepository.getByOrderId(orderId);
-        order.validateAmountMatch(amount);
+        Payment payment = findPayment(orderId);
+        payment.validateAmountMatch(amount);
 
-        PaymentResult confirmed = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-        if (confirmed.isDone()) {
-            confirm(getReservation(order.getReservationId())); // TODO Payment 저장.
-            return confirmed;
+        try {
+            PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            payment.confirm(paymentKey);
+            paymentRepository.update(payment);
+            confirmReservation(payment.getSlotId(), payment.getReservationId());
+            return result;
+        } catch (TossPaymentException e) {
+            if (e.isRetryable()) {
+                payment.markUnknown();
+                updatePaymentStatus(payment);
+                throw e;
+            }
+            payment.fail();
+            updatePaymentStatus(payment);
+            cancelReservation(payment.getSlotId(), payment.getReservationId());
+            throw e;
+        } catch (Exception e) {
+            payment.markUnknown();
+            updatePaymentStatus(payment);
+            throw e;
         }
-
-        throw new RuntimeException(); // 예외처리 ?
     }
 
-    public void cancelPayment(String orderId) {
-        Reservation reservation = getReservationByOrderId(orderId);
-        if (reservation.isPendingPayment()) {
-            ReservationSlot slot = getSlotAndReservationsWithLock(reservation.getSlotId());
-            Reservations changed = slot.cancelByManager(reservation.getId());
-            cancelAndPromote(changed);
+    @Transactional
+    public void cancelPendingByOrderId(String orderId) {
+        if (orderId == null) {
+            return;
         }
+        paymentRepository.findByOrderId(orderId).ifPresent(payment -> {
+            payment.fail();
+            paymentRepository.update(payment);
+            cancelReservation(payment.getSlotId(), payment.getReservationId());
+        });
     }
 
-    private void confirm(Reservation reservation) {
-        reservation.promote();
-        reservationRepository.updateStatus(reservation);
+    private void confirmReservation(Long slotId, Long reservationId) {
+        ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
+        Reservation confirmed = slot.promotePayment(reservationId);
+        reservationRepository.updateStatus(confirmed);
     }
 
-    private Reservation getReservation(Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationException(ReservationErrorInformation.RESERVATION_NOT_FOUND));
-    }
-
-    public Reservation getReservationByOrderId(String orderId) {
-        var order = orderRepository.getByOrderId(orderId);
-        return getReservation(order.getReservationId());
+    private void cancelReservation(Long slotId, Long reservationId) {
+        ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
+        Reservations changed = slot.cancelByManager(reservationId);
+        cancelAndPromote(changed);
     }
 
     private ReservationSlot getSlotAndReservationsWithLock(Long slotId) {
-        ReservationSlot slot = getSlotWithLock(slotId);
-        List<Reservation> activeReservations = getReservationsOfSlot(slot);
+        ReservationSlot slot = reservationSlotRepository.findByIdWithLock(slotId)
+                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
+        List<Reservation> activeReservations = reservationRepository.findReservedAndWaitingBySlotId(slotId);
         return slot.withReservations(new Reservations(activeReservations));
     }
 
-    private ReservationSlot getSlotWithLock(Long slotId) {
-        return slotRepository.findByIdWithLock(slotId)
-                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
+    private void updatePaymentStatus(Payment payment) {
+        paymentRepository.update(payment);
     }
 
-    private List<Reservation> getReservationsOfSlot(ReservationSlot slot) {
-        return reservationRepository.findReservedAndWaitingBySlotId(slot.getId());
+    private Payment findPayment(String orderId) {
+        return paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다."));
     }
 
     public void cancelAndPromote(Reservations changed) {

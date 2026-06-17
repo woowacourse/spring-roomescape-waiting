@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
-import roomescape.order.domain.Order;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.service.PaymentService;
 import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
@@ -63,8 +64,8 @@ class ReservationServiceTest {
         FakeThemeRepository themeRepository = new FakeThemeRepository();
         reservationSlotRepository = new FakeReservationSlotRepository();
         paymentService = mock(PaymentService.class);
-        given(paymentService.createOrder(anyLong(), anyLong()))
-                .willReturn(new Order("test-order-id", 1L, 1000L));
+        given(paymentService.createPendingPayment(anyLong(), anyLong(), anyLong()))
+                .willReturn(Payment.load(1L, 1L, 1L, "test-order-id", null, 1000L, PaymentStatus.PENDING));
 
         reservationService = new ReservationService(reservationRepository, reservationSlotRepository, paymentService);
 
@@ -117,7 +118,7 @@ class ReservationServiceTest {
                 .isEqualTo(PENDING_PAYMENT);
 
         verify(paymentService)
-                .createOrder(anyLong(), anyLong());
+                .createPendingPayment(anyLong(), anyLong(), anyLong());
     }
 
     @Test

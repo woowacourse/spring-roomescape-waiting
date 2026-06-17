@@ -1,5 +1,6 @@
 package roomescape.reservation.repository.dto;
 
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.slot.domain.ReservationSlot;
@@ -19,7 +20,11 @@ public record ReservationWithSlotInformation(
         String themeThumbnailUrl,
         ReservationStatus status,
         LocalDateTime reservedAt,
-        Long waitingTurn
+        Long waitingTurn,
+        String orderId,
+        String paymentKey,
+        Long paymentAmount,
+        PaymentStatus paymentStatus
 ) {
 
     public static ReservationWithSlotInformation from(Reservation reservation, ReservationSlot slot) {
@@ -34,8 +39,8 @@ public record ReservationWithSlotInformation(
                 slot.getTheme().getThumbnailUrl(),
                 reservation.getStatus(),
                 reservation.getReservedAt(),
-                null
+                null,
+                null, null, null, null
         );
     }
-
 }

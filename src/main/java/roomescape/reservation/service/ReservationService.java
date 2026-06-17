@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.order.domain.Order;
+import roomescape.payment.domain.Payment;
 import roomescape.payment.service.PaymentService;
 import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
@@ -44,8 +44,8 @@ public class ReservationService {
         Reservation saved = reservationRepository.save(reservation);
 
         if (saved.isPendingPayment()) {
-            Order order = paymentService.createOrder(saved.getId(), slot.getTheme().getAmount());
-            return ReservationWithSlotDetailDto.of(saved, slot, order);
+            Payment payment = paymentService.createPendingPayment(saved.getId(), slot.getId(), slot.getTheme().getAmount());
+            return ReservationWithSlotDetailDto.of(saved, slot, payment);
         }
 
         return ReservationWithSlotDetailDto.of(saved, slot);

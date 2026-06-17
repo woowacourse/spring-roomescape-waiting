@@ -56,3 +56,17 @@ CREATE TABLE IF NOT EXISTS reservation
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id)
 );
+
+CREATE TABLE IF NOT EXISTS payment
+(
+    id             BIGINT AUTO_INCREMENT NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    slot_id        BIGINT       NOT NULL,
+    order_id       VARCHAR(255) NOT NULL UNIQUE,
+    payment_key    VARCHAR(255),
+    amount         BIGINT       NOT NULL,
+    status         ENUM('PENDING','CONFIRMED','FAILED','UNKNOWN') NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    FOREIGN KEY (slot_id)        REFERENCES reservation_slot (id)
+);
