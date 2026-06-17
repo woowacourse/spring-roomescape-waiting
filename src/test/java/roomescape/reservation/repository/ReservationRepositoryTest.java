@@ -18,6 +18,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.ReservationDateRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
@@ -47,6 +49,8 @@ class ReservationRepositoryTest {
     private ReservationDateRepository reservationDateRepository;
     @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setup() {
@@ -69,7 +73,24 @@ class ReservationRepositoryTest {
     }
 
     private Reservation save(Reservation reservation) {
+        Member member = saveMember(reservation.getMember().getName());
+        ReflectionTestUtils.setField(reservation, "member", member);
         return reservationRepository.save(reservation);
+    }
+
+    private Member saveMember(String name) {
+        return memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(Member.register(name, "password")));
+    }
+
+    private Reservation saveReservation(String name, ReservationDate date, ReservationTime time,
+        Theme theme) {
+        return save(reservation(saveMember(name), date, time, theme));
+    }
+
+    private Reservation saveWaitReservation(String name, ReservationDate date,
+        ReservationTime time, Theme theme, Long waitingOrder) {
+        return save(waitReservation(saveMember(name), date, time, theme, waitingOrder));
     }
 
     private ReservationDate savePastDate() {
@@ -176,15 +197,15 @@ class ReservationRepositoryTest {
         void 성공() {
             // given
             save(reservation("예약자", reservationDate1, reservationTime1, theme));
-            save(Reservation.wait("앞선 대기자", reservationDate1, reservationTime1, theme, 1L));
-            Reservation waiting = save(Reservation.wait(name, reservationDate1, reservationTime1,
-                theme, 2L));
-            Reservation reserved = save(Reservation.reserved(name, reservationDate2, reservationTime2,
-                theme));
+            saveWaitReservation("앞선 대기자", reservationDate1, reservationTime1, theme, 1L);
+            Reservation waiting = saveWaitReservation(name, reservationDate1, reservationTime1,
+                theme, 2L);
+            Reservation reserved = saveReservation(name, reservationDate2, reservationTime2,
+                theme);
 
             // when
             List<ReservationWithWaitingTurn> actual =
-                reservationRepository.findAllByNameWithWaitingTurn(name);
+                reservationRepository.findAllByMemberIdWithWaitingTurn(saveMember(name).getId());
 
             // then
             assertAll(
@@ -208,14 +229,14 @@ class ReservationRepositoryTest {
         void 성공2() {
             // given
             ReservationDate pastDate = savePastDate();
-            Reservation waiting = save(waitReservation(name, reservationDate1, reservationTime1,
-                theme, 1L));
+            Reservation waiting = saveWaitReservation(name, reservationDate1, reservationTime1,
+                theme, 1L);
             ReflectionTestUtils.setField(waiting, "date", pastDate);
             reservationRepository.saveAndFlush(waiting);
 
             // when
             List<ReservationWithWaitingTurn> actual =
-                reservationRepository.findAllByNameWithWaitingTurn(name);
+                reservationRepository.findAllByMemberIdWithWaitingTurn(saveMember(name).getId());
 
             // then
             assertThat(actual)

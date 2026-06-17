@@ -59,7 +59,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
             RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
-                .when().get("/member/my-reservations")
+                .when().get("/member/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
@@ -300,14 +300,14 @@ class ReservationControllerTest extends AcceptanceTest {
 
             RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, memberToken)
-                .when().get("/member/my-reservations")
+                .when().get("/member/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
 
             RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, anotherToken)
-                .when().get("/member/my-reservations")
+                .when().get("/member/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));

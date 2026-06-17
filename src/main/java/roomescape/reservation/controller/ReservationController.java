@@ -36,16 +36,16 @@ public class ReservationController {
         @Validated @RequestBody ReservationSaveDto dto,
         @LoginMember Member member
     ) {
-        Reservation reservation = reservationService.reserve(member.getName(), dto.toCommand());
+        Reservation reservation = reservationService.reserve(member, dto.toCommand());
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }
 
     @AuthGuard(roles = {MEMBER, MANAGER})
-    @GetMapping("/my-reservations")
+    @GetMapping("/reservations-mine")
     public ResponseEntity<List<ReservationDetailDto>> getMyReservations(
         @LoginMember Member member) {
-        List<ReservationDetailDto> responseData = reservationService.readAllByName(member.getName())
+        List<ReservationDetailDto> responseData = reservationService.readAllByMemberId(member.getId())
             .stream()
             .map(ReservationDetailDto::from)
             .toList();
@@ -58,7 +58,7 @@ public class ReservationController {
         @PathVariable Long id,
         @LoginMember Member member
     ) {
-        Reservation reservation = reservationService.cancel(id, member.getName());
+        Reservation reservation = reservationService.cancel(id, member);
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }
@@ -70,8 +70,7 @@ public class ReservationController {
         @LoginMember Member member,
         @Validated @RequestBody ReservationChangeScheduleDto dto
     ) {
-        Reservation reservation = reservationService.changeSchedule(
-            dto.toCommand(id, member.getName()));
+        Reservation reservation = reservationService.changeSchedule(dto.toCommand(id, member));
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }

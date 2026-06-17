@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.ReservationDateRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -48,6 +50,9 @@ class MissionReservationRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private TestEntityManager entityManager;
@@ -75,14 +80,15 @@ class MissionReservationRepositoryTest {
     void dirtyChecking() {
         Reservation reservation = saveReservation("before");
         Long reservationId = reservation.getId();
+        Member after = saveMember("after");
         entityManager.flush();
 
-        ReflectionTestUtils.setField(reservation, "name", "after");
+        ReflectionTestUtils.setField(reservation, "member", after);
         entityManager.flush();
         entityManager.clear();
 
         Reservation actual = reservationRepository.findById(reservationId).get();
-        assertThat(actual.getName()).isEqualTo("after");
+        assertThat(actual.getMember().getId()).isEqualTo(after.getId());
     }
 
     @Test
@@ -103,15 +109,16 @@ class MissionReservationRepositoryTest {
     @DisplayName("쓰기 지연: 변경 감지는 flush 전까지 DB에 반영되지 않는다")
     void writeBehindForUpdate() {
         Reservation reservation = saveReservation("before");
+        Member after = saveMember("write-behind");
         entityManager.flush();
 
-        ReflectionTestUtils.setField(reservation, "name", "write-behind");
+        ReflectionTestUtils.setField(reservation, "member", after);
 
-        assertThat(countReservationByName("write-behind")).isZero();
+        assertThat(countReservationByMemberId(after.getId())).isZero();
 
         entityManager.flush();
 
-        assertThat(countReservationByName("write-behind")).isOne();
+        assertThat(countReservationByMemberId(after.getId())).isOne();
     }
 
     @Test
@@ -136,31 +143,33 @@ class MissionReservationRepositoryTest {
         @DisplayName("명시적 flush()를 호출하면 변경 사항이 DB에 동기화된다")
         void explicitFlush() {
             Reservation reservation = saveReservation("before");
+            Member after = saveMember("explicit-flush");
             entityManager.flush();
 
-            ReflectionTestUtils.setField(reservation, "name", "explicit-flush");
-            assertThat(countReservationByName("explicit-flush")).isZero();
+            ReflectionTestUtils.setField(reservation, "member", after);
+            assertThat(countReservationByMemberId(after.getId())).isZero();
 
             entityManager.flush();
 
-            assertThat(countReservationByName("explicit-flush")).isOne();
+            assertThat(countReservationByMemberId(after.getId())).isOne();
         }
 
         @Test
         @DisplayName("JPQL 실행 직전에 변경 사항이 flush된다")
         void flushBeforeJpql() {
             Reservation reservation = saveReservation("before");
+            Member after = saveMember("jpql-flush");
             entityManager.flush();
 
-            ReflectionTestUtils.setField(reservation, "name", "jpql-flush");
-            assertThat(countReservationByName("jpql-flush")).isZero();
+            ReflectionTestUtils.setField(reservation, "member", after);
+            assertThat(countReservationByMemberId(after.getId())).isZero();
 
             List<Reservation> reservations = entityManager.getEntityManager()
                 .createQuery("SELECT r FROM reservation r", Reservation.class)
                 .getResultList();
 
             assertThat(reservations).isNotEmpty();
-            assertThat(countReservationByName("jpql-flush")).isOne();
+            assertThat(countReservationByMemberId(after.getId())).isOne();
         }
 
         @Test
@@ -171,13 +180,14 @@ class MissionReservationRepositoryTest {
             TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
             Long reservationId = transactionTemplate.execute(status -> {
                 Reservation reservation = saveReservation("before");
+                Member after = saveMember("commit-flush");
                 entityManager.flush();
-                ReflectionTestUtils.setField(reservation, "name", "commit-flush");
+                ReflectionTestUtils.setField(reservation, "member", after);
                 return reservation.getId();
             });
 
             assertThat(reservationId).isNotNull();
-            assertThat(countReservationByName("commit-flush")).isOne();
+            assertThat(countReservationByMemberName("commit-flush")).isOne();
         }
     }
 
@@ -216,16 +226,34 @@ class MissionReservationRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(activeTime15());
         Theme theme = themeRepository.save(activeTheme());
 
-        return reservationRepository.save(reservation(name, date, time, theme));
+        return reservationRepository.save(reservation(saveMember(name), date, time, theme));
+    }
+
+    private Member saveMember(String name) {
+        return memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(Member.register(name, "password")));
     }
 
     private int countReservations() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
     }
 
-    private int countReservationByName(String name) {
+    private int countReservationByMemberId(Long memberId) {
         return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation WHERE name = ?",
+            "SELECT COUNT(*) FROM reservation WHERE member_id = ?",
+            Integer.class,
+            memberId
+        );
+    }
+
+    private int countReservationByMemberName(String name) {
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(*)
+                FROM reservation r
+                JOIN member m ON m.id = r.member_id
+                WHERE m.name = ?
+                """,
             Integer.class,
             name
         );

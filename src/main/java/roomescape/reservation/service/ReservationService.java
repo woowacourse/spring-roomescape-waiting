@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
@@ -44,12 +45,12 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<ReservationWithWaitingTurn> readAllByName(String name) {
-        return reservationRepository.findAllByNameWithWaitingTurn(name);
+    public List<ReservationWithWaitingTurn> readAllByMemberId(Long memberId) {
+        return reservationRepository.findAllByMemberIdWithWaitingTurn(memberId);
     }
 
     @Transactional
-    public Reservation reserve(String name, ReservationSaveCommand command) {
+    public Reservation reserve(Member member, ReservationSaveCommand command) {
         ReservationDate reservationDate = getReservationDate(command.dateId());
         reservationDate.validateIsInactive();
 
@@ -61,15 +62,15 @@ public class ReservationService {
 
         lockSlot(reservationDate, reservationTime, theme);
 
-        boolean isReservedSlot = checkReserved(name, reservationDate, reservationTime, theme);
+        boolean isReservedSlot = checkReserved(member, reservationDate, reservationTime, theme);
         if (isReservedSlot) {
             Long waitingOrder = reservationRepository.findNextWaitingOrderByDateAndTimeAndTheme(
                 reservationDate, reservationTime, theme);
             return reservationRepository.save(
-                Reservation.wait(name, reservationDate, reservationTime, theme, waitingOrder));
+                Reservation.wait(member, reservationDate, reservationTime, theme, waitingOrder));
         }
         return reservationRepository.save(
-            Reservation.reserved(name, reservationDate, reservationTime, theme));
+            Reservation.reserved(member, reservationDate, reservationTime, theme));
     }
 
     @Transactional
@@ -89,14 +90,14 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation cancel(Long id, String requesterName) {
+    public Reservation cancel(Long id, Member requester) {
         Reservation reservation = getReservation(id);
 
         lockSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
 
         reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
-        reservation.cancel(requesterName);
+        reservation.cancel(requester);
         if (reservationStatus == RESERVED) {
             promoteWaitingReservation(reservation.getDate(), reservation.getTime(),
                 reservation.getTheme());
@@ -123,7 +124,7 @@ public class ReservationService {
         previousDate = reservation.getDate();
         previousTime = reservation.getTime();
         theme = reservation.getTheme();
-        reservation.changeSchedule(command.requesterName(), newDate, newTime);
+        reservation.changeSchedule(command.requester(), newDate, newTime);
         decideStatus(reservation);
         promoteWaitingReservation(previousDate, previousTime, theme);
 
@@ -177,7 +178,7 @@ public class ReservationService {
     }
 
     private void decideStatus(Reservation reservation) {
-        boolean isReservedSlot = checkReservedExcept(reservation.getId(), reservation.getName(),
+        boolean isReservedSlot = checkReservedExcept(reservation.getId(), reservation.getMember(),
             reservation.getDate(), reservation.getTime(), reservation.getTheme());
         if (isReservedSlot) {
             Long waitingOrder = reservationRepository.findNextWaitingOrderByDateAndTimeAndTheme(
@@ -208,26 +209,26 @@ public class ReservationService {
             .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
-    private boolean checkReserved(String name, ReservationDate reservationDate,
+    private boolean checkReserved(Member member, ReservationDate reservationDate,
         ReservationTime reservationTime, Theme theme) {
-        return checkReservedExcept(null, name, reservationDate, reservationTime, theme);
+        return checkReservedExcept(null, member, reservationDate, reservationTime, theme);
     }
 
-    private boolean checkReservedExcept(Long excludedId, String name,
+    private boolean checkReservedExcept(Long excludedId, Member member,
         ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         List<Reservation> reservationsInSameSlot = reservationRepository.findAllActiveByDateAndTimeAndTheme(
                 reservationDate, reservationTime, theme)
             .stream()
             .filter(reservation -> !reservation.getId().equals(excludedId))
             .toList();
-        validateReservedByMyself(reservationsInSameSlot, name);
+        validateReservedByMyself(reservationsInSameSlot, member);
 
         return !reservationsInSameSlot.isEmpty();
     }
 
-    private void validateReservedByMyself(List<Reservation> reservationsInSameSlot, String name) {
+    private void validateReservedByMyself(List<Reservation> reservationsInSameSlot, Member member) {
         boolean reservedByMyself = reservationsInSameSlot.stream()
-            .anyMatch(reservation -> reservation.isOwner(name));
+            .anyMatch(reservation -> reservation.isOwner(member));
         if (reservedByMyself) {
             throw new ReservationException(RESERVATION_ALREADY_BOOKED);
         }

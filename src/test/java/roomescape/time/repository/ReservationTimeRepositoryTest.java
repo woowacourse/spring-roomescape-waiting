@@ -13,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.ReservationDateRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
@@ -31,6 +33,8 @@ class ReservationTimeRepositoryTest {
     private ThemeRepository themeRepository;
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     private List<ReservationTime> saveAll(List<ReservationTime> reservationTimes) {
         List<ReservationTime> savedTimes = new ArrayList<>();
@@ -54,7 +58,9 @@ class ReservationTimeRepositoryTest {
 
     private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime,
         Theme theme) {
-        reservationRepository.save(reservation("송송", reservationDate, reservationTime, theme));
+        Member member = memberRepository.findByName("송송")
+            .orElseGet(() -> memberRepository.save(Member.register("송송", "password")));
+        reservationRepository.save(reservation(member, reservationDate, reservationTime, theme));
     }
 
     @Nested

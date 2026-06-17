@@ -18,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT
             new roomescape.reservation.repository.dto.ReservationWithWaitingTurn(
             r.id,
-            r.name,
+            r.member.id,
             r.date.date,
             r.time.startAt,
             r.theme.id,
@@ -44,10 +44,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             END
             )
             FROM reservation r
-            WHERE r.name = :memberName
+            WHERE r.member.id = :memberId
             ORDER BY r.id DESC
         """)
-    List<ReservationWithWaitingTurn> findAllByNameWithWaitingTurn(@Param("memberName") String name);
+    List<ReservationWithWaitingTurn> findAllByMemberIdWithWaitingTurn(@Param("memberId") Long memberId);
 
     @Query("""
         SELECT coalesce(max(r.waitingOrder), 0) + 1

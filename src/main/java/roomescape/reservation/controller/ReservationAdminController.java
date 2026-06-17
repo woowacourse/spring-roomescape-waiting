@@ -45,7 +45,7 @@ public class ReservationAdminController {
         @Valid @RequestBody ReservationSaveDto dto,
         @LoginMember Member manager
     ) {
-        Reservation reservation = reservationService.reserve(manager.getName(), dto.toCommand());
+        Reservation reservation = reservationService.reserve(manager, dto.toCommand());
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }
