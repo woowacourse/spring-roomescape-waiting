@@ -307,23 +307,42 @@ function renderMyReservations(reservations, username) {
             loadInlineTimes();
 
         } else {
+            const payButtonHtml = reservation.unpaid
+                ? `<button class="button primary checkout-btn" type="button">결제하기</button>`
+                : '';
+
+            const unpaidBadgeHtml = reservation.unpaid
+                ? `<span style="color: #e03131; font-size: 13px; font-weight: bold;">(결제 대기중)</span>`
+                : '';
+
+            // 💡 2. 모바일 화면에서도 깨지지 않도록 flex-wrap과 min-width를 추가했습니다.
             article.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                             <strong>${reservation.theme.name}</strong>
                             <span class="${statusClass(reservation.status)}">${formatStatus(reservation)}</span>
+                            ${unpaidBadgeHtml}
                         </div>
                         <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.875rem;">
                             ${reservation.date} · ${formatTime(reservation.time.startAt)}
                         </p>
                     </div>
-                    <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                        ${payButtonHtml}
                         <button class="button secondary inline-edit-btn" type="button">수정</button>
                         <button class="button danger inline-cancel-btn" type="button">취소</button>
                     </div>
                 </div>
             `;
+
+            // 💡 [결제하기] 버튼 이벤트
+            const checkoutBtn = article.querySelector('.checkout-btn');
+            if (checkoutBtn) {
+                checkoutBtn.onclick = () => {
+                    window.location.href = `/orders/checkout/${reservation.id}`;
+                };
+            }
 
             article.querySelector('.inline-edit-btn').onclick = () => {
                 inlineEditState.reservationId = reservation.id;
@@ -349,7 +368,7 @@ function renderMyReservations(reservations, username) {
                         console.warn("결제 내역이 없거나 불러올 수 없는 예약입니다.");
                     }
 
-                    if (orderId) {
+                    if (orderId && orderData.status === 'COMPLETED') {
                         // 2-A: 결제 내역이 있으면 [환불 처리 API] 호출
                         const result = await request(`/payments/cancel/${orderId}`, {
                             method: "POST",
@@ -391,11 +410,25 @@ checkForm.addEventListener("submit", async (event) => {
     const name = checkNameInput.value.trim();
     try {
         const reservations = await request(`/reservations?username=${encodeURIComponent(name)}`, { method: "GET" });
-        renderMyReservations(reservations, name);
+
+        // 💡 [추가] 각 예약마다 주문 정보를 조회하여 '미결제 상태'인지 확인합니다.
+        const enrichedReservations = await Promise.all(reservations.map(async (res) => {
+            try {
+                const orderData = await request(`/orders/${res.id}`, { method: "GET" });
+
+                res.unpaid = (orderData && orderData.status === 'PENDING');
+            } catch (e) {
+                res.unpaid = false;
+            }
+            return res;
+        }));
+
+        renderMyReservations(enrichedReservations, name);
     } catch (error) {
         showFeedback(checkFeedback, "error", error.message);
     }
 });
+
 const historySearchBtn = document.getElementById("history-search-btn");
 
 if (historySearchBtn) {
