@@ -50,8 +50,8 @@ public class Waiting {
         return this.member.equals(member);
     }
 
-    public Reservation promote() {
-        return Reservation.createByAdmin(member, slot.getDate(), slot.getTime(), slot.getTheme(), slot.getStore());
+    public Reservation promote(LocalDateTime now) {
+        return Reservation.createByUser(member, slot.getDate(), slot.getTime(), slot.getTheme(), slot.getStore(), now);
     }
 
     public boolean isInStore(Store store) {

@@ -256,6 +256,22 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
+    public List<Long> findExpiredPendingIdsWithoutOrder(LocalDateTime threshold) {
+        String sql = """
+                SELECT r.id FROM reservations r
+                LEFT JOIN orders o ON o.reservation_id = r.id
+                WHERE r.status = 'PENDING'
+                AND r.deleted_at = :sentinel
+                AND r.created_at < :threshold
+                AND o.id IS NULL
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("sentinel", SENTINEL)
+                .addValue("threshold", threshold);
+        return jdbcTemplate.queryForList(sql, params, Long.class);
+    }
+
+    @Override
     public boolean existsByThemeId(Long themeId) {
         String sql = "SELECT EXISTS(SELECT 1 FROM reservations WHERE theme_id = :themeId)";
         return Boolean.TRUE.equals(

@@ -16,11 +16,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.MemberDao;
 import roomescape.payment.OrderDao;
+import roomescape.promotion.PromotionOutboxDao;
 import roomescape.reservation.ReservationDao;
 import roomescape.theme.ThemeDao;
 import roomescape.time.TimeDao;
 import roomescape.member.Member;
 import roomescape.payment.OrderStatus;
+import roomescape.promotion.OutboxStatus;
+import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationOrder;
 import roomescape.reservation.ReservationService;
 import roomescape.reservation.ReservationStatus;
@@ -43,6 +46,8 @@ class ExpiredOrderWorkerTest {
     private ReservationDao reservationDao;
     @Autowired
     private OrderDao orderDao;
+    @Autowired
+    private PromotionOutboxDao promotionOutboxDao;
     @Autowired
     private MemberDao memberDao;
     @Autowired
@@ -71,6 +76,7 @@ class ExpiredOrderWorkerTest {
 
     @AfterEach
     void tearDown() {
+        jdbcTemplate.update("DELETE FROM promotion_outbox");
         jdbcTemplate.update("DELETE FROM orders");
         jdbcTemplate.update("DELETE FROM reservations");
         jdbcTemplate.update("DELETE FROM times");
@@ -98,6 +104,8 @@ class ExpiredOrderWorkerTest {
                 .isEqualTo(ReservationStatus.CANCELED);
         assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
                 .isEqualTo(OrderStatus.FAILED);
+        // 슬롯이 비었으니 다음 대기자 승격을 위한 아웃박스 할 일이 기록된다 (abandon이 enqueue).
+        assertThat(promotionOutboxDao.findByStatus(OutboxStatus.PENDING)).hasSize(1);
     }
 
     @Test
@@ -111,5 +119,20 @@ class ExpiredOrderWorkerTest {
                 .isEqualTo(ReservationStatus.PENDING);
         assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
                 .isEqualTo(OrderStatus.PENDING);
+    }
+
+    @Test
+    @DisplayName("Order 없는 만료 PENDING(승격 대기 등)도 정리되어 CANCELED")
+    void expiresOrphanPendingWithoutOrder() {
+        Reservation orphan = reservationDao.insert(Reservation.createByUser(
+                member, LocalDate.now().plusDays(1), time, theme, store, LocalDateTime.now()));
+        // order 없이 PENDING만 존재. created_at을 TTL 이전으로 조작 — 방치된 승격 PENDING처럼.
+        jdbcTemplate.update("UPDATE reservations SET created_at = ? WHERE id = ?",
+                Timestamp.valueOf(LocalDateTime.now().minusHours(1)), orphan.getId());
+
+        worker.expireAbandonedOrders();
+
+        assertThat(reservationDao.findById(orphan.getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
     }
 }

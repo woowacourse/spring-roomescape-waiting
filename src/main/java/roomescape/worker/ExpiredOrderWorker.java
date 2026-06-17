@@ -42,5 +42,12 @@ public class ExpiredOrderWorker {
                 log.warn("결제 만료 정리 실패 (다음 주기 재시도): orderId={}", orderId, e);
             }
         }
+        for (Long reservationId : paymentService.findExpiredOrphanPendingIds(threshold)) {
+            try {
+                paymentService.expireOrphanPending(reservationId);
+            } catch (RuntimeException e) {
+                log.warn("승격 PENDING 만료 정리 실패 (다음 주기 재시도): reservationId={}", reservationId, e);
+            }
+        }
     }
 }

@@ -27,6 +27,7 @@ import roomescape.payment.OrderStatus;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentService;
+import roomescape.promotion.PromotionService;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationStatus;
 import roomescape.store.Store;
@@ -45,6 +46,8 @@ class PaymentServiceTest {
     private ReservationDao reservationDao;
     @Mock
     private ReservationAuthorizationService authorizationService;
+    @Mock
+    private PromotionService promotionService;
     @InjectMocks
     private PaymentService paymentService;
 

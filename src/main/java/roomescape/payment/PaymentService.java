@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.payment.OrderDao;
+import roomescape.promotion.PromotionService;
 import roomescape.reservation.ReservationDao;
 import roomescape.member.Member;
 import roomescape.reservation.Reservation;
@@ -23,13 +24,15 @@ public class PaymentService {
     private final PaymentGateway paymentGateway;
     private final ReservationDao reservationDao;
     private final ReservationAuthorizationService authorizationService;
+    private final PromotionService promotionService;
 
     public PaymentService(OrderDao orderDao, PaymentGateway paymentGateway, ReservationDao reservationDao,
-                          ReservationAuthorizationService authorizationService) {
+                          ReservationAuthorizationService authorizationService, PromotionService promotionService) {
         this.orderDao = orderDao;
         this.paymentGateway = paymentGateway;
         this.reservationDao = reservationDao;
         this.authorizationService = authorizationService;
+        this.promotionService = promotionService;
     }
 
     /**
@@ -110,9 +113,29 @@ public class PaymentService {
         }
         order.markFailed();
         orderDao.update(order);
-        reservationDao.findById(order.getReservationId()).ifPresent(reservation -> {
-            reservation.cancelPending(LocalDateTime.now());
-            reservationDao.update(reservation);
-        });
+        reservationDao.findById(order.getReservationId()).ifPresent(this::cancelPendingReservation);
+    }
+
+    /**
+     * 결제 신호 없이 방치된, *주문조차 없는* PENDING 예약(무료 승격 대기 등) 후보를 찾는다.
+     * order 기준 reaper(findExpiredPendingOrderIds)의 사각지대 — 예약 created_at으로 나이를 본다.
+     */
+    @Transactional(readOnly = true)
+    public List<Long> findExpiredOrphanPendingIds(LocalDateTime threshold) {
+        return reservationDao.findExpiredPendingIdsWithoutOrder(threshold);
+    }
+
+    public void expireOrphanPending(Long reservationId) {
+        reservationDao.findById(reservationId).ifPresent(this::cancelPendingReservation);
+    }
+
+    /**
+     * PENDING 예약을 취소(슬롯 해제)하고 다음 대기자 승격을 예약한다.
+     * 결제실패(abandon)·승격PENDING 만료의 공통 코어 — 슬롯을 비우면 항상 승격을 건다(누락 = 큐 멈춤).
+     */
+    private void cancelPendingReservation(Reservation reservation) {
+        reservation.cancelPending(LocalDateTime.now());
+        reservationDao.update(reservation);
+        promotionService.enqueuePromotion(reservation.getSlot());
     }
 }

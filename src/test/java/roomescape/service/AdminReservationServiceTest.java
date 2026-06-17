@@ -310,7 +310,7 @@ class AdminReservationServiceTest {
             promotionOutboxWorker.processPendingTasks();
 
             assertThat(reservationDao.findAllByMemberId(firstWaiter.getId()))
-                    .anyMatch(r -> r.getStatus() == ReservationStatus.BOOKED);
+                    .anyMatch(r -> r.getStatus() == ReservationStatus.PENDING);
             assertThat(waitingService.findAll())
                     .singleElement()
                     .satisfies(remaining -> {

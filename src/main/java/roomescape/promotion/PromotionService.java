@@ -60,10 +60,11 @@ public class PromotionService {
         }
         waitingDao.findFirstBySlotKeyForUpdate(themeId, timeId, date, storeId)
                 .ifPresent(first -> {
-                    if (first.isPast(LocalDateTime.now())) {
+                    LocalDateTime now = LocalDateTime.now();
+                    if (first.isPast(now)) {
                         return;
                     }
-                    reservationDao.insert(first.promote());
+                    reservationDao.insert(first.promote(now));
                     waitingDao.delete(first.getId());
                 });
     }

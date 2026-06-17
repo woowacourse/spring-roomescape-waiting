@@ -57,6 +57,7 @@ CREATE TABLE reservations
     status     VARCHAR(20) NOT NULL DEFAULT 'BOOKED',
     deleted_at TIMESTAMP   NOT NULL DEFAULT '9999-12-31 00:00:00',
     version    BIGINT      NOT NULL DEFAULT 0,
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES members (id),
     FOREIGN KEY (time_id) REFERENCES times (id),
