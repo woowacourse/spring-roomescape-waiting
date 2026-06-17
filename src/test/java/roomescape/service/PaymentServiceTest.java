@@ -81,6 +81,37 @@ class PaymentServiceTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
+    @Test
+    void failPayment_결제_대기_주문이면_주문과_예약을_삭제한다() {
+        ReservationPaymentResponse created = createPendingReservation(37_000L);
+
+        paymentService.failPayment(created.orderId());
+
+        assertThat(paymentOrderRepository.findByOrderId(created.orderId())).isEmpty();
+        assertThat(reservationRepository.findById(created.reservationId())).isEmpty();
+    }
+
+    @Test
+    void failPayment_orderId가_없으면_아무것도_하지_않는다() {
+        ReservationPaymentResponse created = createPendingReservation(37_000L);
+
+        paymentService.failPayment(null);
+
+        assertThat(paymentOrderRepository.findByOrderId(created.orderId())).isPresent();
+        assertThat(reservationRepository.findById(created.reservationId())).isPresent();
+    }
+
+    @Test
+    void failPayment_이미_확정된_예약은_삭제하지_않는다() {
+        ReservationPaymentResponse created = createPendingReservation(37_000L);
+        paymentService.confirmPayment("payment_key", created.orderId(), 37_000L);
+
+        paymentService.failPayment(created.orderId());
+
+        assertThat(paymentOrderRepository.findByOrderId(created.orderId())).isPresent();
+        assertThat(reservationRepository.findById(created.reservationId())).isPresent();
+    }
+
     private ReservationPaymentResponse createPendingReservation(long amount) {
         Long userId = userRepository.save(Fixtures.member("브라운"));
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));

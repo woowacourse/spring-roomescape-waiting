@@ -59,4 +59,10 @@ public class PaymentOrderJdbcRepository implements PaymentOrderRepository {
         String sql = "update payment_order set payment_key = ? where order_id = ?";
         return jdbcTemplate.update(sql, paymentKey, orderId);
     }
+
+    @Override
+    public int deleteByOrderId(String orderId) {
+        String sql = "delete from payment_order where order_id = ?";
+        return jdbcTemplate.update(sql, orderId);
+    }
 }

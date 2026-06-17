@@ -518,7 +518,7 @@
             orderName,
             customerName: tokenInfo()?.username || tokenInfo()?.sub,
             successUrl: `${baseUrl}/payments/success`,
-            failUrl: `${baseUrl}/payment-fail.html`,
+            failUrl: `${baseUrl}/payments/fail`,
         });
     }
 
