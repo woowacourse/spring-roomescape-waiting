@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약이 확정되었습니다</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: #f5f5f5;
+            color: #333;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        main {
+            width: min(460px, 100%);
+            padding: 28px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        h1 { margin-bottom: 12px; color: #2c3e50; font-size: 1.35rem; }
+        p { margin-bottom: 16px; line-height: 1.6; }
+        dl {
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        dt { color: #666; }
+        dd { word-break: break-all; }
+        a {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 6px;
+            background: #2c3e50;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>예약이 확정되었습니다</h1>
+    <p>결제가 승인되어 예약이 완료되었습니다.</p>
+    <dl>
+        <dt>주문번호</dt>
+        <dd th:text="${result.orderId()}">order-id</dd>
+        <dt>결제키</dt>
+        <dd th:text="${paymentKey}">payment-key</dd>
+    </dl>
+    <a href="/">예약 화면으로 돌아가기</a>
+</main>
+</body>
+</html>

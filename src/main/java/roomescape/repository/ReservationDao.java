@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
@@ -28,6 +29,7 @@ public class ReservationDao {
                 reservation.id as reservation_id,
                 reservation.name,
                 reservation.date,
+                reservation.status,
                 time.id as time_id,
                 time.start_at as time_value,
                 theme.id as theme_id,
@@ -59,7 +61,8 @@ public class ReservationDao {
         return Reservation.create(
                 rs.getLong("reservation_id"),
                 new Member(rs.getString("name")),
-                slot
+                slot,
+                ReservationStatus.valueOf(rs.getString("status"))
         );
     };
 
@@ -76,21 +79,27 @@ public class ReservationDao {
                 .addValue("name", reservation.owner().name())
                 .addValue("date", slot.date())
                 .addValue("time_id", slot.time().id())
-                .addValue("theme_id", slot.theme().id());
+                .addValue("theme_id", slot.theme().id())
+                .addValue("status", reservation.status().name());
 
         long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        return Reservation.create(id, reservation.owner(), slot);
+        return Reservation.create(id, reservation.owner(), slot, reservation.status());
     }
 
     public Reservation update(Reservation reservation) {
         Slot slot = reservation.slot();
-        String sql = "UPDATE reservation SET name = :name, date = :date, time_id = :timeId, theme_id = :themeId WHERE id = :id";
+        String sql = """
+                UPDATE reservation
+                SET name = :name, date = :date, time_id = :timeId, theme_id = :themeId, status = :status
+                WHERE id = :id
+                """;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.owner().name())
                 .addValue("date", slot.date())
                 .addValue("timeId", slot.time().id())
                 .addValue("themeId", slot.theme().id())
+                .addValue("status", reservation.status().name())
                 .addValue("id", reservation.id());
         int affected = jdbcTemplate.update(sql, params);
 
@@ -107,6 +116,14 @@ public class ReservationDao {
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
         }
+    }
+
+    public void deletePendingPaymentById(long id) {
+        String sql = "DELETE FROM reservation WHERE id = :id AND status = :status";
+        jdbcTemplate.update(sql, Map.of(
+                "id", id,
+                "status", ReservationStatus.PENDING_PAYMENT.name()
+        ));
     }
 
     public List<Reservation> findAll() {
@@ -141,6 +158,24 @@ public class ReservationDao {
                 .findFirst();
     }
 
+    public Optional<Reservation> findConfirmedBySlotForUpdate(Slot slot) {
+        String sql = SELECT_BASE + """
+                 WHERE reservation.date = :date
+                   AND reservation.time_id = :timeId
+                   AND reservation.theme_id = :themeId
+                   AND reservation.status = :status
+                 FOR UPDATE
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", slot.date())
+                .addValue("timeId", slot.time().id())
+                .addValue("themeId", slot.theme().id())
+                .addValue("status", ReservationStatus.CONFIRMED.name());
+        return jdbcTemplate.query(sql, params, rowMapper)
+                .stream()
+                .findFirst();
+    }
+
     public Optional<Reservation> findByIdForUpdate(long id) {
         String sql = SELECT_BASE + " WHERE reservation.id = :id FOR UPDATE";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper)
@@ -158,6 +193,18 @@ public class ReservationDao {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, slotParams(slot), Boolean.class)
         );
+    }
+
+    public void confirm(long id) {
+        String sql = "UPDATE reservation SET status = :status WHERE id = :id";
+        int affected = jdbcTemplate.update(sql, Map.of(
+                "id", id,
+                "status", ReservationStatus.CONFIRMED.name()
+        ));
+
+        if (affected == 0) {
+            throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
+        }
     }
 
     private SqlParameterSource slotParams(Slot slot) {

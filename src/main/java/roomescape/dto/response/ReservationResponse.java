@@ -28,7 +28,7 @@ public record ReservationResponse(
                 slot.date(),
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),
-                ReservationStatus.RESERVED,
+                statusFrom(reservation),
                 null
         );
     }
@@ -44,5 +44,12 @@ public record ReservationResponse(
                 ReservationStatus.WAITING,
                 waitingWithRank.rank()
         );
+    }
+
+    private static ReservationStatus statusFrom(Reservation reservation) {
+        if (reservation.status() == roomescape.domain.ReservationStatus.PENDING_PAYMENT) {
+            return ReservationStatus.PENDING_PAYMENT;
+        }
+        return ReservationStatus.RESERVED;
     }
 }

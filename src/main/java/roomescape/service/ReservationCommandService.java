@@ -6,12 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
+import payment.order.Order;
+import payment.order.OrderRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -19,13 +22,17 @@ import roomescape.repository.ThemeDao;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ReservationCommandService {
 
+    private static final long RESERVATION_AMOUNT = 5_000L;
+
     private final WaitingCommandService waitingCommandService;
+    private final OrderRepository orderRepository;
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -38,15 +45,68 @@ public class ReservationCommandService {
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
         Reservation reservation = Reservation.forNew(member, slot);
 
-        slot.validateNotPast(now);
-        validateNoDuplicate(slot);
+        validateCreatable(now, slot);
 
+        return save(reservation);
+    }
+
+    public PendingReservation createPendingPaymentReservation(String name, LocalDate date, long timeId, long themeId) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        Member member = new Member(name);
+        Theme theme = findThemeReference(themeId);
+        Slot slot = new Slot(date, findTimeReference(timeId), theme);
+        Reservation reservation = Reservation.forPendingPayment(member, slot);
+
+        validateCreatable(now, slot);
+
+        Reservation savedReservation = save(reservation);
+        String orderId = createOrderId();
+        orderRepository.save(Order.ready(
+                orderId,
+                savedReservation.id(),
+                RESERVATION_AMOUNT,
+                now
+        ));
+
+        return new PendingReservation(
+                savedReservation,
+                orderId,
+                RESERVATION_AMOUNT,
+                theme.name() + " 예약"
+        );
+    }
+
+    public PendingReservation getPendingPaymentReservation(long reservationId, String name) {
+        Member member = new Member(name);
+        Reservation reservation = findReservation(reservationId);
+
+        reservation.validateOwnedBy(member);
+        if (reservation.status() != ReservationStatus.PENDING_PAYMENT) {
+            throw new ResourceNotFoundException("결제 대기 예약을 찾을 수 없습니다.");
+        }
+
+        Order order = orderRepository.findByReservationId(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
+
+        return new PendingReservation(
+                reservation,
+                order.orderId(),
+                order.amount(),
+                reservation.slot().theme().name() + " 예약"
+        );
+    }
+
+    private Reservation save(Reservation reservation) {
         try {
             return reservationDao.save(reservation);
         } catch (DataIntegrityViolationException e) {
             throw duplicateReservationException();
         }
+    }
 
+    private void validateCreatable(LocalDateTime now, Slot slot) {
+        slot.validateNotPast(now);
+        validateNoDuplicate(slot);
     }
 
     public void delete(long reservationId) {
@@ -122,5 +182,9 @@ public class ReservationCommandService {
     private Reservation findReservation(long reservationId) {
         return reservationDao.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
+    }
+
+    private String createOrderId() {
+        return "order_" + UUID.randomUUID().toString().replace("-", "");
     }
 }

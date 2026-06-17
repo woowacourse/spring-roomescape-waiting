@@ -14,6 +14,8 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.TemporaryConflictException;
+import payment.order.Order;
+import payment.order.OrderRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -22,24 +24,28 @@ import roomescape.repository.WaitingDao;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class WaitingCommandService {
+    private static final long RESERVATION_AMOUNT = 5_000L;
+
     private final WaitingDao waitingDao;
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final OrderRepository orderRepository;
     private final Clock clock;
 
     public Waiting create(String name, LocalDate date, long timeId, long themeId) {
         LocalDateTime now = LocalDateTime.now(clock);
         Member member = new Member(name);
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
-        Reservation reservation = findReservationBySlot(slot);
 
         slot.validateNotPast(now);
+        Reservation reservation = findConfirmedReservationBySlot(slot);
         validateNotOwnReservation(reservation, member);
         validateNoDuplicateWaiting(slot, member);
 
@@ -60,9 +66,9 @@ public class WaitingCommandService {
         waitingDao.deleteById(waitingId);
     }
 
-    private Reservation findReservationBySlot(Slot slot) {
-        return reservationDao.findBySlotForUpdate(slot)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다."));
+    private Reservation findConfirmedReservationBySlot(Slot slot) {
+        return reservationDao.findConfirmedBySlotForUpdate(slot)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 확정된 예약이 존재하지 않습니다."));
     }
 
     private void validateNotOwnReservation(Reservation reservation, Member member) {
@@ -103,9 +109,19 @@ public class WaitingCommandService {
     private void promoteWaiting(Waiting waiting) {
         waitingDao.deleteById(waiting.id());
         try {
-            reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
+            Reservation reservation = reservationDao.save(Reservation.forPendingPayment(waiting.owner(), waiting.slot()));
+            orderRepository.save(Order.ready(
+                    createOrderId(),
+                    reservation.id(),
+                    RESERVATION_AMOUNT,
+                    LocalDateTime.now(clock)
+            ));
         } catch (DataIntegrityViolationException e) {
             throw new TemporaryConflictException("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }
+    }
+
+    private String createOrderId() {
+        return "order_" + UUID.randomUUID().toString().replace("-", "");
     }
 }

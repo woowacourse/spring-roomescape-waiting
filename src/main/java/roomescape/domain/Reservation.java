@@ -5,14 +5,22 @@ import roomescape.exception.PastReservationException;
 
 import java.time.LocalDateTime;
 
-public record Reservation(Long id, Member owner, Slot slot) {
+public record Reservation(Long id, Member owner, Slot slot, ReservationStatus status) {
 
     public static Reservation forNew(Member owner, Slot slot) {
-        return new Reservation(null, owner, slot);
+        return new Reservation(null, owner, slot, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation forPendingPayment(Member owner, Slot slot) {
+        return new Reservation(null, owner, slot, ReservationStatus.PENDING_PAYMENT);
     }
 
     public static Reservation create(long id, Member owner, Slot slot) {
-        return new Reservation(id, owner, slot);
+        return new Reservation(id, owner, slot, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation create(long id, Member owner, Slot slot, ReservationStatus status) {
+        return new Reservation(id, owner, slot, status);
     }
 
     public void validateNotStarted(LocalDateTime now) {
@@ -28,7 +36,11 @@ public record Reservation(Long id, Member owner, Slot slot) {
     }
 
     public Reservation withSlot(Slot newSlot) {
-        return new Reservation(id, owner, newSlot);
+        return new Reservation(id, owner, newSlot, status);
+    }
+
+    public Reservation confirm() {
+        return new Reservation(id, owner, slot, ReservationStatus.CONFIRMED);
     }
 
     public boolean isOwnedBy(Member member) {

@@ -21,8 +21,8 @@ import static org.hamcrest.Matchers.nullValue;
 public class ReservationTest {
 
     @Test
-    @DisplayName("예약이 성공적으로 되는지 확인한다.")
-    void createReservationTest() {
+    @DisplayName("사용자 예약 요청은 결제 대기 예약을 생성한다.")
+    void createPendingReservationTest() {
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "녀녕");
@@ -36,10 +36,13 @@ public class ReservationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", notNullValue())
+                .body("reservationId", notNullValue())
                 .body("name", is("녀녕"))
                 .body("date", is("2026-06-05"))
-                .extract().path("id");
+                .body("status", is("PENDING_PAYMENT"))
+                .body("payment.orderId", notNullValue())
+                .body("payment.amount", is(5_000))
+                .extract().path("reservationId");
 
         RestAssured.given().log().all()
                 .when().get("/admin/reservations")
@@ -47,7 +50,8 @@ public class ReservationTest {
                 .statusCode(200)
                 .body("size()", is(4))
                 .body("find { it.id == " + newId + " }.name", is("녀녕"))
-                .body("find { it.id == " + newId + " }.date", is("2026-06-05"));
+                .body("find { it.id == " + newId + " }.date", is("2026-06-05"))
+                .body("find { it.id == " + newId + " }.status", is("결제대기"));
     }
 
     @Test
@@ -69,7 +73,7 @@ public class ReservationTest {
     }
 
     @Test
-    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 대기가 예약으로 전환된다.")
+    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 대기가 결제대기 예약으로 전환된다.")
     void deleteReservationTest() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -84,6 +88,6 @@ public class ReservationTest {
                 .statusCode(200)
                 .body("size()", is(3))
                 .body("find { it.id == 3 }", nullValue())
-                .body("find { it.name == 'user_e' && it.date == '2026-06-05' }.status", is("예약"));
+                .body("find { it.name == 'user_e' && it.date == '2026-06-05' }.status", is("결제대기"));
     }
 }

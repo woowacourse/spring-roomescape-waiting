@@ -16,8 +16,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.FixedClockConfig;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.ResourceNotFoundException;
+import payment.PaymentStatus;
+import payment.order.Order;
+import payment.order.OrderRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.WaitingDao;
 
@@ -37,6 +41,8 @@ class ReservationCommandServiceTest {
     private WaitingDao waitingDao;
     @Autowired
     private WaitingQueryService waitingQueryService;
+    @Autowired
+    private OrderRepository orderRepository;
     @MockitoSpyBean
     private ReservationDao reservationDao;
 
@@ -55,6 +61,42 @@ class ReservationCommandServiceTest {
 
         assertThat(created.id()).isNotNull();
         assertThat(created.owner().name()).isEqualTo("new-user");
+    }
+
+    @Test
+    @DisplayName("사용자 예약 생성 시 결제 대기 예약과 주문을 저장한다.")
+    void createPendingReservationAndOrder() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user",
+                LocalDate.of(2026, 6, 5),
+                1L,
+                2L);
+
+        Reservation created = pending.reservation();
+        assertThat(created.id()).isNotNull();
+        assertThat(created.status()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
+        assertThat(pending.orderId()).startsWith("order_");
+        assertThat(pending.amount()).isEqualTo(5_000L);
+        assertThat(pending.orderName()).isEqualTo("예약없는테마 예약");
+        assertThat(reservationDao.findAllByName(new Member("new-user"))).hasSize(1);
+        Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        assertThat(order.reservationId()).isEqualTo(created.id());
+        assertThat(order.amount()).isEqualTo(5_000L);
+        assertThat(order.status()).isEqualTo(PaymentStatus.READY);
+    }
+
+    @Test
+    @DisplayName("예약 슬롯이 이미 점유되어 있으면 결제 주문을 저장하지 않는다.")
+    void createDuplicateSlotDoesNotSaveOrder() {
+        assertThatThrownBy(() ->
+                reservationCommandService.createPendingPaymentReservation(
+                        "new-user",
+                        LocalDate.of(2026, 6, 5),
+                        1L,
+                        1L))
+                .isInstanceOf(DuplicateException.class);
+
+        assertThat(orderRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -83,11 +125,14 @@ class ReservationCommandServiceTest {
     }
 
     @Test
-    @DisplayName("예약 취소 시 같은 슬롯의 대기 1번이 예약으로 전환되고 대기 목록에서 사라진다.")
+    @DisplayName("예약 취소 시 같은 슬롯의 대기 1번이 결제대기 예약으로 전환되고 대기 목록에서 사라진다.")
     void cancelPromotesFirstWaiting() {
         reservationCommandService.cancel(3L, "user_c");
 
-        assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
+        Reservation promoted = reservationDao.findAllByName(new Member("user_e")).getFirst();
+        assertThat(promoted.status()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
+        assertThat(orderRepository.findAll())
+                .anySatisfy(order -> assertThat(order.reservationId()).isEqualTo(promoted.id()));
         assertThat(waitingDao.findById(3L)).isEmpty();
     }
 
@@ -103,22 +148,24 @@ class ReservationCommandServiceTest {
     }
 
     @Test
-    @DisplayName("대기 N명 중 1번만 예약으로 전환되고 나머지 대기의 순번이 당겨진다.")
+    @DisplayName("대기 N명 중 1번만 결제대기 예약으로 전환되고 나머지 대기의 순번이 당겨진다.")
     void cancelPromotesOnlyFirstWaiting() {
         reservationCommandService.cancel(3L, "user_c");
 
-        assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
+        assertThat(reservationDao.findAllByName(new Member("user_e")).getFirst().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
         assertThat(reservationDao.findAllByName(new Member("user_b"))).hasSize(1);
         assertThat(waitingDao.findById(4L)).isPresent();
         assertThat(waitingQueryService.getByName("user_b").getFirst().rank()).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("관리자 삭제 시 같은 슬롯의 대기 1번이 예약으로 전환된다.")
+    @DisplayName("관리자 삭제 시 같은 슬롯의 대기 1번이 결제대기 예약으로 전환된다.")
     void deletePromotesFirstWaiting() {
         reservationCommandService.delete(3L);
 
-        assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
+        assertThat(reservationDao.findAllByName(new Member("user_e")).getFirst().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
         assertThat(waitingDao.findById(3L)).isEmpty();
     }
 
@@ -147,11 +194,12 @@ class ReservationCommandServiceTest {
     }
 
     @Test
-    @DisplayName("예약 변경 시 비워진 옛 슬롯의 대기 1번이 예약으로 전환된다.")
+    @DisplayName("예약 변경 시 비워진 옛 슬롯의 대기 1번이 결제대기 예약으로 전환된다.")
     void updatePromotesWaitingInVacatedSlot() {
         reservationCommandService.update(2L, "user_b", LocalDate.of(2026, 6, 5), 3L);
 
-        assertThat(reservationDao.findAllByName(new Member("user_d"))).hasSize(1);
+        assertThat(reservationDao.findAllByName(new Member("user_d")).getFirst().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
         assertThat(waitingDao.findById(2L)).isEmpty();
     }
 
