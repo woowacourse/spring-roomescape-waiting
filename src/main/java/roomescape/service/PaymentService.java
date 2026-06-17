@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ReservationCommand;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -41,15 +43,19 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("결제 정보를 찾을 수 없습니다."));
 
         if (!paymentOrder.getAmount().equals(amount)) {
+            log.warn("[결제 금액 불일치] orderId={} 저장={} 요청={}", orderId, paymentOrder.getAmount(), amount);
             throw new IllegalArgumentException("결제 금액이 일치하지 않습니다.");
         }
 
+        log.info("[결제 승인 요청] orderId={} paymentKey={} amount={}", orderId, paymentKey, amount);
         TossPaymentResponse response = tossPaymentGateway.confirm(paymentKey, orderId, amount);
+        log.info("[결제 승인 완료] orderId={} status={} approvedAt={}", response.orderId(), response.status(), response.approvedAt());
 
         Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
         reservation.confirmPendingEntry(paymentOrder.getEntryId());
         reservationRepository.update(reservation);
 
+        log.info("[예약 확정] entryId={} PENDING→RESERVED", paymentOrder.getEntryId());
         return response;
     }
 
