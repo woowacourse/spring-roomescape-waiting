@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.application.service.PromotionService;
+import roomescape.reservation.domain.PromotionSource;
 import roomescape.reservation.event.schema.PromotionFailed;
 import roomescape.reservation.event.schema.ReservationCancelRequested;
 
@@ -36,27 +37,27 @@ class ReservationEventListenerTest {
 
         listener.handleReservationCancelRequested(event);
 
-        verify(promotionService).promoteFromWaiting(date, themeId, timeId);
+        verify(promotionService).promoteFromWaiting(date, themeId, timeId, PromotionSource.CANCELLATION);
     }
 
     @DisplayName("retryCount가 정해진 횟수 미만이면 promoteFromWaiting을 재호출한다.")
     @Test
     void retries_promoteFromWaiting_when_retryCount_less_than_threshold() {
         int retryCount = MAX_RETRY_COUNT - 1;
-        PromotionFailed event = new PromotionFailed(date, themeId, timeId, retryCount);
+        PromotionFailed event = new PromotionFailed(date, themeId, timeId, retryCount, PromotionSource.CANCELLATION);
 
         listener.handlePromotionFailed(event);
 
-        verify(promotionService).promoteFromWaiting(date, themeId, timeId, retryCount);
+        verify(promotionService).promoteFromWaiting(date, themeId, timeId, retryCount, PromotionSource.CANCELLATION);
     }
 
     @DisplayName("retryCount가 정해진 횟수 이상이면 promoteFromWaiting을 호출하지 않는다.")
     @Test
     void does_not_retry_when_retryCount_is_over_threshold() {
-        PromotionFailed event = new PromotionFailed(date, themeId, timeId, MAX_RETRY_COUNT);
+        PromotionFailed event = new PromotionFailed(date, themeId, timeId, MAX_RETRY_COUNT, PromotionSource.CANCELLATION);
 
         listener.handlePromotionFailed(event);
 
-        verify(promotionService, never()).promoteFromWaiting(date, themeId, timeId, MAX_RETRY_COUNT);
+        verify(promotionService, never()).promoteFromWaiting(date, themeId, timeId, MAX_RETRY_COUNT, PromotionSource.CANCELLATION);
     }
 }

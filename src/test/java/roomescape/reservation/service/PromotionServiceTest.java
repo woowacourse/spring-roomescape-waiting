@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import roomescape.reservation.application.service.PromotionService;
+import roomescape.reservation.domain.PromotionSource;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.event.schema.PromotionFailed;
 import roomescape.reservation.event.schema.WaitingPromotedToReservation;
@@ -37,9 +38,9 @@ class PromotionServiceTest {
     void publishes_WaitingPromotedToReservation_when_promoted() {
         when(reservationRepository.insertFromOldestWaiting(date, themeId, timeId)).thenReturn(true);
 
-        promotionService.promoteFromWaiting(date, themeId, timeId);
+        promotionService.promoteFromWaiting(date, themeId, timeId, PromotionSource.DIRECT);
 
-        verify(eventPublisher).publishEvent(new WaitingPromotedToReservation(date, themeId, timeId));
+        verify(eventPublisher).publishEvent(new WaitingPromotedToReservation(date, themeId, timeId, PromotionSource.DIRECT));
     }
 
     @DisplayName("승격 중 예외 발생 시 PromotionFailed 이벤트를 retryCount+1로 발행한다.")
@@ -48,8 +49,8 @@ class PromotionServiceTest {
         when(reservationRepository.insertFromOldestWaiting(date, themeId, timeId))
                 .thenThrow(new RuntimeException("DB 오류"));
 
-        promotionService.promoteFromWaiting(date, themeId, timeId, 1);
+        promotionService.promoteFromWaiting(date, themeId, timeId, 1, PromotionSource.DIRECT);
 
-        verify(eventPublisher).publishEvent(new PromotionFailed(date, themeId, timeId, 2));
+        verify(eventPublisher).publishEvent(new PromotionFailed(date, themeId, timeId, 2, PromotionSource.DIRECT));
     }
 }

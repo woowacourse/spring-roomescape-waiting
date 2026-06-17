@@ -58,25 +58,22 @@
       text-decoration: none;
       font-weight: 600;
     }
+
   </style>
 </head>
 <body>
 <div class="card">
-  <h1>✅ 결제를 완료했어요</h1>
-  <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정했습니다.</p>
+  <h1>결제를 완료했어요</h1>
+  <p class="desc">예약이 확정되었습니다.</p>
 
   <div class="row"><span class="label">결제 상태</span>
-    <span class="val" th:text="${result != null ? result.status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
+    <span class="val" th:text="${result?.status()}">DONE</span></div>
   <div class="row"><span class="label">주문번호</span>
     <span class="val" th:text="${result?.orderId()}">order-xxxx</span></div>
   <div class="row"><span class="label">승인 금액</span>
-    <span class="val"
-          th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
+    <span class="val" th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
   </div>
-  <div class="row"><span class="label">paymentKey</span>
-    <span class="val" th:text="${paymentKey}">tviva...</span></div>
-
-  <a href="/">← 다시 결제하기</a>
+  <a th:href="${reservationUrl}">← 예약 확인하기</a>
 </div>
 </body>
 </html>
