@@ -119,9 +119,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
                  where u.id = ?
                  order by case r.status
                               when 'RESERVED' then 0
-                              when 'PAYMENT_PENDING' then 1
-                              when 'PAYMENT_FAILED' then 2
-                              when 'WAITING' then 3
+                              when 'WAITING' then 1
                               else 2
                           end,
                           r.date,
@@ -164,37 +162,6 @@ public class ReservationJdbcRepository implements ReservationRepository {
             waitingReservations.put(reservation, resultSet.getInt("waiting_order"));
         }, ReservationStatus.WAITING.name(), userId);
         return waitingReservations;
-    }
-
-    @Override
-    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(LocalDate date,
-                                                                                                   Long timeId,
-                                                                                                   Long themeId,
-                                                                                                   Long storeId) {
-        String sql = SELECT_BASE + """
-                where r.date = ?
-                  and r.time_id = ?
-                  and r.theme_id = ?
-                  and r.store_id = ?
-                  and r.status = ?
-                order by r.created_at asc, r.id asc
-                limit 1
-                for update
-                """;
-
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    sql,
-                    rowMapper,
-                    date,
-                    timeId,
-                    themeId,
-                    storeId,
-                    ReservationStatus.WAITING.name()
-            ));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
     }
 
     @Override
@@ -253,15 +220,6 @@ public class ReservationJdbcRepository implements ReservationRepository {
     public int updateStatus(Long id, ReservationStatus status) {
         String sql = "update reservation set status = ? where id = ?";
         return jdbcTemplate.update(sql, status.name(), id);
-    }
-
-    @Override
-    public int updateWaitingToReserved(Reservation reservation) {
-        String sql = "update reservation set status = ? where id = ? and status = ?";
-        return jdbcTemplate.update(sql,
-                ReservationStatus.RESERVED.name(),
-                reservation.getId(),
-                ReservationStatus.WAITING.name());
     }
 
     @Override
