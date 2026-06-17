@@ -45,6 +45,29 @@ public class PaymentOrder {
         this.updatedAt = updatedAt;
     }
 
+    public static PaymentOrder pending(
+            String orderId,
+            Long memberId,
+            Long scheduleId,
+            int amount,
+            LocalDateTime now
+    ) {
+        return new PaymentOrder(
+                null,
+                orderId,
+                memberId,
+                scheduleId,
+                amount,
+                PaymentOrderStatus.PENDING,
+                null,
+                null,
+                null,
+                null,
+                now,
+                now
+        );
+    }
+
     public boolean isConfirmedWith(String paymentKey) {
         return status == PaymentOrderStatus.CONFIRMED && this.paymentKey != null && this.paymentKey.equals(paymentKey);
     }
