@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -188,6 +189,40 @@ class ThemeServiceTest {
             assertThat(result).containsExactlyInAnyOrder(
                     new AvailableTimeResponseDto(TimeResponseDto.from(bookedTime), true),
                     new AvailableTimeResponseDto(TimeResponseDto.from(availableTime), false)
+            );
+        }
+
+        @Test
+        @DisplayName("취소된 예약의 시간은 다시 예약 가능으로 표시된다")
+        void canceledReservationFreesSlot() {
+            Theme savedTheme = themeService.create(requestDto1);
+            Time time = timeDao.insert(new Time(LocalTime.of(13, 0)));
+            LocalDate date = LocalDate.of(2099, 1, 1);
+            Reservation reservation = reservationDao.insert(
+                    Reservation.createByAdmin(member, date, time, savedTheme, store));
+            reservation.cancelByAdmin(LocalDateTime.now());
+            reservationDao.update(reservation);
+
+            List<AvailableTimeResponseDto> result = themeService.findAvailableTimesById(savedTheme.getId(), date);
+
+            assertThat(result).containsExactly(
+                    new AvailableTimeResponseDto(TimeResponseDto.from(time), false)
+            );
+        }
+
+        @Test
+        @DisplayName("결제 대기(PENDING) 예약의 시간은 점유로 표시된다")
+        void pendingReservationOccupiesSlot() {
+            Theme savedTheme = themeService.create(requestDto1);
+            Time time = timeDao.insert(new Time(LocalTime.of(13, 0)));
+            LocalDate date = LocalDate.of(2099, 1, 1);
+            reservationDao.insert(
+                    Reservation.createByUser(member, date, time, savedTheme, store, LocalDateTime.now()));
+
+            List<AvailableTimeResponseDto> result = themeService.findAvailableTimesById(savedTheme.getId(), date);
+
+            assertThat(result).containsExactly(
+                    new AvailableTimeResponseDto(TimeResponseDto.from(time), true)
             );
         }
     }

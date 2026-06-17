@@ -1,6 +1,7 @@
 package roomescape.dao.jdbc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,9 @@ import roomescape.dto.response.TimeResponseDto;
 
 @Repository
 public class ThemeJdbcDao implements ThemeDao {
+    // 활성 예약의 deleted_at 기본값(soft-delete sentinel). 취소된 예약은 실제 취소 시각을 가진다.
+    private static final LocalDateTime SENTINEL = LocalDateTime.of(9999, 12, 31, 0, 0, 0);
+
     private static final RowMapper<Theme> THEME_ROW_MAPPER = (rs, rowNum) ->
             new Theme(
                     rs.getLong("id"),
@@ -163,6 +167,7 @@ public class ThemeJdbcDao implements ThemeDao {
                         WHERE r.time_id = t.id
                         AND r.theme_id = :themeId
                         AND r.date = :date
+                        AND r.deleted_at = :sentinel
                     ) as already_booked
                  FROM times t
                  ORDER BY t.start_at
@@ -170,7 +175,8 @@ public class ThemeJdbcDao implements ThemeDao {
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("themeId", themeId)
-                .addValue("date", localDate);
+                .addValue("date", localDate)
+                .addValue("sentinel", SENTINEL);
 
         return jdbcTemplate.query(sql, params, AVAILABLE_TIME_MAPPER);
     }
