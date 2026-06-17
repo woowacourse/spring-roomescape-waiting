@@ -49,10 +49,10 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.insert(Reservation.createWithoutId("로지",
-                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+                "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
 
         // when
@@ -62,7 +62,7 @@ class ReservationWaitingServiceTest {
         assertThat(response)
                 .extracting(ReservationWaitingResponse::name, ReservationWaitingResponse::reservationDate,
                         r -> r.time().id(), r -> r.theme().id())
-                .containsExactly("맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId());
+                .containsExactly("맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId());
     }
 
     @Test
@@ -71,7 +71,7 @@ class ReservationWaitingServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+                "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
 
         // when & then
@@ -86,10 +86,10 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.insert(Reservation.createWithoutId("로지",
-                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "로지", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+                "로지", LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
 
         // when & then
@@ -104,10 +104,10 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.insert(Reservation.createWithoutId("로지",
-                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+                "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
         waitingService.createReservationWaiting(command, LocalDateTime.now());
 
@@ -123,17 +123,17 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.insert(Reservation.createWithoutId("로지",
-                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
 
         waitingService.createReservationWaiting(new CreateReservationWaitingCommand(
-                "브라운", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+                "브라운", LocalDate.now().plusDays(10), time.getId(), theme.getId()
         ), LocalDateTime.now());
 
         // when
         ReservationWaitingResponse response = waitingService.createReservationWaiting(
                 new CreateReservationWaitingCommand(
-                        "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+                        "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
                 ), LocalDateTime.now());
 
         // then
@@ -145,7 +145,7 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationWaiting saved = reservationWaitingRepository.insert(
+        ReservationWaiting saved = reservationWaitingRepository.save(
                 ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(),
                         new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme))
         );
@@ -163,10 +163,10 @@ class ReservationWaitingServiceTest {
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return timeDao.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 }

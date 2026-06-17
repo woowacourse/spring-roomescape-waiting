@@ -62,6 +62,9 @@ public class ReservationWaitingService {
 
     @Transactional
     public void delete(Long reservationWaitingId) {
+        if (!reservationWaitingRepository.existsById(reservationWaitingId)) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_WAITING_NOT_FOUND);
+        }
         reservationWaitingRepository.deleteById(reservationWaitingId);
     }
 

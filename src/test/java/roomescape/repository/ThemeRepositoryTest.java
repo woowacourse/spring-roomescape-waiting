@@ -9,15 +9,13 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-@JdbcTest
-@Import({ThemeRepository.class, ReservationTimeRepository.class, ReservationRepository.class})
+@DataJpaTest
 class ThemeRepositoryTest {
 
     @Autowired
@@ -50,7 +48,7 @@ class ThemeRepositoryTest {
         saveTheme("방탈출2", "설명2", "https://thumb2.com");
 
         // when
-        List<Theme> themes = themeRepository.selectAll();
+        List<Theme> themes = themeRepository.findAll();
 
         // then
         assertThat(themes).hasSize(2);
@@ -62,7 +60,7 @@ class ThemeRepositoryTest {
         Theme saved = saveTheme("방탈출1", "로지와 러키의 신나는 방탈출", "https://abc.asdfdsa");
 
         // when
-        Optional<Theme> found = themeRepository.selectById(saved.getId());
+        Optional<Theme> found = themeRepository.findById(saved.getId());
 
         // then
         assertAll(
@@ -82,7 +80,7 @@ class ThemeRepositoryTest {
         LocalDate endDate = LocalDate.of(2026, 5, 5);
 
         // when
-        List<Theme> popular = themeRepository.selectPopularThemesByPeriod(startDate, endDate);
+        List<Theme> popular = themeRepository.findPopularThemesByPeriod(startDate, endDate);
 
         // then
         assertAll(
@@ -102,7 +100,7 @@ class ThemeRepositoryTest {
     @Test
     void 아이디에_맞는_테마가_없으면_빈_객체를_반환한다() {
         // when
-        Optional<Theme> found = themeRepository.selectById(900L);
+        Optional<Theme> found = themeRepository.findById(900L);
 
         // then
         assertThat(found).isEmpty();
@@ -114,10 +112,10 @@ class ThemeRepositoryTest {
         Theme saved = saveTheme("방탈출1", "설명", "https://thumb.com");
 
         // when
-        int deleted = themeRepository.delete(saved.getId());
+        themeRepository.deleteById(saved.getId());
 
         // then
-        assertThat(deleted).isEqualTo(1);
+        assertThat(themeRepository.findAll()).isEmpty();
     }
 
     private void setupPopularThemesData() {
@@ -255,14 +253,14 @@ class ThemeRepositoryTest {
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return timeDao.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private void saveReservation(LocalDate date, ReservationTime time, Theme theme) {
-        reservationRepository.insert(Reservation.createWithoutId("예약자", new ReservationSlot(date, time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(date, time, theme)));
     }
 }

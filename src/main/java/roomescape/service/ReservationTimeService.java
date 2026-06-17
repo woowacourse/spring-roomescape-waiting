@@ -41,7 +41,7 @@ public class ReservationTimeService {
     public List<ReservationTimeResponse> getReservationTimes(Long themeId, LocalDate date) {
         validateTheme(themeId);
 
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndDate(themeId, date);
+        List<Reservation> reservations = reservationRepository.findBySlot_Theme_IdAndSlot_Date(themeId, date);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return reservationTimes.stream()
@@ -68,7 +68,7 @@ public class ReservationTimeService {
     }
 
     private void validateTimeIncludeReservation(long reservationTimeId) {
-        boolean existsByTimeId = reservationRepository.existsById(reservationTimeId);
+        boolean existsByTimeId = reservationRepository.existsByTimeId(reservationTimeId);
         if (existsByTimeId) {
             throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_CANNOT_DELETE);
         }

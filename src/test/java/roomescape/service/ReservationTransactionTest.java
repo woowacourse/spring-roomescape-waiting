@@ -57,12 +57,12 @@ public class ReservationTransactionTest {
     @Test
     void 승격_실패_시_예약_삭제도_롤백된다() {
         // given
-        ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.insert(Theme.createWithoutId("방탈출1", "설명", "https://thumb.com"));
+        ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.createWithoutId("방탈출1", "설명", "https://thumb.com"));
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation reservation = reservationRepository.insert(
+        Reservation reservation = reservationRepository.save(
                 Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
-        waitingDao.insert(
+        waitingDao.save(
                 ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
                         new ReservationSlot(date, time, theme)));
 
@@ -75,7 +75,7 @@ public class ReservationTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        assertThat(reservationRepository.selectById(reservation.getId())).isPresent();
-        assertThat(waitingDao.select()).hasSize(1);
+        assertThat(reservationRepository.findById(reservation.getId())).isPresent();
+        assertThat(waitingDao.findAll()).hasSize(1);
     }
 }

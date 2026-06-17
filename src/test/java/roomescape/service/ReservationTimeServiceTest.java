@@ -134,14 +134,14 @@ class ReservationTimeServiceTest {
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return reservationTimeRepository.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 
     private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        reservationRepository.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
+        reservationRepository.save(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
     }
 }

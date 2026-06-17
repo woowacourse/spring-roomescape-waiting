@@ -47,7 +47,7 @@ class ReservationConcurrencyControllerTest extends ControllerTestSupport {
         }
         latch.await();
 
-        List<ReservationWaiting> waitings = waitingDao.select();
+        List<ReservationWaiting> waitings = waitingDao.findAll();
         assertThat(waitings).hasSize(10);
 
         List<Integer> orders = waitings.stream()

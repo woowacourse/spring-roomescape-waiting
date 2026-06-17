@@ -252,15 +252,15 @@ class ReservationServiceTest {
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = saveReservation("브라운", date, time, theme);
-        waitingDao.insert(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
+        waitingDao.save(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
                 new ReservationSlot(date, time, theme)));
 
         // when
         reservationService.delete(reservation.getId());
 
         // then
-        assertThat(reservationRepository.selectByName("로지")).hasSize(1);
-        assertThat(waitingDao.select()).isEmpty();
+        assertThat(reservationRepository.findByName("로지")).hasSize(1);
+        assertThat(waitingDao.findAll()).isEmpty();
     }
 
     @Test
@@ -274,8 +274,8 @@ class ReservationServiceTest {
         reservationService.delete(reservation.getId());
 
         // then
-        assertThat(reservationRepository.select()).isEmpty();
-        assertThat(waitingDao.select()).isEmpty();
+        assertThat(reservationRepository.findAll()).isEmpty();
+        assertThat(waitingDao.findAll()).isEmpty();
     }
 
     @Test
@@ -289,8 +289,8 @@ class ReservationServiceTest {
         Reservation reservation = saveReservation("브라운", date, time, theme);
 
         // 대기 2명 (로지 1번, 맥스 2번)
-        waitingDao.insert(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), slot));
-        ReservationWaiting maxsWaiting = waitingDao.insert(
+        waitingDao.save(ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), slot));
+        ReservationWaiting maxsWaiting = waitingDao.save(
                 ReservationWaiting.createWithoutId("맥스", LocalDateTime.now().plusSeconds(1), slot));
 
         // when
@@ -299,24 +299,24 @@ class ReservationServiceTest {
 
         // then
         // 맥스 1번 대기로 재정렬
-        assertThat(reservationRepository.selectByName("로지")).hasSize(1);
+        assertThat(reservationRepository.findByName("로지")).hasSize(1);
         assertThat(waitingDao.countOrder(slot, maxsWaiting.getId())).isEqualTo(1);
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return reservationTimeRepository.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
+        return reservationRepository.save(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
     }
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return waitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(),
+        return waitingDao.save(ReservationWaiting.createWithoutId(name, LocalDateTime.now(),
                 new ReservationSlot(date, time, theme)));
     }
 }

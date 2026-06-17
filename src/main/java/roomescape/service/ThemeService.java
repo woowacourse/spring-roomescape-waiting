@@ -71,7 +71,7 @@ public class ThemeService {
     }
 
     private void validateThemeIncludeReservation(long themeId) {
-        boolean existsByThemeId = reservationRepository.existsById(themeId);
+        boolean existsByThemeId = reservationRepository.existsByThemeId(themeId);
         if (existsByThemeId) {
             throw new RoomEscapeException(ThemeErrorCode.THEME_CANNOT_DELETE);
         }

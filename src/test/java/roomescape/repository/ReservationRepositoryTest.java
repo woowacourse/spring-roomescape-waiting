@@ -8,15 +8,13 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-@JdbcTest
-@Import({ReservationRepository.class, ReservationTimeRepository.class, ThemeRepository.class})
+@DataJpaTest
 class ReservationRepositoryTest {
 
     @Autowired
@@ -37,7 +35,7 @@ class ReservationRepositoryTest {
                 new ReservationSlot(LocalDate.of(2026, 5, 5), savedTime, savedTheme));
 
         // when
-        Reservation saved = reservationRepository.insert(reservation);
+        Reservation saved = reservationRepository.save(reservation);
 
         // then
         assertThat(saved)
@@ -58,14 +56,14 @@ class ReservationRepositoryTest {
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, savedTime1, savedTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime2, savedTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime3, savedTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("러로", new ReservationSlot(date, savedTime4, savedTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("밤밤", new ReservationSlot(date, savedTime5, savedTheme)));
+        reservationRepository.save(Reservation.createWithoutId("브라운", new ReservationSlot(date, savedTime1, savedTheme)));
+        reservationRepository.save(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime2, savedTheme)));
+        reservationRepository.save(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime3, savedTheme)));
+        reservationRepository.save(Reservation.createWithoutId("러로", new ReservationSlot(date, savedTime4, savedTheme)));
+        reservationRepository.save(Reservation.createWithoutId("밤밤", new ReservationSlot(date, savedTime5, savedTheme)));
 
         // when
-        List<Reservation> reservations = reservationRepository.select();
+        List<Reservation> reservations = reservationRepository.findAll();
 
         // then
         assertAll(
@@ -79,7 +77,7 @@ class ReservationRepositoryTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.insert(Reservation.createWithoutId("브라운",
+        reservationRepository.save(Reservation.createWithoutId("브라운",
                 new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when
@@ -103,7 +101,7 @@ class ReservationRepositoryTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.insert(Reservation.createWithoutId("브라운",
+        reservationRepository.save(Reservation.createWithoutId("브라운",
                 new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when
@@ -130,11 +128,11 @@ class ReservationRepositoryTest {
         Theme theme2 = saveTheme("방탈출2", "설명2", "https://asdfsdf.sdfs");
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        reservationRepository.insert(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime, theme1)));
-        reservationRepository.insert(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime, theme2)));
+        reservationRepository.save(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime, theme1)));
+        reservationRepository.save(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime, theme2)));
 
         // when
-        List<Reservation> result = reservationRepository.selectByThemeIdAndDate(theme1.getId(), date);
+        List<Reservation> result = reservationRepository.findBySlot_Theme_IdAndSlot_Date(theme1.getId(), date);
 
         // then
         assertAll(
@@ -149,7 +147,7 @@ class ReservationRepositoryTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 5, 5);
-        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
 
         // when
         boolean result = reservationRepository.existsBySlot(new ReservationSlot(date, time, theme));
@@ -178,7 +176,7 @@ class ReservationRepositoryTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 5, 5);
-        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
+        reservationRepository.save(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
 
         // when
         boolean result = reservationRepository.existsByNameAndSlot("브라운", new ReservationSlot(date, time, theme));
@@ -207,11 +205,12 @@ class ReservationRepositoryTest {
         ReservationTime time1 = saveTime(10, 0);
         ReservationTime time2 = saveTime(11, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        Reservation saved = reservationRepository.insert(
+        Reservation saved = reservationRepository.save(
                 Reservation.createWithoutId("브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time1, theme)));
 
         // when
-        Reservation updated = reservationRepository.update(saved.getId(), LocalDate.of(2026, 5, 6), time2.getId());
+        saved.changeSlot(new ReservationSlot(LocalDate.of(2026, 5, 6), time2, theme));
+        Reservation updated = reservationRepository.save(saved);
 
         // then
         assertAll(
@@ -225,21 +224,21 @@ class ReservationRepositoryTest {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-        Reservation saved = reservationRepository.insert(
+        Reservation saved = reservationRepository.save(
                 Reservation.createWithoutId("예약1", new ReservationSlot(LocalDate.of(2026, 5, 5), savedTime, savedTheme)));
 
         // when
-        reservationRepository.delete(saved.getId());
+        reservationRepository.deleteById(saved.getId());
 
         // then
-        assertThat(reservationRepository.select()).isEmpty();
+        assertThat(reservationRepository.findAll()).isEmpty();
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return timeDao.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 }

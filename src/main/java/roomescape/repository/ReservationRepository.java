@@ -30,5 +30,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeId(@Param("themeId") long themeId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Reservation> findBySlotForUpdate(ReservationSlot slot);
+    @Query("SELECT r FROM Reservation r WHERE r.slot.date = :#{#slot.date} AND r.slot.time = :#{#slot.time} AND r.slot.theme = :#{#slot.theme}")
+    Optional<Reservation> findBySlotForUpdate(@Param("slot") ReservationSlot slot);
 }

@@ -92,12 +92,12 @@ class ThemeServiceTest {
         Theme normalTheme = saveTheme("사라진 연구소", "설명", "https://thumb2.com");
 
         LocalDate today = LocalDate.now();
-        ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
-        reservationRepository.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, popularTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(2), time, popularTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(3), time, popularTheme)));
-        reservationRepository.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, normalTheme)));
+        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(2), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(3), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, normalTheme)));
 
         List<ThemeResponse> responses = themeService.getPopularThemes(today);
 
@@ -125,8 +125,8 @@ class ThemeServiceTest {
     void 예약에_존재하는_테마를_삭제하면_409를_반환한다() {
         // given
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
+        ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        reservationRepository.save(Reservation.createWithoutId("브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
@@ -136,6 +136,6 @@ class ThemeServiceTest {
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 }
