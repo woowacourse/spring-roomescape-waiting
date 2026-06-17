@@ -10,7 +10,7 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.ReservationDao;
 import roomescape.waiting.WaitingDao;
-import roomescape.domain.member.Member;
+import roomescape.member.Member;
 import roomescape.reservation.Reservation;
 import roomescape.waiting.web.WaitingRequestDto;
 

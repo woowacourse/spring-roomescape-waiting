@@ -20,8 +20,8 @@ import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.PaymentAmountMismatchException;
 import roomescape.dao.OrderDao;
 import roomescape.reservation.ReservationDao;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRole;
+import roomescape.member.Member;
+import roomescape.member.MemberRole;
 import roomescape.domain.payment.Order;
 import roomescape.domain.payment.OrderStatus;
 import roomescape.domain.payment.PaymentGateway;
@@ -29,9 +29,9 @@ import roomescape.domain.payment.PaymentResult;
 import roomescape.domain.payment.PaymentService;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationStatus;
-import roomescape.domain.store.Store;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.Time;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.time.Time;
 import roomescape.common.vo.Name;
 
 @ExtendWith(MockitoExtension.class)

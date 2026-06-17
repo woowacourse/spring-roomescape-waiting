@@ -9,7 +9,7 @@ import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.OrderDao;
 import roomescape.reservation.ReservationDao;
-import roomescape.domain.member.Member;
+import roomescape.member.Member;
 import roomescape.reservation.Reservation;
 
 /**

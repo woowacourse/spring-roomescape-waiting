@@ -19,22 +19,22 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.MemberDao;
+import roomescape.member.MemberDao;
 import roomescape.reservation.ReservationDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.TimeDao;
-import roomescape.dao.jdbc.MemberJdbcDao;
+import roomescape.theme.ThemeDao;
+import roomescape.time.TimeDao;
+import roomescape.member.dao.MemberJdbcDao;
 import roomescape.reservation.dao.ReservationJdbcDao;
-import roomescape.dao.jdbc.ThemeJdbcDao;
-import roomescape.dao.jdbc.TimeJdbcDao;
-import roomescape.domain.member.Member;
+import roomescape.theme.dao.ThemeJdbcDao;
+import roomescape.time.dao.TimeJdbcDao;
+import roomescape.member.Member;
 import roomescape.reservation.Reservation;
-import roomescape.domain.store.Store;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.Time;
-import roomescape.domain.time.TimeService;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.time.Time;
+import roomescape.time.TimeService;
 import roomescape.common.vo.Name;
-import roomescape.dto.request.TimeRequestDto;
+import roomescape.time.web.TimeRequestDto;
 
 @JdbcTest
 @Import({TimeService.class, TimeJdbcDao.class, ReservationJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class})

@@ -6,10 +6,10 @@ import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.vo.Slot;
-import roomescape.domain.member.Member;
-import roomescape.domain.store.Store;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.Time;
+import roomescape.member.Member;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.time.Time;
 
 public class Reservation {
     private final Long id;

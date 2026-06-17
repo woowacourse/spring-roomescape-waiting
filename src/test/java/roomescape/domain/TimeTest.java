@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.InvalidInputException;
-import roomescape.domain.time.Time;
+import roomescape.time.Time;
 
 class TimeTest {
 

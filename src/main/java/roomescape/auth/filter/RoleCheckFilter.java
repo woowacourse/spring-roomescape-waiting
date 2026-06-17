@@ -13,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.filter.OncePerRequestFilter;
 import roomescape.auth.session.SessionUtils;
-import roomescape.dao.MemberDao;
-import roomescape.domain.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.Member;
 
 public abstract class RoleCheckFilter extends OncePerRequestFilter {
     protected final MemberDao memberDao;

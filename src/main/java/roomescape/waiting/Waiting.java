@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
-import roomescape.domain.member.Member;
+import roomescape.member.Member;
 import roomescape.reservation.Reservation;
 import roomescape.common.vo.Slot;
-import roomescape.domain.store.Store;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.Time;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.time.Time;
 
 public class Waiting {
     private final Long id;

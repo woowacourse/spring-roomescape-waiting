@@ -14,8 +14,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import roomescape.auth.session.SessionUtils;
-import roomescape.dao.MemberDao;
-import roomescape.domain.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.Member;
 
 @Component
 public class AuthFilter extends OncePerRequestFilter {

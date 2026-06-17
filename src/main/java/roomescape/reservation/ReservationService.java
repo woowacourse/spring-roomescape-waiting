@@ -9,12 +9,12 @@ import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.vo.Slot;
-import roomescape.dao.TimeDao;
-import roomescape.domain.member.Member;
+import roomescape.time.TimeDao;
+import roomescape.member.Member;
 import roomescape.domain.payment.Order;
 import roomescape.domain.payment.PaymentService;
 import roomescape.domain.promotion.PromotionService;
-import roomescape.domain.time.Time;
+import roomescape.time.Time;
 import roomescape.reservation.web.ReservationPatchDto;
 import roomescape.reservation.web.ReservationRequestDto;
 

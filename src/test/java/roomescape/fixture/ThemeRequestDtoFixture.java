@@ -1,6 +1,6 @@
 package roomescape.fixture;
 
-import roomescape.dto.request.ThemeRequestDto;
+import roomescape.theme.web.ThemeRequestDto;
 
 public class ThemeRequestDtoFixture {
 

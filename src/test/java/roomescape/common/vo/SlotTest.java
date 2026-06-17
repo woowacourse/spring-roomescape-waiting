@@ -8,9 +8,9 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.store.Store;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.Time;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.time.Time;
 
 class SlotTest {
 

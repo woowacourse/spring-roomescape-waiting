@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
-import roomescape.domain.member.Member;
+import roomescape.member.Member;
 import roomescape.reservation.Reservation;
 import roomescape.common.vo.Slot;
 

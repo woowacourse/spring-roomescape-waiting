@@ -3,8 +3,8 @@ package roomescape.reservation.web;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.dto.response.ThemeResponseDto;
-import roomescape.dto.response.TimeResponseDto;
+import roomescape.theme.web.ThemeResponseDto;
+import roomescape.time.web.TimeResponseDto;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationStatus;
 

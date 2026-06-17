@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.WaitingAuthorizationService;
-import roomescape.domain.member.Member;
+import roomescape.member.Member;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.web.WaitingRequestDto;
 import roomescape.waiting.web.WaitingResponse;
