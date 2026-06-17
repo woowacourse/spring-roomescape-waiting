@@ -14,28 +14,38 @@
       <h4 id="paymentStatusTitle" class="mb-2">결제를 확인하고 있습니다</h4>
       <p id="paymentStatusMessage" class="text-muted mb-0">잠시만 기다려 주세요...</p>
       <div class="mt-4 d-flex justify-content-center gap-2">
-        <a id="paymentRetryLink" href="/" class="btn btn-primary d-none">다시 시도</a>
+        <button id="paymentActionButton" type="button" class="btn btn-primary d-none"></button>
         <a id="paymentHomeLink" href="/" class="btn btn-dark d-none">홈으로</a>
       </div>
     </div>
   </div>
 </div>
 <script>
-  // 서버는 ErrorResponseDto.code(=PaymentFailureType 등)로 분기 단서를 내려준다.
-  // 사용자 UX 문구는 클라이언트가 code 기준으로 결정한다. (서버 message 는 개발자 디버깅용)
+  // 서버는 ErrorResponseDto.code 로 분기 단서를 내려준다. (서버 message 는 개발자 디버깅용)
+  // 사용자 UX 문구·동작은 클라이언트가 code 기준으로 결정한다.
   const USER_MESSAGES = {
-    CARD_DECLINED: '카드 결제가 거절되었습니다. 다른 카드로 다시 시도해 주세요.',
-    RETRYABLE: '일시적인 오류로 결제가 완료되지 않았습니다. 잠시 후 다시 시도해 주세요.',
-    PAYMENT_AMOUNT_MISMATCH: '결제 금액 정보가 올바르지 않습니다. 다시 시도해 주세요.',
-    NETWORK_ERROR: '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+    CARD_DECLINED: '카드 결제가 거절되었습니다. 다른 카드로 다시 결제해 주세요.',
+    PAYMENT_AMOUNT_MISMATCH: '결제 금액 정보가 올바르지 않습니다. 처음부터 다시 시도해 주세요.',
+    RETRYABLE: '일시적인 오류로 결제가 완료되지 않았습니다. 잠시 후 다시 확인해 주세요.',
+    PAYMENT_GATEWAY_UNREACHABLE: '결제 서버에 연결하지 못했습니다. 아직 결제는 진행되지 않았으니 다시 시도해 주세요.',
+    NETWORK_ERROR: '네트워크 오류가 발생했습니다. 잠시 후 다시 확인해 주세요.'
   };
-  const RETRYABLE_CODES = ['CARD_DECLINED', 'RETRYABLE', 'NETWORK_ERROR'];
   const DEFAULT_FAIL_MESSAGE = '결제 처리 중 문제가 발생했습니다. 문제가 계속되면 고객센터로 문의해 주세요.';
 
-  (async () => {
+  // 이미 확정된 주문 → 결제는 이미 완료된 것이므로 성공으로 간주한다. (success 새로고침/재확인 시)
+  const ALREADY_DONE_CODES = ['ALREADY_CONFIRMED_ORDER'];
+  // 결과 불명(read timeout) → '실패'가 아니라 '확인 필요'. 같은 orderId 로 안전하게 재확인할 수 있다.
+  const UNKNOWN_CODES = ['PAYMENT_RESULT_UNKNOWN'];
+  // 전송/일시 오류 → 결제가 완료되지 않았고, 같은 orderId 로 재확인해도 멱등하게 안전하다.
+  const RECONFIRM_CODES = ['PAYMENT_GATEWAY_UNREACHABLE', 'RETRYABLE', 'NETWORK_ERROR'];
+  // 결제 거절/무효 → 같은 결제로는 진행 불가. 새 결제를 시작해야 한다.
+  const NEW_PAYMENT_CODES = ['CARD_DECLINED', 'PAYMENT_AMOUNT_MISMATCH'];
+
+  (() => {
     const params = new URLSearchParams(window.location.search);
     const reservationId = params.get('reservationId');
     const reservationName = params.get('reservationName');
+    // 재확인은 URL 의 동일 orderId·paymentKey 로 재-POST 한다 → 토스 Idempotency-Key 로 중복 승인되지 않는다.
     const requestBody = {
       orderId: params.get('orderId'),
       paymentKey: params.get('paymentKey'),
@@ -45,22 +55,49 @@
     const icon = document.getElementById('paymentStatusIcon');
     const title = document.getElementById('paymentStatusTitle');
     const message = document.getElementById('paymentStatusMessage');
+    const actionButton = document.getElementById('paymentActionButton');
     const homeLink = document.getElementById('paymentHomeLink');
-    const retryLink = document.getElementById('paymentRetryLink');
 
     const homeHref = reservationName ? '/?reservationName=' + encodeURIComponent(reservationName) : '/';
     homeLink.href = homeHref;
-    // 미결제 예약이 그대로 남아 있으므로, 홈으로 돌아가면 재방문 흐름이 결제를 다시 시작한다.
-    retryLink.href = homeHref;
+
+    function hideActions() {
+      actionButton.classList.add('d-none');
+      actionButton.onclick = null;
+      homeLink.classList.add('d-none');
+    }
+
+    function setAction(text, handler) {
+      actionButton.innerText = text;
+      actionButton.onclick = handler;
+      actionButton.classList.remove('d-none');
+    }
+
+    function showLoading() {
+      hideActions();
+      icon.innerText = '⏳';
+      title.innerText = '결제를 확인하고 있습니다';
+      message.innerText = '잠시만 기다려 주세요...';
+    }
 
     function showSuccess() {
+      hideActions();
       icon.innerText = '✅';
       title.innerText = '결제가 완료되었습니다';
       message.innerText = '예약이 확정되었습니다. 잠시 후 홈으로 이동합니다.';
       setTimeout(() => { location.href = homeHref; }, 1500);
     }
 
-    function showFailure(data) {
+    function showPending() {
+      // 결과 불명 → 실패로 단정하지 않는다. 같은 결제로 재확인을 유도한다.
+      icon.innerText = '⏳';
+      title.innerText = '결제 결과를 확인하고 있어요';
+      message.innerText = '아직 결제 실패가 아닙니다. 중복 결제 없이 안전하게 다시 확인할 수 있어요.';
+      setAction('다시 확인', confirmPayment);
+      homeLink.classList.remove('d-none');
+    }
+
+    function showFailure(data, reconfirmable) {
       const code = data && data.code;
       // 서버 message 는 개발자 디버깅용이라 콘솔에만 남기고, 사용자에겐 code 기반 안내를 노출한다.
       console.error('[payment] confirm failed:', code, data && data.message);
@@ -69,34 +106,56 @@
       title.innerText = '결제에 실패했습니다';
       message.innerText = USER_MESSAGES[code] || DEFAULT_FAIL_MESSAGE;
 
-      if (reservationName && RETRYABLE_CODES.includes(code)) {
-        retryLink.classList.remove('d-none');
+      if (reconfirmable) {
+        // 같은 orderId 로 재확인 (멱등)
+        setAction('다시 시도', confirmPayment);
+      } else if (reservationName && NEW_PAYMENT_CODES.includes(code)) {
+        // 새 결제를 시작해야 하는 경우만 홈의 재방문 결제 흐름으로 보낸다.
+        setAction('다시 결제하기', () => { location.href = homeHref; });
       }
       homeLink.classList.remove('d-none');
     }
 
-    try {
-      const response = await fetch('/api/reservations/' + encodeURIComponent(reservationId) + '/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (response.ok) {
+    function handleError(data) {
+      const code = data && data.code;
+      if (ALREADY_DONE_CODES.includes(code)) {
         showSuccess();
         return;
       }
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (error) {
-        data = {};
+      if (UNKNOWN_CODES.includes(code)) {
+        showPending();
+        return;
       }
-      showFailure(data);
-    } catch (error) {
-      showFailure({ code: 'NETWORK_ERROR', message: error.message });
+      showFailure(data, RECONFIRM_CODES.includes(code));
     }
+
+    async function confirmPayment() {
+      showLoading();
+      try {
+        const response = await fetch('/api/reservations/' + encodeURIComponent(reservationId) + '/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+          showSuccess();
+          return;
+        }
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (error) {
+          data = {};
+        }
+        handleError(data);
+      } catch (error) {
+        handleError({ code: 'NETWORK_ERROR', message: error.message });
+      }
+    }
+
+    confirmPayment();
   })();
 </script>
 </body>
