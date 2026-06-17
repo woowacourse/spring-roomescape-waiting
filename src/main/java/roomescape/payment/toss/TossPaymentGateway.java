@@ -45,8 +45,20 @@ public class TossPaymentGateway implements PaymentGateway {
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
-                    throw TossPaymentException.of(res.getStatusCode(), error);
+                    HttpStatusCode status = res.getStatusCode();
+                    String body = new String(res.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                    TossErrorResponse error = null;
+                    try {
+                        error = body.isBlank() ? null : objectMapper.readValue(body, TossErrorResponse.class);
+                    } catch (Exception ignored) {
+                        // 본문이 JSON이 아니면 아래 기본 예외로 떨어진다(미정의 코드 처리).
+                    }
+                    if (error == null || error.code() == null) {
+                        throw new TossPaymentException(status, "TOSS_ERROR",
+                                "토스 결제 승인 실패 (url=" + properties.confirmUrl()
+                                        + ", status=" + status.value() + ", body=" + body + ")");
+                    }
+                    throw TossPaymentException.of(status, error);
                 })
                 .body(TossPaymentResponse.class);
 
