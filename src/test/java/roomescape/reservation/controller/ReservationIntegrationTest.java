@@ -44,7 +44,7 @@ class ReservationIntegrationTest {
                 .body("size()", is(1))
                 .body("[0].id", is(1))
                 .body("[0].name", is("라이"))
-                .body("[0].status", is("RESERVED"));
+                .body("[0].status", is("CONFIRMED"));
     }
 
     @DisplayName("예약이 없는 경우 예약을 생성하면 RESERVED 상태로 저장된다.")
@@ -60,7 +60,7 @@ class ReservationIntegrationTest {
                 .statusCode(201)
                 .body("id", is(1))
                 .body("name", is("라이"))
-                .body("status", is("RESERVED"));
+                .body("status", is("CONFIRMED"));
     }
 
     @DisplayName("같은 시간대 예약이 이미 존재하는 경우 예약을 생성하면 WAITING 상태로 저장된다.")

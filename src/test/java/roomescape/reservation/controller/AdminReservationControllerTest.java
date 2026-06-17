@@ -39,7 +39,7 @@ public class AdminReservationControllerTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0), LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, null, null, LocalDateTime.now()).withId(1L);
         when(reservationService.getAll()).thenReturn(List.of(reservation));
 
         // when & then
@@ -59,7 +59,7 @@ public class AdminReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 10, 0),
                 LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, null, null, LocalDateTime.now()).withId(1L);
         Mockito.when(reservationService.create(any())).thenReturn(saved);
 
         String requestBody = """
