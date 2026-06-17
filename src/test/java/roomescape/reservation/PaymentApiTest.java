@@ -12,15 +12,25 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.global.exception.PaymentAlreadyProcessedException;
+import roomescape.global.exception.PaymentCardRejectedException;
+import roomescape.global.exception.PaymentGatewayConfigurationException;
 import roomescape.global.exception.PaymentGatewayException;
+import roomescape.global.exception.PaymentInvalidRequestException;
+import roomescape.global.exception.PaymentNotFoundException;
+import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.reservation.application.port.out.payment.PaymentGateway;
 import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.port.out.payment.PaymentStatus;
@@ -145,6 +155,73 @@ class PaymentApiTest {
             softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
             softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
         });
+    }
+
+    @DisplayName("결제 승인 애플리케이션 예외는 API 응답 상태와 errorMessage 형식을 유지합니다.")
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("paymentExceptionMappings")
+    void confirm_payment_application_exception_response(
+            RuntimeException exception,
+            int expectedStatus,
+            String expectedMessage
+    ) {
+        PaymentOrder order = preparePaymentOrder();
+        given(paymentGateway.confirm(any()))
+                .willThrow(exception);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentConfirmRequest(order))
+                .when().post("/payments/success")
+                .then().log().all()
+                .statusCode(expectedStatus)
+                .body("errorMessage", equalTo(expectedMessage))
+                .body("$", not(hasKey("code")));
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
+        });
+    }
+
+    private static Stream<Arguments> paymentExceptionMappings() {
+        return Stream.of(
+                Arguments.of(
+                        new PaymentAlreadyProcessedException(),
+                        409,
+                        "이미 승인된 결제입니다."
+                ),
+                Arguments.of(
+                        new PaymentInvalidRequestException(),
+                        422,
+                        "결제 요청이 올바르지 않거나 만료되었습니다. 다시 결제를 시도해주세요."
+                ),
+                Arguments.of(
+                        new PaymentCardRejectedException(),
+                        422,
+                        "카드 결제가 거절되었습니다. 다른 결제 수단으로 다시 시도해주세요."
+                ),
+                Arguments.of(
+                        new PaymentNotFoundException(),
+                        404,
+                        "결제 정보를 찾을 수 없습니다. 다시 결제를 시도해주세요."
+                ),
+                Arguments.of(
+                        new RetryablePaymentGatewayException(),
+                        503,
+                        "결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요."
+                ),
+                Arguments.of(
+                        new PaymentGatewayConfigurationException(),
+                        500,
+                        "결제 설정에 문제가 발생했습니다. 관리자에게 문의해주세요."
+                ),
+                Arguments.of(
+                        new PaymentGatewayException("결제 승인에 실패했습니다."),
+                        502,
+                        "결제 승인에 실패했습니다."
+                )
+        );
     }
 
     private PaymentOrder preparePaymentOrder() {
