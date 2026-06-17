@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 완료</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+            margin: 0;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        header {
+            background: #1d1d1f;
+            color: #fff;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 28px 24px 22px;
+            background: #f0fff4;
+            border-bottom: 1px solid #d8f3dc;
+        }
+
+        .label {
+            margin: 0 0 10px;
+            color: #1d6b1f;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        h2 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .panel-header p {
+            margin: 0;
+            color: #4f6f52;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .panel-body {
+            padding: 24px;
+            display: grid;
+            gap: 24px;
+        }
+
+        h3 {
+            margin: 0 0 12px;
+            font-size: 16px;
+        }
+
+        .summary-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f3;
+            font-size: 14px;
+        }
+
+        .summary-row span {
+            color: #666;
+        }
+
+        .summary-row strong,
+        .summary-row code {
+            color: #1d1d1f;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .summary-row code {
+            font-size: 12px;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .actions a {
+            display: block;
+            text-align: center;
+            padding: 13px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .primary {
+            background: #007aff;
+            color: #fff;
+        }
+
+        .secondary {
+            background: #f0f0f3;
+            color: #1d1d1f;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>방탈출 예약</h1>
+    <a href="/">메인으로</a>
+</header>
+<main>
+    <section class="panel">
+        <div class="panel-header">
+            <p class="label">예약 완료</p>
+            <h2>예약이 확정되었습니다</h2>
+            <p>결제가 정상적으로 처리되어 예약이 완료되었습니다.</p>
+        </div>
+        <div class="panel-body">
+            <section>
+                <h3>예약 정보</h3>
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <span>예약번호</span>
+                        <strong id="reservation-id">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>예약자</span>
+                        <strong id="name">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>테마</span>
+                        <strong id="theme">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>방문일</span>
+                        <strong id="date">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>방문 시간</span>
+                        <strong id="time">-</strong>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h3>결제 정보</h3>
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <span>주문명</span>
+                        <strong id="order-name">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>주문번호</span>
+                        <code id="order-id">-</code>
+                    </div>
+                    <div class="summary-row">
+                        <span>결제금액</span>
+                        <strong id="amount">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>상태</span>
+                        <strong>CONFIRMED</strong>
+                    </div>
+                </div>
+            </section>
+            <div class="actions">
+                <a class="secondary" href="/">메인으로</a>
+                <a class="primary" href="my-reservations.html">내 예약 보기</a>
+            </div>
+        </div>
+    </section>
+</main>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const PAYMENT_DRAFT_KEY = 'roomescape-payment-draft';
+    const draft = JSON.parse(sessionStorage.getItem(PAYMENT_DRAFT_KEY) || '{}');
+    const payment = draft.payment || {};
+
+    document.getElementById('reservation-id').textContent = draft.reservationId || payment.reservationId || '-';
+    document.getElementById('name').textContent = draft.name || '-';
+    document.getElementById('theme').textContent = draft.themeName || '-';
+    document.getElementById('date').textContent = draft.date || '-';
+    document.getElementById('time').textContent = draft.timeStartAt || '-';
+    document.getElementById('order-name').textContent = payment.orderName || '방탈출 예약';
+    document.getElementById('order-id').textContent = params.get('orderId') || payment.orderId || '-';
+    document.getElementById('amount').textContent = params.get('amount') || payment.amount
+            ? `${Number(params.get('amount') || payment.amount).toLocaleString()}원`
+            : '-';
+
+    sessionStorage.removeItem(PAYMENT_DRAFT_KEY);
+</script>
+</body>
+</html>

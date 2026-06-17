@@ -1,8 +1,13 @@
 package roomescape.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +23,8 @@ import roomescape.service.PaymentService;
 @Controller
 @RequestMapping("/payments")
 public class PaymentController {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
 
     private static final long DEFAULT_AMOUNT = 50_000L;
     private static final String ORDER_NAME = "방탈출 예약";
@@ -52,7 +59,9 @@ public class PaymentController {
             @RequestParam Long themeId
     ) {
         paymentService.confirm(paymentKey, orderId, amount);
-        return redirectReservation(themeId, "success");
+        return new RedirectView(
+                "/payment-success.html?themeId=%d&orderId=%s&amount=%d".formatted(themeId, orderId, amount)
+        );
     }
 
     @GetMapping("/fail")
@@ -62,13 +71,28 @@ public class PaymentController {
             @RequestParam(required = false) String orderId,
             @RequestParam Long themeId
     ) {
-        if (orderId != null) {
+        log.info(
+                "payments/fail reached. code={}, message={}, orderId={}, themeId={}",
+                code,
+                message,
+                orderId,
+                themeId
+        );
+
+        if (StringUtils.hasText(orderId)) {
             paymentService.fail(orderId);
         }
-        return redirectReservation(themeId, "fail");
+
+        String redirectUrl = "/payment-fail.html?themeId=%d&orderId=%s&paymentCode=%s&paymentMessage=%s"
+                .formatted(themeId, defaultString(orderId), defaultString(code), encode(message));
+        return new RedirectView(redirectUrl);
     }
 
-    private RedirectView redirectReservation(Long themeId, String paymentResult) {
-        return new RedirectView("/reservation.html?themeId=%d&paymentResult=%s".formatted(themeId, paymentResult));
+    private String defaultString(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(defaultString(value), StandardCharsets.UTF_8);
     }
 }

@@ -211,104 +211,6 @@
             line-height: 1.5;
         }
 
-        .complete-panel {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .complete-header {
-            padding: 28px 24px 22px;
-            background: #f0fff4;
-            border-bottom: 1px solid #d8f3dc;
-        }
-
-        .complete-label {
-            margin: 0 0 10px;
-            color: #1d6b1f;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .complete-header h2 {
-            margin: 0 0 8px;
-            font-size: 24px;
-        }
-
-        .complete-header p {
-            margin: 0;
-            color: #4f6f52;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .complete-body {
-            padding: 24px;
-            display: grid;
-            gap: 24px;
-        }
-
-        .complete-section h3 {
-            margin: 0 0 12px;
-            font-size: 16px;
-        }
-
-        .summary-list {
-            display: grid;
-            gap: 10px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f3;
-            font-size: 14px;
-        }
-
-        .summary-row span {
-            color: #666;
-        }
-
-        .summary-row strong,
-        .summary-row code {
-            color: #1d1d1f;
-            text-align: right;
-            overflow-wrap: anywhere;
-        }
-
-        .summary-row code {
-            font-size: 12px;
-        }
-
-        .complete-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .complete-actions a {
-            display: block;
-            text-align: center;
-            padding: 13px 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .complete-actions .primary {
-            background: #007aff;
-            color: #fff;
-        }
-
-        .complete-actions .secondary {
-            background: #f0f0f3;
-            color: #1d1d1f;
-        }
-
         .payment-summary {
             display: grid;
             gap: 10px;
@@ -437,73 +339,12 @@
         <button id="submit" class="submit-btn" disabled>예약하기</button>
         <p id="payment-hint" class="payment-hint"></p>
     </div>
-
-    <div id="complete-panel" class="complete-panel hidden">
-        <div class="complete-header">
-            <p class="complete-label">예약 완료</p>
-            <h2>예약이 확정되었습니다</h2>
-            <p>결제가 정상적으로 처리되어 예약이 완료되었습니다.</p>
-        </div>
-        <div class="complete-body">
-            <div class="complete-section">
-                <h3>예약 정보</h3>
-                <div class="summary-list">
-                    <div class="summary-row">
-                        <span>예약번호</span>
-                        <strong id="complete-reservation-id">-</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>예약자</span>
-                        <strong id="complete-name">-</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>테마</span>
-                        <strong id="complete-theme">-</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>방문일</span>
-                        <strong id="complete-date">-</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>방문 시간</span>
-                        <strong id="complete-time">-</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="complete-section">
-                <h3>결제 정보</h3>
-                <div class="summary-list">
-                    <div class="summary-row">
-                        <span>주문명</span>
-                        <strong id="complete-order-name">-</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>주문번호</span>
-                        <code id="complete-order-id">-</code>
-                    </div>
-                    <div class="summary-row">
-                        <span>결제금액</span>
-                        <strong id="complete-amount">-</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>상태</span>
-                        <strong>CONFIRMED</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="complete-actions">
-                <a class="secondary" href="/">메인으로</a>
-                <a class="primary" href="my-reservations.html">내 예약 보기</a>
-            </div>
-        </div>
-    </div>
 </main>
 
 <script>
     const params = new URLSearchParams(window.location.search);
     const themeId = params.get('themeId');
     const PAYMENT_DRAFT_KEY = 'roomescape-payment-draft';
-    const paymentResult = params.get('paymentResult');
 
     let selectedTimeId = null;
     let selectedTimeStatus = null;
@@ -511,8 +352,7 @@
     let paymentReady = null;
     let paymentWidgetRendered = false;
     let paymentWidgetRendering = null;
-    let paymentAuthenticated = paymentResult === 'success';
-    let paymentRestored = false;
+    let paymentAuthenticated = false;
     let currentTheme = null;
 
     if (!themeId) {
@@ -553,9 +393,8 @@
     function setupDateInput() {
         const input = document.getElementById('date-input');
         const today = formatLocalDate(new Date());
-        const draft = paymentResult ? getPaymentDraft() : null;
         input.min = today;
-        input.value = draft?.date || today;
+        input.value = today;
         input.addEventListener('change', loadAvailableTimes);
         loadAvailableTimes();
     }
@@ -628,7 +467,6 @@
             container.querySelectorAll('.time-btn').forEach(btn => {
                 btn.addEventListener('click', () => selectTime(btn));
             });
-            restorePaymentState();
         } catch (e) {
             container.innerHTML = '<p class="error">예약 가능 시간을 불러오지 못했습니다.</p>';
         }
@@ -742,11 +580,6 @@
             return paymentReady;
         }
 
-        const draft = paymentResult ? getPaymentDraft() : null;
-        if (draft?.payment) {
-            return draft.payment;
-        }
-
         const reservationId = await createPendingReservation();
         const response = await fetch(`/payments/ready?reservationId=${reservationId}`, {method: 'POST'});
         if (!response.ok) {
@@ -821,9 +654,18 @@
                 failUrl: paymentReturnUrl('fail')
             });
         } catch (error) {
-            if (error.code !== 'USER_CANCEL') {
-                hint.textContent = `결제 요청 실패: ${error.message}`;
+            if (error.code === 'USER_CANCEL') {
+                const failUrl = new URL(paymentReturnUrl('fail'));
+                failUrl.searchParams.set('code', error.code);
+                failUrl.searchParams.set('message', error.message || '사용자가 결제를 취소했습니다.');
+                if (paymentReady?.orderId) {
+                    failUrl.searchParams.set('orderId', paymentReady.orderId);
+                }
+                window.location.href = failUrl.toString();
+                return;
             }
+
+            hint.textContent = `결제 요청 실패: ${error.message}`;
             payButton.disabled = false;
         }
     }
@@ -856,67 +698,6 @@
         const url = new URL(`/payments/${result}`, origin);
         url.searchParams.set('themeId', themeId);
         return url.toString();
-    }
-
-    function restorePaymentState() {
-        if (paymentRestored || !paymentResult) {
-            return;
-        }
-
-        paymentRestored = true;
-        const draft = getPaymentDraft();
-        const result = document.getElementById('result');
-        if (!draft) {
-            result.innerHTML = '<p class="error">이전 예약 정보를 복원하지 못했습니다. 다시 선택해 주세요.</p>';
-            return;
-        }
-
-        const nameInput = document.getElementById('name-input');
-        nameInput.value = draft.name;
-
-        const timeButton = document.querySelector(`.time-btn[data-id="${draft.timeId}"]`);
-        if (!timeButton) {
-            result.innerHTML = '<p class="error">이전 예약 시간을 복원하지 못했습니다. 다시 선택해 주세요.</p>';
-            return;
-        }
-
-        selectTime(timeButton);
-        paymentReady = draft.payment;
-        renderPaymentSummary(paymentReady);
-        validateForm();
-
-        if (paymentResult === 'success') {
-            paymentAuthenticated = true;
-            renderCompletePanel(draft);
-            sessionStorage.removeItem(PAYMENT_DRAFT_KEY);
-        }
-
-        if (paymentResult === 'fail') {
-            paymentAuthenticated = false;
-            document.getElementById('payment-step').classList.remove('hidden');
-            document.getElementById('pay-button').classList.remove('hidden');
-            document.getElementById('pay-button').disabled = false;
-            document.getElementById('payment-hint').textContent = '결제에 실패했습니다. 결제창 열기를 눌러 다시 시도할 수 있습니다.';
-            result.innerHTML = '<p class="error">결제에 실패했습니다. 다시 결제해 주세요.</p>';
-            validateForm();
-        }
-    }
-
-    function renderCompletePanel(draft) {
-        document.querySelectorAll('.step').forEach(step => step.classList.add('hidden'));
-        document.getElementById('complete-panel').classList.remove('hidden');
-
-        const payment = draft.payment || {};
-        document.getElementById('complete-reservation-id').textContent = draft.reservationId || '-';
-        document.getElementById('complete-name').textContent = draft.name || '-';
-        document.getElementById('complete-theme').textContent = draft.themeName || currentTheme?.name || '-';
-        document.getElementById('complete-date').textContent = draft.date || '-';
-        document.getElementById('complete-time').textContent = draft.timeStartAt || selectedTimeText() || '-';
-        document.getElementById('complete-order-name').textContent = payment.orderName || '-';
-        document.getElementById('complete-order-id').textContent = payment.orderId || '-';
-        document.getElementById('complete-amount').textContent = payment.amount
-                ? `${Number(payment.amount).toLocaleString()}원`
-                : '-';
     }
 
     function selectedTimeText() {
