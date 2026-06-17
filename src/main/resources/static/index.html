@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Roomflow | 방탈출 예약</title>
     <link rel="stylesheet" href="/css/roomescape.css">
-    <script src="https://js.tosspayments.com/v1/payment"></script>
-    <script defer src="/js/roomescape.js"></script>
+    <script defer src="/js/roomescape.js?v=checkout-template"></script>
 </head>
 <body data-page="home">
 <header class="site-header">
@@ -38,7 +37,7 @@
     </section>
 
     <section id="reservation-panel" class="booking-grid" aria-label="예약 신청">
-        <form id="reservationForm" class="booking-panel">
+        <form id="reservationForm" class="booking-panel" method="post" action="/payments/checkout">
             <div class="section-heading compact">
                 <p class="eyebrow">BOOKING</p>
                 <h2>예약 신청</h2>
@@ -61,6 +60,7 @@
             </div>
 
             <div class="selected-slot" id="selectedSlot">시간을 선택해 주세요.</div>
+            <input id="selectedTimeId" name="timeId" type="hidden" required>
 
             <button id="submitReservation" class="button primary wide" type="submit" disabled>예약 신청</button>
         </form>

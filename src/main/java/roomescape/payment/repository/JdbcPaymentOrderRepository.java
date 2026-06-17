@@ -14,7 +14,6 @@ import roomescape.payment.domain.PaymentOrderStatus;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -119,31 +118,6 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         return jdbcTemplate.query(sql, paymentOrderRowMapper, orderId)
                 .stream()
                 .findFirst();
-    }
-
-    @Override
-    public boolean existsReadyOrder(String name, LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM payment_order
-                    WHERE name = ?
-                      AND date = ?
-                      AND time_id = ?
-                      AND theme_id = ?
-                      AND status = ?
-                )
-                """;
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                name,
-                date,
-                timeId,
-                themeId,
-                PaymentOrderStatus.READY.name()
-        ));
     }
 
     private int insert(PaymentOrder paymentOrder, KeyHolder keyHolder) {

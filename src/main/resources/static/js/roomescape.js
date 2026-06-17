@@ -264,7 +264,7 @@ function updateSelectedSlot() {
     submit.disabled = false;
 }
 
-async function createReservation(event) {
+function createReservation(event) {
     event.preventDefault();
 
     const name = $("#guestName").value.trim();
@@ -277,36 +277,15 @@ async function createReservation(event) {
         return;
     }
 
-    try {
-        const paymentOrder = await api("/payments/orders", {
-            method: "POST",
-            body: JSON.stringify({ name, date, timeId, themeId })
-        });
-        localStorage.setItem("roomflow.name", name);
-        showToast("결제창으로 이동합니다.");
-        await requestTossPayment(paymentOrder);
-    } catch (error) {
-        showToast(error.message, "error");
-    }
-}
-
-async function requestTossPayment(paymentOrder) {
-    if (!paymentOrder.clientKey) {
-        throw new Error("Toss Payments 클라이언트 키가 설정되지 않았습니다.");
-    }
-    if (!window.TossPayments) {
-        throw new Error("Toss Payments 결제창을 불러오지 못했습니다.");
+    $("#selectedTimeId").value = timeId;
+    if (!name || !date || !themeId) {
+        showToast("예약 정보를 입력해 주세요.", "error");
+        return;
     }
 
-    const tossPayments = TossPayments(paymentOrder.clientKey);
-    await tossPayments.requestPayment("카드", {
-        amount: paymentOrder.amount,
-        orderId: paymentOrder.orderId,
-        orderName: paymentOrder.orderName,
-        customerName: paymentOrder.customerName,
-        successUrl: `${window.location.origin}/payment-success.html`,
-        failUrl: `${window.location.origin}/payment-fail.html`
-    });
+    localStorage.setItem("roomflow.name", name);
+    showToast("결제 주문서를 준비합니다.");
+    event.target.submit();
 }
 
 async function initPaymentSuccess() {

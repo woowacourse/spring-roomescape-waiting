@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -211,18 +212,46 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("같은 예약 정보로 결제 대기 주문이 있으면 새 주문을 만들지 않는다.")
-    void prepare_fail_whenReadyOrderAlreadyExists() {
+    @DisplayName("같은 예약 정보로 결제 대기 주문이 있어도 새 결제 시도를 만들 수 있다.")
+    void prepare_success_whenReadyOrderAlreadyExists() {
         ReservationTime time = saveReservationTime(10);
         Theme theme = saveTheme();
-        paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+        PaymentReadyOrder firstOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
 
-        assertThatThrownBy(() -> paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId()))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("이미 결제 대기 중인 예약 요청이 있습니다.");
+        PaymentReadyOrder secondOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
 
-        assertThat(countAllPaymentOrders()).isEqualTo(1);
+        assertThat(secondOrder.orderId()).isNotEqualTo(firstOrder.orderId());
+        assertThat(countAllPaymentOrders()).isEqualTo(2);
         assertThat(countAllReservations()).isZero();
+    }
+
+    @Test
+    @DisplayName("이미 확정된 같은 예약이 있으면 결제 승인 API를 호출하지 않는다.")
+    void confirm_fail_whenSameReservationAlreadyConfirmedDoesNotCallGatewayAgain() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder firstOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+        PaymentReadyOrder secondOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenAnswer(invocation -> {
+                    PaymentConfirmation confirmation = invocation.getArgument(0);
+                    return new PaymentResult(
+                            confirmation.paymentKey(),
+                            confirmation.orderId(),
+                            confirmation.amount()
+                    );
+                });
+        paymentService.confirm("payment-key-123", firstOrder.orderId(), firstOrder.amount());
+        clearInvocations(paymentGateway);
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key-456", secondOrder.orderId(), secondOrder.amount()))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
+
+        verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        assertThat(countAllPaymentOrders()).isEqualTo(2);
+        assertThat(countAllReservations()).isEqualTo(1);
     }
 
     @Test
@@ -333,4 +362,5 @@ class PaymentServiceTest {
     private Integer countAllPaymentOrders() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM payment_order", Integer.class);
     }
+
 }

@@ -2,7 +2,6 @@ package roomescape.payment.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.ConflictException;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
@@ -46,10 +45,6 @@ public class PaymentService {
     public PaymentReadyOrder prepare(String name, LocalDate date, Long timeId, Long themeId) {
         reservationService.validateCreatable(name, date, timeId, themeId);
 
-        if (paymentOrderRepository.existsReadyOrder(name, date, timeId, themeId)) {
-            throw new ConflictException("이미 결제 대기 중인 예약 요청이 있습니다.");
-        }
-
         PaymentOrder paymentOrder = PaymentOrder.ready(
                 generateOrderId(),
                 paymentProperties.reservationAmount(),
@@ -76,6 +71,13 @@ public class PaymentService {
         if (!paymentOrder.isReady()) {
             throw new PaymentInvalidRequestException("결제 대기 중인 주문이 아닙니다.");
         }
+
+        reservationService.validateCreatable(
+                paymentOrder.getName(),
+                paymentOrder.getDate(),
+                paymentOrder.getTimeId(),
+                paymentOrder.getThemeId()
+        );
 
         PaymentResult paymentResult;
         try {
