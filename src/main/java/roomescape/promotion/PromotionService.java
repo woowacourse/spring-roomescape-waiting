@@ -1,11 +1,11 @@
-package roomescape.domain.promotion;
+package roomescape.promotion;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.PromotionOutboxDao;
+import roomescape.promotion.PromotionOutboxDao;
 import roomescape.reservation.ReservationDao;
 import roomescape.waiting.WaitingDao;
 import roomescape.common.vo.Slot;

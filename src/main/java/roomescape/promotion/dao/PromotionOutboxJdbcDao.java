@@ -1,4 +1,4 @@
-package roomescape.dao.jdbc;
+package roomescape.promotion.dao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,9 +9,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.dao.PromotionOutboxDao;
-import roomescape.domain.promotion.OutboxStatus;
-import roomescape.domain.promotion.PromotionTask;
+import roomescape.promotion.PromotionOutboxDao;
+import roomescape.promotion.OutboxStatus;
+import roomescape.promotion.PromotionTask;
 
 @Repository
 public class PromotionOutboxJdbcDao implements PromotionOutboxDao {

@@ -25,14 +25,14 @@ import roomescape.theme.ThemeDao;
 import roomescape.time.TimeDao;
 import roomescape.waiting.WaitingDao;
 import roomescape.member.dao.MemberJdbcDao;
-import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
+import roomescape.promotion.dao.PromotionOutboxJdbcDao;
 import roomescape.reservation.dao.ReservationJdbcDao;
 import roomescape.store.dao.StoreJdbcDao;
 import roomescape.theme.dao.ThemeJdbcDao;
 import roomescape.time.dao.TimeJdbcDao;
 import roomescape.waiting.dao.WaitingJdbcDao;
 import roomescape.member.Member;
-import roomescape.domain.promotion.PromotionService;
+import roomescape.promotion.PromotionService;
 import roomescape.reservation.AdminReservationService;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationCreator;
@@ -46,7 +46,7 @@ import roomescape.waiting.WaitingService;
 import roomescape.reservation.web.AdminReservationRequestDto;
 import roomescape.reservation.web.ReservationPatchDto;
 import roomescape.waiting.web.WaitingRequestDto;
-import roomescape.dto.response.PageResponse;
+import roomescape.common.PageResponse;
 import roomescape.worker.PromotionOutboxWorker;
 
 @JdbcTest

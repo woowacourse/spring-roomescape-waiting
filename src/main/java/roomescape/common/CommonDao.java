@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.common;
 
 import java.util.List;
 import java.util.Optional;

@@ -2,7 +2,7 @@ package roomescape.theme;
 
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.dao.CommonDao;
+import roomescape.common.CommonDao;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeReservationCount;
 import roomescape.common.vo.Name;

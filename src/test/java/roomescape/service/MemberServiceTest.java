@@ -18,7 +18,7 @@ import roomescape.config.PasswordConfig;
 import roomescape.member.dao.MemberJdbcDao;
 import roomescape.member.Member;
 import roomescape.member.MemberService;
-import roomescape.dto.request.LoginRequestDto;
+import roomescape.member.web.LoginRequestDto;
 
 @JdbcTest
 @Import({MemberService.class, MemberJdbcDao.class, PasswordConfig.class})

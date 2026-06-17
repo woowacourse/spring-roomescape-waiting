@@ -1,4 +1,4 @@
-package roomescape.dto.response;
+package roomescape.common;
 
 import java.util.List;
 import java.util.function.Function;

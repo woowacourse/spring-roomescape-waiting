@@ -1,4 +1,4 @@
-package roomescape.domain.promotion;
+package roomescape.promotion;
 
 public enum OutboxStatus {
     PENDING,

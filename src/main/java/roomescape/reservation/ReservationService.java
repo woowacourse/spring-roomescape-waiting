@@ -13,7 +13,7 @@ import roomescape.time.TimeDao;
 import roomescape.member.Member;
 import roomescape.payment.Order;
 import roomescape.payment.PaymentService;
-import roomescape.domain.promotion.PromotionService;
+import roomescape.promotion.PromotionService;
 import roomescape.time.Time;
 import roomescape.reservation.web.ReservationPatchDto;
 import roomescape.reservation.web.ReservationRequestDto;

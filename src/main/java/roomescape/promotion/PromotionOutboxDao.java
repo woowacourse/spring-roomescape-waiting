@@ -1,8 +1,8 @@
-package roomescape.dao;
+package roomescape.promotion;
 
 import java.util.List;
-import roomescape.domain.promotion.OutboxStatus;
-import roomescape.domain.promotion.PromotionTask;
+import roomescape.promotion.OutboxStatus;
+import roomescape.promotion.PromotionTask;
 
 public interface PromotionOutboxDao {
 

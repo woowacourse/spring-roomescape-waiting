@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.auth.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
-import roomescape.dto.request.LoginRequestDto;
-import roomescape.dto.request.SignupRequestDto;
+import roomescape.member.web.LoginRequestDto;
+import roomescape.member.web.SignupRequestDto;
 import roomescape.member.web.MemberResponseDto;
 import roomescape.member.MemberService;
 

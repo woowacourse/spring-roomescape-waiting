@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import roomescape.domain.promotion.PromotionService;
-import roomescape.domain.promotion.PromotionTask;
+import roomescape.promotion.PromotionService;
+import roomescape.promotion.PromotionTask;
 
 /**
  * 아웃박스 워커. 이벤트 기반(push)이 아니라 시간 기반(polling)으로, 일정 간격마다 깨어나

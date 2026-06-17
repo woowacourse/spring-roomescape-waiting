@@ -1,4 +1,4 @@
-package roomescape.domain.promotion;
+package roomescape.promotion;
 
 import java.time.LocalDate;
 import roomescape.common.DomainAssert;
