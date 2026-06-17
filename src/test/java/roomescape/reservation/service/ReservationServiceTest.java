@@ -21,6 +21,7 @@ import roomescape.global.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -78,7 +79,7 @@ class ReservationServiceTest {
     @DisplayName("본인 예약의 날짜와 시간을 변경합니다.")
     @Test
     void update_reservation() {
-        ReservationDetail detail = new ReservationDetail(1L, "스타크", LocalDate.of(2026, 5, 6), 1L, "theme name", "theme description", "theme img url", 1L, LocalTime.of(10, 0));
+        ReservationDetail detail = new ReservationDetail(1L, "스타크", LocalDate.of(2026, 5, 6), 1L, "theme name", "theme description", "theme img url", 1L, LocalTime.of(10, 0), ReservationStatus.CONFIRMED, 30000L);
         Reservation updated = Reservation.builder().id(1L).name("스타크").date(LocalDate.of(2026, 5, 7)).themeId(1L).timeId(2L).build();
 
         when(reservationRepository.findDetailById(1L)).thenReturn(Optional.of(detail));
@@ -100,7 +101,7 @@ class ReservationServiceTest {
     @DisplayName("본인 이름이 아닌 경우 예약 변경 시 예외가 발생합니다.")
     @Test
     void update_other_users_reservation() {
-        ReservationDetail detail = new ReservationDetail(1L, "스타크", LocalDate.of(2026, 5, 6), 1L, "theme name", "theme description", "theme img url", 1L, LocalTime.of(10, 0));
+        ReservationDetail detail = new ReservationDetail(1L, "스타크", LocalDate.of(2026, 5, 6), 1L, "theme name", "theme description", "theme img url", 1L, LocalTime.of(10, 0), ReservationStatus.CONFIRMED, 30000L);
 
         when(reservationRepository.findDetailById(1L)).thenReturn(Optional.of(detail));
 
@@ -114,7 +115,7 @@ class ReservationServiceTest {
     @DisplayName("지난 예약은 취소할 수 없습니다.")
     @Test
     void cancel_past_reservation() {
-        ReservationDetail detail = new ReservationDetail(1L, "스타크", LocalDate.of(2026, 5, 6), 1L, "theme name", "theme description", "theme img url", 1L, LocalTime.of(10, 0));
+        ReservationDetail detail = new ReservationDetail(1L, "스타크", LocalDate.of(2026, 5, 6), 1L, "theme name", "theme description", "theme img url", 1L, LocalTime.of(10, 0), ReservationStatus.CONFIRMED, 30000L);
 
         when(reservationRepository.findDetailById(1L)).thenReturn(Optional.of(detail));
 

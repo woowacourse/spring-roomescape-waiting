@@ -31,8 +31,8 @@ class ThemeControllerTest {
     @Test
     void find_all_themes() throws Exception {
         given(themeService.findAll()).willReturn(List.of(
-                new ThemeResponse(1L, "theme 1", "description 1", "img 1"),
-                new ThemeResponse(2L, "theme 2", "description 2", "img 2")
+                new ThemeResponse(1L, "theme 1", "description 1", "img 1", 30000L),
+                new ThemeResponse(2L, "theme 2", "description 2", "img 2", 30000L)
         ));
 
         mockMvc.perform(get("/themes"))
@@ -47,8 +47,8 @@ class ThemeControllerTest {
     @Test
     void find_popular_themes() throws Exception {
         given(themeService.findPopularThemes(any(), any(), anyInt())).willReturn(List.of(
-                new ThemeResponse(1L, "theme 1", "description 1", "img 1"),
-                new ThemeResponse(2L, "theme 2", "description 2", "img 2")
+                new ThemeResponse(1L, "theme 1", "description 1", "img 1", 30000L),
+                new ThemeResponse(2L, "theme 2", "description 2", "img 2", 30000L)
         ));
 
         mockMvc.perform(get("/themes/popular")

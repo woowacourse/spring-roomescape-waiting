@@ -46,6 +46,7 @@ class JdbcReservationTimeRepositoryTest {
                 .name("theme name")
                 .description("theme description")
                 .thumbnailImgUrl("theme img url")
+                .price(30000L)
                 .build());
 
         List<AvailableReservationTime> times = timeRepository

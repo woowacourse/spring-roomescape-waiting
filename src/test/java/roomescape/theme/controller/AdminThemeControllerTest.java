@@ -34,7 +34,7 @@ class AdminThemeControllerTest {
     @Test
     void create_theme() throws Exception {
         given(themeService.save(any()))
-                .willReturn(new ThemeResponse(1L, "theme", "description", "img"));
+                .willReturn(new ThemeResponse(1L, "theme", "description", "img", 30000L));
 
         mockMvc.perform(post("/admin/themes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -42,7 +42,8 @@ class AdminThemeControllerTest {
                                 {
                                   "name": "theme",
                                   "description": "description",
-                                  "thumbnailImgUrl": "img"
+                                  "thumbnailImgUrl": "img",
+                                  "price": 30000
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -59,7 +60,8 @@ class AdminThemeControllerTest {
                                 {
                                   "name": "",
                                   "description": "description",
-                                  "thumbnailImgUrl": "img"
+                                  "thumbnailImgUrl": "img",
+                                  "price": 30000
                                 }
                                 """))
                 .andExpect(status().isBadRequest())

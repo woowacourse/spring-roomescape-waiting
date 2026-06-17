@@ -26,7 +26,8 @@ public class RepositoryTestHelper {
         return themeInsert.executeAndReturnKey(Map.of(
                 "name", name,
                 "description", description,
-                "thumbnail_img_url", thumbnailImgUrl
+                "thumbnail_img_url", thumbnailImgUrl,
+                "price", 30000L
         )).longValue();
     }
 
