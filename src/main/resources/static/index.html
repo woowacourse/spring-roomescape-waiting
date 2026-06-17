@@ -517,8 +517,8 @@
             orderId: paymentReservation.orderId,
             orderName,
             customerName: tokenInfo()?.username || tokenInfo()?.sub,
-            successUrl: `${baseUrl}/payments/success`,
-            failUrl: `${baseUrl}/payments/fail`,
+            successUrl: `${baseUrl}/payment-success.html`,
+            failUrl: `${baseUrl}/payment-fail.html`,
         });
     }
 
