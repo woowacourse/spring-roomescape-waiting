@@ -19,7 +19,6 @@ import roomescape.controller.dto.MyReservationResponse;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.ReservationUpdateRequest;
-import roomescape.service.OrderService;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.ReservationResult;
 
@@ -27,21 +26,17 @@ import roomescape.service.dto.ReservationResult;
 @RestController
 @RequestMapping("/user/reservations")
 public class UserReservationController {
-    private static final long DEFAULT_AMOUNT = 50_000L;
 
     private final ReservationService reservationService;
-    private final OrderService orderService;
 
-    public UserReservationController(ReservationService reservationService, OrderService orderService) {
+    public UserReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.orderService = orderService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse create(@RequestBody @Valid ReservationRequest request) {
         ReservationResult saved = reservationService.create(request.toCommand());
-        orderService.create(DEFAULT_AMOUNT);
         return ReservationResponse.from(saved);
     }
 

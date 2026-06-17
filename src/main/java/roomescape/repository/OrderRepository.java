@@ -15,7 +15,6 @@ public class OrderRepository {
 
     public void save(Order order) {
         store.put(order.getOrderId(), order);
-        System.out.println(store);
     }
 
     public Order getByOrderId(String orderId) {
