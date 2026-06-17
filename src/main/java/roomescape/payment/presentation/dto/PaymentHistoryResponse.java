@@ -1,6 +1,5 @@
 package roomescape.payment.presentation.dto;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.Builder;
 import roomescape.payment.application.dto.OrderInfo;
