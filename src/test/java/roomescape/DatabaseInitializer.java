@@ -14,6 +14,7 @@ public class DatabaseInitializer {
 
     public void clear() {
         jdbcTemplate.update("SET REFERENTIAL_INTEGRITY FALSE");
+        jdbcTemplate.update("TRUNCATE TABLE payment_order");
         jdbcTemplate.update("TRUNCATE TABLE reservation");
         jdbcTemplate.update("TRUNCATE TABLE reservation_waiting");
         jdbcTemplate.update("TRUNCATE TABLE reservation_slot");
