@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -57,12 +58,12 @@ public class JdbcPaymentRepository implements PaymentRepository {
     }
 
     @Override
-    public Payment findByOrderId(String orderId) {
+    public Optional<Payment> findByOrderId(String orderId) {
         String sql = "SELECT id, reservation_id, order_id, amount, payment_key FROM payment WHERE order_id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, paymentRowMapper, orderId);
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, paymentRowMapper, orderId));
         } catch (EmptyResultDataAccessException e) {
-            throw new ResourceNotFoundException("주문을 찾을 수 없습니다: orderId=" + orderId);
+            return Optional.empty();
         }
     }
 
@@ -75,5 +76,10 @@ public class JdbcPaymentRepository implements PaymentRepository {
         if (affectedRows == 0) {
             throw new ResourceNotFoundException("주문을 찾을 수 없습니다: orderId=" + orderId);
         }
+    }
+
+    @Override
+    public void deleteByOrderId(String orderId) {
+        jdbcTemplate.update("DELETE FROM payment WHERE order_id = ?", orderId);
     }
 }

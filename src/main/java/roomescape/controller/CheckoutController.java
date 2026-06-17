@@ -83,6 +83,9 @@ public class CheckoutController {
             Model model
     ) {
         // 사용자 취소 시 orderId 가 없을 수 있다.
+        if (orderId != null) {
+            paymentService.cancelOrder(orderId);
+        }
         return failView(model, code, message, orderId);
     }
 
