@@ -8,6 +8,7 @@ public class Order {
     private final String orderId;
     private final Long amount;
     private final Long reservationId;
+    private String paymentKey;
 
     public Order(String orderId, Long amount, Long reservationId) {
         this.orderId = orderId;
@@ -25,5 +26,13 @@ public class Order {
 
     public Long getReservationId() {
         return reservationId;
+    }
+
+    public void confirm(String paymentKey) {
+        this.paymentKey = paymentKey;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
     }
 }

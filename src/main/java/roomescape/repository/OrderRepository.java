@@ -25,4 +25,7 @@ public class OrderRepository {
         return order;
     }
 
+    public void confirm(String orderId, String paymentKey) {
+        getByOrderId(orderId).confirm(paymentKey);
+    }
 }

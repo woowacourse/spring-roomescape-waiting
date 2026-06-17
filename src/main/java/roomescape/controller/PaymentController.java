@@ -3,17 +3,17 @@ package roomescape.controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.view.RedirectView;
 import roomescape.controller.dto.PaymentReadyResponse;
 import roomescape.domain.Order;
 import roomescape.service.OrderService;
-import roomescape.service.ReservationService;
+import roomescape.service.PaymentService;
 
 @Controller
 @RequestMapping("/payments")
@@ -23,16 +23,16 @@ public class PaymentController {
     private static final String ORDER_NAME = "방탈출 예약";
 
     private final OrderService orderService;
-    private final ReservationService reservationService;
+    private final PaymentService paymentService;
     private final String clientKey;
 
     public PaymentController(
             OrderService orderService,
-            ReservationService reservationService,
+            PaymentService paymentService,
             @Value("${toss.client-key:}") String clientKey
     ) {
         this.orderService = orderService;
-        this.reservationService = reservationService;
+        this.paymentService = paymentService;
         this.clientKey = clientKey;
     }
 
@@ -51,8 +51,7 @@ public class PaymentController {
             @RequestParam Long amount,
             @RequestParam Long themeId
     ) {
-        orderService.validateAmount(orderId, amount);
-        reservationService.confirm(orderService.findReservationId(orderId));
+        paymentService.confirm(paymentKey, orderId, amount);
         return redirectReservation(themeId, "success");
     }
 
@@ -64,7 +63,7 @@ public class PaymentController {
             @RequestParam Long themeId
     ) {
         if (orderId != null) {
-            reservationService.fail(orderService.findReservationId(orderId));
+            paymentService.fail(orderId);
         }
         return redirectReservation(themeId, "fail");
     }

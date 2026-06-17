@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
@@ -124,16 +123,6 @@ public class ReservationService {
 
         reservationRepository.updateDateAndTime(command.getId(), command.getDate(), command.getTimeId());
         return ReservationResult.from(findUpdatedReservationOrThrow(command.getId()));
-    }
-
-    public void confirm(Long id) {
-        findByIdOrThrow(id);
-        reservationRepository.updateStatus(id, ReservationStatus.CONFIRMED);
-    }
-
-    public void fail(Long id) {
-        findByIdOrThrow(id);
-        reservationRepository.updateStatus(id, ReservationStatus.FAILED);
     }
 
     private ReservationTime findTimeOrThrow(Long timeId) {
