@@ -1,9 +1,9 @@
-package roomescape.dao;
+package roomescape.payment;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.payment.Order;
+import roomescape.payment.Order;
 
 public interface OrderDao {
     Order insert(Order order);

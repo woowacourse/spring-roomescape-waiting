@@ -11,8 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import roomescape.domain.payment.PaymentConfirmation;
-import roomescape.domain.payment.PaymentResult;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentResult;
 
 /**
  * 실제 토스 샌드박스 API를 호출하는 통합 테스트. 외부 호출이라 환경변수 RUN_REAL_API=true 일 때만 실행된다.

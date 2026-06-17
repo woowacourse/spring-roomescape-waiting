@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import roomescape.domain.payment.PaymentConfirmation;
-import roomescape.domain.payment.PaymentGateway;
-import roomescape.domain.payment.PaymentResult;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
 
 /**
  * 토스 결제 승인 어댑터(부패 방지 계층). 토스 요청·응답·에러 *포맷(DTO)*은 이 클래스 밖으로 새지 않는다.

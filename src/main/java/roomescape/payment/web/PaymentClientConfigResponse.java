@@ -1,4 +1,4 @@
-package roomescape.dto.response;
+package roomescape.payment.web;
 
 public record PaymentClientConfigResponse(String clientKey) {
 }

@@ -19,9 +19,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import roomescape.domain.payment.PaymentConfirmation;
-import roomescape.domain.payment.PaymentGateway;
-import roomescape.domain.payment.PaymentResult;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
 import roomescape.payment.toss.TossPaymentException;
 
 class PaymentControllerE2ETest extends BaseE2ETest {

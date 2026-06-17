@@ -1,4 +1,4 @@
-package roomescape.domain.payment;
+package roomescape.payment;
 
 /**
  * 결제 승인 포트. PaymentService가 의존하는 유일한 결제 추상이며, 토스를 모른다.

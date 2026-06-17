@@ -1,4 +1,4 @@
-package roomescape.domain.payment;
+package roomescape.payment;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.OrderDao;
+import roomescape.payment.OrderDao;
 import roomescape.reservation.ReservationDao;
 import roomescape.member.Member;
 import roomescape.reservation.Reservation;

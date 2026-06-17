@@ -8,8 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.PaymentAmountMismatchException;
-import roomescape.domain.payment.Order;
-import roomescape.domain.payment.OrderStatus;
+import roomescape.payment.Order;
+import roomescape.payment.OrderStatus;
 
 class OrderTest {
 

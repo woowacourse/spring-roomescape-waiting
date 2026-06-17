@@ -1,4 +1,4 @@
-package roomescape.controller.user;
+package roomescape.payment.web;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
-import roomescape.domain.payment.PaymentService;
-import roomescape.dto.request.PaymentConfirmRequestDto;
-import roomescape.dto.request.PaymentFailRequestDto;
-import roomescape.dto.response.PaymentClientConfigResponse;
+import roomescape.payment.PaymentService;
+import roomescape.payment.web.PaymentConfirmRequestDto;
+import roomescape.payment.web.PaymentFailRequestDto;
+import roomescape.payment.web.PaymentClientConfigResponse;
 
 @RestController
 @RequestMapping("/payments")

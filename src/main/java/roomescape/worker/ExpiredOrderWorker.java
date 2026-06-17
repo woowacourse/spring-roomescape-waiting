@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import roomescape.domain.payment.PaymentService;
+import roomescape.payment.PaymentService;
 
 /**
  * 결제 미완료(abandonment) 정리 스케줄러. 손님이 결제창을 닫아 success/fail 신호가 안 와도,

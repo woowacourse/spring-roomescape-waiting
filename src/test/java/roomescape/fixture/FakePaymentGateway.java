@@ -1,8 +1,8 @@
 package roomescape.fixture;
 
-import roomescape.domain.payment.PaymentConfirmation;
-import roomescape.domain.payment.PaymentGateway;
-import roomescape.domain.payment.PaymentResult;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
 
 /**
  * 테스트용 결제 게이트웨이 더블. 외부 토스 호출 없이 항상 성공 응답을 돌려준다.

@@ -19,8 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import roomescape.domain.payment.PaymentConfirmation;
-import roomescape.domain.payment.PaymentResult;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentResult;
 
 /**
  * 토스 승인 어댑터를 가짜 HTTP 서버(MockWebServer)로 검증한다.
