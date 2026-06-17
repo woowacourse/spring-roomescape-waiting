@@ -16,7 +16,8 @@ spring:
 toss:
   client-key: ${TOSS_CLIENT_KEY:test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm}
   secret-key: ${TOSS_SECRET_KEY:}
-  confirm-url: ${TOSS_CONFIRM_URL:https://api.tosspayments.com/v1/payments/confirm}
+  base-url: ${TOSS_BASE_URL:https://api.tosspayments.com}
+  confirm-url: ${TOSS_CONFIRM_URL:/v1/payments/confirm}
 
 # 결제 미완료(abandonment) 정리 스케줄러.
 # ttl-minutes: 이 시간이 지난 PENDING 주문을 정리(결제창 유효시간보다 길게 — 진행 중 결제 보호).

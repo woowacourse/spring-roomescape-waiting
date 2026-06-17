@@ -7,5 +7,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * clientKey는 공개(프론트 위젯)지만, secretKey는 서버 승인 전용 비밀이다.
  */
 @ConfigurationProperties(prefix = "toss")
-public record TossProperties(String clientKey, String secretKey, String confirmUrl) {
+public record TossProperties(String clientKey, String secretKey, String baseUrl, String confirmUrl) {
 }
