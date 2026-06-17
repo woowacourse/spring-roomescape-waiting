@@ -22,8 +22,6 @@ import roomescape.repository.WaitlistRepository;
 
 @DataJpaTest
 @Import({
-    JdbcReservationRepository.class,
-    JdbcSlotRepository.class,
     JdbcWaitlistRepository.class
 })
 class JdbcWaitlistRepositoryTest {

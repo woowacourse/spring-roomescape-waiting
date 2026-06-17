@@ -383,7 +383,7 @@ class ReservationServiceTest {
             FIXED_TODAY,
             pastTime,
             theme
-        ));
+        )).getId();
 
         assertThatThrownBy(() -> reservationService.cancelMyReservation(reservationId, name))
             .isInstanceOf(RoomEscapeException.class);

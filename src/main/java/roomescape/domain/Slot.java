@@ -1,20 +1,45 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(
+    name = "slot",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
+)
 public class Slot {
 
-    private final Long id;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
 
     private Slot(Long id, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    protected Slot() {
+
     }
 
     public static Slot of(LocalDate date, ReservationTime time, Theme theme) {

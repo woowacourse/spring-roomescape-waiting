@@ -23,8 +23,6 @@ import roomescape.repository.ThemeRepository;
 
 @DataJpaTest
 @Import({
-    JdbcReservationRepository.class,
-    JdbcSlotRepository.class,
     TestClockConfig.class
 })
 class JdbcReservationRepositoryTest {
@@ -52,7 +50,7 @@ class JdbcReservationRepositoryTest {
         Theme theme = createTheme();
 
         Long saveId = reservationRepository.save(createReservation(
-            "브라운", FUTURE_THIRD_DATE, reservationTime, theme));
+            "브라운", FUTURE_THIRD_DATE, reservationTime, theme)).getId();
 
         Optional<Reservation> reservation = reservationRepository.findById(saveId);
 
@@ -98,7 +96,7 @@ class JdbcReservationRepositoryTest {
         reservationRepository.save(createReservation(
             "브라운", FUTURE_THIRD_DATE, twelveClock, theme));
         Long findId = reservationRepository.save(createReservation(
-            "브리", FUTURE_THIRD_DATE, tenClock, theme));
+            "브리", FUTURE_THIRD_DATE, tenClock, theme)).getId();
 
         Optional<Reservation> reservation = reservationRepository.findById(findId);
 
@@ -118,20 +116,18 @@ class JdbcReservationRepositoryTest {
         ReservationTime twelveClock = createReservationTime(TWELVE);
         Theme findTheme = createTheme();
 
-        Long firstSaveId = reservationRepository.save(createReservation(
+        reservationRepository.save(createReservation(
             "브라운", findDate, twelveClock, findTheme));
-        Long secondSaveId = reservationRepository.save(createReservation(
+        reservationRepository.save(createReservation(
             "브리", findDate, tenClock, findTheme));
-        Long thirdSaveId = reservationRepository.save(createReservation(
+        reservationRepository.save(createReservation(
             "브리", FUTURE_SECOND_DATE, tenClock, findTheme));
 
         Set<Long> findReservationsId = reservationRepository.findReservedTimeIdsByDateAndThemeId(findDate,
             findTheme.getId());
 
-        assertThat(findReservationsId).hasSize(2);
-        assertThat(findReservationsId.contains(firstSaveId)).isTrue();
-        assertThat(findReservationsId.contains(secondSaveId)).isTrue();
-        assertThat(findReservationsId.contains(thirdSaveId)).isFalse();
+        assertThat(findReservationsId)
+            .containsExactlyInAnyOrder(tenClock.getId(), twelveClock.getId());
     }
 
     @Test
@@ -176,7 +172,7 @@ class JdbcReservationRepositoryTest {
         Theme theme = createTheme();
 
         Long saveId = reservationRepository.save(createReservation(
-            "브라운", FUTURE_SECOND_DATE, reservationTime, theme));
+            "브라운", FUTURE_SECOND_DATE, reservationTime, theme)).getId();
         reservationRepository.deleteById(saveId);
 
         assertThat(reservationRepository.findById(saveId)).isEmpty();

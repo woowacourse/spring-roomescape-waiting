@@ -3,15 +3,29 @@ package roomescape.domain;
 import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.exception.RoomEscapeException;
 
+@Entity
+@Table(name = "reservation")
 public class Reservation {
 
-    private final Long id;
-    private final String name;
-    private final Slot slot;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "slot_id", unique = true)
+    private Slot slot;
 
     public Reservation(Long id, String name, Slot slot) {
         this.id = id;
@@ -21,6 +35,10 @@ public class Reservation {
 
     public Reservation(String name, Slot slot) {
         this(null, name, slot);
+    }
+
+    protected Reservation() {
+
     }
 
     public void verifyReservable(LocalDateTime now) {

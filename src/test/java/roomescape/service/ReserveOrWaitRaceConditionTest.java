@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
@@ -183,7 +184,7 @@ public class ReserveOrWaitRaceConditionTest {
         reservationRepository.save(firstReservation);
 
         assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(
-            status -> reservationRepository.save(duplicateReservation)
+            status -> reservationRepository.saveAndFlush(duplicateReservation)
         )).isInstanceOf(DataIntegrityViolationException.class);
 
         Long waitlistId = transactionTemplate.execute(
@@ -198,7 +199,7 @@ public class ReserveOrWaitRaceConditionTest {
     }
 
     @Test
-    void 같은_트랜잭션에서_unique_충돌을_잡고_대기_등록할_때_H2_JdbcTemplate환경에서_확인한다() {
+    void 같은_트랜잭션에서_unique_충돌을_잡으면_JPA_트랜잭션은_롤백된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
         Reservation firstReservation = createReservation("브라운", reservationTime, theme);
@@ -206,21 +207,15 @@ public class ReserveOrWaitRaceConditionTest {
 
         reservationRepository.save(firstReservation);
 
-        Long waitlistId = transactionTemplate.execute(status -> {
+        assertThatThrownBy(() -> transactionTemplate.execute(status -> {
             try {
-                reservationRepository.save(duplicateReservation);
+                reservationRepository.saveAndFlush(duplicateReservation);
             } catch (DataIntegrityViolationException e) {
                 return waitlistRepository.save(duplicateReservation, WAITLIST_CREATED_AT);
             }
 
             throw new AssertionError("같은 슬롯 예약 저장은 unique 충돌이 발생해야 합니다.");
-        });
-
-        Waitlist savedWaitlist = waitlistRepository.findById(waitlistId).orElseThrow();
-        assertThat(savedWaitlist.getName()).isEqualTo("브리");
-        assertThat(savedWaitlist.getDate()).isEqualTo(FUTURE_FIRST_DATE);
-        assertThat(savedWaitlist.getTime().getId()).isEqualTo(reservationTime.getId());
-        assertThat(savedWaitlist.getTheme().getId()).isEqualTo(theme.getId());
+        })).isInstanceOf(UnexpectedRollbackException.class);
     }
 
 

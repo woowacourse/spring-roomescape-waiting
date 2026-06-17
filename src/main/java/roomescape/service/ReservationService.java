@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +49,8 @@ public class ReservationService {
     private final WaitlistOrderPolicy waitlistOrderPolicy;
 
     public ReservationService(
-        ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
+        ReservationRepository reservationRepository,
+        WaitlistRepository waitlistRepository,
         SlotRepository slotRepository,
         ReservationTimeRepository timeRepository,
         ThemeRepository themeRepository,
@@ -142,7 +143,7 @@ public class ReservationService {
         try {
             Reservation saved = reservationWriter.save(reservation);
             return ReservationWithStatus.reserved(saved);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             return waitlistWriter.save(reservation);
         }
     }
@@ -186,6 +187,7 @@ public class ReservationService {
 
     private void cancelAndPromoteNextWaitlist(Reservation reservation) {
         reservationRepository.deleteById(reservation.getId());
+        reservationRepository.flush();
 
         List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotId(reservation.getSlot().getId());
         Optional<Waitlist> firstWaitlist = waitlistOrderPolicy.selectPromotionTarget(sameSlotWaitlists);
@@ -215,15 +217,9 @@ public class ReservationService {
             getReservationTime(request.timeId())
         );
         verifyNoConflict(updated);
-        Reservation updatedWithSlot = withSavedSlot(updated);
-        reservationRepository.updateDateTime(updatedWithSlot);
+        Slot slot = slotRepository.getOrCreate(updated.getSlot());
 
-        return getReservation(id);
-    }
-
-    private Reservation withSavedSlot(Reservation reservation) {
-        Slot slot = slotRepository.getOrCreate(reservation.getSlot());
-        return new Reservation(reservation.getId(), reservation.getName(), slot);
+        return reservationRepository.save(new Reservation(updated.getId(), updated.getName(), slot));
     }
 
     private void verifyNoConflict(Reservation reservation) {

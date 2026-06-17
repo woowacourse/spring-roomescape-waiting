@@ -4,34 +4,91 @@ import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
 import roomescape.domain.exception.RoomEscapeException;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Override
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        ORDER BY r.slot.date DESC, r.slot.time.startAt ASC
+        """)
     List<Reservation> findAll();
 
-    List<Reservation> findByName(String name);
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        WHERE r.name = :name
+        ORDER BY r.slot.date DESC, r.slot.time.startAt ASC
+        """)
+    List<Reservation> findByName(@Param("name") String name);
 
-    Optional<Reservation> findById(Long id);
+    @Query("""
+        SELECT r.slot.time.id
+        FROM Reservation r
+        WHERE r.slot.date = :date AND r.slot.theme.id = :themeId
+        """)
+    Set<Long> findReservedTimeIdsByDateAndThemeId(
+        @Param("date") LocalDate date,
+        @Param("themeId") Long themeId
+    );
 
-    Set<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot.time.id = :timeId")
+    boolean existsByTimeId(@Param("timeId") Long timeId);
 
-    boolean existsByTimeId(Long timeId);
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot.theme.id = :themeId")
+    boolean existsByThemeId(@Param("themeId") Long themeId);
 
-    boolean existsByThemeId(Long themeId);
+    @Query("""
+        SELECT COUNT(r) > 0
+        FROM Reservation r
+        WHERE r.slot.date = :date
+          AND r.slot.time.id = :timeId
+          AND r.slot.theme.id = :themeId
+        """)
+    boolean existsBySlot(
+        @Param("date") LocalDate date,
+        @Param("timeId") Long timeId,
+        @Param("themeId") Long themeId
+    );
 
-    boolean existsBy(Reservation reservation);
+    @Query("""
+        SELECT COUNT(r) > 0
+        FROM Reservation r
+        WHERE r.name = :name
+          AND r.slot.date = :date
+          AND r.slot.time.id = :timeId
+          AND r.slot.theme.id = :themeId
+        """)
+    boolean existsByNameAndSlot(
+        @Param("name") String name,
+        @Param("date") LocalDate date,
+        @Param("timeId") Long timeId,
+        @Param("themeId") Long themeId
+    );
 
-    boolean existsBySameUser(Reservation reservation);
+    default boolean existsBy(Reservation reservation) {
+        return existsBySlot(
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
+        );
+    }
 
-    Long save(Reservation reservation);
-
-    void deleteById(Long id);
-
-    void updateDateTime(Reservation updated);
+    default boolean existsBySameUser(Reservation reservation) {
+        return existsByNameAndSlot(
+            reservation.getName(),
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
+        );
+    }
 
     default Reservation getById(Long id, String message) {
         return findById(id).orElseThrow(() -> new RoomEscapeException(RESERVATION_NOT_FOUND, message));

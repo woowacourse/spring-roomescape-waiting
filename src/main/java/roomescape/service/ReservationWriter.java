@@ -25,8 +25,6 @@ public class ReservationWriter {
         Slot slot = slotRepository.getOrCreate(reservation.getSlot());
         Reservation reservationWithSlot = new Reservation(reservation.getName(), slot);
 
-        Long savedId = reservationRepository.save(reservationWithSlot);
-
-        return reservationRepository.getById(savedId, "존재하지 않는 예약입니다.");
+        return reservationRepository.save(reservationWithSlot);
     }
 }
