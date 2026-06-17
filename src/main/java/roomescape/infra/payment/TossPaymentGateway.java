@@ -10,14 +10,17 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import roomescape.exception.client.BusinessRuleViolationException;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
 
 @Component
-public class TossPaymentClient {
+public class TossPaymentGateway implements PaymentGateway {
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
-    public TossPaymentClient(
+    public TossPaymentGateway(
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.secret-key:}") String secretKey,
             ObjectMapper objectMapper
@@ -31,16 +34,18 @@ public class TossPaymentClient {
         this.objectMapper = objectMapper;
     }
 
-    public TossPaymentResponse confirm(String paymentKey, String orderId, Long amount) {
-        return restClient.post()
+    @Override
+    public PaymentResult confirm(PaymentConfirmation confirmation) {
+        TossPaymentResponse response = restClient.post()
                 .uri("/v1/payments/confirm")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new TossConfirmRequest(paymentKey, orderId, amount))
+                .body(TossConfirmRequest.from(confirmation))
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    TossErrorResponse error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
+                .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
+                    TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(), TossErrorResponse.class);
                     throw new BusinessRuleViolationException(error.message());
                 })
                 .body(TossPaymentResponse.class);
+        return response.toResult();
     }
 }

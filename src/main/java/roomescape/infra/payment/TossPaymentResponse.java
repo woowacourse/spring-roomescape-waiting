@@ -1,5 +1,7 @@
 package roomescape.infra.payment;
 
+import roomescape.payment.PaymentResult;
+
 public record TossPaymentResponse(
         String paymentKey,
         String orderId,
@@ -9,4 +11,8 @@ public record TossPaymentResponse(
         String method,
         String approvedAt
 ) {
+
+    public PaymentResult toResult() {
+        return new PaymentResult(paymentKey, orderId, totalAmount, status);
+    }
 }

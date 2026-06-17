@@ -4,7 +4,8 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Order;
 import roomescape.domain.ReservationStatus;
 import roomescape.exception.client.PaymentAmountMismatchException;
-import roomescape.infra.payment.TossPaymentClient;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
 import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationRepository;
 
@@ -13,22 +14,22 @@ public class PaymentService {
 
     private final OrderRepository orderRepository;
     private final ReservationRepository reservationRepository;
-    private final TossPaymentClient tossPaymentClient;
+    private final PaymentGateway paymentGateway;
 
     public PaymentService(
             OrderRepository orderRepository,
             ReservationRepository reservationRepository,
-            TossPaymentClient tossPaymentClient
+            PaymentGateway paymentGateway
     ) {
         this.orderRepository = orderRepository;
         this.reservationRepository = reservationRepository;
-        this.tossPaymentClient = tossPaymentClient;
+        this.paymentGateway = paymentGateway;
     }
 
     public void confirm(String paymentKey, String orderId, Long amount) {
         Order order = orderRepository.getByOrderId(orderId);
         validateAmount(order, amount);
-        tossPaymentClient.confirm(paymentKey, orderId, amount);
+        paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
         orderRepository.confirm(orderId, paymentKey);
         reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.CONFIRMED);
     }
