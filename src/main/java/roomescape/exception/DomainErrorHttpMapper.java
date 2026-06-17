@@ -16,7 +16,7 @@ public class DomainErrorHttpMapper {
                  REFERENCED_TIME, REFERENCED_THEME, WAIT_IS_FULL, SLOT_JUST_TAKEN,
                  PAYMENT_ALREADY_PROCESSED, DUPLICATED_PAYMENT_ORDER -> HttpStatus.CONFLICT;
             case PAYMENT_GATEWAY_CONFIG_ERROR -> HttpStatus.BAD_GATEWAY;
-            case PAYMENT_RETRYABLE -> HttpStatus.SERVICE_UNAVAILABLE;
+            case PAYMENT_RETRYABLE, PAYMENT_UNKNOWN -> HttpStatus.SERVICE_UNAVAILABLE;
             default -> HttpStatus.BAD_REQUEST;
         };
     }

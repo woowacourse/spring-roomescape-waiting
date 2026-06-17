@@ -29,6 +29,7 @@ CREATE TABLE reservation
     theme_id    BIGINT       NOT NULL,
     status      VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
     order_id    VARCHAR(64),
+    idempotency_key VARCHAR(64),
     amount      BIGINT,
     payment_key VARCHAR(255),
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -37,6 +38,7 @@ CREATE TABLE reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id),
     CONSTRAINT uk_reservation_order_id UNIQUE (order_id),
+    CONSTRAINT uk_reservation_idempotency_key UNIQUE (idempotency_key),
     CONSTRAINT uk_reservation_payment_key UNIQUE (payment_key)
 );
 

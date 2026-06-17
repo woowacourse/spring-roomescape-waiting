@@ -86,13 +86,21 @@ public class ReceptionFacade {
         return receptions;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = RoomEscapeException.class)
     public ReceptionResponse confirmPayment(String paymentKey, String orderId, Long amount) {
         reservationService.lockByOrderId(orderId);
         Reservation lockedReservation = reservationService.findByOrderId(orderId);
         validatePaymentRequest(lockedReservation, amount);
 
-        PaymentResult result = paymentService.confirm(paymentKey, orderId, amount);
+        PaymentResult result;
+        try {
+            result = paymentService.confirm(paymentKey, orderId, lockedReservation.getIdempotencyKey(), amount);
+        } catch (RoomEscapeException e) {
+            if (e.code() == DomainErrorCode.PAYMENT_UNKNOWN) {
+                reservationService.markPaymentUnknown(orderId);
+            }
+            throw e;
+        }
         validatePaymentResult(result, orderId, amount);
 
         Reservation confirmed = reservationService.confirmPayment(orderId, result.paymentKey());
@@ -149,7 +157,7 @@ public class ReceptionFacade {
     }
 
     private void validatePaymentRequest(Reservation reservation, Long amount) {
-        if (!reservation.isPending()) {
+        if (!reservation.needsPaymentConfirmation()) {
             throw new RoomEscapeException(DomainErrorCode.PAYMENT_ALREADY_PROCESSED);
         }
         if (!reservation.getAmount().equals(amount)) {

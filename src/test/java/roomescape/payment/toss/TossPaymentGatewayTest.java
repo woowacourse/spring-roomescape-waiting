@@ -7,7 +7,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -31,7 +33,8 @@ class TossPaymentGatewayTest {
     void beforeEach() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
-        var restClient = new TossClientConfig().tossRestClient(mockWebServer.url("/").toString(), "test_gsk_dummy");
+        var restClient = new TossClientConfig().tossRestClient(mockWebServer.url("/").toString(), "test_gsk_dummy",
+                Duration.ofSeconds(1), Duration.ofSeconds(1));
         tossPaymentGateway = new TossPaymentGateway(restClient, new ObjectMapper(), new TossPaymentErrorMapper());
     }
 
@@ -46,13 +49,14 @@ class TossPaymentGatewayTest {
                 {"paymentKey":"payment_key","orderId":"order_test","status":"DONE","totalAmount":50000}
                 """);
 
-        var result = tossPaymentGateway.confirm(new PaymentConfirmation("payment_key", "order_test", 50000L));
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L));
         var request = mockWebServer.takeRequest();
 
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.approvedAmount()).isEqualTo(50000L);
         assertThat(request.getPath()).isEqualTo("/v1/payments/confirm");
         assertThat(request.getHeader("Authorization")).isEqualTo(expectedAuthorization());
+        assertThat(request.getHeader("Idempotency-Key")).isEqualTo("order_test");
         assertThat(request.getBody().readUtf8()).contains("payment_key", "order_test", "50000");
     }
 
@@ -62,7 +66,7 @@ class TossPaymentGatewayTest {
         enqueue(status, "{\"code\":\"" + code + "\",\"message\":\"error\"}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment_key", "order_test", 50000L)))
+                new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L)))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(expected));
     }
@@ -72,10 +76,25 @@ class TossPaymentGatewayTest {
         enqueue(400, "{}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment_key", "order_test", 50000L)))
+                new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L)))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(e -> assertThat(((RoomEscapeException) e).code())
                         .isEqualTo(DomainErrorCode.PAYMENT_FAILED));
+    }
+
+    @Test
+    void readTimeoutMapsToUnknownPaymentErrorTest() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"paymentKey\":\"payment_key\",\"orderId\":\"order_test\",\"status\":\"DONE\",\"totalAmount\":50000}")
+                .setBodyDelay(2, TimeUnit.SECONDS));
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L)))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_UNKNOWN));
     }
 
     static Stream<Arguments> errorCases() {

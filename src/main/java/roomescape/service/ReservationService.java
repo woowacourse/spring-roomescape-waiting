@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -33,13 +34,18 @@ public class ReservationService {
     }
 
     public Reservation savePending(ServiceReservationCreateRequest request, ReservationTime reservationTime, Theme theme) {
+        String orderId = orderIdGenerator.generate();
         Reservation reservationWithoutId = Reservation.pending(request.name(), request.reservationDate(),
-                reservationTime, theme, orderIdGenerator.generate(), RESERVATION_AMOUNT);
+                reservationTime, theme, orderId, UUID.randomUUID().toString(), RESERVATION_AMOUNT);
         return reservationRepository.save(reservationWithoutId);
     }
 
     public List<Reservation> findByName(String name) {
         return reservationRepository.findByName(name);
+    }
+
+    public List<Reservation> findPaymentHistoryByName(String name) {
+        return reservationRepository.findPaymentHistoryByName(name);
     }
 
     public List<Reservation> findAll() {
@@ -80,6 +86,10 @@ public class ReservationService {
 
     public Reservation confirmPayment(String orderId, String paymentKey) {
         return reservationRepository.confirmPayment(orderId, paymentKey);
+    }
+
+    public Reservation markPaymentUnknown(String orderId) {
+        return reservationRepository.markPaymentUnknown(orderId);
     }
 
     public void deletePendingByOrderId(String orderId) {

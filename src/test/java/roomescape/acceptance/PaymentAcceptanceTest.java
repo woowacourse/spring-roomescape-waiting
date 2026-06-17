@@ -94,6 +94,21 @@ class PaymentAcceptanceTest extends AcceptanceTest {
                 .body("secretKey", nullValue());
     }
 
+    @Test
+    void 사용자_결제_내역을_조회한다() {
+        예약_시간과_테마를_생성한다();
+        Map<String, Object> pending = ReservationFixture.createPendingReservation("예약자", NOW_DATE, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .when().get("/payments?name=예약자")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", equalTo(1))
+                .body("[0].status", equalTo(ReservationStatus.PENDING.name()))
+                .body("[0].orderId", equalTo(pending.get("orderId")))
+                .body("[0].amount", equalTo(50000));
+    }
+
     private void 예약_시간과_테마를_생성한다() {
         ReservationTimeFixture.createReservationTime(FUTURE_TIME);
         ThemeFixture.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");

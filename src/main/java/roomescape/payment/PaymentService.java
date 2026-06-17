@@ -11,7 +11,7 @@ public class PaymentService {
         this.paymentGateway = paymentGateway;
     }
 
-    public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
-        return paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+    public PaymentResult confirm(String paymentKey, String orderId, String idempotencyKey, Long amount) {
+        return paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, idempotencyKey, amount));
     }
 }

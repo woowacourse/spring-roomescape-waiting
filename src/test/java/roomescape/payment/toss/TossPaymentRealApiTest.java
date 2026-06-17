@@ -28,7 +28,8 @@ class TossPaymentRealApiTest {
     @Test
     void nonExistingPaymentKeyMapsToDomainExceptionTest() {
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("tgen_does_not_exist_payment_key", "real-api-test-order-id", 1000L)))
+                new PaymentConfirmation("tgen_does_not_exist_payment_key", "real-api-test-order-id",
+                        "real-api-test-order-id", 1000L)))
                 .isInstanceOf(RoomEscapeException.class);
     }
 }

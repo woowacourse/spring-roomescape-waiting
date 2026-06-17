@@ -24,12 +24,12 @@ class PaymentServiceTest {
     void confirmDelegatesGatewayTest() {
         PaymentResult expected = new PaymentResult("payment_key", "order_test", "DONE", 50000L);
 
-        when(paymentGateway.confirm(new PaymentConfirmation("payment_key", "order_test", 50000L)))
+        when(paymentGateway.confirm(new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L)))
                 .thenReturn(expected);
 
-        PaymentResult result = paymentService.confirm("payment_key", "order_test", 50000L);
+        PaymentResult result = paymentService.confirm("payment_key", "order_test", "order_test", 50000L);
 
         assertThat(result).isEqualTo(expected);
-        verify(paymentGateway, times(1)).confirm(new PaymentConfirmation("payment_key", "order_test", 50000L));
+        verify(paymentGateway, times(1)).confirm(new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L));
     }
 }

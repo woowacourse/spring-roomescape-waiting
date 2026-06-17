@@ -21,6 +21,7 @@ const elements = {
   searchForm: document.querySelector("#reservation-search-form"),
   searchNameInput: document.querySelector("#reservation-search-name"),
   searchResult: document.querySelector("#reservation-search-result"),
+  paymentHistoryResult: document.querySelector("#payment-history-result"),
   toast: document.querySelector("#toast"),
 };
 
@@ -309,8 +310,13 @@ async function handleReservationSearch(event) {
   event.preventDefault();
   const name = elements.searchNameInput.value.trim();
   renderLoading(elements.searchResult, "예약을 조회하는 중입니다.");
-  const reservations = await requestJson(`/reservations?name=${encodeURIComponent(name)}`);
+  renderLoading(elements.paymentHistoryResult, "결제 내역을 조회하는 중입니다.");
+  const [reservations, paymentHistory] = await Promise.all([
+    requestJson(`/reservations?name=${encodeURIComponent(name)}`),
+    requestJson(`/payments?name=${encodeURIComponent(name)}`),
+  ]);
   renderSearchResult(reservations);
+  renderPaymentHistory(paymentHistory);
 }
 
 function renderSearchResult(reservations) {
@@ -320,6 +326,65 @@ function renderSearchResult(reservations) {
     return;
   }
   reservations.forEach((r) => elements.searchResult.appendChild(createReservationItem(r)));
+}
+
+function renderPaymentHistory(paymentHistory) {
+  elements.paymentHistoryResult.innerHTML = "";
+  if (paymentHistory.length === 0) {
+    renderEmpty(elements.paymentHistoryResult, "조회된 결제 내역이 없습니다.");
+    return;
+  }
+  paymentHistory.forEach((payment) => elements.paymentHistoryResult.appendChild(createPaymentHistoryItem(payment)));
+}
+
+function createPaymentHistoryItem(payment) {
+  const item = document.createElement("article");
+  item.className = "reservation-item payment-history-item";
+  item.append(createPaymentHistorySummary(payment));
+  return item;
+}
+
+function createPaymentHistorySummary(payment) {
+  const summary = document.createElement("div");
+  summary.className = "reservation-summary";
+
+  const titleRow = document.createElement("div");
+  titleRow.className = "reservation-title-row";
+  const strong = document.createElement("strong");
+  strong.textContent = payment.theme.name;
+  titleRow.append(strong, createPaymentStatusPill(payment));
+  summary.appendChild(titleRow);
+
+  const meta = document.createElement("div");
+  meta.className = "reservation-meta";
+  meta.append(
+    createSpan(`${payment.date}  ${formatStartAt(payment.time.startAt)}`),
+    createSpan(`주문번호  ${payment.orderId}`),
+    createSpan(`금액  ${formatAmount(payment.amount)}`),
+  );
+  if (payment.paymentKey) {
+    meta.appendChild(createSpan(`결제키  ${payment.paymentKey}`));
+  }
+  summary.appendChild(meta);
+
+  return summary;
+}
+
+function createPaymentStatusPill(payment) {
+  const pill = document.createElement("span");
+  if (payment.status === "CONFIRMED") {
+    pill.className = "status-pill is-confirmed";
+    pill.textContent = "결제 완료";
+    return pill;
+  }
+  if (payment.status === "PAYMENT_UNKNOWN") {
+    pill.className = "status-pill is-unknown";
+    pill.textContent = "확인 필요";
+    return pill;
+  }
+  pill.className = "status-pill is-pending";
+  pill.textContent = "결제 대기";
+  return pill;
 }
 
 function createReservationItem(reservation) {
@@ -406,9 +471,17 @@ async function cancelReservation(reservation) {
 
 async function refreshReservationSearch() {
   const name = elements.searchNameInput.value.trim();
-  if (!name) { elements.searchResult.innerHTML = ""; return; }
-  const reservations = await requestJson(`/reservations?name=${encodeURIComponent(name)}`);
+  if (!name) {
+    elements.searchResult.innerHTML = "";
+    elements.paymentHistoryResult.innerHTML = "";
+    return;
+  }
+  const [reservations, paymentHistory] = await Promise.all([
+    requestJson(`/reservations?name=${encodeURIComponent(name)}`),
+    requestJson(`/payments?name=${encodeURIComponent(name)}`),
+  ]);
   renderSearchResult(reservations);
+  renderPaymentHistory(paymentHistory);
 }
 
 // ── UI 유틸 ─────────────────────────────────────────────────
@@ -469,6 +542,11 @@ function formatDate(date) {
 
 function formatStartAt(startAt) {
   return startAt.slice(0, 5);
+}
+
+function formatAmount(amount) {
+  if (amount == null) return "-";
+  return `${Number(amount).toLocaleString("ko-KR")}원`;
 }
 
 function addDays(date, days) {

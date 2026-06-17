@@ -142,7 +142,27 @@ public class JdbcReservationRepositoryTest {
         assertThat(saved.getId()).isEqualTo(1L);
         assertThat(found.getStatus()).isEqualTo(ReservationStatus.PENDING);
         assertThat(found.getOrderId()).isEqualTo("order_test");
+        assertThat(found.getIdempotencyKey()).isEqualTo("order_test");
         assertThat(found.getAmount()).isEqualTo(50000L);
+    }
+
+    @Test
+    void findPaymentHistoryByNameReturnsPendingAndConfirmedReservationsTest() {
+        Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
+                theme, "order_test", 50000L);
+        reservationRepository.save(pendingReservation);
+        reservationRepository.confirmPayment("order_test", "payment_key");
+
+        ReservationTime otherReservationTime = new ReservationTime(2L, LocalTime.of(11, 0));
+        Reservation otherPendingReservation = Reservation.pending("buzz", LocalDate.of(2026, 5, 2),
+                otherReservationTime, theme, "order_other", 50000L);
+        reservationRepository.save(otherPendingReservation);
+
+        List<Reservation> paymentHistory = reservationRepository.findPaymentHistoryByName("fizz");
+
+        assertThat(paymentHistory).hasSize(1);
+        assertThat(paymentHistory.get(0).getOrderId()).isEqualTo("order_test");
+        assertThat(paymentHistory.get(0).getPaymentKey()).isEqualTo("payment_key");
     }
 
     @Test
@@ -173,13 +193,14 @@ public class JdbcReservationRepositoryTest {
     @Test
     void deleteStalePendingBeforeTest() {
         String sql = """
-                INSERT INTO reservation(name, date, time_id, theme_id, status, order_id, amount, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO reservation(name, date, time_id, theme_id, status, order_id, idempotency_key, amount,
+                                        created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         jdbcTemplate.update(sql, "old", "2026-05-02", 1L, 1L, ReservationStatus.PENDING.name(),
-                "order_old", 50000L, LocalDateTime.of(2026, 5, 2, 8, 49));
+                "order_old", "order_old", 50000L, LocalDateTime.of(2026, 5, 2, 8, 49));
         jdbcTemplate.update(sql, "fresh", "2026-05-02", 2L, 1L, ReservationStatus.PENDING.name(),
-                "order_fresh", 50000L, LocalDateTime.of(2026, 5, 2, 8, 50));
+                "order_fresh", "order_fresh", 50000L, LocalDateTime.of(2026, 5, 2, 8, 50));
 
         reservationRepository.deleteStalePendingBefore(LocalDateTime.of(2026, 5, 2, 8, 50));
 

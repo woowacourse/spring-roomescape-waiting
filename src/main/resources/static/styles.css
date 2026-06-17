@@ -565,6 +565,17 @@ a { color: inherit; }
   gap: 10px;
 }
 
+.payment-history-panel {
+  margin-top: 24px;
+}
+
+.payment-history-panel h3 {
+  margin: 0 0 12px;
+  color: var(--text-strong);
+  font-size: 16px;
+  font-weight: 800;
+}
+
 .reservation-item {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -579,6 +590,10 @@ a { color: inherit; }
 
 .reservation-item:hover {
   border-color: var(--border-strong);
+}
+
+.payment-history-item {
+  grid-template-columns: 1fr;
 }
 
 .reservation-summary {
@@ -644,6 +659,12 @@ a { color: inherit; }
   background: var(--warn-soft);
   color: var(--warn);
   border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.status-pill.is-pending {
+  background: var(--amber-soft);
+  color: var(--amber-deep);
+  border: 1px solid rgba(245, 158, 11, 0.24);
 }
 
 .status-pill.is-past {
@@ -1062,4 +1083,9 @@ a { color: inherit; }
   .summary-grid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.status-pill.is-unknown {
+  background: rgba(245, 158, 11, 0.14);
+  color: var(--warn);
 }

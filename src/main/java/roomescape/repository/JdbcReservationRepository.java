@@ -33,8 +33,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservationWithoutId) {
         String sql = """
-                INSERT INTO reservation(name, date, time_id, theme_id, status, order_id, amount, payment_key)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO reservation(name, date, time_id, theme_id, status, order_id, idempotency_key, amount,
+                                        payment_key)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try {
@@ -47,12 +48,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                 preparedStatement.setLong(4, reservationWithoutId.getTheme().getId());
                 preparedStatement.setString(5, reservationWithoutId.getStatus().name());
                 preparedStatement.setString(6, reservationWithoutId.getOrderId());
+                preparedStatement.setString(7, reservationWithoutId.getIdempotencyKey());
                 if (reservationWithoutId.getAmount() == null) {
-                    preparedStatement.setObject(7, null);
+                    preparedStatement.setObject(8, null);
                 } else {
-                    preparedStatement.setLong(7, reservationWithoutId.getAmount());
+                    preparedStatement.setLong(8, reservationWithoutId.getAmount());
                 }
-                preparedStatement.setString(8, reservationWithoutId.getPaymentKey());
+                preparedStatement.setString(9, reservationWithoutId.getPaymentKey());
 
                 return preparedStatement;
             }, keyHolder);
@@ -67,7 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_id, r.amount, r.payment_key,
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
                        t.id as time_id, t.start_at as time_value,
                        th.id as theme_id, th.name as theme_name,
                        th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
@@ -88,7 +90,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_id, r.amount, r.payment_key,
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
                        t.id as time_id, t.start_at as time_value,
                        th.id as theme_id, th.name as theme_name,
                        th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
@@ -144,7 +146,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findByOrderId(String orderId) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_id, r.amount, r.payment_key,
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
                        t.id as time_id, t.start_at as time_value,
                        th.id as theme_id, th.name as theme_name,
                        th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
@@ -166,11 +168,28 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 UPDATE reservation
                 SET status = ?, payment_key = ?
-                WHERE order_id = ? AND status = ?
+                WHERE order_id = ? AND status IN (?, ?)
                 """;
 
         int updated = jdbcTemplate.update(sql, ReservationStatus.CONFIRMED.name(), paymentKey,
-                orderId, ReservationStatus.PENDING.name());
+                orderId, ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+        if (updated == 0) {
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
+        }
+        return findByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    @Override
+    public Reservation markPaymentUnknown(String orderId) {
+        String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE order_id = ? AND status IN (?, ?)
+                """;
+
+        int updated = jdbcTemplate.update(sql, ReservationStatus.PAYMENT_UNKNOWN.name(), orderId,
+                ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
         if (updated == 0) {
             throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
         }
@@ -195,7 +214,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByName(String name) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_id, r.amount, r.payment_key,
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
                        t.id as time_id, t.start_at as time_value,
                        th.id as theme_id, th.name as theme_name,
                        th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
@@ -209,9 +228,26 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findPaymentHistoryByName(String name) {
+        String sql = """
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
+                       t.id as time_id, t.start_at as time_value,
+                       th.id as theme_id, th.name as theme_name,
+                       th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
+                FROM reservation r
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme th ON r.theme_id = th.id
+                WHERE r.name = (?) AND r.order_id IS NOT NULL
+                ORDER BY r.id DESC
+                """;
+
+        return jdbcTemplate.query(sql, reservationRowMapper(), name);
+    }
+
+    @Override
     public List<Reservation> findAll() {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_id, r.amount, r.payment_key,
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
                        t.id as time_id, t.start_at as time_value,
                        th.id as theme_id, th.name as theme_name,
                        th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
@@ -252,6 +288,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             LocalDate date = resultSet.getDate("date").toLocalDate();
             ReservationStatus status = ReservationStatus.valueOf(resultSet.getString("status"));
             String orderId = resultSet.getString("order_id");
+            String idempotencyKey = resultSet.getString("idempotency_key");
             Long amount = nullableLong(resultSet.getObject("amount"));
             String paymentKey = resultSet.getString("payment_key");
             Long timeId = resultSet.getLong("time_id");
@@ -263,7 +300,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
             ReservationTime reservationTime = new ReservationTime(timeId, timeValue);
             Theme theme = new Theme(themeId, themeName, themeDescription, themeThumbnailUrl);
-            return new Reservation(id, name, date, reservationTime, theme, status, orderId, amount, paymentKey);
+            return new Reservation(id, name, date, reservationTime, theme, status, orderId, idempotencyKey, amount,
+                    paymentKey);
         };
     }
 

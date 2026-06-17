@@ -24,11 +24,15 @@ public interface ReservationRepository {
 
     Reservation confirmPayment(String orderId, String paymentKey);
 
+    Reservation markPaymentUnknown(String orderId);
+
     void deletePendingByOrderId(String orderId);
 
     void deleteStalePendingBefore(LocalDateTime expiresBefore);
 
     List<Reservation> findByName(String name);
+
+    List<Reservation> findPaymentHistoryByName(String name);
 
     List<Reservation> findAll();
 

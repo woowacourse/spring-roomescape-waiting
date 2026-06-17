@@ -102,7 +102,7 @@ public class ReceptionFacadeTest {
 
         doNothing().when(reservationService).lockByOrderId("order_test");
         when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
-        when(paymentService.confirm("payment_key", "order_test", 50000L))
+        when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
                 .thenReturn(new PaymentResult("payment_key", "order_test", "DONE", 50000L));
         when(reservationService.confirmPayment("order_test", "payment_key")).thenReturn(confirmedReservation);
 
@@ -112,7 +112,7 @@ public class ReceptionFacadeTest {
         InOrder inOrder = Mockito.inOrder(reservationService, paymentService);
         inOrder.verify(reservationService).lockByOrderId("order_test");
         inOrder.verify(reservationService).findByOrderId("order_test");
-        inOrder.verify(paymentService).confirm("payment_key", "order_test", 50000L);
+        inOrder.verify(paymentService).confirm("payment_key", "order_test", "order_test", 50000L);
         inOrder.verify(reservationService).confirmPayment("order_test", "payment_key");
     }
 
@@ -127,7 +127,7 @@ public class ReceptionFacadeTest {
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(e -> assertThat(((RoomEscapeException) e).code())
                         .isEqualTo(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH));
-        verify(paymentService, never()).confirm(any(), any(), any());
+        verify(paymentService, never()).confirm(any(), any(), any(), any());
     }
 
     @Test
@@ -136,7 +136,7 @@ public class ReceptionFacadeTest {
                 ReservationStatus.PENDING, "order_test", 50000L, null);
 
         when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
-        when(paymentService.confirm("payment_key", "order_test", 50000L))
+        when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
                 .thenReturn(new PaymentResult("payment_key", "other_order", "DONE", 50000L));
 
         assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))
@@ -152,7 +152,7 @@ public class ReceptionFacadeTest {
                 ReservationStatus.PENDING, "order_test", 50000L, null);
 
         when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
-        when(paymentService.confirm("payment_key", "order_test", 50000L))
+        when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
                 .thenReturn(new PaymentResult("payment_key", "order_test", "ABORTED", 50000L));
 
         assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))

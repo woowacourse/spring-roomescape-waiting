@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -47,16 +49,20 @@ public class ReservationServiceTest {
     void savePendingTest() {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest("fizz", LocalDate.of(2026, 5, 2),
                 reservationTime.getId(), theme.getId());
-        Reservation pendingReservation = Reservation.pending("fizz", request.reservationDate(), reservationTime, theme,
-                "order_test", 50000L);
-        Reservation savedReservation = Reservation.of(1L, pendingReservation);
 
         when(orderIdGenerator.generate()).thenReturn("order_test");
-        when(reservationRepository.save(pendingReservation)).thenReturn(savedReservation);
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> Reservation.of(1L, invocation.getArgument(0)));
 
         Reservation result = reservationService.savePending(request, reservationTime, theme);
 
-        assertThat(result).isEqualTo(savedReservation);
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationRepository).save(captor.capture());
+        Reservation pendingReservation = captor.getValue();
+        assertThat(pendingReservation.getOrderId()).isEqualTo("order_test");
+        assertThat(pendingReservation.getIdempotencyKey()).isNotBlank();
+        assertThat(pendingReservation.getIdempotencyKey()).isNotEqualTo("order_test");
+        assertThat(result).isEqualTo(Reservation.of(1L, pendingReservation));
     }
 
     @Test
