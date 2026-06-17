@@ -1,13 +1,13 @@
-package payment.web;
+package roomescape.payment.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import payment.OrderNotFoundException;
-import payment.PaymentAmountMismatchException;
-import payment.PaymentService;
-import payment.client.TossPaymentException;
+import roomescape.payment.OrderNotFoundException;
+import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentService;
+import roomescape.payment.client.TossPaymentException;
 
 /**
  * Toss 결제위젯 성공/실패 콜백을 처리한다.

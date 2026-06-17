@@ -1,4 +1,4 @@
-package payment;
+package roomescape.payment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
-import payment.order.Order;
-import payment.order.OrderRepository;
+import roomescape.payment.order.Order;
+import roomescape.payment.order.OrderRepository;
 import roomescape.RoomescapeApplication;
 import roomescape.controller.FixedClockConfig;
 import roomescape.domain.Reservation;

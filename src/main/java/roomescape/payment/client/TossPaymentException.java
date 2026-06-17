@@ -1,8 +1,8 @@
-package payment.client;
+package roomescape.payment.client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import payment.client.dto.TossErrorResponse;
+import roomescape.payment.client.dto.TossErrorResponse;
 
 /**
  * Toss 결제 API 에러를 표현하는 도메인 예외. 호출부가 상황별로 다르게 대응할 수 있게 코드별 중첩 예외로 나뉜다.

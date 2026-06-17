@@ -19,9 +19,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.ResourceNotFoundException;
-import payment.PaymentStatus;
-import payment.order.Order;
-import payment.order.OrderRepository;
+import roomescape.payment.PaymentStatus;
+import roomescape.payment.order.Order;
+import roomescape.payment.order.OrderRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.WaitingDao;
 

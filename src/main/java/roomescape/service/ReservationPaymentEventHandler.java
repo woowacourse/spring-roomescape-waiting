@@ -3,8 +3,8 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import payment.PaymentConfirmedEvent;
-import payment.PaymentFailedEvent;
+import roomescape.payment.PaymentConfirmedEvent;
+import roomescape.payment.PaymentFailedEvent;
 import roomescape.repository.ReservationDao;
 
 @Component

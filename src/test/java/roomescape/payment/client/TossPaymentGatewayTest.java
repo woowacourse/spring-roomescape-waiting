@@ -1,4 +1,4 @@
-package payment.client;
+package roomescape.payment.client;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
-import payment.PaymentConfirmation;
+import roomescape.payment.PaymentConfirmation;
 
 class TossPaymentGatewayTest {
 

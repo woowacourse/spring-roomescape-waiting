@@ -1,17 +1,17 @@
-package payment.client;
+package roomescape.payment.client;
 
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import payment.PaymentConfirmation;
-import payment.PaymentGateway;
-import payment.PaymentResult;
-import payment.PaymentStatus;
-import payment.client.dto.ConfirmRequest;
-import payment.client.dto.TossErrorResponse;
-import payment.client.dto.TossPaymentResponse;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentStatus;
+import roomescape.payment.client.dto.ConfirmRequest;
+import roomescape.payment.client.dto.TossErrorResponse;
+import roomescape.payment.client.dto.TossPaymentResponse;
 
 /**
  * PaymentGateway 포트의 Toss 구현(어댑터). Toss 의 요청·응답·에러 포맷은 이 클래스 밖으로 새어 나가지 않는다(부패 방지 계층).

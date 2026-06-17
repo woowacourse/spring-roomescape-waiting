@@ -1,10 +1,10 @@
-package payment;
+package roomescape.payment;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import payment.order.Order;
-import payment.order.OrderRepository;
+import roomescape.payment.order.Order;
+import roomescape.payment.order.OrderRepository;
 
 /**
  * 결제 승인 유스케이스. 게이트웨이 호출 '전에' 금액을 검증하는 것이 핵심이다.

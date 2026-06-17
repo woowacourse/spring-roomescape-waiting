@@ -14,7 +14,7 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.TemporaryConflictException;
-import payment.PaymentOrderPort;
+import roomescape.payment.PaymentOrderPort;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;

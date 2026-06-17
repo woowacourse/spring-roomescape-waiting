@@ -1,4 +1,4 @@
-package payment.order;
+package roomescape.payment.order;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -7,8 +7,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import payment.OrderTicket;
-import payment.PaymentOrderPort;
+import roomescape.payment.OrderTicket;
+import roomescape.payment.PaymentOrderPort;
 
 @Service
 @Transactional(readOnly = true)

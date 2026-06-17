@@ -1,4 +1,4 @@
-package payment.client.dto;
+package roomescape.payment.client.dto;
 
 /**
  * Toss 결제 승인 요청 바디. 세 필드 모두 필수다.

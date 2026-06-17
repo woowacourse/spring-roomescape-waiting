@@ -1,4 +1,4 @@
-package payment.order;
+package roomescape.payment.order;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import payment.OrderNotFoundException;
-import payment.PaymentStatus;
+import roomescape.payment.OrderNotFoundException;
+import roomescape.payment.PaymentStatus;
 
 /**
  * 결제 주문 저장소.

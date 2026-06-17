@@ -1,4 +1,4 @@
-package payment.client.dto;
+package roomescape.payment.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

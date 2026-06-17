@@ -19,7 +19,7 @@ import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.PastReservationException;
 import roomescape.exception.ResourceNotFoundException;
-import payment.order.OrderRepository;
+import roomescape.payment.order.OrderRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.WaitingDao;
 

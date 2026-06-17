@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import payment.OrderTicket;
+import roomescape.payment.OrderTicket;
 import roomescape.domain.Reservation;
 
 public record PendingReservation(

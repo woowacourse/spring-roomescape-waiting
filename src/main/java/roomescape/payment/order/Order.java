@@ -1,7 +1,7 @@
-package payment.order;
+package roomescape.payment.order;
 
 import java.time.LocalDateTime;
-import payment.PaymentStatus;
+import roomescape.payment.PaymentStatus;
 
 /**
  * 결제 전에 서버가 미리 저장해 두는 주문 정보. successUrl 의 amount 와 대조해 금액 위변조를 막는 기준값이다.

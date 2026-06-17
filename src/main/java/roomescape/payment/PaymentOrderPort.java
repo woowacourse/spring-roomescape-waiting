@@ -1,4 +1,4 @@
-package payment;
+package roomescape.payment;
 
 import java.util.Optional;
 
