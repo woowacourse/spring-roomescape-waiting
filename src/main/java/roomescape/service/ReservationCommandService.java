@@ -24,6 +24,7 @@ import roomescape.repository.ThemeDao;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -58,9 +59,9 @@ public class ReservationCommandService {
         Reservation reservation = Reservation.forPendingPayment(member, slot);
 
         slot.validateNotPast(now);
-        PendingReservation existingPending = findReusablePendingReservation(slot, member);
-        if (existingPending != null) {
-            return existingPending;
+        Optional<PendingReservation> existingPending = findReusablePendingReservation(slot, member);
+        if (existingPending.isPresent()) {
+            return existingPending.get();
         }
 
         Reservation savedReservation = save(reservation);
@@ -71,10 +72,9 @@ public class ReservationCommandService {
         return PendingReservation.of(savedReservation, order);
     }
 
-    private PendingReservation findReusablePendingReservation(Slot slot, Member member) {
+    private Optional<PendingReservation> findReusablePendingReservation(Slot slot, Member member) {
         return reservationDao.findBySlotForUpdate(slot)
-                .map(existing -> pendingReservationFrom(existing, member))
-                .orElse(null);
+                .map(existing -> pendingReservationFrom(existing, member));
     }
 
     private PendingReservation pendingReservationFrom(Reservation reservation, Member member) {
