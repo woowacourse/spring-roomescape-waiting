@@ -1,4 +1,4 @@
-package roomescape.domain.waiting;
+package roomescape.waiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -6,7 +6,7 @@ import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
+import roomescape.reservation.Reservation;
 import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;

@@ -1,4 +1,4 @@
-package roomescape.controller.manager;
+package roomescape.reservation.web;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.response.AdminReservationResponseDto;
-import roomescape.domain.reservation.AdminReservationService;
+import roomescape.reservation.AdminReservationService;
+import roomescape.reservation.Reservation;
 
 @RestController
 @RequestMapping("/manager/reservations")

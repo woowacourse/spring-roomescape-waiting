@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.reservation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,16 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.ReservationDao;
+import roomescape.common.vo.Slot;
 import roomescape.dao.TimeDao;
 import roomescape.domain.member.Member;
-import roomescape.common.vo.Slot;
-import roomescape.domain.time.Time;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.domain.promotion.PromotionService;
 import roomescape.domain.payment.Order;
 import roomescape.domain.payment.PaymentService;
+import roomescape.domain.promotion.PromotionService;
+import roomescape.domain.time.Time;
+import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.reservation.web.ReservationRequestDto;
 
 @Service
 @Transactional

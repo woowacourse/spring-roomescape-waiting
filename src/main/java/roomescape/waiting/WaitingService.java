@@ -1,4 +1,4 @@
-package roomescape.domain.waiting;
+package roomescape.waiting;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.WaitingDao;
+import roomescape.reservation.ReservationDao;
+import roomescape.waiting.WaitingDao;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.dto.request.WaitingRequestDto;
+import roomescape.reservation.Reservation;
+import roomescape.waiting.web.WaitingRequestDto;
 
 @Service
 @Transactional

@@ -1,11 +1,12 @@
-package roomescape.dao;
+package roomescape.waiting;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.dao.CommonDao;
 import roomescape.common.vo.Slot;
-import roomescape.domain.waiting.Waiting;
-import roomescape.domain.waiting.Waitings;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.Waitings;
 
 public interface WaitingDao extends CommonDao<Waiting> {
 

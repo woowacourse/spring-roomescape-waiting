@@ -1,4 +1,4 @@
-package roomescape.dao.jdbc;
+package roomescape.waiting.dao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,15 +11,15 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.dao.WaitingDao;
+import roomescape.waiting.WaitingDao;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
 import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.domain.waiting.Waiting;
-import roomescape.domain.waiting.Waitings;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.Waitings;
 import roomescape.common.vo.Name;
 
 @Repository

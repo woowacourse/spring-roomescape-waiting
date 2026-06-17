@@ -1,22 +1,21 @@
-package roomescape.domain.reservation;
+package roomescape.reservation;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.ReservationDao;
+import roomescape.common.vo.Slot;
 import roomescape.dao.StoreDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
-import roomescape.dao.WaitingDao;
 import roomescape.domain.member.Member;
-import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.dto.request.AdminReservationRequestDto;
-import roomescape.dto.request.ReservationRequestDto;
+import roomescape.reservation.web.AdminReservationRequestDto;
+import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.waiting.WaitingDao;
 
 @Component
 public class ReservationCreator {
@@ -68,8 +67,7 @@ public class ReservationCreator {
     }
 
     /**
-     * 새치기 방지: 취소 직후 슬롯이 비어 보이는 순간(아웃박스 승격 대기 중)에 다른 사용자가
-     * 대기자를 제치고 직접 예약하는 것을 막는다. 대기 행을 잠금 조회하여 워커의 승격과 직렬화한다.
+     * 새치기 방지: 취소 직후 슬롯이 비어 보이는 순간(아웃박스 승격 대기 중)에 다른 사용자가 대기자를 제치고 직접 예약하는 것을 막는다. 대기 행을 잠금 조회하여 워커의 승격과 직렬화한다.
      */
     private void validateNoWaitingQueue(Slot slot) {
         if (!waitingDao.findQueueBySlotForUpdate(slot).isEmpty()) {

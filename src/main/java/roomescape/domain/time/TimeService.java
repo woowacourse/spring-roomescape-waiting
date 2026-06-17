@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.ReservationDao;
+import roomescape.reservation.ReservationDao;
 import roomescape.dao.TimeDao;
 import roomescape.dto.request.TimeRequestDto;
 

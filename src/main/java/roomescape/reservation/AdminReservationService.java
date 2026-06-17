@@ -1,20 +1,19 @@
-package roomescape.domain.reservation;
+package roomescape.reservation;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.vo.Slot;
 import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.member.Member;
-import roomescape.common.vo.Slot;
-import roomescape.domain.time.Time;
-import roomescape.dto.request.AdminReservationRequestDto;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.response.PageResponse;
 import roomescape.domain.promotion.PromotionService;
+import roomescape.domain.time.Time;
+import roomescape.dto.response.PageResponse;
+import roomescape.reservation.web.AdminReservationRequestDto;
+import roomescape.reservation.web.ReservationPatchDto;
 
 @Service
 @Transactional

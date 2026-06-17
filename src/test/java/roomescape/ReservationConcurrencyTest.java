@@ -16,18 +16,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
+import roomescape.reservation.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
+import roomescape.reservation.Reservation;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
 import roomescape.common.vo.Name;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.domain.reservation.ReservationService;
+import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.reservation.ReservationService;
 
 @SpringBootTest
 @ActiveProfiles("test")

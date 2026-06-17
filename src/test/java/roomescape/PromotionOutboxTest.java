@@ -16,20 +16,20 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.PromotionOutboxDao;
-import roomescape.dao.ReservationDao;
+import roomescape.reservation.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.member.Member;
 import roomescape.domain.promotion.OutboxStatus;
-import roomescape.domain.reservation.Reservation;
+import roomescape.reservation.Reservation;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
 import roomescape.common.vo.Name;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.dto.request.WaitingRequestDto;
-import roomescape.domain.reservation.ReservationService;
-import roomescape.domain.waiting.WaitingService;
+import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.waiting.web.WaitingRequestDto;
+import roomescape.reservation.ReservationService;
+import roomescape.waiting.WaitingService;
 import roomescape.worker.PromotionOutboxWorker;
 
 @SpringBootTest(properties = "scheduling.enabled=false")

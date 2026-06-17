@@ -1,11 +1,11 @@
-package roomescape.dao;
+package roomescape.reservation;
 
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.reservation.Reservation;
 import roomescape.common.vo.Slot;
+import roomescape.dao.CommonDao;
 
 public interface ReservationDao extends CommonDao<Reservation> {
     List<Reservation> findAll(int limit, int offset);

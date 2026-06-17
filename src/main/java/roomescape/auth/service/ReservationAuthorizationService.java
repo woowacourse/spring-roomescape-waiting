@@ -5,9 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
-import roomescape.dao.ReservationDao;
+import roomescape.reservation.ReservationDao;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
+import roomescape.reservation.Reservation;
 import roomescape.domain.store.Store;
 
 @Service

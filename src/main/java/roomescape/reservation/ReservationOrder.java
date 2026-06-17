@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.reservation;
 
 import roomescape.domain.payment.Order;
 

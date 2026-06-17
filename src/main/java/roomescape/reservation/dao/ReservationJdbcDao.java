@@ -1,4 +1,4 @@
-package roomescape.dao.jdbc;
+package roomescape.reservation.dao;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -13,16 +13,16 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.common.exception.DuplicateEntityException;
-import roomescape.dao.ReservationDao;
+import roomescape.common.vo.Name;
+import roomescape.common.vo.Slot;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.common.vo.Name;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.ReservationStatus;
 
 @Repository
 public class ReservationJdbcDao implements ReservationDao {

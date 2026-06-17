@@ -16,19 +16,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.dao.MemberDao;
 import roomescape.dao.OrderDao;
-import roomescape.dao.ReservationDao;
+import roomescape.reservation.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.member.Member;
 import roomescape.domain.payment.OrderStatus;
-import roomescape.domain.reservation.ReservationOrder;
-import roomescape.domain.reservation.ReservationService;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.reservation.ReservationOrder;
+import roomescape.reservation.ReservationService;
+import roomescape.reservation.ReservationStatus;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
 import roomescape.common.vo.Name;
-import roomescape.dto.request.ReservationRequestDto;
+import roomescape.reservation.web.ReservationRequestDto;
 import roomescape.worker.ExpiredOrderWorker;
 
 @SpringBootTest(properties = "scheduling.enabled=false")

@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.PromotionOutboxDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.WaitingDao;
+import roomescape.reservation.ReservationDao;
+import roomescape.waiting.WaitingDao;
 import roomescape.common.vo.Slot;
 
 /**

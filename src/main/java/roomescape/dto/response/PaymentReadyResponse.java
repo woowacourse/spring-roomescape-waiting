@@ -1,7 +1,7 @@
 package roomescape.dto.response;
 
 import roomescape.domain.payment.Order;
-import roomescape.domain.reservation.Reservation;
+import roomescape.reservation.Reservation;
 
 /**
  * 예약 생성 응답. 프론트가 이 값으로 토스 결제창을 띄운다(orderId·amount·orderName).

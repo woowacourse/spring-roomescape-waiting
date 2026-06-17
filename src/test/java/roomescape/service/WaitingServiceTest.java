@@ -18,14 +18,14 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.WaitingDao;
-import roomescape.dao.jdbc.ReservationJdbcDao;
-import roomescape.dao.jdbc.WaitingJdbcDao;
+import roomescape.waiting.WaitingDao;
+import roomescape.reservation.dao.ReservationJdbcDao;
+import roomescape.waiting.dao.WaitingJdbcDao;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
-import roomescape.domain.waiting.Waiting;
-import roomescape.domain.waiting.WaitingService;
-import roomescape.dto.request.WaitingRequestDto;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingService;
+import roomescape.waiting.web.WaitingRequestDto;
 
 @JdbcTest
 @Import({WaitingService.class, WaitingJdbcDao.class, ReservationJdbcDao.class})

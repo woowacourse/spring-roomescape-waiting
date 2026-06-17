@@ -1,4 +1,4 @@
-package roomescape.domain.waiting;
+package roomescape.waiting;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -11,7 +11,7 @@ import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
+import roomescape.reservation.Reservation;
 import roomescape.common.vo.Slot;
 
 public class Waitings {

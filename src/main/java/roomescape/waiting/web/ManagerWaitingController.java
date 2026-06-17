@@ -1,4 +1,4 @@
-package roomescape.controller.manager;
+package roomescape.waiting.web;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.domain.member.Member;
-import roomescape.dto.response.WaitingResponse;
-import roomescape.domain.waiting.WaitingService;
+import roomescape.waiting.web.WaitingResponse;
+import roomescape.waiting.WaitingService;
 
 @RestController
 @RequestMapping("/manager/waitings")

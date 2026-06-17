@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -6,10 +6,10 @@ import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.vo.Slot;
+import roomescape.domain.member.Member;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.domain.member.Member;
 
 public class Reservation {
     private final Long id;
@@ -129,15 +129,47 @@ public class Reservation {
         return Objects.hashCode(id);
     }
 
-    public Long getId() { return id; }
-    public Member getMember() { return member; }
-    public Slot getSlot() { return slot; }
-    public LocalDate getDate() { return slot.getDate(); }
-    public Time getTime() { return slot.getTime(); }
-    public Theme getTheme() { return slot.getTheme(); }
-    public Store getStore() { return slot.getStore(); }
-    public Long getStoreId() { return slot.getStoreId(); }
-    public ReservationStatus getStatus() { return status; }
-    public long getVersion() { return version; }
-    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public Slot getSlot() {
+        return slot;
+    }
+
+    public LocalDate getDate() {
+        return slot.getDate();
+    }
+
+    public Time getTime() {
+        return slot.getTime();
+    }
+
+    public Theme getTheme() {
+        return slot.getTheme();
+    }
+
+    public Store getStore() {
+        return slot.getStore();
+    }
+
+    public Long getStoreId() {
+        return slot.getStoreId();
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
 }

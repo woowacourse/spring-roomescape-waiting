@@ -1,4 +1,4 @@
-package roomescape.controller.user;
+package roomescape.waiting.web;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -15,10 +15,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.domain.member.Member;
-import roomescape.domain.waiting.Waiting;
-import roomescape.dto.request.WaitingRequestDto;
-import roomescape.dto.response.WaitingResponse;
-import roomescape.domain.waiting.WaitingService;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.web.WaitingRequestDto;
+import roomescape.waiting.web.WaitingResponse;
+import roomescape.waiting.WaitingService;
 
 @RestController
 @RequestMapping("/waitings")
