@@ -60,7 +60,7 @@ public class TimeSlotService {
             return exists;
         }
         checkDuplicatedStartAt(request.startAt());
-        return timeSlotRepository.update(timeSlot);
+        return timeSlotRepository.save(timeSlot);
     }
 
     @Transactional
@@ -68,11 +68,13 @@ public class TimeSlotService {
         TimeSlot timeSlot = findTimeSlotById(id);
         checkDuplicatedStartAt(request.startAt());
         TimeSlot changed = timeSlot.changeTime(request.startAt());
-        return timeSlotRepository.update(changed);
+        return timeSlotRepository.save(changed);
     }
 
     public List<AvailableTimeSlot> findAvailableTimes(long themeId, LocalDate date) {
-        return timeSlotRepository.findAvailableTimeSlots(themeId, date);
+        return timeSlotRepository.findAvailableSlotViews(themeId, date).stream()
+                .map(v -> new AvailableTimeSlot(new TimeSlot(v.getId(), v.getStartAt()), v.getAvailable()))
+                .toList();
     }
 
     private void checkDuplicatedStartAt(LocalTime startAt) {

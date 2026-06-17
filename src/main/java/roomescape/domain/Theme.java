@@ -1,9 +1,16 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Optional;
 
+@Entity
 public class Theme {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id;
     private final String name;
     private final String description;
@@ -17,6 +24,13 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public Theme() {
+        this.id = null;
+        this.name = null;
+        this.description = null;
+        this.thumbnailUrl = null;
     }
 
     public static Theme transientOf(String name, String description, String thumbnailUrl) {

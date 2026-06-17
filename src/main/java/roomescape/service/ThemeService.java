@@ -53,14 +53,14 @@ public class ThemeService {
     @Transactional
     public Theme putTheme(long id, ThemeRequest request) {
         findThemeById(id);
-        return themeRepository.update(new Theme(id, request.name(), request.description(), request.thumbnailUrl()));
+        return themeRepository.save(new Theme(id, request.name(), request.description(), request.thumbnailUrl()));
     }
 
     @Transactional
     public Theme patchTheme(long id, ThemePatchRequest request) {
         Theme theme = findThemeById(id);
         Theme renewed = theme.renewal(request.name(), request.description(), request.thumbnailUrl());
-        return themeRepository.update(renewed);
+        return themeRepository.save(renewed);
     }
 
     public List<Theme> findPopularThemes(Long topCount, Long during) {
