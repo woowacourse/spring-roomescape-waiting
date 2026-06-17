@@ -21,17 +21,17 @@ public class ReservationFixture {
 
     public static ReservationApplicationCreateCommand pastStarkCreateCommand(Long themeId, Long timeId,
                                                                              LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(STARK, PAST_RESERVATION_DATE, themeId, timeId, now);
+        return new ReservationApplicationCreateCommand(STARK, PAST_RESERVATION_DATE, themeId, timeId, "mock_payment_key", 1000L, now);
     }
 
     public static ReservationApplicationCreateCommand futureStarkCreateCommand(Long themeId, Long timeId,
                                                                                LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(STARK, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+        return new ReservationApplicationCreateCommand(STARK, FUTURE_RESERVATION_DATE, themeId, timeId, "mock_payment_key", 1000L, now);
     }
 
     public static ReservationApplicationCreateCommand futureKayaCreateCommand(Long themeId, Long timeId,
                                                                               LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(KAYA, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+        return new ReservationApplicationCreateCommand(KAYA, FUTURE_RESERVATION_DATE, themeId, timeId, "mock_payment_key", 1000L, now);
     }
 
     public static ReservationUpdateCommand futureStarkUpdateCommand(Long timeId, LocalDateTime now) {

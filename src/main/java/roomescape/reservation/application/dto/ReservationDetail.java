@@ -2,6 +2,7 @@ package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.payment.PaymentStatus;
 
 public record ReservationDetail(
         Long reservationId,
@@ -12,6 +13,7 @@ public record ReservationDetail(
         String themeDescription,
         String thumbnailImgUrl,
         Long timeId,
-        LocalTime startAt
+        LocalTime startAt,
+        PaymentStatus paymentStatus
 ) {
 }

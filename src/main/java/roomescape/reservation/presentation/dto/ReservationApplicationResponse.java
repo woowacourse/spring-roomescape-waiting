@@ -15,6 +15,7 @@ public record ReservationApplicationResponse(
         ThemeResponse theme,
         ReservationTimeResponse time,
         Status status,
+        roomescape.payment.PaymentStatus paymentStatus,
         Long rank
 ) {
     public static ReservationApplicationResponse from(ReservationApplicationResult result) {
@@ -25,6 +26,7 @@ public record ReservationApplicationResponse(
                 ThemeResponse.from(result.theme()),
                 ReservationTimeResponse.from(result.time()),
                 result.status(),
+                result.paymentStatus(),
                 result.rank()
         );
     }

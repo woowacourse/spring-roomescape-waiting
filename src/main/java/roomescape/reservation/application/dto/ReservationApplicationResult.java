@@ -13,6 +13,7 @@ public record ReservationApplicationResult(
         ThemeResult theme,
         ReservationTimeResult time,
         Status status,
+        roomescape.payment.PaymentStatus paymentStatus,
         Long rank
 ) {
 
@@ -25,6 +26,7 @@ public record ReservationApplicationResult(
                 themeResult,
                 timeResult,
                 Status.CONFIRM,
+                reservation.getPaymentStatus(),
                 null
         );
     }
@@ -39,6 +41,7 @@ public record ReservationApplicationResult(
                 themeResult,
                 timeResult,
                 Status.WAITING,
+                null,
                 rank
         );
     }
@@ -59,6 +62,7 @@ public record ReservationApplicationResult(
                         reservationDetail.startAt()
                 ),
                 Status.CONFIRM,
+                reservationDetail.paymentStatus(),
                 null
         );
     }
@@ -79,6 +83,7 @@ public record ReservationApplicationResult(
                         waitingDetail.startAt()
                 ),
                 Status.WAITING,
+                null,
                 waitingDetail.rank()
         );
     }
