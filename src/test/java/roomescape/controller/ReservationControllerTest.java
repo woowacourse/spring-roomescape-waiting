@@ -110,12 +110,16 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("사용자 예약 조회")
     @Test
     void 사용자_예약_조회() {
+        String date = LocalDate.now().plusDays(1).toString();
+        createReservation("조회자", date, 1, 1);
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .queryParam("username", "김철수")
+                .queryParam("username", "조회자")
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
+                .body("reservations[0].date", equalTo(date))
                 .body("reservations[0].reservationStatus", equalTo("RESERVED"));
     }
 
@@ -146,9 +150,12 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("이미 예약된 시간이면 409")
     @Test
     void 이미_예약된_시간이면_409() {
+        String date = LocalDate.now().plusDays(30).toString();
+        createReservation("포비", date, 3, 1);
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("브라운", "2026-04-29", 3, 1))
+                .body(reservationParams("브라운", date, 3, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
@@ -354,9 +361,12 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("본인이 이미 예약한 슬롯에 대기 신청하면 409")
     @Test
     void 본인_예약_슬롯에_대기_신청하면_409() {
+        String futureDate = LocalDate.now().plusDays(30).toString();
+        createReservation("김철수", futureDate, 3, 1);
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("김철수", "2026-05-10", 3, 1))
+                .body(reservationParams("김철수", futureDate, 3, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
@@ -384,7 +394,7 @@ class ReservationControllerTest extends ControllerTest {
     void 존재하지_않는_시간으로_대기_신청하면_404() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("이영희", "2026-05-10", 999, 1))
+                .body(reservationParams("이영희", LocalDate.now().plusDays(1).toString(), 999, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(404)
@@ -396,7 +406,7 @@ class ReservationControllerTest extends ControllerTest {
     void 존재하지_않는_테마로_대기_신청하면_404() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("이영희", "2026-05-10", 3, 999))
+                .body(reservationParams("이영희", LocalDate.now().plusDays(1).toString(), 3, 999))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(404)
