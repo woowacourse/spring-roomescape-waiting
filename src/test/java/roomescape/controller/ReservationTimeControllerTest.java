@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ClearDbTest;
-import roomescape.dto.ReservationTimeCreateCommand;
-import roomescape.dto.ReservationTimeResult;
+import roomescape.dto.request.ReservationTimeCreateRequest;
+import roomescape.dto.response.ReservationTimeResult;
 
 @ClearDbTest
 class ReservationTimeControllerTest {
@@ -28,7 +28,7 @@ class ReservationTimeControllerTest {
         void 성공() {
             LocalTime startAt = LocalTime.of(12, 0);
             LocalTime endAt = LocalTime.of(12, 30);
-            ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(startAt, endAt);
+            ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(startAt, endAt);
 
             ReservationTimeResult response = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)

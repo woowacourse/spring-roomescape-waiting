@@ -7,11 +7,11 @@ import roomescape.domain.*;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.*;
-import roomescape.dto.ReservationCreateCommand;
-import roomescape.dto.ReservationModifyCommand;
-import roomescape.dto.AvailableDateResult;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationTimeStatusResult;
+import roomescape.dto.request.ReservationCreateRequest;
+import roomescape.dto.command.ReservationModifyCommand;
+import roomescape.dto.response.AvailableDateResult;
+import roomescape.dto.response.ReservationResult;
+import roomescape.dto.response.ReservationTimeStatusResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,7 +29,7 @@ public class ReservationService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public ReservationResult create(final ReservationCreateCommand command) {
+    public ReservationResult create(final ReservationCreateRequest command) {
         final Theme findTheme = findThemeOrThrow(command.themeId());
         final ReservationTime findReservationTime = findReservationTimeOrThrow(command.timeId());
 
@@ -74,14 +74,7 @@ public class ReservationService {
     }
 
     public List<ReservationTimeStatusResult> getReservationTimeStatuses(final LocalDate date, final Long themeId) {
-        return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId)
-                .stream()
-                .map(reservationTimesWithStatus -> new ReservationTimeStatusResult(
-                        reservationTimesWithStatus.id(),
-                        reservationTimesWithStatus.startAt(),
-                        reservationTimesWithStatus.reserved()
-                ))
-                .toList();
+        return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId);
     }
 
     @Transactional

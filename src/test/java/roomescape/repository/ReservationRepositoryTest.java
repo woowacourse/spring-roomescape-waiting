@@ -21,7 +21,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationTimesWithStatus;
+import roomescape.dto.response.ReservationTimeStatusResult;
 
 @JdbcTest
 @Import(ReservationRepository.class)
@@ -283,7 +283,7 @@ class ReservationRepositoryTest {
             reservationRepository.save(Reservation.create("검프", date, reservationTime, theme));
 
             // when
-            List<ReservationTimesWithStatus> result = reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, 1L);
+            List<ReservationTimeStatusResult> result = reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, 1L);
 
             // then
             assertThat(result).hasSize(1);
@@ -296,7 +296,7 @@ class ReservationRepositoryTest {
             LocalDate date = LocalDate.now().plusDays(1);
 
             // when
-            List<ReservationTimesWithStatus> result = reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, 1L);
+            List<ReservationTimeStatusResult> result = reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, 1L);
 
             // then
             assertThat(result).hasSize(1);

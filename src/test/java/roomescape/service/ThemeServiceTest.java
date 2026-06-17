@@ -19,8 +19,8 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.dto.ThemeCreateCommand;
-import roomescape.dto.ThemeResult;
+import roomescape.dto.request.ThemeCreateRequest;
+import roomescape.dto.response.ThemeResult;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -36,7 +36,7 @@ class ThemeServiceTest {
     @Test
     void 테마_생성() {
         // given
-        ThemeCreateCommand request = new ThemeCreateCommand("우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg");
+        ThemeCreateRequest request = new ThemeCreateRequest("우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg");
         Theme savedTheme = Theme.createWithId(1L, "우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg");
 
         given(themeRepository.save(any(Theme.class))).willReturn(savedTheme);

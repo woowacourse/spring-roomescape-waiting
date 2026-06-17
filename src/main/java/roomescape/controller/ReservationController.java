@@ -5,13 +5,13 @@ import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.dto.ReservationModifyRequest;
+import roomescape.dto.request.ReservationModifyRequest;
 import roomescape.service.ReservationService;
-import roomescape.dto.ReservationCreateCommand;
-import roomescape.dto.ReservationModifyCommand;
-import roomescape.dto.AvailableDateResult;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationTimeStatusResult;
+import roomescape.dto.request.ReservationCreateRequest;
+import roomescape.dto.command.ReservationModifyCommand;
+import roomescape.dto.response.AvailableDateResult;
+import roomescape.dto.response.ReservationResult;
+import roomescape.dto.response.ReservationTimeStatusResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResult> create(
-            @Valid @RequestBody ReservationCreateCommand request
+            @Valid @RequestBody ReservationCreateRequest request
     ) {
         final ReservationResult result = reservationService.create(request);
         return ResponseEntity.created(URI.create("/reservations/" + result.id()))

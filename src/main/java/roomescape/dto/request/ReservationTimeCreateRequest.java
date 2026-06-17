@@ -1,10 +1,10 @@
-package roomescape.dto;
+package roomescape.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public record ReservationTimeCreateCommand(
+public record ReservationTimeCreateRequest(
         @DateTimeFormat(pattern = "hh:mm")
         @NotNull(message = "START_TIME_NULL")
         LocalTime startAt,

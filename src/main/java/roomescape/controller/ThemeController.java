@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ThemeService;
-import roomescape.dto.ThemeCreateCommand;
-import roomescape.dto.ThemeResult;
+import roomescape.dto.request.ThemeCreateRequest;
+import roomescape.dto.response.ThemeResult;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResult> create(
-            @Valid @RequestBody ThemeCreateCommand request
+            @Valid @RequestBody ThemeCreateRequest request
     ) {
         final ThemeResult result = themeService.create(request);
         return ResponseEntity.created(URI.create("/themes/" + result.id()))

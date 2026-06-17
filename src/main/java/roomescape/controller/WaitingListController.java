@@ -4,10 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.dto.WaitingListCreateCommand;
-import roomescape.dto.WaitingListDeleteCommand;
-import roomescape.dto.WaitingListDeleteRequest;
-import roomescape.dto.WaitingListResult;
+import roomescape.dto.request.WaitingListCreateRequest;
+import roomescape.dto.command.WaitingListDeleteCommand;
+import roomescape.dto.request.WaitingListDeleteRequest;
+import roomescape.dto.response.WaitingListResult;
 import roomescape.service.WaitingListService;
 
 import java.net.URI;
@@ -21,7 +21,7 @@ public class WaitingListController {
     private final WaitingListService waitingListService;
 
     @PostMapping
-    public ResponseEntity<WaitingListResult> create(@RequestBody @Valid WaitingListCreateCommand createCommand) {
+    public ResponseEntity<WaitingListResult> create(@RequestBody @Valid WaitingListCreateRequest createCommand) {
         final WaitingListResult result = waitingListService.create(createCommand);
         return ResponseEntity.created(URI.create("/waiting-list/" + result.id()))
                 .body(result);

@@ -6,9 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.WaitingListCreateCommand;
-import roomescape.dto.WaitingListDeleteCommand;
-import roomescape.dto.WaitingListResult;
+import roomescape.dto.request.WaitingListCreateRequest;
+import roomescape.dto.command.WaitingListDeleteCommand;
+import roomescape.dto.response.WaitingListResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -28,7 +28,7 @@ public class WaitingListService {
     private final ReservationRepository reservationRepository;
 
     @Transactional
-    public WaitingListResult create(final WaitingListCreateCommand command) {
+    public WaitingListResult create(final WaitingListCreateRequest command) {
         final Theme findTheme = findThemeOrThrow(command.themeId());
         final ReservationTime findReservationTime = findReservationTimeOrThrow(command.timeId());
 

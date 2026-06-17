@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ClearDbTest;
-import roomescape.dto.AvailableDateResult;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationTimeStatusResult;
+import roomescape.dto.response.AvailableDateResult;
+import roomescape.dto.response.ReservationResult;
+import roomescape.dto.response.ReservationTimeStatusResult;
 
 import java.time.LocalDate;
 

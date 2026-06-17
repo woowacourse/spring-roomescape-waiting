@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.ClearDbTest;
-import roomescape.dto.ReservationTimeResult;
-import roomescape.dto.ThemeResult;
-import roomescape.dto.WaitingListResult;
+import roomescape.dto.response.ReservationTimeResult;
+import roomescape.dto.response.ThemeResult;
+import roomescape.dto.response.WaitingListResult;
 
 import java.time.LocalDate;
 

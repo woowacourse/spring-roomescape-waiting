@@ -14,7 +14,6 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.WaitingListRow;
 
 import java.sql.Date;
 import java.sql.Timestamp;

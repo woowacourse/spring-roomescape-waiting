@@ -1,9 +1,9 @@
-package roomescape.dto;
+package roomescape.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record ThemeCreateCommand(
+public record ThemeCreateRequest(
         @NotNull(message = "THEME_NAME_NULL_OR_BLANK")
         @NotBlank(message = "THEME_NAME_NULL_OR_BLANK")
         String name,

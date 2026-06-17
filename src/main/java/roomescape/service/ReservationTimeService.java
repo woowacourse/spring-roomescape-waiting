@@ -7,8 +7,8 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.dto.ReservationTimeCreateCommand;
-import roomescape.dto.ReservationTimeResult;
+import roomescape.dto.request.ReservationTimeCreateRequest;
+import roomescape.dto.response.ReservationTimeResult;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeResult create(final ReservationTimeCreateCommand command) {
+    public ReservationTimeResult create(final ReservationTimeCreateRequest command) {
         final ReservationTime reservationTime = ReservationTime.create(
                 command.startAt(),
                 command.endAt()

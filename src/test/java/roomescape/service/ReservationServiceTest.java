@@ -26,13 +26,13 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.AvailableDateResult;
-import roomescape.dto.ReservationCreateCommand;
-import roomescape.dto.ReservationModifyCommand;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationStatus;
-import roomescape.dto.ReservationTimeStatusResult;
-import roomescape.dto.ReservationTimesWithStatus;
+import roomescape.dto.response.AvailableDateResult;
+import roomescape.dto.request.ReservationCreateRequest;
+import roomescape.dto.command.ReservationModifyCommand;
+import roomescape.dto.response.ReservationResult;
+import roomescape.domain.ReservationStatus;
+import roomescape.dto.response.ReservationTimeStatusResult;
+import roomescape.dto.response.ReservationTimeStatusResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.OrderRepository;
@@ -71,7 +71,7 @@ class ReservationServiceTest {
 
         @Test
         void 성공() {
-            ReservationCreateCommand request = new ReservationCreateCommand("오리", 1000L, futureDate, 1L, 1L);
+            ReservationCreateRequest request = new ReservationCreateRequest("오리", 1000L, futureDate, 1L, 1L);
             Reservation saved = Reservation.createWithId(1L, "오리", futureDate, time, theme);
 
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
@@ -90,7 +90,7 @@ class ReservationServiceTest {
 
         @Test
         void 테마가_없으면_예외발생() {
-            ReservationCreateCommand request = new ReservationCreateCommand("오리", 1000L, futureDate, 1L, 1L);
+            ReservationCreateRequest request = new ReservationCreateRequest("오리", 1000L, futureDate, 1L, 1L);
             given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.create(request))
@@ -101,7 +101,7 @@ class ReservationServiceTest {
 
         @Test
         void 시간이_없으면_예외발생() {
-            ReservationCreateCommand request = new ReservationCreateCommand("오리", 1000L, futureDate, 1L, 1L);
+            ReservationCreateRequest request = new ReservationCreateRequest("오리", 1000L, futureDate, 1L, 1L);
             given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
 
@@ -114,7 +114,7 @@ class ReservationServiceTest {
         @Test
         void 과거_날짜면_예외발생() {
             LocalDate pastDate = LocalDate.now().minusDays(1);
-            ReservationCreateCommand request = new ReservationCreateCommand("오리", 1000L, pastDate, 1L, 1L);
+            ReservationCreateRequest request = new ReservationCreateRequest("오리", 1000L, pastDate, 1L, 1L);
 
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
             given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
@@ -126,7 +126,7 @@ class ReservationServiceTest {
 
         @Test
         void 중복_슬롯이면_예외발생() {
-            ReservationCreateCommand request = new ReservationCreateCommand("오리", 1000L, futureDate, 1L, 1L);
+            ReservationCreateRequest request = new ReservationCreateRequest("오리", 1000L, futureDate, 1L, 1L);
 
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
             given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
@@ -380,8 +380,8 @@ class ReservationServiceTest {
 
         @Test
         void 날짜_테마로_예약시간_상태_목록_조회() {
-            ReservationTimesWithStatus status1 = new ReservationTimesWithStatus(1L, LocalTime.of(10, 0), true);
-            ReservationTimesWithStatus status2 = new ReservationTimesWithStatus(2L, LocalTime.of(12, 0), false);
+            ReservationTimeStatusResult status1 = new ReservationTimeStatusResult(1L, LocalTime.of(10, 0), true);
+            ReservationTimeStatusResult status2 = new ReservationTimeStatusResult(2L, LocalTime.of(12, 0), false);
 
             given(reservationRepository.findReservationTimeStatusesByDateAndThemeId(futureDate, 1L))
                     .willReturn(List.of(status1, status2));
