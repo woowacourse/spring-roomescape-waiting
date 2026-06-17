@@ -128,6 +128,10 @@ public class Reservation {
         }
     }
 
+    public void cancelPendingEntry(long entryId) {
+        entries.cancelIfPending(entryId);
+    }
+
     public LocalDate getDate() {
         return schedule.getDate();
     }

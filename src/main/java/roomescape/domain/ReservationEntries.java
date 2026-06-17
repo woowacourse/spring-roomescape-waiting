@@ -69,6 +69,12 @@ public class ReservationEntries {
         replace(id, entry.cancel());
     }
 
+    public void cancelIfPending(long id) {
+        findById(id)
+                .filter(ReservationEntry::isPending)
+                .ifPresent(entry -> replace(id, entry.cancel()));
+    }
+
     private void replace(long id, ReservationEntry replacement) {
         entries.replaceAll(e -> e.isSameId(id) ? replacement : e);
     }

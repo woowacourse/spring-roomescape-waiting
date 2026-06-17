@@ -76,7 +76,7 @@ public class PaymentService {
 
         paymentOrderRepository.findByOrderId(orderId).ifPresent(paymentOrder -> {
             Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
-            reservation.cancelEntry(paymentOrder.getEntryId());
+            reservation.cancelPendingEntry(paymentOrder.getEntryId());
             reservationRepository.update(reservation);
             log.info("[결제 실패 정리] orderId={} entryId={} PENDING→DELETED", orderId, paymentOrder.getEntryId());
         });
