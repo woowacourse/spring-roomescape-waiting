@@ -17,6 +17,7 @@ import roomescape.controller.dto.ErrorResponse;
 import roomescape.domain.exception.InvalidDomainException;
 import roomescape.exception.base.RoomeScapeException;
 import roomescape.exception.base.RoomeScapeServerException;
+import roomescape.infra.payment.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,6 +29,13 @@ public class GlobalExceptionHandler {
     // 4xx 클라이언트 예외 통합 처리
     @ExceptionHandler(RoomeScapeException.class)
     public ResponseEntity<ErrorResponse> handleRoomeScapeException(RoomeScapeException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException e) {
         return ResponseEntity
                 .status(e.getStatus())
                 .body(new ErrorResponse(e.getMessage()));

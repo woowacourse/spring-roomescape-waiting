@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import roomescape.exception.client.BusinessRuleViolationException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
@@ -43,7 +42,7 @@ public class TossPaymentGateway implements PaymentGateway {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
                     TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(), TossErrorResponse.class);
-                    throw new BusinessRuleViolationException(error.message());
+                    throw TossPaymentException.of(errorResponse.getStatusCode(), error);
                 })
                 .body(TossPaymentResponse.class);
         return response.toResult();
