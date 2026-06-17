@@ -30,6 +30,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT r.id AS reservation_id,
                    r.name AS reservation_name,
                    r.created_at AS reservation_created_at,
+                   r.paid AS reservation_paid,
                    s.id AS slot_id,
                    s.date AS slot_date,
                    t.id AS time_id,
@@ -65,7 +66,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getLong("reservation_id"),
                 slot,
                 resultSet.getString("reservation_name"),
-                resultSet.getObject("reservation_created_at", LocalDateTime.class)
+                resultSet.getObject("reservation_created_at", LocalDateTime.class),
+                resultSet.getBoolean("reservation_paid")
         );
     };
 
@@ -106,13 +108,14 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Long insert(Reservation reservation) {
-        String sql = "insert into reservation(slot_id, name, created_at) values(?, ?, ?)";
+        String sql = "insert into reservation(slot_id, name, created_at, paid) values(?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setLong(1, reservation.getSlot().getId());
             ps.setString(2, reservation.getName());
             ps.setObject(3, reservation.getCreatedAt());
+            ps.setBoolean(4, reservation.isPaid());
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -128,6 +131,28 @@ public class JdbcReservationRepository implements ReservationRepository {
     public long update(Long id, String name, Long slotId, LocalDateTime createdAt) {
         String sql = "update reservation set slot_id = ?, name = ?, created_at = ? where id = ?";
         return jdbcTemplate.update(sql, slotId, name, createdAt, id);
+    }
+
+    @Override
+    public int updatePaid(Long id, boolean paid) {
+        String sql = "update reservation set paid = ? where id = ?";
+        return jdbcTemplate.update(sql, paid, id);
+    }
+
+    @Override
+    public List<Reservation> findUnpaidCreatedBefore(LocalDateTime threshold) {
+        String sql = SELECT_RESERVATION_SQL + " WHERE r.paid = FALSE AND r.created_at < ?";
+        return jdbcTemplate.query(sql, reservationRowMapper, threshold);
+    }
+
+    @Override
+    public int deleteUnpaidByIds(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return 0;
+        }
+        String placeholders = String.join(", ", ids.stream().map(id -> "?").toList());
+        String sql = "delete from reservation where paid = FALSE and id in (" + placeholders + ")";
+        return jdbcTemplate.update(sql, ids.toArray());
     }
 
     @Override

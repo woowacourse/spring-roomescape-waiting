@@ -8,32 +8,66 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
+import roomescape.domain.reservationOrder.ReservationOrder;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.SlotDomainService;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservationOrder.OrderResponse;
 import roomescape.exception.ConcurrencyConflictException;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ReservationService {
 
+    private static final long EVICTION_THRESHOLD_MINUTES = 10;
+
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final SlotDomainService slotDomainService;
+    private final ReservationOrderService reservationOrderService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationWaitingRepository reservationWaitingRepository,
-                              SlotDomainService slotDomainService) {
+                              SlotDomainService slotDomainService,
+                              ReservationOrderService reservationOrderService) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.slotDomainService = slotDomainService;
+        this.reservationOrderService = reservationOrderService;
+    }
+
+    @Transactional
+    public OrderResponse reserve(ReservationRequest reservationReq) {
+        ReservationResponse reservation = create(reservationReq);
+        ReservationOrder order = reservationOrderService.insert(reservation.id());
+        return OrderResponse.from(order);
+    }
+
+    @Transactional
+    public void deleteEvictedReservations() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(EVICTION_THRESHOLD_MINUTES);
+        List<Reservation> evicted = reservationRepository.findUnpaidCreatedBefore(threshold);
+        if (evicted.isEmpty()) {
+            return;
+        }
+
+        List<Long> ids = evicted.stream().map(Reservation::getId).toList();
+        reservationRepository.deleteUnpaidByIds(ids);
+
+        for (Reservation reservation : evicted) {
+            if (reservationRepository.isExistBySlot(reservation.getSlotId())) {
+                continue;
+            }
+            promoteOrCleanupSlot(reservation.getSlotId());
+        }
     }
 
     public ReservationResponse read(Long id) {
