@@ -44,18 +44,22 @@
   <h1>✅ 결제를 완료했어요</h1>
   <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정했습니다.</p>
 
+  <div style="text-align: center; margin-bottom: 24px;">
+    <img th:src="${result?.themeThumbnailUrl()}" th:alt="${result?.themeName()}" style="max-width: 100%; border-radius: 8px; margin-bottom: 12px;"/>
+    <h2 th:text="${result?.themeName()}" style="font-size: 18px; margin: 0 0 8px;">Theme Name</h2>
+    <p style="color: #666; font-size: 14px; margin: 0;" th:text="${result?.reservationDate()} + ' ' + ${result?.reservationTime()}">2024-01-01 10:00</p>
+  </div>
+
   <div class="row"><span class="label">결제 상태</span>
-    <span class="val" th:text="${result != null ? result.status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
+    <span class="val" th:text="${result != null ? result.response().status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
   <div class="row"><span class="label">주문번호</span>
-    <span class="val" th:text="${result?.orderId()}">order-xxxx</span></div>
+    <span class="val" th:text="${result?.response()?.orderId()}">order-xxxx</span></div>
   <div class="row"><span class="label">승인 금액</span>
     <span class="val"
-          th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
+          th:text="${result != null ? #numbers.formatInteger(result.response().approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
   </div>
-  <div class="row"><span class="label">paymentKey</span>
-    <span class="val" th:text="${paymentKey}">tviva...</span></div>
 
-  <a href="/">← 다시 결제하기</a>
+  <a href="/">← 홈으로 돌아가기</a>
 </div>
 </body>
 </html>

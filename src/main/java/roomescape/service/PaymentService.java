@@ -23,6 +23,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ReservationCommand;
+import roomescape.service.result.PaymentConfirmResult;
 
 @Slf4j
 @Service
@@ -40,7 +41,7 @@ public class PaymentService {
     @Value("${toss.client-key}")
     private String clientKey;
 
-    public TossPaymentResponse confirm(String paymentKey, String orderId, Long amount) {
+    public PaymentConfirmResult confirm(String paymentKey, String orderId, Long amount) {
         PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("결제 정보를 찾을 수 없습니다."));
 
@@ -58,7 +59,14 @@ public class PaymentService {
         reservationRepository.update(reservation);
 
         log.info("[예약 확정] entryId={} PENDING→RESERVED", paymentOrder.getEntryId());
-        return response;
+        
+        return new PaymentConfirmResult(
+                response,
+                reservation.getTheme().getName(),
+                reservation.getTheme().getThumbnailImageUrl(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt()
+        );
     }
 
     public PreparePaymentResponse prepare(ReservationCommand command) {

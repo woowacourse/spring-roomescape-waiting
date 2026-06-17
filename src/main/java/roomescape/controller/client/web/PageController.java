@@ -55,7 +55,6 @@ public class PageController {
             Model model) {
         try {
             var result = paymentService.confirm(paymentKey, orderId, amount);
-            model.addAttribute("paymentKey", paymentKey);
             model.addAttribute("orderId", orderId);
             model.addAttribute("amount", amount);
             model.addAttribute("result", result);
