@@ -36,7 +36,7 @@ public class PaymentService {
 
     public void fail(String orderId) {
         Order order = orderRepository.getByOrderId(orderId);
-        reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.FAILED);
+        reservationRepository.deleteById(order.getReservationId());
     }
 
     private void validateAmount(Order order, Long amount) {

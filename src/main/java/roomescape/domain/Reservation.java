@@ -58,10 +58,6 @@ public class Reservation {
         return new Reservation(id, name, slot, ReservationStatus.CONFIRMED);
     }
 
-    public Reservation fail() {
-        return new Reservation(id, name, slot, ReservationStatus.FAILED);
-    }
-
     private static void validate(String name, Slot slot) {
         validateName(name);
         validateSlot(slot);
