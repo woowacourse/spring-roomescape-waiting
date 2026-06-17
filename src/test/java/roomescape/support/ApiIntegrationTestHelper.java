@@ -24,7 +24,8 @@ public class ApiIntegrationTestHelper {
                 .usingGeneratedKeyColumns("id");
         this.reservationInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
-                .usingGeneratedKeyColumns("id");
+                .usingGeneratedKeyColumns("id")
+                .usingColumns("name", "date", "theme_id", "time_id");
         this.waitingInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
@@ -41,7 +42,8 @@ public class ApiIntegrationTestHelper {
         return themeInsert.executeAndReturnKey(Map.of(
                 "name", name,
                 "description", description,
-                "thumbnail_img_url", thumbnailImgUrl
+                "thumbnail_img_url", thumbnailImgUrl,
+                "price", 30000L
         )).longValue();
     }
 

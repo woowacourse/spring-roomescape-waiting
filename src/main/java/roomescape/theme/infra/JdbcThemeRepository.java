@@ -35,6 +35,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                                 .name(rs.getString("name"))
                                 .description(rs.getString("description"))
                                 .thumbnailImgUrl(rs.getString("thumbnail_img_url"))
+                                .price(rs.getLong("price"))
                                 .build()
                 , id).stream().findFirst();
     }
@@ -47,6 +48,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                         .name(rs.getString("name"))
                         .description(rs.getString("description"))
                         .thumbnailImgUrl(rs.getString("thumbnail_img_url"))
+                        .price(rs.getLong("price"))
                         .build()
         );
     }
@@ -54,11 +56,11 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findSortedPopularThemes(LocalDate from, LocalDate to, int limit) {
         String sql = """
-                SELECT t.id, t.name, t.description, t.thumbnail_img_url
+                SELECT t.id, t.name, t.description, t.thumbnail_img_url, t.price
                 FROM theme t
                 JOIN reservation r ON t.id = r.theme_id
                 WHERE r.date BETWEEN ? AND ?
-                GROUP BY t.id, t.name, t.description, t.thumbnail_img_url
+                GROUP BY t.id, t.name, t.description, t.thumbnail_img_url, t.price
                 ORDER BY COUNT(r.id) DESC
                 LIMIT ?
                 """;
@@ -69,6 +71,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                         .name(rs.getString("name"))
                         .description(rs.getString("description"))
                         .thumbnailImgUrl(rs.getString("thumbnail_img_url"))
+                        .price(rs.getLong("price"))
                         .build(),
                 from, to, limit);
     }
@@ -78,7 +81,8 @@ public class JdbcThemeRepository implements ThemeRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
-                .addValue("thumbnail_img_url", theme.getThumbnailImgUrl());
+                .addValue("thumbnail_img_url", theme.getThumbnailImgUrl())
+                .addValue("price", theme.getPrice());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return theme.withId(id);

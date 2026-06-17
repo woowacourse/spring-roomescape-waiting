@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.ConflictException;
 import roomescape.global.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservation.exception.ReservationErrorMessage;
@@ -26,14 +27,15 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
-                .usingGeneratedKeyColumns("id");
+                .usingGeneratedKeyColumns("id")
+                .usingColumns("name", "date", "theme_id", "time_id");
     }
 
     @Override
     public List<ReservationDetail> findAll() {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at
+                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status, r.amount
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
@@ -48,20 +50,24 @@ public class JdbcReservationRepository implements ReservationRepository {
                         rs.getString("description"),
                         rs.getString("thumbnail_img_url"),
                         rs.getLong("time_id"),
-                        rs.getTime("start_at").toLocalTime())
+                        rs.getTime("start_at").toLocalTime(),
+                        ReservationStatus.valueOf(rs.getString("status")),
+                        rs.getLong("amount"))
         );
     }
 
     @Override
     public List<Reservation> findByName(String name) {
         return jdbcTemplate.query(
-                "SELECT id, name, date, theme_id, time_id FROM reservation WHERE name = ? ORDER BY date ASC",
+                "SELECT id, name, date, theme_id, time_id, status, amount FROM reservation WHERE name = ? ORDER BY date ASC",
                 (rs, rowNum) -> mapReservation(
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getDate("date").toLocalDate(),
                         rs.getLong("theme_id"),
-                        rs.getLong("time_id")),
+                        rs.getLong("time_id"),
+                        ReservationStatus.valueOf(rs.getString("status")),
+                        rs.getLong("amount")),
                 name
         );
     }
@@ -69,13 +75,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return jdbcTemplate.query(
-                "SELECT id, name, date, theme_id, time_id FROM reservation WHERE id = ?",
+                "SELECT id, name, date, theme_id, time_id, status, amount FROM reservation WHERE id = ?",
                 (rs, rowNum) -> mapReservation(
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getDate("date").toLocalDate(),
                         rs.getLong("theme_id"),
-                        rs.getLong("time_id")),
+                        rs.getLong("time_id"),
+                        ReservationStatus.valueOf(rs.getString("status")),
+                        rs.getLong("amount")),
                 id
         ).stream().findFirst();
     }
@@ -84,7 +92,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<ReservationDetail> findDetailById(Long id) {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at
+                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status, r.amount
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
@@ -99,7 +107,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                         rs.getString("description"),
                         rs.getString("thumbnail_img_url"),
                         rs.getLong("time_id"),
-                        rs.getTime("start_at").toLocalTime()),
+                        rs.getTime("start_at").toLocalTime(),
+                        ReservationStatus.valueOf(rs.getString("status")),
+                        rs.getLong("amount")),
                 id
         ).stream().findFirst();
     }
@@ -181,13 +191,16 @@ public class JdbcReservationRepository implements ReservationRepository {
         }
     }
 
-    private Reservation mapReservation(Long id, String name, LocalDate date, Long themeId, Long timeId) {
+    private Reservation mapReservation(Long id, String name, LocalDate date, Long themeId, Long timeId,
+                                        ReservationStatus status, Long amount) {
         return Reservation.builder()
                 .id(id)
                 .name(name)
                 .date(date)
                 .themeId(themeId)
                 .timeId(timeId)
+                .status(status)
+                .amount(amount)
                 .build();
     }
 }

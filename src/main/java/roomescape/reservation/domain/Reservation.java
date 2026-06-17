@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,10 +16,9 @@ public class Reservation {
     private final LocalDate date;
     private final Long themeId;
     private final Long timeId;
-
-    public static Reservation of(Long id, String name, LocalDate date, Long themeId, Long timeId) {
-        return new Reservation(id, name, date, themeId, timeId);
-    }
+    private final ReservationStatus status;
+    private final Long amount;
+    private final LocalDateTime expiresAt;
 
     public Reservation withId(Long generatedId) {
         return Reservation.builder()
@@ -27,6 +27,9 @@ public class Reservation {
                 .date(this.date)
                 .themeId(this.themeId)
                 .timeId(this.timeId)
+                .status(this.status)
+                .amount(this.amount)
+                .expiresAt(this.expiresAt)
                 .build();
     }
 
@@ -37,6 +40,9 @@ public class Reservation {
                 .date(date)
                 .themeId(this.themeId)
                 .timeId(timeId)
+                .status(this.status)
+                .amount(this.amount)
+                .expiresAt(this.expiresAt)
                 .build();
     }
 

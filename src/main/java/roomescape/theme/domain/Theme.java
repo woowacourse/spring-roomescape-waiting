@@ -13,6 +13,7 @@ public class Theme {
     private final String name;
     private final String description;
     private final String thumbnailImgUrl;
+    private final Long price;
 
     public Theme withId(Long generatedId) {
         return Theme.builder()
@@ -20,6 +21,7 @@ public class Theme {
                 .name(this.name)
                 .description(this.description)
                 .thumbnailImgUrl(this.thumbnailImgUrl)
+                .price(this.price)
                 .build();
     }
 }
