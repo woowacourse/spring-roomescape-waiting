@@ -1,15 +1,23 @@
 package roomescape.domain;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(
+        name = "uk_reservation_waiting",
+        columnNames = {"name", "reservation_date", "time_id", "theme_id"}
+))
 public class ReservationWaiting {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +27,7 @@ public class ReservationWaiting {
     private LocalDateTime createdAt;
 
     @Embedded
+    @AttributeOverride(name = "date", column = @Column(name = "reservation_date"))
     private ReservationSlot slot;
 
     public ReservationWaiting() {
