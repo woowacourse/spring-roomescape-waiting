@@ -193,7 +193,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 
 <div class="toast" id="toast"></div>
 
-<script src="https://js.tosspayments.com/v1/payment"></script>
 <script>
 async function logout() {
   await fetch('/logout', { method: 'POST' });
@@ -386,27 +385,15 @@ async function doReserve() {
       return;
     }
     const order = await r.json(); // { reservationId, orderId, amount, orderName }
-    closeModal();
-    // 2) 토스 결제창 인증으로 넘어간다. 성공/실패는 successUrl/failUrl로 돌아온다.
-    await startPayment(order);
+    // 2) 주문 정보를 결제 페이지로 넘기고 이동 — 거기서 v2 결제위젯을 띄운다.
+    sessionStorage.setItem('toss_order', JSON.stringify({ ...order, themeId: Number(themeId) }));
+    location.href = '/payment/checkout';
   } catch {
     closeModal();
     toast('err', '네트워크 오류가 발생했습니다');
   } finally {
     btn.disabled = false;
   }
-}
-
-async function startPayment(order) {
-  const cfg = await (await fetch('/payments/config')).json();
-  const tossPayments = TossPayments(cfg.clientKey);
-  await tossPayments.requestPayment('카드', {
-    amount: order.amount,
-    orderId: order.orderId,
-    orderName: order.orderName,
-    successUrl: location.origin + '/payment/success',
-    failUrl: location.origin + '/payment/fail'
-  });
 }
 
 async function doWait() {

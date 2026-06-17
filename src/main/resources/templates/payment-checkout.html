@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 — ESCAPE</title>
+<!-- Toss Payments v2 결제위젯(주문서형) SDK -->
+<script src="https://js.tosspayments.com/v2/standard"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#080808;color:#d4d4d4;font-family:'Inter',sans-serif;font-weight:300;padding:3rem 1rem;display:flex;justify-content:center}
+.card{max-width:480px;width:100%;border:1px solid #525252;background:#0f0f0f;padding:2.5rem}
+h1{font-size:1.2rem;color:#ebebeb;margin-bottom:1.5rem;letter-spacing:.08em;font-weight:400}
+.row{display:flex;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid #1f1f1f;font-size:.9rem}
+.row .label{color:#888}
+.row b{color:#ebebeb;font-weight:400}
+#payment-method,#agreement{margin-top:1.25rem}
+.btn{width:100%;margin-top:1.5rem;padding:1rem;border:1px solid #c22235;background:#c22235;color:#fff;font-size:.85rem;letter-spacing:.1em;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn:hover:not(:disabled){box-shadow:0 0 20px rgba(194,34,53,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-cancel{width:100%;margin-top:.75rem;padding:.85rem;border:1px solid #525252;background:transparent;color:#aaa;font-size:.72rem;letter-spacing:.15em;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-cancel:hover{border-color:#c22235;color:#c22235}
+.err{margin-top:1rem;color:#e5485a;font-size:.82rem;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>결제</h1>
+  <div class="row"><span class="label">예약</span><b id="order-name">—</b></div>
+  <div class="row"><span class="label">결제 금액</span><b id="amount">—</b></div>
+
+  <!-- v2 결제위젯이 결제수단·약관 UI를 이 div 안에 렌더한다 -->
+  <div id="payment-method"></div>
+  <div id="agreement"></div>
+
+  <button class="btn" id="pay-btn" disabled>결제하기</button>
+  <button class="btn-cancel" id="cancel-btn">취소하고 돌아가기</button>
+  <p class="err" id="err"></p>
+</div>
+
+<script>
+// 예약 생성 응답을 reservation 페이지에서 sessionStorage로 넘겨받는다.
+const order = JSON.parse(sessionStorage.getItem('toss_order') || 'null');
+if (!order) { location.href = '/'; }
+
+document.getElementById('order-name').textContent = order.orderName;
+document.getElementById('amount').textContent = order.amount.toLocaleString() + '원';
+
+const payBtn = document.getElementById('pay-btn');
+const cancelBtn = document.getElementById('cancel-btn');
+const errEl = document.getElementById('err');
+
+// 미결제(PENDING) 주문/예약을 정리해 슬롯을 즉시 풀어준다 (failUrl 콜백과 같은 엔드포인트).
+async function abandon() {
+  try {
+    await fetch('/payments/fail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: order.orderId })
+    });
+  } catch {}
+}
+
+let widgets;
+(async () => {
+  try {
+    const cfg = await (await fetch('/payments/config')).json();
+    const tossPayments = TossPayments(cfg.clientKey);
+    widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+    // 금액을 먼저 설정해야 결제수단 UI를 렌더할 수 있다.
+    await widgets.setAmount({ currency: 'KRW', value: order.amount });
+    await Promise.all([
+      widgets.renderPaymentMethods({ selector: '#payment-method', variantKey: 'DEFAULT' }),
+      widgets.renderAgreement({ selector: '#agreement', variantKey: 'AGREEMENT' })
+    ]);
+    payBtn.disabled = false; // 렌더 완료 전 결제 요청은 실패하므로 그때까지 막는다.
+  } catch (e) {
+    // 위젯이 못 뜨면 주문이 PENDING으로 묶이므로 즉시 정리하고 사유를 드러낸다.
+    errEl.textContent = '결제위젯을 불러오지 못했습니다: ' + (e && e.message ? e.message : e);
+    await abandon();
+  }
+})();
+
+payBtn.addEventListener('click', async () => {
+  payBtn.disabled = true;
+  errEl.textContent = '';
+  try {
+    // 금액은 setAmount()로 위젯에 이미 설정돼 있어 다시 넘기지 않는다.
+    await widgets.requestPayment({
+      orderId: order.orderId,
+      orderName: order.orderName,
+      successUrl: location.origin + '/payment/success',
+      failUrl: location.origin + '/payment/fail'
+    });
+  } catch (e) {
+    // 사용자가 결제창을 닫으면 USER_CANCEL — 페이지에 머물며 재시도 가능하게 둔다.
+    if (e && e.code !== 'USER_CANCEL') {
+      errEl.textContent = '결제 요청 실패: ' + (e.message || e);
+    }
+    payBtn.disabled = false;
+  }
+});
+
+cancelBtn.addEventListener('click', async () => {
+  // 명시적 취소 = 빠른 슬롯 해제 후 예약 페이지로 복귀.
+  cancelBtn.disabled = true;
+  await abandon();
+  location.href = order.themeId ? ('/reservation?themeId=' + order.themeId) : '/';
+});
+</script>
+</body>
+</html>

@@ -41,6 +41,11 @@ public class PageController {
         return "payment-fail";
     }
 
+    @GetMapping("/payment/checkout")
+    public String paymentCheckout() {
+        return "payment-checkout";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
