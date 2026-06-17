@@ -22,13 +22,13 @@ import roomescape.dto.projection.ReservationTimeStatusProjection;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeStatusResponse;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.TempReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
 
     @Mock
-    private ReservationTimeRepository reservationTimeRepository;
+    private TempReservationTimeRepository reservationTimeRepository;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
