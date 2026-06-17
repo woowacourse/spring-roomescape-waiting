@@ -7,6 +7,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.reservation.application.service.PromotionService;
 import roomescape.reservation.application.service.WaitingCommandService;
+import roomescape.reservation.domain.PromotionSource;
 import roomescape.reservation.event.schema.WaitingPromotedToReservation;
 import roomescape.reservation.event.schema.WaitingSaved;
 
@@ -19,7 +20,7 @@ public class WaitingEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleWaitingSaved(WaitingSaved event) {
-        promotionService.promoteFromWaiting(event.date(), event.themeId(), event.timeId());
+        promotionService.promoteFromWaiting(event.date(), event.themeId(), event.timeId(), PromotionSource.DIRECT);
     }
 
     @EventListener

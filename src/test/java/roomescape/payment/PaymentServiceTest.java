@@ -29,7 +29,7 @@ class PaymentServiceTest {
 
   @BeforeEach
   void setUp() {
-    orderRepository.save(new Order("order-1", 10000L));
+    orderRepository.save(new Order("order-1", 10000L, 1L));
   }
 
   @Test

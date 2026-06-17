@@ -178,10 +178,13 @@ public class JdbcReservationRepository implements ReservationRepository {
         try {
             int rows = jdbcTemplate.update(
                     """
-                            INSERT INTO reservation (name, date, theme_id, time_id)
-                            SELECT name, date, theme_id, time_id FROM waiting
-                            WHERE date = ? AND theme_id = ? AND time_id = ?
-                            ORDER BY id ASC LIMIT 1
+                            INSERT INTO reservation (name, date, theme_id, time_id, status, amount, expires_at)
+                            SELECT w.name, w.date, w.theme_id, w.time_id,
+                                   'PENDING_PAYMENT', t.price, DATEADD('MINUTE', 10, NOW())
+                            FROM waiting w
+                            JOIN theme t ON t.id = w.theme_id
+                            WHERE w.date = ? AND w.theme_id = ? AND w.time_id = ?
+                            ORDER BY w.id ASC LIMIT 1
                             """,
                     date, themeId, timeId
             );
@@ -189,6 +192,18 @@ public class JdbcReservationRepository implements ReservationRepository {
         } catch (DuplicateKeyException e) {
             return false;
         }
+    }
+
+    @Override
+    public boolean confirmPayment(Long reservationId) {
+        int rows = jdbcTemplate.update(
+                """
+                        UPDATE reservation SET status = 'CONFIRMED'
+                        WHERE id = ? AND status = 'PENDING_PAYMENT' AND expires_at > NOW()
+                        """,
+                reservationId
+        );
+        return rows > 0;
     }
 
     private Reservation mapReservation(Long id, String name, LocalDate date, Long themeId, Long timeId,

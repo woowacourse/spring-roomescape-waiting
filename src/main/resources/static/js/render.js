@@ -352,6 +352,10 @@ function renderBookingSummary(theme) {
         <dd>${escapeHtml(state.selectedDate || "-")} ${time ? escapeHtml(time.startAt) : ""}</dd>
       </div>
       <div>
+        <dt>금액</dt>
+        <dd>${theme?.price != null ? escapeHtml(theme.price.toLocaleString("ko-KR")) + "원" : "-"}</dd>
+      </div>
+      <div>
         <dt>모드</dt>
         <dd>${state.editingReservationId ? "예약 변경" : selectedTime()?.available === false ? "대기 신청" : "새 예약"}</dd>
       </div>
@@ -406,24 +410,31 @@ function renderMyReservationsContent(hasName) {
     }
 
     return `
-    <div class="reservation-table" role="table" aria-label="내 예약 목록">
+    <div class="reservation-table status-table" role="table" aria-label="내 예약 목록">
       <div class="table-head" role="row">
         <span>예약자</span>
         <span>테마</span>
         <span>일정</span>
+        <span>상태</span>
         <span>관리</span>
       </div>
-      ${state.myReservations.map((reservation) => `
+      ${state.myReservations.map((reservation) => {
+        const isPending = reservation.status === "PENDING_PAYMENT";
+        return `
         <div class="table-row" role="row">
           <span>${escapeHtml(reservation.name)}</span>
           <span>${escapeHtml(reservation.theme.name)}</span>
           <span>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)}</span>
+          <span>${isPending ? '<span class="waiting-badge">결제 대기</span>' : "확정"}</span>
           <span class="table-actions">
-            <button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}">변경</button>
+            ${isPending
+              ? `<a class="primary-button" href="/payment?reservationId=${reservation.id}">결제</a>`
+              : `<button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}">변경</button>`
+            }
             <button class="danger-button" type="button" data-action="delete-reservation" data-reservation-id="${reservation.id}">취소</button>
           </span>
         </div>
-      `).join("")}
+      `}).join("")}
     </div>
   `;
 }
@@ -543,6 +554,10 @@ function renderThemesAdmin() {
       <div class="form-row wide">
         <label for="theme-thumbnail">이미지 URL</label>
         <input id="theme-thumbnail" name="thumbnailImgUrl" type="url" placeholder="https://images.unsplash.com/...">
+      </div>
+      <div class="form-row">
+        <label for="theme-price">가격 (원)</label>
+        <input id="theme-price" name="price" type="number" min="0" placeholder="50000">
       </div>
       <button class="primary-button" type="submit" ${state.submitting ? "disabled" : ""}>테마 추가</button>
     </form>

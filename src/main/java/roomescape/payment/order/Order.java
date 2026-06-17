@@ -7,10 +7,12 @@ public class Order {
 
   private final String orderId;
   private final Long amount;
+  private final Long reservationId;
 
-  public Order(String orderId, Long amount) {
+  public Order(String orderId, Long amount, Long reservationId) {
     this.orderId = orderId;
     this.amount = amount;
+    this.reservationId = reservationId;
   }
 
   public String getOrderId() {
@@ -19,6 +21,10 @@ public class Order {
 
   public Long getAmount() {
     return amount;
+  }
+
+  public Long getReservationId() {
+    return reservationId;
   }
 
 }

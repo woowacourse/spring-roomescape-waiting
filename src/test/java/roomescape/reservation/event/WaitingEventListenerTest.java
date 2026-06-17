@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.application.service.PromotionService;
 import roomescape.reservation.application.service.WaitingCommandService;
+import roomescape.reservation.domain.PromotionSource;
 import roomescape.reservation.event.schema.WaitingPromotedToReservation;
 import roomescape.reservation.event.schema.WaitingSaved;
 
@@ -37,13 +38,13 @@ class WaitingEventListenerTest {
 
         listener.handleWaitingSaved(event);
 
-        verify(promotionService).promoteFromWaiting(date, themeId, timeId);
+        verify(promotionService).promoteFromWaiting(date, themeId, timeId, PromotionSource.DIRECT);
     }
 
     @DisplayName("WaitingPromotedToReservation 이벤트 수신 시 deleteOldestBySlot을 호출한다.")
     @Test
     void calls_deleteOldestBySlot_on_waiting_promoted() {
-        WaitingPromotedToReservation event = new WaitingPromotedToReservation(date, themeId, timeId);
+        WaitingPromotedToReservation event = new WaitingPromotedToReservation(date, themeId, timeId, PromotionSource.DIRECT);
 
         listener.handleWaitingPromoted(event);
 
