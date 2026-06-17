@@ -195,6 +195,19 @@ public class ReservationDao {
         );
     }
 
+    public boolean existsPendingPaymentByOwner(Member member) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation
+                    WHERE name = :name AND status = :status
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of(
+                "name", member.name(),
+                "status", ReservationStatus.PENDING_PAYMENT.name()
+        ), Boolean.class));
+    }
+
     public void confirm(long id) {
         String sql = "UPDATE reservation SET status = :status WHERE id = :id";
         int affected = jdbcTemplate.update(sql, Map.of(

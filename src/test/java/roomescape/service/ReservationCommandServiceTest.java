@@ -140,6 +140,25 @@ class ReservationCommandServiceTest {
     }
 
     @Test
+    @DisplayName("결제 대기 중인 예약이 있으면 다른 슬롯에 예약을 신청할 수 없다.")
+    void createPendingPaymentReservationBlockedWhenAlreadyPendingOnDifferentSlot() {
+        reservationCommandService.createPendingPaymentReservation(
+                "new-user",
+                LocalDate.of(2026, 6, 5),
+                1L,
+                2L);
+
+        assertThatThrownBy(() ->
+                reservationCommandService.createPendingPaymentReservation(
+                        "new-user",
+                        LocalDate.of(2026, 6, 5),
+                        2L,
+                        2L))
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage("이미 결제 대기 중인 예약이 있습니다. 결제를 완료하거나 취소 후 다시 시도해주세요.");
+    }
+
+    @Test
     @DisplayName("존재하지 않는 예약은 취소할 수 없다.")
     void cancelNonExistent() {
         assertThatThrownBy(() ->

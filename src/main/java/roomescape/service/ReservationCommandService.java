@@ -63,6 +63,7 @@ public class ReservationCommandService {
         if (existingPending.isPresent()) {
             return existingPending.get();
         }
+        validateNoPendingPaymentForMember(member);
 
         Reservation savedReservation = save(reservation);
         eventPublisher.publishEvent(new ReservationPendingPaymentEvent(savedReservation.id(), now));
@@ -172,6 +173,12 @@ public class ReservationCommandService {
                 .ifPresent(existing -> {
                     throw duplicateReservationException();
                 });
+    }
+
+    private void validateNoPendingPaymentForMember(Member member) {
+        if (reservationDao.existsPendingPaymentByOwner(member)) {
+            throw new DuplicateException("이미 결제 대기 중인 예약이 있습니다. 결제를 완료하거나 취소 후 다시 시도해주세요.");
+        }
     }
 
     private DuplicateException duplicateReservationException() {
