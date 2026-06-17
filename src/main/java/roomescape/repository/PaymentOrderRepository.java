@@ -10,4 +10,6 @@ public interface PaymentOrderRepository {
     Optional<PaymentOrder> findByOrderId(String orderId);
 
     int updatePaymentKey(String orderId, String paymentKey);
+
+    int deleteByOrderId(String orderId);
 }

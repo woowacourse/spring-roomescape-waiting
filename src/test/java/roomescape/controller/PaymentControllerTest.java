@@ -1,7 +1,9 @@
 package roomescape.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,5 +60,30 @@ class PaymentControllerTest {
                         .param("amount", "1000"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("결제 금액이 주문 금액과 일치하지 않습니다."));
+    }
+
+    @Test
+    void GET_payments_fail_결제_대기_주문을_정리하고_실패_페이지로_이동한다() throws Exception {
+        mockMvc.perform(get("/payments/fail")
+                        .param("code", "REJECT_CARD_PAYMENT")
+                        .param("message", "카드 결제가 거절되었습니다.")
+                        .param("orderId", "order_123456"))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location",
+                        "/payment-fail.html?code=REJECT_CARD_PAYMENT&message=%EC%B9%B4%EB%93%9C%20%EA%B2%B0%EC%A0%9C%EA%B0%80%20%EA%B1%B0%EC%A0%88%EB%90%98%EC%97%88%EC%8A%B5%EB%8B%88%EB%8B%A4.&orderId=order_123456"));
+
+        verify(paymentService).failPayment("order_123456");
+    }
+
+    @Test
+    void GET_payments_fail_orderId가_없어도_실패_페이지로_이동한다() throws Exception {
+        mockMvc.perform(get("/payments/fail")
+                        .param("code", "PAY_PROCESS_CANCELED")
+                        .param("message", "사용자가 결제를 취소했습니다."))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location",
+                        "/payment-fail.html?code=PAY_PROCESS_CANCELED&message=%EC%82%AC%EC%9A%A9%EC%9E%90%EA%B0%80%20%EA%B2%B0%EC%A0%9C%EB%A5%BC%20%EC%B7%A8%EC%86%8C%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4."));
+
+        verify(paymentService).failPayment(null);
     }
 }

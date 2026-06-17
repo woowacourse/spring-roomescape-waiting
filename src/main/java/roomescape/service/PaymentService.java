@@ -40,6 +40,26 @@ public class PaymentService {
         return result;
     }
 
+    @Transactional
+    public void failPayment(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            return;
+        }
+
+        paymentOrderRepository.findByOrderId(orderId)
+                .ifPresent(this::deletePendingPaymentOrder);
+    }
+
+    private void deletePendingPaymentOrder(PaymentOrder paymentOrder) {
+        reservationRepository.findById(paymentOrder.getReservationId())
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.PAYMENT_PENDING)
+                .filter(reservation -> paymentOrder.getPaymentKey() == null)
+                .ifPresent(reservation -> {
+                    paymentOrderRepository.deleteByOrderId(paymentOrder.getOrderId());
+                    reservationRepository.deleteById(reservation.getId());
+                });
+    }
+
     private void validateAmount(long amount, PaymentOrder paymentOrder) {
         if (paymentOrder.getAmount() != amount) {
             throw new PaymentAmountMismatchException();

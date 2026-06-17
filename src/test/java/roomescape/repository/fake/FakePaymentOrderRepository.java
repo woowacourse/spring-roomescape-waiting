@@ -35,4 +35,14 @@ public class FakePaymentOrderRepository implements PaymentOrderRepository {
         store.put(paymentOrder.getId(), paymentOrder.withPaymentKey(paymentKey));
         return 1;
     }
+
+    @Override
+    public int deleteByOrderId(String orderId) {
+        Optional<PaymentOrder> found = findByOrderId(orderId);
+        if (found.isEmpty()) {
+            return 0;
+        }
+        store.remove(found.get().getId());
+        return 1;
+    }
 }
