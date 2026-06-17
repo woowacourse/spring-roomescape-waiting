@@ -69,6 +69,19 @@ public class PaymentService {
         );
     }
 
+    public void cancel(String orderId) {
+        if (orderId == null) {
+            return;
+        }
+
+        paymentOrderRepository.findByOrderId(orderId).ifPresent(paymentOrder -> {
+            Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
+            reservation.cancelEntry(paymentOrder.getEntryId());
+            reservationRepository.update(reservation);
+            log.info("[결제 실패 정리] orderId={} entryId={} PENDING→DELETED", orderId, paymentOrder.getEntryId());
+        });
+    }
+
     public PreparePaymentResponse prepare(ReservationCommand command) {
         Reservation reservation = findOrCreateSlotForUpdate(command);
         reservation.addPendingEntry(command.name(), command.amount(), LocalDateTime.now(clock));

@@ -1,12 +1,14 @@
 package roomescape.controller.client.web;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.service.PaymentService;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class PageController {
@@ -73,6 +75,11 @@ public class PageController {
             @RequestParam String message,
             @RequestParam(required = false) String orderId,
             Model model) {
+        try {
+            paymentService.cancel(orderId);
+        } catch (Exception e) {
+            log.warn("[결제 실패 정리 실패] orderId={} message={}", orderId, e.getMessage());
+        }
         model.addAttribute("code", code);
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
