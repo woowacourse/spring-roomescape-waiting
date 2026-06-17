@@ -19,10 +19,11 @@ public class TossPaymentGateway implements PaymentGateway {
     private final String secretKey;
 
     public TossPaymentGateway(
+            RestClient.Builder restClientBuilder,
             @Value("${payment.toss.base-url:https://api.tosspayments.com}") String baseUrl,
             @Value("${payment.toss.secret-key}") String secretKey
     ) {
-        this.restClient = RestClient.builder()
+        this.restClient = restClientBuilder
                 .baseUrl(baseUrl)
                 .build();
         this.secretKey = secretKey;
