@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import roomescape.exception.custom.AlreadyWaitingException;
 import roomescape.exception.custom.WaitIsFullException;
@@ -70,14 +71,6 @@ public class Waits {
                 .count() + 1;
     }
 
-    public List<Wait> getWaits() {
-        return List.copyOf(waits);
-    }
-
-    public Long size() {
-        return (long) waits.size();
-    }
-
     private void validateNotDuplicated(String name, Slot slot) {
         boolean isDuplicated = waits.stream()
                 .anyMatch(wait -> wait.isSameUser(name) && wait.isSameSlot(slot));
@@ -90,5 +83,19 @@ public class Waits {
         if (isFullWaitsBySlot(slot)) {
             throw new WaitIsFullException();
         }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Waits waits1 = (Waits) object;
+        return Objects.equals(waits, waits1.waits);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(waits);
     }
 }

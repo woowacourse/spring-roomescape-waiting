@@ -97,7 +97,7 @@ public class ReservationTimeServiceTest {
     void deleteTest() {
         reservationTimeService.delete(1L);
 
-        verify(reservationTimeRepository, times(1)).delete(1L);
+        verify(reservationTimeRepository, times(1)).deleteById(1L);
     }
 
     @Test

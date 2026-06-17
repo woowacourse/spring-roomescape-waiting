@@ -57,11 +57,13 @@ public class WaitServiceTest {
     void saveTest() {
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
         Wait wait = waitWithoutId.withId(1L);
-        Waits waits = new Waits(List.of());
+
+        List<Wait> waits = List.of();
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);
-        when(waitRepository.calculateWaitingOrder(wait)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait.getReservationDate(), wait.getTimeId(), wait.getThemeId(),
+                wait.getId())).thenReturn(1L);
 
         assertThat(waitService.save(waitWithoutId)).isEqualTo(wait);
     }
@@ -73,7 +75,7 @@ public class WaitServiceTest {
 
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
 
-        Waits waits = new Waits(List.of(wait1, wait2));
+        List<Wait> waits = List.of(wait1, wait2);
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
@@ -89,7 +91,7 @@ public class WaitServiceTest {
         Wait otherWait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "neo", slot);
         Wait otherWait3 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 13, 0), "lucky", slot);
 
-        Waits waits = new Waits(List.of(otherWait1, otherWait2, otherWait3));
+        List<Wait> waits = List.of(otherWait1, otherWait2, otherWait3);
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
@@ -102,13 +104,16 @@ public class WaitServiceTest {
         Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
         Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "fizz", otherSlot);
 
-        Waits fizzWaits = new Waits(List.of(wait1, wait2));
+        List<Wait> fizzWaits = List.of(wait1, wait2);
+        Waits result = new Waits(fizzWaits);
 
         when(waitRepository.findByName("fizz")).thenReturn(fizzWaits);
-        when(waitRepository.calculateWaitingOrder(wait1)).thenReturn(1L);
-        when(waitRepository.calculateWaitingOrder(wait2)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait1.getReservationDate(), wait1.getTimeId(), wait1.getThemeId(),
+                wait1.getId())).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait2.getReservationDate(), wait2.getTimeId(), wait2.getThemeId(),
+                wait2.getId())).thenReturn(2L);
 
-        assertThat(waitService.findByName("fizz")).isEqualTo(fizzWaits);
+        assertThat(waitService.findByName("fizz")).isEqualTo(result);
     }
 
     @Test
@@ -116,13 +121,16 @@ public class WaitServiceTest {
         Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
         Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", otherSlot);
 
-        Waits waits = new Waits(List.of(wait1, wait2));
+        List<Wait> waits = List.of(wait1, wait2);
+        Waits result = new Waits(waits);
 
-        when(waitRepository.findAll()).thenReturn(waits);
-        when(waitRepository.calculateWaitingOrder(wait1)).thenReturn(1L);
-        when(waitRepository.calculateWaitingOrder(wait2)).thenReturn(1L);
+        when(waitRepository.findAllWaits()).thenReturn(waits);
+        when(waitRepository.calculateWaitingOrder(wait1.getReservationDate(), wait1.getTimeId(), wait1.getThemeId(),
+                wait1.getId())).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait2.getReservationDate(), wait2.getTimeId(), wait2.getThemeId(),
+                wait2.getId())).thenReturn(2L);
 
-        assertThat(waitService.findAll()).isEqualTo(waits);
+        assertThat(waitService.findAll()).isEqualTo(result);
     }
 
     @Test
@@ -137,15 +145,18 @@ public class WaitServiceTest {
         Wait wait1 = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", slot);
         Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", slot);
 
-        Waits waits = new Waits(List.of(wait1, wait2));
+        List<Wait> waits = List.of(wait1, wait2);
+        Waits result = new Waits(waits);
 
         when(waitRepository.findBySlot(slot.getReservationDate(), slot.getTime().getId(),
                 slot.getTheme().getId())).thenReturn(
                 waits);
-        when(waitRepository.calculateWaitingOrder(wait1)).thenReturn(1L);
-        when(waitRepository.calculateWaitingOrder(wait2)).thenReturn(2L);
+        when(waitRepository.calculateWaitingOrder(wait1.getReservationDate(), wait1.getTimeId(), wait1.getThemeId(),
+                wait1.getId())).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait2.getReservationDate(), wait2.getTimeId(), wait2.getThemeId(),
+                wait2.getId())).thenReturn(2L);
 
-        assertThat(waitService.findBySlot(slot)).isEqualTo(waits);
+        assertThat(waitService.findBySlot(slot)).isEqualTo(result);
     }
 
     @Test

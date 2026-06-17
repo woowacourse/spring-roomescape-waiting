@@ -25,15 +25,7 @@ public interface WaitRepository extends JpaRepository<Wait, Long> {
             @Param("themeId") Long themeId
     );
 
-    @Query(
-            value = """
-                    SELECT w FROM Wait w 
-                    WHERE w.slot.reservationDate = :reservationDate 
-                      AND w.slot.time.id = :timeId 
-                      AND w.slot.theme.id = :themeId
-                      AND w.name = :name
-                    """)
-    List<Wait> findByName(@Param("name") String name);
+    List<Wait> findByName(String name);
 
     @Query(
             value = """
