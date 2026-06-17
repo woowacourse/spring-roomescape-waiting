@@ -114,7 +114,7 @@ public class ReservationServiceTest {
         Reservation reservation = new Reservation(1L, "fizz", slot);
         reservationService.delete(reservation, false);
 
-        verify(reservationRepository, times(1)).delete(1L);
+        verify(reservationRepository, times(1)).deleteById(1L);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class ReservationServiceTest {
 
     @Test
     void validateReferencedThemeExceptionTest() {
-        when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
+        when(reservationRepository.existsBySlot_Theme_Id(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationService.validateReferencedTheme(1L))
                 .isInstanceOf(CannotDeleteThemeInUseException.class);
@@ -145,7 +145,7 @@ public class ReservationServiceTest {
 
     @Test
     void validateReferencedTimeExceptionTest() {
-        when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
+        when(reservationRepository.existsBySlot_Time_Id(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationService.validateReferencedTime(1L))
                 .isInstanceOf(CannotDeleteReservationTimeInUseException.class);

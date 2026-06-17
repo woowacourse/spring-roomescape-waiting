@@ -153,7 +153,7 @@ class JdbcWaitRepositoryTest {
     }
 
     @Test
-    void findOrderByWaitTest() {
+    void calculateWaitingOrderTest() {
         String createWait = "INSERT INTO `wait`(`created_at`, `name`, `reservation_date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
@@ -168,9 +168,9 @@ class JdbcWaitRepositoryTest {
         Wait waitFizz = new Wait(2L, LocalDateTime.of(2026, 5, 21, 10, 1), "fizz", slot);
         Wait waitNeo = new Wait(3L, LocalDateTime.of(2026, 5, 21, 10, 2), "neo", slot);
 
-        assertThat(waitRepository.findOrderByWait(waitLuke)).isEqualTo(1L);
-        assertThat(waitRepository.findOrderByWait(waitFizz)).isEqualTo(2L);
-        assertThat(waitRepository.findOrderByWait(waitNeo)).isEqualTo(3L);
+        assertThat(waitRepository.calculateWaitingOrder(waitLuke)).isEqualTo(1L);
+        assertThat(waitRepository.calculateWaitingOrder(waitFizz)).isEqualTo(2L);
+        assertThat(waitRepository.calculateWaitingOrder(waitNeo)).isEqualTo(3L);
     }
 
     @Test

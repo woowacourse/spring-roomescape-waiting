@@ -28,19 +28,21 @@ public class WaitService {
 
     @Transactional
     public Wait save(Wait waitWithoutId) {
-        Waits waits = waitRepository.findBySlot(waitWithoutId.getReservationDate(), waitWithoutId.getTime().getId(),
-                waitWithoutId.getTheme().getId());
+        Waits waits = new Waits(
+                waitRepository.findBySlot(waitWithoutId.getReservationDate(), waitWithoutId.getTimeId(),
+                        waitWithoutId.getThemeId())
+        );
         waits.validateCreate(waitWithoutId.getName(), waitWithoutId.getSlot());
 
         return waitRepository.save(waitWithoutId);
     }
 
     public Waits findByName(String name) {
-        return waitRepository.findByName(name);
+        return new Waits(waitRepository.findByName(name));
     }
 
     public Waits findAll() {
-        return waitRepository.findAll();
+        return new Waits(waitRepository.findAllWaits());
     }
 
     @Transactional
@@ -53,7 +55,8 @@ public class WaitService {
     }
 
     public Waits findBySlot(Slot slot) {
-        return waitRepository.findBySlot(slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
+        return new Waits(waitRepository.findBySlot(slot.getReservationDate(), slot.getTimeId(),
+                slot.getThemeId()));
     }
 
     public Wait findWait(Long waitId) {
@@ -62,17 +65,18 @@ public class WaitService {
     }
 
     public Long calculateOrder(Wait wait) {
-        return waitRepository.findOrderByWait(wait);
+        return waitRepository.calculateWaitingOrder(wait.getReservationDate(), wait.getTimeId(), wait.getThemeId(),
+                wait.getId());
     }
 
     public void validateReferencedTime(Long timeId) {
-        if (waitRepository.existsByTimeId(timeId)) {
+        if (waitRepository.existsBySlot_Time_Id(timeId)) {
             throw new CannotDeleteReservationTimeInUseException();
         }
     }
 
     public void validateReferencedTheme(Long themeId) {
-        if (waitRepository.existsByThemeId(themeId)) {
+        if (waitRepository.existsBySlot_Theme_Id(themeId)) {
             throw new CannotDeleteThemeInUseException();
         }
     }

@@ -70,7 +70,7 @@ public class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    void findReservedTimesByDateAndThemeTest() {
+    void findReservedTimesByDateAndThemeIdTest() {
         String insertReservationTimeSql = "INSERT INTO `reservation_time` (`start_at`) VALUES (?)";
         jdbcTemplate.update(insertReservationTimeSql, "10:00");
         jdbcTemplate.update(insertReservationTimeSql, "11:00");
@@ -83,7 +83,7 @@ public class JdbcReservationTimeRepositoryTest {
         jdbcTemplate.update(insertReservationSql, "fizz", "2026-05-02", 1L, 1L);
         jdbcTemplate.update(insertReservationSql, "fizz", "2026-05-02", 2L, 1L);
 
-        List<ReservationTime> reservedTimes = reservationTimeRepository.findReservedTimesByDateAndTheme(
+        List<ReservationTime> reservedTimes = reservationTimeRepository.findReservedTimesByDateAndTheme_Id(
                 LocalDate.of(2026, 5, 2),
                 1L);
 

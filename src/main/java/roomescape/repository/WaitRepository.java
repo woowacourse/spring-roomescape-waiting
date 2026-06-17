@@ -1,27 +1,58 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.Wait;
-import roomescape.domain.Waits;
 
-public interface WaitRepository {
+public interface WaitRepository extends JpaRepository<Wait, Long> {
 
-    Wait save(Wait waitWithoutId);
+    @Query("SELECT w FROM Wait w")
+    List<Wait> findAllWaits();
 
-    Optional<Wait> findById(Long id);
+    @Query(
+            value = """
+                    SELECT w FROM Wait w 
+                    WHERE w.slot.reservationDate = :reservationDate 
+                      AND w.slot.time.id = :timeId 
+                      AND w.slot.theme.id = :themeId
+                    """)
+    List<Wait> findBySlot(
+            @Param("reservationDate") LocalDate reservationDate,
+            @Param("timeId") Long timeId,
+            @Param("themeId") Long themeId
+    );
 
-    Waits findBySlot(LocalDate reservationDate, Long timeId, Long themeId);
+    @Query(
+            value = """
+                    SELECT w FROM Wait w 
+                    WHERE w.slot.reservationDate = :reservationDate 
+                      AND w.slot.time.id = :timeId 
+                      AND w.slot.theme.id = :themeId
+                      AND w.name = :name
+                    """)
+    List<Wait> findByName(@Param("name") String name);
 
-    Waits findByName(String name);
+    @Query(
+            value = """
+                    WITH slot_waiting_list AS (
+                        SELECT `id`, ROW_NUMBER() OVER (ORDER BY created_at, id) AS `order`
+                        FROM wait
+                        WHERE `reservation_date` = :date AND `time_id` = :timeId AND `theme_id` = :themeId
+                    )
+                    SELECT `order` FROM slot_waiting_list WHERE `id` = :waitId
+                    """,
+            nativeQuery = true
+    )
+    Long calculateWaitingOrder(
+            @Param("date") LocalDate date,
+            @Param("timeId") Long timeId,
+            @Param("themeId") Long themeId,
+            @Param("waitId") Long waitId);
 
-    Waits findAll();
+    boolean existsBySlot_Time_Id(Long timeId);
 
-    Long findOrderByWait(Wait wait);
-
-    void deleteById(Long id);
-
-    boolean existsByTimeId(Long timeId);
-
-    boolean existsByThemeId(Long themeId);
+    boolean existsBySlot_Theme_Id(Long themeId);
 }

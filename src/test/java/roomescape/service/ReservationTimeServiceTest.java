@@ -79,7 +79,8 @@ public class ReservationTimeServiceTest {
                 new ReservationTime(3L, LocalTime.of(12, 0))
         );
 
-        when(reservationTimeRepository.findReservedTimesByDateAndTheme(date, theme.getId())).thenReturn(reservedTimes);
+        when(reservationTimeRepository.findReservedTimesByDateAndTheme_Id(date, theme.getId())).thenReturn(
+                reservedTimes);
         assertThat(reservationTimeService.findReservedTimesByDateAndTheme(date, theme.getId())).isEqualTo(
                 reservedTimes);
     }

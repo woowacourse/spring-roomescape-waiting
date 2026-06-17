@@ -1,15 +1,29 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.custom.InvalidDomainValueException;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final String name;
-    private final Slot slot;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @Embedded
+    private Slot slot;
+
+    public Reservation() {
+    }
 
     public Reservation(Long id, String name, Slot slot) {
         validate(name, slot);
@@ -47,7 +61,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return slot.getDate();
+        return slot.getReservationDate();
     }
 
     public ReservationTime getTime() {

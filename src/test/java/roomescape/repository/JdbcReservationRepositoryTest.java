@@ -110,11 +110,11 @@ public class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void deleteTest() {
+    void deleteByIdTest() {
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 1L);
 
-        reservationRepository.delete(1L);
+        reservationRepository.deleteById(1L);
 
         String findReservationCountSql = "SELECT COUNT(*) FROM `reservation`";
         int count = jdbcTemplate.queryForObject(findReservationCountSql, Integer.class);
@@ -127,13 +127,13 @@ public class JdbcReservationRepositoryTest {
         String insertReservationTimeSql = "INSERT INTO `reservation_time` (`id`, `start_at`) VALUES (?, ?)";
         jdbcTemplate.update(insertReservationTimeSql, 100L, "13:00");
 
-        boolean exist = reservationRepository.existsByTimeId(100L);
+        boolean exist = reservationRepository.existsBySlot_Time_Id(100L);
         assertThat(exist).isFalse();
 
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, "fizz", "2026-05-02", 100L, 1L);
 
-        exist = reservationRepository.existsByTimeId(100L);
+        exist = reservationRepository.existsBySlot_Time_Id(100L);
         assertThat(exist).isTrue();
     }
 
@@ -142,22 +142,24 @@ public class JdbcReservationRepositoryTest {
         String insertThemeSql = "INSERT INTO `theme` (`id`, `name`, `description`, `thumbnail_url`) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(insertThemeSql, 100L, "방탈출1", "방탈출1 설명", "url.jpg");
 
-        boolean exist = reservationRepository.existsByThemeId(100L);
+        boolean exist = reservationRepository.existsBySlot_Theme_Id(100L);
         assertThat(exist).isFalse();
 
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 100L);
 
-        exist = reservationRepository.existsByThemeId(100L);
+        exist = reservationRepository.existsBySlot_Theme_Id(100L);
         assertThat(exist).isTrue();
     }
 
     @Test
-    void findBySlotTest() {
+    void findByDateAndTimeIdAndThemeIdTest() {
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 1L);
 
-        Optional<Reservation> slot = reservationRepository.findBySlot(LocalDate.of(2026, 5, 2), 1L, 1L);
+        Optional<Reservation> slot = reservationRepository.findBySlot(
+                LocalDate.of(2026, 5, 2), 1L,
+                1L);
 
         assertThat(slot).isNotEmpty();
         assertThat(slot.get().getDate()).isEqualTo(LocalDate.of(2026, 5, 2));

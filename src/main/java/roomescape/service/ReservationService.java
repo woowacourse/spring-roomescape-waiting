@@ -51,7 +51,7 @@ public class ReservationService {
     public void delete(Reservation reservation, boolean isAdmin) {
         ReservationValidator reservationValidator = ReservationValidatorFactory.getValidator(isAdmin);
         reservationValidator.validateDelete(reservation, LocalDateTime.now(clock));
-        reservationRepository.delete(reservation.getId());
+        reservationRepository.deleteById(reservation.getId());
     }
 
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
@@ -59,13 +59,13 @@ public class ReservationService {
     }
 
     public void validateReferencedTheme(Long themeId) {
-        if (reservationRepository.existsByThemeId(themeId)) {
+        if (reservationRepository.existsBySlot_Theme_Id(themeId)) {
             throw new CannotDeleteThemeInUseException();
         }
     }
 
-    public void validateReferencedTime(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+    public void validateReferencedTime(Long timeId) {
+        if (reservationRepository.existsBySlot_Time_Id(timeId)) {
             throw new CannotDeleteReservationTimeInUseException();
         }
     }

@@ -61,7 +61,7 @@ public class WaitServiceTest {
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);
-        when(waitRepository.findOrderByWait(wait)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait)).thenReturn(1L);
 
         assertThat(waitService.save(waitWithoutId)).isEqualTo(wait);
     }
@@ -105,8 +105,8 @@ public class WaitServiceTest {
         Waits fizzWaits = new Waits(List.of(wait1, wait2));
 
         when(waitRepository.findByName("fizz")).thenReturn(fizzWaits);
-        when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
-        when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait1)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait2)).thenReturn(1L);
 
         assertThat(waitService.findByName("fizz")).isEqualTo(fizzWaits);
     }
@@ -119,8 +119,8 @@ public class WaitServiceTest {
         Waits waits = new Waits(List.of(wait1, wait2));
 
         when(waitRepository.findAll()).thenReturn(waits);
-        when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
-        when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait1)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait2)).thenReturn(1L);
 
         assertThat(waitService.findAll()).isEqualTo(waits);
     }
@@ -139,10 +139,11 @@ public class WaitServiceTest {
 
         Waits waits = new Waits(List.of(wait1, wait2));
 
-        when(waitRepository.findBySlot(slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())).thenReturn(
+        when(waitRepository.findBySlot(slot.getReservationDate(), slot.getTime().getId(),
+                slot.getTheme().getId())).thenReturn(
                 waits);
-        when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
-        when(waitRepository.findOrderByWait(wait2)).thenReturn(2L);
+        when(waitRepository.calculateWaitingOrder(wait1)).thenReturn(1L);
+        when(waitRepository.calculateWaitingOrder(wait2)).thenReturn(2L);
 
         assertThat(waitService.findBySlot(slot)).isEqualTo(waits);
     }
