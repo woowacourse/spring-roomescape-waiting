@@ -53,7 +53,7 @@ class ReservationControllerTest {
     void 내_예약_조회_성공() {
         given()
                 .cookie("JSESSIONID", sessionId)
-                .get("/bookings")
+                .get("/reservations-mine")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", greaterThanOrEqualTo(1));

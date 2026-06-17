@@ -203,10 +203,16 @@ function submitBooking() {
     body: JSON.stringify({date: state.date, timeId: state.timeId, themeId: state.themeId})
   })
     .then(res => {
+      if (res.status === 401) {
+        showToast('로그인이 필요합니다.');
+        setTimeout(() => { window.location.href = '/login'; }, 1000);
+        return null;
+      }
       if (res.status === 201) return res.json();
       return res.json().then(body => { throw new Error(body.message || '신청에 실패했습니다.'); });
     })
     .then(booking => {
+      if (!booking) return;
       const fallback = booking.status === 'WAITING'
         ? '대기 신청이 완료되었습니다.'
         : '예약이 완료되었습니다.';
