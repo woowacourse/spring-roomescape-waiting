@@ -26,7 +26,7 @@ public class ThemeDao {
 
     public Theme save(Theme theme) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sql = "INSERT INTO theme (name, description, thumbnail_image_url, is_active) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO theme (name, description, thumbnail_image_url, price, is_active) VALUES (?, ?, ?, ?, ?)";
 
         RepositoryExceptionTranslator.execute(
                 () -> jdbcTemplate.update(connection -> {
@@ -34,7 +34,8 @@ public class ThemeDao {
                     ps.setString(1, theme.getName());
                     ps.setString(2, theme.getDescription());
                     ps.setString(3, theme.getThumbnailImageUrl());
-                    ps.setBoolean(4, theme.isActive());
+                    ps.setInt(4, theme.getPrice());
+                    ps.setBoolean(5, theme.isActive());
                     return ps;
                 }, keyHolder), "이미 존재하는 테마 정보입니다.");
 
@@ -44,6 +45,7 @@ public class ThemeDao {
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailImageUrl(),
+                theme.getPrice(),
                 theme.isActive()
         );
     }
@@ -51,7 +53,7 @@ public class ThemeDao {
     public void update(Theme theme) {
         String sql = """
                     UPDATE theme
-                    SET name = ?, description = ?, thumbnail_image_url = ?, is_active = ?
+                    SET name = ?, description = ?, thumbnail_image_url = ?, price = ?, is_active = ?
                     WHERE id=?
                 """;
 
@@ -60,6 +62,7 @@ public class ThemeDao {
                         theme.getName(),
                         theme.getDescription(),
                         theme.getThumbnailImageUrl(),
+                        theme.getPrice(),
                         theme.isActive(),
                         theme.getId()
                 ), "이미 존재하는 테마 정보입니다.");

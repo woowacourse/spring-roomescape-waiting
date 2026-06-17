@@ -28,7 +28,8 @@ public final class ReservationQueryRowMapper {
                             rs.getLong("theme_id"),
                             rs.getString("theme_name"),
                             rs.getString("theme_description"),
-                            rs.getString("theme_thumbnail_image_url")
+                            rs.getString("theme_thumbnail_image_url"),
+                            rs.getInt("theme_price")
                     ),
                     new ReservationTimeResponse(
                             rs.getLong("time_id"),

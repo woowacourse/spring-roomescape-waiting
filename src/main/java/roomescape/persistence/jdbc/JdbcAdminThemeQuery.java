@@ -16,7 +16,7 @@ public class JdbcAdminThemeQuery implements AdminThemeQuery {
 
     @Override
     public List<AdminThemeResponse> getAllThemes() {
-        String sql = "SELECT id, name, description, thumbnail_image_url, is_active FROM theme ORDER BY id ASC";
+        String sql = "SELECT id, name, description, thumbnail_image_url, price, is_active FROM theme ORDER BY id ASC";
         return jdbcTemplate.query(sql, AdminThemeResponseRowMapper.ADMIN_THEME_RESPONSE_ROW_MAPPER);
     }
 }

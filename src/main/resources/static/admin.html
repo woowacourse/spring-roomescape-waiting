@@ -52,6 +52,10 @@
               <label class="form-label" for="themeThumbnail">썸네일 URL</label>
               <input class="form-input" id="themeThumbnail" name="thumbnailImageUrl" placeholder="https://..." type="text" />
             </div>
+            <div class="form-group">
+              <label class="form-label" for="themePrice">가격</label>
+              <input class="form-input" id="themePrice" min="0" name="price" placeholder="30000" step="1000" type="number" />
+            </div>
             <button class="btn-primary" type="submit">추가하기</button>
           </form>
         </div>
@@ -64,11 +68,12 @@
                   <th>ID</th>
                   <th>이름</th>
                   <th>설명</th>
+                  <th>가격</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody data-role="theme-table">
-                <tr class="loading-row"><td colspan="4">불러오는 중...</td></tr>
+                <tr class="loading-row"><td colspan="5">불러오는 중...</td></tr>
               </tbody>
             </table>
           </div>

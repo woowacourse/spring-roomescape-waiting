@@ -4,6 +4,7 @@ CREATE TABLE theme
     name                VARCHAR(20)  NOT NULL,
     description         VARCHAR(255) NOT NULL,
     thumbnail_image_url VARCHAR(500) NOT NULL,
+    price               INT          NOT NULL DEFAULT 0,
     is_active           TINYINT      NOT NULL DEFAULT 1,
     PRIMARY KEY (id),
     CONSTRAINT uk_theme_name UNIQUE (name)

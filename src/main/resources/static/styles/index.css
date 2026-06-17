@@ -89,6 +89,17 @@
   text-overflow: ellipsis;
 }
 
+.popular-card-price,
+.theme-card-price {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.popular-card-price {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
 .popular-card-desc {
   color: var(--text-secondary);
   font-size: 12px;
@@ -127,6 +138,11 @@
 .theme-card-name {
   margin-bottom: 6px;
   font-size: 16px;
+}
+
+.theme-card-price {
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .theme-card-desc {

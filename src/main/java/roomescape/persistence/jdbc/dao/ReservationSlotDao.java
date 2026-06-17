@@ -62,7 +62,7 @@ public class ReservationSlotDao {
         String sql = """
                 SELECT r.id AS res_id, r.date AS res_date,
                        rt.id AS time_id, rt.start_at AS time_start, rt.status AS time_status,
-                       t.id AS theme_id, t.name AS theme_name, t.description, t.thumbnail_image_url, t.is_active
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.thumbnail_image_url, t.price, t.is_active
                 FROM reservation_slot r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -75,7 +75,7 @@ public class ReservationSlotDao {
         String sql = """
                 SELECT r.id AS res_id, r.date AS res_date,
                        rt.id AS time_id, rt.start_at AS time_start, rt.status AS time_status,
-                       t.id AS theme_id, t.name AS theme_name, t.description, t.thumbnail_image_url, t.is_active
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.thumbnail_image_url, t.price, t.is_active
                 FROM reservation_slot r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -89,7 +89,7 @@ public class ReservationSlotDao {
         String sql = """
                 SELECT r.id AS res_id, r.date AS res_date,
                        rt.id AS time_id, rt.start_at AS time_start, rt.status AS time_status,
-                       t.id AS theme_id, t.name AS theme_name, t.description, t.thumbnail_image_url, t.is_active
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.thumbnail_image_url, t.price, t.is_active
                 FROM reservation re
                 JOIN reservation_slot r ON re.slot_id = r.id
                 JOIN reservation_time rt ON r.time_id = rt.id

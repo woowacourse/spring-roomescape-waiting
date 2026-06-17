@@ -10,7 +10,8 @@ public final class ThemeResponseRowMapper {
                     rs.getLong("id"),
                     rs.getString("name"),
                     rs.getString("description"),
-                    rs.getString("thumbnail_image_url")
+                    rs.getString("thumbnail_image_url"),
+                    rs.getInt("price")
             );
 
     private ThemeResponseRowMapper() {

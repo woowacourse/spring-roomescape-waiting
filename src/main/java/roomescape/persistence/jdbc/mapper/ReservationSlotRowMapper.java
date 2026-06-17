@@ -20,6 +20,7 @@ public final class ReservationSlotRowMapper {
                 rs.getString("theme_name"),
                 rs.getString("description"),
                 rs.getString("thumbnail_image_url"),
+                rs.getInt("price"),
                 rs.getBoolean("is_active")
         );
         return new ReservationSlot(

@@ -11,6 +11,7 @@ public final class AdminThemeResponseRowMapper {
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getString("thumbnail_image_url"),
+                    rs.getInt("price"),
                     rs.getBoolean("is_active")
             );
 
