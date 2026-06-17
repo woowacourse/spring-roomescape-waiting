@@ -13,10 +13,8 @@ import roomescape.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
-import org.springframework.context.ApplicationEventPublisher;
-import payment.ReservationPendingPaymentEvent;
-import payment.order.Order;
-import payment.order.OrderService;
+import payment.OrderTicket;
+import payment.PaymentOrderPort;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -32,8 +30,7 @@ import java.util.Optional;
 public class ReservationCommandService {
 
     private final WaitingCommandService waitingCommandService;
-    private final OrderService orderService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final PaymentOrderPort paymentOrderPort;
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -66,11 +63,9 @@ public class ReservationCommandService {
         validateNoPendingPaymentForMember(member);
 
         Reservation savedReservation = save(reservation);
-        eventPublisher.publishEvent(new ReservationPendingPaymentEvent(savedReservation.id(), now));
-        Order order = orderService.findByReservationId(savedReservation.id())
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
+        OrderTicket ticket = paymentOrderPort.placeOrder(savedReservation.id());
 
-        return PendingReservation.of(savedReservation, order);
+        return PendingReservation.of(savedReservation, ticket);
     }
 
     private Optional<PendingReservation> findReusablePendingReservation(Slot slot, Member member) {
@@ -88,9 +83,9 @@ public class ReservationCommandService {
         if (!existing.isOwnedBy(member)) {
             throw pendingPaymentInProgressException();
         }
-        Order order = orderService.findByReservationId(existing.id())
+        OrderTicket ticket = paymentOrderPort.findTicket(existing.id())
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
-        return PendingReservation.of(existing, order);
+        return PendingReservation.of(existing, ticket);
     }
 
     public PendingReservation getPendingPaymentReservation(long reservationId, String name) {
@@ -102,10 +97,10 @@ public class ReservationCommandService {
             throw new ResourceNotFoundException("결제 대기 예약을 찾을 수 없습니다.");
         }
 
-        Order order = orderService.findByReservationId(reservationId)
+        OrderTicket ticket = paymentOrderPort.findTicket(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
 
-        return PendingReservation.of(reservation, order);
+        return PendingReservation.of(reservation, ticket);
     }
 
     private Reservation save(Reservation reservation) {

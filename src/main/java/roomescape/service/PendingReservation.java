@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import payment.order.Order;
+import payment.OrderTicket;
 import roomescape.domain.Reservation;
 
 public record PendingReservation(
@@ -10,11 +10,11 @@ public record PendingReservation(
         String orderName
 ) {
 
-    public static PendingReservation of(Reservation reservation, Order order) {
+    public static PendingReservation of(Reservation reservation, OrderTicket ticket) {
         return new PendingReservation(
                 reservation,
-                order.orderId(),
-                order.amount(),
+                ticket.orderId(),
+                ticket.amount(),
                 reservation.slot().theme().name() + " 예약"
         );
     }
