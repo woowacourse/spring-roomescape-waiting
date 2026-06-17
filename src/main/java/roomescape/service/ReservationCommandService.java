@@ -74,21 +74,23 @@ public class ReservationCommandService {
     }
 
     private Optional<PendingReservation> findReusablePendingReservation(Slot slot, Member member) {
-        return reservationDao.findBySlotForUpdate(slot)
-                .map(existing -> pendingReservationFrom(existing, member));
+        Optional<Reservation> existing = reservationDao.findBySlotForUpdate(slot);
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(validateAndBuildPending(existing.get(), member));
     }
 
-    private PendingReservation pendingReservationFrom(Reservation reservation, Member member) {
-        if (reservation.status() != ReservationStatus.PENDING_PAYMENT) {
+    private PendingReservation validateAndBuildPending(Reservation existing, Member member) {
+        if (existing.status() != ReservationStatus.PENDING_PAYMENT) {
             throw duplicateReservationException();
         }
-        if (!reservation.isOwnedBy(member)) {
+        if (!existing.isOwnedBy(member)) {
             throw pendingPaymentInProgressException();
         }
-
-        Order order = orderService.findByReservationId(reservation.id())
+        Order order = orderService.findByReservationId(existing.id())
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
-        return PendingReservation.of(reservation, order);
+        return PendingReservation.of(existing, order);
     }
 
     public PendingReservation getPendingPaymentReservation(long reservationId, String name) {

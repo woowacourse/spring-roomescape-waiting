@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.ForbiddenException;
 import roomescape.exception.PastReservationException;
+import roomescape.domain.ReservationStatus;
 
 class ReservationTest {
 
@@ -21,7 +22,7 @@ class ReservationTest {
     }
 
     private Reservation reservation(Member owner, Slot slot) {
-        return Reservation.create(1, owner, slot);
+        return Reservation.create(1, owner, slot, ReservationStatus.CONFIRMED);
     }
 
     @Test

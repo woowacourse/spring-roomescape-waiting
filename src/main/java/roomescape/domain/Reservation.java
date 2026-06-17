@@ -15,10 +15,6 @@ public record Reservation(Long id, Member owner, Slot slot, ReservationStatus st
         return new Reservation(null, owner, slot, ReservationStatus.PENDING_PAYMENT);
     }
 
-    public static Reservation create(long id, Member owner, Slot slot) {
-        return new Reservation(id, owner, slot, ReservationStatus.CONFIRMED);
-    }
-
     public static Reservation create(long id, Member owner, Slot slot, ReservationStatus status) {
         return new Reservation(id, owner, slot, status);
     }
@@ -37,10 +33,6 @@ public record Reservation(Long id, Member owner, Slot slot, ReservationStatus st
 
     public Reservation withSlot(Slot newSlot) {
         return new Reservation(id, owner, newSlot, status);
-    }
-
-    public Reservation confirm() {
-        return new Reservation(id, owner, slot, ReservationStatus.CONFIRMED);
     }
 
     public boolean isOwnedBy(Member member) {
