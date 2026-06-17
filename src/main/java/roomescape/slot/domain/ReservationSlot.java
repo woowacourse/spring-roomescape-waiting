@@ -50,9 +50,9 @@ public class ReservationSlot {
         return reservations.reserve(requesterName, this.id, reservedAt);
     }
 
-    public Reservation promotePayment(Long reservationId) {
+    public Reservation confirmPayment(Long reservationId) {
         Reservation reservation = reservations.findById(reservationId);
-        reservation.promote();
+        reservation.confirm();
         return reservation;
     }
 

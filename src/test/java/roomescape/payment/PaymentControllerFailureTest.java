@@ -66,4 +66,5 @@ class PaymentControllerFailureTest extends AcceptanceTest {
                 .statusCode(HttpStatus.OK.value())
                 .body("status", is(ReservationStatus.PENDING_PAYMENT.name()));
     }
+
 }

@@ -349,7 +349,8 @@ function openPaymentModal(reservation) {
             });
         } catch (error) {
             if (error.code === "USER_CANCEL") {
-                location.href = `/payments/fail?code=${error.code}&message=${encodeURIComponent("결제를 취소했습니다.")}&orderId=${reservation.orderId}`;
+                alert("결제가 완료되지 않았습니다.");
+                location.href = "/reservation-lookup";
             } else {
                 alert(error.message);
             }

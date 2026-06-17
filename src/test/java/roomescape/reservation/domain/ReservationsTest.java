@@ -151,7 +151,7 @@ class ReservationsTest {
                 .isEqualTo(CANCELED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -174,7 +174,7 @@ class ReservationsTest {
                 .isEqualTo(CANCELED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -216,7 +216,7 @@ class ReservationsTest {
                 .isEqualTo(CANCELED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -304,7 +304,7 @@ class ReservationsTest {
                 .isEqualTo(RESERVED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
 }

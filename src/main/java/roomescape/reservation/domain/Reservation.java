@@ -94,6 +94,10 @@ public class Reservation {
     }
 
     public void promote() {
+        this.status = ReservationStatus.PENDING_PAYMENT;
+    }
+
+    public void confirm() {
         this.status = ReservationStatus.RESERVED;
     }
 

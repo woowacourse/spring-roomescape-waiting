@@ -24,7 +24,8 @@ public class PageController {
     }
 
     @GetMapping("/reservation-lookup")
-    public String reservationLookupPage() {
+    public String reservationLookupPage(org.springframework.ui.Model model) {
+        model.addAttribute("clientKey", clientKey);
         return "reservation-lookup";
     }
 

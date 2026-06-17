@@ -265,7 +265,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
                     .isEqualTo(CANCELED);
 
             Assertions.assertThat(promoted.getStatus())
-                    .isEqualTo(RESERVED);
+                    .isEqualTo(PENDING_PAYMENT);
         }
 
         @Test
@@ -287,7 +287,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
                     .isEqualTo(CANCELED);
 
             Assertions.assertThat(promoted.getStatus())
-                    .isEqualTo(RESERVED);
+                    .isEqualTo(PENDING_PAYMENT);
         }
 
     }

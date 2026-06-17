@@ -5,15 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.payment.client.PaymentGateway;
 import roomescape.payment.domain.Payment;
-import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.exception.TossPaymentException;
 import roomescape.payment.repository.PaymentRepository;
 import roomescape.payment.service.dto.PaymentConfirmation;
 import roomescape.payment.service.dto.PaymentResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Reservations;
-import roomescape.reservation.exception.ReservationErrorInformation;
-import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
@@ -22,8 +19,6 @@ import roomescape.slot.repository.ReservationSlotRepository;
 import java.util.List;
 import java.util.UUID;
 
-import static roomescape.payment.domain.PaymentStatus.FAILED;
-import static roomescape.payment.domain.PaymentStatus.UNKNOWN;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
 @Service
@@ -42,7 +37,6 @@ public class PaymentService {
         return paymentRepository.save(Payment.pending(reservationId, slotId, orderId, amount));
     }
 
-    @Transactional
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Payment payment = findPayment(orderId);
         payment.validateAmountMatch(amount);
@@ -84,7 +78,7 @@ public class PaymentService {
 
     private void confirmReservation(Long slotId, Long reservationId) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
-        Reservation confirmed = slot.promotePayment(reservationId);
+        Reservation confirmed = slot.confirmPayment(reservationId);
         reservationRepository.updateStatus(confirmed);
     }
 

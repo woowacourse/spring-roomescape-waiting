@@ -37,6 +37,11 @@ async function handleResponseError(response, defaultMessage, overrides = {}) {
 let reschedulingReservation = null;
 let selectedDate = null;
 let selectedTime = null;
+let currentReservation = null;
+
+// Toss Payments Widget Initialization
+const customerKey = Math.random().toString(36).substring(2, 12);
+let paymentWidget = null;
 
 async function authFetch(url, options = {}) {
     const token = localStorage.getItem("token");
@@ -58,6 +63,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         location.href = "/";
         return;
     }
+
+    // Initialize Toss PaymentWidget using global tossClientKey
+    const initPaymentWidget = () => {
+        if (typeof PaymentWidget !== "undefined" && typeof tossClientKey !== "undefined" && tossClientKey) {
+            paymentWidget = PaymentWidget(tossClientKey, customerKey);
+            return true;
+        }
+        return false;
+    };
+
+    if (!initPaymentWidget()) {
+        const checkInterval = setInterval(() => {
+            if (initPaymentWidget()) {
+                clearInterval(checkInterval);
+            }
+        }, 100);
+        setTimeout(() => clearInterval(checkInterval), 3000);
+    }
+
     await loadMyReservations();
 });
 
@@ -92,7 +116,10 @@ function renderReservations(reservations) {
 
         const isCanceled = reservation.status === "CANCELED";
         const isWaiting = reservation.status === "WAITING";
+        const isReserved = reservation.status === "RESERVED";
         const isPendingPayment = reservation.status === "PENDING_PAYMENT";
+        const isFailed = reservation.paymentStatus === "FAILED";
+        const isUnknown = reservation.paymentStatus === "UNKNOWN";
 
         const waitingTurnText = isWaiting && reservation.waitingTurn
             ? `<p>대기 순번: ${reservation.waitingTurn}번째</p>`
@@ -111,14 +138,21 @@ function renderReservations(reservations) {
                 <h3>${reservation.themeName}</h3>
                 <p>날짜: ${reservation.date}</p>
                 <p>시간: ${formatTime(reservation.time)}</p>
-                <p>상태: ${formatStatus(reservation.status)}</p>
+                <p>상태: ${formatStatus(reservation.status, reservation.paymentStatus)}</p>
                 ${waitingTurnText}
 
                 <div class="button-group">
                     <button
+                        class="payment-retry-button reschedule-button"
+                        type="button"
+                        ${(isPendingPayment || isFailed || isUnknown) ? "" : "style='display: none;'"}
+                    >
+                        결제 하기
+                    </button>
+                    <button
                         class="reschedule-button"
                         type="button"
-                        ${(isCanceled || isPendingPayment) ? "style='display: none;'" : ""}
+                        ${(isCanceled || isPendingPayment || isFailed || isUnknown) ? "style='display: none;'" : ""}
                     >
                         예약 변경
                     </button>
@@ -134,22 +168,72 @@ function renderReservations(reservations) {
         `;
 
         const cancelButton = article.querySelector(".cancel-button");
-        const rescheduleButton = article.querySelector(".reschedule-button");
+        const rescheduleButton = article.querySelector(".reschedule-button:not(.payment-retry-button)");
+        const paymentRetryButton = article.querySelector(".payment-retry-button");
 
         if (!isCanceled) {
             cancelButton.addEventListener("click", async () => {
                 await cancelReservation(reservation.slotId, reservation.id);
             });
 
-            if (!isPendingPayment) {
+            if (rescheduleButton && !isPendingPayment && !isFailed && !isUnknown) {
                 rescheduleButton.addEventListener("click", () => {
                     openRescheduleModal(reservation);
+                });
+            }
+
+            if (paymentRetryButton && (isPendingPayment || isFailed || isUnknown)) {
+                paymentRetryButton.addEventListener("click", () => {
+                    openPaymentModal(reservation);
                 });
             }
         }
 
         reservationResultList.appendChild(article);
     });
+}
+
+function openPaymentModal(reservation) {
+    currentReservation = reservation;
+    const paymentModal = document.getElementById("payment-modal");
+    paymentModal.style.display = "block";
+
+    if (!paymentWidget) {
+        alert("결제 위젯을 초기화할 수 없습니다. 잠시 후 다시 시도해주세요.");
+        return;
+    }
+
+    paymentWidget.renderPaymentMethods("#payment-method", { value: reservation.amount });
+    paymentWidget.renderAgreement("#agreement");
+
+    const paymentButton = document.getElementById("payment-button");
+    paymentButton.onclick = async () => {
+        try {
+            await paymentWidget.requestPayment({
+                orderId: reservation.orderId,
+                orderName: reservation.themeName,
+                successUrl: window.location.origin + "/payments/success",
+                failUrl: window.location.origin + "/payments/fail",
+                customerName: reservation.name
+            });
+        } catch (error) {
+            if (error.code === "USER_CANCEL") {
+                alert("결제가 완료되지 않았습니다.");
+                location.href = "/reservation-lookup";
+            } else {
+                alert(error.message);
+            }
+        }
+    };
+}
+
+function closePaymentModal() {
+    if (currentReservation) {
+        alert("결제가 완료되지 않았습니다.");
+        location.href = "/reservation-lookup";
+        return;
+    }
+    document.getElementById("payment-modal").style.display = "none";
 }
 
 function openRescheduleModal(reservation) {
@@ -305,9 +389,9 @@ function formatTime(value) {
     return `${parts[0]}:${parts[1]}`;
 }
 
-function formatStatus(status) {
+function formatStatus(status, paymentStatus) {
     if (status === "RESERVED") {
-        return "예약 완료";
+        return "결제 완료";
     }
     if (status === "WAITING") {
         return "예약 대기";
@@ -316,6 +400,12 @@ function formatStatus(status) {
         return "예약 취소";
     }
     if (status === "PENDING_PAYMENT") {
+        if (paymentStatus === "FAILED") {
+            return "결제 실패";
+        }
+        if (paymentStatus === "UNKNOWN") {
+            return "결제 대기(확인 중)";
+        }
         return "결제 대기";
     }
     return status;
