@@ -18,6 +18,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.Waitings;
+import roomescape.domain.payment.Payment;
 import roomescape.domain.policy.ReservationPolicy;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -111,9 +112,11 @@ public class ReservationService {
     public List<MyReservationResult> findMyReservationsAndWaitings(String name) {
         List<MyReservationResult> results = new ArrayList<>();
 
-        reservationRepository.findByNameOrderByDateAscTimeAsc(name).forEach(r ->
-                results.add(MyReservationResult.ofReservation(
-                        r.getId(), r.getDate(), r.getTime(), r.getTheme())));
+        reservationRepository.findByNameOrderByDateAscTimeAsc(name).forEach(r -> {
+            Payment payment = paymentService.findByReservationId(r.getId()).orElse(null);
+            results.add(MyReservationResult.ofReservation(
+                    r.getId(), r.getDate(), r.getTime(), r.getTheme(), payment));
+        });
 
         waitingRepository.findByName(name).forEach(w ->
                 results.add(MyReservationResult.ofWaiting(

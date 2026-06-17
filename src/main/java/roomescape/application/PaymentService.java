@@ -1,5 +1,6 @@
 package roomescape.application;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentConfirmation;
 import roomescape.domain.payment.PaymentGateway;
 import roomescape.domain.payment.PaymentResult;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.domain.repository.PaymentRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.client.PaymentAlreadyProcessedException;
@@ -87,6 +89,26 @@ public class PaymentService {
             paymentRepository.deleteByReservationId(reservationId); // FK: 결제 먼저
             reservationRepository.deleteById(reservationId);
         });
+    }
+
+
+    /**
+     * read timeout 등으로 결과가 불확실한 결제를 '확인 필요(IN_DOUBT)'로 표시한다. 삭제하지 않는다.
+     */
+    @Transactional
+    public void markInDoubt(String orderId) {
+        paymentRepository.findByOrderId(orderId).ifPresent(payment -> {
+            if (payment.isPending()) {
+                paymentRepository.updateStatus(orderId, PaymentStatus.IN_DOUBT);
+            }
+        });
+    }
+
+    /**
+     * 내역 표시용 조회 — 예약 1건의 결제 정보를 찾는다(없으면 빈 값). 읽기라 트랜잭션을 두지 않는다.
+     */
+    public Optional<Payment> findByReservationId(Long reservationId) {
+        return paymentRepository.findByReservationId(reservationId);
     }
 
 
