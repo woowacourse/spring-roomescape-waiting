@@ -118,9 +118,13 @@ public class ReservationDao {
                 SELECT COUNT(*)
                 FROM reservation_waiting
                 WHERE time_id = ?
+            ) + (
+                SELECT COUNT(*)
+                FROM reservation_payment
+                WHERE time_id = ?
             )
             """;
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId, timeId);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId, timeId, timeId);
         return Objects.requireNonNullElse(count, 0) > 0;
     }
 
@@ -134,9 +138,13 @@ public class ReservationDao {
                     SELECT COUNT(*)
                     FROM reservation_waiting
                     WHERE theme_id = ?
+                ) + (
+                    SELECT COUNT(*)
+                    FROM reservation_payment
+                    WHERE theme_id = ?
                 )
                 """;
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId, themeId, themeId);
         return Objects.requireNonNullElse(count, 0) > 0;
     }
 

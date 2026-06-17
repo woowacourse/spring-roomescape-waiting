@@ -1,0 +1,125 @@
+package roomescape.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationPaymentDao;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.ReservationPayment;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.payment.OrderIdGenerator;
+import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationTimeNotFoundException;
+
+@ExtendWith(MockitoExtension.class)
+class ReservationPaymentServiceTest {
+
+    @Mock private ReservationDao reservationDao;
+    @Mock private ReservationPaymentDao reservationPaymentDao;
+    @Mock private ReservationTimeDao reservationTimeDao;
+    @Mock private ThemeDao themeDao;
+    @Mock private OrderIdGenerator orderIdGenerator;
+    @Mock private Clock clock;
+
+    private ReservationPaymentService reservationPaymentService;
+
+    private final ReservationTime sampleTime = new ReservationTime(1L, LocalTime.of(10, 0));
+    private final Theme sampleTheme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+    private final LocalDateTime fixedNow = LocalDateTime.of(2026, 5, 14, 12, 0);
+
+    @BeforeEach
+    void setUp() {
+        reservationPaymentService = new ReservationPaymentService(
+                reservationDao,
+                reservationPaymentDao,
+                reservationTimeDao,
+                themeDao,
+                orderIdGenerator,
+                clock,
+                10000L
+        );
+    }
+
+    @Test
+    void prepare_예약_결제_대기_주문을_저장한다() {
+        fixClock();
+        LocalDate date = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(false);
+        given(reservationPaymentDao.existsByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(false);
+        given(orderIdGenerator.generate()).willReturn("order_123456");
+        given(reservationPaymentDao.save(any(ReservationPayment.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        ReservationPayment payment = reservationPaymentService.prepare("브라운", date, 1L, 1L);
+
+        assertThat(payment.getOrderId()).isEqualTo("order_123456");
+        assertThat(payment.getAmount()).isEqualTo(10000L);
+        assertThat(payment.getReservation().getName()).isEqualTo("브라운");
+        then(reservationPaymentDao).should().save(any(ReservationPayment.class));
+    }
+
+    @Test
+    void prepare_이미_확정_예약된_슬롯이면_예외() {
+        LocalDate date = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(true);
+
+        assertThatThrownBy(() -> reservationPaymentService.prepare("브라운", date, 1L, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
+
+        then(reservationPaymentDao).should(never()).save(any());
+    }
+
+    @Test
+    void prepare_이미_결제_대기중인_슬롯이면_예외() {
+        LocalDate date = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(false);
+        given(reservationPaymentDao.existsByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(true);
+
+        assertThatThrownBy(() -> reservationPaymentService.prepare("브라운", date, 1L, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
+
+        then(reservationPaymentDao).should(never()).save(any());
+    }
+
+    @Test
+    void prepare_존재하지_않는_시간이면_예외() {
+        given(reservationTimeDao.findById(99L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationPaymentService.prepare("브라운", fixedNow.toLocalDate().plusDays(1), 99L, 1L))
+                .isInstanceOf(ReservationTimeNotFoundException.class)
+                .hasMessage("존재하지 않는 예약 시간입니다.");
+
+        then(reservationPaymentDao).should(never()).save(any());
+    }
+
+    private void fixClock() {
+        given(clock.getZone()).willReturn(ZoneOffset.UTC);
+        given(clock.instant()).willReturn(fixedNow.toInstant(ZoneOffset.UTC));
+    }
+}
