@@ -39,74 +39,76 @@ h1{font-size:1.2rem;color:#ebebeb;margin-bottom:1.5rem;letter-spacing:.08em;font
 </div>
 
 <script>
-// 예약 생성 응답을 reservation 페이지에서 sessionStorage로 넘겨받는다.
-const order = JSON.parse(sessionStorage.getItem('toss_order') || 'null');
-if (!order) { location.href = '/'; }
+(function () {
+  // 예약 생성 응답을 reservation 페이지에서 sessionStorage로 넘겨받는다.
+  const order = JSON.parse(sessionStorage.getItem('toss_order') || 'null');
+  if (!order) { location.href = '/'; return; }
 
-document.getElementById('order-name').textContent = order.orderName;
-document.getElementById('amount').textContent = order.amount.toLocaleString() + '원';
+  document.getElementById('order-name').textContent = order.orderName;
+  document.getElementById('amount').textContent = order.amount.toLocaleString() + '원';
 
-const payBtn = document.getElementById('pay-btn');
-const cancelBtn = document.getElementById('cancel-btn');
-const errEl = document.getElementById('err');
+  const payBtn = document.getElementById('pay-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const errEl = document.getElementById('err');
 
-// 미결제(PENDING) 주문/예약을 정리해 슬롯을 즉시 풀어준다 (failUrl 콜백과 같은 엔드포인트).
-async function abandon() {
-  try {
-    await fetch('/payments/fail', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: order.orderId })
-    });
-  } catch {}
-}
-
-let widgets;
-(async () => {
-  try {
-    const cfg = await (await fetch('/payments/config')).json();
-    const tossPayments = TossPayments(cfg.clientKey);
-    widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
-    // 금액을 먼저 설정해야 결제수단 UI를 렌더할 수 있다.
-    await widgets.setAmount({ currency: 'KRW', value: order.amount });
-    await Promise.all([
-      widgets.renderPaymentMethods({ selector: '#payment-method', variantKey: 'DEFAULT' }),
-      widgets.renderAgreement({ selector: '#agreement', variantKey: 'AGREEMENT' })
-    ]);
-    payBtn.disabled = false; // 렌더 완료 전 결제 요청은 실패하므로 그때까지 막는다.
-  } catch (e) {
-    // 위젯이 못 뜨면 주문이 PENDING으로 묶이므로 즉시 정리하고 사유를 드러낸다.
-    errEl.textContent = '결제위젯을 불러오지 못했습니다: ' + (e && e.message ? e.message : e);
-    await abandon();
+  // 미결제(PENDING) 주문/예약을 정리해 슬롯을 즉시 풀어준다 (failUrl 콜백과 같은 엔드포인트).
+  async function abandon() {
+    try {
+      await fetch('/payments/fail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.orderId })
+      });
+    } catch {}
   }
-})();
 
-payBtn.addEventListener('click', async () => {
-  payBtn.disabled = true;
-  errEl.textContent = '';
-  try {
-    // 금액은 setAmount()로 위젯에 이미 설정돼 있어 다시 넘기지 않는다.
-    await widgets.requestPayment({
-      orderId: order.orderId,
-      orderName: order.orderName,
-      successUrl: location.origin + '/payment/success',
-      failUrl: location.origin + '/payment/fail'
-    });
-  } catch (e) {
-    // 사용자가 결제창을 닫으면 USER_CANCEL — 페이지에 머물며 재시도 가능하게 둔다.
-    if (e && e.code !== 'USER_CANCEL') {
-      errEl.textContent = '결제 요청 실패: ' + (e.message || e);
+  let widgets;
+  (async () => {
+    try {
+      const cfg = await (await fetch('/payments/config')).json();
+      const tossPayments = TossPayments(cfg.clientKey);
+      widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+      // 금액을 먼저 설정해야 결제수단 UI를 렌더할 수 있다.
+      await widgets.setAmount({ currency: 'KRW', value: order.amount });
+      await Promise.all([
+        widgets.renderPaymentMethods({ selector: '#payment-method', variantKey: 'DEFAULT' }),
+        widgets.renderAgreement({ selector: '#agreement', variantKey: 'AGREEMENT' })
+      ]);
+      payBtn.disabled = false; // 렌더 완료 전 결제 요청은 실패하므로 그때까지 막는다.
+    } catch (e) {
+      // 위젯 로드 실패(일시적 네트워크 포함)는 자동 취소하지 않는다 — 섣불리 PENDING을 취소하면
+      // 일시 장애에도 슬롯이 풀려버린다. 사용자가 새로고침으로 재시도하거나 '취소하고 돌아가기'로 직접 정리.
+      errEl.textContent = '결제 위젯을 불러오지 못했습니다. 새로고침하거나 취소 후 다시 시도해주세요.';
     }
-    payBtn.disabled = false;
-  }
-});
+  })();
 
-cancelBtn.addEventListener('click', async () => {
-  // 명시적 취소 = 빠른 슬롯 해제 후 예약 페이지로 복귀.
-  cancelBtn.disabled = true;
-  await abandon();
-  location.href = order.themeId ? ('/reservation?themeId=' + order.themeId) : '/';
-});
+  payBtn.addEventListener('click', async () => {
+    payBtn.disabled = true;
+    errEl.textContent = '';
+    try {
+      // 금액은 setAmount()로 위젯에 이미 설정돼 있어 다시 넘기지 않는다.
+      await widgets.requestPayment({
+        orderId: order.orderId,
+        orderName: order.orderName,
+        successUrl: location.origin + '/payment/success',
+        failUrl: location.origin + '/payment/fail'
+      });
+    } catch (e) {
+      // 사용자가 결제창을 닫으면 USER_CANCEL — 페이지에 머물며 재시도 가능하게 둔다.
+      if (e && e.code !== 'USER_CANCEL') {
+        errEl.textContent = '결제 요청 실패: ' + (e.message || e);
+      }
+      payBtn.disabled = false;
+    }
+  });
+
+  cancelBtn.addEventListener('click', async () => {
+    // 명시적 취소 = 빠른 슬롯 해제 후 예약 페이지로 복귀.
+    cancelBtn.disabled = true;
+    await abandon();
+    location.href = order.themeId ? ('/reservation?themeId=' + order.themeId) : '/';
+  });
+})();
 </script>
 </body>
 </html>
