@@ -14,3 +14,9 @@ auth:
   jwt:
     secret: test-roomescape-test-roomescape-test-roomescape
     access-token-expiration-seconds: 3600
+
+payment:
+  toss:
+    base-url: https://api.tosspayments.com
+    secret-key: test_sk_placeholder
+    client-key: test_ck_placeholder

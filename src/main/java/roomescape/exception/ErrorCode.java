@@ -15,6 +15,20 @@ public enum ErrorCode {
             "서버 내부 오류가 발생하였습니다. 관리자에게 문의해주세요."),
     RESERVATION_NOT_OWNED_BY_MEMBER(HttpStatus.FORBIDDEN, "RESERVATION_403_OWNER", "본인 예약(%d번)만 처리할 수 있습니다."),
 
+    // Payment
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_404", "주문(%s)을 찾을 수 없습니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "PAYMENT_400_AMOUNT_MISMATCH",
+            "결제 금액이 일치하지 않습니다. 저장 금액=%d, 요청 금액=%d"),
+    PAYMENT_NOT_PENDING(HttpStatus.CONFLICT, "PAYMENT_409_NOT_PENDING", "주문(%s)은 결제 대기 상태가 아닙니다."),
+    PAYMENT_ALREADY_PROCESSED(HttpStatus.CONFLICT, "PAYMENT_409_ALREADY_PROCESSED", "이미 처리된 결제입니다."),
+    PAYMENT_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "PAYMENT_400_INVALID_REQUEST", "결제 요청이 올바르지 않습니다."),
+    PAYMENT_GATEWAY_CONFIG_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_500_GATEWAY_CONFIG",
+            "결제 설정 오류가 발생했습니다. 관리자에게 문의해주세요."),
+    PAYMENT_CARD_REJECTED(HttpStatus.FORBIDDEN, "PAYMENT_403_CARD_REJECTED", "카드 결제가 거절되었습니다."),
+    PAYMENT_GATEWAY_RETRYABLE(HttpStatus.BAD_GATEWAY, "PAYMENT_502_RETRYABLE",
+            "결제 승인 중 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
+    PAYMENT_GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAYMENT_502_GATEWAY", "결제 승인 중 오류가 발생했습니다."),
+
     // Waiting
     WAITING_ALREADY_EXIST(HttpStatus.CONFLICT, "WAITING_409", "이미 신청한 대기가 존재합니다."),
     WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION(HttpStatus.CONFLICT, "WAITING_409_OWN_RESERVATION",
