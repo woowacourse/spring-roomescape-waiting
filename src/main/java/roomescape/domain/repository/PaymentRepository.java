@@ -15,4 +15,6 @@ public interface PaymentRepository {
     void updateConfirmed(String orderId, String paymentKey, PaymentStatus status);
 
     void deleteByReservationId(Long reservationId);
+
+    void updateStatus(String orderId, PaymentStatus status);
 }

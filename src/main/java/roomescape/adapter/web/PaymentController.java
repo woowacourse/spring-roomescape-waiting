@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.application.PaymentService;
 import roomescape.exception.RoomEscapeException;
+import roomescape.exception.server.PaymentTimeoutException;
 
 @Controller
 @RequestMapping("/payments")
@@ -29,7 +30,10 @@ public class PaymentController {
         try {
             paymentService.confirm(paymentKey, orderId, amount);
             return "redirect:/payment-result.html?status=success";
-        } catch (RoomEscapeException e) {
+        } catch (PaymentTimeoutException e) {                 // 확인 필요 — 삭제 금지
+            paymentService.markInDoubt(orderId);
+            return "redirect:/payment-result.html?status=pending&message=" + encode(e.getMessage());
+        } catch (RoomEscapeException e) {                      // 거절·연결실패 등 — 안전하게 정리
             paymentService.cancelPending(orderId);
             return "redirect:/payment-result.html?status=fail&message=" + encode(e.getMessage());
         }
