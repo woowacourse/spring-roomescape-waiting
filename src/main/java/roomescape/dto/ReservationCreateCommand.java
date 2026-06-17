@@ -10,6 +10,9 @@ public record ReservationCreateCommand(
         @NotBlank(message = "PERSON_NAME_NULL_OR_BLANK")
         String name,
 
+        @NotNull(message = "AMOUNT_NULL")
+        Long amount,
+
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         @NotNull(message = "DATE_NULL")
         LocalDate date,

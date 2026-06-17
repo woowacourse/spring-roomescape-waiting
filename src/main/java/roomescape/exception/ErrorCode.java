@@ -23,6 +23,7 @@ public enum ErrorCode {
     TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약 시간 정보를 찾을 수 없습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약 정보를 찾을 수 없습니다."),
     WAITING_LIST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약 대기 정보를 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문 정보를 찾을 수 없습니다."),
 
     TIME_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 시간대에 잔여 예약이 존재합니다."),
     THEME_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 테마에 잔여 예약이 존재합니다."),
