@@ -17,6 +17,7 @@ import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.controller.dto.response.ReservationResponse;
@@ -25,7 +26,7 @@ import roomescape.domain.order.PaymentStatus;
 import roomescape.service.PaymentGateway;
 import roomescape.service.dto.result.PaymentResult;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationApiTest {
     private final String userName = "브라운";
@@ -40,8 +41,13 @@ class ReservationApiTest {
     @MockBean
     private PaymentGateway paymentGateway;
 
+    @LocalServerPort
+    int port;
+
     @BeforeEach
     void setUp() {
+        RestAssured.port = port;
+        
         initialTotalSize = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         initialConfirmedSize = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE status = 'CONFIRMED'", Integer.class);

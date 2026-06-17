@@ -22,7 +22,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import roomescape.domain.order.PaymentStatus;
 import roomescape.infrastructure.payment.PaymentConfirmation;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 class TossPaymentGatewayTest {
 
     static MockWebServer mockWebServer;
