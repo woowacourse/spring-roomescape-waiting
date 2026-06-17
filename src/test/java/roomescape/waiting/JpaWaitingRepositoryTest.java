@@ -1,6 +1,7 @@
 package roomescape.waiting;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.waiting.adapter.out.persistence.JpaWaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 import roomescape.waiting.domain.Waiting;
 
 @DataJpaTest
@@ -53,6 +55,17 @@ class JpaWaitingRepositoryTest {
         boolean result = waitingRepository.existsBySlotIdAndMemberId(999L, 999L);
 
         assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("회원 id와 슬롯 id 조합으로 대기 존재 여부를 정확히 확인한다.")
+    void checks_waiting_existence_by_distinct_member_and_slot_ids() {
+        waitingRepository.save(Waiting.create(roomescape.TestFixtures.member(3L), roomescape.TestFixtures.slot(SLOT_ID)));
+
+        assertSoftly(softly -> {
+            softly.assertThat(waitingRepository.existsBySlotIdAndMemberId(3L, SLOT_ID)).isTrue();
+            softly.assertThat(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, 3L)).isFalse();
+        });
     }
 
     @Test
@@ -140,6 +153,42 @@ class JpaWaitingRepositoryTest {
                         firstSlotThird.getId(),
                         secondSlotFirst.getId()
                 );
+    }
+
+    @Test
+    @DisplayName("빈 슬롯 id 목록으로 대기를 조회하면 빈 목록을 반환한다.")
+    void empty_slot_ids_return_empty_waitings() {
+        waitingRepository.save(Waiting.create(roomescape.TestFixtures.member(3L), roomescape.TestFixtures.slot(SLOT_ID)));
+
+        List<Waiting> result = waitingRepository.findAllBySlotIds(List.of());
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("특정 회원의 대기 상세 목록을 대기 신청 순서대로 조회할 수 있다.")
+    void finds_all_waiting_details_by_member_id_in_request_order() {
+        Waiting otherMemberWaiting = waitingRepository.save(
+                Waiting.create(roomescape.TestFixtures.member(2L), roomescape.TestFixtures.slot(SLOT_ID)));
+        Waiting first = waitingRepository.save(
+                Waiting.create(roomescape.TestFixtures.member(MEMBER_ID), roomescape.TestFixtures.slot(SLOT_ID)));
+        Waiting second = waitingRepository.save(
+                Waiting.create(roomescape.TestFixtures.member(MEMBER_ID), roomescape.TestFixtures.slot(2L)));
+
+        List<WaitingDetailProjection> result = waitingRepository.findAllWaitingDetailsByMemberId(MEMBER_ID);
+
+        assertThat(result).extracting(WaitingDetailProjection::id)
+                .containsExactly(first.getId(), second.getId());
+        assertThat(result).extracting(WaitingDetailProjection::id)
+                .doesNotContain(otherMemberWaiting.getId());
+        assertSoftly(softly -> {
+            softly.assertThat(result.getFirst().slotId()).isEqualTo(SLOT_ID);
+            softly.assertThat(result.getFirst().memberName()).isEqualTo("a");
+            softly.assertThat(result.getFirst().date()).isEqualTo(LocalDate.parse("2026-05-05"));
+            softly.assertThat(result.getFirst().themeId()).isEqualTo(1L);
+            softly.assertThat(result.getFirst().themeName()).isEqualTo("세기의 도둑");
+            softly.assertThat(result.getFirst().timeId()).isEqualTo(1L);
+        });
     }
 
     @Test
