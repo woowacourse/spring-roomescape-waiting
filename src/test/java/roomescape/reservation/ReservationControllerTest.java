@@ -102,7 +102,7 @@ class ReservationControllerTest {
                 LocalDate.of(2026, 5, 5),
                 new ThemeFindResponse(1L, "theme", "description", "thumbnail"),
                 new TimeInformation(1L, java.time.LocalTime.of(10, 0)),
-                ReservationStatus.RESERVED,
+                ReservationStatus.CONFIRMED,
                 null
         );
     }
