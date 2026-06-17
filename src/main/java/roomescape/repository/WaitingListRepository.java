@@ -59,7 +59,8 @@ public class WaitingListRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM waiting_list w
                 JOIN reservation_time t ON w.time_id = t.id
                 JOIN theme h ON w.theme_id = h.id 
@@ -90,7 +91,8 @@ public class WaitingListRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM waiting_list w
                 JOIN reservation_time t ON w.time_id = t.id
                 JOIN theme h ON w.theme_id = h.id 
@@ -137,7 +139,8 @@ public class WaitingListRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM waiting_list w
                 JOIN reservation_time t ON w.time_id = t.id
                 JOIN theme h ON w.theme_id = h.id 
@@ -247,7 +250,8 @@ public class WaitingListRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("thumbnail_url")
+                resultSet.getString("theme_thumbnail_url"),
+                resultSet.getLong("theme_price")
         );
 
         return WaitingList.createWithId(

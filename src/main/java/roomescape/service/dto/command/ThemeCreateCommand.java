@@ -14,6 +14,8 @@ public record ThemeCreateCommand(
 
         @NotNull(message = "테마 썸네일 URL은 비워둘 수 없습니다.")
         @NotBlank(message = "테마 썸네일 URL은 비워둘 수 없습니다.")
-        String thumbnailUrl
+        String thumbnailUrl,
+
+        Long price
 ) {
 }

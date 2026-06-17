@@ -39,7 +39,7 @@ public class ThemeRepository {
 
     public List<Theme> findAll() {
         final String sql = """
-                SELECT id, name, description, thumbnail_url
+                SELECT id, name, description, thumbnail_url, price
                 FROM theme
                 """;
 
@@ -48,7 +48,7 @@ public class ThemeRepository {
 
     public Optional<Theme> findById(final Long themeId) {
         final String sql = """
-                SELECT id, name, description, thumbnail_url
+                SELECT id, name, description, thumbnail_url, price
                 FROM theme
                 WHERE id = ?
                 """;
@@ -72,7 +72,8 @@ public class ThemeRepository {
                     t.id,
                     t.name,
                     t.description,
-                    t.thumbnail_url
+                    t.thumbnail_url,
+                    t.price
                 FROM theme t
                 LEFT JOIN reservation r
                     ON r.theme_id = t.id
@@ -82,7 +83,8 @@ public class ThemeRepository {
                     t.id,
                     t.name,
                     t.description,
-                    t.thumbnail_url
+                    t.thumbnail_url,
+                    t.price
                 ORDER BY
                     COUNT(r.id) DESC,
                     t.name ASC
@@ -101,8 +103,8 @@ public class ThemeRepository {
 
     private long insertTheme(final Theme theme) {
         final String sql = """
-                INSERT INTO theme (name, description, thumbnail_url)
-                VALUES (?, ?, ?)
+                INSERT INTO theme (name, description, thumbnail_url, price)
+                VALUES (?, ?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -116,6 +118,7 @@ public class ThemeRepository {
             preparedStatement.setString(1, theme.getName());
             preparedStatement.setString(2, theme.getDescription());
             preparedStatement.setString(3, theme.getThumbnailUrl());
+            preparedStatement.setLong(4, theme.getPrice());
 
             return preparedStatement;
         }, keyHolder);
@@ -131,7 +134,8 @@ public class ThemeRepository {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getString("description"),
-                resultSet.getString("thumbnail_url")
+                resultSet.getString("thumbnail_url"),
+                resultSet.getLong("price")
         );
     }
 }

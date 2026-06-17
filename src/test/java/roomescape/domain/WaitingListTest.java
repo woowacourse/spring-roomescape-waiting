@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class WaitingListTest {
 
     private final ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-    private final Theme theme = Theme.createWithId(1L, "우테코", "우테코는 재밌어", "https://wooteco.com/thumbnail.jpg");
+    private final Theme theme = Theme.createWithId(1L, "우테코", "우테코는 재밌어", "https://wooteco.com/thumbnail.jpg", 30000L);
 
     @Test
     void WaitingList_객체_생성() {

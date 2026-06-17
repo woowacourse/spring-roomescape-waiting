@@ -74,7 +74,8 @@ public class ReservationRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id 
@@ -98,7 +99,8 @@ public class ReservationRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id 
@@ -123,7 +125,8 @@ public class ReservationRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id 
@@ -249,7 +252,8 @@ public class ReservationRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
+                resultSet.getString("theme_thumbnail_url"),
+                resultSet.getLong("theme_price")
         );
 
         return Reservation.createWithId(
