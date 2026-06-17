@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationRepository;
+import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -122,6 +124,20 @@ class ReservationWaitingServiceTest {
         assertThatThrownBy(() -> reservationWaitingService.saveWaiting("브라운", futureDate, 1L, 1L))
                 .isInstanceOf(ReservationConflictException.class)
                 .hasMessage("이미 대기 신청한 시간입니다.");
+    }
+
+    @Test
+    void findAllWaiting_전체_대기_목록_반환() {
+        Reservation w1 = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), fixedNow, sampleTime, sampleTheme, ReservationStatus.WAITING);
+        Reservation w2 = new Reservation(2L, "이영희", LocalDate.of(2026, 5, 15), fixedNow.plusSeconds(1), sampleTime, sampleTheme, ReservationStatus.WAITING);
+        given(reservationRepository.findAllWaitingWithRank(ReservationStatus.WAITING))
+                .willReturn(List.of(new MyReservation(w1, 1L), new MyReservation(w2, 2L)));
+
+        List<MyReservation> result = reservationWaitingService.findAllWaiting();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).waitingNumber()).isEqualTo(1L);
+        assertThat(result.get(1).waitingNumber()).isEqualTo(2L);
     }
 
     @Test

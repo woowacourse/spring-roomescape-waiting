@@ -90,4 +90,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<MyReservation> findWaitingWithRankByName(
             @Param("name") String name, @Param("status") ReservationStatus status);
+
+    @Query("""
+            SELECT new roomescape.domain.MyReservation(
+                w,
+                (SELECT COUNT(w2) + 1 FROM Reservation w2
+                 WHERE w2.theme = w.theme
+                   AND w2.date = w.date
+                   AND w2.time = w.time
+                   AND w2.status = :status
+                   AND (w2.createdAt < w.createdAt
+                        OR (w2.createdAt = w.createdAt AND w2.id < w.id))))
+            FROM Reservation w
+            WHERE w.status = :status
+            ORDER BY w.createdAt ASC, w.id ASC
+            """)
+    List<MyReservation> findAllWaitingWithRank(@Param("status") ReservationStatus status);
 }

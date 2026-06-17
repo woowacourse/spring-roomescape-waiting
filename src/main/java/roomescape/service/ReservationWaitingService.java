@@ -5,10 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationRepository;
+import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -63,6 +63,11 @@ public class ReservationWaitingService {
                     reservation.validateCancellable(LocalDateTime.now(clock));
                     reservationRepository.deleteById(id);
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyReservation> findAllWaiting() {
+        return reservationRepository.findAllWaitingWithRank(ReservationStatus.WAITING);
     }
 
     @Transactional(readOnly = true)
