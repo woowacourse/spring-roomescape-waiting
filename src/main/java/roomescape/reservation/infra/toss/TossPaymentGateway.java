@@ -1,6 +1,5 @@
 package roomescape.reservation.infra.toss;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
@@ -21,6 +20,8 @@ import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.infra.toss.dto.ConfirmRequest;
 import roomescape.reservation.infra.toss.dto.TossErrorResponse;
 import roomescape.reservation.infra.toss.dto.TossPaymentResponse;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
 @Component
@@ -54,7 +55,7 @@ public class TossPaymentGateway implements PaymentGateway {
         TossErrorResponse error;
         try {
             error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             return new PaymentGatewayException("결제 승인에 실패했습니다.");
         }
 
