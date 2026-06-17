@@ -68,12 +68,7 @@ public class ReservationCommandService {
         Order order = orderService.findByReservationId(savedReservation.id())
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
 
-        return new PendingReservation(
-                savedReservation,
-                order.orderId(),
-                order.amount(),
-                theme.name() + " 예약"
-        );
+        return PendingReservation.of(savedReservation, order);
     }
 
     private PendingReservation findReusablePendingReservation(Slot slot, Member member) {
@@ -92,12 +87,7 @@ public class ReservationCommandService {
 
         Order order = orderService.findByReservationId(reservation.id())
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
-        return new PendingReservation(
-                reservation,
-                order.orderId(),
-                order.amount(),
-                reservation.slot().theme().name() + " 예약"
-        );
+        return PendingReservation.of(reservation, order);
     }
 
     public PendingReservation getPendingPaymentReservation(long reservationId, String name) {
@@ -112,12 +102,7 @@ public class ReservationCommandService {
         Order order = orderService.findByReservationId(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
 
-        return new PendingReservation(
-                reservation,
-                order.orderId(),
-                order.amount(),
-                reservation.slot().theme().name() + " 예약"
-        );
+        return PendingReservation.of(reservation, order);
     }
 
     private Reservation save(Reservation reservation) {
