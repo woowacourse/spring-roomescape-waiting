@@ -145,7 +145,7 @@ function renderReservations(reservations) {
                     <button
                         class="payment-retry-button reschedule-button"
                         type="button"
-                        ${(isPendingPayment || isFailed || isUnknown) ? "" : "style='display: none;'"}
+                        ${(!isCanceled && !isFailed && (isPendingPayment || isUnknown)) ? "" : "style='display: none;'"}
                     >
                         결제 하기
                     </button>
