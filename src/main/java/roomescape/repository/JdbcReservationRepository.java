@@ -1,11 +1,13 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -86,6 +88,23 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findUnpaidCreatedBefore(LocalDateTime dateTime) {
+        String sql = SELECT_RESERVATION_SQL + " WHERE r.paid = false AND r.created_at < ?";
+        return jdbcTemplate.query(sql, reservationRowMapper, Timestamp.valueOf(dateTime));
+    }
+
+    @Override
+    public void deleteUnpaidByIds(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        String placeholders = ids.stream().map(id -> "?").collect(Collectors.joining(", "));
+        jdbcTemplate.update(
+                "DELETE FROM reservation WHERE paid = false AND id IN (" + placeholders + ")",
+                ids.toArray());
+    }
+
+    @Override
     public List<Reservation> findAllReservations() {
         return jdbcTemplate.query(SELECT_RESERVATION_SQL, reservationRowMapper);
     }
@@ -128,9 +147,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updatePaid(Long id, boolean paid) {
+    public int updatePaid(Long id, boolean paid) {
         String sql = "update reservation set paid = ? where id = ?";
-        jdbcTemplate.update(sql, paid, id);
+        return jdbcTemplate.update(sql, paid, id);
     }
 
     @Override

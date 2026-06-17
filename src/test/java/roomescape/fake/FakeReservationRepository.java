@@ -67,14 +67,15 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updatePaid(Long id, boolean paid) {
+    public int updatePaid(Long id, boolean paid) {
         for (int i = 0; i < store.size(); i++) {
             Reservation r = store.get(i);
             if (r.getId() != null && r.getId().equals(id)) {
                 store.set(i, r.updatePaid(paid));
-                return;
+                return 1;
             }
         }
+        return 0;
     }
 
     @Override
@@ -94,5 +95,18 @@ public class FakeReservationRepository implements ReservationRepository {
         int before = store.size();
         store.removeIf(reservation -> reservation.getId() != null && reservation.getId().equals(id));
         return before - store.size();
+    }
+
+    @Override
+    public List<Reservation> findUnpaidCreatedBefore(LocalDateTime dateTime) {
+        return store.stream()
+                .filter(reservation -> !reservation.isPaid() && reservation.getCreatedAt().isBefore(dateTime))
+                .toList();
+    }
+
+    @Override
+    public void deleteUnpaidByIds(List<Long> ids) {
+        store.removeIf(reservation ->
+                reservation.getId() != null && !reservation.isPaid() && ids.contains(reservation.getId()));
     }
 }

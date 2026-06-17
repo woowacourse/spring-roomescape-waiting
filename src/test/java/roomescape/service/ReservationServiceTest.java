@@ -81,7 +81,6 @@ class ReservationServiceTest {
         theme = new Theme(themeId, "테마", "설명", "http://example.com");
     }
 
-    // reserve()는 주문 정보(orderId, amount)만 반환하므로, 생성된 예약은 조회로 돌려받는다.
     private ReservationResponse reserve(String name, LocalDate date) {
         reservationService.reserve(new ReservationRequest(name, date, timeId, themeId));
         return reservationService.readByName(name).stream()
@@ -359,5 +358,65 @@ class ReservationServiceTest {
         assertThat(remaining.get(0).name()).isEqualTo("네오");
         assertThat(reservationWaitingDao.findAllReservationWaiting()).hasSize(1);
         assertThat(reservationWaitingDao.findAllReservationWaiting().get(0).getName()).isEqualTo("제이슨");
+    }
+
+    private void insertReservation(LocalDate date, String name, LocalDateTime createdAt, boolean paid) {
+        Slot slot = Slot.create(date, time, theme);
+        Long slotId = slotDao.insert(slot);
+        reservationUpdatingDao.insert(Reservation.restore(null, slot.withId(slotId), name, createdAt, paid));
+    }
+
+    @Test
+    void 결제대기로_만료된_예약은_정리되고_슬롯이_반납된다() {
+        setUpTimeAndTheme();
+        LocalDate date = LocalDate.now().plusDays(1);
+        insertReservation(date, "브라운", LocalDateTime.now().minusMinutes(20), false);
+
+        reservationService.deleteEvictedReservations();
+
+        assertThat(reservationService.readAll()).isEmpty();
+        assertThat(slotDao.findByDateAndTimeAndTheme(date, timeId, themeId)).isEmpty();
+    }
+
+    @Test
+    void 최근이거나_결제된_예약은_정리되지_않는다() {
+        setUpTimeAndTheme();
+        insertReservation(LocalDate.now().plusDays(1), "최근미결제", LocalDateTime.now().minusMinutes(1), false);
+        insertReservation(LocalDate.now().plusDays(2), "결제완료", LocalDateTime.now().minusMinutes(20), true);
+
+        reservationService.deleteEvictedReservations();
+
+        assertThat(reservationService.readAll()).hasSize(2);
+    }
+
+    @Test
+    void deleteUnpaidByIds는_결제된_예약은_지우지_않는다() {
+        setUpTimeAndTheme();
+        Slot slot = Slot.create(LocalDate.now().plusDays(1), time, theme);
+        Long slotId = slotDao.insert(slot);
+        Long paidId = reservationUpdatingDao.insert(
+                Reservation.restore(null, slot.withId(slotId), "결제됨", LocalDateTime.now().minusMinutes(20), true));
+
+        reservationUpdatingDao.deleteUnpaidByIds(List.of(paidId));
+
+        assertThat(reservationUpdatingDao.findReservationById(paidId)).isPresent();
+    }
+
+    @Test
+    void 만료된_예약_정리시_대기열이_있으면_대기자가_승격된다() {
+        setUpTimeAndTheme();
+        LocalDate date = LocalDate.now().plusDays(1);
+        Slot slot = Slot.create(date, time, theme);
+        Long slotId = slotDao.insert(slot);
+        reservationUpdatingDao.insert(
+                Reservation.restore(null, slot.withId(slotId), "브라운", LocalDateTime.now().minusMinutes(20), false));
+        reservationWaitingDao.create(ReservationWaiting.create("네오", slot.withId(slotId)));
+
+        reservationService.deleteEvictedReservations();
+
+        List<ReservationResponse> remaining = reservationService.readAll();
+        assertThat(remaining).hasSize(1);
+        assertThat(remaining.get(0).name()).isEqualTo("네오");
+        assertThat(reservationWaitingDao.findAllReservationWaiting()).isEmpty();
     }
 }

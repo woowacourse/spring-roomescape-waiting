@@ -21,11 +21,14 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ReservationService {
+
+    private static final long PENDING_EXPIRE_MINUTES = 10;
 
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
@@ -105,6 +108,23 @@ public class ReservationService {
             return;
         }
         promoteOrCleanupSlot(reservation.getSlot().getId());
+    }
+
+    @Transactional
+    public void deleteEvictedReservations() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(PENDING_EXPIRE_MINUTES);
+        List<Reservation> evicted = reservationRepository.findUnpaidCreatedBefore(threshold);
+        if (evicted.isEmpty()) {
+            return;
+        }
+
+        reservationRepository.deleteUnpaidByIds(evicted.stream().map(Reservation::getId).toList());
+        for (Reservation reservation : evicted) {
+            if (reservationRepository.isExistBySlot(reservation.getSlotId())) {
+                continue;
+            }
+            promoteOrCleanupSlot(reservation.getSlotId());
+        }
     }
 
     private ReservationResponse updateReservation(Reservation existedReservation, ReservationRequest request) {

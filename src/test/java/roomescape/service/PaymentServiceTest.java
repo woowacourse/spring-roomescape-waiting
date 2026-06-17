@@ -19,6 +19,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.payment.PaymentConfirmRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.PaymentException.AlreadyProcessedException;
 import roomescape.exception.PaymentException.PaymentAmountMismatchException;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.exception.PaymentException.PaymentNotFoundException;
@@ -82,16 +83,25 @@ class PaymentServiceTest {
     }
 
     @Test
-    void 승인_후_예약_확정에_실패하면_예외가_전파된다_환불_보상_대상() {
-        // 주문은 있으나 예약이 없어 complete 단계에서 실패하는 상황(이미 승인=출금된 뒤)
+    void 예약이_없으면_승인_호출_전에_차단된다() {
         orderRepository.save(ReservationOrder.restore("order-1", 10000, null, 1L));
-        paymentGateway.setResult(
-                new PaymentResult("pk_test", "order-1", 10000, PaymentStatus.APPROVED, OffsetDateTime.now()));
 
         assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest("pk_test", "order-1", 10000)))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        assertThat(paymentGateway.isCalled()).isTrue();
+        assertThat(paymentGateway.isCalled()).isFalse();
+    }
+
+    @Test
+    void 이미_결제된_예약이면_승인_호출_전에_차단된다() {
+        Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), time, theme);
+        reservationRepository.save(Reservation.restore(1L, slot, "테스트", LocalDateTime.now(), true));
+        orderRepository.save(ReservationOrder.restore("order-1", 10000, null, 1L));
+
+        assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest("pk_test", "order-1", 10000)))
+                .isInstanceOf(AlreadyProcessedException.class);
+
+        assertThat(paymentGateway.isCalled()).isFalse();
     }
 
     @Test

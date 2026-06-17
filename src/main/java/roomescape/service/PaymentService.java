@@ -10,6 +10,7 @@ import roomescape.domain.reservationOrder.ReservationOrder;
 import roomescape.dto.payment.PaymentConfirmRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.PaymentException.AlreadyProcessedException;
 
 @Service
 public class PaymentService {
@@ -31,8 +32,10 @@ public class PaymentService {
     }
 
     public ReservationResponse confirm(PaymentConfirmRequest request) {
+
         ReservationOrder order = reservationOrderService.getByOrderId(request.orderId());
         order.verifyAmount(request.amount());
+        verifyReservationPayable(order.getReservationId());
 
         PaymentResult result = paymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
 
@@ -45,13 +48,25 @@ public class PaymentService {
     }
 
 
+    private void verifyReservationPayable(long reservationId) {
+        Reservation reservation = reservationRepository.findReservationById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("예약이 존재하지 않습니다."));
+        if (reservation.isPaid()) {
+            throw new AlreadyProcessedException("이미 결제된 예약입니다.");
+        }
+    }
+
     private Reservation complete(ReservationOrder order, String paymentKey) {
         reservationOrderService.completeOrder(order, paymentKey);
 
         Reservation reservation = reservationRepository.findReservationById(order.getReservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약을 찾을 수 없습니다."));
         Reservation confirmed = reservation.confirmPayment();
-        reservationRepository.updatePaid(confirmed.getId(), confirmed.isPaid());
+
+        int updated = reservationRepository.updatePaid(confirmed.getId(), confirmed.isPaid());
+        if (updated == 0) {
+            throw new ResourceNotFoundException("예약이 정리되어 결제를 반영할 수 없습니다.");
+        }
 
         return confirmed;
     }
