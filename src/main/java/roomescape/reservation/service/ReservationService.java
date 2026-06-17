@@ -4,6 +4,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.RoomescapeException;
+import roomescape.payment.dao.PaymentOrderDao;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
@@ -24,12 +25,15 @@ public class ReservationService {
     private final ThemeDao themeDao;
     private final TimeDao timeDao;
     private final ReservationWaitingDao reservationWaitingDao;
+    private final PaymentOrderDao paymentOrderDao;
 
-    public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao, ReservationWaitingDao reservationWaitingDao) {
+    public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao,
+                              ReservationWaitingDao reservationWaitingDao, PaymentOrderDao paymentOrderDao) {
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
         this.timeDao = timeDao;
         this.reservationWaitingDao = reservationWaitingDao;
+        this.paymentOrderDao = paymentOrderDao;
     }
 
     public List<Reservation> findAll() {
@@ -46,7 +50,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation add(String name, Long themeId, LocalDate date, Long timeId) {
+    public Reservation add(String name, Long themeId, LocalDate date, Long timeId, String orderId, Long amount) {
         ReservationTime time = timeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomescapeException(RESERVATION_TIME_NOT_FOUND));
 
@@ -59,7 +63,9 @@ public class ReservationService {
 
         Reservation newReservation = new Reservation(name, themeId, date, time);
         try {
-            return reservationDao.insert(newReservation);
+            Reservation saved = reservationDao.insert(newReservation);
+            paymentOrderDao.insert(orderId, amount, saved.getId());
+            return saved;
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(RESERVATION_ALREADY_EXISTS);
         }
