@@ -2,19 +2,43 @@ package roomescape.domain.reservation;
 
 import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.theme.Theme;
 
+@Entity
 public class Reservation {
     private static final long TRANSIENT = 0L;
-    private final long id;
-    private final ReservationName name;
-    private final Slot slot;
-    private final Status status;
-    private final LocalDateTime createdAt;
 
-    private Reservation(long id, ReservationName name, Slot slot, Status status, LocalDateTime createdAt) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private ReservationName name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot_id", nullable = false)
+    private Slot slot;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    protected Reservation() {
+    }
+
+    private Reservation(Long id, ReservationName name, Slot slot, Status status, LocalDateTime createdAt) {
         this.id = id;
         this.name = Objects.requireNonNull(name);
         this.slot = Objects.requireNonNull(slot);
@@ -22,7 +46,7 @@ public class Reservation {
         this.createdAt = Objects.requireNonNull(createdAt);
     }
 
-    public static Reservation load(long id, ReservationName reservationName, Slot slot, Status status,
+    public static Reservation load(Long id, ReservationName reservationName, Slot slot, Status status,
                                    LocalDateTime createdAt) {
         return new Reservation(id, reservationName, slot, status, createdAt);
     }

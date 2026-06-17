@@ -39,6 +39,7 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationResponse> findList(@RequestParam(required = false) String name) {
         List<RankedReservation> reservations = reservationService.findList(name);
+        System.out.println("예약 건 수 : " + reservations.size());
 
         return reservations.stream()
                 .map(ReservationResponse::from)
@@ -63,5 +64,10 @@ public class ReservationController {
     public ReservationResponse update(@Valid @RequestBody ReservationUpdateRequest request, @PathVariable long id) {
         RankedReservation updated = reservationService.update(request, id, LocalDateTime.now());
         return ReservationResponse.from(updated);
+    }
+
+    @GetMapping("/test")
+    public void test() {
+        reservationService.find(1L);
     }
 }

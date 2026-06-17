@@ -30,7 +30,7 @@ public class Theme {
         this.thumbnailUrl = Objects.requireNonNull(thumbnailUrl);
     }
 
-    public static Theme load(long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
+    public static Theme load(Long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         return new Theme(id, name, description, thumbnailUrl);
     }
 

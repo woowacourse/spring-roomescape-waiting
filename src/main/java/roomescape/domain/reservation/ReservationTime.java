@@ -14,14 +14,14 @@ public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @Column(nullable = false)
     private LocalTime startAt;
 
     protected ReservationTime() {
     }
 
-    private ReservationTime(long id, LocalTime startAt) {
+    private ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = Objects.requireNonNull(startAt);
     }

@@ -1,10 +1,17 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Embeddable
 public class ReservationDate {
-    private final LocalDate value;
+    @Column(name = "date", nullable = false)
+    private LocalDate value;
+
+    protected ReservationDate() {
+    }
 
     public ReservationDate(LocalDate value) {
         this.value = Objects.requireNonNull(value);

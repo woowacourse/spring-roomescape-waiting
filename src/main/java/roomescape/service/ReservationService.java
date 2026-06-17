@@ -13,16 +13,21 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
-import roomescape.domain.reservation.Status;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationJpaRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
     private final SlotService slotService;
-    private final ReservationRepository reservationRepository;
+    private final ReservationJpaRepository reservationRepository;
 
-    public ReservationService(SlotService slotService, ReservationRepository reservationRepository) {
+//    public ReservationService(SlotService slotService, ReservationRepository reservationRepository) {
+//        this.slotService = slotService;
+//        this.reservationRepository = reservationRepository;
+//    }
+
+
+    public ReservationService(SlotService slotService, ReservationJpaRepository reservationRepository) {
         this.slotService = slotService;
         this.reservationRepository = reservationRepository;
     }
@@ -66,7 +71,8 @@ public class ReservationService {
         Reservations reservations = new Reservations(reservationRepository.findAllBySlot(updateSlot));
         Reservation reserved = reservations.reserve(new ReservationName(request.getName()), updateSlot, now);
 
-        Reservation updated = reservationRepository.update(id, reserved);
+//        Reservation updated = reservationRepository.update(id, reserved);
+        Reservation updated = null;
 
         if (originReservation.isApproved()) {
             findFirstWaitingAndUpdateStatus(originReservation);
@@ -76,8 +82,8 @@ public class ReservationService {
     }
 
     private void findFirstWaitingAndUpdateStatus(Reservation reservation) {
-        reservationRepository.findFirstWaitingBySlot(reservation.getSlot())
-                .ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
+//        reservationRepository.findFirstWaitingBySlot(reservation.getSlot())
+//                .ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
     }
 
     @Transactional
