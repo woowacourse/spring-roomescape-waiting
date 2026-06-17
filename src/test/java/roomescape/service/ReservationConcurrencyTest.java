@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import roomescape.controller.dto.UserReservationRequest;
+import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
@@ -67,11 +67,11 @@ class ReservationConcurrencyTest {
     void sameMemberCannotReserveSameScheduleConcurrently() throws Exception {
         LocalDate date = LocalDate.now().plusDays(30);
         Member member = saveMember("member-a", "러로");
-        UserReservationRequest request = new UserReservationRequest(date, TIME_ID, THEME_ID);
+        AdminReservationRequest request = new AdminReservationRequest(member.getId(), date, TIME_ID, THEME_ID);
 
         List<Throwable> failures = executeConcurrently(
-                () -> reservationService.saveReservationByMember(request, member),
-                () -> reservationService.saveReservationByMember(request, member)
+                () -> reservationService.saveReservationByAdmin(request),
+                () -> reservationService.saveReservationByAdmin(request)
         );
 
         assertThat(failures).hasSize(1);
@@ -92,11 +92,12 @@ class ReservationConcurrencyTest {
         LocalDate date = LocalDate.now().plusDays(31);
         Member first = saveMember("member-a", "러로");
         Member second = saveMember("member-b", "현미밥");
-        UserReservationRequest request = new UserReservationRequest(date, TIME_ID, THEME_ID);
+        AdminReservationRequest firstRequest = new AdminReservationRequest(first.getId(), date, TIME_ID, THEME_ID);
+        AdminReservationRequest secondRequest = new AdminReservationRequest(second.getId(), date, TIME_ID, THEME_ID);
 
         List<Throwable> failures = executeConcurrently(
-                () -> reservationService.saveReservationByMember(request, first),
-                () -> reservationService.saveReservationByMember(request, second)
+                () -> reservationService.saveReservationByAdmin(firstRequest),
+                () -> reservationService.saveReservationByAdmin(secondRequest)
         );
 
         assertThat(failures).isEmpty();
@@ -115,10 +116,9 @@ class ReservationConcurrencyTest {
         Member reserver = saveMember("member-a", "러로");
         Member firstWaiting = saveMember("member-b", "현미밥");
         Member secondWaiting = saveMember("member-c", "오뚜기밥");
-        UserReservationRequest request = new UserReservationRequest(date, TIME_ID, THEME_ID);
-        long reservationId = reservationService.saveReservationByMember(request, reserver);
-        reservationService.saveReservationByMember(request, firstWaiting);
-        reservationService.saveReservationByMember(request, secondWaiting);
+        long reservationId = reservationService.saveReservationByAdmin(new AdminReservationRequest(reserver.getId(), date, TIME_ID, THEME_ID));
+        reservationService.saveReservationByAdmin(new AdminReservationRequest(firstWaiting.getId(), date, TIME_ID, THEME_ID));
+        reservationService.saveReservationByAdmin(new AdminReservationRequest(secondWaiting.getId(), date, TIME_ID, THEME_ID));
 
         List<Throwable> failures = executeConcurrently(
                 () -> reservationService.cancelReservation(reservationId, reserver),
@@ -142,13 +142,13 @@ class ReservationConcurrencyTest {
         Member reserver = saveMember("member-a", "러로");
         Member waiting = saveMember("member-b", "현미밥");
         Member newMember = saveMember("member-c", "오뚜기밥");
-        UserReservationRequest request = new UserReservationRequest(date, TIME_ID, THEME_ID);
-        long reservationId = reservationService.saveReservationByMember(request, reserver);
-        reservationService.saveReservationByMember(request, waiting);
+        long reservationId = reservationService.saveReservationByAdmin(new AdminReservationRequest(reserver.getId(), date, TIME_ID, THEME_ID));
+        reservationService.saveReservationByAdmin(new AdminReservationRequest(waiting.getId(), date, TIME_ID, THEME_ID));
+        AdminReservationRequest newMemberRequest = new AdminReservationRequest(newMember.getId(), date, TIME_ID, THEME_ID);
 
         List<Throwable> failures = executeConcurrently(
                 () -> reservationService.cancelReservation(reservationId, reserver),
-                () -> reservationService.saveReservationByMember(request, newMember)
+                () -> reservationService.saveReservationByAdmin(newMemberRequest)
         );
 
         assertThat(failures).isEmpty();

@@ -3,7 +3,10 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -20,9 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import roomescape.controller.dto.payment.PaymentConfirmResponse;
 import roomescape.controller.dto.payment.PaymentOrderRequest;
-import roomescape.controller.dto.payment.PaymentOrderResponse;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
@@ -36,21 +37,14 @@ import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentOrder;
 import roomescape.payment.PaymentOrderIdGenerator;
 import roomescape.payment.PaymentOrderStatus;
-import roomescape.repository.MemberDao;
+import roomescape.payment.PaymentResult;
 import roomescape.repository.PaymentOrderDao;
-import roomescape.repository.ReservationDao;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
     @Mock
     private PaymentOrderDao paymentOrderDao;
-
-    @Mock
-    private MemberDao memberDao;
-
-    @Mock
-    private ReservationDao reservationDao;
 
     @Mock
     private ScheduleService scheduleService;
@@ -72,8 +66,6 @@ class PaymentServiceTest {
     void setUp() {
         paymentService = new PaymentService(
                 paymentOrderDao,
-                memberDao,
-                reservationDao,
                 scheduleService,
                 reservationService,
                 paymentGateway,
@@ -87,19 +79,17 @@ class PaymentServiceTest {
     void createOrderUsesThemePrice() {
         Member member = member(1L);
         Schedule schedule = schedule(10L, 23000);
-        PaymentOrderRequest request = new PaymentOrderRequest(schedule.getDate(), 1L, 1L);
+        PaymentOrderRequest request = request(schedule);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
-        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
-        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
         given(orderIdGenerator.generate()).willReturn("order-123456");
         ArgumentCaptor<PaymentOrder> orderCaptor = ArgumentCaptor.forClass(PaymentOrder.class);
 
-        PaymentOrderResponse response = paymentService.createOrder(request, member, "http://localhost:8080");
+        PaymentOrder response = paymentService.createOrder(request, member);
 
-        assertThat(response.clientKey()).isEqualTo("test_ck_123");
-        assertThat(response.orderId()).isEqualTo("order-123456");
-        assertThat(response.amount()).isEqualTo(23000);
+        assertThat(response.getOrderId()).isEqualTo("order-123456");
+        assertThat(response.getAmount()).isEqualTo(23000);
+        verify(reservationService).validatePaymentOrderCreatable(eq(member), eq(schedule), any(LocalDateTime.class));
         verify(paymentOrderDao).save(orderCaptor.capture());
         assertThat(orderCaptor.getValue().getAmount()).isEqualTo(23000);
         assertThat(orderCaptor.getValue().getStatus()).isEqualTo(PaymentOrderStatus.PENDING);
@@ -110,11 +100,14 @@ class PaymentServiceTest {
     void createOrderPastSchedule() {
         Member member = member(1L);
         Schedule schedule = schedule(10L, 23000, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
-        PaymentOrderRequest request = new PaymentOrderRequest(schedule.getDate(), 1L, 1L);
+        PaymentOrderRequest request = request(schedule);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
+        willThrow(new RoomescapeException(DomainErrorCode.PAST_RESERVATION, "과거 시각으로는 결제를 시작할 수 없습니다."))
+                .given(reservationService)
+                .validatePaymentOrderCreatable(eq(member), eq(schedule), any(LocalDateTime.class));
 
-        assertThatThrownBy(() -> paymentService.createOrder(request, member, "http://localhost:8080"))
+        assertThatThrownBy(() -> paymentService.createOrder(request, member))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.PAST_RESERVATION);
@@ -128,12 +121,14 @@ class PaymentServiceTest {
     void createOrderDuplicateReservation() {
         Member member = member(1L);
         Schedule schedule = schedule(10L, 23000);
-        PaymentOrderRequest request = new PaymentOrderRequest(schedule.getDate(), 1L, 1L);
+        PaymentOrderRequest request = request(schedule);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
-        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(true);
+        willThrow(new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다."))
+                .given(reservationService)
+                .validatePaymentOrderCreatable(eq(member), eq(schedule), any(LocalDateTime.class));
 
-        assertThatThrownBy(() -> paymentService.createOrder(request, member, "http://localhost:8080"))
+        assertThatThrownBy(() -> paymentService.createOrder(request, member))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
@@ -147,13 +142,14 @@ class PaymentServiceTest {
     void createOrderSlotUnavailable() {
         Member member = member(1L);
         Schedule schedule = schedule(10L, 23000);
-        PaymentOrderRequest request = new PaymentOrderRequest(schedule.getDate(), 1L, 1L);
+        PaymentOrderRequest request = request(schedule);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
-        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
-        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(1);
+        willThrow(new RoomescapeException(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE, "이미 예약된 슬롯은 결제할 수 없습니다."))
+                .given(reservationService)
+                .validatePaymentOrderCreatable(eq(member), eq(schedule), any(LocalDateTime.class));
 
-        assertThatThrownBy(() -> paymentService.createOrder(request, member, "http://localhost:8080"))
+        assertThatThrownBy(() -> paymentService.createOrder(request, member))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE);
@@ -174,6 +170,9 @@ class PaymentServiceTest {
                 .isEqualTo(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH);
 
         verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        verify(reservationService, never()).validateBeforeConfirm(anyLong(), anyLong(), any(LocalDateTime.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
     }
 
     @DisplayName("승인 전 슬롯이 이미 차 있으면 승인 API를 호출하지 않는다.")
@@ -181,15 +180,72 @@ class PaymentServiceTest {
     void confirmSlotUnavailableBeforeGateway() {
         PaymentOrder order = pendingOrder(23000);
         given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
-        given(reservationDao.countReservationByScheduleId(order.getScheduleId())).willReturn(1);
+        willThrow(new RoomescapeException(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE, "이미 예약된 슬롯은 결제할 수 없습니다."))
+                .given(reservationService)
+                .validateBeforeConfirm(eq(order.getMemberId()), eq(order.getScheduleId()), any(LocalDateTime.class));
 
         assertThatThrownBy(() -> paymentService.confirm("payment-key", order.getOrderId(), order.getAmount()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE);
 
-        verify(scheduleService).lockById(order.getScheduleId());
         verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("승인 전 본인 중복 예약이면 승인 API를 호출하지 않는다.")
+    @Test
+    void confirmDuplicateReservationBeforeGateway() {
+        PaymentOrder order = pendingOrder(23000);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        willThrow(new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다."))
+                .given(reservationService)
+                .validateBeforeConfirm(eq(order.getMemberId()), eq(order.getScheduleId()), any(LocalDateTime.class));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", order.getOrderId(), order.getAmount()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
+
+        verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("승인 전 과거 스케줄이면 승인 API를 호출하지 않는다.")
+    @Test
+    void confirmPastScheduleBeforeGateway() {
+        PaymentOrder order = pendingOrder(23000);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        willThrow(new RoomescapeException(DomainErrorCode.PAST_RESERVATION, "과거 시각으로는 결제를 시작할 수 없습니다."))
+                .given(reservationService)
+                .validateBeforeConfirm(eq(order.getMemberId()), eq(order.getScheduleId()), any(LocalDateTime.class));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", order.getOrderId(), order.getAmount()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAST_RESERVATION);
+
+        verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("주문 정보가 없으면 승인 API를 호출하지 않는다.")
+    @Test
+    void confirmOrderNotFound() {
+        given(paymentOrderDao.findByOrderId("missing-order")).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "missing-order", 23000))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
+
+        verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        verify(reservationService, never()).validateBeforeConfirm(anyLong(), anyLong(), any(LocalDateTime.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
     }
 
     @DisplayName("이미 확정된 같은 orderId/paymentKey 콜백은 멱등 성공으로 응답한다.")
@@ -198,15 +254,98 @@ class PaymentServiceTest {
         PaymentOrder order = confirmedOrder(23000);
         given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
 
-        PaymentConfirmResponse response = paymentService.confirm(order.getPaymentKey(), order.getOrderId(), order.getAmount());
+        paymentService.confirm(order.getPaymentKey(), order.getOrderId(), order.getAmount());
 
-        assertThat(response.status()).isEqualTo(PaymentOrderStatus.CONFIRMED.name());
-        assertThat(response.reservationId()).isEqualTo(order.getReservationId());
         verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        verify(reservationService, never()).validateBeforeConfirm(anyLong(), anyLong(), any(LocalDateTime.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("승인 API가 실패하면 예약 확정과 주문 확정을 하지 않는다.")
+    @Test
+    void confirmGatewayFailure() {
+        PaymentOrder order = pendingOrder(23000);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willThrow(new RoomescapeException(DomainErrorCode.PAYMENT_REJECTED, "카드 결제가 거절되었습니다."));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", order.getOrderId(), order.getAmount()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAYMENT_REJECTED);
+
+        verify(reservationService).validateBeforeConfirm(eq(order.getMemberId()), eq(order.getScheduleId()), any(LocalDateTime.class));
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("승인 API 성공 후 확정 예약을 저장하고 주문을 CONFIRMED로 변경한다.")
+    @Test
+    void confirmSuccess() {
+        PaymentOrder order = pendingOrder(23000);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willReturn(new PaymentResult("payment-key", order.getOrderId(), order.getAmount(), "DONE"));
+        given(reservationService.saveConfirmedReservationByPayment(order.getScheduleId(), order.getMemberId()))
+                .willReturn(99L);
+        ArgumentCaptor<PaymentConfirmation> confirmationCaptor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+
+        paymentService.confirm("payment-key", order.getOrderId(), order.getAmount());
+
+        verify(reservationService).validateBeforeConfirm(eq(order.getMemberId()), eq(order.getScheduleId()), any(LocalDateTime.class));
+        verify(paymentGateway).confirm(confirmationCaptor.capture());
+        PaymentConfirmation confirmation = confirmationCaptor.getValue();
+        assertThat(confirmation.paymentKey()).isEqualTo("payment-key");
+        assertThat(confirmation.orderId()).isEqualTo(order.getOrderId());
+        assertThat(confirmation.amount()).isEqualTo(order.getAmount());
+        verify(paymentOrderDao).confirm(eq(order.getOrderId()), eq("payment-key"), eq(99L), any(LocalDateTime.class));
+    }
+
+    @DisplayName("승인 후 확정 예약 저장에 실패하면 주문을 CONFIRMED로 변경하지 않는다.")
+    @Test
+    void confirmReservationSaveFailureAfterGateway() {
+        PaymentOrder order = pendingOrder(23000);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willReturn(new PaymentResult("payment-key", order.getOrderId(), order.getAmount(), "DONE"));
+        given(reservationService.saveConfirmedReservationByPayment(order.getScheduleId(), order.getMemberId()))
+                .willThrow(new RoomescapeException(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE, "이미 예약된 슬롯은 결제할 수 없습니다."));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", order.getOrderId(), order.getAmount()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE);
+
+        verify(paymentGateway).confirm(any(PaymentConfirmation.class));
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("failUrl에 orderId가 있으면 결제 주문 실패 정보를 저장한다.")
+    @Test
+    void failWithOrderId() {
+        paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", "order-123456");
+
+        verify(paymentOrderDao).fail(eq("order-123456"), eq("PAY_PROCESS_CANCELED"), eq("사용자가 결제를 취소했습니다."), any(LocalDateTime.class));
+    }
+
+    @DisplayName("failUrl에 orderId가 없으면 아무 작업도 하지 않는다.")
+    @Test
+    void failWithoutOrderId() {
+        paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", null);
+        paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", " ");
+
+        verify(paymentOrderDao, never()).fail(any(), any(), any(), any(LocalDateTime.class));
     }
 
     private PaymentOrder pendingOrder(int amount) {
-        return order(amount, PaymentOrderStatus.PENDING, null, null);
+        return PaymentOrder.pending(
+                "order-123456",
+                1L,
+                10L,
+                amount,
+                LocalDateTime.now()
+        );
     }
 
     private PaymentOrder confirmedOrder(int amount) {
@@ -233,6 +372,10 @@ class PaymentServiceTest {
 
     private Member member(Long id) {
         return new Member(id, "member" + id, "회원" + id, "password", Role.USER);
+    }
+
+    private PaymentOrderRequest request(Schedule schedule) {
+        return new PaymentOrderRequest(schedule.getDate(), 1L, 1L);
     }
 
     private Schedule schedule(Long id, int price) {
