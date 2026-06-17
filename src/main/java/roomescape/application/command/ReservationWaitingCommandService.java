@@ -37,11 +37,13 @@ public class ReservationWaitingCommandService {
 
     public void delete(ReservationWaiting reservationWaiting) {
         reservationWaitingRepository.deleteById(reservationWaiting.getId());
+        reservationWaitingRepository.flush();
     }
 
     public void deleteMine(ReservationWaiting reservationWaiting, Member requester) {
         reservationWaiting.cancelBy(requester);
 
         reservationWaitingRepository.deleteById(reservationWaiting.getId());
+        reservationWaitingRepository.flush();
     }
 }

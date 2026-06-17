@@ -1,10 +1,13 @@
 package roomescape.application.query;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationResponses;
@@ -28,9 +31,22 @@ public class ReservationQueryService {
     }
 
     public ReservationResponses findPage(int page, int size) {
-        List<Reservation> reservations = reservationRepository.findAll(page * size, size);
-        long totalCount = reservationRepository.count();
-        return ReservationResponses.from(reservations, totalCount, page, size);
+        Page<Reservation> reservations = reservationRepository.findAll(
+                PageRequest.of(
+                        page,
+                        size,
+                        Sort.by(
+                                Sort.Order.desc("slot.date"),
+                                Sort.Order.asc("slot.time.startAt")
+                        )
+                )
+        );
+        return ReservationResponses.from(
+                reservations.getContent(),
+                reservations.getTotalElements(),
+                page,
+                size
+        );
     }
 
     public Reservation getById(Long id) {
@@ -43,11 +59,14 @@ public class ReservationQueryService {
     }
 
     public ReservationResponses findMine(Member member) {
-        List<Reservation> reservations = reservationRepository.findByMember(member);
+        List<Reservation> reservations = reservationRepository.findByReserver(member);
         return ReservationResponses.from(reservations, reservations.size(), 0, reservations.size());
     }
 
     public Set<Long> findReservedTimeIds(LocalDate date, Theme theme) {
-        return new HashSet<>(reservationRepository.findReservedTimeIdsByDateAndTheme(date, theme));
+        return reservationRepository.findBySlot_DateAndSlot_Theme(date, theme)
+                .stream()
+                .map(reservation -> reservation.getTime().getId())
+                .collect(Collectors.toSet());
     }
 }

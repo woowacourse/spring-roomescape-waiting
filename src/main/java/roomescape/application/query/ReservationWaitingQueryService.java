@@ -33,15 +33,15 @@ public class ReservationWaitingQueryService {
     }
 
     public Optional<ReservationWaiting> findFirstBySlot(Slot slot) {
-        return reservationWaitingRepository.findFirstBySlot(slot);
+        return reservationWaitingRepository.findFirstBySlotOrderByIdAsc(slot);
     }
 
     public ReservationWaitingWithOrder getWithOrderById(Long id) {
-        return reservationWaitingQueryRepository.findById(id)
+        return reservationWaitingQueryRepository.findWithOrderById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지않는 예약대기입니다. Id: " + id));
     }
 
     public List<ReservationWaitingWithOrder> findMine(Member member) {
-        return reservationWaitingQueryRepository.findByMember(member);
+        return reservationWaitingQueryRepository.findByName(member.name());
     }
 }

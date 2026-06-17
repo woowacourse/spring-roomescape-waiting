@@ -1,8 +1,12 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import roomescape.domain.exception.BusinessRuleViolationException;
 
+@Embeddable
 public record Member(
+        @Column(nullable = false)
         String name
 ) {
 

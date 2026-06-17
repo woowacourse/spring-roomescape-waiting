@@ -112,7 +112,7 @@ class ReservationWaitingUseCaseMockTest {
         given(reservationQueryService.findBySlot(SLOT))
                 .willReturn(Optional.of(reservation));
         given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
-        given(reservationWaitingQueryRepository.findById(saved.getId())).willReturn(Optional.of(savedWithOrder));
+        given(reservationWaitingQueryRepository.findWithOrderById(saved.getId())).willReturn(Optional.of(savedWithOrder));
 
         assertThat(reservationWaitingApplicationService.save(request)).isEqualTo(savedWithOrder);
     }

@@ -9,16 +9,15 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.exception.ConflictException;
-import roomescape.repository.ReservationTimeJdbcRepository;
+import roomescape.repository.ReservationTimeRepository;
 
-@JdbcTest
-@Import(ReservationTimeJdbcRepository.class)
-class ReservationTimeJdbcRepositoryTest {
+@DataJpaTest
+class ReservationTimeRepositoryTest {
 
     private static final LocalTime START_AT = LocalTime.of(10, 0);
     private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 8, 5);
@@ -27,7 +26,7 @@ class ReservationTimeJdbcRepositoryTest {
     private static final String THEME_THUMBNAIL_IMAGE_URL = "https://example.com/horror.jpg";
 
     @Autowired
-    private ReservationTimeJdbcRepository repository;
+    private ReservationTimeRepository repository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -41,12 +40,11 @@ class ReservationTimeJdbcRepositoryTest {
     }
 
     @Test
-    void 같은_시작_시간으로_저장하면_ConflictException을_던진다() {
-        repository.save(new ReservationTime(null, START_AT));
+    void 같은_시작_시간으로_저장하면_DataIntegrityViolationException을_던진다() {
+        repository.saveAndFlush(new ReservationTime(null, START_AT));
 
-        assertThatThrownBy(() -> repository.save(new ReservationTime(null, START_AT)))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("이미 존재하는 예약 시간");
+        assertThatThrownBy(() -> repository.saveAndFlush(new ReservationTime(null, START_AT)))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -54,7 +52,7 @@ class ReservationTimeJdbcRepositoryTest {
         repository.save(new ReservationTime(null, LocalTime.of(11, 0)));
         repository.save(new ReservationTime(null, LocalTime.of(9, 0)));
 
-        List<ReservationTime> times = repository.findAll();
+        List<ReservationTime> times = repository.findAll(Sort.by("startAt"));
 
         assertThat(times)
                 .extracting(ReservationTime::getStartAt)
@@ -93,7 +91,7 @@ class ReservationTimeJdbcRepositoryTest {
     }
 
     @Test
-    void 예약에서_사용_중인_시간을_삭제하면_ConflictException을_던진다() {
+    void 예약에서_사용_중인_시간을_삭제하면_DataIntegrityViolationException을_던진다() {
         ReservationTime saved = repository.save(new ReservationTime(null, START_AT));
         jdbcTemplate.update(
                 "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
@@ -105,8 +103,9 @@ class ReservationTimeJdbcRepositoryTest {
                 "브라운", RESERVATION_DATE, saved.getId(), themeId
         );
 
-        assertThatThrownBy(() -> repository.deleteById(saved.getId()))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("사용 중인 예약");
+        repository.deleteById(saved.getId());
+
+        assertThatThrownBy(repository::flush)
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 }

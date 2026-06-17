@@ -12,4 +12,15 @@ public record ReservationWaitingWithOrder(
         Theme theme,
         int order
 ) {
+
+    public ReservationWaitingWithOrder(
+            Long id,
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            Long order
+    ) {
+        this(id, name, date, time, theme, Math.toIntExact(order));
+    }
 }

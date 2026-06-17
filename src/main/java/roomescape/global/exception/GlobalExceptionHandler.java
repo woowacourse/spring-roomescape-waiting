@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -28,6 +29,9 @@ public final class GlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     private static final String DETAIL_VALIDATION_ERROR = "요청 본문의 일부 필드가 유효하지 않습니다.";
     private static final String DETAIL_INTERNAL_ERROR = "요청을 처리하는 중 알 수 없는 오류가 발생했습니다.";
+    private static final String DETAIL_DATA_INTEGRITY_VIOLATION = "요청한 데이터가 이미 존재하거나 사용 중입니다.";
+    private static final String DUPLICATE_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
+    private static final String DUPLICATE_WAITING = "이미 대기를 신청한 예약입니다.";
     private static final String ERRORS_PROPERTY = "errors";
     private static final String POINTER_PREFIX = "/";
 
@@ -49,6 +53,16 @@ public final class GlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ProblemDetail handleBusinessRuleViolation(BusinessRuleViolationException ex, WebRequest request) {
         return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ProblemType.BUSINESS_RULE_VIOLATION, ex, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex, WebRequest request) {
+        return buildProblem(
+                HttpStatus.CONFLICT,
+                ProblemType.CONFLICT,
+                new ConflictException(toConflictMessage(ex), ex),
+                request
+        );
     }
 
     @ExceptionHandler(Exception.class)
@@ -101,6 +115,21 @@ public final class GlobalExceptionHandler extends ResponseEntityExceptionHandler
         applyType(problem, type, request);
         logException(ex, status, request);
         return problem;
+    }
+
+    private String toConflictMessage(DataIntegrityViolationException ex) {
+        String causeMessage = ex.getMostSpecificCause().getMessage();
+        if (causeMessage == null) {
+            return DETAIL_DATA_INTEGRITY_VIOLATION;
+        }
+        String normalized = causeMessage.toUpperCase();
+        if (normalized.contains("UNIQUE_RESERVATION_WAITING_DATE_TIME_THEME_NAME")) {
+            return DUPLICATE_WAITING;
+        }
+        if (normalized.contains("UNIQUE_RESERVATION_DATE_TIME_THEME")) {
+            return DUPLICATE_RESERVATION;
+        }
+        return DETAIL_DATA_INTEGRITY_VIOLATION;
     }
 
     private void applyType(ProblemDetail problem, ProblemType type, WebRequest request) {
