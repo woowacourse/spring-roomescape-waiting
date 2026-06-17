@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import payment.order.Order;
 import payment.order.OrderRepository;
+import roomescape.RoomescapeApplication;
 import roomescape.controller.FixedClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -24,7 +25,7 @@ import roomescape.repository.ReservationDao;
 import roomescape.service.PendingReservation;
 import roomescape.service.ReservationCommandService;
 
-@SpringBootTest
+@SpringBootTest(classes = RoomescapeApplication.class)
 @Import(FixedClockConfig.class)
 @Sql(scripts = "/reservation-fixture.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class PaymentServiceTest {
@@ -77,5 +78,16 @@ class PaymentServiceTest {
     @DisplayName("실패 콜백에서 orderId가 없으면 저장소를 조회하지 않고 종료한다.")
     void failWithoutOrderId() {
         paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", null);
+    }
+
+    @Test
+    @DisplayName("실패 콜백에서 orderId가 있으면 결제대기 예약을 삭제한다.")
+    void failWithOrderIdDeletesPendingReservation() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+
+        paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", pending.orderId());
+
+        assertThat(reservationDao.findById(pending.reservation().id())).isEmpty();
     }
 }

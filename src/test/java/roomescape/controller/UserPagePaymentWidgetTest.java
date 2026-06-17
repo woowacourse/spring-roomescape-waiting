@@ -42,4 +42,15 @@ class UserPagePaymentWidgetTest {
         assertThat(page).contains("resumePendingPayment");
         assertThat(page).contains("/payment?name=");
     }
+
+    @Test
+    void userPageNotifiesServerAndResetsCheckoutWhenPaymentWidgetFails() throws IOException {
+        String page = Files.readString(USER_PAGE);
+
+        assertThat(page).contains("notifyPaymentFailure");
+        assertThat(page).contains("/payments/fail?");
+        assertThat(page).contains("resetCheckout();");
+        assertThat(page).contains("await loadTimes();");
+        assertThat(page).contains("결제가 취소되었습니다. 다시 시간을 선택해주세요.");
+    }
 }

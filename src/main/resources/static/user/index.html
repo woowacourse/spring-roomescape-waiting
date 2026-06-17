@@ -715,6 +715,7 @@
         const reserveBtn = document.getElementById('reserveBtn');
         const name = document.getElementById('name').value.trim();
         const date = document.getElementById('date').value;
+        let createdPayment = null;
         if (!name) return showAlert('이름을 입력해주세요.', 'error');
 
         if (pendingCheckout && paymentWidgets) {
@@ -743,8 +744,13 @@
 
             const pending = await res.json();
             const payment = pending.payment;
+            createdPayment = payment;
             if (!payment.clientKey) {
-                showAlert('결제창을 열 수 없습니다. 서버의 Toss 클라이언트 키 설정을 확인해주세요.', 'error');
+                await handlePaymentFailure(
+                    payment,
+                    {code: 'CLIENT_KEY_EMPTY', message: 'Toss 클라이언트 키가 설정되지 않았습니다.'},
+                    '결제창을 열 수 없습니다. 서버의 Toss 클라이언트 키 설정을 확인해주세요.'
+                );
                 return;
             }
 
@@ -754,6 +760,10 @@
             reserveBtn.textContent = '결제 요청하기';
             showAlert('결제수단과 약관을 확인한 뒤 결제 요청하기를 눌러주세요.', 'info');
         } catch (error) {
+            if (createdPayment) {
+                await handlePaymentFailure(createdPayment, error, '결제창을 열지 못했습니다. 다시 시간을 선택해주세요.');
+                return;
+            }
             showAlert(error?.message ?? '결제창을 열지 못했습니다.', 'error');
         } finally {
             reserveBtn.disabled = false;
@@ -805,10 +815,46 @@
                 failUrl: `${window.location.origin}/payments/fail`
             });
         } catch (error) {
+            if (isPaymentCancelError(error)) {
+                await handlePaymentFailure(pendingCheckout, error);
+                return;
+            }
             showAlert(error?.message ?? '결제창을 열지 못했습니다.', 'error');
             reserveBtn.disabled = false;
             reserveBtn.textContent = '결제 요청하기';
         }
+    }
+
+    async function handlePaymentFailure(payment, error, message = '결제가 취소되었습니다. 다시 시간을 선택해주세요.') {
+        await notifyPaymentFailure(payment, error);
+        selectedTimeId = null;
+        selectedTimeBooked = false;
+        resetCheckout();
+        toggleSubmitButtons();
+
+        try {
+            await loadTimes();
+        } catch (_) {
+            // loadTimes already renders its own error message.
+        }
+        showAlert(message, 'error');
+    }
+
+    async function notifyPaymentFailure(payment, error) {
+        if (!payment?.orderId) return;
+
+        const params = new URLSearchParams({
+            orderId: payment.orderId,
+            code: error?.code ?? 'PAY_PROCESS_CANCELED',
+            message: error?.message ?? '결제가 취소되었습니다.'
+        });
+        await fetch(`/payments/fail?${params.toString()}`);
+    }
+
+    function isPaymentCancelError(error) {
+        return error?.code === 'PAY_PROCESS_CANCELED'
+            || error?.code === 'USER_CANCEL'
+            || (error?.message ?? '').includes('취소');
     }
 
     function resetCheckout() {
