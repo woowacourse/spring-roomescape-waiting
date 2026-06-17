@@ -3,9 +3,11 @@ package roomescape.ui.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,17 +50,20 @@ public class RoomescapePageController {
     private final ThemeService themeService;
     private final TimeService timeService;
     private final HolidayService holidayService;
+    private final String clientKey;
 
     public RoomescapePageController(
             ReservationService reservationService,
             ThemeService themeService,
             TimeService timeService,
-            HolidayService holidayService
+            HolidayService holidayService,
+            @Value("${toss.client-key}") String clientKey
     ) {
         this.reservationService = reservationService;
         this.themeService = themeService;
         this.timeService = timeService;
         this.holidayService = holidayService;
+        this.clientKey = clientKey;
     }
 
     @GetMapping("/dashboard")
@@ -115,7 +120,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId));
+            reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId, null, null));
             addSuccessMessage(redirectAttributes, "예약을 생성했습니다.");
         } catch (PastReservationException | DuplicateReservationException |
                  IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
@@ -140,20 +145,39 @@ public class RoomescapePageController {
             @RequestParam String name,
             @RequestParam Long themeId,
             @RequestParam Long timeId,
+            @RequestParam Long amount,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            Reservation created = reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId));
+            String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
+            Reservation created = reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId, orderId, amount));
             if (created.getStatus() == Status.WAITING) {
                 addSuccessMessage(redirectAttributes, "이미 예약된 슬롯이라 예약 대기로 등록되었습니다.");
-            } else {
-                addSuccessMessage(redirectAttributes, "예약이 완료되었습니다.");
+                return "redirect:/page/reservations?name=" + name;
             }
+            redirectAttributes.addAttribute("orderId", orderId);
+            redirectAttributes.addAttribute("amount", amount);
+            redirectAttributes.addAttribute("orderName", "방탈출 예약");
+            return "redirect:/page/payment";
         } catch (PastReservationException | DuplicateReservationException |
                  IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "예약 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
+            return "redirect:/page/reservations?name=" + name;
         }
-        return "redirect:/page/reservations?name=" + name;
+    }
+
+    @GetMapping("/payment")
+    public String paymentPage(
+            @RequestParam String orderId,
+            @RequestParam Long amount,
+            @RequestParam String orderName,
+            Model model
+    ) {
+        model.addAttribute("clientKey", clientKey);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("amount", amount);
+        model.addAttribute("orderName", orderName);
+        return "payment/checkout";
     }
 
     @PostMapping("/reservations/{id}/update")

@@ -32,6 +32,10 @@ public interface ReservationRepository {
 
     boolean promoteToReserved(Long waitingId);
 
+    boolean confirmPayment(Long reservationId, String paymentKey);
+
+    java.util.Optional<Reservation> findByOrderId(String orderId);
+
     List<ReservationWithWaitingOrder> findAllByName(String name);
 
     boolean isDuplicatedWithName(String name, Long themeId, ReservationTime time);
