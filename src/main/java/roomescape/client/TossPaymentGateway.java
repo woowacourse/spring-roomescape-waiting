@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import roomescape.client.dto.TossErrorResponse;
+import roomescape.client.dto.TossPaymentResponse;
 
 @Component
 public class TossPaymentGateway {
@@ -36,14 +39,9 @@ public class TossPaymentGateway {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ConfirmRequest(paymentKey, orderId, amount))
                 .retrieve()
-                .onStatus(status -> status.isError(), (req, resp) -> {
-                    String message = "결제 승인에 실패했습니다.";
-                    try {
-                        byte[] body = resp.getBody().readAllBytes();
-                        JsonNode node = objectMapper.readTree(body);
-                        message = node.path("message").asText(message);
-                    } catch (IOException ignored) {}
-                    throw new TossPaymentException(message);
+                .onStatus(HttpStatusCode::isError, (req, resp) -> {
+                    var error = objectMapper.readValue(resp.getBody(), TossErrorResponse.class);
+                    throw new TossPaymentException(error.message());
                 })
                 .body(TossPaymentResponse.class);
     }

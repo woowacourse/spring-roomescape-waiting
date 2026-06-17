@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
