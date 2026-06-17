@@ -77,6 +77,21 @@ class PaymentApproverTest {
         assertThat(approved).isFalse();
     }
 
+    @Test
+    void 이미_처리된_결제는_승인_성공으로_간주해_true를_반환한다() {
+        // given: 토스가 ALREADY_PROCESSED_PAYMENT 에러를 응답 (멱등 케이스)
+        mockTossServer.expect(requestTo(APPROVE_URL))
+                .andRespond(withStatus(HttpStatus.BAD_REQUEST)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"code\":\"ALREADY_PROCESSED_PAYMENT\",\"message\":\"이미 처리된 결제 입니다.\"}"));
+
+        // when
+        boolean approved = paymentApprover.approve(APPROVE_REQUEST);
+
+        // then
+        assertThat(approved).isTrue();
+    }
+
     @Nested
     class 승인_API가_에러를_응답하면 {
 

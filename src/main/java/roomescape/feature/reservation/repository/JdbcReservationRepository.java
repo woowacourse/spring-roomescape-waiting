@@ -33,7 +33,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("reservation")
-                .usingColumns("name", "date", "time_id", "theme_id", "status")
+                .usingColumns("name", "date", "time_id", "theme_id", "status", "order_amount")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -41,7 +41,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findAllReservations() {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
+                        SELECT r.id, r.name, r.date, r.status, r.order_status, r.order_amount, r.version,
                                rt.id AS time_id, rt.start_at, rt.status AS time_status,
                                t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                                t.status AS theme_status
@@ -57,7 +57,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findLowestIdWaitingReservation(SlotKey slotKey) {
         String findSql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
+                SELECT r.id, r.name, r.date, r.status, r.order_status, r.order_amount, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
@@ -141,6 +141,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 mapTheme(rs),
                 ReservationStatus.valueOf(rs.getString("status")),
                 OrderStatus.valueOf(rs.getString("order_status")),
+                rs.getLong("order_amount"),
                 rs.getLong("version")
         );
     }
@@ -166,7 +167,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
+                SELECT r.id, r.name, r.date, r.status, r.order_status, r.order_amount, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
@@ -189,7 +190,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
+                SELECT r.id, r.name, r.date, r.status, r.order_status, r.order_amount, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
@@ -240,12 +241,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                 "date", reservation.getDate(),
                 "time_id", reservation.getTime().getId(),
                 "theme_id", reservation.getTheme().getId(),
-                "status", reservation.getStatus().name()
+                "status", reservation.getStatus().name(),
+                "order_amount", reservation.getAmount()
         );
         Long generatedKey = simpleJdbcInsert.executeAndReturnKey(args).longValue();
 
         return Reservation.reconstruct(generatedKey, reservation.getName(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme(), reservation.getStatus());
+                reservation.getTime(), reservation.getTheme(), reservation.getStatus(),
+                reservation.getOrderStatus(), reservation.getAmount(), 0L);
     }
 
     @Override
@@ -280,7 +283,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return Reservation.reconstruct(reservation.getId(), reservation.getName(), reservation.getDate(),
                 reservation.getTime(), reservation.getTheme(), reservation.getStatus(),
-                reservation.getOrderStatus(), reservation.getVersion() + 1);
+                reservation.getOrderStatus(), reservation.getAmount(), reservation.getVersion() + 1);
     }
 
     @Override

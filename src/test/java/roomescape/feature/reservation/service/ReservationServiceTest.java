@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import roomescape.feature.payment.PaymentApprover;
+import roomescape.feature.payment.PaymentProperties;
 import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
@@ -67,7 +68,8 @@ class ReservationServiceTest {
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         reservationService = new ReservationManagementService(
-            reservationRepository, timeRepository, themeRepository, paymentApprover, mapper, eventPublisher);
+            reservationRepository, timeRepository, themeRepository, paymentApprover,
+            new PaymentProperties("test_ck", 1_000L), mapper, eventPublisher);
     }
 
     private Time timeWithId(Long id) {

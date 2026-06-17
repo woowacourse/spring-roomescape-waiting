@@ -23,6 +23,7 @@ class ReservationTest {
     private static final Theme DEFAULT_THEME = ThemeFixture.VALID.createInstance();
     private static final LocalDate FUTURE_DATE = LocalDate.now().plusYears(1);
     private static final LocalDate PAST_DATE = LocalDate.now().minusYears(1);
+    private static final long DEFAULT_AMOUNT = ReservationFixture.DEFAULT_AMOUNT;
 
     @Nested
     class 생성한다 {
@@ -31,7 +32,7 @@ class ReservationTest {
         void 미래_일정으로_생성하면_정상_생성된다() {
             assertThatNoException().isThrownBy(() ->
                     Reservation.create(DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME,
-                            ReservationStatus.ACTIVE)
+                            ReservationStatus.ACTIVE, DEFAULT_AMOUNT)
             );
         }
 
@@ -39,7 +40,7 @@ class ReservationTest {
         void 과거_일정으로_생성하면_예외를_던진다() {
             assertThatThrownBy(() ->
                     Reservation.create(DEFAULT_RESERVER_NAME, PAST_DATE, DEFAULT_TIME, DEFAULT_THEME,
-                            ReservationStatus.ACTIVE)
+                            ReservationStatus.ACTIVE, DEFAULT_AMOUNT)
             ).isInstanceOf(GeneralException.class)
                     .hasMessage("지난 예약은 생성할 수 없습니다");
         }
@@ -47,7 +48,7 @@ class ReservationTest {
         @Test
         void WAITING_상태로_생성하면_WAITING_상태의_예약이_반환된다() {
             Reservation reservation = Reservation.create(DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME,
-                    DEFAULT_THEME, ReservationStatus.WAITING);
+                    DEFAULT_THEME, ReservationStatus.WAITING, DEFAULT_AMOUNT);
 
             assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
         }
@@ -234,12 +235,12 @@ class ReservationTest {
     class 주문을_확정한다 {
 
         @Test
-        void ACTIVE이고_PENDING이면_CONFIRMED_상태로_전이된다() {
+        void ACTIVE이고_PENDING이고_금액이_일치하면_CONFIRMED_상태로_전이된다() {
             // given
             Reservation activeReservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
 
             // when
-            Reservation confirmed = activeReservation.confirmOrder();
+            Reservation confirmed = activeReservation.confirmOrder(DEFAULT_AMOUNT);
 
             // then
             assertThat(confirmed.getOrderStatus()).isEqualTo(OrderStatus.CONFIRMED);
@@ -252,7 +253,7 @@ class ReservationTest {
                     1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
 
             // when & then
-            assertThatThrownBy(waitingReservation::confirmOrder)
+            assertThatThrownBy(() -> waitingReservation.confirmOrder(DEFAULT_AMOUNT))
                     .isInstanceOf(GeneralException.class)
                     .hasMessage("활성된 예약이 아닙니다.");
         }
@@ -265,9 +266,21 @@ class ReservationTest {
                     ReservationStatus.ACTIVE, OrderStatus.CONFIRMED, 0L);
 
             // when & then
-            assertThatThrownBy(confirmedReservation::confirmOrder)
+            assertThatThrownBy(() -> confirmedReservation.confirmOrder(DEFAULT_AMOUNT))
                     .isInstanceOf(GeneralException.class)
                     .hasMessage("이미 주문이 확정된 예약입니다.");
+        }
+
+        @Test
+        void 결제_금액이_주문_금액과_다르면_예외를_던진다() {
+            // given
+            Reservation activeReservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+            long tamperedAmount = DEFAULT_AMOUNT + 1;
+
+            // when & then
+            assertThatThrownBy(() -> activeReservation.confirmOrder(tamperedAmount))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("결제 금액이 올바르지 않습니다.");
         }
     }
 }

@@ -21,16 +21,24 @@ public class PaymentApprover {
     private final ObjectMapper objectMapper;
 
     public boolean approve(PaymentApproveRequest request) {
-        PaymentResponse response = paymentRestClient.post()
-                .uri(APPROVE_URI)
-                .body(request)
-                .contentType(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, errorHandler())
-                .body(PaymentResponse.class);
+        try {
+            PaymentResponse response = paymentRestClient.post()
+                    .uri(APPROVE_URI)
+                    .body(request)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, errorHandler())
+                    .body(PaymentResponse.class);
 
-        return response != null
-                && response.status() == PaymentStatus.DONE;
+            return response != null
+                    && response.status() == PaymentStatus.DONE;
+        } catch (PaymentException e) {
+            if (e.getFailureType() == PaymentFailureType.ALREADY_DONE) {
+                // 멱등: 이미 처리된 결제는 승인된 것으로 간주한다. (토스 승인 성공 후 DB 반영 실패 복구 등)
+                return true;
+            }
+            throw e;
+        }
     }
 
     private ErrorHandler errorHandler() {

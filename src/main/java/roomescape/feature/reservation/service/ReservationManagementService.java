@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.payment.PaymentApprover;
 import roomescape.feature.payment.PaymentException;
+import roomescape.feature.payment.PaymentProperties;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 import roomescape.feature.reservation.domain.OrderStatus;
 import roomescape.feature.reservation.domain.Reservation;
@@ -46,6 +47,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final PaymentApprover paymentApprover;
+    private final PaymentProperties paymentProperties;
     private final ReservationMapper reservationMapper;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -111,7 +113,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
                     parameterErrorResponses);
         }
 
-        return Reservation.create(command.name(), command.date(), time, theme, status);
+        return Reservation.create(command.name(), command.date(), time, theme, status, paymentProperties.amount());
     }
 
     @Override
@@ -143,7 +145,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     public void confirmReservation(Long reservationId, PaymentApproveRequest request) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(reservationId)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
-        Reservation confirmedReservation = reservation.confirmOrder();
+        Reservation confirmedReservation = reservation.confirmOrder(request.amount());
 
         boolean approved = paymentApprover.approve(request);
         if (!approved) {

@@ -13,11 +13,25 @@
       <div id="paymentStatusIcon" class="mb-3" style="font-size: 3rem;">⏳</div>
       <h4 id="paymentStatusTitle" class="mb-2">결제를 확인하고 있습니다</h4>
       <p id="paymentStatusMessage" class="text-muted mb-0">잠시만 기다려 주세요...</p>
-      <a id="paymentHomeLink" href="/" class="btn btn-dark mt-4 d-none">홈으로</a>
+      <div class="mt-4 d-flex justify-content-center gap-2">
+        <a id="paymentRetryLink" href="/" class="btn btn-primary d-none">다시 시도</a>
+        <a id="paymentHomeLink" href="/" class="btn btn-dark d-none">홈으로</a>
+      </div>
     </div>
   </div>
 </div>
 <script>
+  // 서버는 ErrorResponseDto.code(=PaymentFailureType 등)로 분기 단서를 내려준다.
+  // 사용자 UX 문구는 클라이언트가 code 기준으로 결정한다. (서버 message 는 개발자 디버깅용)
+  const USER_MESSAGES = {
+    CARD_DECLINED: '카드 결제가 거절되었습니다. 다른 카드로 다시 시도해 주세요.',
+    RETRYABLE: '일시적인 오류로 결제가 완료되지 않았습니다. 잠시 후 다시 시도해 주세요.',
+    PAYMENT_AMOUNT_MISMATCH: '결제 금액 정보가 올바르지 않습니다. 다시 시도해 주세요.',
+    NETWORK_ERROR: '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+  };
+  const RETRYABLE_CODES = ['CARD_DECLINED', 'RETRYABLE', 'NETWORK_ERROR'];
+  const DEFAULT_FAIL_MESSAGE = '결제 처리 중 문제가 발생했습니다. 문제가 계속되면 고객센터로 문의해 주세요.';
+
   (async () => {
     const params = new URLSearchParams(window.location.search);
     const reservationId = params.get('reservationId');
@@ -32,11 +46,34 @@
     const title = document.getElementById('paymentStatusTitle');
     const message = document.getElementById('paymentStatusMessage');
     const homeLink = document.getElementById('paymentHomeLink');
+    const retryLink = document.getElementById('paymentRetryLink');
 
-    const homeHref = reservationName
-        ? '/?reservationName=' + encodeURIComponent(reservationName)
-        : '/';
+    const homeHref = reservationName ? '/?reservationName=' + encodeURIComponent(reservationName) : '/';
     homeLink.href = homeHref;
+    // 미결제 예약이 그대로 남아 있으므로, 홈으로 돌아가면 재방문 흐름이 결제를 다시 시작한다.
+    retryLink.href = homeHref;
+
+    function showSuccess() {
+      icon.innerText = '✅';
+      title.innerText = '결제가 완료되었습니다';
+      message.innerText = '예약이 확정되었습니다. 잠시 후 홈으로 이동합니다.';
+      setTimeout(() => { location.href = homeHref; }, 1500);
+    }
+
+    function showFailure(data) {
+      const code = data && data.code;
+      // 서버 message 는 개발자 디버깅용이라 콘솔에만 남기고, 사용자에겐 code 기반 안내를 노출한다.
+      console.error('[payment] confirm failed:', code, data && data.message);
+
+      icon.innerText = '❌';
+      title.innerText = '결제에 실패했습니다';
+      message.innerText = USER_MESSAGES[code] || DEFAULT_FAIL_MESSAGE;
+
+      if (reservationName && RETRYABLE_CODES.includes(code)) {
+        retryLink.classList.remove('d-none');
+      }
+      homeLink.classList.remove('d-none');
+    }
 
     try {
       const response = await fetch('/api/reservations/' + encodeURIComponent(reservationId) + '/payment', {
@@ -45,25 +82,20 @@
         body: JSON.stringify(requestBody)
       });
 
-      if (!response.ok) {
-        let data;
-        try {
-          data = await response.json();
-        } catch (error) {
-          data = {};
-        }
-        throw new Error(data.message || '결제 승인에 실패했습니다.');
+      if (response.ok) {
+        showSuccess();
+        return;
       }
 
-      icon.innerText = '✅';
-      title.innerText = '결제가 완료되었습니다';
-      message.innerText = '예약이 확정되었습니다. 잠시 후 홈으로 이동합니다.';
-      setTimeout(() => { location.href = homeHref; }, 1500);
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        data = {};
+      }
+      showFailure(data);
     } catch (error) {
-      icon.innerText = '❌';
-      title.innerText = '결제 확인에 실패했습니다';
-      message.innerText = error.message || '결제 승인 중 오류가 발생했습니다.';
-      homeLink.classList.remove('d-none');
+      showFailure({ code: 'NETWORK_ERROR', message: error.message });
     }
   })();
 </script>
