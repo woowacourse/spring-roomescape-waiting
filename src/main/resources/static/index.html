@@ -147,6 +147,11 @@
     let times = [];
     let currentReservationName = '';
 
+    // 테마별 고정 결제 금액 (없으면 기본값)
+    const THEME_PRICES = {};
+    const DEFAULT_PRICE = 50000;
+    const priceOf = (themeId) => THEME_PRICES[themeId] ?? DEFAULT_PRICE;
+
     const today = new Date().toISOString().slice(0, 10);
     dateInput.value = today;
     dateInput.min = today;
@@ -406,23 +411,53 @@
         try {
             const reservationName = nameInput.value.trim();
             const isWaiting = reservationModeInput.value === 'waiting';
-            await requestJson(isWaiting ? '/reservation-waitings' : '/reservations', {
+
+            if (isWaiting) {
+                await requestJson('/reservation-waitings', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: reservationName,
+                        date: dateInput.value,
+                        timeId: Number(timeIdInput.value),
+                        themeId: Number(themeSelect.value),
+                    }),
+                });
+                setStatus(formStatusEl, '대기 신청이 완료되었습니다.');
+                form.reset();
+                dateInput.value = today;
+                dateInput.min = today;
+                resetSelectedTime();
+                currentReservationName = reservationName;
+                myReservationNameInput.value = currentReservationName;
+                await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);
+                return;
+            }
+
+            // 예약: 결제 전 임시 저장(PENDING) 후 결제 페이지로 이동
+            const themeId = Number(themeSelect.value);
+            const amount = priceOf(themeId);
+            const orderId = 'order-' + crypto.randomUUID().replace(/-/g, '');
+            const orderName = themeNameById(themeId) + ' 방탈출 예약';
+
+            const {reservationId} = await requestJson('/reservations', {
                 method: 'POST',
                 body: JSON.stringify({
                     name: reservationName,
                     date: dateInput.value,
                     timeId: Number(timeIdInput.value),
-                    themeId: Number(themeSelect.value),
+                    themeId,
+                    orderId,
+                    amount,
                 }),
             });
-            setStatus(formStatusEl, isWaiting ? '대기 신청이 완료되었습니다.' : '예약이 완료되었습니다.');
-            form.reset();
-            dateInput.value = today;
-            dateInput.min = today;
-            resetSelectedTime();
-            currentReservationName = reservationName;
-            myReservationNameInput.value = currentReservationName;
-            await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);
+
+            const query = new URLSearchParams({
+                reservationId,
+                orderId,
+                amount: String(amount),
+                orderName,
+            });
+            location.href = `/payments/checkout.html?${query}`;
         } catch (error) {
             setStatus(formStatusEl, error.message, true);
         }

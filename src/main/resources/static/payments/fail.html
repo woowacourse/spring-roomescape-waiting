@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <title>결제 실패</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="app-header">
+    <a class="brand" href="/">
+        <span class="brand-mark">RE</span>
+        <span>Room Escape</span>
+    </a>
+</header>
+<main>
+    <section class="reservation-title">
+        <h1>결제 실패</h1>
+        <p id="code"></p>
+        <p id="message"></p>
+        <a href="/" class="primary-button">홈으로 돌아가기</a>
+    </section>
+</main>
+
+<script>
+    const urlParams = new URLSearchParams(location.search);
+    const reservationId = urlParams.get('reservationId');
+
+    document.getElementById('code').textContent = '에러코드: ' + (urlParams.get('code') ?? '-');
+    document.getElementById('message').textContent = '실패 사유: ' + (urlParams.get('message') ?? '결제가 취소되었습니다.');
+
+    // 결제 실패 → 선점해 둔 예약 정리
+    if (reservationId) {
+        fetch(`/reservations/${reservationId}`, {method: 'DELETE'});
+    }
+</script>
+</body>
+</html>

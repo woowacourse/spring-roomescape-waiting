@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <title>결제 완료</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="app-header">
+    <a class="brand" href="/">
+        <span class="brand-mark">RE</span>
+        <span>Room Escape</span>
+    </a>
+</header>
+<main>
+    <section class="reservation-title">
+        <h1 id="title">결제 승인 중...</h1>
+        <p id="orderId"></p>
+        <p id="amount"></p>
+        <a href="/" class="primary-button">홈으로 돌아가기</a>
+    </section>
+</main>
+
+<script>
+    const urlParams = new URLSearchParams(location.search);
+    const paymentKey = urlParams.get('paymentKey');
+    const orderId = urlParams.get('orderId');
+    const amount = urlParams.get('amount');
+    const reservationId = urlParams.get('reservationId');
+
+    async function confirm() {
+        const response = await fetch('/payments/confirm', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({paymentKey, orderId, amount: Number(amount)}),
+        });
+
+        const json = await response.json();
+
+        if (!response.ok) {
+            // 승인 실패 → fail 페이지로 이동 (PENDING 예약 정리 위해 reservationId 전달)
+            location.href = `/payments/fail.html?reservationId=${reservationId}&code=${json.code}&message=${encodeURIComponent(json.message)}`;
+            return;
+        }
+
+        document.getElementById('title').textContent = '예약이 완료되었습니다!';
+        document.getElementById('orderId').textContent = '주문번호: ' + json.orderId;
+        document.getElementById('amount').textContent = '결제 금액: ' + json.approvedAmount.toLocaleString() + '원';
+    }
+
+    confirm();
+</script>
+</body>
+</html>
