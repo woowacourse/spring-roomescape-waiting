@@ -63,12 +63,9 @@ CREATE TABLE payment_order
     reservation_id BIGINT      NOT NULL,
     order_id       VARCHAR(64) NOT NULL,
     amount         BIGINT      NOT NULL,
-    payment_key    VARCHAR(200),
-    idempotency_key VARCHAR(300) NOT NULL,
     created_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE (order_id),
-    UNIQUE (idempotency_key),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
 

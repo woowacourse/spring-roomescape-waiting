@@ -2,9 +2,6 @@ package roomescape.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -23,7 +20,6 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
-import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
@@ -35,7 +31,6 @@ import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserRepository;
 import roomescape.repository.PaymentOrderRepository;
-import roomescape.service.payment.IdempotencyKeyGenerator;
 import roomescape.service.payment.OrderIdGenerator;
 
 @Service
@@ -48,7 +43,6 @@ public class ReservationService {
     private final StoreRepository storeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
     private final OrderIdGenerator orderIdGenerator;
-    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final TimeProvider timeProvider;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -58,7 +52,6 @@ public class ReservationService {
                               StoreRepository storeRepository,
                               PaymentOrderRepository paymentOrderRepository,
                               OrderIdGenerator orderIdGenerator,
-                              IdempotencyKeyGenerator idempotencyKeyGenerator,
                               TimeProvider timeProvider) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
@@ -67,7 +60,6 @@ public class ReservationService {
         this.storeRepository = storeRepository;
         this.paymentOrderRepository = paymentOrderRepository;
         this.orderIdGenerator = orderIdGenerator;
-        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
         this.timeProvider = timeProvider;
     }
 
@@ -80,20 +72,13 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationWithStatusResponses getMyReservations(Long userId) {
         List<Reservation> reservations = reservationRepository.findAllByUserId(userId).stream()
-                .filter(reservation -> !reservation.isWaiting())
+                .filter(Reservation::isReserved)
                 .toList();
-        Map<Long, PaymentOrder> paymentOrdersByReservationId = paymentOrderRepository.findAllByReservationIds(
-                        reservations.stream()
-                                .map(Reservation::getId)
-                                .toList())
-                .stream()
-                .collect(Collectors.toMap(PaymentOrder::getReservationId, Function.identity()));
 
         Map<Reservation, Integer> waitingReservations =
                 reservationRepository.findWaitingReservationsWithOrderByUserId(userId);
 
-        return ReservationWithStatusResponses.of(reservations, waitingReservations, paymentOrdersByReservationId,
-                false);
+        return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
     }
 
     @Transactional
@@ -105,9 +90,7 @@ public class ReservationService {
 
         Long newReservationId = reservationRepository.save(newReservation);
         String orderId = orderIdGenerator.generate();
-        String idempotencyKey = idempotencyKeyGenerator.generate();
-        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount(), null,
-                idempotencyKey));
+        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount()));
         return new ReservationPaymentResponse(newReservationId, orderId, command.amount());
     }
 
@@ -155,11 +138,7 @@ public class ReservationService {
         validateIsReserved(reservation);
         validateExistingNotInPast(reservation);
 
-        Optional<Reservation> firstWaitingReservation = findFirstWaitingReservationForUpdate(reservation);
-
-        deleteReservation(command.reservationId());
-
-        firstWaitingReservation.ifPresent(this::confirmWaitingReservation);
+        reservationRepository.deleteById(command.reservationId());
     }
 
     @Transactional
@@ -170,9 +149,12 @@ public class ReservationService {
         validateIsWaiting(reservation);
         validateExistingNotInPast(reservation);
 
-        deleteReservation(command.reservationId());
+        reservationRepository.deleteById(command.reservationId());
     }
 
+    /**
+     * 헬퍼메서드
+     */
     private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
@@ -182,7 +164,9 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
         Store store = storeRepository.findById(command.storeId())
                 .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
-        return new Reservation(null, user, theme, command.date(), reservationTime, store, status);
+        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store,
+                status);
+        return newReservation;
     }
 
     private void validateIsReserved(Reservation existing) {
@@ -246,35 +230,6 @@ public class ReservationService {
                 reservation.getStore().getId(),
                 reservation.getUser().getId())) {
             throw new DuplicateWaitingReservationException();
-        }
-    }
-
-    private Optional<Reservation> findFirstWaitingReservationForUpdate(Reservation reservation) {
-        return reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getStore().getId());
-    }
-
-    private void deleteReservation(long reservationId) {
-        int affected = reservationRepository.deleteById(reservationId);
-        validateReservationModified(affected);
-    }
-
-    private void confirmWaitingReservation(Reservation waitingReservation) {
-        Reservation confirmedReservation = waitingReservation.confirm();
-        updateWaitingToReserved(confirmedReservation);
-    }
-
-    private void updateWaitingToReserved(Reservation reservation) {
-        int affected = reservationRepository.updateWaitingToReserved(reservation);
-        validateReservationModified(affected);
-    }
-
-    private void validateReservationModified(int affected) {
-        if (affected == 0) {
-            throw new ReservationConcurrentConflictException();
         }
     }
 }

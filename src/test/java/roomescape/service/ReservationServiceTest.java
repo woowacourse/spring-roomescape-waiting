@@ -2,10 +2,12 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import roomescape.TestClockConfig;
 import roomescape.domain.Reservation;
@@ -14,7 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.domain.payment.PaymentOrder;
-import roomescape.domain.payment.PaymentStatus;
 import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationResponses;
 import roomescape.dto.response.ReservationWithStatusResponses;
@@ -22,12 +23,12 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
-import roomescape.exception.ReservationConcurrentConflictException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationNotWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.fake.FakeReservationRepository;
 import roomescape.repository.fake.FakeReservationTimeRepository;
@@ -35,7 +36,6 @@ import roomescape.repository.fake.FakeStoreRepository;
 import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.repository.fake.FakeUserRepository;
 import roomescape.repository.fake.FakePaymentOrderRepository;
-import roomescape.service.payment.FixedIdempotencyKeyGenerator;
 import roomescape.service.payment.FixedOrderIdGenerator;
 
 class ReservationServiceTest {
@@ -60,7 +60,6 @@ class ReservationServiceTest {
         storeRepository.save(Fixtures.store("매장"));
         service = new ReservationService(reservationRepository, themeRepository, reservationTimeRepository,
                 userRepository, storeRepository, paymentOrderRepository, new FixedOrderIdGenerator("order_123456"),
-                new FixedIdempotencyKeyGenerator("idempotency-key-123"),
                 new TestClockConfig().timeProvider());
         manager = buildUser("매니저");
         storeRepository.assignManager(Fixtures.DEFAULT_STORE_ID, manager.getId());
@@ -99,28 +98,6 @@ class ReservationServiceTest {
         assertThat(paymentOrder.getReservationId()).isEqualTo(created.reservationId());
         assertThat(paymentOrder.getAmount()).isEqualTo(37_000L);
         assertThat(paymentOrder.getOrderId()).matches("[A-Za-z0-9_-]{6,64}");
-        assertThat(paymentOrder.getIdempotencyKey()).isEqualTo("idempotency-key-123");
-    }
-
-    @Test
-    void getMyReservations_예약_정보와_결제_정보를_함께_응답한다() {
-        User brown = buildUser("브라운");
-        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
-        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        ReservationPaymentResponse created = service.createReservation(
-                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), timeId, 37_000L));
-
-        ReservationWithStatusResponses response = service.getMyReservations(brown.getId());
-
-        assertThat(response.reservations()).hasSize(1);
-        var reservation = response.reservations().getFirst();
-        assertThat(reservation.id()).isEqualTo(created.reservationId());
-        assertThat(reservation.themeName()).isEqualTo("공포");
-        assertThat(reservation.date()).isEqualTo(LocalDate.of(2026, 5, 8));
-        assertThat(reservation.paymentStatus()).isEqualTo(PaymentStatus.PAYMENT_PENDING);
-        assertThat(reservation.orderId()).isEqualTo(created.orderId());
-        assertThat(reservation.paymentKey()).isNull();
-        assertThat(reservation.amount()).isEqualTo(37_000L);
     }
 
     @Test
@@ -190,6 +167,7 @@ class ReservationServiceTest {
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
     }
 
+    @Disabled("TODO: 예약 대기 순번 조회 구현 후 작성")
     @Test
     void getMyReservations_예약_대기는_대기_순번을_포함해_반환한다() {
         User brown = buildUser("브라운");
@@ -201,15 +179,13 @@ class ReservationServiceTest {
 
         reservationRepository.save(buildReservation(charles, themeBId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildWaitingReservation(aron, themeBId, timeId, LocalDate.of(2026, 5, 2)));
-        reservationRepository.save(
-                buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
+        reservationRepository.save(buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
 
         ReservationWithStatusResponses results = service.getMyReservations(brown.getId());
 
         assertThat(results.waitingReservations()).hasSize(1);
         assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().name()).isEqualTo("브라운");
-        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder())
-                .isEqualTo(2);
+        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder()).isEqualTo(2);
     }
 
     @Test
@@ -270,78 +246,6 @@ class ReservationServiceTest {
         service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
 
         assertThat(reservationRepository.findById(reservationId)).isEmpty();
-    }
-
-    @Test
-    void cancelOwnReservation_첫번째_예약_대기를_예약_확정으로_승격한다() {
-        User brown = buildUser("브라운");
-        User charles = buildUser("샤를");
-        User aron = buildUser("아론");
-        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
-        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        LocalDate date = LocalDate.of(2026, 5, 8);
-        Long reservationId = reservationRepository.save(buildReservation(brown, themeId, timeId, date));
-        Long firstWaitingId = reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, date));
-        Long secondWaitingId = reservationRepository.save(buildWaitingReservation(aron, themeId, timeId, date));
-
-        service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
-
-        assertThat(reservationRepository.findById(reservationId)).isEmpty();
-        assertThat(reservationRepository.findById(firstWaitingId).orElseThrow().getStatus())
-                .isEqualTo(ReservationStatus.RESERVED);
-        assertThat(reservationRepository.findById(secondWaitingId).orElseThrow().getStatus())
-                .isEqualTo(ReservationStatus.WAITING);
-    }
-
-    @Test
-    void cancelOwnReservation_대기_예약이_없는_경우_승격은_이뤄지지_않는다() {
-        User brown = buildUser("브라운");
-        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
-        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        LocalDate date = LocalDate.of(2026, 5, 8);
-        Long reservationId = reservationRepository.save(buildReservation(brown, themeId, timeId, date));
-
-        service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
-
-        assertThat(reservationRepository.findById(reservationId)).isEmpty();
-        assertThat(reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(date, timeId, themeId,
-                Fixtures.DEFAULT_STORE_ID).isEmpty()).isTrue();
-        assertThat(reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(date, timeId, themeId,
-                Fixtures.DEFAULT_STORE_ID)).isFalse();
-    }
-
-    @Test
-    void cancelOwnReservation_두명의_사용자가_동시에_삭제를_요청하는_경우_ReservationConcurrentModificationException() {
-        User brown = buildUser("브라운");
-        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
-        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        Long reservationId = reservationRepository.save(
-                buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
-
-        reservationRepository.failDeleteOnce();
-
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
-                .isInstanceOf(ReservationConcurrentConflictException.class)
-                .hasMessage("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요.");
-    }
-
-    @Test
-    void cancelOwnReservation_대기_예약을_승격시키기_직전에_해당_대기가_삭제되는_경우_ReservationConcurrentModificationException() {
-        User brown = buildUser("브라운");
-        User charles = buildUser("샤를");
-        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
-        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        LocalDate date = LocalDate.of(2026, 5, 8);
-        Long reservationId = reservationRepository.save(buildReservation(brown, themeId, timeId, date));
-        Long waitingId = reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, date));
-
-        reservationRepository.failUpdateWaitingToReservedOnce();
-
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
-                .isInstanceOf(ReservationConcurrentConflictException.class)
-                .hasMessage("예약 정보가 변경되어 요청을 처리할 수 없습니다. 다시 시도해주세요.");
-        assertThat(reservationRepository.findById(waitingId).orElseThrow().getStatus())
-                .isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test

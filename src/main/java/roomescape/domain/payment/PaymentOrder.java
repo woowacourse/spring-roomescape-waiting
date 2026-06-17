@@ -5,27 +5,21 @@ import roomescape.exception.InvalidDomainException;
 public class PaymentOrder {
 
     private static final String ORDER_ID_PATTERN = "[A-Za-z0-9_-]{6,64}";
-    private static final int IDEMPOTENCY_KEY_MAX_LENGTH = 300;
 
     private final Long id;
     private final Long reservationId;
     private final String orderId;
     private final long amount;
-    private final String paymentKey;
-    private final String idempotencyKey;
 
-    public PaymentOrder(Long id, Long reservationId, String orderId, long amount, String paymentKey,
-                        String idempotencyKey) {
-        validate(reservationId, orderId, amount, idempotencyKey);
+    public PaymentOrder(Long id, Long reservationId, String orderId, long amount) {
+        validate(reservationId, orderId, amount);
         this.id = id;
         this.reservationId = reservationId;
         this.orderId = orderId;
         this.amount = amount;
-        this.paymentKey = paymentKey;
-        this.idempotencyKey = idempotencyKey;
     }
 
-    private void validate(Long reservationId, String orderId, long amount, String idempotencyKey) {
+    private void validate(Long reservationId, String orderId, long amount) {
         if (reservationId == null) {
             throw new InvalidDomainException("예약 id는 필수입니다.");
         }
@@ -35,21 +29,13 @@ public class PaymentOrder {
         if (amount <= 0) {
             throw new InvalidDomainException("결제 금액은 양수여야 합니다.");
         }
-        if (idempotencyKey == null || idempotencyKey.isBlank()
-                || idempotencyKey.length() > IDEMPOTENCY_KEY_MAX_LENGTH) {
-            throw new InvalidDomainException("멱등키는 1~300자여야 합니다.");
-        }
     }
 
     public PaymentOrder withId(Long id) {
         if (this.id != null) {
             throw new InvalidDomainException("이미 id가 존재하는 도메인입니다. 도메인 id는 생성 이후 수정될 수 없습니다.");
         }
-        return new PaymentOrder(id, reservationId, orderId, amount, paymentKey, idempotencyKey);
-    }
-
-    public PaymentOrder withPaymentKey(String paymentKey) {
-        return new PaymentOrder(id, reservationId, orderId, amount, paymentKey, idempotencyKey);
+        return new PaymentOrder(id, reservationId, orderId, amount);
     }
 
     public Long getId() {
@@ -66,13 +52,5 @@ public class PaymentOrder {
 
     public long getAmount() {
         return amount;
-    }
-
-    public String getPaymentKey() {
-        return paymentKey;
-    }
-
-    public String getIdempotencyKey() {
-        return idempotencyKey;
     }
 }
