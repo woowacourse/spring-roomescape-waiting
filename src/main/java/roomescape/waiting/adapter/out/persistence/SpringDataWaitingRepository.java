@@ -50,6 +50,24 @@ interface SpringDataWaitingRepository extends JpaRepository<Waiting, Long> {
                 w.slot.time.startAt
             )
             FROM Waiting w
+            ORDER BY w.id
+            """)
+    List<WaitingDetailProjection> findAllWaitingDetails();
+
+    @Query("""
+            SELECT new roomescape.waiting.application.port.out.projection.WaitingDetailProjection(
+                w.id,
+                w.slot.id,
+                w.member.name,
+                w.slot.date,
+                w.slot.theme.id,
+                w.slot.theme.name,
+                w.slot.theme.description,
+                w.slot.theme.thumbnailUrl,
+                w.slot.time.id,
+                w.slot.time.startAt
+            )
+            FROM Waiting w
             WHERE w.member.id = :memberId
             ORDER BY w.id
             """)

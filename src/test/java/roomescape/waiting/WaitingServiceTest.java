@@ -28,8 +28,10 @@ import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingDetailFindResponse;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 import roomescape.waiting.domain.Waiting;
 
 @ExtendWith(MockitoExtension.class)
@@ -210,6 +212,18 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("매니저는 소유자 검증 없이 예약 대기를 취소할 수 있다.")
+    void manager_cancels_waiting_successfully() {
+        Waiting waiting = roomescape.TestFixtures.waiting(1L, 2L, 1L);
+        when(waitingRepository.findByIdForUpdate(waiting.getId())).thenReturn(Optional.of(waiting));
+
+        assertThatCode(() -> waitingService.deleteById(1L))
+                .doesNotThrowAnyException();
+
+        verify(waitingRepository).deleteById(1L);
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
     void canceling_other_members_waiting_throws_exception() {
         Waiting waiting = roomescape.TestFixtures.waiting(1L, 1L, 1L);
@@ -232,6 +246,44 @@ class WaitingServiceTest {
                 );
 
         verify(waitingRepository, never()).deleteById(999L);
+    }
+
+    @Test
+    @DisplayName("대기 목록 조회 시 여러 슬롯의 대기열을 한 번에 조회해 순번을 계산한다.")
+    void finds_waiting_details_with_bulk_waiting_line_lookup() {
+        WaitingDetailProjection firstWaitingDetail = waitingDetail(11L, 10L);
+        WaitingDetailProjection secondWaitingDetail = waitingDetail(22L, 20L);
+
+        when(waitingRepository.findAllWaitingDetails())
+                .thenReturn(List.of(firstWaitingDetail, secondWaitingDetail));
+        when(waitingRepository.findAllBySlotIds(List.of(10L, 20L)))
+                .thenReturn(List.of(
+                        roomescape.TestFixtures.waiting(9L, 3L, 10L),
+                        roomescape.TestFixtures.waiting(11L, MEMBER_ID, 10L),
+                        roomescape.TestFixtures.waiting(21L, 3L, 20L),
+                        roomescape.TestFixtures.waiting(22L, MEMBER_ID, 20L)
+                ));
+
+        List<WaitingDetailFindResponse> responses = waitingService.findWaitingDetails();
+
+        assertThat(responses).extracting(WaitingDetailFindResponse::waitingOrder)
+                .containsExactly(2L, 2L);
+        verify(waitingRepository).findAllBySlotIds(List.of(10L, 20L));
+    }
+
+    private WaitingDetailProjection waitingDetail(Long waitingId, Long slotId) {
+        return new WaitingDetailProjection(
+                waitingId,
+                slotId,
+                "member",
+                LocalDate.of(2026, 6, 1),
+                1L,
+                "theme",
+                "description",
+                "thumbnail",
+                1L,
+                LocalTime.of(10, 0)
+        );
     }
 
 }

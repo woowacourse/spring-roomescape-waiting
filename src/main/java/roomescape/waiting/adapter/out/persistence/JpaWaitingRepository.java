@@ -64,6 +64,11 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<WaitingDetailProjection> findAllWaitingDetails() {
+        return repository.findAllWaitingDetails();
+    }
+
+    @Override
     public List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId) {
         return repository.findAllWaitingDetailsByMemberId(memberId);
     }

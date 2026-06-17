@@ -1,5 +1,6 @@
 package roomescape.waiting.application;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,16 +13,20 @@ import roomescape.slot.application.SlotAssembler;
 import roomescape.slot.domain.Slot;
 import roomescape.slot.domain.SlotOccupancy;
 import roomescape.waiting.application.dto.request.WaitingRequest;
+import roomescape.waiting.application.dto.response.WaitingDetailFindResponse;
 import roomescape.waiting.application.dto.response.WaitingResponse;
 import roomescape.waiting.application.port.in.CancelWaitingUseCase;
 import roomescape.waiting.application.port.in.CreateWaitingUseCase;
+import roomescape.waiting.application.port.in.FindWaitingUseCase;
 import roomescape.waiting.application.port.out.WaitingRepository;
+import roomescape.waiting.application.port.out.projection.WaitingDetailProjection;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingLine;
+import roomescape.waiting.domain.WaitingLines;
 
 @Service
 @RequiredArgsConstructor
-public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCase {
+public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCase, FindWaitingUseCase {
 
     private final SlotAssembler slotAssembler;
     private final MemberRepository memberRepository;
@@ -74,13 +79,44 @@ public class WaitingService implements CreateWaitingUseCase, CancelWaitingUseCas
     }
 
     @Transactional
+    public void deleteById(long waitingId) {
+        findWaitingForUpdate(waitingId);
+        waitingRepository.deleteById(waitingId);
+    }
+
+    @Transactional
     public void deleteByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.WAITING_NOT_FOUND, waitingId));
+        Waiting waiting = findWaitingForUpdate(waitingId);
 
         waiting.validateOwnedBy(memberId);
 
         waitingRepository.deleteById(waitingId);
+    }
+
+    private Waiting findWaitingForUpdate(long waitingId) {
+        return waitingRepository.findByIdForUpdate(waitingId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.WAITING_NOT_FOUND, waitingId));
+    }
+
+    public List<WaitingDetailFindResponse> findWaitingDetails() {
+        List<WaitingDetailProjection> waitingDetails = waitingRepository.findAllWaitingDetails();
+        WaitingLines waitingLines = findWaitingLines(waitingDetails);
+
+        return waitingDetails.stream()
+                .map(waitingDetail -> WaitingDetailFindResponse.from(
+                        waitingDetail,
+                        waitingLines.orderOf(waitingDetail.slotId(), waitingDetail.id())
+                ))
+                .toList();
+    }
+
+    private WaitingLines findWaitingLines(List<WaitingDetailProjection> waitingDetails) {
+        List<Long> slotIds = waitingDetails.stream()
+                .map(WaitingDetailProjection::slotId)
+                .distinct()
+                .toList();
+
+        return WaitingLines.of(waitingRepository.findAllBySlotIds(slotIds));
     }
 
 }
