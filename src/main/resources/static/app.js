@@ -83,9 +83,11 @@ function renderReservations(reservations) {
     row.className = "reservation-row";
     const isWaiting = reservation.status === "waiting";
     const waitingText = isWaiting && reservation.waitingOrder ? `(대기 ${reservation.waitingOrder}번째)` : (isWaiting ? '(대기)' : '');
+    const needsPayment = !isWaiting && reservation.orderId;
     row.innerHTML = `
-      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${waitingText}</span>
+      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${waitingText}${needsPayment ? ' (결제 대기)' : ''}</span>
       <div class="reservation-actions">
+        ${needsPayment ? `<button class="ghost reservation-pay" data-order-id="${reservation.orderId}" type="button">결제하기</button>` : ''}
         ${!isWaiting ? `<button class="ghost reservation-update" data-id="${reservation.id}" data-theme-id="${reservation.theme?.id ?? ""}" type="button">변경</button>` : ''}
         <button class="danger reservation-delete" data-id="${reservation.id}" data-status="${reservation.status || 'reserved'}" type="button">삭제</button>
       </div>
@@ -191,13 +193,18 @@ $("#availableTimes").addEventListener("click", async (event) => {
       })
     });
 
+    if (!isWaiting && created.orderId) {
+      window.location.href = `/payments/checkout?orderId=${encodeURIComponent(created.orderId)}`;
+      return;
+    }
+
     await loadAvailableTimes();
     await loadPopularThemes();
     $("#lookupName").value = name;
     await loadReservations();
     $("#reservationSuccess").textContent =
-      `${isWaiting ? '대기' : '예약'} 성공: #${created.id} / [${created.theme?.name ?? "선택 테마"}] ${created.date} ${created.time.startAt} / ${created.name}`;
-    setMessage(`${isWaiting ? '대기 신청이' : '예약이'} 정상적으로 완료되었습니다.`);
+      `대기 성공: #${created.id} / [${created.theme?.name ?? "선택 테마"}] ${created.date} ${created.time.startAt} / ${created.name}`;
+    setMessage("대기 신청이 정상적으로 완료되었습니다.");
   } catch (error) {
     setMessage(error.message);
   }
@@ -213,6 +220,12 @@ $("#loadPopular").addEventListener("click", async () => {
 });
 
 $("#reservations").addEventListener("click", async (event) => {
+  const payButton = event.target.closest("button.reservation-pay");
+  if (payButton) {
+    window.location.href = `/payments/checkout?orderId=${encodeURIComponent(payButton.dataset.orderId)}`;
+    return;
+  }
+
   const button = event.target.closest("button[data-id]");
   if (!button) return;
 
