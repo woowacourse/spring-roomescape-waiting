@@ -100,7 +100,6 @@ public class ReservationApplicationService {
         return ReservationResponse.from(reservation);
     }
 
-    @Transactional
     public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest request) {
         final Reservation oldReservation = reservationService.getReservation(reservationId);
         final ReservationTime time = reservationTimeService.getById(request.timeId());
@@ -111,7 +110,6 @@ public class ReservationApplicationService {
         return ReservationResponse.from(reservation);
     }
 
-    @Transactional
     public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest request) {
         final Reservation oldReservation = reservationService.getReservation(reservationId);
         final ReservationTime time = reservationTimeService.getById(request.timeId());
@@ -122,7 +120,6 @@ public class ReservationApplicationService {
         return ReservationResponse.from(reservation);
     }
 
-    @Transactional
     public void cancelReservationByIdAndPromoteWaiting(final long reservationId) {
         final Reservation reservation = reservationService.getReservation(reservationId);
         reservationService.cancel(reservation);
@@ -130,7 +127,6 @@ public class ReservationApplicationService {
         promoteIfFutureSlot(reservation);
     }
 
-    @Transactional
     public void deleteReservationById(final long reservationId) {
         final Reservation reservation = reservationService.getReservation(reservationId);
         reservationService.deleteById(reservationId);
