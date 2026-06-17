@@ -378,6 +378,8 @@ function renderMyReservations(reservations, username) {
                                 name: username
                             })
                         });
+                        const params = new URLSearchParams({ username, status: reservation.status });
+                        await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
                         showFeedback(checkFeedback, "success", `예약이 취소되었습니다. (환불 금액: ${result.canceledAmount}원)`);
                     } else {
                         // 2-B: 결제 내역이 없으면 (예: 대기 예약, 구형 데이터) [일반 삭제 API] 호출
