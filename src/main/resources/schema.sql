@@ -63,6 +63,7 @@ CREATE TABLE payment_order
     reservation_id BIGINT      NOT NULL,
     order_id       VARCHAR(64) NOT NULL,
     amount         BIGINT      NOT NULL,
+    payment_key    VARCHAR(200),
     created_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE (order_id),
