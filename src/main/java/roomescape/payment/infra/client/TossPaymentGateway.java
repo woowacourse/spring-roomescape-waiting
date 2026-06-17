@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import roomescape.payment.application.dto.PaymentCancel;
@@ -32,6 +33,8 @@ public class TossPaymentGateway implements PaymentGateway {
                 .build();
         TossPaymentResponse response = tossRestClient.post()
                 .uri("/v1/payments/confirm")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Idempotency-Key", confirmation.orderId())
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, res) -> {
