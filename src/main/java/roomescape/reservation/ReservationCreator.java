@@ -15,6 +15,7 @@ import roomescape.theme.Theme;
 import roomescape.time.Time;
 import roomescape.reservation.web.AdminReservationRequestDto;
 import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingDao;
 
 @Component
@@ -58,6 +59,14 @@ public class ReservationCreator {
         validateAvailable(slot);
 
         return Reservation.createByAdmin(member, request.date(), time, theme, store);
+    }
+
+    /**
+     * 승격 전용 생성: 대기를 PENDING 예약으로 만들어 저장한다. 유저 생성(createByUser)과 달리
+     * 권한·새치기(대기 큐) 검증을 거치지 않는다 — 승격은 시스템이 수행하는 완전히 다른 행동이다.
+     */
+    public Reservation createFromPromotion(Waiting waiting, LocalDateTime now) {
+        return reservationDao.insert(waiting.promote(now));
     }
 
     private void validateAvailable(Slot slot) {

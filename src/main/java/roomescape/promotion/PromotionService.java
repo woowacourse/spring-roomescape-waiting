@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.promotion.PromotionOutboxDao;
+import roomescape.reservation.ReservationCreator;
 import roomescape.reservation.ReservationDao;
 import roomescape.waiting.WaitingDao;
 import roomescape.common.vo.Slot;
@@ -20,12 +21,14 @@ public class PromotionService {
     private final PromotionOutboxDao promotionOutboxDao;
     private final WaitingDao waitingDao;
     private final ReservationDao reservationDao;
+    private final ReservationCreator reservationCreator;
 
     public PromotionService(PromotionOutboxDao promotionOutboxDao, WaitingDao waitingDao,
-                            ReservationDao reservationDao) {
+                            ReservationDao reservationDao, ReservationCreator reservationCreator) {
         this.promotionOutboxDao = promotionOutboxDao;
         this.waitingDao = waitingDao;
         this.reservationDao = reservationDao;
+        this.reservationCreator = reservationCreator;
     }
 
     /**
@@ -64,7 +67,7 @@ public class PromotionService {
                     if (first.isPast(now)) {
                         return;
                     }
-                    reservationDao.insert(first.promote(now));
+                    reservationCreator.createFromPromotion(first, now);
                     waitingDao.delete(first.getId());
                 });
     }
