@@ -8,6 +8,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 
 /**
@@ -63,7 +64,7 @@ class PaymentApproverRetryTest {
         mockServer.expect(times(MAX_ATTEMPTS), requestTo(CONFIRM_URL))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(request -> {
-                    throw new ResourceAccessException("결제 서버에 연결할 수 없습니다.");
+                    throw new ResourceAccessException("connection refused", new ConnectException("Connection refused"));
                 });
 
         // when
@@ -79,7 +80,7 @@ class PaymentApproverRetryTest {
         // given: 매 시도마다 읽기 타임아웃 → 소진 후 상태 조회 시 DONE
         mockServer.expect(times(MAX_ATTEMPTS), requestTo(CONFIRM_URL))
                 .andRespond(request -> {
-                    throw new RestClientException("읽기 타임아웃");
+                    throw new ResourceAccessException("read timed out", new SocketTimeoutException("Read timed out"));
                 });
         mockServer.expect(requestTo(STATUS_URL))
                 .andExpect(method(HttpMethod.GET))
@@ -100,7 +101,7 @@ class PaymentApproverRetryTest {
         // given: 매 시도마다 읽기 타임아웃 → 소진 후 상태 조회해도 아직 미완료
         mockServer.expect(times(MAX_ATTEMPTS), requestTo(CONFIRM_URL))
                 .andRespond(request -> {
-                    throw new RestClientException("읽기 타임아웃");
+                    throw new ResourceAccessException("read timed out", new SocketTimeoutException("Read timed out"));
                 });
         mockServer.expect(requestTo(STATUS_URL))
                 .andRespond(withSuccess(

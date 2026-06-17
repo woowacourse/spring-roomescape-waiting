@@ -11,6 +11,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 
 class PaymentApproverTest {
@@ -99,10 +100,10 @@ class PaymentApproverTest {
 
     @Test
     void 연결_실패는_PaymentConnectionException으로_변환한다() {
-        // given: 요청이 토스에 전송되기 전 실패 (ResourceAccessException 으로 표면화)
+        // given: TCP 연결 수립 실패 (ConnectException) → ResourceAccessException 으로 표면화
         mockTossServer.expect(requestTo(APPROVE_URL))
                 .andRespond(request -> {
-                    throw new ResourceAccessException("결제 서버에 연결할 수 없습니다.");
+                    throw new ResourceAccessException("connection refused", new ConnectException("Connection refused"));
                 });
 
         // when
@@ -114,10 +115,10 @@ class PaymentApproverTest {
 
     @Test
     void 느린_응답은_PaymentTimeoutException으로_변환한다() {
-        // given: 요청은 전송됐으나 응답을 받지 못함 (RestClientException 으로 표면화)
+        // given: 읽기 타임아웃 (SocketTimeoutException) → ResourceAccessException 으로 표면화
         mockTossServer.expect(requestTo(APPROVE_URL))
                 .andRespond(request -> {
-                    throw new RestClientException("읽기 타임아웃");
+                    throw new ResourceAccessException("read timed out", new SocketTimeoutException("Read timed out"));
                 });
 
         // when

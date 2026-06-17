@@ -8,6 +8,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
@@ -64,10 +66,14 @@ public class PaymentApprover {
             }
             throw e;
         } catch (ResourceAccessException e) {
-            // 연결 실패: 요청이 토스에 도달조차 못 함 → 미청구가 확정 → 안전하게 재시도 가능.
-            throw new PaymentConnectionException(e);
+            Throwable cause = e.getCause();
+            if (cause instanceof ConnectException || cause instanceof UnknownHostException) {
+                // TCP 연결 자체가 수립되지 않음 → 요청이 전송된 적 없음 → 미청구 확정.
+                throw new PaymentConnectionException(e);
+            }
+            // 읽기 타임아웃·연결 리셋 등: 요청 전송 여부 불명 → 보수적으로 결과 불명 처리.
+            throw new PaymentTimeoutException(e);
         } catch (RestClientException e) {
-            // 읽기 타임아웃 등 느린 응답: 요청은 보냈으나 응답을 받지 못함 → 결과 불명.
             throw new PaymentTimeoutException(e);
         }
     }
