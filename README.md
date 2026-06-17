@@ -5,7 +5,7 @@
 1단계
 - [ ] 매핑 변환 
   - [ ] JDBC -> jpa 변경
-  - [ ] Theme 매핑 변환
+  - [X] Theme 매핑 변환
   - [X] ReservationTime 매핑 변
 
 ## API 명세
