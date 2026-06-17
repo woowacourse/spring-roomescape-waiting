@@ -10,6 +10,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.payment.application.dto.PaymentCancel;
 import roomescape.payment.application.dto.PaymentConfirmation;
 import roomescape.payment.application.PaymentGateway;
@@ -20,6 +21,7 @@ import roomescape.payment.infra.client.dto.TossErrorResponse;
 import roomescape.payment.infra.client.dto.TossPaymentResponse;
 import roomescape.payment.infra.client.exception.TossExceptionFactory;
 import roomescape.payment.infra.client.exception.TossInfrastructureException;
+import roomescape.payment.infra.client.exception.TossInfrastructureException.TossConnectionException;
 import roomescape.payment.infra.client.exception.TossInfrastructureException.TossTimeoutException;
 
 @Component
@@ -53,6 +55,8 @@ public class TossPaymentGateway implements PaymentGateway {
                     }).body(TossPaymentResponse.class);
             return toResult(response);
         } catch (ResourceAccessException e) {
+            throw new TossConnectionException("토스 서버 연결 실패");
+        } catch (RestClientException e) {
             throw new TossTimeoutException("토스 서버 응답 대기 시간 초과");
         }
     }

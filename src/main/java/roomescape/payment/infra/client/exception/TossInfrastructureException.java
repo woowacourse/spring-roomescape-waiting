@@ -25,4 +25,10 @@ public abstract class TossInfrastructureException extends TossPaymentException {
             super(HttpStatus.REQUEST_TIMEOUT, "TIMEOUT", message);
         }
     }
+
+    public static class TossConnectionException extends TossInfrastructureException {
+        public TossConnectionException(String message) {
+            super(HttpStatus.SERVICE_UNAVAILABLE, "CONNECTION_ERROR", message);
+        }
+    }
 }

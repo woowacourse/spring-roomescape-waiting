@@ -10,6 +10,7 @@ import roomescape.payment.infra.client.exception.TossBusinessException.InvalidRe
 import roomescape.payment.infra.client.exception.TossBusinessException.PaymentNotFound;
 import roomescape.payment.infra.client.exception.TossBusinessException.SessionExpired;
 import roomescape.payment.infra.client.exception.TossInfrastructureException.Retryable;
+import roomescape.payment.infra.client.exception.TossInfrastructureException.TossConnectionException;
 import roomescape.payment.infra.client.exception.TossInfrastructureException.TossTimeoutException;
 
 public class TossExceptionFactory {
@@ -24,6 +25,7 @@ public class TossExceptionFactory {
             case "NOT_FOUND_PAYMENT" -> new PaymentNotFound(error.message());
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new Retryable(error.message());
             case "TIMEOUT" -> new TossTimeoutException(error.message());
+            case "CONNECTION_ERROR" -> new TossConnectionException(error.message());
             default -> new TossPaymentException(status, error.code(), error.message()) {};
         };
     }
