@@ -2,6 +2,7 @@ package roomescape.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.ReservationResult;
 
 public class ReservationResponse {
@@ -13,14 +14,16 @@ public class ReservationResponse {
 
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
+    private final ReservationStatus status;
 
     public ReservationResponse(Long id, String name, LocalDate date, ReservationTimeResponse time,
-                               ThemeResponse theme) {
+                               ThemeResponse theme, ReservationStatus status) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public static ReservationResponse from(ReservationResult result) {
@@ -29,7 +32,8 @@ public class ReservationResponse {
                 result.getName(),
                 result.getDate(),
                 ReservationTimeResponse.from(result.getTime()),
-                ThemeResponse.from(result.getTheme())
+                ThemeResponse.from(result.getTheme()),
+                result.getStatus()
         );
     }
 
@@ -51,5 +55,9 @@ public class ReservationResponse {
 
     public ThemeResponse getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }

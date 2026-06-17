@@ -10,17 +10,19 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final Slot slot;
+    private final ReservationStatus status;
 
-    private Reservation(Long id, String name, Slot slot) {
+    private Reservation(Long id, String name, Slot slot, ReservationStatus status) {
         validate(name, slot);
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.status = status;
     }
 
     public static Reservation create(String name, Slot slot, ReservationPolicy policy) {
         policy.validateCreatable(slot.getDate(), slot.getTime().getStartAt());
-        return new Reservation(null, name, slot);
+        return new Reservation(null, name, slot, ReservationStatus.PENDING);
     }
 
     public static Reservation create(String name, LocalDate date,
@@ -30,7 +32,11 @@ public class Reservation {
     }
 
     public static Reservation withId(Long id, String name, Slot slot) {
-        return new Reservation(id, name, slot);
+        return withId(id, name, slot, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation withId(Long id, String name, Slot slot, ReservationStatus status) {
+        return new Reservation(id, name, slot, status);
     }
 
     public static Reservation withId(Long id, String name, LocalDate date,
@@ -38,8 +44,22 @@ public class Reservation {
         return withId(id, name, new Slot(date, time, theme));
     }
 
+    public static Reservation withId(Long id, String name, LocalDate date,
+                                     ReservationTime time, Theme theme,
+                                     ReservationStatus status) {
+        return withId(id, name, new Slot(date, time, theme), status);
+    }
+
     public static Reservation promote(Waiting w) {
-        return new Reservation(null, w.getName(), w.getSlot());
+        return new Reservation(null, w.getName(), w.getSlot(), ReservationStatus.CONFIRMED);
+    }
+
+    public Reservation confirm() {
+        return new Reservation(id, name, slot, ReservationStatus.CONFIRMED);
+    }
+
+    public Reservation fail() {
+        return new Reservation(id, name, slot, ReservationStatus.FAILED);
     }
 
     private static void validate(String name, Slot slot) {
@@ -86,6 +106,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return slot.getTheme();
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public boolean isOwnedBy(String name) {
