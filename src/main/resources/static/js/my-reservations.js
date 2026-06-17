@@ -70,6 +70,9 @@ function buildRow(r) {
   row.appendChild(cell(r.themeName || '-'));
   row.appendChild(cell(r.date));
   row.appendChild(cell(formatTime(r.time)));
+  row.appendChild(paymentStatusCell(r.status));
+  row.appendChild(cell(r.amount != null ? r.amount.toLocaleString() + '원' : '-'));
+  row.appendChild(cell(r.orderId || '-'));
 
   const actions = document.createElement('td');
   actions.className = 'actions-cell';
@@ -78,6 +81,27 @@ function buildRow(r) {
   row.appendChild(actions);
 
   return row;
+}
+
+function paymentStatusCell(status) {
+  const td = document.createElement('td');
+  const badge = document.createElement('span');
+  badge.style.cssText = 'display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;';
+  if (status === 'CONFIRMED') {
+    badge.style.background = '#dcfce7';
+    badge.style.color = '#166534';
+    badge.textContent = '결제 완료';
+  } else if (status === 'PAYMENT_UNCERTAIN') {
+    badge.style.background = '#ffedd5';
+    badge.style.color = '#9a3412';
+    badge.textContent = '확인 필요';
+  } else {
+    badge.style.background = '#f1f5f9';
+    badge.style.color = '#475569';
+    badge.textContent = '결제 대기';
+  }
+  td.appendChild(badge);
+  return td;
 }
 
 function buildWaitingRow(waiting) {
@@ -119,7 +143,7 @@ function startEdit(row, r) {
   });
   cells[3].appendChild(timeSelect);
 
-  const actions = cells[4];
+  const actions = cells[7];
   actions.innerHTML = '';
   actions.className = 'actions-cell';
   actions.appendChild(button('저장', 'btn btn-success btn-sm', () => {

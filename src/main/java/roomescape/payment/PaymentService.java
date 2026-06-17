@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationService;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.theme.Theme;
@@ -55,6 +56,9 @@ public class PaymentService {
         PaymentResult paymentResult;
         try {
             paymentResult = tossPaymentGateway.confirm(paymentKey, orderId, amount);
+        } catch (NetworkUncertain e) {
+            reservationRepository.updateStatus(reservation.getId(), ReservationStatus.PAYMENT_UNCERTAIN);
+            throw e;
         } catch (PaymentGatewayException e) {
             reservationService.deleteReservation(reservation.getId());
             throw e;

@@ -85,4 +85,5 @@ public class TossPaymentException extends PaymentGatewayException {
             super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
         }
     }
+
 }
