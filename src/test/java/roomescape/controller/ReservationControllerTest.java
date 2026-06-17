@@ -11,6 +11,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.UserReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,16 +35,16 @@ class ReservationControllerTest {
 
     @Test
     void 내_예약_목록_조회_요청을_Service에_전달하고_결과를_반환한다() throws Exception {
-        List<Reservation> reservations = List.of(
-                new Reservation(1L, "레서", new Schedule(LocalDate.of(2026, 5, 6),
+        List<UserReservation> reservations = List.of(
+                new UserReservation(new Reservation(1L, "레서", new Schedule(LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
-                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))), null),
 
-                new Reservation(2L, "레서", new Schedule(LocalDate.of(2026, 5, 7),
+                new UserReservation(new Reservation(2L, "레서", new Schedule(LocalDate.of(2026, 5, 7),
                         new ReservationTime(2L, LocalTime.of(20, 0)),
-                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2")))
+                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"))), null)
         );
-        when(reservationService.findUserReservations("레서", 1, 5)).thenReturn(reservations);
+        when(reservationService.findUserReservationsWithPayments("레서", 1, 5)).thenReturn(reservations);
 
         mockMvc.perform(get("/reservations")
                         .param("name", "레서")
@@ -59,7 +60,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[1].id").value(2))
                 .andExpect(jsonPath("$.reservations[1].date").value("2026-05-07"));
 
-        verify(reservationService).findUserReservations("레서", 1, 5);
+        verify(reservationService).findUserReservationsWithPayments("레서", 1, 5);
     }
 
     @Test

@@ -197,6 +197,39 @@
             border: 1px solid #3b82f655;
             color: #60a5fa;
         }
+        .res-status.payment-pending {
+            background: #713f1233;
+            border: 1px solid #f59e0b66;
+            color: #fbbf24;
+        }
+        .res-status.payment-confirmed {
+            background: #14532d33;
+            border: 1px solid #22c55e55;
+            color: #4ade80;
+        }
+        .res-status.payment-failed {
+            background: #7f1d1d33;
+            border: 1px solid #ef444455;
+            color: #fca5a5;
+        }
+        .res-status.payment-unknown {
+            background: #312e8133;
+            border: 1px solid #818cf855;
+            color: #a5b4fc;
+        }
+
+        .payment-detail {
+            margin-top: 0.75rem;
+            display: grid;
+            gap: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+
+        .payment-detail code {
+            color: #cbd5e1;
+        }
 
         .res-actions {
             display: flex;
@@ -473,6 +506,7 @@
         const statusBadge = isWaiting
             ? `<span class="res-status waiting">예약 대기 ${r.rank}번째</span>`
             : `<span class="res-status reserved">예약 완료</span>`;
+        const payment = paymentInfo(r.payment);
 
         const card = document.createElement('div');
         card.className = 'res-card';
@@ -487,7 +521,9 @@
                     <span>${r.time.startAt}</span>
                     <span class="dot"></span>
                     ${statusBadge}
+                    ${payment.badge}
                 </div>
+                ${payment.detail}
             </div>
             <div class="res-actions">
                 ${isWaiting ? '' : '<button class="btn-action edit">변경</button>'}
@@ -498,6 +534,43 @@
         if (editBtn) editBtn.addEventListener('click', () => openEditModal(r));
         card.querySelector('.del').addEventListener('click', () => openCancelModal(r));
         return card;
+    }
+
+    function paymentInfo(payment) {
+        if (!payment) {
+            return { badge: '', detail: '' };
+        }
+
+        const statusClass = {
+            PENDING: 'payment-pending',
+            CONFIRMED: 'payment-confirmed',
+            FAILED: 'payment-failed',
+            UNKNOWN: 'payment-unknown'
+        }[payment.status] || 'payment-unknown';
+        const amount = typeof payment.amount === 'number' ? payment.amount.toLocaleString('ko-KR') + '원' : '-';
+        const paymentKey = payment.paymentKey
+            ? `<div>paymentKey <code>${escapeHtml(payment.paymentKey)}</code></div>`
+            : '';
+
+        return {
+            badge: `<span class="res-status ${statusClass}">${escapeHtml(payment.statusLabel)}</span>`,
+            detail: `
+                <div class="payment-detail">
+                    <div>orderId <code>${escapeHtml(payment.orderId)}</code></div>
+                    ${paymentKey}
+                    <div>금액 <code>${amount}</code></div>
+                </div>
+            `
+        };
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
     }
 
     /* ── 변경 모달 ── */

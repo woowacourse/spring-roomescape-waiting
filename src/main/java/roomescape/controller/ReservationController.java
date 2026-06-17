@@ -10,6 +10,7 @@ import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationsResponse;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.UserReservation;
 
 import java.util.List;
 
@@ -29,8 +30,8 @@ public class ReservationController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<Reservation> userReservations = reservationService.findUserReservations(name, page, size);
-        ReservationsResponse response = ReservationsResponse.from(userReservations);
+        List<UserReservation> userReservations = reservationService.findUserReservationsWithPayments(name, page, size);
+        ReservationsResponse response = ReservationsResponse.fromUserReservations(userReservations);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
