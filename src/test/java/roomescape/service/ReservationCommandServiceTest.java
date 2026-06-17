@@ -100,6 +100,46 @@ class ReservationCommandServiceTest {
     }
 
     @Test
+    @DisplayName("내 결제대기 예약이 있는 슬롯을 다시 예약하면 기존 결제 정보를 반환한다.")
+    void createPendingPaymentReservationReturnsExistingPendingForSameUser() {
+        PendingReservation first = reservationCommandService.createPendingPaymentReservation(
+                "new-user",
+                LocalDate.of(2026, 6, 5),
+                1L,
+                2L);
+
+        PendingReservation second = reservationCommandService.createPendingPaymentReservation(
+                "new-user",
+                LocalDate.of(2026, 6, 5),
+                1L,
+                2L);
+
+        assertThat(second.reservation().id()).isEqualTo(first.reservation().id());
+        assertThat(second.orderId()).isEqualTo(first.orderId());
+        assertThat(reservationDao.findAllByName(new Member("new-user"))).hasSize(1);
+        assertThat(orderRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("다른 사용자의 결제대기 예약이 있는 슬롯은 결제 진행 중으로 안내한다.")
+    void createPendingPaymentReservationRejectsPendingSlotOwnedByOtherUser() {
+        reservationCommandService.createPendingPaymentReservation(
+                "other-user",
+                LocalDate.of(2026, 6, 5),
+                1L,
+                2L);
+
+        assertThatThrownBy(() ->
+                reservationCommandService.createPendingPaymentReservation(
+                        "new-user",
+                        LocalDate.of(2026, 6, 5),
+                        1L,
+                        2L))
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage("해당 시간은 현재 결제 진행 중입니다. 잠시 후 다시 시도해주세요.");
+    }
+
+    @Test
     @DisplayName("존재하지 않는 예약은 취소할 수 없다.")
     void cancelNonExistent() {
         assertThatThrownBy(() ->

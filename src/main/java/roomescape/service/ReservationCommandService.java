@@ -14,7 +14,7 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import payment.order.Order;
-import payment.order.OrderRepository;
+import payment.order.OrderService;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -22,17 +22,14 @@ import roomescape.repository.ThemeDao;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ReservationCommandService {
 
-    private static final long RESERVATION_AMOUNT = 5_000L;
-
     private final WaitingCommandService waitingCommandService;
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -57,22 +54,44 @@ public class ReservationCommandService {
         Slot slot = new Slot(date, findTimeReference(timeId), theme);
         Reservation reservation = Reservation.forPendingPayment(member, slot);
 
-        validateCreatable(now, slot);
+        slot.validateNotPast(now);
+        PendingReservation existingPending = findReusablePendingReservation(slot, member);
+        if (existingPending != null) {
+            return existingPending;
+        }
 
         Reservation savedReservation = save(reservation);
-        String orderId = createOrderId();
-        orderRepository.save(Order.ready(
-                orderId,
-                savedReservation.id(),
-                RESERVATION_AMOUNT,
-                now
-        ));
+        Order order = orderService.createReady(savedReservation.id(), now);
 
         return new PendingReservation(
                 savedReservation,
-                orderId,
-                RESERVATION_AMOUNT,
+                order.orderId(),
+                order.amount(),
                 theme.name() + " 예약"
+        );
+    }
+
+    private PendingReservation findReusablePendingReservation(Slot slot, Member member) {
+        return reservationDao.findBySlotForUpdate(slot)
+                .map(existing -> pendingReservationFrom(existing, member))
+                .orElse(null);
+    }
+
+    private PendingReservation pendingReservationFrom(Reservation reservation, Member member) {
+        if (reservation.status() != ReservationStatus.PENDING_PAYMENT) {
+            throw duplicateReservationException();
+        }
+        if (!reservation.isOwnedBy(member)) {
+            throw pendingPaymentInProgressException();
+        }
+
+        Order order = orderService.findByReservationId(reservation.id())
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
+        return new PendingReservation(
+                reservation,
+                order.orderId(),
+                order.amount(),
+                reservation.slot().theme().name() + " 예약"
         );
     }
 
@@ -85,7 +104,7 @@ public class ReservationCommandService {
             throw new ResourceNotFoundException("결제 대기 예약을 찾을 수 없습니다.");
         }
 
-        Order order = orderRepository.findByReservationId(reservationId)
+        Order order = orderService.findByReservationId(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
 
         return new PendingReservation(
@@ -169,6 +188,10 @@ public class ReservationCommandService {
         return new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
     }
 
+    private DuplicateException pendingPaymentInProgressException() {
+        return new DuplicateException("해당 시간은 현재 결제 진행 중입니다. 잠시 후 다시 시도해주세요.");
+    }
+
     private ReservationTime findTimeReference(long timeId) {
         return reservationTimeDao.findById(timeId)
                 .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 시간입니다."));
@@ -184,7 +207,4 @@ public class ReservationCommandService {
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
     }
 
-    private String createOrderId() {
-        return "order_" + UUID.randomUUID().toString().replace("-", "");
-    }
 }
