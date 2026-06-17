@@ -14,6 +14,7 @@ import roomescape.payment.application.exception.PaymentAmountMismatchException;
 import roomescape.payment.application.exception.PaymentUnauthorizedException;
 import roomescape.payment.domain.Order;
 import roomescape.payment.domain.OrderRepository;
+import roomescape.payment.domain.OrderStatus;
 
 @Slf4j
 @Service
@@ -36,6 +37,12 @@ public class PaymentService {
                 .amount(amount)
                 .build()
         );
+        OrderStatus actualStatus = OrderStatus.fromToss(result.status());
+        if (!actualStatus.equals(OrderStatus.COMPLETED)) {
+            Order failed = order.fail(clock);
+            orderRepository.update(failed);
+            throw new OrderUpdateException("결제가 정상적으로 완료되지 않았습니다. 현재 상태: " + actualStatus.name());
+        }
         try {
             Order completed = order.complete(paymentKey, clock);
             int affected = orderRepository.update(completed);

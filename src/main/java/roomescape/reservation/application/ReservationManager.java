@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.application.OrderService;
 import roomescape.reservation.application.dto.ReservationCancelCommand;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
@@ -28,6 +29,7 @@ public class ReservationManager {
     private final ReservationTimeService timeService;
     private final ThemeService themeService;
     private final TimeSlotService timeSlotService;
+    private final OrderService orderService;
 
     public List<ReservationInfo> getReservations() {
         List<ReservationInfo> activeReservations = activeReservationService.getReservations();
@@ -49,7 +51,9 @@ public class ReservationManager {
         Theme theme = themeService.getThemeById(command.themeId());
         TimeSlot slot = timeSlotService.getTimeSlot(command.date(), time, theme);
         try {
-            return activeReservationService.add(slot, command);
+            ReservationInfo reservation = activeReservationService.add(slot, command);
+            orderService.createOrder(reservation.id());
+            return reservation;
         } catch (ReservationInUseException e) {
             return pendingReservationService.add(slot, command);
         }

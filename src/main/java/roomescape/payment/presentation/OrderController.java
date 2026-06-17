@@ -27,8 +27,8 @@ public class OrderController {
     private String clientKey;
 
     @GetMapping("/checkout/{reservationId}")
-    public String checkout(@PathVariable Long reservationId, @RequestParam Long amount, Model model) {
-        OrderInfo order = orderService.createOrder(reservationId, amount);
+    public String checkout(@PathVariable Long reservationId, Model model) {
+        OrderInfo order = orderService.getOrder(reservationId);
         model.addAttribute("clientKey", clientKey);
         model.addAttribute("orderId", order.orderId());
         model.addAttribute("orderName", order.themeName());

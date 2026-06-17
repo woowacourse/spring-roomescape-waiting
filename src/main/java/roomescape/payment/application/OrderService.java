@@ -15,15 +15,16 @@ import roomescape.reservation.domain.ActiveReservationRepository;
 @RequiredArgsConstructor
 public class OrderService {
 
+    private static final Long AMOUNT = 50000L;
+
     private final Clock clock;
     private final OrderRepository orderRepository;
     private final ActiveReservationRepository reservationRepository;
 
-    public OrderInfo createOrder(Long reservationId, Long amount) {
+    public void createOrder(Long reservationId) {
         String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
         ActiveReservation activeReservation = reservationRepository.getById(reservationId);
-        Order order = orderRepository.save(Order.createPending(orderId, amount, activeReservation, clock));
-        return OrderInfo.from(order);
+        orderRepository.save(Order.createPending(orderId, AMOUNT, activeReservation, clock));
     }
 
     public OrderInfo getOrder(Long reservationId) {

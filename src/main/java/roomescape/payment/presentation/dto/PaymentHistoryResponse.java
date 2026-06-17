@@ -1,5 +1,6 @@
 package roomescape.payment.presentation.dto;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.Builder;
 import roomescape.payment.application.dto.OrderInfo;
@@ -15,7 +16,7 @@ public record PaymentHistoryResponse(
 ) {
     public static PaymentHistoryResponse from(OrderInfo info) {
         return PaymentHistoryResponse.builder()
-                .at(info.createdAt().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                .at(info.createdAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .success("COMPLETED".equals(info.status().name()))
                 .status(info.status().name())
                 .orderId(info.orderId())
