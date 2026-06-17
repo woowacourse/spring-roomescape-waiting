@@ -28,9 +28,11 @@ CREATE TABLE reservation_slot
 
 CREATE TABLE reservation
 (
-    id      BIGINT      NOT NULL AUTO_INCREMENT,
-    name    VARCHAR(10) NOT NULL,
-    slot_id BIGINT      NOT NULL,
+    id          BIGINT      NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(10) NOT NULL,
+    slot_id     BIGINT      NOT NULL,
+    status      VARCHAR(20) NOT NULL,
+    payment_key VARCHAR(200),
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
     CONSTRAINT uk_reservation_slot_id UNIQUE (slot_id)
@@ -45,4 +47,17 @@ CREATE TABLE reservation_waiting
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
     CONSTRAINT uk_reservation_waiting_slot_id_name UNIQUE (name, slot_id)
-)
+);
+
+CREATE TABLE payment_order
+(
+    id             BIGINT      NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64) NOT NULL,
+    reservation_id BIGINT      NOT NULL,
+    amount         BIGINT      NOT NULL,
+    status         VARCHAR(20) NOT NULL,
+    created_at     DATETIME    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    CONSTRAINT uk_payment_order_order_id UNIQUE (order_id)
+);

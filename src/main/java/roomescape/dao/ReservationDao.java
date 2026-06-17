@@ -35,10 +35,17 @@ public class ReservationDao {
                 theme
         );
 
+        ReservationState state = ReservationState.valueOf(resultSet.getString("status"));
+
+        String paymentKey = resultSet.getString("payment_key");
+
+
         return new Reservation(
                 resultSet.getLong("id"),
                 resultSet.getString("reservation_name"),
-                slot
+                slot,
+                state,
+                paymentKey
         );
     };
 
@@ -58,12 +65,16 @@ public class ReservationDao {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
         parameters.put("slot_id", slot.getId());
+        parameters.put("status", reservation.getState().name());
+        parameters.put("payment_key", reservation.getPaymentKey());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
         return new Reservation(
                 generatedId.longValue(),
                 reservation.getName(),
-                slot
+                slot,
+                reservation.getState(),
+                reservation.getPaymentKey()
         );
     }
 
@@ -92,21 +103,21 @@ public class ReservationDao {
 
     public boolean existsByTimeId(long timeId) {
         String sql = """
-            SELECT COUNT(*) > 0
-            FROM reservation AS r
-            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
-            WHERE rs.time_id = ?
-            """;
+                SELECT COUNT(*) > 0
+                FROM reservation AS r
+                INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+                WHERE rs.time_id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
     }
 
     public boolean existsByThemeId(long themeId) {
         String sql = """
-            SELECT COUNT(*) > 0
-            FROM reservation AS r
-            INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
-            WHERE rs.theme_id = ?
-            """;
+                SELECT COUNT(*) > 0
+                FROM reservation AS r
+                INNER JOIN reservation_slot AS rs ON r.slot_id = rs.id
+                WHERE rs.theme_id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
@@ -154,6 +165,8 @@ public class ReservationDao {
         return """
                 SELECT r.id,
                        r.name as reservation_name,
+                       r.status,
+                       r.payment_key,
                        rs.id as slot_id,
                        rs.date as reservation_date,
                        rt.id as time_id,

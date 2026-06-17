@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
@@ -142,7 +141,7 @@ class ReservationTimeServiceTest {
 
     private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         ReservationSlot slot = saveSlot(date, time, theme);
-        reservationDao.insert(Reservation.createWithoutId(name, slot));
+        reservationDao.insert(Reservation.createConfirmedWithoutId(name, slot));
     }
 
     private ReservationSlot saveSlot(LocalDate date, ReservationTime time, Theme theme) {

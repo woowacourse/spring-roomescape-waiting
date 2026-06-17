@@ -26,7 +26,7 @@ public class ReservationWaiting {
     }
 
     public Reservation promoteToReservation() {
-        return Reservation.createWithoutId(name, slot);
+        return Reservation.createConfirmedWithoutId(name, slot);
     }
 
     public Long getId() {

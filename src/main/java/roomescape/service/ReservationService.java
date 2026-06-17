@@ -48,7 +48,7 @@ public class ReservationService {
         lockSlot.validateNotPast(now);
         validateUniqueReservation(lockSlot);
 
-        Reservation reservation = Reservation.createWithoutId(command.name(), lockSlot);
+        Reservation reservation = Reservation.createConfirmedWithoutId(command.name(), lockSlot);
 
         try {
             Reservation savedReservation = reservationDao.insert(reservation);
@@ -169,7 +169,7 @@ public class ReservationService {
         reservationWaitingDao.delete(waiting.getId());
     }
 
-    private ReservationSlot lockSlot(ReservationSlot slot){
+    private ReservationSlot lockSlot(ReservationSlot slot) {
         return reservationSlotDao.selectByIdForUpdate(slot.getId())
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
     }
