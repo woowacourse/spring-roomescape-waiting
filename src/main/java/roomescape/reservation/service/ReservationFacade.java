@@ -2,12 +2,16 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ResourceInUseException;
+import roomescape.order.service.OrderService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
@@ -20,14 +24,19 @@ import roomescape.reservation.dto.response.ReservationTimeFindAllResponse;
 @Service
 public class ReservationFacade {
 
+    public static final long DEFAULT_RESERVATION_PRICE = 50000L;
+
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
+    private final OrderService orderService;
 
     private final ConcurrentHashMap<String, ReentrantLock> slotLocks = new ConcurrentHashMap<>();
 
-    public ReservationFacade(ReservationService reservationService, ReservationTimeService reservationTimeService) {
+    public ReservationFacade(ReservationService reservationService,
+        ReservationTimeService reservationTimeService, OrderService orderService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
+        this.orderService = orderService;
     }
 
     public ReservationCreateResponse createReservation(ReservationRequest request) {
@@ -35,7 +44,14 @@ public class ReservationFacade {
             request.themeId());
         lock.lock();
         try {
-            return reservationService.create(request);
+            ReservationCreateResponse reservationCreateResponse = reservationService.create(
+                request);
+
+            if (reservationCreateResponse.status() == ReservationStatus.PENDING) {
+                String orderId = generateOrderId();
+                orderService.save(reservationCreateResponse.id(), orderId, DEFAULT_RESERVATION_PRICE);
+            }
+            return reservationCreateResponse;
         } finally {
             lock.unlock();
         }
@@ -114,6 +130,11 @@ public class ReservationFacade {
 
     public List<MyReservationResponse> findReservationsByName(String name) {
         return reservationService.findAllByName(name);
+    }
+
+    @NonNull
+    private static String generateOrderId() {
+        return "order-" + UUID.randomUUID().toString().replace("-", "");
     }
 
     private Lock getSlotLock(LocalDate date, Long timeId, Long themeId) {

@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Set;
 
 public enum ReservationStatus {
+  PENDING,
+  CONFIRMED,
   RESERVED,
   WAITING,
   CANCELED;

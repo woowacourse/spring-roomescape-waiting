@@ -41,12 +41,12 @@ public class ReservationService {
             throw new DuplicateReservationException("이미 예약된 예약을 중복 예약할 수 없습니다.");
         }
 
-        ReservationStatus status = ReservationStatus.RESERVED;
+        ReservationStatus status = ReservationStatus.PENDING;
         if (isExistSlot) {
             status = ReservationStatus.WAITING;
         }
-        Reservation reservation = reservationDao.insert(request.name(), LocalDate.parse(request.date()), request.timeId(), request.themeId(), status);
 
+        Reservation reservation = reservationDao.insert(request.name(), LocalDate.parse(request.date()), request.timeId(), request.themeId(), status);
         return ReservationCreateResponse.from(reservation);
     }
 
