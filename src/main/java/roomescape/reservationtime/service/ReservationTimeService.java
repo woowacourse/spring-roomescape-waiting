@@ -11,18 +11,18 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.repository.JpaReservationTimeRepository;
 import roomescape.theme.service.ThemeService;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeService themeService;
 
     public ReservationTimeService(
-            final ReservationTimeRepository reservationTimeRepository,
+            final JpaReservationTimeRepository reservationTimeRepository,
             final ReservationRepository reservationRepository,
             final ThemeService themeService
     ) {
