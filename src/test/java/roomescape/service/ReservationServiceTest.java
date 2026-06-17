@@ -25,7 +25,7 @@ import roomescape.reservation.ReservationDao;
 import roomescape.theme.ThemeDao;
 import roomescape.time.TimeDao;
 import roomescape.member.dao.MemberJdbcDao;
-import roomescape.payment.dao.OrderJdbcDao;
+import roomescape.order.dao.OrderJdbcDao;
 import roomescape.promotion.dao.PromotionOutboxJdbcDao;
 import roomescape.reservation.dao.ReservationJdbcDao;
 import roomescape.store.dao.StoreJdbcDao;
@@ -34,9 +34,8 @@ import roomescape.time.dao.TimeJdbcDao;
 import roomescape.waiting.dao.WaitingJdbcDao;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.payment.PaymentService;
+import roomescape.order.OrderService;
 import roomescape.promotion.PromotionService;
-import roomescape.fixture.FakePaymentGateway;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationCreator;
 import roomescape.reservation.ReservationService;
@@ -53,7 +52,7 @@ import roomescape.reservation.web.ReservationRequestDto;
 @Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, WaitingService.class,
         ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class,
         WaitingJdbcDao.class, PromotionOutboxJdbcDao.class, PromotionService.class,
-        OrderJdbcDao.class, PaymentService.class, FakePaymentGateway.class})
+        OrderJdbcDao.class, OrderService.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
 

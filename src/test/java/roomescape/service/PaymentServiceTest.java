@@ -1,14 +1,12 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,106 +16,84 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.PaymentAmountMismatchException;
-import roomescape.payment.OrderDao;
-import roomescape.reservation.ReservationDao;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.payment.Order;
-import roomescape.payment.OrderStatus;
+import roomescape.order.Order;
+import roomescape.order.OrderService;
+import roomescape.order.OrderStatus;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentService;
-import roomescape.promotion.PromotionService;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationStatus;
-import roomescape.store.Store;
-import roomescape.theme.Theme;
-import roomescape.time.Time;
-import roomescape.common.vo.Name;
+import roomescape.reservation.ReservationService;
 
+/**
+ * PaymentService는 이제 조율만 한다 — 주문 상태는 OrderService, 예약 상태는 ReservationService가 소유.
+ * 따라서 테스트도 "올바르게 위임하는가"를 검증한다(상태 변이 자체는 각 서비스 테스트의 몫).
+ */
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
     @Mock
-    private OrderDao orderDao;
-    @Mock
     private PaymentGateway paymentGateway;
     @Mock
-    private ReservationDao reservationDao;
+    private OrderService orderService;
+    @Mock
+    private ReservationService reservationService;
     @Mock
     private ReservationAuthorizationService authorizationService;
-    @Mock
-    private PromotionService promotionService;
     @InjectMocks
     private PaymentService paymentService;
 
     private final Member member = new Member(1L, "유저", "user@test.com", "password", MemberRole.USER);
 
-    private Reservation pendingReservation(Long id) {
-        Time time = new Time(1L, LocalTime.of(13, 0));
-        Theme theme = new Theme(1L, new Name("테마"), "http://url", "설명", 30000L);
-        Store store = new Store(1L, "강남점");
-        return Reservation.reconstruct(id, member, LocalDate.now().plusDays(1), time, theme,
-                ReservationStatus.PENDING, null, 0L, store);
-    }
-
     @Test
-    @DisplayName("금액이 일치하면 승인 후 주문이 CONFIRMED, 예약이 BOOKED가 된다")
+    @DisplayName("금액이 일치하면 승인 후 주문 확정·예약 확정을 각 서비스에 위임한다")
     void confirmSuccess() {
         Order order = Order.reconstruct(1L, "order-1", 10L, 30000L, null, OrderStatus.PENDING);
-        Reservation reservation = pendingReservation(10L);
-        given(orderDao.findByOrderId("order-1")).willReturn(Optional.of(order));
+        given(orderService.findByOrderId("order-1")).willReturn(Optional.of(order));
         given(paymentGateway.confirm(any())).willReturn(new PaymentResult("pk-1", "order-1", "DONE", 30000L));
-        given(reservationDao.findById(10L)).willReturn(Optional.of(reservation));
 
         paymentService.confirm(member, "pk-1", "order-1", 30000L);
 
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
-        assertThat(order.getPaymentKey()).isEqualTo("pk-1");
-        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.BOOKED);
         verify(paymentGateway).confirm(any());
-        verify(orderDao).update(order);
-        verify(reservationDao).update(reservation);
+        verify(orderService).complete(order, "pk-1");
+        verify(reservationService).confirm(10L);
     }
 
     @Test
-    @DisplayName("조작된 금액은 검증에서 막히고 게이트웨이가 호출되지 않는다")
+    @DisplayName("조작된 금액은 검증에서 막히고 게이트웨이·확정 위임이 일어나지 않는다")
     void confirmAmountMismatchBlocksGateway() {
         Order order = Order.reconstruct(1L, "order-1", 10L, 30000L, null, OrderStatus.PENDING);
-        given(orderDao.findByOrderId("order-1")).willReturn(Optional.of(order));
+        given(orderService.findByOrderId("order-1")).willReturn(Optional.of(order));
 
         assertThatThrownBy(() -> paymentService.confirm(member, "pk-1", "order-1", 20000L))
                 .isInstanceOf(PaymentAmountMismatchException.class);
 
         verify(paymentGateway, never()).confirm(any());
+        verify(reservationService, never()).confirm(anyLong());
     }
 
     @Test
-    @DisplayName("만료 정리(expire)는 PENDING 주문을 FAILED로, 예약을 CANCELED로 만든다 (abandon 재사용)")
+    @DisplayName("만료 정리(expire)는 주문 실패 처리와 예약 취소를 각 서비스에 위임한다")
     void expireAbandonedOrder() {
         Order order = Order.reconstruct(1L, "order-1", 10L, 30000L, null, OrderStatus.PENDING);
-        Reservation reservation = pendingReservation(10L);
-        given(orderDao.findByOrderId("order-1")).willReturn(Optional.of(order));
-        given(reservationDao.findById(10L)).willReturn(Optional.of(reservation));
+        given(orderService.findByOrderId("order-1")).willReturn(Optional.of(order));
 
         paymentService.expire("order-1");
 
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.FAILED);
-        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
-        verify(orderDao).update(order);
-        verify(reservationDao).update(reservation);
+        verify(orderService).markFailed(order);
+        verify(reservationService).cancelPending(10L);
     }
 
     @Test
-    @DisplayName("이미 확정된 주문은 만료 정리에서 건너뛴다")
+    @DisplayName("이미 확정된 주문은 만료 정리에서 건너뛴다(위임 없음)")
     void expireSkipsConfirmed() {
         Order order = Order.reconstruct(1L, "order-1", 10L, 30000L, "pk", OrderStatus.CONFIRMED);
-        given(orderDao.findByOrderId("order-1")).willReturn(Optional.of(order));
+        given(orderService.findByOrderId("order-1")).willReturn(Optional.of(order));
 
         paymentService.expire("order-1");
 
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
-        verify(orderDao, never()).update(any());
-        verify(reservationDao, never()).update(any());
+        verify(orderService, never()).markFailed(any());
+        verify(reservationService, never()).cancelPending(anyLong());
     }
 }

@@ -11,8 +11,8 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.vo.Slot;
 import roomescape.time.TimeDao;
 import roomescape.member.Member;
-import roomescape.payment.Order;
-import roomescape.payment.PaymentService;
+import roomescape.order.Order;
+import roomescape.order.OrderService;
 import roomescape.promotion.PromotionService;
 import roomescape.time.Time;
 import roomescape.reservation.web.ReservationPatchDto;
@@ -26,7 +26,7 @@ public class ReservationService {
     private final PromotionService promotionService;
     private final ReservationAuthorizationService authorizationService;
     private final ReservationCreator reservationCreator;
-    private final PaymentService paymentService;
+    private final OrderService orderService;
 
     public ReservationService(
             ReservationDao reservationDao,
@@ -34,14 +34,14 @@ public class ReservationService {
             PromotionService promotionService,
             ReservationAuthorizationService authorizationService,
             ReservationCreator reservationCreator,
-            PaymentService paymentService
+            OrderService orderService
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
         this.promotionService = promotionService;
         this.authorizationService = authorizationService;
         this.reservationCreator = reservationCreator;
-        this.paymentService = paymentService;
+        this.orderService = orderService;
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +67,7 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
         }
-        Order order = paymentService.createOrder(saved.getId(), saved.getTheme().getPrice());
+        Order order = orderService.create(saved.getId(), saved.getTheme().getPrice());
         return new ReservationOrder(saved, order);
     }
 
@@ -89,5 +89,35 @@ public class ReservationService {
         reservation.cancelByUser(LocalDateTime.now());
         reservationDao.update(reservation);
         promotionService.enqueuePromotion(reservation.getSlot());
+    }
+
+    /**
+     * 결제 승인 성공 → 결제 대기(PENDING) 예약을 확정(BOOKED)으로. 결제 흐름이 위임한다.
+     */
+    public void confirm(Long reservationId) {
+        Reservation reservation = reservationDao.findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+        reservation.confirm(LocalDateTime.now());
+        reservationDao.update(reservation);
+    }
+
+    /**
+     * 결제 실패·만료 등으로 PENDING 예약을 취소(슬롯 해제)하고 다음 대기자 승격을 예약한다.
+     * 이미 정리됐으면 조용히 건너뛴다(멱등).
+     */
+    public void cancelPending(Long reservationId) {
+        reservationDao.findById(reservationId).ifPresent(reservation -> {
+            reservation.cancelPending(LocalDateTime.now());
+            reservationDao.update(reservation);
+            promotionService.enqueuePromotion(reservation.getSlot());
+        });
+    }
+
+    /**
+     * 주문조차 없는 방치 PENDING(무료 승격 대기 등) 후보. 주문 기준 reaper의 사각지대 — 예약 created_at 기준.
+     */
+    @Transactional(readOnly = true)
+    public List<Long> findExpiredOrphanPendingIds(LocalDateTime threshold) {
+        return reservationDao.findExpiredPendingIdsWithoutOrder(threshold);
     }
 }

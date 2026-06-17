@@ -1,6 +1,6 @@
-package roomescape.payment.web;
+package roomescape.reservation.web;
 
-import roomescape.payment.Order;
+import roomescape.order.Order;
 import roomescape.reservation.Reservation;
 
 /**

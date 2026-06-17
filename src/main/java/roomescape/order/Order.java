@@ -1,4 +1,4 @@
-package roomescape.payment;
+package roomescape.order;
 
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;

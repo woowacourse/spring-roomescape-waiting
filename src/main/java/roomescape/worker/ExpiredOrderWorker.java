@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import roomescape.payment.PaymentService;
+import roomescape.reservation.ReservationService;
 
 /**
  * 결제 미완료(abandonment) 정리 스케줄러. 손님이 결제창을 닫아 success/fail 신호가 안 와도,
@@ -24,11 +25,13 @@ public class ExpiredOrderWorker {
     private static final Logger log = LoggerFactory.getLogger(ExpiredOrderWorker.class);
 
     private final PaymentService paymentService;
+    private final ReservationService reservationService;
     private final long ttlMinutes;
 
-    public ExpiredOrderWorker(PaymentService paymentService,
+    public ExpiredOrderWorker(PaymentService paymentService, ReservationService reservationService,
                               @Value("${payment.expiry.ttl-minutes:30}") long ttlMinutes) {
         this.paymentService = paymentService;
+        this.reservationService = reservationService;
         this.ttlMinutes = ttlMinutes;
     }
 
@@ -42,9 +45,9 @@ public class ExpiredOrderWorker {
                 log.warn("결제 만료 정리 실패 (다음 주기 재시도): orderId={}", orderId, e);
             }
         }
-        for (Long reservationId : paymentService.findExpiredOrphanPendingIds(threshold)) {
+        for (Long reservationId : reservationService.findExpiredOrphanPendingIds(threshold)) {
             try {
-                paymentService.expireOrphanPending(reservationId);
+                reservationService.cancelPending(reservationId);
             } catch (RuntimeException e) {
                 log.warn("승격 PENDING 만료 정리 실패 (다음 주기 재시도): reservationId={}", reservationId, e);
             }

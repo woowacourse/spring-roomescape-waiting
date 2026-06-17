@@ -2,45 +2,35 @@ package roomescape.payment;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.payment.OrderDao;
-import roomescape.promotion.PromotionService;
-import roomescape.reservation.ReservationDao;
 import roomescape.member.Member;
-import roomescape.reservation.Reservation;
+import roomescape.order.Order;
+import roomescape.order.OrderService;
+import roomescape.reservation.ReservationService;
 
 /**
  * 결제 애플리케이션 서비스. 토스를 모르고 PaymentGateway(포트)만 의존한다.
- * 주문 저장(결제 전), 승인(검증→게이트웨이→확정), 실패 정리를 오케스트레이션한다.
+ * 결제 흐름을 *조율*만 한다 — 주문(OrderService)·예약(ReservationService) 상태는 각 서비스가 소유하고,
+ * 여기서는 게이트웨이 호출과 그 결과 전파(주문 확정/실패 → 예약 확정/취소)만 맡는다.
  */
 @Service
 @Transactional
 public class PaymentService {
-    private final OrderDao orderDao;
     private final PaymentGateway paymentGateway;
-    private final ReservationDao reservationDao;
+    private final OrderService orderService;
+    private final ReservationService reservationService;
     private final ReservationAuthorizationService authorizationService;
-    private final PromotionService promotionService;
 
-    public PaymentService(OrderDao orderDao, PaymentGateway paymentGateway, ReservationDao reservationDao,
-                          ReservationAuthorizationService authorizationService, PromotionService promotionService) {
-        this.orderDao = orderDao;
+    public PaymentService(PaymentGateway paymentGateway, OrderService orderService,
+                          ReservationService reservationService,
+                          ReservationAuthorizationService authorizationService) {
         this.paymentGateway = paymentGateway;
-        this.reservationDao = reservationDao;
+        this.orderService = orderService;
+        this.reservationService = reservationService;
         this.authorizationService = authorizationService;
-        this.promotionService = promotionService;
-    }
-
-    /**
-     * 결제 인증 전, 주문 정보(orderId·금액)를 먼저 저장한다. orderId는 서버가 UUID로 생성한다.
-     */
-    public Order createOrder(Long reservationId, long amount) {
-        String orderId = UUID.randomUUID().toString();
-        return orderDao.insert(Order.create(orderId, reservationId, amount));
     }
 
     /**
@@ -52,90 +42,57 @@ public class PaymentService {
 
     /**
      * successUrl 콜백 처리. 저장된 주문 금액과 대조한 뒤(검증), 통과해야 승인 API를 호출한다.
-     * 조작된 금액은 validateAmount에서 막혀 게이트웨이까지 가지 않는다.
+     * 승인되면 주문을 확정하고 예약 확정(BOOKED)을 예약 서비스에 위임한다.
      */
     public void confirm(Member member, String paymentKey, String orderId, long amount) {
-        Order order = orderDao.findByOrderId(orderId)
+        Order order = orderService.findByOrderId(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 주문입니다."));
         authorizationService.validateMemberCanAccess(member, order.getReservationId());
         order.validateAmount(amount);
 
         PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
 
-        order.complete(result.paymentKey());
-        orderDao.update(order);
-        confirmReservation(order.getReservationId());
+        orderService.complete(order, result.paymentKey());
+        reservationService.confirm(order.getReservationId());
     }
 
     /**
      * failUrl 처리. 사용자가 취소(PAY_PROCESS_CANCELED)하면 orderId가 없을 수 있어 null 가드를 둔다.
-     * 결제 대기 상태의 주문/예약을 정리한다.
      */
     public void fail(Member member, String orderId) {
         if (orderId == null || orderId.isBlank()) {
             return;
         }
-        orderDao.findByOrderId(orderId).ifPresent(order -> {
+        orderService.findByOrderId(orderId).ifPresent(order -> {
             authorizationService.validateMemberCanAccess(member, order.getReservationId());
             abandon(order);
         });
     }
 
     /**
-     * 결제 신호 없이 방치된(abandonment) 주문 후보를 찾는다. 기준 시각보다 *이전에* 생성된 PENDING만 —
-     * 갓 만든 PENDING(아직 결제 진행 중일 수 있음)은 기준 시각보다 어려서 걸리지 않는다.
+     * 결제 신호 없이 방치된 주문 후보를 찾는다(주문 기준). 갓 만든 PENDING은 기준 시각보다 어려서 안 걸린다.
      */
     @Transactional(readOnly = true)
     public List<String> findExpiredPendingOrderIds(LocalDateTime threshold) {
-        return orderDao.findExpiredPending(threshold).stream()
-                .map(Order::getOrderId)
-                .toList();
+        return orderService.findExpiredPendingOrderIds(threshold);
     }
 
     /**
      * 만료된 주문 한 건을 정리한다. failUrl 콜백과 똑같이 abandon을 재사용한다(트리거만 다르고 정리 로직은 하나).
-     * 다시 조회해 그 사이 확정/정리됐으면 abandon이 알아서 건너뛴다.
      */
     public void expire(String orderId) {
-        orderDao.findByOrderId(orderId).ifPresent(this::abandon);
+        orderService.findByOrderId(orderId).ifPresent(this::abandon);
     }
 
-    private void confirmReservation(Long reservationId) {
-        Reservation reservation = reservationDao.findById(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
-        reservation.confirm(LocalDateTime.now());
-        reservationDao.update(reservation);
-    }
-
+    /**
+     * 방치된 주문을 실패 처리하고, 예약 취소(슬롯 해제 + 다음 대기자 승격)는 예약 서비스에 위임한다.
+     * 이미 확정/정리됐으면 건너뛴다(멱등).
+     */
     private void abandon(Order order) {
         if (!order.isPending()) {
             return;
         }
-        order.markFailed();
-        orderDao.update(order);
-        reservationDao.findById(order.getReservationId()).ifPresent(this::cancelPendingReservation);
-    }
-
-    /**
-     * 결제 신호 없이 방치된, *주문조차 없는* PENDING 예약(무료 승격 대기 등) 후보를 찾는다.
-     * order 기준 reaper(findExpiredPendingOrderIds)의 사각지대 — 예약 created_at으로 나이를 본다.
-     */
-    @Transactional(readOnly = true)
-    public List<Long> findExpiredOrphanPendingIds(LocalDateTime threshold) {
-        return reservationDao.findExpiredPendingIdsWithoutOrder(threshold);
-    }
-
-    public void expireOrphanPending(Long reservationId) {
-        reservationDao.findById(reservationId).ifPresent(this::cancelPendingReservation);
-    }
-
-    /**
-     * PENDING 예약을 취소(슬롯 해제)하고 다음 대기자 승격을 예약한다.
-     * 결제실패(abandon)·승격PENDING 만료의 공통 코어 — 슬롯을 비우면 항상 승격을 건다(누락 = 큐 멈춤).
-     */
-    private void cancelPendingReservation(Reservation reservation) {
-        reservation.cancelPending(LocalDateTime.now());
-        reservationDao.update(reservation);
-        promotionService.enqueuePromotion(reservation.getSlot());
+        orderService.markFailed(order);
+        reservationService.cancelPending(order.getReservationId());
     }
 }
